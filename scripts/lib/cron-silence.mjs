@@ -2,6 +2,8 @@
 export const SCHEDULE_EXPECTATIONS = Object.freeze([
   // 15-minute schedule: tolerate twelve intervals before reporting silence.
   Object.freeze({ path: '.github/workflows/decision-monitor.yml', max_silence_minutes: 180 }),
+  // Daily schedule: one 24-hour interval plus four hours for delayed starts.
+  Object.freeze({ path: '.github/workflows/main-daily-validation.yml', max_silence_minutes: 1680 }),
 ]);
 
 const integer = x => Number.isSafeInteger(x) && x > 0;
@@ -11,6 +13,9 @@ const markerPrefix = '<!-- cron-silence ';
 
 export async function observeScheduleSilence({ github, owner, repo, now = Date.now() }) {
   if (!Number.isFinite(now)) throw new Error('定期起動の観測日時が不正');
+  const { data: repository } = await github.rest.repos.get({ owner, repo });
+  const defaultBranch = repository?.default_branch;
+  if (typeof defaultBranch !== 'string' || !defaultBranch.trim()) throw new Error('定期起動の既定ブランチを確認できない');
   const silent = [];
   for (const policy of SCHEDULE_EXPECTATIONS) {
     const { data: workflow } = await github.rest.actions.getWorkflow({ owner, repo,
@@ -23,16 +28,16 @@ export async function observeScheduleSilence({ github, owner, repo, now = Date.n
     // Newly registered workflows get the same grace period as an existing schedule.
     if (Date.parse(workflow.created_at) > cutoff) continue;
     const { data } = await github.rest.actions.listWorkflowRuns({ owner, repo, workflow_id: workflow.id,
-      event: 'schedule', created: `>=${new Date(cutoff).toISOString()}`, per_page: 1, page: 1 });
+      event: 'schedule', branch: defaultBranch, created: `>=${new Date(cutoff).toISOString()}`, per_page: 1, page: 1 });
     if (!Number.isSafeInteger(data?.total_count) || data.total_count < 0 || !Array.isArray(data.workflow_runs)
       || data.workflow_runs.length > 1 || data.total_count < data.workflow_runs.length
       || (data.total_count > 0 && data.workflow_runs.length === 0)) {
       throw new Error(`${policy.path}: 定期実行一覧が不完全`);
     }
     for (const run of data.workflow_runs) {
-      if (!integer(run?.id) || run.workflow_id !== workflow.id || run.event !== 'schedule'
+      if (!integer(run?.id) || run.workflow_id !== workflow.id || run.event !== 'schedule' || run.head_branch !== defaultBranch
         || !timestamp(run.created_at) || Date.parse(run.created_at) < cutoff || Date.parse(run.created_at) > now) {
-        throw new Error(`${policy.path}: 定期実行の期間・対象を確認できない`);
+        throw new Error(`${policy.path}: 定期実行の期間・対象・既定ブランチを確認できない`);
       }
     }
     // One real scheduled start is enough for liveness; completion belongs to recovery.
@@ -68,40 +73,86 @@ export function silenceRefs(bodies, owner, repo, now) {
 export async function selftest() {
   const errors = []; const check = (yes, why) => { if (!yes) errors.push(why); };
   const now = Date.parse('2026-09-04T12:00:00Z');
-  const metadata = { id: 30, name: 'Decision Monitor', path: SCHEDULE_EXPECTATIONS[0].path,
-    state: 'active', created_at: '2026-09-04T08:00:00Z' };
-  const run = { id: 301, workflow_id: 30, event: 'schedule', created_at: '2026-09-04T11:59:00Z' };
-  async function probe({ workflow = metadata, rows = [], total = rows.length, fail = null } = {}) {
+  const metadata = SCHEDULE_EXPECTATIONS.map((policy, index) => ({ id: 30 + index, path: policy.path,
+    state: 'active', created_at: '2026-09-01T08:00:00Z' }));
+  const runs = metadata.map(workflow => ({ id: workflow.id * 10 + 1, workflow_id: workflow.id,
+    event: 'schedule', head_branch: 'main', created_at: '2026-09-04T11:59:00Z' }));
+  async function probe({ target = 0, workflow = metadata[target], rows = [], total = rows?.length,
+    fail = null, defaultBranch = 'main', sourceRows = null } = {}) {
     const requests = [];
-    const github = { rest: { actions: {
-      getWorkflow: async p => { requests.push(p); if (fail === 'metadata') throw new Error('403'); return { data: workflow }; },
-      listWorkflowRuns: async p => { requests.push(p); if (fail === 'runs') throw new Error('network');
-        return { data: { total_count: total, workflow_runs: rows } }; },
+    const github = { rest: { repos: { get: async p => {
+      requests.push(p); if (fail === 'repo') throw new Error('403'); return { data: { default_branch: defaultBranch } };
+    } }, actions: {
+      getWorkflow: async p => {
+        requests.push(p); if (fail === 'metadata') throw new Error('403');
+        const index = metadata.findIndex(w => w.path.split('/').at(-1) === p.workflow_id);
+        return { data: index === target ? workflow : metadata[index] };
+      },
+      listWorkflowRuns: async p => {
+        requests.push(p); if (fail === 'runs') throw new Error('network');
+        const index = metadata.findIndex(w => w.id === p.workflow_id);
+        if (index !== target) return { data: { total_count: 1, workflow_runs: [{ ...runs[index], head_branch: defaultBranch }] } };
+        if (sourceRows) {
+          const selected = sourceRows.filter(r => r.event === p.event && r.head_branch === p.branch
+            && Date.parse(r.created_at) >= Date.parse(p.created.slice(2)));
+          return { data: { total_count: selected.length, workflow_runs: selected.slice(0, p.per_page) } };
+        }
+        return { data: { total_count: total, workflow_runs: rows } };
+      },
     } } };
     try { return { silent: await observeScheduleSilence({ github, owner: 'o', repo: 'r', now }), requests }; }
     catch (error) { return { error, requests }; }
   }
-  const absent = await probe();
-  check(absent.silent?.length === 1, '定期起動が無い状態を見逃した');
-  check(absent.requests.some(p => p.event === 'schedule' && p.created === '>=2026-09-04T09:00:00.000Z'
-    && !('status' in p)), '定期起動の期間またはeventの指定が無い');
-  for (const status of ['queued', 'in_progress', 'completed']) {
-    check((await probe({ rows: [{ ...run, status }] })).silent?.length === 0, `最近の${status}を起動欠落とした`);
+  const absent = [];
+  for (const [target, policy] of SCHEDULE_EXPECTATIONS.entries()) {
+    const result = await probe({ target }); absent.push(result.silent?.[0]);
+    check(result.silent?.length === 1 && result.silent[0].workflow_path === policy.path,
+      `${policy.path}: 定期起動が無い状態を見逃した`);
+    const cutoff = new Date(now - policy.max_silence_minutes * 60_000).toISOString();
+    check(result.requests.some(p => p.workflow_id === metadata[target].id && p.event === 'schedule'
+      && p.branch === 'main' && p.created === `>=${cutoff}` && !('status' in p)),
+    `${policy.path}: 定期起動の期間・event・既定ブランチの指定が無い`);
+    for (const status of ['queued', 'in_progress', 'completed']) {
+      check((await probe({ target, rows: [{ ...runs[target], status }] })).silent?.length === 0,
+        `${policy.path}: 最近の${status}を起動欠落とした`);
+    }
+    const fresh = await probe({ target, workflow: { ...metadata[target], created_at: new Date(Date.parse(cutoff) + 1).toISOString() } });
+    check(fresh.silent?.length === 0 && !fresh.requests.some(p => p.workflow_id === metadata[target].id),
+      `${policy.path}: 新設直後の猶予を守らない`);
+    const initialBoundary = await probe({ target, workflow: { ...metadata[target], created_at: cutoff } });
+    check(initialBoundary.silent?.[0]?.workflow_path === policy.path, `${policy.path}: 初回猶予を過ぎても欠落を見逃した`);
+    for (const workflow of [null, { ...metadata[target], state: 'disabled_manually' }, { ...metadata[target], id: 0 },
+      { ...metadata[target], path: '.github/workflows/other.yml' }, { ...metadata[target], created_at: '2099-01-01' }]) {
+      check(Boolean((await probe({ target, workflow })).error), `${policy.path}: 対象不明を正常または起動欠落にした`);
+    }
+    for (const rows of [[{ ...runs[target], event: 'workflow_dispatch' }], [{ ...runs[target], event: 'workflow_run' }],
+      [{ ...runs[target], head_branch: 'feature' }], [{ ...runs[target], workflow_id: 99 }],
+      [{ ...runs[target], created_at: new Date(Date.parse(cutoff) - 1).toISOString() }],
+      [{ ...runs[target], created_at: '2099-01-01' }], [{}], null]) {
+      check(Boolean((await probe({ target, rows, total: 1 })).error), `${policy.path}: 期間・対象・event・ブランチ不明を正常とした`);
+    }
+    for (const event of ['workflow_dispatch', 'workflow_run']) {
+      check((await probe({ target, sourceRows: [{ ...runs[target], event }] })).silent?.[0]?.workflow_path === policy.path,
+        `${policy.path}: ${event}を自然な定期起動の代用にした`);
+    }
+    check((await probe({ target, sourceRows: [{ ...runs[target], head_branch: 'feature' }] })).silent?.[0]?.workflow_path === policy.path,
+      `${policy.path}: 別ブランチを既定ブランチの定期起動の代用にした`);
   }
-  const fresh = await probe({ workflow: { ...metadata, created_at: '2026-09-04T11:00:00Z' } });
-  check(fresh.silent?.length === 0 && fresh.requests.length === 1, '新設直後の猶予を守らない');
-  for (const workflow of [null, { ...metadata, state: 'disabled_manually' }, { ...metadata, id: 0 },
-    { ...metadata, path: '.github/workflows/other.yml' }, { ...metadata, created_at: '2099-01-01' }]) {
-    check(Boolean((await probe({ workflow })).error), '対象不明を正常または起動欠落にした');
+  check((await probe({ target: 1, sourceRows: [{ ...runs[1], created_at: '2026-09-03T12:00:00Z' }] })).silent?.length === 0,
+    '日次の24時間以内の自然起動を欠落とした');
+  check((await probe({ target: 1, sourceRows: [{ ...runs[1], created_at: '2026-09-03T08:00:00Z' }] })).silent?.length === 0,
+    '日次の28時間の猶予境界にある起動を欠落とした');
+  check((await probe({ target: 1, sourceRows: [{ ...runs[1], created_at: '2026-09-03T07:59:59Z' }] })).silent?.[0]?.workflow_id === 31,
+    '日次の28時間を超えた自然起動だけで欠落を隠した');
+  check((await probe({ target: 1, defaultBranch: 'release', rows: [{ ...runs[1], head_branch: 'release' }] })).silent?.length === 0,
+    'APIで確認した既定ブランチをmainに固定した');
+  for (const options of [{ rows: [], total: 1 }, { rows: [runs[0]], total: 0 }, { total: null },
+    { fail: 'metadata' }, { fail: 'runs' }, { fail: 'repo' }, { defaultBranch: null }, { defaultBranch: '' }]) {
+    check(Boolean((await probe(options)).error), '不完全な観測を正常にした');
   }
-  for (const rows of [[{ ...run, event: 'workflow_dispatch' }], [{ ...run, event: 'workflow_run' }],
-    [{ ...run, workflow_id: 31 }], [{ ...run, created_at: '2026-09-04T08:00:00Z' }],
-    [{ ...run, created_at: '2099-01-01' }], [{}], null]) {
-    check(Boolean((await probe({ rows, total: 1 })).error), '期間・対象・event不明を正常とした');
-  }
-  for (const options of [{ rows: [], total: 1 }, { rows: [run], total: 0 }, { total: null },
-    { fail: 'metadata' }, { fail: 'runs' }]) check(Boolean((await probe(options)).error), '不完全な観測を正常にした');
-  const marker = silenceMarker(absent.silent?.[0] ?? {}, 'o', 'r', 'workflow_dispatch');
+  const markers = absent.map(row => silenceMarker(row ?? {}, 'o', 'r', 'workflow_dispatch'));
+  const marker = markers[0];
+  check(silenceRefs(markers, 'o', 'r', now).length === 2, '日次と短周期の起動欠落を同時に追跡できない');
   check(silenceRefs([marker], 'o', 'r', now)[0]?.workflow_id === 30, '起動欠落の追跡参照が失われた');
   check(silenceRefs(['a link\n' + marker], 'o', 'r', now)[0]?.observed_via === 'workflow_dispatch', '手動観測の出所が失われた');
   const repeated = silenceRefs([marker.replace('12:00:00', '11:00:00'), ...Array(60).fill(marker)], 'o', 'r', now);

@@ -1,0 +1,556 @@
+<!DOCTYPE html><html lang="tr"><head>
+<script src="/js/i18n/tr/messages.dfd6df89eae7.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/daily-note-plugins/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Günlük notları geliştirmek için takın — Takvim/Periyodik Notlar | SimpleMemo</title>
+  <meta name="description" content="Periyodik Notlarda Takvimin tarih ve hafta numarasından bir günlük veya haftalık dergi seti nasıl oluşturulur. Obsidian&#x27;in Linux sürümünde günlük ve haftalık sürümlerin oluşturulmasını, şablon yansımasını, kaydedilmesini ve yeniden açılmasını kontrol edin. Ayar değeri, orijinal ekran, giriş Markdown ve gerçek kaydetme örneği yayınlanacaktır.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Günlük notları geliştirmek için takın — Takvim/Periyodik Notlar | SimpleMemo">
+  <meta property="og:description" content="Periyodik Notlarda Takvimin tarih ve hafta numarasından bir günlük veya haftalık dergi seti nasıl oluşturulur. Obsidian&#x27;in Linux sürümünde günlük ve haftalık sürümlerin oluşturulmasını, şablon yansımasını, kaydedilmesini ve yeniden açılmasını kontrol edin. Ayar değeri, orijinal ekran, giriş Markdown ve gerçek kaydetme örneği yayınlanacaktır.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-01">
+  <meta property="og:url" content="https://simplememofast.com/tr/obsidian/daily-note-plugins/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-daily-note-plugins.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="tr_TR">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Günlük notları geliştirmek için takın — Takvim/Periyodik Notlar | SimpleMemo">
+  <meta name="twitter:description" content="Periyodik Notlarda Takvimin tarih ve hafta numarasından bir günlük veya haftalık dergi seti nasıl oluşturulur. Obsidian&#x27;in Linux sürümünde günlük ve haftalık sürümlerin oluşturulmasını, şablon yansımasını, kaydedilmesini ve yeniden açılmasını kontrol edin. Ayar değeri, orijinal ekran, giriş Markdown ve gerçek kaydetme örneği yayınlanacaktır.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-daily-note-plugins.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/tr/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/daily-note-plugins/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  
+
+  <!-- JSON-LD: Article -->
+  
+
+  <!-- JSON-LD: FAQPage -->
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    /* 中央揃えの和文は行頭が毎行ずれて読みにくい。狭い画面では左揃えにし、
+       行が2〜3行に収まる広い画面だけ中央のままにする。 */
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    /* ── 「開かず」の段階 ──────────────────────────────
+       この記事の骨子。読者が言う「開かず」と記事が指す「開かず」は
+       ずれていることが多いので、先に3段階へ分解して合意を取る。 */
+    .lv{display:grid;grid-template-columns:auto 1fr;gap:0 1.1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.3rem 1.3rem;margin:.85rem 0}
+    .lv__n{grid-row:1/3;width:2.6rem;height:2.6rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;align-self:start}
+    .lv__t{font-size:1.05rem;font-weight:700;line-height:1.55;margin:0 0 .4rem}
+    .lv__d{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0}
+    @media(max-width:520px){
+      .lv{grid-template-columns:1fr;gap:.6rem}
+      .lv__n{grid-row:auto}
+    }
+
+    /* 原因ブロック */
+    .cz{background:var(--surface);border:1px solid var(--border);border-left:3px solid rgba(255,183,52,.55);border-radius:var(--radius-sm);padding:1.35rem 1.3rem;margin:1rem 0}
+    .cz__n{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#ffc76b;margin-bottom:.4rem}
+    .cz__t{font-size:1.05rem;font-weight:700;line-height:1.6;margin:0 0 .55rem}
+    .cz p{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0 0 .7rem}
+    .cz p:last-child{margin-bottom:0}
+    .cz ol,.cz ul{margin:.2rem 0 .7rem;padding-left:1.35rem;font-size:.95rem;line-height:1.9;color:var(--text-secondary)}
+    .cz li{margin-bottom:.3rem}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em}
+
+    /* ── 比較表 ────────────────────────────────────────
+       狭い画面で列を縦に割ると見出し列が語中で折り返して読めなくなる
+       ので、行ごとのカードに組み替えて全幅を使わせる（/siri/ と同じ流儀）。 */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:26%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  
+<style>.plugin-answer{font-size:1.06rem;line-height:1.9;border-left:3px solid #65d6e8;padding-left:1.1rem}.hero-graphic{width:100%;height:auto;display:block;border-radius:14px;margin:1.7rem auto 0;max-width:54rem}.shot{margin:1.5rem 0;border:1px solid var(--border);background:var(--surface);border-radius:12px;overflow:hidden}.shot img{display:block;width:100%;height:auto}.shot figcaption{padding:.9rem 1rem;color:var(--text-secondary);font-size:.9rem;line-height:1.8}.shot figcaption a{display:inline-flex;min-height:44px;align-items:center;color:var(--accent-bright)}.plugin-table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.95rem}.plugin-table th,.plugin-table td{border:1px solid var(--border);padding:.8rem;text-align:left;vertical-align:top;line-height:1.8;overflow-wrap:anywhere}.plugin-table th{background:var(--surface)}.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;background:#0d1525;border:1px solid var(--border);border-radius:10px;padding:1.1rem;line-height:1.8;font-size:.92rem;box-sizing:border-box;max-width:100%}.capture-code code{background:none;border:0;padding:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:1em}.code-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-top:1.2rem}.copy-button{min-height:44px;border-radius:8px;padding:.55rem .9rem;border:1px solid #4589d6;color:#fff;background:#165bac;font:inherit;cursor:pointer}.download-row{display:flex;gap:.65rem;flex-wrap:wrap;margin:1rem 0}.download-row a{min-height:44px;display:inline-flex;align-items:center;padding:.45rem .8rem;color:var(--accent-bright);border:1px solid var(--border);border-radius:8px;font-size:.9rem;overflow-wrap:anywhere}.scope-note{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem;line-height:1.85}.proof-details{margin:1rem 0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px}.proof-details summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:700}.proof-details p{line-height:1.85}.faq-item summary{min-height:44px}.source-list li{line-height:1.85;margin:.65rem 0}.receipt-line{overflow-wrap:anywhere;color:var(--text-secondary);font-size:.88rem}.toc-links{display:flex;flex-wrap:wrap;gap:.8rem;margin:1.2rem 0}.toc-links a{min-height:44px;display:inline-flex;align-items:center;color:var(--accent-bright)}@media(max-width:600px){.plugin-table,.plugin-table tbody,.plugin-table tr,.plugin-table th,.plugin-table td{display:block;width:auto}.plugin-table thead{display:none}.plugin-table tr{margin-bottom:1rem}.plugin-table td:before{content:attr(data-label);display:block;font-size:.82rem;color:var(--text-secondary);font-weight:700}.capture-code{font-size:.85rem;padding:.8rem}.lp-hero{padding-top:2.3rem}.lp-hero__title{font-size:1.85rem}}.lp-section{scroll-margin-top:72px}</style><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/tr/obsidian/daily-note-plugins/#article",
+  "headline": "Günlük notları geliştirmek için eklenti — Takvim/Periyodik Notlar",
+  "description": "Periyodik Notlarda Takvimin tarih ve hafta numarasından bir günlük veya haftalık dergi seti nasıl oluşturulur. Obsidian'in Linux sürümünde günlük ve haftalık sürümlerin oluşturulmasını, şablon yansımasını, kaydedilmesini ve yeniden açılmasını kontrol edin. Ayar değeri, orijinal ekran, giriş Markdown ve gerçek kaydetme örneği yayınlanacaktır.",
+  "url": "https://simplememofast.com/tr/obsidian/daily-note-plugins/",
+  "mainEntityOfPage": "https://simplememofast.com/tr/obsidian/daily-note-plugins/",
+  "image": "https://simplememofast.com/assets/img/og/obsidian-daily-note-plugins.png",
+  "inLanguage": "tr",
+  "datePublished": "2026-10-01",
+  "dateModified": "2026-10-01",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://simplememofast.com/#organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    }
+  }
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Ana sayfa",
+      "item": "https://simplememofast.com/tr/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Günlük not",
+      "item": "https://simplememofast.com/tr/obsidian/daily-note/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Takvim/Periyodik Notlar",
+      "item": "https://simplememofast.com/tr/obsidian/daily-note-plugins/"
+    }
+  ]
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Hem Takvim hem de Periyodik Notlara ihtiyacım var mı?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tarih seçme arayüzünü günlük ve haftalık not ayarlarıyla birleştirmek için bu iki aracı kullanın. Calendar takvimden giriş sağlar; Periodic Notes, Daily/Weekly klasörlerini, biçimlerini ve şablonlarını ayarlar. Yalnızca standart günlük not ayarları için ana makaledeki günlük not açıklamasından başlayın."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Hafta numarası görüntülenmezse ne olur?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Bu Takvim 1.5.10'de, Ayarlar Takvimi'ndeki hafta numarasını göster açıldığında, sol kenarda bir hafta numarası sütunu görüntülenir. Sadece sağ kenar çubuğu açılarak Geri Bağlantılar gibi başka bir sekme seçilebileceğinden Takvim sekmesini seçin."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Tarihe tıklarsam ve metne geçemezsem ne olur?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Bu kez, Yeni Günlük Not ve Yeni Haftalık Not oluşturulma onayı, ana ekranda değil, açık olan Ayarlar'ın ayrı bir penceresinde görüntülendi. Her iki ekrana da bakın, hedef dosya adını onaylayın ve onay ekranında Oluştur'u seçin. Onaylamadan önce aynı tarihe defalarca basmanın sonucu doğrulanmadı."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Hangi haftalık format YYYY veya gggg?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Bu sabit örnekte kullanılan değer gggg-[W]ww'dir ve 2026-W40 2026-09-30 ortamında oluşturulmuştur. Haftanın yılını ve tarihin yılını temsil eden format sınırda eşleşmeyebilir, bu nedenle formatı karıştırmayın ve ayrıca hafta başlangıç tarihini ve uygulamanın yerelini kontrol edin. Tüm yıl sınırlarının, konumların ve saat dilimlerinin sonuçları doğrulanmadı."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Şablon değişkenleri ve Şablonlayıcı da kullanıyor musunuz?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Günlük giriş için Obsidian'in yerel {{date:YYYY-MM-DD}}'sini kullandım ve gerçek oluşturmada 2026-09-30'nin değiştirilmesini doğruladım. Haftalık metin, yazarın statik metnidir. Templater, JavaScript, keyfi değişkenler ve tüm biçim belirteçlerinin yürütülmesi bu örneğe dahil değildir."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "iPhone, SimpleMemo ve senkron aynı şekilde mi çalışıyor?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Gerçek işlemler, Linux Obsidian1.13.7 üzerinde yazarın Vault örneğinde kontrol edildi. iOS, Android, diğer işletim sistemleri, Obsidian Sync ve SimpleMemo entegrasyonları, cihazlar arası eşitleme, hız, üretkenlik veya trafik etkisi bu kayıtta doğrulanmadı. iPhone üzerinden günlüğe ekleme yolu için ayrı günlük not yazısına bakın."
+      }
+    }
+  ],
+  "inLanguage": "tr",
+  "@id": "https://simplememofast.com/tr/obsidian/daily-note-plugins/#faq"
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/tr/obsidian/daily-note-plugins/#webpage",
+  "name": "Günlük notları geliştirmek için eklenti — Takvim/Periyodik Notlar",
+  "url": "https://simplememofast.com/tr/obsidian/daily-note-plugins/",
+  "inLanguage": "tr",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/tr/#website"
+  }
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Ana gezinme" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/tr/guides/">Kılavuzlar</a><a href="/tr/use-cases/">Kullanım örnekleri</a><a href="/tr/vs/">Karşılaştır</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/tr/guides/">Kılavuzlar</a></li>
+        <li><a href="/tr/use-cases/">Kullanım örnekleri</a></li>
+        <li><a href="/tr/vs/">Karşılaştır</a></li>
+        <li><a href="/tr/methods/"><span>Yöntemler</span></a></li>
+        <li><a href="/tr/blog/"><span>Blog</span></a></li>
+        <li><a href="/tr/glossary/"><span>Sözlük</span></a></li>
+        <li><a href="/tr/faq">Sık sorulan sorular</a></li>
+        <li><a href="/tr/about/">Geliştirici hakkında</a></li>
+        <li><a href="/tr/devlog/">Geliştirme günlüğü</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>İndir</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Türkçe · Dil seçin"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>TR</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="tr" dir="ltr"><p class="site-language-title">Dil seçin</p><div class="site-language-grid"><a href="/obsidian/daily-note-plugins/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/daily-note-plugins/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/daily-note-plugins/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/daily-note-plugins/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/daily-note-plugins/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/daily-note-plugins/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/daily-note-plugins/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/daily-note-plugins/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/daily-note-plugins/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="tr" aria-current="page"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true">✓</span></span></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="global-nav__cta">İndir</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menü"><span>Menü</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content"><article class="container"><header class="lp-hero sd-hero sd-hero--media"><p class="lp-hero__label">Obsidian · Günlük ve haftalık notlar</p><h1 class="lp-hero__title">Günlük notları geliştirmek için eklenti — Takvim/Periyodik Notlar</h1><p class="lp-hero__sub">Tarih ve hafta numarasından geriye bakmak istediğiniz defteri açmak için bir giriş hazırlayın. Bu, Takvim ve Periyodik Notları birleştirmenin, günlükleri ve haftalık günlükleri oluşturmanın ve kaydetmenin ve bunları aynı uygulamada tekrar açmanın bir örneğidir.</p><p>Doğrulama tarihi: 2026 yıl 9 ay 30 (UTC) · Linux sürümü Obsidian 1.13.7</p><img class="hero-graphic sd-hero-media" src="/assets/img/og/obsidian-daily-note-plugins.png" width="1200" height="630" fetchpriority="high" decoding="async" alt="Takvim tarihinden günlüğüne ve hafta numarasından haftalık dergiye kadar bir rehber harita. Orijinal GUI ekranı her prosedürde yayınlanır"></header>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="choose"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">İki rolü ayırırsanız kurulumu kolaydır</h2></div><div class="ce-chapter__body"><p class="plugin-answer"><strong>Takvim, "defterin ne zaman açılması gerektiğinin" girişidir ve Periyodik Notlar "nerede, hangi isim ve metinle yapılır" ayarıdır. </strong> Bu sefer günlük bir 2026-09-30 ve haftalık bir 2026-W40 yaptım ve yazarın onayını şablonun gövdesine ekledim ve kaydettim.</p><p>Obsidian standart günlük notlar ve iPhone'den günlüke not ekleme yolları <a href="/tr/obsidian/daily-note/">günlük notlar ana makale</a>'de ele alınır. Bu makale, masaüstü takvim işlemleri ve günlük ve haftalık ayarlara daraltılır.</p>
+<div class="sd-table" tabindex="0" role="region" aria-label="Yatay olarak kaydırılabilen tablo"><table class="plugin-table"><thead><tr><th>Fonksiyon</th><th>Rol</th><th>Bu örnekte onaylanan aralık</th></tr></thead><tbody>
+<tr><th scope="row">Temel Günlük notlar</th><td data-label="Rol">Obsidian standart günlük not işlevi.</td><td data-label="Onaylanmış aralık">Gerçek GUI ile etkinleştirildi. Aşağıdaki ikisi, yalnızca standart işlevler kullanılarak günlük oluşturmadan ayrılarak birleştirilir.</td></tr>
+<tr><th scope="row">Takvim 1.5.10</th><td data-label="Rol">Tarih ve hafta numarasından bir nota giden bir kenar çubuğu.</td><td data-label="Onaylanmış aralık">Tarih 30, hafta numarası 40, oluşturma onayı, önceki ay ve mevcut ay transferi.</td></tr>
+<tr><th scope="row">Periyodik Notlar 0.0.17</th><td data-label="Rol">Günlük/Haftalık depolama hedefi, biçimi ve şablonu.</td><td data-label="Onaylanmış aralık">Günlük ve haftalık dergi ayarları, gerçek oluşturma metni, kaydetme, aynı uygulamada yeniden açma.</td></tr></tbody></table></div>
+<p class="scope-note">Burada kullanılan sürümler, resmi beta olmayan etiketlerden seçilen Takvim 1.5.10 ve Periyodik Notlar 0.0.17'dir. Bu, önerilen en son ve güncel sürümlerde ve diğer sürümlerde aynı sonucu garanti eden bir kayıt değildir. Çalıştırılan kullanıcı arayüzünün sürümü de aşağıdaki orijinal ekranda kontrol edilir.</p>
+<nav class="toc-links" aria-label="Bu makalenin içindekiler tablosu"><a href="#setup">sürüm ve etkinleştirme</a><a href="#settings">Değer ayarı</a><a href="#daily">Bir günlük yapın</a><a href="#weekly">Haftalık bir dergi yapın</a><a href="#faq">Tökezleme ve SSS</a><a href="#next">Sonraki adım</a></nav></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="setup"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">Doğrulanmış bir sürüm hazırlayın ve etkinleştirin</h2></div><div class="ce-chapter__body"><p>Bu örnekte, resmi sürüm dosyası izole yazar Vault'e manuel olarak yerleştirildi ve daha sonra GUI'den etkinleştirildi ve çalıştırıldı. Bu, Topluluk eklentilerinde Göz At → Yükle'ye tıklayarak tanıtılan bir doğrulama değildir.</p><ol class="steps-list"><li>Vault'de uygulama için boş bir <strong translate="no">日誌</strong>, <strong translate="no">週誌</strong> ve <strong translate="no">テンプレート</strong> klasörleri hazırlayın. Bu örneğin girişi aşağıdaki Markdown'ü kullanır.</li><li><a href="https://github.com/liamcain/obsidian-calendar-plugin/releases/tag/1.5.10" target="_blank" rel="noopener">Takvim 1.5.10 resmi sürümü</a> ve <a href="https://github.com/liamcain/obsidian-periodic-notes/releases/tag/0.0.17" target="_blank" rel="noopener">Periyodik Notlar 0.0.17 resmi sürümü</a>'den kontrol edebilirsiniz. Manuel yerleştirmenin yapılandırması aşağıda gösterilmiştir.</li><li>Ayarlar → Core eklentileriyle Günlük notları açın. Bu işlemde, Komut paleti de AÇIKtı ve Hızlı değiştirici AÇIK durumunu kontrol etti.</li><li>Kendiniz hazırladığınız Vault Güvenini onayladıktan sonra, Ayarlar → Topluluk eklentilerinde Periyodik Notlar ve Takvim'i açın. Aşağıdaki orijinal ekran, bu ikisi gerçekten etkinleştirildikten sonraki ekrandır.</li><li>Sağ kenar çubuğunu açın ve <strong>Takvim sekmesini</strong> seçin. Geri Bağlantılar gibi ayrı bir sekmede bırakırsanız, tarih ekranını göremezsiniz.</li></ol>
+<pre class="capture-code" tabindex="0"><code>.obsidian/plugins/calendar/
+  manifest.json
+  main.js
+.obsidian/plugins/periodic-notes/
+  manifest.json
+  main.js
+  styles.css</code></pre><p>Takvim'in bu sürümünde, stiller main.js'ye dahil edilir ve başka hiçbir styles.cs elde edilmez. Yukarıdakiler gerçek dosyanın yapılandırmasıdır. Eklentinin kendisi bu sayfanın dağıtım ZIP'ine dahil değildir.</p><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/plugins.png" target="_blank" rel="noopener" aria-label="Takvim ve Periyodik Notların gerçek sürüm ekranını ve AÇIK ayar ekranını orijinal boyutta açın"><img src="/assets/img/obsidian-daily-note-plugins/plugins.png" width="900" height="700" loading="lazy" decoding="async" alt="Takvim ve Periyodik Notlar gerçek sürüm ekranı ve AÇIK ayar ekranı"></a><figcaption>Yeni yazar Vault ile gerçek ekran etkinleştirildi. Takvim v1.5.10, Periyodik Notlar v0.0.17 ekranı ve AÇIK gözlendi. <a href="/assets/img/obsidian-daily-note-plugins/plugins.png" target="_blank" rel="noopener">Orijinal resmi açın</a></figcaption></figure></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="settings"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">Günlüğün ve haftalık derginin depolama hedefini önceden hizalayın</h2></div><div class="ce-chapter__body"><p>Ayarlar → Periyodik Notlar'da Günlük Notlar ve Haftalık Notlar'ı açın ve aşağıdaki değerleri girin. Klasörler ve şablonlar önceden Vault'de hazırlanacaktır. Bu ayar girişi, gerçek GUI'nin ve kaydedilmiş JSON'in ekranıyla eşleştirildi.</p>
+<div class="sd-table" tabindex="0" role="region" aria-label="Yatay olarak kaydırılabilen tablo"><table class="plugin-table"><thead><tr><th>Ayarlar</th><th>Günlük Notlar</th><th>Haftalık Notlar</th></tr></thead><tbody>
+<tr><th scope="row">Biçim</th><td data-label="Günlük Notlar"><code>YYYY-MM-DD</code></td><td data-label="Haftalık Notlar"><code>gggg-[W]ww</code></td></tr>
+<tr><th scope="row">Not Klasörü</th><td data-label="Günlük Notlar"><code>日誌</code></td><td data-label="Haftalık Notlar"><code>週誌</code></td></tr>
+<tr><th scope="row">Not Şablonu</th><td data-label="Günlük Notlar"><code>テンプレート/日</code></td><td data-label="Haftalık Notlar"><code>テンプレート/週</code></td></tr></tbody></table></div>
+<p>Ayarlar → Takvim'de <strong>Hafta numarasını göster</strong> ve <strong>Yeni not oluşturmadan önce onayla</strong> açık. Bu haftanın başlangıç tarihi Locale default (Pazar), uygulamanın yerel ayarı en ve ortamın saat dilimi UTC'dir. Tüm haftalık sınırları ve yerel kombinasyonları doğrulamanın bir sonucu değildir.</p><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/settings.png" target="_blank" rel="noopener" aria-label="Periyodik Notlar gerçek GUI ayarları, günlük ve Haftalık klasör formatı şablonları orijinal boyutta açık"><img src="/assets/img/obsidian-daily-note-plugins/settings.png" width="900" height="700" loading="lazy" decoding="async" alt="Periyodik Notlar gerçek GUI ayarları, Günlük ve Haftalık klasör biçimi şablonları"></a><figcaption>Günlük ve haftalık AÇIK ile gerçek GUI'den sabit değeri girmeden önce bağımsız denemenin orijinal ekranı. Bu kaydedilmiş JSON'i yeni oluşturma doğrulamasıyla aynı baytlarla devraldım. <a href="/assets/img/obsidian-daily-note-plugins/settings.png" target="_blank" rel="noopener">Orijinal resmi açın</a></figcaption></figure><details class="proof-details"><summary>Takvim'in haftalık sayı ayarının orijinal ekranı</summary><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/week-number.png" target="_blank" rel="noopener" aria-label="Gerçek GUI&#x27;yi Takvim&#x27;in Gösteri haftası numarası orijinal boyutunda açık olarak açın"><img src="/assets/img/obsidian-daily-note-plugins/week-number.png" width="900" height="700" loading="lazy" decoding="async" alt="Takvim&#x27;in Show hafta numarası AÇIK olan gerçek GUI"></a><figcaption>Gerçek GUI'de Show week numarasının açık olduğu orijinal ekran. Oluşturma girişiminde aynı kaydetme ayarlarını devraldık. <a href="/assets/img/obsidian-daily-note-plugins/week-number.png" target="_blank" rel="noopener">Orijinal resmi açın</a></figcaption></figure></details></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="daily"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">Bir günlük oluşturun ve 30 tarihinden itibaren yeniden açın</h2></div><div class="ce-chapter__body"><p>Günlük girdiyi <strong>テンプレート/日.md</strong>'e kaydedin. Burada kullanılan tarih değişkeni Obsidian'in yerel formatıdır.</p><div class="code-heading"><strong>Günlük şablon girişinin tam metni</strong><button type="button" class="copy-button" data-copy="daily-template">İçeriği kopyala</button></div><pre class="capture-code" tabindex="0"><code data-code="daily-template"># {{date:YYYY-MM-DD}}
+
+これは著者作成のデイリーノート用テンプレートです。
+
+## 確認
+
+- [ ] 保存した本文をもう一度開く
+- [[索引]]
+</code></pre><div class="download-row"><a class="md-download" data-file="daily-template" href="/assets/downloads/obsidian-daily-note-plugins/daily-template.md" download="daily-template.md">Markdown (170 bayt) alın</a></div><ol class="steps-list"><li>Seçin 2026 yıl 9 ay 30 gün Takvim. Bu sefer, onay ekranı Ayarlar'ın açık olan başka bir penceresinde göründü.</li><li><strong>Yeni Günlük Not</strong>'da 2026-09-30 hedefini kontrol edin ve o ekranda <strong>Oluştur</strong> öğesini seçin. 日誌/2026-09-30.md ana ekranda editöre açıldı.</li><li>Başlığın 2026-09-30 ile değiştirildiği metne bir onay satırı ekledim ve Ctrl+S ile kaydettim.</li><li>Dizini seçin, başka bir metne geçin ve soldaki dosya listesinden 日誌/2026-09-30.md'i yeniden seçin. Kaydedilen 235 baytlarının metni yeniden açıldıktan sonra bile eşleşti.</li></ol><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/daily.png" target="_blank" rel="noopener" aria-label="Takvim tarihinden itibaren oluşturulan günlüğü yeniden açtıktan sonra gerçek ekranı orijinal boyutunda açın"><img src="/assets/img/obsidian-daily-note-plugins/daily.png" width="1720" height="1000" loading="lazy" decoding="async" alt="Takvim tarihinden itibaren oluşturulan günlüğü yeniden açtıktan sonra gerçek ekran"></a><figcaption>Tarih tıklamasından itibaren oluşturulan orijinal ekran, yazarın onayını kaydetti ve dosya listesinden aynı notu yeniden açtı. Tarih başlığı ve metin kaydedilen dosyayla eşleştirildi. <a href="/assets/img/obsidian-daily-note-plugins/daily.png" target="_blank" rel="noopener">Orijinal resmi açın</a></figcaption></figure><details class="proof-details"><summary>Günlüğün tam metni ve oluşturma onay ekranı</summary><div class="code-heading"><strong>GUI'de kaydedilen ve yeniden açılan günlük metnin tam metni</strong><button type="button" class="copy-button" data-copy="daily-saved">İçeriği kopyala</button></div><pre class="capture-code" tabindex="0"><code data-code="daily-saved"># 2026-09-30
+
+これは著者作成のデイリーノート用テンプレートです。
+
+## 確認
+
+- [ ] 保存した本文をもう一度開く
+- [[索引]]
+
+著者確認: Calendarの日付クリックで開いた本文を保存。</code></pre><div class="download-row"><a class="md-download" data-file="daily-saved" href="/assets/downloads/obsidian-daily-note-plugins/daily-saved.md" download="daily-saved.md">Markdown (235 bayt) alın</a></div><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/daily-confirm.png" target="_blank" rel="noopener" aria-label="2026-09-30&#x27;i orijinal boyutunda New Daily Note&#x27;da oluşturmak için gerçek onay ekranını açın"><img src="/assets/img/obsidian-daily-note-plugins/daily-confirm.png" width="900" height="700" loading="lazy" decoding="async" alt="Yeni Günlük Notta 2026-09-30 oluşturmak için gerçek onay ekranı"></a><figcaption>Anadan farklı olan Ayarlar penceresinde görüntülenen gerçek oluşturma onayı. O Yarat'ı seçtim ve bir günlük yaptım. <a href="/assets/img/obsidian-daily-note-plugins/daily-confirm.png" target="_blank" rel="noopener">Orijinal resmi açın</a></figcaption></figure></details></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="weekly"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">Hafta numarası 40'den itibaren haftalık bir dergi yapın ve yeniden açın</h2></div><div class="ce-chapter__body"><p>Haftalık girdiyi <strong>テンプレート/週.md</strong> olarak kaydedin. Haftanın metni statik bir yazar şablonudur. Keyfi haftalık değişkenlerin değiştirilmesine bir örnek olarak kabul edilmez.</p><div class="code-heading"><strong>Haftalık şablon girişinin tam metni</strong><button type="button" class="copy-button" data-copy="weekly-template">İçeriği kopyala</button></div><pre class="capture-code" tabindex="0"><code data-code="weekly-template"># 週の確認
+
+これは著者作成の週間ノート用テンプレートです。
+
+## 確認
+
+- [ ] 一週間の対象を記録する
+- [[索引]]
+</code></pre><div class="download-row"><a class="md-download" data-file="weekly-template" href="/assets/downloads/obsidian-daily-note-plugins/weekly-template.md" download="weekly-template.md">Markdown (151 bayt) alın</a></div><ol class="steps-list"><li>Hafta numarasının sütununu gösteren Takvim'de <strong>40</strong> öğesini seçin. Bu ortamda hedef isim 2026-W40 idi.</li><li>Ayarlar'ın başka bir penceresinde görünen <strong>Yeni Haftalık Not</strong> 2026-W40'ini kontrol edin ve gerçek <strong>Oluştur</strong> öğesini seçin.</li><li>週誌/2026-W40.md'de açılan metne bir onay satırı ekledim ve Ctrl+S ile kaydettim. Bu, bu satırın orijinal statik haftalık şablona eklenmesinin sonucudur.</li><li>dizinine geçtim ve soldaki dosya listesinden 週誌/2026-W40.md'i yeniden seçtim. Kaydedilen 219 baytlarının metni, tekrar açıldıktan sonra bile eşleşti.</li></ol><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/weekly.png" target="_blank" rel="noopener" aria-label="40 takvim haftası numarasından oluşturulan haftalık dergiyi yeniden açtıktan sonra gerçek ekranı orijinal boyutta açın"><img src="/assets/img/obsidian-daily-note-plugins/weekly.png" width="1720" height="1000" loading="lazy" decoding="async" alt="Takvim&#x27;in hafta numarası 40&#x27;den oluşturulan haftalık dergiyi yeniden açtıktan sonra gerçek ekran"></a><figcaption>Hafta numarasından oluşturun, yazarın onayını kaydedin ve dosya listesinden orijinal ekranı tekrar açın. Hafta numarası 40 ve statik metin ve eklenen onay metni gözlendi. <a href="/assets/img/obsidian-daily-note-plugins/weekly.png" target="_blank" rel="noopener">Orijinal resmi açın</a></figcaption></figure><details class="proof-details"><summary>Haftalık derginin tam metni ve oluşturma onay ekranı</summary><div class="code-heading"><strong>GUI'de kaydedilen ve yeniden açılan haftalık metnin tam metni</strong><button type="button" class="copy-button" data-copy="weekly-saved">İçeriği kopyala</button></div><pre class="capture-code" tabindex="0"><code data-code="weekly-saved"># 週の確認
+
+これは著者作成の週間ノート用テンプレートです。
+
+## 確認
+
+- [ ] 一週間の対象を記録する
+- [[索引]]
+
+著者確認: Calendarの週番号から開いた本文を保存。</code></pre><div class="download-row"><a class="md-download" data-file="weekly-saved" href="/assets/downloads/obsidian-daily-note-plugins/weekly-saved.md" download="weekly-saved.md">Markdown (219 bayt) alın</a></div><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/weekly-confirm.png" target="_blank" rel="noopener" aria-label="Yeni Haftalık Notta orijinal boyutta 2026-W40 oluşturmak için gerçek onay ekranını açın"><img src="/assets/img/obsidian-daily-note-plugins/weekly-confirm.png" width="900" height="700" loading="lazy" decoding="async" alt="Yeni Haftalık Notta 2026-W40 oluşturmak için gerçek onay ekranı"></a><figcaption>Günlükten farklı bir gerçek tıklama ile çıkan haftalık oluşturma onayı. Hedef 2026-W40. <a href="/assets/img/obsidian-daily-note-plugins/weekly-confirm.png" target="_blank" rel="noopener">Orijinal resmi açın</a></figcaption></figure></details>
+<details class="proof-details"><summary>Orijinal ekran bir önceki aya taşındı ve geçerli aya geri döndü</summary><p>Başka bir sabit denemede, Önceki Takvim Ayı'nı bir kez seçtim ve Eylül 2026'den Ağustos 2026'e geçtim ve Eylül 2026'ye dönmek için bir kez Sonraki Ay'ı seçtim. Tüm ay ve yıl sınırlarının işleyişini onaylamanın bir sonucu değildir.</p><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/august.png" target="_blank" rel="noopener" aria-label="Takvim&#x27;de bir önceki ayın 2026 yılı 8 ayını orijinal boyutuyla birlikte gösteren orijinal ekranı açın"><img src="/assets/img/obsidian-daily-note-plugins/august.png" width="1720" height="1000" loading="lazy" decoding="async" alt="Takvim&#x27;de bir önceki ayın 2026 yılı 8 ayını gösteren orijinal ekran"></a><figcaption>Bir kez bir önceki aya taşınan gerçek ekranın başlığı Ağustos 2026'dir. <a href="/assets/img/obsidian-daily-note-plugins/august.png" target="_blank" rel="noopener">Orijinal resmi açın</a></figcaption></figure><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/september.png" target="_blank" rel="noopener" aria-label="Takvim&#x27;de geçerli ayın 2026 yılı 9 ayına dönen orijinal ekranı orijinal boyutunda açın"><img src="/assets/img/obsidian-daily-note-plugins/september.png" width="1720" height="1000" loading="lazy" decoding="async" alt="Takvim&#x27;de geçerli ayın 2026 yılı 9 ayına geri dönen orijinal ekran"></a><figcaption>Bir kez bir sonraki aya taşıdığım ve iade ettiğim gerçek ekranın başlığı Eylül 2026. <a href="/assets/img/obsidian-daily-note-plugins/september.png" target="_blank" rel="noopener">Orijinal resmi açın</a></figcaption></figure></details></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="downloads"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">Alıştırma için giriş yapın ve kaydedilmiş gerçek örnekleri alın</h2></div><div class="ce-chapter__body"><p>Giriş dizini, 3 şablonu ve GUI ile yapılan 2 kaydetme örneği ayrılmıştır. Eklenti gövdesi ve JSON ayarları dahil değildir. Mevcut not defterinin üzerine yazmamak için Vault uygulamanıza girdi yerleştiren bir yapılandırmadır. Okuyucunun Vault'e içe aktarma işlemi doğrulanmadı.</p><div class="download-row"><a class="md-download" data-file="index" href="/assets/downloads/obsidian-daily-note-plugins/index.md" download="index.md">Giriş indeksi Markdown (214 bayt)</a><a class="zip-download" href="/assets/downloads/obsidian-daily-note-plugins/author-inputs-and-saved-examples.zip" download="author-inputs-and-saved-examples.zip">Giriş 3 + gerçek kaydetme örneği 2 ZIP</a></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">Tökezlediğinizde kontrol edin ve SSS</h2></div><div class="ce-chapter__body"><details class="faq-item"><summary class="faq-summary">Hem Takvim hem de Periyodik Notlara ihtiyacım var mı?</summary><div class="faq-answer">Tarih seçme arayüzünü günlük ve haftalık not ayarlarıyla birleştirmek için bu iki aracı kullanın. Calendar takvimden giriş sağlar; Periodic Notes, Daily/Weekly klasörlerini, biçimlerini ve şablonlarını ayarlar. Yalnızca standart günlük not ayarları için ana makaledeki günlük not açıklamasından başlayın.</div></details><details class="faq-item"><summary class="faq-summary">Hafta numarası görüntülenmezse ne olur?</summary><div class="faq-answer">Bu Takvim 1.5.10'de, Ayarlar Takvimi'ndeki hafta numarasını göster açıldığında, sol kenarda bir hafta numarası sütunu görüntülenir. Sadece sağ kenar çubuğu açılarak Geri Bağlantılar gibi başka bir sekme seçilebileceğinden Takvim sekmesini seçin.</div></details><details class="faq-item"><summary class="faq-summary">Tarihe tıklarsam ve metne geçemezsem ne olur?</summary><div class="faq-answer">Bu kez, Yeni Günlük Not ve Yeni Haftalık Not oluşturulma onayı, ana ekranda değil, açık olan Ayarlar'ın ayrı bir penceresinde görüntülendi. Her iki ekrana da bakın, hedef dosya adını onaylayın ve onay ekranında Oluştur'u seçin. Onaylamadan önce aynı tarihe defalarca basmanın sonucu doğrulanmadı.</div></details><details class="faq-item"><summary class="faq-summary">Hangi haftalık format YYYY veya gggg?</summary><div class="faq-answer">Bu sabit örnekte kullanılan değer gggg-[W]ww'dir ve 2026-W40 2026-09-30 ortamında oluşturulmuştur. Haftanın yılını ve tarihin yılını temsil eden format sınırda eşleşmeyebilir, bu nedenle formatı karıştırmayın ve ayrıca hafta başlangıç tarihini ve uygulamanın yerelini kontrol edin. Tüm yıl sınırlarının, konumların ve saat dilimlerinin sonuçları doğrulanmadı.</div></details><details class="faq-item"><summary class="faq-summary">Şablon değişkenleri ve Şablonlayıcı da kullanıyor musunuz?</summary><div class="faq-answer">Günlük giriş için Obsidian'in yerel {{date:YYYY-MM-DD}}'sini kullandım ve gerçek oluşturmada 2026-09-30'nin değiştirilmesini doğruladım. Haftalık metin, yazarın statik metnidir. Templater, JavaScript, keyfi değişkenler ve tüm biçim belirteçlerinin yürütülmesi bu örneğe dahil değildir.</div></details><details class="faq-item"><summary class="faq-summary">iPhone, SimpleMemo ve senkron aynı şekilde mi çalışıyor?</summary><div class="faq-answer">Gerçek işlemler, Linux Obsidian1.13.7 üzerinde yazarın Vault örneğinde kontrol edildi. iOS, Android, diğer işletim sistemleri, Obsidian Sync ve SimpleMemo entegrasyonları, cihazlar arası eşitleme, hız, üretkenlik veya trafik etkisi bu kayıtta doğrulanmadı. iPhone üzerinden günlüğe ekleme yolu için ayrı günlük not yazısına bakın.</div></details></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">Onaylanmış gerçek kapsam ve resmi materyaller</h2></div><div class="ce-chapter__body"><ul><li>Resmi Linux sürümü Obsidian 1.13.7/Yükleyici 1.13.7, İngilizce kullanıcı arayüzü. Takvim 1.5.10/Periyodik Notlar 0.0.17 gerçek sürüm ekranı.</li><li>Yazar Vault'in gerçek GUI ayarları, günlük ve haftalık oluşturma onayı, metin, kaydetme ve aynı uygulamada yeniden açma. Aylık hareket başka bir sabit girişimle doğrulandı.</li><li>Eklentinin resmi sürüm varlıkları manuel olarak yerleştirilir. Yardımcı kod, ilk ortamı hazırlamak, durumu okumak ve dosyaları kaydetmek ve orijinali kopyalamak için kullanıldı. API, notların oluşturulması, düzenlenmesi, kaydedilmesi ve yeniden açılmasının yerini almaz.</li><li>Yayımlanan PNG ve Markdown dosyaları özgün baytları korur. iOS, diğer işletim sistemleri, SimpleMemo, Sync, tüm tarih/hafta/ay/saat/saat dilimi durumları, üretkenlik ve trafik etkileri doğrulanmadı.</li></ul>
+<p>Hazırlık aşamasında başlatma ve durdurma, beta sürüm ekranı ve kaydetme ayarları arasındaki uyumsuzluk, gizli sekmeye tıklayın ve başka bir pencerenin onay ekranının gözden kaçırılmaması orijinal başarısızlık olarak bırakılır. Bu makaleyi oluşturma ve kaydetme örneği, başka bir sabit girişime dayanmaktadır. Hızlı geçiş ekranını Ctrl+O ile gözlemleyemedim ve aynı hedefin dosya listesinden gerçek bir tıklama ile ilk kez yeniden açtım. Orijinal dosyanın ayrıntıları ve yazışmaları <a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/daily-note-plugins-20260930.md" target="_blank" rel="noopener"> doğrulama kaydında</a> özetlenecektir.</p>
+<details class="proof-details"><summary>Gerçek Genel sürüm ekranı</summary><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/version.png" target="_blank" rel="noopener" aria-label="Gerçek Obsidian sürümü 1.13.7&#x27;i ve Orijinal boyutta Genel&#x27;de görüntülenen Yükleyici sürümü 1.13.7&#x27;yi açın"><img src="/assets/img/obsidian-daily-note-plugins/version.png" width="900" height="700" loading="lazy" decoding="async" alt="Gerçek Obsidian sürümü 1.13.7 ve Yükleyici sürümü 1.13.7 Genel"></a><figcaption>Ayrı bir pencerede bırakılan oluşturma onayını işledikten sonra, gerçek GUI'den bir kez Genel'i seçtim ve uygulamanın ve yükleyicinin 1.13.7'ini gözlemledim. <a href="/assets/img/obsidian-daily-note-plugins/version.png" target="_blank" rel="noopener">Orijinal resmi açın</a></figcaption></figure></details>
+<ul class="source-list"><li><a href="https://github.com/liamcain/obsidian-calendar-plugin/blob/7d2aebda7f4a280bedc6da6d25f4da611d1625ef/README.md" target="_blank" rel="noopener">Takvim 1.5.10'in sabit taahhüt・Resmi README</a></li><li><a href="https://github.com/liamcain/obsidian-calendar-plugin/blob/7d2aebda7f4a280bedc6da6d25f4da611d1625ef/src/settings.ts" target="_blank" rel="noopener">Takvim sabit ayar kaynağı</a></li><li><a href="https://github.com/liamcain/obsidian-periodic-notes/blob/5b96e4f14130b0c024edb5ddb7871d01d61d9522/README.md" target="_blank" rel="noopener">Periyodik Notlar 0.0.17'in sabit taahhüdü・Resmi README</a></li><li><a href="https://github.com/liamcain/obsidian-periodic-notes/blob/5b96e4f14130b0c024edb5ddb7871d01d61d9522/src/settings/SettingsTab.svelte" target="_blank" rel="noopener">Periyodik Notlar sabit ayar UI kaynağı</a></li></ul>
+<p class="receipt-line">Özgün dosyalar ve ayarlar, gerçek işlem kayıtlarından ayrı karşılaştırıldı. Resmî sürüm dosyasının aynı derlemesini kaynak koddan yeniden üretme doğrulanmadı.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="next"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">Sonra, girişte günlükte bir not bırakmaya karar verin</h2></div><div class="ce-chapter__body"><p>Formu tarih ve hafta numarasından itibaren açılacak şekilde hazırladıktan sonra, kısa günlük notları nereye ekleyeceğinizi seçebilirsiniz. iPhone'den Obsidian'in günlüğüne eklenecek rota ve standart günlük notun ve tarih formatının onaylanması ana makalede ele alınmıştır.</p><div class="internal-links"><a data-next-step="daily-note" href="/tr/obsidian/daily-note/">Günlük Notun ana makalesine</a><a href="/tr/obsidian/plugins/templater/">Şablonlayıcı nasıl kullanılır</a></div></div></section></article></main><script>document.querySelectorAll('[data-copy]').forEach(function(b){b.addEventListener('click',async function(){var k=b.getAttribute('data-copy'),e=document.querySelector('[data-code="'+k+'"]');try{await navigator.clipboard.writeText(e.textContent);b.textContent=globalThis.SimpleMemoI18n.text("コピーしました");setTimeout(function(){b.textContent=globalThis.SimpleMemoI18n.text("本文をコピー")},1600)}catch(err){b.textContent=globalThis.SimpleMemoI18n.text("コピーできませんでした")}})});</script><footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="tr" dir="ltr"><a class="site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Küçük bir not. Bir sonraki adım.</p><p class="site-footer-description">iPhone'unuzdan Obsidian'a ve e-postaya not gönderin.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="Alt bilgi gezinmesi">
+      <div class="footer__col">
+        <p class="footer__col-title">Ürün</p>
+        <a href="/tr/download/" class="footer__link">İndir</a>
+        <a href="/tr/" class="footer__link">Ana sayfa</a>
+        <a href="/tr/apple-watch/" class="footer__link">Apple Watch</a>
+        <a href="/tr/obsidian/" class="footer__link">Obsidian entegrasyonu</a>
+        <a href="/tr/use-cases/" class="footer__link">Kullanım örnekleri</a>
+        <a href="/tr/guides/" class="footer__link">Kılavuzlar</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Karşılaştırmalar ve geçiş</p>
+        <a href="/tr/note-to-email/" class="footer__link">E-postaya not gönderme</a>
+        <a href="/tr/vs/" class="footer__link">Karşılaştır</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Destek</p>
+        <a href="/tr/roadmap/" class="footer__link">Açık yol haritası</a>
+        <a href="/tr/devlog/" class="footer__link">Geliştirme günlüğü</a>
+        <a href="/tr/about/" class="footer__link">Geliştirici hakkında</a>
+        <a href="/tr/faq" class="footer__link">Sık sorulan sorular</a>
+        <a href="/tr/privacy" class="footer__link">Gizlilik</a>
+        <a href="/tr/contact" class="footer__link">İletişim</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / İşleten: YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

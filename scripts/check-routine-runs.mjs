@@ -53,6 +53,8 @@ export const OVERDUE_GRACE_HOURS = 6;
  */
 export function diagnose(r, { now, observedAt = now }) {
   if (!r || typeof r !== 'object') return 'malformed';
+  // Historical disabled status is not the current state of an unreadable row.
+  if (r.observation_state === 'unavailable') return 'observation_unavailable';
   const endedOneShot = r.ended_reason === 'run_once_fired';
   if (r.enabled !== true && !endedOneShot) return 'stopped';
   if (r.last_run_status === 'FAILED') return 'failed';
@@ -141,6 +143,28 @@ export function validate(doc, { now = Date.now() } = {}) {
   const ref = Number.isFinite(observedAt) ? observedAt : now;
   const unhealthy = [];
   for (const r of doc.routines) {
+    if (r.observation_state === 'unavailable') {
+      const p = r.source_observation, last = r.last_verified;
+      const oldAt = Date.parse(last?.observed_at), readAt = Date.parse(p?.observed_at);
+      const emptyCurrent = ['enabled', 'cron_expression', 'run_once_at', 'next_run_at',
+        'last_fired_at', 'last_run_status', 'last_run_fired_at', 'last_run_finished_at', 'last_run_session_id']
+        .every(k => r[k] === null);
+      const accounted = intentionalIds.has(r.id)
+        ? !openIds.has(r.id) && last?.routine?.enabled === false
+          && diagnose(last.routine, { now: oldAt }) === 'stopped'
+        : open.some(f => f.id === r.id && f.what === 'observation_unavailable');
+      if (!accounted || !emptyCurrent
+        || p?.id !== r.id || p.method !== 'GET' || p.http_status !== 404
+        || p.endpoint !== '/v1/code/triggers/' + r.id
+        || !Number.isFinite(readAt) || readAt > ref || ref - readAt > 60000
+        || !Number.isFinite(oldAt) || oldAt > readAt
+        || last?.routine?.id !== r.id || typeof last.routine.enabled !== 'boolean'
+        || last.routine.observation_state) {
+        problems.push(`${r.id}: 参照不可の現在証跡・未解消の記録または意図的停止・履歴が不整合`);
+      } else {
+        warnings.push(`${r.id}: 個別GETは404。現在の有効状態・削除・実行結果は不明。未解消の記録または意図的停止の判断と最後の実測履歴を保持し、復旧成功には数えない`);
+      }
+    }
     const what = diagnose(r, { now, observedAt: ref });
     if (!what) continue;
     unhealthy.push({ id: r.id, name: r.name, what });
@@ -233,6 +257,23 @@ function selftest() {
   const real = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
   const NOW = Date.parse('2026-08-28T00:30:00Z');
   const V = (d) => validate(d, { now: NOW });
+  // All currently observed routines may legitimately be recorded as unhealthy.
+  // Keep the negative tests independent of that live mix by adding one healthy,
+  // unrecorded control to the cloned snapshot before making it unhealthy.
+  const healthyControl = (d) => {
+    const id = 'selftest-healthy-unrecorded';
+    assert(!d.routines.some((r) => r.id === id), 'selftest control ID is already in the snapshot');
+    const observed = Date.parse(d.observed_at);
+    assert(Number.isFinite(observed), 'snapshot observation time is invalid');
+    const r = {
+      id, name: 'selftest healthy control', enabled: true,
+      cron_expression: '0 0 * * *', run_once_at: null,
+      next_run_at: new Date(observed + DAY).toISOString(),
+      last_fired_at: d.observed_at, last_run_status: 'SUCCEEDED',
+    };
+    d.routines.push(r);
+    return r;
+  };
 
   const scenarios = [
     ['実データが検査を通る', () => {
@@ -275,30 +316,26 @@ function selftest() {
     // [2026-08-31] **実データに結びついていた。**`find(r => r.enabled)` は
     // 先頭の有効な routine を取るだけなので、そこが**既に open_findings に載っている**
     // 日（＝いま）は、止めても「一覧に無い」にならず、この検査が黙って空回りする。
-    // **どちらの一覧にも居ない健全な1本**を選ぶ形にして、件数から切り離した。
+    // **どちらの一覧にも居ない健全な1本**を検体にして、件数から切り離した。
+    // 現在の実データにその行が無い日も、合成検体で検出力を保つ。
     ['**新しく止まった routine を通さない**', () => {
-      // [2026-08-31] **`find((r) => r.enabled)` だと、先頭が記録済みの行に当たると鳴らない。**
-      // 記録が増えた日に実際に踏んだ。**どちらの一覧にも居ない行**を選ぶ。
       const p = V(broken(real, (d) => {
-        const recorded = new Set([...d.open_findings, ...d.intentional_stops].map((f) => f.id));
-        const r = d.routines.find((x) => x.enabled && !recorded.has(x.id));
-        if (!r) throw new Error('記録されていない enabled な routine が実データに無い'
-          + ' — **この検査は空回りしている**');
+        const r = healthyControl(d);
         r.enabled = false;
       })).problems;
       assert(p.some((x) => x.includes('どちらの一覧にも無い')), p.join(' / '));
     }],
     ['**新しく失敗した routine を通さない**', () => {
       const p = V(broken(real, (d) => {
-        const r = d.routines.find((x) => x.enabled && x.last_run_status !== 'FAILED');
+        const r = healthyControl(d);
         r.last_run_status = 'FAILED';
       })).problems;
       assert(p.some((x) => x.includes('failed')), p.join(' / '));
     }],
     ['**発火予定を過ぎたものを通さない**', () => {
       const p = V(broken(real, (d) => {
-        const r = d.routines.find((x) => x.enabled && x.last_run_status !== 'FAILED');
-        r.next_run_at = '2026-08-20T00:00:00Z';
+        const r = healthyControl(d);
+        r.next_run_at = new Date(Date.parse(d.observed_at) - DAY).toISOString();
       })).problems;
       assert(p.some((x) => x.includes('overdue')), p.join(' / '));
     }],
@@ -368,6 +405,13 @@ function selftest() {
       const p = V(broken(real, (d) => {
         const f = d.open_findings[0];
         const r = d.routines.find((x) => x.id === f.id);
+        // This fixture represents a new healthy source read, not null current
+        // fields left over from an unavailable observation.
+        if (r.observation_state === 'unavailable') {
+          const verified = structuredClone(r.last_verified.routine);
+          for (const key of Object.keys(r)) delete r[key];
+          Object.assign(r, verified);
+        }
         // [2026-08-31] **固定日付を置くと、写しの観測時刻を追い越されて overdue のまま残る。**
         // overdue の基準を壁時計から observed_at へ移した（同日の別の直し）ので、
         // **写しより後**に置かないと「健全になった」形にならない。実際にここで踏んだ。
@@ -378,7 +422,13 @@ function selftest() {
     }],
     ['**止めたはずのものが動いていたら落とす**', () => {
       const p = V(broken(real, (d) => {
-        const r = d.routines.find((x) => x.id === d.intentional_stops[0].id);
+        const index = d.routines.findIndex((x) => x.id === d.intentional_stops[0].id);
+        // Model a current API record returning, not a contradictory unavailable
+        // marker. Contradictory markers have a separate rejection test.
+        if (d.routines[index].observation_state === 'unavailable') {
+          d.routines[index] = structuredClone(d.routines[index].last_verified.routine);
+        }
+        const r = d.routines[index];
         // [2026-08-31] 固定日付だと写しの観測時刻を追い越されて overdue のまま残り、
         // 「動いている」形にならない（上の『直ったのに〜』と同じ理由）。
         const after = new Date(Date.parse(d.observed_at) + DAY).toISOString().replace(/\.\d+Z$/, 'Z');

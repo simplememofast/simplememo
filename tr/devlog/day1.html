@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/day1">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>[Geliştirme Günlüğü Günü1] Captio'i o kadar çok seviyorum ki "o deneyimi" tekrar yapmak istedim | SimpleMemo</title>
+  <meta name="description" content="Geliştirme günlüğü Day1, Captio deneyimini seçme nedeni, gönderildiğinde kaybolan tasarım, dökülmeleri önlemek için Outbox mimarisi, Relay API ve gizlilik tasarımı dahil olmak üzere tüm teknik yargıları kaydeder. Dökülmeleri önlemek için tek dokunuşla iletim ve tasarım serbest bırakılacaktır.">
+  <meta name="theme-color" content="#070b14">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="author" content="Obsidian連携シンプルメモ開発チーム">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- OGP -->
+  <meta property="og:title" content="[Geliştirme Günlüğü Günü1] Captio&#x27;i o kadar çok seviyorum ki &quot;o deneyimi&quot; tekrar yapmak istedim">
+  <meta property="og:description" content="Captio deneyimini parçalarına ayıran ve UIKit, Outbox mimarisi, Relay API ve gizlilik tasarımından tüm teknik kararları kaydeden geliştirme günlüğü Day1. Dökülmeyi önlemek için tek dokunuşla iletim ve tasarım.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://simplememofast.com/tr/devlog/day1">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-day1.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
+  <meta property="article:author" content="Obsidian連携シンプルメモ開発チーム">
+  <meta property="article:section" content="Development">
+  <meta property="article:tag" content="Captio">
+  <meta property="article:tag" content="UIKit">
+  <meta property="article:tag" content="Outbox Architecture">
+  <meta property="article:tag" content="Privacy">
+  <meta property="article:tag" content="Swift">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="[Geliştirme Günlüğü Günü1] Captio&#x27;i o kadar çok seviyorum ki &quot;o deneyimi&quot; tekrar yapmak istedim">
+  <meta name="twitter:description" content="Captio deneyimini söken ve UIKit, Outbox mimarisi, Relay API ve gizlilik tasarımı dahil olmak üzere tüm teknik yargıları kaydeden geliştirme günlüğü Day1.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-day1.png">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/tr/devlog/day1">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/day1">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/day1">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/day1">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/day1">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/day1">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/day1">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/day1">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/day1">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/day1">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/day1">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/day1">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BlogPosting -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/tr/devlog/day1#article",
+  "headline": "[Geliştirme Günlüğü Günü1] Captio'i o kadar çok seviyorum ki \"o deneyimi\" tekrar yapmak istedim",
+  "description": "Captio deneyimini parçalarına ayıran ve UIKit, Outbox mimarisi, Relay API ve gizlilik tasarımından tüm teknik kararları kaydeden geliştirme günlüğü Day1. Dökülmeyi önlemek için tek dokunuşla iletim ve tasarım.",
+  "url": "https://simplememofast.com/tr/devlog/day1",
+  "inLanguage": "tr",
+  "datePublished": "2026-02-13",
+  "dateModified": "2026-10-02",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://simplememofast.com/#organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/devlog-day1.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/tr/devlog/day1#webpage"
+  }
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Ana sayfa",
+      "item": "https://simplememofast.com/tr/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Geliştirme Günlüğü",
+      "item": "https://simplememofast.com/tr/devlog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Geliştirme Günlüğü Günü1",
+      "item": "https://simplememofast.com/tr/devlog/day1"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Speakable (AIO / Voice Search) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/tr/devlog/day1#webpage",
+  "inLanguage": "tr",
+  "name": "Geliştirme Günlüğü Günü1 - Captio'i o kadar çok seviyorum ki bu deneyimi tekrar yaşamak istedim",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/tr/#website"
+  },
+  "url": "https://simplememofast.com/tr/devlog/day1"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container { display: flex; justify-content: flex-end; padding: 1.25rem 0; }
+    .lang-switcher { display: inline-flex; background: rgba(18, 26, 46, 0.95); border: 1px solid rgba(82, 160, 255, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .lang-switcher__btn { background: transparent; border: none; color: #c9d4ec; padding: 0.75rem 1.1rem;
+      min-height: 48px; border-radius: 19px; cursor: pointer; font-size: 0.8rem; font-weight: 400; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.02em; }
+    .lang-switcher__btn:hover { color: #f2f6ff; }
+    .lang-switcher__btn:focus-visible { outline: 2px solid #4da3ff; outline-offset: 2px; }
+    .lang-switcher__btn.active { background: rgba(82, 160, 255, 0.25); border: 1px solid rgba(82, 160, 255, 0.2); color: #fff; box-shadow: 0 0 12px rgba(82, 160, 255, 0.1); }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+    @media (prefers-reduced-motion: reduce) { .lang-switcher__btn { transition: none; } }
+
+    pre { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 16px 0; }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 0.85rem; color: #e0e0e0; }
+    .article-meta { text-align: center; margin-bottom: 30px; color: var(--text-muted); font-size: 0.85rem; }
+    .article-toc { background: rgba(18, 26, 46, 0.85); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 30px; }
+    .article-toc h2 { font-size: 0.95rem; margin-bottom: 12px; }
+    .article-toc ol { padding-left: 20px; }
+    .article-toc li { margin-bottom: 6px; }
+    .article-toc a { color: var(--accent); text-decoration: none; font-size: 0.875rem; }
+    .article-toc a:hover { text-decoration: underline; }
+    .related-topics { margin-top: 50px; }
+    .related-topics h2 { font-size: 1.1rem; margin-bottom: 16px; }
+    .related-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 600px) { .related-grid { grid-template-columns: 1fr 1fr; } }
+    .related-card { background: rgba(18, 26, 46, 0.85); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; text-decoration: none; color: inherit; display: block; transition: border-color 0.25s; }
+    .related-card:hover { border-color: rgba(82, 160, 255, 0.3); }
+    .related-card__title { font-size: 0.9rem; font-weight: 700; color: var(--text-primary, #fff); margin-bottom: 4px; }
+    .related-card__desc { font-size: 0.8rem; color: var(--text-secondary); }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Ana gezinme" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/tr/guides/">Kılavuzlar</a><a href="/tr/use-cases/">Kullanım örnekleri</a><a href="/tr/vs/">Karşılaştır</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/tr/guides/">Kılavuzlar</a></li>
+        <li><a href="/tr/use-cases/">Kullanım örnekleri</a></li>
+        <li><a href="/tr/vs/">Karşılaştır</a></li>
+        <li><a href="/tr/methods/"><span>Yöntemler</span></a></li>
+        <li><a href="/tr/blog/"><span>Blog</span></a></li>
+        <li><a href="/tr/glossary/"><span>Sözlük</span></a></li>
+        <li><a href="/tr/faq">Sık sorulan sorular</a></li>
+        <li><a href="/tr/about/">Geliştirici hakkında</a></li>
+        <li><a href="/tr/devlog/">Geliştirme günlüğü</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>İndir</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Türkçe · Dil seçin"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>TR</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="tr" dir="ltr"><p class="site-language-title">Dil seçin</p><div class="site-language-grid"><a href="/devlog/day1" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/devlog/day1" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/devlog/day1" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/devlog/day1" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/devlog/day1" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/devlog/day1" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/devlog/day1" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/devlog/day1" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/devlog/day1" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="tr" aria-current="page"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true">✓</span></span></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">İndir</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menü"><span>Menü</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- ======================== -->
+      <!-- JAPANESE VERSION         -->
+      <!-- ======================== -->
+      <div>
+        <h1 class="page-content__title sd-title">[Geliştirme Günlüğü Günü1] Captio'i o kadar çok seviyorum ki "o deneyimi" tekrar yapmak istedim</h1>
+        <div class="article-meta">2026 yıl 2 ay 13 gün</div>
+
+        <!-- Table of Contents -->
+        <nav class="article-toc">
+          <h2>İçindekiler</h2>
+          <ol>
+            <li><a href="#ja-intro">Giriş: Captio'in varlığı</a></li>
+            <li><a href="#ja-section1">Captio'in "ne"si hakkında iyi olan neydi - Deneyimi sökmeye çalıştım</a></li>
+            <li><a href="#ja-section2">Mimari: Neden SwiftUI yerine UIKit</a></li>
+            <li><a href="#ja-section3">Tek dokunuşla "gönder ve kaybol"u gerçekleştirmek için tasarım</a></li>
+            <li><a href="#ja-section4">Dökülmeyi önlemek için Outbox mimarisi</a></li>
+            <li><a href="#ja-section5">Röle API: Posta kutusunun OAuth bağlantısına güvenmeden gönderme</a></li>
+            <li><a href="#ja-section6">Bugün yaptığım şey: Küçük rahatsızlığı tek tek sil</a></li>
+            <li><a href="#ja-section7">Geçmiş ekran durumu tutarsızlığı çözüldü</a></li>
+            <li><a href="#ja-section8">Mahremiyete karşı panoid takıntısı</a></li>
+            <li><a href="#ja-section9">10 dil desteği: Dünyanın dört bir yanındaki Captio kullanıcılarına teslimat yapmak istiyorum</a></li>
+            <li><a href="#ja-section10">Bugünün öğrenmesi: Ürün bir "güvenlik duygusu" tasarımıdır</a></li>
+            <li><a href="#ja-section11">Bir Dahaki sefere (Day2) Bildirimi</a></li>
+          </ol>
+        </nav>
+
+        <div class="page-content__body">
+
+          <!-- Introduction -->
+          <section id="ja-intro">
+            <p>Captio adlı uygulamayı biliyor musunuz?</p>
+            <p>Bir not yazın ve gönder düğmesine basın. E-posta adresinize bir not almak için ihtiyacınız olan tek şey bu. Başlattığınız anda klavye görüntülenecek ve yazarsanız gönderin ve gönderirseniz kaybolacaktır. Hiç gereksiz fonksiyon yoktur. Bu kadar büyük bir uygulamaydı.</p>
+            <p>Ama "hepsi bu kadar" inanılmaz derecede rahattı.</p>
+            <p>Banliyö treninde aklıma gelen fikirler, toplantı sırasında aniden aklıma gelen görevler ve yatmadan önce aklımdan geçen kelimeler - Captio hepsini hemen posta kutuma teslim etti. Not uygulamasını açma, klasör seçme ve başlık ekleme gibi bir güçlük yoktur. "Sıfır sürtünme" deneyimi, bir kez öğrendikten sonra bırakamayacağınız bir şeydi.</p>
+            <p>Captio hizmetini sonlandırdı.</p>
+            <p>Birkaç alternatif uygulama denedim, ancak hiçbiri bu deneyimden uzak değildi. Yavaş başlatma, kullanıcı arayüzünde gereksiz öğeler var ve iletimden sonra notlar kalıyor - önemsiz bir fark gibi görünebilir, ancak Captio tarafından yaratılan deneyimin özü bu tür "önemsiz şeylerin" birikimiydi.</p>
+            <p>Bu yüzden kendim yapmaya karar verdim. Captio'i tekrar deneyimleyin.</p>
+            <p>Bu, "SimpleMemo" Day1'in geliştirme günlüğüdür. Bu makalede, Captio deneyimini parçalarına ayıracağız ve modern bir teknoloji yığınında nasıl yeniden üretileceğine dair tüm teknik yargıları kaydedeceğiz.</p>
+          </section>
+
+          <!-- Section 1 -->
+          <section id="ja-section1" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-01">1. Captio hakkında "ne" iyiydi - Deneyimi sökmeye çalıştım</h2></div><div class="ce-chapter__body">
+            <p>Captio deneyimini sözlü olarak ifade etmek için onu 3'in iki unsuruna ayırmaya çalıştım.</p>
+
+            <h3>Öğe 1: Anında Başlatmadan Girişe</h3>
+            <p>Captio'i başlattığınızda klavye hemen görüntülenir ve metin girebilirsiniz. Ana ekran, açılış ekranından sonra görüntülenir ve oradan not oluşturma düğmesine basmak için bir prosedür yoktur. Başlangıç = Giriş. Buna "başlangıçtan metin girişine kadar süre" <strong>Metne-Süre</strong> diyoruz. Captio'in deneyimi 0.5 saniyeden azdı.</p>
+
+            <h3>Öğe 2: Gönderdikten Sonra Anında Temizle (Gönderdikten Sonra Anında Temizle)</h3>
+            <p>Gönder düğmesine bastığınızda ekran hemen temizlenecektir. Gönderiyorum..." İlerleme çubuğuna bakarken bekleyecek zamanım yok. Yazdığınız not kaybolduğu anda, "Ah, gönderebildim" güvenlik duygusuyla bir sonraki eyleme geçebilirsiniz. Buna "gönder düğmesine basmaktan kullanıcı arayüzünün temizlenmesine kadar olan süre" <strong>Send-to-Reset</strong> diyoruz. Amaç, beklediğinizi hissetmeden önce ekranı boşaltmaktır.</p>
+
+            <h3>Öğe 3: Gereksiz Bir Şey Yok (Gereksiz Bir Şey Yok)</h3>
+            <p>Klasör işlevi, etiket işlevi, zengin metin, markdown desteği - bunların hiçbiri Captio'de mevcut değildi. Yalnızca bir metin giriş alanı ve bir gönder düğmesi vardır. Bu düzgünlük bilişsel yükü sıfıra yaklaştırdı. Ne yapacağını düşünmek zorunda olmayan bir uygulama. Captio idi.</p>
+
+            <p>Bu 3 öğesi modern iOS geliştirmesinde yeniden üretilmiştir. "SimpleMemo"nin görevi budur.</p>
+          </div></section>
+
+          <!-- Section 2 -->
+          <section id="ja-section2" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-02">2. Mimari: SwiftUI neden "değil" UIKit</h2></div><div class="ce-chapter__body">
+            <p>2026'de iOS'in geliştirilmesinde, SwiftUI yerine UIKit'i seçmek sapkın görünebilir. Ancak, en öncelikli hedefimiz açıktı - <strong>Metin Zamanı 500ms veya daha az</strong>.</p>
+
+            <p>SwiftUI'nin `body` yeniden değerlendirmesi, `StateObject` başlatma`, `@Environment` çözümü - bu ek yükler normal uygulama geliştirmede göz ardı edilebilir, ancak "başlangıç girişi" elde etmek için göz ardı edilemezler. 1ms ile bile metin alanına hızlı bir şekilde odaklanmak istiyorum.</p>
+
+            <p>Orada benimsenen şey, Storyboard kullanmadan <strong>UIKit doğrudan yapımıdır</strong>.</p>
+
+            <p>SceneDelegate ile bir pencere oluşturun ve CompositeViewController'ı doğrudan rootViewController'a ayarlayın. Storyboard'un ayrıştırma işlemini bile atlayın.</p>
+
+<pre tabindex="0"><code>// SceneDelegate.swift
+func scene(_ scene: UIScene,
+           willConnectTo session: UISceneSession,
+           options connectionOptions: UIScene.ConnectionOptions) {
+    guard let windowScene = (scene as? UIWindowScene) else { return }
+    let window = UIWindow(windowScene: windowScene)
+    window.rootViewController = ComposeViewController()
+    window.makeKeyAndVisible()
+    self.window = window
+}</code></pre>
+
+            <p>ve ComposeViewController'ın `viewDidAppear` ile anında metin görünümüne odaklanın.</p>
+
+<pre tabindex="0"><code>// ComposeViewController.swift
+override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    textView.becomeFirstResponder()
+}</code></pre>
+
+            <p>Yalnızca bu 2 koduyla, başlangıçtan klavye ekranına giden yol en kısa yoldur.</p>
+
+            <p>Hedef 500 ms veya altıdır. Daha sonra ekran kaydıyla yapılan ölçümde, 11/8/2026 tarihinde iPhone 16e üzerinde sıcak başlatmada, simgeye dokunmaktan klavyenin tamamen görünmesine kadar 0.4 saniye geçti. SwiftUI içinde `@FocusState` ve body yeniden değerlendirmesinin zamanlamasını hassas denetlemek zor olduğundan bu yolu hızlandırmanın güç olduğuna karar verdik. İki yaklaşımı aynı koşullarda ölçüp karşılaştırmış değiliz.</p>
+
+            <p>UIKit "eski" olabilir. Ancak, "hızlı". Bu 1 noktasında, UIKit hala en iyi seçimdir.</p>
+          </div></section>
+
+          <!-- Section 3 -->
+          <section id="ja-section3" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-03">3. Tek dokunuşla "gönder ve kaybol"u gerçekleştirmek için tasarım</h2></div><div class="ce-chapter__body">
+            <p>Captio'in "gönderildiğinde kaybolur" deneyimini yeniden üretmek için en önemli tasarım kararı vardır. <strong> iletim animasyonunu ve kullanıcı arayüzü temizlemesini ağ yanıtından</strong> tamamen ayırmaktır.</p>
+
+            <p>Yaygın uygulamaların iletim akışı aşağıdaki gibidir:</p>
+            <ol>
+              <li>gönder düğmesine basın</li>
+              <li>Göster yükleme göstergesi</li>
+              <li>Sunucudan yanıt bekliyor</li>
+              <li>Başarılıysa kullanıcı arayüzünü temizle, başarısız olursa hatayı görüntüle</li>
+            </ol>
+
+            <p>Bu akışta, ağ gecikmesi olduğu gibi kullanıcı arayüz gecikmesi haline gelir. Akışımız şöyle:</p>
+            <ol>
+              <li>gönder düğmesine basın</li>
+              <li><strong>hemen</strong>temizle kullanıcı arayüzü (animasyon: 0.25 saniye)</li>
+              <li>Arka planda ağ iletimi</li>
+              <li>Başarılı → Outbox'den sessizce silin / Başarısız → Arka planda tekrar deneyin</li>
+            </ol>
+
+<pre tabindex="0"><code>// ComposeViewController.swift
+private func performSendAnimation() {
+    UIView.animate(withDuration: 0.25,
+                   delay: 0,
+                   options: .curveEaseOut) {
+        self.textView.alpha = 0
+        self.subjectField.alpha = 0
+    } completion: { _ in
+        self.textView.text = ""
+        self.subjectField.text = ""
+        self.textView.alpha = 1
+        self.subjectField.alpha = 1
+        self.textView.becomeFirstResponder()
+    }
+}</code></pre>
+
+            <p>Kullanıcılar için, gönder düğmesine bastığınız anda not "kaybolur" ve bir sonraki notu yazabilirsiniz. Ağın başarısı veya başarısızlığı, kullanıcının göremeyeceği bir yerde ele alınır.</p>
+
+            <p>"Ama ya iletim başarısız olursa?" - Bu sorunun cevabı bir sonraki bölümdeki Outbox mimarisidir.</p>
+          </div></section>
+
+          <!-- Section 4 -->
+          <section id="ja-section4" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-04">4. Dökülmeyi önlemek için Outbox mimarisi</h2></div><div class="ce-chapter__body">
+            <p>İletim kullanıcı arayüzünü ağ yanıtından ayırmak, "UI'nin temizlendiği, ancak e-posta iletiminin gerçekten başarısız olduğu" bir durumun ortaya çıkabileceği anlamına gelir. Bu kesinlikle kabul edilemez. Kullanıcının "gönderildiğini" düşündüğü not aslında gönderilmedi - bu, not uygulaması için ölümcül bir güven kaybıdır.</p>
+
+            <p>Orada benimsenen şey <strong>Outbox deseni</strong>.</p>
+
+            <p>Mesaj iletim akışı aşağıdaki gibidir:</p>
+            <ol>
+              <li><strong>Gönder düğmesine dokunun</strong>: AES-GCM mesajını şifreleyin ve Outbox'e kaydedin (yerel depolama)</li>
+              <li><strong>UI clear</strong>: performSendAnimation ile ekranı anında temizleyin</li>
+              <li><strong>Arka plan iletimi</strong>: Outbox'den bir mesaj çıkarın ve Relay API'e gönderin</li>
+              <li><strong>Başarı</strong>: Outbox'den gelen mesajı silin</li>
+              <li><strong>Başarısızlık</strong>: İletimi beklerken bırakın ve daha sonra tekrar gönderin</li>
+              <li><strong>Çevrimdışı</strong>: NWPathMonitor ile bağlantıyı izleyin ve geri döndüğünüzde otomatik olarak yeniden gönderin</li>
+            </ol>
+
+            <p>Önemli olan, ağı göndermeden önce <strong>Outbox'e kaydetmek</strong>. Sonuç olarak, uygulama aniden çökse veya terminal gücü kesilse bile, Outbox'e yazılan mesaj kalacaktır.</p>
+
+            <p>Outbox'de depolanan mesajlar, CryptoKit kullanılarak AES-GCM şifrelemesi ile korunur. Şifreleme anahtarı Anahtarlıkta saklanır ve uygulamanın sanal alanının dışından erişilemez.</p>
+
+<pre tabindex="0"><code>// OutboxManager.swift
+func enqueue(message: OutboxMessage) throws {
+    let key = try KeychainHelper.getOrCreateSymmetricKey()
+    let sealedBox = try AES.GCM.seal(
+        message.plainData,
+        using: key
+    )
+    let encrypted = EncryptedOutboxEntry(
+        id: message.id,
+        sealedData: sealedBox.combined!,
+        createdAt: Date(),
+        retryCount: 0
+    )
+    try persistenceStore.save(encrypted)
+}</code></pre>
+
+            <p>Ayrıca, her şeyi kendi başına uyguladığı için <strong>harici kitaplığa bağımlılık sıfırdır</strong>. CryptoKit, NWPathMonitor, URLSession - hepsi orijinal Apple çerçevesiyle tamamlandı. Üçüncü taraf kütüphane sürüm kontrolü ve güvenlik denetiminden uzak olmak, küçük ekipler için büyük bir avantajdır.</p>
+          </div></section>
+
+          <!-- Section 5 -->
+          <section id="ja-section5" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-05">5. Röle API: Posta kutusunda OAuth işbirliğine güvenmeden gönderme</h2></div><div class="ce-chapter__body">
+            <p>Captio'in iletim mekanizması resmi olarak açıklanmamıştır. Geliştiricinin sonlandırma duyurusunun nedeni, artık uygulamanın kararlılığını ve güvenliğini korumak için zaman harcamaya devam edememesi ve iletim yönteminin bir neden olarak gösterilmemesidir. Bununla birlikte, genel olarak, harici e-posta API'e güvenerek gönderim, sağlayıcının gereksinimlerindeki ve erişim kısıtlamalarındaki değişikliklerden kolayca etkilenir.</p>
+
+            <p><strong>Cloudflare Workers + Resend API</strong> yapılandırmasını seçtik.</p>
+
+            <p>Cloudflare Workers, dünyanın dört bir yanındaki kullanıcılara en yakın veri merkezinde kod yürüten bir uç bilgi işlem platformudur. Japonya'dan gelen talepler Japonya'nın kenarında işlenir ve Amerika Birleşik Devletleri'nden gelen talepler Amerika Birleşik Devletleri'nin kenarında işlenir. Bu, geleneksel sunucusuz (AWS Lambda, vb.) ile karşılaştırıldığında soğuk başlatma sorununu neredeyse ortadan kaldırır.</p>
+
+            <p>E-posta göndermek için Resend API'i kullanın. Resend, geliştiriciler için bir e-posta API'tür.</p>
+
+            <h3>Posta kimlik doğrulama akışı</h3>
+            <p>Kullanıcı hedef e-posta adresini ayarladığında, e-posta 6 haneli doğrulama koduyla doğrulanır. Bu, üçüncü taraf e-posta adreslerine yetkisiz gönderimi önler.</p>
+
+            <h3>Çok katmanlı hız sınırı</h3>
+            <p>Yetkisiz kullanımı önlemek için çok katmanlı oran kısıtlamaları uygulanır.</p>
+
+<pre tabindex="0"><code>// Cloudflare Worker - Rate Limit Configuration
+const RATE_LIMITS = {
+  devicePerMinute: 30,    // 1デバイスあたり1分30回
+  devicePerDay: 200,      // 1デバイスあたり1日200回
+  ipPerHour: 120,         // 1IPあたり1時間120回
+  globalPerDay: 300       // サービス全体で1日300回（調整可能）
+};</code></pre>
+
+            <p>3 katmanına cihaz birimi, IP birimi ve genel birime göre hız limitleri uygulayarak, tek bir cihazda kaçak ve botnet saldırılarını engelleyebilirsiniz.</p>
+
+            <p><strong>2026-09 güncellemesi:</strong> Cihaz başına sınır ve toplam 1 günlük sınır, 6/2026 tarihinde kaldırıldı. Güncel gönderim sınırı, IP adresi başına 1 saatlik kotadır.</p>
+
+            <h3>Güç eşitliği garantisi</h3>
+            <p>Ağ istikrarsızlığı nedeniyle yinelenen iletimi önlemek için her mesaja bir UUID atayın ve Relay API tarafında bir yinelenen kontrol gerçekleştirin. Aynı UUID mesajı yeniden gönderilirse, 2 süresinden sonra bir e-posta göndermeden başarılı bir yanıt gönderir. Bu, Outbox modelinin yeniden deneme mekanizmasıyla birleştirildiğinde kullanıcının aynı notu iki kez almasını önler.</p>
+
+            <p><strong>2026-10 güncellemesi:</strong> Güncel gönderim sunucusu yinelenen istekleri kendisi denetlemez. İleti kimliği, Resend isteğine Idempotency-Key olarak eklenir. Resend aynı anahtarı 24 saat hatırlar ve aynı içerikli isteğe önceki yanıtı döndürür. Böylece aynı not 24 saat içinde tekrar gönderilmez. Ayrıntılar için <a href="/tr/devlog/relay-api-design">Relay API tasarımına</a> bakın.</p>
+          </div></section>
+
+          <!-- Section 6 -->
+          <section id="ja-section6" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-06">6. Bugün yaptığım şey: Küçük rahatsızlık hissini tek tek silin</h2></div><div class="ce-chapter__body">
+            <p>Day1'in uygulama çalışmalarının çoğu yıldız derecelendirme iletişim kutusunu gözden geçirmek için harcandı. App Store'in değerlendirmesi uygulamanın can damarıdır, ancak kullanıcı deneyimine zarar verecek şekilde değerlendirmeye çalışmayın.</p>
+
+            <h3>Ekran koşullarının yeniden tasarlanması</h3>
+            <p>Yıldız derecelendirme iletişim kutusunun görüntüleme koşulları şu şekilde ayarlanmıştır:</p>
+            <ul>
+              <li><strong>Her 100 görüntülenir</strong>: Yalnızca uygulamayı yeterince kullanan kullanıcılara gösterilir</li>
+              <li><strong> Minimum 14 gün aralığı</strong>: En son görüntülendiğinden bu yana 14'den fazla geçti</li>
+              <li><strong>Kapatıldıktan sonra 30 gün göstermeme</strong>: Kullanıcı kapatırsa 30 gün boyunca yeniden gösterilmez</li>
+            </ul>
+
+            <h3>Yıldız simgesinin dokunuş alanını değiştirin</h3>
+            <p>Apple İnsan Arayüzü Yönergeleri, minimum dokunma hedef boyutunun 44x44pt olmasını önerir. Yıldız simgesinin dokunma alanı bu standardı karşılamıyordu, bu yüzden düzeltildi.</p>
+
+<pre tabindex="0"><code>// StarRatingView.swift
+private func createStarButton() -> UIButton {
+    let button = UIButton(type: .custom)
+    button.translatesAutoresizingMaskIntoConstraints = false
+    NSLayoutConstraint.activate([
+        button.widthAnchor.constraint(greaterThanOrEqualToConstant: 44),
+        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44)
+    ])
+    return button
+}</code></pre>
+
+            <h3>Yıldız simgesi bozulma düzeltme</h3>
+            <p>UIStackView'ın `.fillEqually` dağıtımı nedeniyle yıldız simgesinin bozulması sorunu düzeltildi. `contentMode` `.scaleAspectFit` olarak ayarlandı ve StackView'un dağıtımı `.equalSpacing` olarak değiştirildi.</p>
+
+            <h3>Değerlendirme sonrası akış</h3>
+            <ul>
+              <li><strong>5 yıldız</strong>: App Store'in inceleme ekranına geçiş (`SKStoreReviewController`)</li>
+              <li><strong>4 yıldız ve altı:</strong> Yalnızca kısa bir “Teşekkürler” bildirimi gösterilip işlem sonlandırılır. Olumsuz değerlendirmeler App Store sayfasına yönlendirilmez.</li>
+            </ul>
+          </div></section>
+
+          <!-- Section 7 -->
+          <section id="ja-section7" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-07">7. Geçmiş görüntüleme durumu tutarsızlığı çözüldü</h2></div><div class="ce-chapter__body">
+            <p>İletim geçmişi ekranında bir hata fark ettim (Geçmiş). İletim tamamlanmış olmasına rağmen durumun "Gönderiliyor" olarak kaldığına dair bir mesaj vardı.</p>
+
+            <p>Nedenin araştırılması sonucunda durum güncelleme mantığıyla ilgili bir sorun olduğu tespit edildi. Önceki uygulamalarda, mesajın metin içeriği durumu güncellemek için bir anahtar olarak kullanıldı. Ancak, aynı içeriğe sahip bir notu birden fazla kez gönderirseniz, metin tabanlı bir arama doğru mesajı belirleyemez.</p>
+
+            <p>Düzeltme basit ve netti. Metin tabanlı arama <strong>Kimlik tabanlı durum güncellemesi</strong> olarak değiştirildi. Outbox kaydedilirken her mesaja bir UUID atanır, bu nedenle Geçmiş'in durumunu güncellemek için bu kimliği kullanın.</p>
+
+<pre tabindex="0"><code>// HistoryManager.swift
+// Before: テキストベースの検索（バグの原因）
+// func updateStatus(forText text: String, status: SendStatus)
+
+// After: IDベースのステータス更新
+func updateStatus(forMessageId id: UUID, status: SendStatus) {
+    guard let index = entries.firstIndex(where: { $0.messageId == id }) else {
+        return
+    }
+    entries[index].status = status
+    persistEntries()
+}</code></pre>
+
+            <p>Bu düzeltmeyle, aynı içeriğe sahip bir notu kaç kez gönderirseniz gönderin, her durum artık doğru şekilde görüntülenir.</p>
+          </div></section>
+
+          <!-- Section 8 -->
+          <section id="ja-section8" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-08">8. Gizlilikle ilgili panoid takıntısı</h2></div><div class="ce-chapter__body">
+            <p>Özel bilgiler not uygulamasına yazılır. Şifreler, kişisel endişeler, iş fikirleri - kullanıcıların ne yazacağını tahmin etmek imkansızdır. Bu nedenle gizlilik koruması "yeterli" değil, ancak "aşırı" tam olarak doğru.</p>
+
+            <h3>App switcher'da gizlilik katmanı</h3>
+            <p>iOS uygulama değiştiricide uygulama ekranı küçük resim olarak görüntülenir. Uygulama arka plana geçtiğinde bir gizlilik katmanı görüntüler, böylece notun içeriği uygulama değiştirici ekranından görülemez.</p>
+
+            <p><strong>2026-09 güncellemesi:</strong> Bu koruma güncel uygulamada etkin değildir. Görüntüleme kodu kaynakta vardır, ancak çağrılmamaktadır. Açık not, uygulama değiştiricinin görüntüsünde kalabilir. Ayrıntılar için “Gizlilik tasarımı” makalesine bakın.</p>
+
+            <h3>Geçici URLOturumu</h3>
+            <p>Normal URL Oturumu önbelleği, çerezleri ve kimlik doğrulama bilgilerini diskte depolar. `URLSessionConfiguration.ephemeral` kullanarak, bu bilgilerin diskte hiç kalmadığından emin oluruz. Bu, notun içeriğinin bir iletişim önbelleği olarak depoda kalmasını önlemek içindir.</p>
+
+            <h3>Zararsız günlükler</h3>
+            <p>Geliştirme aşamasındaki hata ayıklama günlüklerinin dikkatli olması gerekir. " "Gönderilen notun içeriğini günlüğüne çıkarma" gibi görünüşte zararsız süreç bir güvenlik açığı olabilir. Politikamız açıktır:</p>
+            <ul>
+              <li>Bir DEBUG derlemesi olsa bile, <strong> günlüğüne hiç kaydedilmeyecektir</strong></li>
+              <li>Hata günlüğü `localizedDescription` kullanmaz, yalnızca <strong>`type(of: error)` kaydedilir</strong></li>
+              <li>Sebep: Çünkü `localizedDescription` kullanıcı girdisi içerebilir</li>
+            </ul>
+
+<pre tabindex="0"><code>// NetworkManager.swift
+// BAD: エラーの詳細をログに出力
+// Logger.error("Send failed: \(error.localizedDescription)")
+
+// GOOD: エラーの型のみをログに出力
+Logger.error("Send failed: \(type(of: error))")</code></pre>
+
+            <p>Paranoyak görünebilir. Ancak, memo uygulamasına güvenmek ve kullanmak için bu derecede paranoyanın gerekli olduğunu düşünüyorum.</p>
+          </div></section>
+
+          <!-- Section 9 -->
+          <section id="ja-section9" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-09">9. 10 dil desteği: Dünyanın dört bir yanındaki Captio kullanıcılarına teslim etmek istiyorum</h2></div><div class="ce-chapter__body">
+            <p>Captio'in başta İngilizce konuşulan ülkelerde olmak üzere tüm dünyada kullanıcıları vardı. Eski kullanıcılara "SimpleMemo"i iletmek için ilk sürümden itibaren 10 dili desteklendi.</p>
+
+            <p>Desteklenen diller: Japonca, İngilizce, İspanyolca, Fransızca, Almanca, İtalyanca, Portekizce, Korece, Çince (basitleştirilmiş), Arapça.</p>
+
+            <p><strong>2026-09 güncellemesi:</strong> Güncel App Store açıklamasında desteklenen 10 dil şunlardır: Japonca, İngilizce, İspanyolca, Fransızca, Almanca, Portekizce, Rusça, Basitleştirilmiş Çince, Geleneksel Çince ve Arapça. Yukarıdaki listede yer alan İtalyanca ve Korece, güncel açıklamada bulunmamaktadır.</p>
+
+            <p>Özellikle <strong>Arapça RTL (Sağdan Sola) desteği</strong> teknik bir zorluktu. Sadece metnin yönü değil, aynı zamanda tüm kullanıcı arayüzü düzeninin de yansıtılması gerekir. Otomatik Düzenin `öncü`/`izleyen` kısıtlamasını tutarlı bir şekilde kullanarak, bir RTL ortamında bile doğal bir düzen gerçekleştirir.</p>
+
+            <h3>uygulama içi dil değiştirme</h3>
+            <p>iOS 16'den sonra uygulama içi dil değiştirmeye ek olarak, kendi dil değiştirme mekanizmasını da uygular. Dil değiştirildiğinde, sorunsuz bir geçiş deneyimi sağlamak için ViewController `cross-dissolve` geçişi ile değiştirilir.</p>
+
+<pre tabindex="0"><code>// LanguageManager.swift
+func applyLanguageChange() {
+    guard let window = UIApplication.shared.connectedScenes
+        .compactMap({ $0 as? UIWindowScene })
+        .first?.windows.first else { return }
+
+    let newVC = ComposeViewController()
+    newVC.view.frame = window.bounds
+    UIView.transition(with: window,
+                      duration: 0.3,
+                      options: .transitionCrossDissolve,
+                      animations: {
+        window.rootViewController = newVC
+    })
+}</code></pre>
+          </div></section>
+
+          <!-- Section 10 -->
+          <section id="ja-section10" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-10">10. Bugünün öğrenmesi: Ürün bir "güvenlik duygusu" tasarımıdır</h2></div><div class="ce-chapter__body">
+            <p>Day1'i bitirdikten sonra düşündüğüm şey, bu ürünün özünün bir "güvenlik duygusu" tasarımı olduğudur.</p>
+
+            <p>Teknik sayıları özetleyelim:</p>
+            <ul>
+              <li><strong>Mesaje için süre</strong>: 500ms veya daha az (hedef)</li>
+              <li><strong>Send-to-Reset</strong>: Bekleme hissi vermeyen kısalık (hedef)</li>
+              <li><strong>Mesaj dökülmesi</strong>: Outbox deseniyle önleyin</li>
+              <li><strong>Şifreleme</strong>: AES-GCM (CryptoKit)</li>
+              <li><strong>Harici kitaplık bağımlılığı</strong>: sıfır</li>
+            </ul>
+
+            <p>Ancak, bu sayıların tümü "güvenlik duygusu" adı verilen tek bir hedefte özetlenmiştir.</p>
+
+            <p>Hızlı başlangıç → "İstediğiniz zaman hemen yazabilirsiniz" gönül rahatlığı. <br> Gönderdiğinizde Kaybolur → "İşlenmiş" güvenlik duygusu. <br> Dökülme karşı önlemleri → "Bulaşma olmadan kaybolmayacak" gönül rahatlığı. <br> Şifreleme → "Kimse göremez" gönül rahatlığı.</p>
+
+            <p>Captio yalnızca özellikleri iyi olduğu için sevilmedi. Güvenle kullanılabilen bir deneyim titizlikle geliştirilmişti. Sürdürmek istediğimiz anlayış bu.</p>
+          </div></section>
+
+          <!-- Section 11 -->
+          <section id="ja-section11" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-11">11. Bir dahaki sefere (Day2) önizleme</h2></div><div class="ce-chapter__body">
+            <p>Day2 aşağıdaki konularda çalışacaktır:</p>
+            <ul>
+              <li><strong>İletim animasyonunun sofistikeliği</strong>: Mevcut 0.25 saniyelik solmadan daha rahat bir animasyona</li>
+              <li><strong>Geçmiş durum güncellemelerinin zamanlama optimizasyonu</strong>: Gerçek zamanlı güncellemelerin toplu güncellemelerle karşılaştırılması</li>
+              <li><strong>Başarı bildirimi gerçekten gerekli mi?</strong> Gönderimin başarılı olduğuna ilişkin geri bildirimde, hiç bildirim göstermeme seçeneğini değerlendirme</li>
+            </ul>
+            <p>Captio'in "hiçbir şey" bütünlüğünü hedefleyerek, Day2'e kadar devam edin.</p>
+          </div></section>
+
+        </div>
+      </div>
+
+      <!-- ======================== -->
+      <!-- ENGLISH VERSION          -->
+      <!-- ======================== -->
+
+      <!-- ======================== -->
+      <!-- RELATED TOPICS (shared)  -->
+      <!-- ======================== -->
+      <div class="related-topics">
+        <h2 id="reading-12" data-ce-number="12"> <span>İlgili Konular Derin Kazma</span> </h2>
+        <div class="related-grid">
+          <a href="/tr/devlog/uikit-vs-swiftui" class="related-card">
+            <div class="related-card__title">
+              <span>UIKit vs SwiftUI: Başlangıç hızı için seçim</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>2026'de UIKit'i seçmemin nedeni. Time-to-Text 500ms veya daha azını hedefleyen mimari tasarım.</span>
+
+            </div>
+          </a>
+          <a href="/tr/devlog/outbox-architecture" class="related-card">
+            <div class="related-card__title">
+              <span>Outbox mimarisi: dökülmeyi önlemek için tasarım</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>Kullanıcı arayüzü gönderilir gönderilmez temizlenir, ancak gönderilmeyen mesaj terminalde kalır ve yeniden gönderilir. AES-GCM şifreleme Outbox modelinin tam resmi.</span>
+
+            </div>
+          </a>
+          <a href="/tr/devlog/relay-api-design" class="related-card">
+            <div class="related-card__title">
+              <span>Röle API: Cloudflare Çalışanları ile bir e-posta dağıtım üssü oluşturun</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>Posta kutusunda OAuth işbirliğine güvenmeden gönderme. Kenarda hareket eden API rölesinden (Cloudflare Workers) Resend ile gönderin.</span>
+
+            </div>
+          </a>
+          <a href="/tr/devlog/privacy-first-design" class="related-card">
+            <div class="related-card__title">
+              <span>Önce Gizlilik Tasarımı: Paranoyak Taahhüt</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>Geçici URL Oturumu, günlük işleme için güncel özellikler ve uygulama değiştirici (notları otomatik olarak gizleme işlevi etkin değildir).</span>
+
+            </div>
+          </a>
+          <a href="/tr/captio-alternative/" class="related-card">
+            <div class="related-card__title">
+              <span>Captio Alternatif Uygulama Karşılaştırma ve Geçiş Kılavuzu</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>Captio'den geçiş prosedürü, işlev karşılaştırma tablosu, SSS. Aktarmayı düşünüyorsanız buraya tıklayın.</span>
+
+            </div>
+          </a>
+          <a href="/tr/note-to-email/" class="related-card">
+            <div class="related-card__title">
+              <span>Kendinize e-posta ile nasıl not gönderilir</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>Aklınıza gelen fikri hemen e-posta ile gönderin. Not → E-posta kullanım kılavuzu.</span>
+
+            </div>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-13" data-ce-number="13"> <span>Kaynaklar</span> </h2></div><div class="ce-chapter__body">
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developer.apple.com/documentation/uikit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Geliştirici — UIKit Belgeleri</a> — <span>UIKit çerçevesine resmi referans. SimpleMemo'in kullanıcı arayüzünü oluşturmak için kullanılır</span></li>
+    <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Geliştirici — CryptoKit Belgeleri</a> — <span>AES-GCM şifreleme ile Outbox veri korumasını uygulamak için kullanılır</span></li>
+    <li><a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener" style="color:var(--accent);">Cloudflare İşçi Belgeleri</a> — <span>Posta rölesi için sunucusuz bir taban olarak kabul edildi API</span></li>
+    <li><a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener" style="color:var(--accent);">Chris Richardson — Pattern: Transactional outbox (microservices.io)</a> — <span>Önce bekleme tablosuna gönderilecek mesajı yazan (Outbox) ve başka bir işlem gönderen bir tasarım modeli. SimpleMemo terminalde aynı fikri kullanır</span></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc5321" target="_blank" rel="noopener" style="color:var(--accent);">RFC 5321 — Basit Posta Aktarım Protokolü (SMTP)</a> — <span>Posta İletim Protokolü için Standart Şartname</span></li>
+  </ul>
+</div></section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/tr/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>Sonraki okuma</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Obsidian işbirliğiyle notları saklamak için bir yer oluşturun</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span> Bağlantıyı iPhone'de ayarlar ve hedefi kaydederseniz gönderilen notu Obsidian'ye de bırakabilirsiniz. </span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>İlgili içerikler</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/tr/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio Alternatif Uygulama Karşılaştırması</span></a></li>
+    <li><a href="/tr/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Tüm blog yazıları</span></a></li>
+    <li><a href="/tr/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Memo Uygulaması Karşılaştırma Listesi</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="tr" dir="ltr"><a class="site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Küçük bir not. Bir sonraki adım.</p><p class="site-footer-description">iPhone'unuzdan Obsidian'a ve e-postaya not gönderin.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="Alt bilgi gezinmesi">
+      <div class="footer__col">
+        <p class="footer__col-title">Ürün</p>
+        <a href="/tr/download/" class="footer__link">İndir</a>
+        <a href="/tr/" class="footer__link">Ana sayfa</a>
+        <a href="/tr/how-to/" class="footer__link"><span>Kılavuzlar</span> </a>
+        <a href="/tr/templates/" class="footer__link"><span>Şablonlar</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Karşılaştırmalar ve geçiş</p>
+        <a href="/tr/captio/" class="footer__link"><span>Captio yöntemi</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Yazılar</p>
+        <a href="/tr/devlog/" class="footer__link">Geliştirme günlüğü</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Destek</p>
+        <a href="/tr/roadmap/" class="footer__link">Açık yol haritası</a>
+        <a href="/tr/about/" class="footer__link">Geliştirici hakkında</a>
+        <a href="/tr/terms" class="footer__link"><span>Kullanım koşulları</span> </a>
+        <a href="/tr/privacy" class="footer__link">Gizlilik</a>
+        <a href="/tr/contact" class="footer__link">İletişim</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / İşleten: YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

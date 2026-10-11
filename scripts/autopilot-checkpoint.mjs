@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Preserve only declared public page work when a model run fails. Never archive
+// Preserve only declared public page work when a model or output check fails. Never archive
 // the workspace, environment, conversation, credentials or collected analytics.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -54,7 +54,7 @@ export function capture({ cwd, fork, base, output, runId, attempt = 1 }) {
   const d = declaration(cwd, fork, base);
   ordinaryFiles(cwd, d.allowed);
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'autopilot-index-'));
-  let patch;
+  let patch, declaredPageChangeCount;
   try {
     // A separate index includes new assets without touching the agent's index.
     const env = { ...process.env, GIT_INDEX_FILE: path.join(tmp, 'index') };
@@ -63,8 +63,10 @@ export function capture({ cwd, fork, base, output, runId, attempt = 1 }) {
       || git(cwd, ['ls-tree', base, '--', f]).trim());
     if (present.length) git(cwd, ['add', '-A', '--', ...present], { env });
     patch = git(cwd, ['diff', '--cached', '--binary', '--full-index', '--no-renames', base, '--', ...d.allowed], { env, encoding: 'buffer' });
+    declaredPageChangeCount = git(cwd, ['diff', '--cached', '--name-only', '-z', '--no-renames', base, '--', ...d.allowed], { env })
+      .split('\0').filter(Boolean).length;
   } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
-  if (!patch.length) return { saved: false, reason: 'no_unpublished_page_changes' };
+  if (!patch.length) return { saved: false, reason: 'no_unpublished_page_changes', declared_page_change_count: 0 };
   assert(patch.length <= MAX_PATCH, 'checkpoint exceeds size limit');
   const meta = { version: 1, run_id: String(runId), attempt, base_sha: base, fork_sha: fork,
     intent_file: d.file, intent_hash: d.hash, patch_hash: sha(patch), created_at: new Date().toISOString() };
@@ -72,7 +74,8 @@ export function capture({ cwd, fork, base, output, runId, attempt = 1 }) {
   fs.mkdirSync(output);
   fs.writeFileSync(path.join(output, 'work.patch'), patch, { mode: 0o600 });
   fs.writeFileSync(path.join(output, 'checkpoint.json'), JSON.stringify(meta, null, 2) + '\n', { mode: 0o600 });
-  return { saved: true, bytes: patch.length, intent: d.file, base_sha: base };
+  return { saved: true, reason: 'saved', declared_page_change_count: declaredPageChangeCount,
+    bytes: patch.length, intent: d.file, base_sha: base };
 }
 
 export function restore({ cwd, directory }) {
@@ -105,10 +108,13 @@ export function checkWiring(source) {
   assert(source.includes('node "$RUNNER_TEMP/checkpoint-tools/scripts/autopilot-checkpoint.mjs" --save'), 'failure checkpoint must execute from trusted tools');
   assert(source.includes('git worktree add --detach "$RUNNER_TEMP/checkpoint-tools" "$GITHUB_SHA"'), 'tools must come from the workflow commit');
   assert(source.includes('--workspace "$GITHUB_WORKSPACE"'), 'capture the failed workspace, not the trusted tools tree');
-  assert(source.includes("failure() && steps.claude.outcome == 'failure'"), 'checkpoint is for failed model runs');
+  const condition = source.match(/id: checkpoint\s+if: >-\s+([\s\S]*?)\n\s+continue-on-error:/)?.[1].replace(/\s+/g, ' ').trim();
+  assert.equal(condition, "!cancelled() && (steps.claude.outcome == 'failure' || (steps.claude.outcome == 'success' && steps.output.outcome == 'failure'))",
+    'checkpoint must also preserve success-with-missing/unknown output, without running after cancellation');
   assert(source.includes('actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02'), 'pinned artifact upload required');
   assert(source.includes("steps.checkpoint.outputs.saved == 'true'"), 'upload only a successfully saved checkpoint');
   assert(source.includes('path: ${{ runner.temp }}/autopilot-checkpoint'), 'upload only the bounded checkpoint directory');
+  return condition;
 }
 
 async function selftest() {
@@ -135,7 +141,9 @@ async function selftest() {
     put('index.html', '<title>After</title>\n'); put('assets/test.png', Buffer.from([137, 80, 78, 71, 0, 1]));
     put('.env', 'private sentinel'); put('data/content-graph.json', 'excluded metadata sentinel');
     const before = g('status', '--porcelain');
-    assert.equal(capture(args).saved, true);
+    const saved = capture(args);
+    assert.equal(saved.saved, true);
+    assert.equal(saved.declared_page_change_count, 2);
     assert.equal(g('status', '--porcelain'), before, 'capture must not change the index');
     assert(!fs.readFileSync(path.join(output, 'work.patch'), 'utf8').includes('sentinel'));
     // Exercise the workflow CLI from this trusted checkout against a separate
@@ -150,7 +158,7 @@ async function selftest() {
     execFileSync(process.execPath, [fileURLToPath(import.meta.url), '--save', cliOutput, '--workspace', cwd],
       { encoding: 'utf8', stdio: 'pipe', env: { ...process.env, GITHUB_REPOSITORY: 'simplememofast/simplememo',
         GITHUB_RUN_ID: '123', GITHUB_RUN_ATTEMPT: '1', GITHUB_OUTPUT: outFile } });
-    assert.equal(fs.readFileSync(outFile, 'utf8').trim(), 'saved=true');
+    assert.equal(fs.readFileSync(outFile, 'utf8').trim(), 'saved=true\nreason=saved\ndeclared_page_change_count=2');
     assert.throws(() => restore({ cwd, directory: output }), /clean tree/);
     g('reset', '--hard', base); g('clean', '-fdq');
     const cliRestored = JSON.parse(execFileSync(process.execPath,
@@ -184,9 +192,26 @@ async function selftest() {
     assert.throws(() => restore({ cwd, directory: output }), /symlink/);
     assert.throws(() => capture({ ...args, fork: base }), /one committed declaration/);
     assert.throws(() => capture({ ...args, output: path.join(cwd, 'artifact') }), /outside repository/);
+    put('index.html', 'x'.repeat(MAX_PATCH + 1));
+    const oversizedOutput = path.join(dir, 'oversized');
+    assert.throws(() => capture({ ...args, output: oversizedOutput }),
+      error => error.code === 'ENOBUFS' || /size limit/.test(error.message));
+    assert(!fs.existsSync(oversizedOutput), 'oversized work must not create an upload directory');
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
   const source = fs.readFileSync(path.join(ROOT, '.github/workflows/obsidian-autopilot.yml'), 'utf8');
-  checkWiring(source);
+  const condition = checkWiring(source);
+  // Evaluate the actual, exactly allowlisted workflow expression, not a second predicate.
+  const shouldSave = new Function('steps', 'cancelled', `return (${condition});`);
+  for (const claude of ['success', 'failure', 'skipped', 'cancelled']) {
+    for (const output of ['success', 'failure', 'skipped']) {
+      for (const cancelled of [false, true]) {
+        assert.equal(shouldSave({ claude: { outcome: claude }, output: { outcome: output } }, () => cancelled),
+          !cancelled && (claude === 'failure' || (claude === 'success' && output === 'failure')));
+      }
+    }
+  }
+  assert.throws(() => checkWiring(source.replace("steps.output.outcome == 'failure'", "steps.output.outcome == 'success'")));
+  assert.throws(() => checkWiring(source.replace('!cancelled() &&', 'true &&')));
   assert.throws(() => checkWiring(source.replace('checkpoint-tools/scripts/autopilot-checkpoint.mjs', 'checkpoint-tools/scripts/unused.mjs')));
   console.log('checkpoint: real Git capture/restore, new binary assets, private-file exclusion, dirty tree, integrity and failure wiring passed');
 }
@@ -206,9 +231,16 @@ async function main() {
   const base = rev(cwd, upstream), fork = git(cwd, ['merge-base', 'origin/main', base]).trim();
   const result = capture({ cwd, fork, base, output: path.resolve(args[args.indexOf('--save') + 1]),
     runId: process.env.GITHUB_RUN_ID, attempt: Number(process.env.GITHUB_RUN_ATTEMPT) });
-  if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, `saved=${result.saved}\n`);
+  if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT,
+    `saved=${result.saved}\nreason=${result.reason}\ndeclared_page_change_count=${result.declared_page_change_count}\n`);
   console.log(JSON.stringify(result));
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  main().catch(error => { console.error(error.message); process.exitCode = 1; });
+  main().catch(error => {
+    if (process.argv.includes('--save')) {
+      if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, 'saved=false\nreason=capture_failed\n');
+      console.error('checkpoint capture failed; no workspace or command details are logged');
+    } else console.error(error.message);
+    process.exitCode = 1;
+  });
 }

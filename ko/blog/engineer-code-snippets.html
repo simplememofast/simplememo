@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/blog/engineer-code-snippets">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script><title>엔지니어의 코드 스니펫 메모 관리 — 즉시 메모·태그·검색·공유를 위한 4의 방법 | SimpleMemo</title>
+  <meta name="description" content="엔지니어의 코드 스니펫 메모 관리를 철저히 해설합니다. 즉시 캡처, 태그 기반 분류, 검색 최적화, 팀 공유 지식 기반화를 적용한 4 방법으로 개발 효율성을 향상시킵니다. 언어별 스니펫 메모의 모범 사례와 이메일로 관리하는 장점도 소개합니다.">
+  <meta property="og:title" content="엔지니어의 코드 스니펫 메모 관리">
+  <meta property="og:description" content="즉시 메모·태그·검색·공유의 4 가지 방법으로 코드 스니펫을 관리하는 방법을 설명합니다.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-04T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/ko/blog/engineer-code-snippets">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog-engineer-code-snippets.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="엔지니어의 코드 스니펫 메모 관리">
+  <meta name="twitter:description" content="즉시 메모·태그·검색·공유의 4가지 방법으로 관리하는 메모 정리법.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-engineer-code-snippets.png">
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/ko/blog/engineer-code-snippets#article",
+  "inLanguage": "ko",
+  "image": "https://simplememofast.com/assets/img/og/blog-engineer-code-snippets.png",
+  "headline": "엔지니어의 코드 스니펫 메모 관리",
+  "description": "엔지니어의 코드 스니펫 메모 관리를 철저히 해설합니다. 즉시 캡처·태그 분류·검색 최적화·팀 공유를 위한 4 방법.",
+  "url": "https://simplememofast.com/ko/blog/engineer-code-snippets",
+  "datePublished": "2026-03-04",
+  "dateModified": "2026-10-03",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/ko/blog/engineer-code-snippets"
+  }
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "홈",
+      "item": "https://simplememofast.com/ko/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "블로그",
+      "item": "https://simplememofast.com/ko/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "엔지니어의 코드 스니펫 메모 관리",
+      "item": "https://simplememofast.com/ko/blog/engineer-code-snippets"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/ko/blog/engineer-code-snippets#webpage",
+  "inLanguage": "ko",
+  "name": "엔지니어의 코드 스니펫 메모 관리",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/ko/#website"
+  },
+  "url": "https://simplememofast.com/ko/blog/engineer-code-snippets"
+}</script>  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>.lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}[data-lang="en"]{display:none}[data-lang].active{display:block}span[data-lang].active{display:inline}.lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}.lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}.lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.tip-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;margin-bottom:1rem}.tip-card__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem}.tip-card__name{font-size:1.05rem;font-weight:700}.tip-card__rank{font-size:.875rem;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:12px;padding:.2rem .6rem;font-weight:700}.tip-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.75rem}.tip-card__example{font-size:.875rem;color:var(--text-secondary);line-height:1.7;background:rgba(100,180,255,.04);border-left:3px solid var(--accent);padding:.75rem 1rem;border-radius:0 6px 6px 0;margin-top:.5rem}.faq-item{border-bottom:1px solid var(--border)}.faq-details{padding:0}.faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}.faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}.faq-details[open] .faq-summary::after{transform:rotate(45deg)}.faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}.cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}.cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}.cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}.internal-links a:hover{border-color:var(--accent)}.step-number{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);border-radius:50%;font-size:.875rem;font-weight:700;color:var(--accent);margin-right:.5rem;flex-shrink:0}@media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+    <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ko/blog/engineer-code-snippets">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/engineer-code-snippets">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/engineer-code-snippets">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/engineer-code-snippets">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/engineer-code-snippets">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/engineer-code-snippets">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/engineer-code-snippets">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/engineer-code-snippets">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/engineer-code-snippets">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/engineer-code-snippets">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/engineer-code-snippets">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/engineer-code-snippets">
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/ko/blog/engineer-code-snippets#faq","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"코드 스니펫 관리에 가장 적합한 도구는 무엇입니까?","acceptedAnswer":{"@type":"Answer","text":"즉시 캡처에 Captio식, 정리에 GitHub Gist·Notion·Obsidian, 일상 사용에 VS Code 스니펫 기능이 최적입니다."}},{"@type":"Question","name":"스니펫의 분류 방법은?","acceptedAnswer":{"@type":"Answer","text":"언어×카테고리의 2 축 태그로 분류합니다.[ Python][API]와 같이 접두사를 통일하면 검색성이 비약적으로 향상됩니다."}},{"@type":"Question","name":"Stack Overflow의 답변을 메모하는 의미는 무엇입니까?","acceptedAnswer":{"@type":"Answer","text":"한 번 찾은 답을 다시 찾는 수고를 줄일 수 있습니다. 자신의 프로젝트에 적용한 형태로 저장합시다."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="메인 내비게이션" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/ko/guides/">사용 가이드</a><a href="/ko/use-cases/">활용 사례</a><a href="/ko/vs/">비교</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/ko/guides/">사용 가이드</a></li>
+        <li><a href="/ko/use-cases/">활용 사례</a></li>
+        <li><a href="/ko/vs/">비교</a></li>
+        <li><a href="/ko/methods/"><span>메소드</span></a></li>
+        <li><a href="/ko/blog/"><span>블로그</span></a></li>
+        <li><a href="/ko/glossary/"><span>용어집</span></a></li>
+        <li><a href="/ko/faq">자주 묻는 질문</a></li>
+        <li><a href="/ko/about/">개발자 소개</a></li>
+        <li><a href="/ko/devlog/">개발 기록</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>다운로드</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="한국어 · 언어 선택"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>KO</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ko" dir="ltr"><p class="site-language-title">언어 선택</p><div class="site-language-grid"><a href="/blog/engineer-code-snippets" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/engineer-code-snippets" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/blog/engineer-code-snippets" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/blog/engineer-code-snippets" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ko" aria-current="page"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/es/blog/engineer-code-snippets" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/engineer-code-snippets" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/engineer-code-snippets" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/engineer-code-snippets" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/engineer-code-snippets" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">다운로드</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="메뉴"><span>메뉴</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content"><div class="container">
+    <div class="lp-hero sd-hero"><div class="sd-hero-copy"><div class="lp-hero__label"><span>엔지니어용</span></div><h1 class="lp-hero__title"><span>엔지니어의 <br> 코드 스니펫 메모 관리</span></h1><p class="lp-hero__sub"><span>엔지니어의 코드 스니펫 메모 관리란, 일상적인 개발에서 발견한 유용한 코드 조각·해결책·설계 패턴을 메모 앱으로 즉시 캡처하고, 검색 가능한 형태로 축적하는 관리 방법입니다. 한 번 조사한 내용을 적어 두면, 같은 검색을 다시 할 필요가 없습니다. 본 기사에서는 4의 관리 방법을 설명합니다. </span></p>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>저자: <a href="/ko/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · 공개일: <time datetime="2026-03-06">2026년03월06일</time></span> </p></div><nav class="sd-hero-index" aria-label="이 페이지의 내용"><p>이 페이지의 내용</p><a href="#reading-01"><span aria-hidden="true">01</span><span>방법1：즉시 캡처 - 생각난 순간에 저장</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>방법2：태그 기반 분류 시스템</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>방법3：검색 최적화 메모 작성 방법</span><span aria-hidden="true">↗</span></a></nav></div>
+
+    <!-- TL;DR Summary for AI Citation -->
+    <div class="tldr" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:2rem;font-size:.9rem;line-height:1.8;">
+      <div style="font-weight:700;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">요약</div>
+      <p style="color:var(--text-secondary);margin:0;">엔지니어의 코드 스니펫 메모 관리를 철저히 해설합니다. 즉시 메모 캡처, 태그 분류, 검색 최적화, 팀 공유의 4가지 방법으로 개발 효율을 크게 향상시키는 방법을 소개합니다.</p>
+
+    </div>
+
+    <section class="lp-section ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"><span>방법1：즉시 캡처 - 생각난 순간에 저장</span></h2></div><div class="ce-chapter__body">
+      <div><div class="tip-card"><div class="tip-card__header"><span class="tip-card__name"><span class="step-number">1</span>코드 검토 중에 알게 된 점을 즉시 메모</span><span class="tip-card__rank">캡처</span></div><div class="tip-card__desc"><p>엔지니어가 “이것은 편리하다”라고 생각하는 순간이 개발 중에 갑자기 찾아옵니다:</p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>코드 검토 중：</strong>선배의 우아한 글쓰기 방식을 발견했습니다</li><li><strong>디버깅 중：</strong>3시간 고민했던 버그의 해결책을 발견했습니다</li><li><strong>문서 읽는 중:</strong>API의 숨겨진 편리한 매개변수를 발견했습니다</li><li><strong>스터디/컨퍼런스：</strong>발표자의 코드 예시가 참고가 되었습니다</li></ul><p style="margin-top:.75rem">이것들은 “나중에 정리하자”라고 생각하면, 기록되지 않은 채로 잊어버리기 쉽습니다. Captio식으로 자신에게 메일을 보내면, 이동 중에도 스마트폰에서 바로 캡처할 수 있습니다.</p></div><div class="tip-card__example"><strong>메모 예시：</strong>「[Python][pandas] df.query()로 SQL 스타일로 필터링할 수 있습니다. Df[df['age'] &gt; 30]보다 읽기 쉽습니다. 공식docs:링크」</div></div></div>
+
+    </div></section>
+
+    <section class="lp-section ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02"><span>방법2：태그 기반 분류 시스템</span></h2></div><div class="ce-chapter__body">
+      <div><div class="tip-card"><div class="tip-card__header"><span class="tip-card__name"><span class="step-number">2</span>언어×카테고리의 2 축 태그</span><span class="tip-card__rank">분류</span></div><div class="tip-card__desc"><p>코드 스니펫의 분류는 “언어”와 “카테고리”의 2 축에서 수행합니다:</p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>언어 태그：</strong>[Python] [JavaScript] [TypeScript] [SQL] [Shell] [Go]</li><li><strong>카테고리 태그：</strong>[API] [DB] [UI] [Auth] [Deploy] [Test] [Performance]</li><li><strong>상태：</strong>[검증 완료] [미검증] [비추천]</li></ul><p style="margin-top:.75rem">메모의 앞에 태그를 붙이는 규칙을 통일합니다. Gmail 검색에 “[Python][API]”를 입력하면, Python 관련 API 처리 코드를 즉시 목록으로 확인할 수 있습니다.</p></div><div class="tip-card__example"><strong>명명 예시:</strong>「[JS][API][검증 완료] fetch with retry - 3회 재시도+지수 백오프가 포함된 fetch 래퍼」</div></div></div>
+
+    </div></section>
+
+    <section class="lp-section ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"><span>방법3：검색 최적화 메모 작성 방법</span></h2></div><div class="ce-chapter__body">
+      <div><div class="tip-card"><div class="tip-card__header"><span class="tip-card__name"><span class="step-number">3</span>미래의 내가 검색할 키워드로 작성</span><span class="tip-card__rank">검색성</span></div><div class="tip-card__desc"><p>메모의 가치는 “쓸 때”가 아니라 “검색했을 때”에 발생합니다. 다음 규칙에 대해 검색 히트율을 최대화합니다:</p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>문제문을 포함하십시오:</strong>「CORS 오류가 발생했을 때의 대처법」</li><li><strong>오류 메시지 원문：</strong>「Access-Control-Allow-Origin missing」</li><li><strong>해결 방안 요약:</strong>「서버 측에서 헤더 추가」</li><li><strong>코드 조각:</strong>실제로 동작한 코드를 붙여넣기</li><li><strong>참고 URL：</strong>공식 문서 및 Stack Overflow 링크</li></ul><p style="margin-top:.75rem">「3개월 후의 제가 같은 문제에 부딪혔을 때, 어떤 키워드로 검색하시겠습니까？」 상상하면서 쓰는 것이 요령입니다.</p></div></div></div>
+
+    </div></section>
+
+    <section class="lp-section ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04"><span>방법4：팀 공유 지식 기반화</span></h2></div><div class="ce-chapter__body">
+      <div><div class="tip-card"><div class="tip-card__header"><span class="tip-card__name"><span class="step-number">4</span>개인 메모→팀 자산에</span><span class="tip-card__rank">공유</span></div><div class="tip-card__desc"><p>개인이 축적한 스니펫 메모는 팀의 지식 기반의 씨앗이 됩니다:</p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>주 1 공유:</strong>그 주에 가장 유용했던 스니펫을 1에 Slack에 게시</li><li><strong>GitHub Gist화：</strong>검증된 스니펫을 Gist에 모아 README에 추가</li><li><strong>Notion/Wiki 전기：</strong>프로젝트 고유의 지식을 공식 문서로 승격</li><li><strong>온보딩 자료：</strong>「자주 묻는 문제와 해결책」을 신입 회원을 위해 정리</li></ul><p style="margin-top:.75rem">1의 메모가 10의 개발 시간을 절약합니다. Captio식으로 즉시 캡처→Gmail로 축적→GitHub Gist로 공유되는 3 단계가 가장 강력합니다.</p></div></div></div>
+
+    </div></section>
+
+    <section class="lp-section ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05"><span>자주 묻는 질문</span></h2></div><div class="ce-chapter__body">
+      <div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">코드 스니펫 관리에 가장 적합한 도구는 무엇입니까?</summary><div class="faq-answer"><p>즉시 캡처에 Captio식, 정리에 GitHub Gist·Notion·Obsidian, 일상 사용에 VS Code 스니펫 기능이 최적입니다.</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">스니펫의 분류 방법은?</summary><div class="faq-answer"><p>언어×카테고리의 2 축 태그로 분류합니다.[ Python][API]와 같이 접두사를 통일하면 검색성이 비약적으로 향상됩니다.</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Stack Overflow의 답변을 메모하는 의미는 무엇입니까?</summary><div class="faq-answer"><p>한 번 찾은 답을 다시 찾는 수고를 줄일 수 있습니다. 자신의 프로젝트에 적용한 형태로 저장합시다.</p></div></details></div>
+      </div>
+
+    </div></section>
+
+    <section class="lp-section ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06"><span>언어별 스니펫 메모의 모범 사례</span></h2></div><div class="ce-chapter__body">
+      <div>
+        <div class="tip-card">
+          <div class="tip-card__header"><span class="tip-card__name">Python / 데이터 처리계</span><span class="tip-card__rank">Python</span></div>
+          <div class="tip-card__desc">
+            <p>Python 스니펫은 “라이브러리명+처리 내용”으로 메모하면 검색성이 최대화됩니다. Python은 라이브러리가 풍부하기 때문에 표준 라이브러리와 서드파티 라이브러리를 구분해 두면 나중에 도움이 됩니다.</p>
+            <ul style="margin-top:.5rem;padding-left:1.2rem">
+              <li><strong>명명 규칙:</strong>[Python][pandas] CSV를 읽어 결함 값을 처리합니다 — 다음과 같이 “라이브러리 이름”을 반드시 태그에 포함합니다</li>
+              <li><strong>버전 정보：</strong>Python 3.11 이후에서 사용할 수 있는 새로운 구문(매치 케이스 문장 등)은 버전을 명시합니다. 「[ Python3.11+]와 같은 태그를 추가합니다</li>
+              <li><strong>가상 환경 명령:</strong>venv, conda, Poetry 등 환경 구축 명령은 자주 사용하지만 잊어버리기 쉽습니다.「[ Python][env] poetry add --dev pytest와 같은 메모</li>
+              <li><strong>원라이너 모음:</strong>리스트 내포 표기와 lambda식 등, Python의 강력한 원라이너는 잊어버린 시점에 필요하게 됩니다. 구체적인 예와 함께 저장</li>
+            </ul>
+          </div>
+          <div class="tip-card__example"><strong>메모 예시：</strong>「[Python][pandas][검증 완료] 큰 CSV를 분할 로드 - pd.read_csv('file.csv', chunksize=10000) 로 메모리를 절약합니다. 1000000 행에서도 동작이 확인되었습니다.</div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-card__header"><span class="tip-card__name">JavaScript / TypeScript / 프론트엔드</span><span class="tip-card__rank">JS/TS</span></div>
+          <div class="tip-card__desc">
+            <p>JavaScript/TypeScript는 프레임워크의 변화가 심하기 때문에, “프레임워크명+버전” 기재가 특히 중요합니다.</p>
+            <ul style="margin-top:.5rem;padding-left:1.2rem">
+              <li><strong>React/Next.js：</strong>「[React18][Hooks]」「[Next14][App Router]」와 같이 메이저 버전과 패러다임을 명시합니다. Server Components 관련은 Pages Router와 App Router에서 전혀 다릅니다</li>
+              <li><strong>TypeScript의 형식：</strong>복잡한 제네릭 및 유틸리티 형식(Partial, Pick, Omit)의 사용 방법은 잊어버리기 쉽습니다. 구체적인 사용 사례와 함께 메모</li>
+              <li><strong>npm/yarn 명령:</strong> 패키지의 설치·제거·버전 지정 명령은 미묘하게 다릅니다. 「[ Npm] npm install --save-exact package@1.2.3와 같이 메모</li>
+              <li><strong>브라우저 API：</strong>Intersection Observer, Web Workers, Service Worker 등 사용 빈도가 낮아 필요할 때 바로 기억하지 못합니다 API는 스니펫으로 저장</li>
+            </ul>
+          </div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-card__header"><span class="tip-card__name">SQL / 셸 스크립트 / 인프라계</span><span class="tip-card__rank">SQL/Shell</span></div>
+          <div class="tip-card__desc">
+            <p>SQL·셸·인프라 계열 명령은 “실행 환경”과 “위험도” 정보가 특히 중요합니다.</p>
+            <ul style="margin-top:.5rem;padding-left:1.2rem">
+              <li><strong>SQL：</strong>「[SQL][PostgreSQL] 윈도우 함수로 랭킹」「[SQL][MySQL] JSON형 컬럼의 쿼리」와 같이 RDBMS의 종류를 명시합니다. MySQL·PostgreSQL·SQLite에서 구문이 다른 경우가 많습니다</li>
+              <li><strong>셸 스크립트:</strong>「[Shell][파괴적인] rm -rf의 안전한 대체: trash-cli」와 같이, 프로덕션 환경에서 실행하면 위험한 명령에 [파괴적인] 태그를 붙입니다</li>
+              <li><strong>Docker/K8s：</strong>「[Docker] 멀티스테이지 빌드로 이미지 크기 축소」「[K8s] Pod 재시작 없이 ConfigMap 업데이트」와 같이 운영 씬을 제목에 포함합니다</li>
+              <li><strong>Git：</strong>「[Git] 특정 커밋만 별도 브랜치에 적용: cherry-pick」와 같이 작업 목적을 일본어로 적어 두면 검색 히트율이 상승합니다</li>
+            </ul>
+          </div>
+          <div class="tip-card__example"><strong>중요：</strong>쉘 명령 메모에는 반드시 “실행한 환경(macOS/Linux/WSL)”을 추가합시다. OS에 따라 명령 옵션이 달라지는 경우가 매우 많으며, 메모대로 실행하면 오류가 발생하는 원인으로 흔히 발생하는 것이 이것입니다.</div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <section class="lp-section ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07"><span>코드 스니펫을 이메일로 관리하는 장점</span></h2></div><div class="ce-chapter__body">
+      <div>
+        <div class="tip-card">
+          <div class="tip-card__header"><span class="tip-card__name">왜 GitHub Gist도 Notion도 아닌 이메일인가요</span><span class="tip-card__rank">이점</span></div>
+          <div class="tip-card__desc">
+            <p>코드 스니펫 관리 도구는 다수 존재하지만, “캡처의 즉시성”과 “검색의 편리성”을 동시에 만족하는 데 있어 이메일 기반 관리에는 독자적인 장점이 있습니다.</p>
+            <p style="margin-top:.75rem"><strong>장점1：캡처 작업이 적습니다</strong></p>
+            <p style="margin-top:.5rem">GitHub Gist를 열고 제목을 입력한 뒤 코드를 붙여넣어... 그러한 흐름은 이동 중이나 회의 중에는 사용할 수 없습니다. iOS 엔지니어로서 일상적으로 Swift의 스니펫을 이메일을 통해 축적하고 있는데, 반년 만에 200 이상의 스니펫이 자연스럽게 라이브러리화되었습니다. Captio식이라면, 스마트폰에서 3초만 있으면 코드 스니펫과 컨텍스트를 메모할 수 있습니다. 나중에 Gist에 정리하자고 생각하고 잊어버리는 것보다, 먼저 메일에 넣어두는 것이 확실합니다.</p>
+            <p style="margin-top:.75rem"><strong>메트2：Gmail의 검색 성능</strong></p>
+            <p style="margin-top:.5rem">Gmail의 검색 기능은 매우 고성능입니다。「 from:noreply@mail.simplememofast.com python api retry와 같이 발신자+키워드로 검색하면, 자신의 스니펫 메모만을 정확히 좁힐 수 있습니다. 전체 텍스트 검색은 당연히 첨부 파일 이름이나 날짜 범위로 필터링도 가능합니다.</p>
+            <p style="margin-top:.75rem"><strong>장점3：툴 의존성 없음</strong></p>
+            <p style="margin-top:.5rem">스니펫 관리 도구의 교체는 매우 번거롭습니다. 내보내기→임포트 호환성 문제, 태그 및 메타데이터 손실 등. 하지만 이메일은 수십 년 동안 사용되어 온 표준적인 구조이며, 특정 도구에 의존하지 않습니다. Gist와 Notion이 사양을 변경하거나 서비스가 종료되어도, 이메일에 저장한 스니펫은 영향을 받지 않습니다. Markdown 기반 도구에 관심이 있으신 분은 <a href="/ko/vs/obsidian/">Obsidian와의 차이</a>와 <a href="/ko/vs/joplin/">Joplin과의 비교</a>도 확인해 주시기 바랍니다.</p>
+            <p style="margin-top:.75rem"><strong>메트4：시계열이 자동으로 기록됩니다</strong></p>
+            <p style="margin-top:.5rem">메일에는 전송 일시가 자동으로 기록되므로, “이 스니펫을 언제 저장했는지”, “이 버그를 언제 해결했는지”를 정확히 알 수 있습니다. 프로젝트를 되돌아보거나 기술 블로그를 작성할 때 “시간 순서의 지식 로그”로서 매우 유용합니다.</p>
+            <p style="margin-top:.75rem"><strong>장점5：팀 공유가 간편합니다</strong></p>
+            <p style="margin-top:.5rem">저장한 스니펫 메모를 동료와 공유하고 싶다면, 이메일이라면 그대로 전달하기만 하면 됩니다. 포맷 변환도 계정 초대도 필요 없습니다. '며칠 전의 CORS 오류 해결 방법, 이메일로 보내드릴게요'라고 말하면 바로 공유가 완료됩니다.</p>
+          </div>
+          <div class="tip-card__example"><strong>권장 흐름：</strong>즉시 캡처(Captio식→메일)→ 주말 정리(특히 중요한 것을 GitHub Gist로 승격)→ 팀 공유(Gist URL을 Slack에 게시). 메일은 “잡다한 캡처 보관소”, Gist는 “정리된 쇼케이스”로 역할을 구분하는 것이 가장 실용적입니다.</div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <section class="lp-section ce-chapter sd-chapter">
+  <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08"> <span>관련 기사</span> </h2></div><div class="ce-chapter__body">
+  <div class="internal-links">
+    <a href="/ko/blog/chatgpt-memo-workflow"> <span>ChatGPT 시대에 메모를 하는 의미가 있습니까? </span> </a>
+    <a href="/ko/blog/ai-information-workflow"> <span>AI 시대의 정보 정리법 메모→메일→GPT 워크플로우</span> </a>
+    <a href="/ko/blog/meeting-memo-template"> <span>회의 메모 작성 방법 템플릿 5선 회의록이 극적으로 변하는 포맷</span> </a>
+  </div>
+</div></section>
+
+<div class="cta-box"><div class="cta-box__title"><span>코드의 인식을 즉시 캡처</span></div><div class="cta-box__desc"><span>리뷰 중 발견을 탭하여 0.4초(iPhone 16e·웜 실행 실측)로 작성을 시작할 수 있습니다. 자신에게 보내는 메일로 스니펫 라이브러리를 구축합니다.</span></div><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="App Store에서 다운로드"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="App Store에서 다운로드" loading="lazy"></a></div>
+
+    <section class="lp-section ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09"><span>관련 페이지</span></h2></div><div class="ce-chapter__body"><div class="internal-links"><a href="/ko/blog/memo-taking-tips"><span>메모 작성 요령 10선</span></a><a href="/ko/blog/chatgpt-memo-workflow"><span>ChatGPT 시대의 메모</span></a><a href="/ko/blog/ai-information-workflow"><span>AI 시대의 정보 정리</span></a><a href="/ko/blog/idea-memo-organization"><span>아이디어 메모 정리법</span></a><a href="/ko/blog/productivity-methods-comparison"><span>생산성 메서드 비교</span></a><a href="/ko/blog/"><span>블로그 목록</span></a></div></div></section>
+  </div>
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/ko/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>다음 읽기</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Obsidian 연동으로 메모를 저장할 장소를 만들 수 있습니다</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>iPhone에서 연동 및 저장 위치를 설정하면, 전송한 메모를 Obsidian에도 남길 수 있습니다. </span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>관련 콘텐츠</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/ko/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio 대체 앱 비교</span></a></li>
+    <li><a href="/ko/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>자신에게 이메일을 보내는 방법</span></a></li>
+    <li><a href="/ko/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>메모 앱 비교 목록</span></a></li>
+    <li><a href="/ko/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>사용 방법 가이드</span></a></li>
+  </ul>
+</section>
+<!-- Author Bio -->
+<aside class="author-bio" style="margin:3rem auto 2rem;max-width:800px;padding:1.5rem 2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;gap:1.25rem;align-items:flex-start;">
+  <img src="/assets/img/app-icon-56.png" alt="Simple Memo - Obsidian용" width="48" height="48" loading="lazy" style="border-radius:50%;flex-shrink:0;margin-top:.2rem;">
+  <div>
+    <p style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">AI ATAKA</p>
+    <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;"><span>SimpleMemo의 개발자. iPhone에서 설정한 이메일 주소와 연동 대상 노트에 글을 남기는 앱을 개발하고 있습니다. </span></p>
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+      <a href="/ko/about/" style="font-size:.8rem;color:var(--accent);text-decoration:none;">프로필</a>
+      <a href="https://x.com/simplememofast" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">X / 트위터</a>
+      <a href="https://github.com/simplememofast" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">GitHub</a>
+    </div>
+  </div>
+</aside>
+</main>
+
+      <section class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+        <h3 style="font-size:1rem;margin-bottom:0.75rem">참고문헌</h3>
+        <ul style="font-size:0.85rem;line-height:1.6;list-style:none;padding:0">
+        <li><a href="https://doi.org/10.1145/3528579.3529177" target="_blank" rel="noopener">Storey, M.-A., Houck, B., &amp; Zimmermann, T. (2022). 개발자와 관리자가 생산성을 품질에 맞게 정의하고 교환하는 방법 15 제국제 소프트웨어 공학 협동 및 인간적 측면 학술대회 논문집 (CHASE '22), 26-35.</a></li>
+        <li><a href="https://queue.acm.org/detail.cfm?id=3595878" target="_blank" rel="noopener">Noda, A., Storey, M.-A., Forsgren, N., &amp; Greiler, M. (2023). DevEx: 실제로 생산성을 이끄는 것 ACM 대기열 21(2).</a></li>
+        </ul>
+      </section>
+
+    <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ko" dir="ltr"><a class="site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">작은 메모, 다음 한 걸음.</p><p class="site-footer-description">iPhone에서 Obsidian과 이메일로 메모를 보내세요.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="푸터 탐색 메뉴">
+      <div class="footer__col">
+        <p class="footer__col-title">프로덕트</p>
+        <a href="/ko/download/" class="footer__link">다운로드</a>
+        <a href="/ko/" class="footer__link">홈</a>
+        <a href="/ko/use-cases/" class="footer__link">활용 사례</a>
+        <a href="/ko/guides/" class="footer__link">사용 가이드</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">비교·전환</p>
+        <a href="/ko/captio-alternative/" class="footer__link"><span>Captio 대체</span></a>
+        <a href="/ko/note-to-email/" class="footer__link">메모를 이메일로</a>
+        <a href="/ko/vs/" class="footer__link">비교</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">읽을거리</p>
+        <a href="/ko/blog/" class="footer__link"><span>블로그</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">지원</p>
+        <a href="/ko/roadmap/" class="footer__link">공개 로드맵</a>
+        <a href="/ko/devlog/" class="footer__link">개발 기록</a>
+        <a href="/ko/about/" class="footer__link">개발자 소개</a>
+        <a href="/ko/faq" class="footer__link">자주 묻는 질문</a>
+        <a href="/ko/privacy" class="footer__link">개인정보 보호</a>
+        <a href="/ko/contact" class="footer__link">문의</a>
+      </div>
+      </nav><p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 운영: YURIKA, K.K.</p></div></footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body></html>

@@ -8,22 +8,22 @@
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- Google tag (gtag.js) - deferred for LCP -->
   <script>
-    window.addEventListener('load', function() {
+    (function() {
       if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
-      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
-      ric(function() {
-        var s = document.createElement('script');
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
-        s.async = true;
-        document.head.appendChild(s);
-        s.onload = function() {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
-        };
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
       });
-    });
+    })();
   </script>
   <title>Offline-First Memo Apps 2026: Simple Memo vs Apple Notes vs Obsidian</title>
   <meta name="description" content="Offline-first memo apps compared. Simple Memo's Outbox queue, Apple Notes, Obsidian, Joplin, Standard Notes, Bear, and Google Keep offline modes analyzed.">
@@ -50,6 +50,17 @@
 
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/en/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/offline-first-comparison">
 
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -69,7 +80,7 @@
     "description": "Offline-first memo apps compared. Simple Memo's Outbox queue, Apple Notes, Obsidian, Joplin, Standard Notes, Bear, and Google Keep offline modes analyzed.",
     "image": "https://simplememofast.com/assets/img/og/blog-offline-first-comparison.png",
     "datePublished": "2026-03-21",
-    "dateModified": "2026-08-12",
+    "dateModified": "2026-09-30",
     "url": "https://simplememofast.com/en/blog/offline-first-comparison",
     "author": {
       "@type": "Person",
@@ -117,10 +128,6 @@
     "name": "Offline-First Memo Apps 2026: Simple Memo vs Apple Notes vs Obsidian",
     "isPartOf": {
       "@id": "https://simplememofast.com/en/#website"
-    },
-    "speakable": {
-      "@type": "SpeakableSpecification",
-      "cssSelector": [".page-content__title", ".page-content__body p:first-of-type"]
     },
     "url": "https://simplememofast.com/en/blog/offline-first-comparison"
   }
@@ -258,32 +265,35 @@
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="Main navigation">
+  <nav class="global-nav" aria-label="Main navigation" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/en/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager">
-        Simple Memo - for Obsidian
-      </a>
-      <ul class="global-nav__links" id="navLinks">
+      <a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/">Guides</a><a href="/en/use-cases/">Use cases</a><a href="/en/vs/">Compare</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
         <li><a href="/en/guides/">Guides</a></li>
-        <li><a href="/en/use-cases/">Use Cases</a></li>
+        <li><a href="/en/use-cases/">Use cases</a></li>
         <li><a href="/en/vs/">Compare</a></li>
         <li><a href="/en/methods/">Methods</a></li>
         <li><a href="/en/blog/">Blog</a></li>
         <li><a href="/en/glossary/">Glossary</a></li>
         <li><a href="/en/faq">FAQ</a></li>
-        <li><a href="/en/about/">About</a></li>
-        <li><a href="/en/devlog/">Dev Log</a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8">Download</a></li>
+        <li><a href="/en/about/">About the developer</a></li>
+        <li><a href="/en/devlog/">Development log</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">Download</a></li>
       </ul>
-      <div class="global-nav__actions">
-        <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8" class="global-nav__cta">
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="English · Choose a language"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>EN</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="en" dir="ltr"><p class="site-language-title">Choose a language</p><div class="site-language-grid"><a href="/blog/offline-first-comparison" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="en" aria-current="page"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh/blog/offline-first-comparison" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/blog/offline-first-comparison" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/offline-first-comparison" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/blog/offline-first-comparison" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/offline-first-comparison" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/offline-first-comparison" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/offline-first-comparison" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/offline-first-comparison" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
           Download
         </a>
-        <button class="global-nav__hamburger" aria-label="Menu" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">&#9776;</button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
   </nav>
@@ -297,8 +307,8 @@
           <a href="/en/blog/" style="color:var(--accent);text-decoration:none;">Blog</a> &gt;
           Offline-First Memo Apps 2026
         </p>
-        <h1 class="page-content__title" style="font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem;">Offline-First Memo Apps 2026:<br>Simple Memo vs Apple Notes vs Obsidian</h1>
-        <p style="font-size:.875rem;color:var(--text-muted);">By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Published: <time datetime="2026-03-21">March 21, 2026</time> · Last updated: <time datetime="2026-08-12">August 12, 2026</time> · Reading time: ~10 minutes</p>
+        <h1 class="page-content__title sd-title" style="font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem;">Offline-First Memo Apps 2026:<br>Simple Memo vs Apple Notes vs Obsidian</h1>
+        <p style="font-size:.875rem;color:var(--text-muted);">By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Published: <time datetime="2026-03-21">March 21, 2026</time> · Last updated: <time datetime="2026-09-30">September 30, 2026</time> · Reading time: ~10 minutes</p>
       </div>
 
       <div class="page-content__body" style="max-width:780px;margin:0 auto;line-height:1.8;">
@@ -307,10 +317,10 @@
              conclusion of the matrix and the verdict section, stated up front. -->
         <div class="tldr" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:2rem;font-size:.9rem;line-height:1.8;">
           <div style="font-weight:700;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">TL;DR</div>
-          <p style="color:var(--text-secondary);margin:0;">&ldquo;Offline&rdquo; is not one property. <strong>Offline-first</strong> apps treat your device as the source of truth (Obsidian, Standard Notes); <strong>offline-capable</strong> apps let you work offline but treat the cloud as primary (Apple Notes, Bear, Google Keep); and some are effectively online-only (Notion). For capture specifically, the question is not whether you can type without a signal but what happens to what you typed. <strong>Simple Memo - for Obsidian</strong> (SimpleMemoFast, iOS) answers it with an Outbox: the memo is encrypted with AES-GCM on the device, queued, and sent by itself once a network returns &mdash; ready to type 0.4s after launch, free for 3 sends a day, and what you send appends itself to your Obsidian vault.</p>
+          <p style="color:var(--text-secondary);margin:0;">&ldquo;Offline&rdquo; is not one property. <strong>Offline-first</strong> apps treat your device as the source of truth (Obsidian, Standard Notes); <strong>offline-capable</strong> apps let you work offline but sync through the cloud (Apple Notes, Bear, Google Keep&rsquo;s mobile apps); and some work mainly online with limited offline access (Notion, which added an offline mode in 2025). For capture specifically, the question is not whether you can type without a signal but what happens to what you typed. <strong>Simple Memo - for Obsidian</strong> (SimpleMemoFast, iOS) answers it with an Outbox: the memo is encrypted with AES-GCM on the device, queued, and sent by itself once a network returns &mdash; ready to type 0.4s after launch, free for 3 sends a day, and what you send appends itself to your Obsidian vault.</p>
         </div>
 
-        <h2>Introduction: Why Offline Matters</h2>
+        <h2 id="reading-01" data-ce-number="01">Introduction: Why Offline Matters</h2>
 
         <p>We live with connectivity most of the time, but not all of the time. You're on a flight. You're underground on the subway. You're in a dead zone while hiking. You're deliberately offline for focus. In these moments, your note app matters.</p>
 
@@ -318,46 +328,46 @@
 
         <p>This article dissects seven memo apps and their actual offline capabilities. We'll explain Simple Memo - for Obsidian's Outbox architecture, compare sync strategies, and help you choose based on your actual use cases.</p>
 
-        <h2>Defining the Terms</h2>
+        <h2 id="reading-02" data-ce-number="02">Defining the Terms</h2>
 
         <h3>Offline-First Architecture</h3>
         <p>Your device is the source of truth. All data starts local. Sync to the cloud is secondary. If the cloud goes down or you lose connection, nothing breaks. You can work indefinitely offline, then sync when reconnected. Example: Obsidian, Joplin.</p>
 
         <h3>Offline-Capable Architecture</h3>
-        <p>Cloud is the primary source of truth, but the app can work without it. You can create notes offline, but syncing is required for full functionality. If offline for too long, sync conflicts may occur. Example: Apple Notes, Bear (iCloud dependent).</p>
+        <p>Cloud is the primary source of truth, but the app can work without it. You can create notes offline, but syncing is required for full functionality. If offline for too long, sync conflicts may occur. Example: Apple Notes, Bear (syncs through iCloud).</p>
 
         <h3>Online-Only Architecture</h3>
-        <p>The app requires network connection to function. You might be able to view cached content offline, but not create or edit. Example: Google Keep, Notion, most web-based note apps.</p>
+        <p>The app requires network connection to function. You might be able to view cached content offline, but not create or edit. Example: most web-based note apps. (Notion added an offline mode in 2025 that covers pages downloaded for offline use.)</p>
 
         <h3>Hybrid/Outbox Architecture</h3>
         <p>A newer pattern: you work offline freely (local is source of truth), but when a specific action is triggered (send, save to cloud), the app queues the operation and retries on reconnect. Example: Simple Memo - for Obsidian's Outbox, email clients with draft folders.</p>
 
-        <h2>Simple Memo - for Obsidian: The Outbox Pattern Explained</h2>
+        <h2 id="reading-03" data-ce-number="03">Simple Memo - for Obsidian: The Outbox Pattern Explained</h2>
 
-        <p>Simple Memo - for Obsidian uses an innovative Outbox architecture that deserves its own deep explanation. It's not quite offline-first (Obsidian's model), but it's more sophisticated than offline-capable.</p>
+        <p>Simple Memo - for Obsidian uses an Outbox architecture that deserves its own explanation. It's not quite offline-first (Obsidian's model), but it's more sophisticated than offline-capable.</p>
 
         <h3>How Simple Memo - for Obsidian's Outbox Works</h3>
 
         <ol>
           <li>User taps compose and creates a note locally</li>
           <li>User types and edits — all changes are local (offline works)</li>
-          <li>User hits "Send" — note is encrypted with AES-GCM</li>
+          <li>User hits "Send" — the memo is saved to the on-device Outbox, encrypted with AES-GCM</li>
           <li>App attempts to send to email</li>
           <li>If connected: send immediately</li>
-          <li>If offline: queue in Outbox (disk-stored), retry every 2 minutes, retry on reconnect, user can force retry</li>
-          <li>Email is delivered, receipt is logged, Outbox is cleared</li>
+          <li>If offline: the memo waits in the Outbox (stored on the device) and is sent again when the connection returns, when you open the app, or from a background task</li>
+          <li>Once the send is accepted, it is recorded in the send history and leaves the Outbox (arrival in your inbox still depends on email delivery)</li>
         </ol>
 
-        <p><strong>Key advantage:</strong> You can create and edit notes completely offline. When you hit "Send," if you're offline, it queues the message. The moment you reconnect (airplane lands, subway emerges, WiFi returns), the app automatically retries and delivers all queued notes to your email inbox.</p>
+        <p><strong>Key advantage:</strong> You can create and edit notes completely offline. When you hit "Send," if you're offline, it queues the message. When you're back online (airplane lands, subway emerges, WiFi returns), the app retries the queued notes automatically, the next time you open the app or in the background.</p>
 
-        <p><strong>Privacy win:</strong> The encryption happens on your device before the message ever attempts to send. Even if it sits in the Outbox for hours, it's already encrypted with AES-GCM. Simple Memo - for Obsidian's servers never see the plaintext.</p>
+        <p><strong>Privacy:</strong> While a memo waits in the Outbox, it is stored on the device encrypted with AES-GCM. When it is sent, the memo body passes through Simple Memo's relay (Cloudflare Workers) and the email delivery service to reach your inbox. They do not keep memo bodies, but this is not end-to-end encryption (see the <a href="/en/privacy">privacy policy</a>).</p>
 
         <h3>Simple Memo - for Obsidian Outbox Strengths</h3>
         <ul>
           <li>True offline creation and editing</li>
           <li>On-device AES-GCM encryption for the local Outbox and send history (delivery itself is not end-to-end encrypted)</li>
           <li>Automatic retry on reconnect (transparent to user)</li>
-          <li>No sync conflicts (email is idempotent)</li>
+          <li>No sync conflicts to resolve (each memo is sent as its own email)</li>
           <li>Works with any email provider</li>
         </ul>
 
@@ -369,9 +379,9 @@
           <li>No real-time sync (only email delivery)</li>
         </ul>
 
-        <h2>Comparison: Offline Capabilities Matrix</h2>
+        <h2 id="reading-04" data-ce-number="04">Comparison: Offline Capabilities Matrix</h2>
 
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Scrollable table">
           <table style="width:100%;border-collapse:collapse;font-size:.875rem;margin:1.5rem 0;overflow-x:auto;display:block;">
           <thead>
             <tr>
@@ -405,7 +415,7 @@
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">True offline-first</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Manual or plugin</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Depends on sync method</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">File-level</td>
             </tr>
             <tr>
@@ -414,7 +424,7 @@
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Auto-sync</td>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Version history</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Conflict copies</td>
             </tr>
             <tr>
               <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Standard Notes</strong></th>
@@ -426,25 +436,25 @@
             </tr>
             <tr>
               <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Bear</strong></th>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">iCloud-dependent</td>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Limited</td>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Limited</td>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">iCloud</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Offline-capable</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">iCloud (Bear Pro)</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Last-sync-wins</td>
             </tr>
             <tr>
               <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Google Keep</strong></th>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Online-only</td>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">No</td>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">No</td>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">N/A</td>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">N/A</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Offline-capable (mobile apps)</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Not tested</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes (per Keep help)</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">When online</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">&ldquo;Conflicting edits&rdquo; notice</td>
             </tr>
           </tbody>
         </table>
         </div>
 
-        <h2>Deep Dives: How Each App Handles Offline</h2>
+        <h2 id="reading-05" data-ce-number="05">Deep Dives: How Each App Handles Offline</h2>
 
         <h3>Apple Notes: iCloud Sync with Local Caching</h3>
 
@@ -452,21 +462,21 @@
 
         <p><strong>Strengths:</strong> Seamless offline creation, transparent iCloud sync, works across iPhone, iPad, Mac, and web, handwriting and rich media offline.</p>
 
-        <p><strong>Weaknesses:</strong> iCloud required for multi-device sync, sync conflicts can occur if offline for too long, no visibility into sync state, data stored unencrypted on Apple's servers (unless iCloud+ Advanced).</p>
+        <p><strong>Weaknesses:</strong> iCloud required for multi-device sync, sync conflicts can occur if offline for too long, no visibility into sync state, and notes on iCloud are end-to-end encrypted only if you turn on Advanced Data Protection (standard protection encrypts them in transit and at rest, with keys held by Apple).</p>
 
         <h3>Obsidian: True Offline-First, Local Files</h3>
 
         <p>Obsidian stores everything in local markdown files. Your vault is 100% on your device. Sync is optional and via external services (iCloud, Dropbox, or Obsidian Sync). This is the purest offline-first implementation.</p>
 
-        <p><strong>Strengths:</strong> Complete offline independence, you own your files (can access raw .md files), no cloud vendor lock-in, sync is optional and manual.</p>
+        <p><strong>Strengths:</strong> Complete offline independence, you own your files (can access raw .md files), no cloud vendor lock-in, sync is optional.</p>
 
-        <p><strong>Weaknesses:</strong> Sync requires extra setup (Dropbox, iCloud, or paid Obsidian Sync), sync conflicts must be manually resolved, no built-in mobile app (relies on community efforts), file system access on mobile is limited.</p>
+        <p><strong>Weaknesses:</strong> Syncing between devices needs setup (iCloud, a third-party service, or paid Obsidian Sync), and sync conflicts may need manual resolution. The official mobile apps need the vault stored where your sync method works on the phone.</p>
 
         <h3>Joplin: Offline-First with Built-In Sync</h3>
 
-        <p>Joplin is offline-first with batteries included. Create notes locally, they're stored in an encrypted database. Sync to Joplin Cloud, Dropbox, NextCloud, or S3. Automatic conflict resolution via version history.</p>
+        <p>Joplin is offline-first with batteries included. Notes are stored in a local database and can be synced to Joplin Cloud, Dropbox, Nextcloud or S3. End-to-end encryption for sync is optional and turned on manually. When a sync conflict happens, Joplin copies the local note into a Conflicts notebook.</p>
 
-        <p><strong>Strengths:</strong> True offline-first design, multiple sync backends, built-in encryption, version history and conflict resolution, cross-platform (iOS, Android, Mac, Windows, Linux).</p>
+        <p><strong>Strengths:</strong> True offline-first design, multiple sync backends, optional end-to-end encryption for sync, note history, conflict copies instead of silent overwrites, cross-platform (iOS, Android, Mac, Windows, Linux).</p>
 
         <p><strong>Weaknesses:</strong> iOS app is not as polished as native options, sync can be slow with large databases, desktop-focused (mobile is secondary).</p>
 
@@ -476,17 +486,17 @@
 
         <p><strong>Strengths:</strong> End-to-end encryption (Standard Notes can't read your notes), offline create and edit, cross-platform, open-source server option.</p>
 
-        <p><strong>Weaknesses:</strong> Subscription required for advanced features ($1.99/month as of June 2026), smaller community than competitors, less powerful organizing features.</p>
+        <p><strong>Weaknesses:</strong> Subscription required for advanced features (paid plans from $90/year), smaller community than competitors, less powerful organizing features.</p>
 
-        <h3>Bear: Dependent on iCloud Sync</h3>
+        <h3>Bear: Offline Notes, iCloud Sync with Bear Pro</h3>
 
-        <p>Bear uses iCloud for all syncing. While you can create notes offline, full functionality depends on iCloud connection. Offline editing is supported but with caveats: iCloud is mandatory for any multi-device use, offline editing is limited, and privacy is tied to iCloud encryption (not end-to-end by default).</p>
+        <p>You can create and edit notes in Bear offline. Syncing across devices uses iCloud and requires Bear Pro ($2.99/month or $29.99/year). Bear supports Apple&rsquo;s Advanced Data Protection; without it, iCloud data is not end-to-end encrypted.</p>
 
-        <h3>Google Keep: No Offline Support</h3>
+        <h3>Google Keep: Offline Edits on Mobile</h3>
 
-        <p>Google Keep requires internet connection. You cannot create or edit notes offline. Period.</p>
+        <p>Google Keep&rsquo;s help notes that if you edit the same note on different devices while one of them is offline, you may see a &ldquo;Conflicting edits found&rdquo; notification &mdash; edits made offline are kept and synced later. We have not tested creating notes offline in Keep, so check it on your device before relying on it.</p>
 
-        <h2>Use Cases: When Offline-First Matters</h2>
+        <h2 id="reading-06" data-ce-number="06">Use Cases: When Offline-First Matters</h2>
 
         <h3>Airplane Mode (No Internet for Hours)</h3>
         <p><strong>Best choice: Simple Memo - for Obsidian, Obsidian, or Joplin.</strong> You're in the air for 6 hours. You want to capture meeting notes, ideas, brainstorms. With offline-first apps, you create freely. When you land, reconnect and everything syncs automatically.</p>
@@ -501,26 +511,26 @@
         <p><strong>Best choice: Simple Memo - for Obsidian or Joplin.</strong> You want to capture sensitive information without network transmission. Offline-first apps keep data local until you explicitly decide to sync/send.</p>
 
         <h3>Content Creator (Drafts Before Publishing)</h3>
-        <p><strong>Best choice: Obsidian, Simple Memo - for Obsidian, or Joplin.</strong> You write offline, review, edit, then publish. Offline-first guarantees your work is safe locally before any cloud interaction.</p>
+        <p><strong>Best choice: Obsidian, Simple Memo - for Obsidian, or Joplin.</strong> You write offline, review, edit, then publish. Offline-first keeps your work on the device before any cloud interaction.</p>
 
         <h3>Minimal Setup / Apple Ecosystem Only</h3>
         <p><strong>Best choice: Apple Notes.</strong> If you're all-in on Apple devices, Apple Notes is built-in, fast, and handles offline seamlessly via iCloud.</p>
 
-        <h2>The Verdict: Which Architecture Wins?</h2>
+        <h2 id="reading-07" data-ce-number="07">The Verdict: Which Architecture Wins?</h2>
 
-        <p><strong>Simple Memo - for Obsidian's Outbox</strong> pattern is innovative because it bridges two worlds: the speed and privacy of offline-first, with the clarity of email-based sync. You get end-to-end encryption, zero sync conflicts, and automatic retry on reconnect. It's tailored for quick capture.</p>
+        <p><strong>Simple Memo - for Obsidian's Outbox</strong> pattern is innovative because it bridges two worlds: the speed and privacy of offline-first, with the clarity of email-based sync. You get AES-GCM encryption for memos waiting on the device (not end-to-end encryption), no sync conflicts to resolve, and automatic retry on reconnect. It's tailored for quick capture.</p>
 
-        <p><strong>Obsidian</strong> is the most flexible. Your files are yours. Sync is optional. But setup is required, and mobile support lags.</p>
+        <p><strong>Obsidian</strong> is the most flexible. Your files are yours. Sync is optional. But syncing across devices needs setup.</p>
 
         <p><strong>Joplin</strong> is the best all-around offline-first option: mature, cross-platform, built-in sync, version history. It's designed for serious note-taking, not quick capture.</p>
 
         <p><strong>Apple Notes</strong> is best if you're already in the Apple ecosystem. iCloud sync is seamless, offline works well, and it's built-in.</p>
 
-        <p><strong>Google Keep</strong> shouldn't be trusted for anything you care about offline. It's online-only.</p>
+        <p><strong>Google Keep</strong>&rsquo;s mobile apps keep offline edits and sync them later; check for conflicting edits if you use it on several devices.</p>
 
-        <h2>Recommendation Matrix</h2>
+        <h2 id="reading-08" data-ce-number="08">Recommendation Matrix</h2>
 
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Scrollable table">
           <table style="width:100%;border-collapse:collapse;font-size:.875rem;margin:1.5rem 0;overflow-x:auto;display:block;">
           <thead>
             <tr>
@@ -564,7 +574,7 @@
         </table>
         </div>
 
-        <h2>Conclusion</h2>
+        <h2 id="reading-09" data-ce-number="09">Conclusion</h2>
 
         <p>Offline-first is not a luxury — it's a necessity. If your note app requires internet connection, you're dependent on someone else's infrastructure. If your app is offline-capable or offline-first, you own your data and your workflow.</p>
 
@@ -593,7 +603,7 @@
 
   </main>
 
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
@@ -601,39 +611,35 @@
         <a href="/en/download/" class="footer__link">Download</a>
         <a href="/en/" class="footer__link">Home</a>
         <a href="/en/send-email-to-yourself/" class="footer__link">Email Yourself Apps</a>
-        <a href="/en/use-cases/" class="footer__link">Use Cases</a>
+        <a href="/en/use-cases/" class="footer__link">Use cases</a>
         <a href="/en/guides/" class="footer__link">Guides</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">Compare & Switch</p>
         <a href="/en/captio-alternative/" class="footer__link">Captio Alternative</a>
-        <a href="/en/note-to-email/" class="footer__link">Note to Email</a>
-        <a href="/en/vs/" class="footer__link">Comparisons</a>
+        <a href="/en/note-to-email/" class="footer__link">Notes to email</a>
+        <a href="/en/vs/" class="footer__link">Compare</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">Read</p>
-        <a href="/en/about/" class="footer__link">About</a>
+        <a href="/en/about/" class="footer__link">About the developer</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">Support</p>
         <a href="/en/roadmap/" class="footer__link">Public roadmap</a>
-        <a href="/en/devlog/" class="footer__link">Dev log</a>
+        <a href="/en/devlog/" class="footer__link">Development log</a>
         <a href="/en/faq" class="footer__link">FAQ</a>
         <a href="/en/privacy" class="footer__link">Privacy</a>
         <a href="/en/contact" class="footer__link">Contact</a>
       </div>
       </nav>
       <p class="footer__copyright">
-        © 2026 Simple Memo - for Obsidian / Yurika Inc.
+        © 2026 Simple Memo - for Obsidian / YURIKA, K.K.
       </p>
     </div>
   </footer>
 
-  <script>
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

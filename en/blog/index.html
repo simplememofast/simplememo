@@ -8,22 +8,22 @@
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- Google tag (gtag.js) - deferred for LCP -->
   <script>
-    window.addEventListener('load', function() {
+    (function() {
       if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
-      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
-      ric(function() {
-        var s = document.createElement('script');
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
-        s.async = true;
-        document.head.appendChild(s);
-        s.onload = function() {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
-        };
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
       });
-    });
+    })();
   </script>
   <title>Blog — Simple Memo - for Obsidian</title>
   <meta name="description" content="Simple Memo blog — email-yourself workflows, quick capture, Captio alternatives, inbox zero, offline-first design, indie iOS development.">
@@ -34,7 +34,7 @@
   <meta property="og:description" content="Simple Memo blog — email-yourself workflows, quick capture, Captio alternatives, inbox zero, offline-first design, indie iOS development.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://simplememofast.com/en/blog/">
-  <meta property="og:image" content="https://simplememofast.com/assets/img/og/index.png">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/index-en-20261001.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:site_name" content="Simple Memo - for Obsidian">
@@ -45,13 +45,21 @@
   <meta name="twitter:site" content="@simplememofast">
   <meta name="twitter:title" content="Blog — Simple Memo - for Obsidian">
   <meta name="twitter:description" content="Simple Memo blog — email-yourself workflows, quick capture, Captio alternatives, inbox zero, offline-first design, indie iOS development.">
-  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/index.png">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/index-en-20261001.jpg">
 
   <!-- Canonical -->
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/en/blog/">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/">
   <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/">
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/">
 
   <!-- Favicon -->
@@ -325,71 +333,103 @@
       margin: 0;
       line-height: 1.5;
     }
+    .blog-archive {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 0.75rem;
+      list-style: none;
+      padding: 0;
+      margin: 1.5rem 0 0;
+    }
+    .blog-archive a {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      padding: 0.75rem 1rem;
+      border: 1px solid rgba(100,160,220,0.14);
+      border-radius: 8px;
+      color: #fff;
+      text-decoration: none;
+      line-height: 1.5;
+    }
+    .blog-archive a:hover, .blog-archive a:focus-visible {
+      border-color: rgba(100,180,255,0.65);
+    }
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="Main navigation">
+  <nav class="global-nav" aria-label="Main navigation" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/en/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager">
-        Simple Memo - for Obsidian
-      </a>
-      <ul class="global-nav__links" id="navLinks">
+      <a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/">Guides</a><a href="/en/use-cases/">Use cases</a><a href="/en/vs/">Compare</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
         <li><a href="/en/guides/">Guides</a></li>
-        <li><a href="/en/use-cases/">Use Cases</a></li>
+        <li><a href="/en/use-cases/">Use cases</a></li>
         <li><a href="/en/vs/">Compare</a></li>
         <li><a href="/en/methods/">Methods</a></li>
         <li><a href="/en/blog/">Blog</a></li>
         <li><a href="/en/glossary/">Glossary</a></li>
         <li><a href="/en/faq">FAQ</a></li>
-        <li><a href="/en/about/">About</a></li>
-        <li><a href="/en/devlog/">Dev Log</a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8">Download</a></li>
+        <li><a href="/en/about/">About the developer</a></li>
+        <li><a href="/en/devlog/">Development log</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">Download</a></li>
       </ul>
-      <div class="global-nav__actions">
-        <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8" class="global-nav__cta">
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="English · Choose a language"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>EN</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="en" dir="ltr"><p class="site-language-title">Choose a language</p><div class="site-language-grid"><a href="/blog/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="en" aria-current="page"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh/blog/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/blog/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/blog/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
           Download
         </a>
-        <button class="global-nav__hamburger" aria-label="Menu" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">&#9776;</button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
   </nav>
 
   <main class="page-content">
     <div class="container">
-      <h1 class="page-content__title">Blog</h1>
+      <h1 class="page-content__title sd-title">Blog</h1>
       <p style="color:rgba(255,255,255,0.6);margin-top:0.5rem;">Tips, guides, and behind-the-scenes from the Simple Memo - for Obsidian team.</p>
 
       <ul class="blog-list">
         <li class="blog-list__item">
+          <a href="/en/blog/foundation-models-choose-not-write">
+            <p class="blog-list__date"><time datetime="2026-09-24">September 24, 2026</time></p>
+            <h2 class="blog-list__title" id="reading-01" data-ce-number="01">Let the on-device model choose, not write: a voice follow-up loop with Foundation Models</h2>
+            <p class="blog-list__desc">How Dialogue Memo uses Apple's Foundation Models on device: @Generable enums choose follow-up questions, sentence IDs lay out notes, and deterministic code renders every visible word.</p>
+          </a>
+        </li>
+        <li class="blog-list__item">
           <a href="/en/blog/ios26-speechanalyzer-custom-vocabulary">
             <p class="blog-list__date"><time datetime="2026-09-18">September 18, 2026</time></p>
-            <h2 class="blog-list__title">iOS 26 didn't kill custom vocabulary — you're adding it to the wrong module</h2>
+            <h2 class="blog-list__title" id="reading-02" data-ce-number="02">iOS 26 didn't kill custom vocabulary — you're adding it to the wrong module</h2>
             <p class="blog-list__desc">How AnalysisContext.contextualStrings works with DictationTranscriber, its 100-phrase guidance, setContext replacement semantics, and choosing the right iOS 26 speech module.</p>
           </a>
         </li>
         <li class="blog-list__item">
           <a href="/en/blog/obsidian-voice-input">
             <p class="blog-list__date"><time datetime="2026-07-10">July 10, 2026</time></p>
-            <h2 class="blog-list__title">Voice Notes in Obsidian: 4 Ways to Dictate on iPhone (2026)</h2>
+            <h2 class="blog-list__title" id="reading-03" data-ce-number="03">Voice Notes in Obsidian: 4 Ways to Dictate on iPhone (2026)</h2>
             <p class="blog-list__desc">Obsidian has no built-in speech-to-text. Keyboard dictation, Shortcuts + Obsidian URI, Whisper plugins, and a no-plugin auto-append app — compared.</p>
           </a>
         </li>
         <li class="blog-list__item">
           <a href="/en/blog/obsidian-iphone-memo">
             <p class="blog-list__date"><time datetime="2026-07-10">July 10, 2026</time></p>
-            <h2 class="blog-list__title">How to Capture Notes in Obsidian from iPhone: 6 Ways (2026)</h2>
+            <h2 class="blog-list__title" id="reading-04" data-ce-number="04">How to Capture Notes in Obsidian from iPhone: 6 Ways (2026)</h2>
             <p class="blog-list__desc">Official mobile app, Shortcuts + URI, files, Drafts-style apps, email auto-append, and Apple Watch — compared by speed and offline support.</p>
           </a>
         </li>
         <li class="blog-list__item">
           <a href="/en/blog/fleeting-notes">
             <p class="blog-list__date"><time datetime="2026-07-10">July 10, 2026</time></p>
-            <h2 class="blog-list__title">Fleeting Notes: How to Write and Process Them (Zettelkasten)</h2>
+            <h2 class="blog-list__title" id="reading-05" data-ce-number="05">Fleeting Notes: How to Write and Process Them (Zettelkasten)</h2>
             <p class="blog-list__desc">What fleeting notes are, how to write them (real examples), the 3 rules that make them work, and a simple flow to process them within 24-48 hours.</p>
           </a>
         </li>
@@ -397,60 +437,112 @@
         <li class="blog-list__item">
           <a href="/en/blog/email-to-obsidian">
             <p class="blog-list__date"><time datetime="2026-06-16">June 16, 2026</time></p>
-            <h2 class="blog-list__title">Email to Obsidian: Send iPhone Notes to Your Vault (No Plugin)</h2>
+            <h2 class="blog-list__title" id="reading-06" data-ce-number="06">Email to Obsidian: Send iPhone Notes to Your Vault (No Plugin)</h2>
             <p class="blog-list__desc">Get iPhone notes into Obsidian automatically — no plugin, any email provider. Inbox-note and daily-note workflows, app vs manual Shortcuts, offline support.</p>
           </a>
         </li>
         <li class="blog-list__item">
           <a href="/en/blog/ios26-speechanalyzer-live-mic">
             <p class="blog-list__date"><time datetime="2026-06-16">June 16, 2026</time></p>
-            <h2 class="blog-list__title">Wiring iOS 26's SpeechAnalyzer to a Live Microphone: What the Docs Don't Tell You</h2>
-            <p class="blog-list__desc">A practitioner's guide to iOS 26 SpeechAnalyzer / SpeechTranscriber on a live AVAudioEngine mic: working code, the format-conversion trap, on-device model download, volatile vs final results, ~0.3–0.5s real latency, the watchOS split, and migrating from SFSpeechRecognizer.</p>
+            <h2 class="blog-list__title" id="reading-07" data-ce-number="07">Wiring iOS 26's SpeechAnalyzer to a Live Microphone: What the Docs Don't Tell You</h2>
+            <p class="blog-list__desc">A practitioner's guide to iOS 26 SpeechAnalyzer / SpeechTranscriber on a live AVAudioEngine mic: working code, the format-conversion trap, on-device model download, volatile vs final results, the watchOS split, and migrating from SFSpeechRecognizer.</p>
           </a>
         </li>
         <li class="blog-list__item">
           <a href="/en/blog/inbox-zero-workflow-tips-2026">
             <p class="blog-list__date"><time datetime="2026-03-21">March 21, 2026</time></p>
-            <h2 class="blog-list__title">Inbox Zero Email Workflow Tips 2026: Achieve Email Mastery</h2>
+            <h2 class="blog-list__title" id="reading-08" data-ce-number="08">Inbox Zero Email Workflow Tips 2026: Achieve Email Mastery</h2>
             <p class="blog-list__desc">Learn how to achieve and maintain zero unread emails using capture, process, and archive methods.</p>
           </a>
         </li>
         <li class="blog-list__item">
           <a href="/en/blog/fastest-note-app-iphone-2026">
             <p class="blog-list__date"><time datetime="2026-03-21">March 21, 2026</time></p>
-            <h2 class="blog-list__title">Fastest Note-Taking Apps for iPhone 2026: Speed Benchmarks</h2>
+            <h2 class="blog-list__title" id="reading-09" data-ce-number="09">Fastest Note-Taking Apps for iPhone 2026: Speed Benchmarks</h2>
             <p class="blog-list__desc">Comprehensive speed comparison of the fastest note-taking apps for iPhone in 2026. Benchmark data on launch time, time to first character, and save time.</p>
           </a>
         </li>
         <li class="blog-list__item">
           <a href="/en/blog/ios-quick-capture-comparison">
             <p class="blog-list__date"><time datetime="2026-03-21">March 21, 2026</time></p>
-            <h2 class="blog-list__title">Best iOS Quick Capture Apps 2026: Simple Memo - for Obsidian vs Drafts vs Apple Notes</h2>
+            <h2 class="blog-list__title" id="reading-10" data-ce-number="10">Best iOS Quick Capture Apps 2026: Simple Memo - for Obsidian vs Drafts vs Apple Notes</h2>
             <p class="blog-list__desc">Comprehensive comparison of iOS quick capture apps including Simple Memo - for Obsidian, Drafts, Apple Notes, Google Keep, Bear, and Notion. Speed, privacy, automation, and pricing analysis.</p>
           </a>
         </li>
         <li class="blog-list__item">
           <a href="/en/blog/offline-first-comparison">
             <p class="blog-list__date"><time datetime="2026-03-21">March 21, 2026</time></p>
-            <h2 class="blog-list__title">Offline-First Memo Apps 2026: Simple Memo - for Obsidian Outbox vs Apple Notes vs Obsidian</h2>
+            <h2 class="blog-list__title" id="reading-11" data-ce-number="11">Offline-First Memo Apps 2026: Simple Memo - for Obsidian Outbox vs Apple Notes vs Obsidian</h2>
             <p class="blog-list__desc">Comprehensive comparison of offline-first memo apps. Simple Memo - for Obsidian Outbox architecture, Apple Notes sync, Obsidian, Joplin, Standard Notes, Bear, and Google Keep offline capabilities analyzed.</p>
           </a>
         </li>
         <li class="blog-list__item">
           <a href="/en/blog/how-to-email-yourself-note-iphone">
             <p class="blog-list__date"><time datetime="2026-03-21">March 21, 2026</time></p>
-            <h2 class="blog-list__title">How to Email Yourself a Note on iPhone: 3 Methods Compared</h2>
+            <h2 class="blog-list__title" id="reading-12" data-ce-number="12">How to Email Yourself a Note on iPhone: 3 Methods Compared</h2>
             <p class="blog-list__desc">Learn how to email yourself a note on iPhone using the Mail app, Simple Memo - for Obsidian app, or Siri Shortcuts. Compare methods and find the fastest approach.</p>
           </a>
         </li>
         <li class="blog-list__item">
           <a href="/en/blog/captio-shutdown-alternatives">
             <p class="blog-list__date"><time datetime="2026-03-21">March 21, 2026</time></p>
-            <h2 class="blog-list__title">Captio App Shut Down? Here Are the Best Alternatives</h2>
+            <h2 class="blog-list__title" id="reading-13" data-ce-number="13">Captio App Shut Down? Here Are the Best Alternatives</h2>
             <p class="blog-list__desc">Captio app shut down in October 2024. Explore the top 5 alternatives to Captio for iPhone including Simple Memo - for Obsidian, Drafts, and others.</p>
           </a>
         </li>
       </ul>
+
+      <section aria-labelledby="blog-archive-title" style="margin-top:3rem;" class="ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 id="blog-archive-title" style="font-size:1.4rem;margin-bottom:.5rem;" data-ce-number="14">More articles</h2></div><div class="ce-chapter__body">
+        <p style="color:rgba(255,255,255,.65);">Browse the rest of our published guides and research.</p>
+        <ul class="blog-archive">
+          <li><a href="/en/blog/ai-information-workflow">AI-Era Information Workflow: Memo to Email to GPT</a></li>
+          <li><a href="/en/blog/ai-vs-simple-memo">AI Memo Apps vs Simple Memo — Do You Really Need AI?</a></li>
+          <li><a href="/en/blog/benchmark-methodology">How we measure Simple Memo speed claims</a></li>
+          <li><a href="/en/blog/best-memo-apps-2026">Best Memo Apps 2026: 20 Compared by Use, Free Limits, and Sharing</a></li>
+          <li><a href="/en/blog/best-note-to-self-apps-2026">Best Note-to-Self Apps for iPhone (2026): 8 Apps Compared</a></li>
+          <li><a href="/en/blog/brain-science-memo">What Memory Research Says About Taking Notes</a></li>
+          <li><a href="/en/blog/business-memo-apps-2026">Best Memo Apps for Business Users 2026 — Top 10 Compared</a></li>
+          <li><a href="/en/blog/captio-discontinued">Why Captio Was Discontinued and What to Use Instead — 2026 Update</a></li>
+          <li><a href="/en/blog/captioo-alternative">Captioo vs Simple Memo: email-to-self workflows</a></li>
+          <li><a href="/en/blog/chatgpt-memo-workflow">Is Memo-Taking Still Meaningful in the ChatGPT Era?</a></li>
+          <li><a href="/en/blog/digital-vs-handwritten-notes">Digital vs handwritten notes: an evidence-based comparison</a></li>
+          <li><a href="/en/blog/email-management-tips">Email Management Guide</a></li>
+          <li><a href="/en/blog/email-self-task-management">Email yourself for task capture: review, deadlines, completion</a></li>
+          <li><a href="/en/blog/email-yourself-memo">How to Email Yourself Memos Faster — Works with Gmail &amp; Outlook</a></li>
+          <li><a href="/en/blog/engineer-code-snippets">Code Snippet Memo Management for Engineers</a></li>
+          <li><a href="/en/blog/fastest-memo-app-benchmark">Which Memo App Is Fastest? Launch Speed Benchmark 2026 — Real Data</a></li>
+          <li><a href="/en/blog/free-memo-apps-ranking">5 Free Memo Apps: Workflows and Limits (2026)</a></li>
+          <li><a href="/en/blog/freelance-memo-management">Freelance Invoice &amp; Expense Memo Management</a></li>
+          <li><a href="/en/blog/gen-z-memo">Gen Z Memo Methods: The Captio-Style Trend</a></li>
+          <li><a href="/en/blog/google-keep-shutdown">Is Google Keep Shutting Down? Official Updates and 3 Backup Checks</a></li>
+          <li><a href="/en/blog/how-to-choose-memo-app">How to choose a memo app: five criteria</a></li>
+          <li><a href="/en/blog/idea-memo-organization">Idea Memo Organization: Turn Scattered Notes into Gold</a></li>
+          <li><a href="/en/blog/information-organization-guide">Personal information management: a complete guide</a></li>
+          <li><a href="/en/blog/instant-capture-workflow">Instant capture workflow: save ideas as they arise</a></li>
+          <li><a href="/en/blog/iphone-memo-tips">8 iPhone Memo Tips You&#x27;re Missing</a></li>
+          <li><a href="/en/blog/journaling-for-beginners">Journaling for Beginners</a></li>
+          <li><a href="/en/blog/line-keep-alternative">Is LINE Keep Memo still available?</a></li>
+          <li><a href="/en/blog/meeting-memo-template">5 Meeting Note Templates: Copy or Download Markdown</a></li>
+          <li><a href="/en/blog/memo-app-encryption-comparison">Memo App Encryption Comparison 2026</a></li>
+          <li><a href="/en/blog/memo-app-privacy">Note App Privacy: AI Use, Storage, and Deletion</a></li>
+          <li><a href="/en/blog/memo-app-security-comparison">Note App Security: Sharing, Locks, and Recovery</a></li>
+          <li><a href="/en/blog/memo-app-speed-test-2026">Memo App Speed Test 2026: Separate Typing, Saving and Sending</a></li>
+          <li><a href="/en/blog/memo-habit">Complete Guide to Building a Memo Habit — 21-Day Program</a></li>
+          <li><a href="/en/blog/memo-taking-tips">10 Note-Taking Tips for Effective Memos</a></li>
+          <li><a href="/en/blog/minimalist-digital-memo">Minimalist Digital Memo Methods</a></li>
+          <li><a href="/en/blog/morning-memo-routine">Morning Memo Routine: Set Your Day&#x27;s Priorities</a></li>
+          <li><a href="/en/blog/offline-memo-apps">Best Offline Memo Apps 2026 — 5 Apps That Work Without Internet</a></li>
+          <li><a href="/en/blog/productivity-methods-comparison">Productivity methods: GTD vs Inbox Zero vs Zettelkasten</a></li>
+          <li><a href="/en/blog/reading-notes-guide">Effective Reading Notes: Turn Books into Knowledge</a></li>
+          <li><a href="/en/blog/remote-work-memo">Remote work memo management: five techniques</a></li>
+          <li><a href="/en/blog/sales-meeting-notes">Sales Meeting Note Techniques</a></li>
+          <li><a href="/en/blog/student-memo-app">Memo App Guide for College Students</a></li>
+          <li><a href="/en/blog/travel-planning-memo">How to Create Travel Planning Memos</a></li>
+          <li><a href="/en/blog/which-memo-app-flowchart">Which Memo App Is Right for You? A 2026 Decision Flowchart</a></li>
+          <li><a href="/en/blog/work-efficiency-memo">7 Memo Techniques for Work Productivity</a></li>
+        </ul>
+      </div></section>
     </div>
   <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
        Exactly one destination per page. Adding a second defeats the purpose: the page
@@ -471,13 +563,13 @@
 
   </main>
 
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">Product</p>
         <a href="/en/download/" class="footer__link">Download</a>
-        <a href="/en/use-cases/" class="footer__link">Use Cases</a>
+        <a href="/en/use-cases/" class="footer__link">Use cases</a>
         <a href="/en/guides/" class="footer__link">Guides</a>
         <a href="/en/how-to/" class="footer__link">How to Use</a>
         <a href="/en/templates/" class="footer__link">Templates</a>
@@ -485,15 +577,15 @@
       <div class="footer__col">
         <p class="footer__col-title">Compare & Switch</p>
         <a href="/en/captio-alternative/" class="footer__link">Captio Alternative</a>
-        <a href="/en/note-to-email/" class="footer__link">Note to Email</a>
-        <a href="/en/vs/" class="footer__link">Comparisons</a>
-        <a href="/captio/" class="footer__link">Captio Method</a>
+        <a href="/en/note-to-email/" class="footer__link">Notes to email</a>
+        <a href="/en/vs/" class="footer__link">Compare</a>
+        <a href="/en/captio/" class="footer__link">Captio Method</a>
         <a href="/en/comparison/" class="footer__link">Comparison Guide</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">Read</p>
-        <a href="/en/about/" class="footer__link">About</a>
-        <a href="/en/devlog/" class="footer__link">Dev Log</a>
+        <a href="/en/about/" class="footer__link">About the developer</a>
+        <a href="/en/devlog/" class="footer__link">Development log</a>
         <a href="/en/methods/" class="footer__link">Methods</a>
         <a href="/en/blog/" class="footer__link">Blog</a>
         <a href="/en/glossary/" class="footer__link">Glossary</a>
@@ -515,16 +607,12 @@
         <a href="https://github.com/simplememofast" rel="me noopener" target="_blank" class="footer__link">GitHub</a>
       </nav>
       <p class="footer__copyright">
-        © 2026 Simple Memo - for Obsidian / Yurika Inc.
+        © 2026 Simple Memo - for Obsidian / YURIKA, K.K.
       </p>
     </div>
   </footer>
 
-  <script>
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

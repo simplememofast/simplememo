@@ -6,22 +6,22 @@
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
   <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/about/">
   <script>
-    window.addEventListener('load', function() {
+    (function() {
       if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
-      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
-      ric(function() {
-        var s = document.createElement('script');
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
-        s.async = true;
-        document.head.appendChild(s);
-        s.onload = function() {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
-        };
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
       });
-    });
+    })();
   </script>
   <title>Obsidian連携シンプルメモについて — 開発者ストーリー | simplememofast.com</title>
   <meta name="description" content="Obsidian連携シンプルメモの開発者ストーリー。Captioを愛したエンジニアが、サービス終了後にあの体験を再現するために開発したiOSメモアプリです。ミッション、開発哲学、UIKitを選んだ技術的背景、運営情報まで公開しています。">
@@ -50,6 +50,14 @@
   <link rel="canonical" href="https://simplememofast.com/about/">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/about/">
   <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/about/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/about/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/about/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/about/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/about/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/about/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/about/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/about/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/about/">
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/about/">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -59,7 +67,7 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- JSON-LD: AboutPage -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"AboutPage","@id":"https://simplememofast.com/about/#webpage","name":"Obsidian連携シンプルメモについて — 開発者ストーリー","description":"Obsidian連携シンプルメモの開発者ストーリー。Captioを愛したエンジニアが、サービス終了後に「あの体験」を再現するために開発したiOSメモアプリ。","url":"https://simplememofast.com/about/","inLanguage":"ja","datePublished":"2026-03-05","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/","jobTitle":"iOS Developer","worksFor":{"@type":"Organization","name":"Obsidian連携シンプルメモ","alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"sameAs":["https://github.com/simplememofast","https://x.com/simplememofast","https://note.com/simplememo","https://zenn.dev/simplememo","https://qiita.com/paji"]},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".mission-banner__ja"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"AboutPage","@id":"https://simplememofast.com/about/#webpage","name":"Obsidian連携シンプルメモについて — 開発者ストーリー","description":"Obsidian連携シンプルメモの開発者ストーリー。Captioを愛したエンジニアが、サービス終了後に「あの体験」を再現するために開発したiOSメモアプリ。","url":"https://simplememofast.com/about/","inLanguage":"ja","datePublished":"2026-03-05","dateModified":"2026-10-04","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/","jobTitle":"iOS Developer","worksFor":{"@type":"Organization","name":"Obsidian連携シンプルメモ","alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"sameAs":["https://github.com/simplememofast","https://x.com/simplememofast","https://note.com/simplememo","https://zenn.dev/simplememo","https://qiita.com/paji"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
 
   <!-- JSON-LD: Organization -->
   <script type="application/ld+json">
@@ -82,7 +90,7 @@
       "width": 256,
       "height": 256
     },
-    "description": "「起動・書く・送る」最速のメモ体験を提供するiOSアプリの開発チーム。Captioのスピリットを引き継ぎ、ソロ開発者が設計・開発・運営。",
+    "description": "「起動・書く・送る」がすばやいメモアプリを作るiOSアプリの開発チーム。Captioのワークフローに着想を得て、ソロ開発者が設計・開発・運営。",
     "legalName": "株式会社ユリカ",
     "foundingDate": "2023-03",
     "knowsAbout": [
@@ -321,30 +329,35 @@
   </style>
 
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="メインナビゲーション">
+  <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span>Obsidian連携シンプルメモ</span></a>
-      <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span>使い方</span></a></li>
-        <li><a href="/use-cases/"><span>活用事例</span></a></li>
-        <li><a href="/vs/"><span>比較</span></a></li>
+      <a class="global-nav__logo site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/guides/">使い方</a><a href="/use-cases/">活用事例</a><a href="/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/">使い方</a></li>
+        <li><a href="/use-cases/">活用事例</a></li>
+        <li><a href="/vs/">比較</a></li>
         <li><a href="/methods/"><span>メソッド</span></a></li>
         <li><a href="/blog/"><span>ブログ</span></a></li>
         <li><a href="/glossary/"><span>用語集</span></a></li>
-        <li><a href="/faq"><span>FAQ</span></a></li>
-        <li><a href="/about/"><span>開発者</span></a></li>
-        <li><a href="/devlog/"><span>開発記録</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span>ダウンロード</span></a></li>
+        <li><a href="/faq">よくある質問</a></li>
+        <li><a href="/about/">開発者について</a></li>
+        <li><a href="/devlog/">開発記録</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/about/" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/about/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
-        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="日本語 · 言語を選択"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>JA</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ja" dir="ltr"><p class="site-language-title">言語を選択</p><div class="site-language-grid"><span class="site-language-current" data-site-locale="ja" aria-current="page"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/en/about/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/about/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/about/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/about/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/about/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/about/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/about/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/about/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/about/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
           <span>ダウンロード</span>
         </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="メニュー"><span>メニュー</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
   </nav>
@@ -355,7 +368,7 @@
     <div class="container">
 
       <!-- Hero -->
-      <div class="lp-hero">
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
         <div class="lp-hero__label">
           <span>開発者ストーリー</span>
 
@@ -368,56 +381,56 @@
           <span>Captioを愛したエンジニアが、サービス終了後に「あの体験」を再現するために作ったアプリ。速さへの妥協なし、プライバシーへの妥協なし。</span>
 
         </p>
-      </div>
+      </div><nav class="sd-hero-index" aria-label="このページの内容"><p>このページの内容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>開発者ストーリー</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>ミッション</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>開発哲学</span><span aria-hidden="true">↗</span></a></nav></div>
 
       <!-- Atomic Answer Block (AI / LLM citation-friendly) -->
       <aside class="answer-block" aria-label="このページの要点" style="background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-left:3px solid var(--accent,#6ab4ff);border-radius:8px;padding:1.25rem 1.5rem;margin:0 auto 2rem;max-width:760px;font-size:.95rem;line-height:1.85;color:rgba(255,255,255,.75);">
         <span style="font-weight:700;color:var(--accent,#6ab4ff);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;display:block;">要点</span>
 
         <p style="margin:0 0 .75rem;"><strong style="color:#fff;">Obsidian連携シンプルメモ（英語名: Simple Memo - for Obsidian）</strong>は、株式会社ユリカ（日本）が開発する独立系のiOSアプリです。テキストまたは音声のメモをワンタップで自分のメールに送信でき、Obsidianのノートへの自動追記にも対応します。2024年に終了したCaptioの体験を再現する目的で2026年に公開されましたが、Captio・Captioo・Obsidianのいずれの公式アプリ・後継アプリでもありません。旧称「Captio式シンプルメモ」「SimpleMemoFast」は同一プロダクトです。</p>
-        <p style="margin:0;">起動 0.4秒・ワンタップ送信・端末内AES-GCM暗号化（E2Eではない）・メモ本文をサーバーに保存しない設計・オフラインOutbox自動再送信。本ページは開発者ストーリーと運営方針を掲載。</p>
+        <p style="margin:0;">起動 0.4秒（iPhone 16e・ウォーム起動の実測）・ワンタップ送信・端末内AES-GCM暗号化（E2Eではない）・メモ本文をサーバーに恒常的に保存しない設計・オフラインOutbox自動再送信。本ページは開発者ストーリーと運営方針を掲載。</p>
 
       </aside>
 
       <!-- Developer Story -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
           <span>開発者ストーリー</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
 
         <div class="story-block">
           <p>私がCaptioを使い始めたのは、2013年頃のことでした。当時、多くのメモアプリが「整理」や「管理」を謳う中、Captioは真逆のことを主張していました。<strong>起動したら即入力、送信ボタンを押したらメモが消える。それだけ。</strong></p>
           <p>この潔さに、私は完全に心を奪われました。議事録アプリでも、タスク管理ツールでも、クラウド同期が売りのノートアプリでもない。ただ「今この瞬間の思考」を自分のメールに飛ばすだけのツール。余計な摩擦がゼロだからこそ、アイデアが降ってきた瞬間に取りこぼさずに済んだのです。</p>
           <blockquote class="story-block__quote">「Captioがなくなったら、どうしよう」と思ったことは、一度や二度ではありませんでした。</blockquote>
-          <p>2024年10月、その恐れが現実になりました。ある日、CaptioがApp Storeから消えていたのです。正式な告知もなく、代替手段の案内もなく、ただ静かに消えていた。外部APIへの依存が一因とも言われていますが、真相は分かりません。</p>
+          <p>2024年10月、その恐れが現実になりました。Captioのクラウドサービスが終わり、ワンタップのメモが送れなくなったのです。App Storeからはその約2年前に撤退していて、開発元は captio.co で終了を告知し、アプリの安定性と安全性を保つための手間をかけ続けられなくなったと説明していました。</p>
           <p>その夜、私は自分で作ることにしました。Captioへのリスペクトと、あの体験への強い思いを胸に、UIKitで一から書き始めました。</p>
         </div>
 
-      </section>
+      </div></section>
 
       <!-- Mission -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
           <span>ミッション</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="mission-banner">
-          <div class="mission-banner__ja">最速のメモ体験を、すべての人に</div>
+          <div class="mission-banner__ja">すぐ書けるメモ体験を、すべての人に</div>
 
         </div>
         <p class="lp-section__lead">
           <span>「メモを取る」という行為は、本来こんなに重くなくていいはずです。起動して、書いて、送る。それだけで思考が前に進む。Obsidian連携シンプルメモは、その純粋な体験を守り続けることをミッションとして掲げています。機能を増やすことよりも、今ある体験の質を上げることを優先します。</span>
 
         </p>
-      </section>
+      </div></section>
 
       <!-- Development Philosophy -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
           <span>開発哲学</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="reason-cards">
           <div class="reason-card">
             <div class="reason-card__title">
@@ -435,7 +448,7 @@
 
             </div>
             <div class="reason-card__desc">
-              <span>当社が開発するRelay APIはCloudflare Workers上で動作し、メール配信にはResend APIを利用します。これらの外部サービスの稼働状況や仕様変更の影響を受ける構成です。端末内のOutboxは、オフライン時のメモを保持してオンライン復帰時の再送に備えます。</span>
+              <span>当社が開発するRelay APIはCloudflare Workers上で動作し、メール配信にはResend APIを利用します。これらの外部サービスの稼働状況や仕様変更の影響を受ける構成です。端末内のOutboxは、オフラインのときに送信したメモを保持してオンライン復帰時の再送に備えます。</span>
 
             </div>
           </div>
@@ -445,7 +458,7 @@
 
             </div>
             <div class="reason-card__desc">
-              <span>オフライン時のメモは端末内Outboxに暗号化保存され、オンライン復帰時に自動再送されます。「送ったはずなのに届いていなかった」という体験を設計レベルで排除しました。</span>
+              <span>オフラインのときに送信したメモは端末内Outboxに暗号化保存され、オンライン復帰時に自動再送されます。電波のないところで送ったメモを、取りこぼさないための設計です。</span>
 
             </div>
           </div>
@@ -455,19 +468,19 @@
 
             </div>
             <div class="reason-card__desc">
-              <span>起動 0.4秒・ワンタップ送信。この数字はマーケティング上の目標ではなく、実装の制約です。UIKitを選んだのも、この速度要件をSwiftUIより確実に満たせるからです。</span>
+              <span>起動 0.4秒（iPhone 16e・ウォーム起動の実測）・ワンタップ送信。この数字はマーケティング上の目標ではなく、実装の制約です。UIKitを選んだのも、この速度要件をSwiftUIより確実に満たせるからです。</span>
 
             </div>
           </div>
         </div>
-      </section>
+      </div></section>
 
       <!-- Technical Expertise -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
           <span>技術的な背景</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
           <span>Obsidian連携シンプルメモは開発者 AI ATAKA によって設計・実装・運営されています。10年以上のソフトウェア開発経験を持ち、iOSアプリ（UIKit）、バックエンド（Cloudflare Workers）、インフラ（DNS、CDN、メール配信）まですべて一人で担当。その過程で得た知見は、開発日誌として公開しています。</span>
 
@@ -475,7 +488,7 @@
         <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.5rem;">
           <a href="https://github.com/simplememofast" style="font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;display:inline-flex;align-items:center;gap:.4rem;" rel="noopener" target="_blank">GitHub</a>
           <a href="https://x.com/simplememofast" style="font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;display:inline-flex;align-items:center;gap:.4rem;" rel="noopener" target="_blank">X (Twitter)</a>
-          <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__mid&amp;mt=8" style="font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;display:inline-flex;align-items:center;gap:.4rem;" rel="noopener" target="_blank">App Store</a>
+          <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" style="font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;display:inline-flex;align-items:center;gap:.4rem;" rel="noopener" target="_blank">App Store</a>
           <a href="https://note.com/simplememo" style="font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;display:inline-flex;align-items:center;gap:.4rem;" rel="noopener" target="_blank">note</a>
         </div>
 
@@ -484,7 +497,7 @@
           <dt>バックエンド</dt><dd>Cloudflare Workers（TypeScript）</dd>
           <dt>メール配信</dt><dd>Resend API（DKIM署名済み、SPF/DMARC設定済み）</dd>
           <dt>セキュリティ</dt><dd>AES-GCM（端末内暗号化）、HTTPS（TLS 1.3）</dd>
-          <dt>オフライン</dt><dd>Outboxアーキテクチャ（CoreData + 暗号化 + 自動再送）</dd>
+          <dt>オフライン</dt><dd>Outboxアーキテクチャ（AES-GCMで暗号化した端末内のファイル + 自動再送）</dd>
           <dt>最低対応iOS</dt><dd>iOS 16.0以降</dd>
         </dl>
 
@@ -508,7 +521,7 @@
           </li>
           <li class="devlog-list__item">
             <a href="/devlog/outbox-architecture" class="devlog-list__link">
-              <span class="devlog-list__title">Outboxアーキテクチャ — オフラインで絶対に送りこぼさない設計</span>
+              <span class="devlog-list__title">Outboxアーキテクチャ — オフラインでも取りこぼしを防ぐ設計</span>
               <span class="devlog-list__arrow">→</span>
             </a>
           </li>
@@ -526,14 +539,14 @@
           </li>
         </ul>
 
-      </section>
+      </div></section>
 
       <!-- Legal Entity -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
           <span>運営情報</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <dl class="spec-list">
           <dt>運営会社</dt><dd>株式会社ユリカ</dd>
           <dt>開発者</dt><dd>AI ATAKA</dd>
@@ -541,7 +554,7 @@
           <dt>お問い合わせ</dt><dd><!--email_off--><a href="mailto:support@simplememofast.com" style="color:var(--accent)">support@simplememofast.com</a><!--/email_off--></dd>
         </dl>
 
-      </section>
+      </div></section>
 
       <!-- CTA -->
       <div class="cta-box">
@@ -550,21 +563,21 @@
 
         </div>
         <div class="cta-box__desc">
-          <span>ダウンロードは無料。設定は3分。Captioユーザーなら、すぐに慣れます。</span>
+          <span>ダウンロードは無料。設定はすぐに終わります。Captioユーザーなら、すぐに慣れます。</span>
 
         </div>
-        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__bottom&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
         </a>
 
       </div>
 
       <!-- Internal Links -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
           <span>関連ページ</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="internal-links">
           <a href="/captio-alternative/">
             <span>Captio代替 比較・移行ガイド</span>
@@ -598,7 +611,7 @@
 
           </a>
         </div>
-      </section>
+      </div></section>
 
     </div>
   <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
@@ -620,30 +633,30 @@
 
   </main>
 
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ja" dir="ltr"><a class="site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a><div><p class="site-footer-title">思いついたことを、次の一歩へ。</p><p class="site-footer-description">Obsidianとメールに、メモを送るiPhoneアプリ。</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span>ダウンロード</span> </a>
-        <a href="/" class="footer__link"><span>ホーム</span> </a>
-        <a href="/use-cases/" class="footer__link"><span>活用事例</span> </a>
-        <a href="/guides/" class="footer__link"><span>設定ガイド</span> </a>
+        <a href="/download/" class="footer__link">ダウンロード</a>
+        <a href="/" class="footer__link">ホーム</a>
+        <a href="/use-cases/" class="footer__link">活用事例</a>
+        <a href="/guides/" class="footer__link">使い方</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
         <a href="/captio-alternative/" class="footer__link"><span>Captio代替</span> </a>
-        <a href="/note-to-email/" class="footer__link"><span>メモ→メール</span> </a>
-        <a href="/vs/" class="footer__link"><span>アプリ比較</span> </a>
+        <a href="/note-to-email/" class="footer__link">メモをメールへ</a>
+        <a href="/vs/" class="footer__link">比較</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span>公開ロードマップ</span> </a>
-        <a href="/devlog/" class="footer__link"><span>開発記録</span> </a>
-        <a href="/about/" class="footer__link"><span>開発者について</span> </a>
-        <a href="/faq" class="footer__link"><span>FAQ</span> </a>
-        <a href="/privacy" class="footer__link"><span>プライバシー</span> </a>
-        <a href="/contact" class="footer__link"><span>お問い合わせ</span> </a>
+        <a href="/roadmap/" class="footer__link">公開ロードマップ</a>
+        <a href="/devlog/" class="footer__link">開発記録</a>
+        <a href="/about/" class="footer__link">開発者について</a>
+        <a href="/faq" class="footer__link">よくある質問</a>
+        <a href="/privacy" class="footer__link">プライバシー</a>
+        <a href="/contact" class="footer__link">お問い合わせ</a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -652,12 +665,7 @@
     </div>
   </footer>
 
-  <script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

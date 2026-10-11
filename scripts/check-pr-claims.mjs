@@ -511,7 +511,9 @@ const SCENARIOS = [
   }],
 ];
 
-if (process.argv.includes('--selftest')) {
+// 直接実行されたときだけ。import した側（check-pr-hero / generate-pr-hero）の
+// --selftest をここで横取りして exit しない。
+if (process.argv.includes('--selftest') && process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   process.exit(runScenarios(SCENARIOS) === 0 ? 0 : 1);
 }
 

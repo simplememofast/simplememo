@@ -1,0 +1,58 @@
+name: Main Daily Validation
+
+# Validate the published main branch after the JST midnight report window.
+# A separate caller name keeps a successful observation out of SEO Validation's
+# auto-merge workflow_run chain. Reuse the complete suite rather than a subset.
+on:
+  schedule:
+    - cron: '37 16 * * *' # 01:37 JST, after the report monitor's midnight window
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+
+concurrency:
+  group: main-daily-validation-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  observation:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Record actual start and observed report publication
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const { data: run } = await github.rest.actions.getWorkflowRun({
+              owner, repo, run_id: context.runId,
+            });
+            const { data: prs } = await github.rest.pulls.list({
+              owner, repo, state: 'closed', base: 'main',
+              sort: 'updated', direction: 'desc', per_page: 100,
+            });
+            const reports = prs.filter(pr => pr.merged_at &&
+              pr.head.repo?.full_name === `${owner}/${repo}` &&
+              pr.head.ref.startsWith('Codex/decision-observe-'))
+              .sort((a, b) => b.merged_at.localeCompare(a.merged_at));
+            const report = reports[0];
+            await core.summary.addHeading('Main daily validation observation')
+              .addTable([
+                [{ data: 'Observation', header: true }, { data: 'Value', header: true }],
+                ['Trigger', context.eventName],
+                ['Checked commit', context.sha],
+                ['Actual run start UTC', run.run_started_at ?? 'unknown'],
+                ['Report PR observed among the 100 most recently updated closed PRs',
+                  report ? `#${report.number}` : 'not observed in this bounded sample'],
+                ['Observed report merge UTC', report?.merged_at ?? 'unknown'],
+              ]).addRaw('\nA configured schedule or a manual run does not prove a natural scheduled run. '
+                + 'This records observations only; it changes no report, gate, or publication state.\n')
+              .write();
+
+  validation:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/seo-check.yml

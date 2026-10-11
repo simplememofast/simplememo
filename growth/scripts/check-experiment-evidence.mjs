@@ -8,7 +8,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { gscEvidence, gscScope, reviewEvidence, fingerprint, metricSource } from '../lib/experiment-evidence.mjs';
-import { measuresPageCtr } from '../lib/ledger.mjs';
+import { hasPrimaryMetricConflict, measuresPageCtr, validate } from '../lib/ledger.mjs';
+import { targetsOf } from './check-stoploss.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const asOf = '2026-01-15';
@@ -22,6 +23,8 @@ const snapshot = () => ({ label: 'synthetic-post', meta: { period_start: '2026-0
   queryPages: [{ page: '/x/', query: 'exact query', clicks: 2, impressions: 20, position: 5 }],
   dates: ['2026-01-08', '2026-01-09'].map(date => ({ date, clicks: 10, impressions: 50 })) });
 const admit = (e = exp(), s = snapshot(), decision = 'keep') => gscEvidence(e, s, { asOf, decision });
+const markConflict = (e) => { e.measurement_issue = { code: 'primary_metric_conflict',
+  declared_metric: e.target_metric, detected_at: '2026-01-10', note: 'Synthetic primary outcome differs from CTR' }; return e; };
 
 test('matching GSC scope preserves before/post values without claiming causal proof', () => {
   const out = admit();
@@ -29,6 +32,18 @@ test('matching GSC scope preserves before/post values without claiming causal pr
   assert.equal(out.post.value, 0.2);
   assert.equal(out.kind, 'gsc_comparison');
   assert.ok(out.limitations.some(s => s.includes('causality')));
+});
+
+test('a recorded primary-metric conflict blocks efficacy while retaining the CTR stop-loss guardrail', () => {
+  const e = markConflict(exp());
+  assert.equal(hasPrimaryMetricConflict(e), true);
+  assert.equal(measuresPageCtr(e), true);
+  assert.deepEqual(targetsOf({ experiments: [e] }), [e]);
+  assert.throws(() => admit(e), /primary metric conflicts with CTR/);
+  e.status = 'evaluated'; e.decision = 'keep'; e.evaluated_at = asOf;
+  assert.ok(validate({ experiments: [e] }).some(problem => problem.includes('unresolved primary metric conflict')));
+  e.decision = 'abandoned';
+  assert.ok(!validate({ experiments: [e] }).some(problem => problem.includes('unresolved primary metric conflict')));
 });
 
 for (const [name, mutate, error] of [
@@ -113,6 +128,10 @@ test('source-specific comparison checks the contract and hashes, explicitly reco
   assert.equal(out.source, 'ga4');
   assert.match(out.validation, /not independently recomputed/);
   assert.ok(!JSON.stringify(out).includes(dir));
+}));
+test('a recorded primary-metric conflict blocks a comparison review until the contract is resolved', () => withReview((e, r, dir) => {
+  markConflict(e);
+  assert.throws(() => reviewEvidence(e, r, reviewOptions(dir)), /primary metric conflict blocks efficacy comparison/);
 }));
 for (const [name, mutate, error] of [
   ['review experiment mismatch', (_, r) => { r.experiment_id = 'other'; }, /must match/],
@@ -272,6 +291,19 @@ test('CLI abandonment is explicitly administrative and requires a reason', () =>
   assert.equal(run('evaluate', e.id, '--decision', 'abandoned').status, 2);
   assert.equal(run('evaluate', e.id, '--decision', 'abandoned', '--note', 'Stop for a documented operational reason').status, 0);
   assert.equal(JSON.parse(fs.readFileSync(ledgerPath)).experiments[0].evidence.kind, 'administrative');
+}));
+test('CLI blocks a conflicted outcome but permits documented administrative closure', () => withCli(({ e, save, run, ledgerPath }) => {
+  markConflict(e); save();
+  const before = fs.readFileSync(ledgerPath, 'utf8');
+  const rejected = run('evaluate', e.id, '--decision', 'keep', '--snapshot', 'synthetic-post', '--note', 'Synthetic');
+  assert.equal(rejected.status, 2);
+  assert.match(rejected.stderr, /primary metric conflicts with CTR/);
+  assert.equal(fs.readFileSync(ledgerPath, 'utf8'), before);
+  const closed = run('evaluate', e.id, '--decision', 'abandoned', '--note', 'Documented cancellation without an efficacy claim');
+  assert.equal(closed.status, 0, closed.stderr);
+  const result = JSON.parse(fs.readFileSync(ledgerPath)).experiments[0];
+  assert.equal(result.decision, 'abandoned');
+  assert.equal(result.evidence.kind, 'administrative');
 }));
 test('registered FAQ scope is exact and all four September 13 CTA metrics require their actual source', () => {
   const rows = JSON.parse(fs.readFileSync(path.join(ROOT, 'growth/experiments/experiments.json'))).experiments;

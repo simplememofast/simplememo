@@ -9,6 +9,8 @@ import {compactMentions} from './company-mentions.mjs';
 import {compactCtaMeasurement} from './company-cta-measurement.mjs';
 import {bingReport} from './company-bing.mjs';
 import {reportFailure,failureReportingSummary} from './company-automation-health.mjs';
+import {siteAcquisition,acquisitionReport,acquisitionMaterial} from './company-acquisition.mjs';
+import {currentSiteAcquisition} from './company-data.mjs';
 
 const percent = v => Number.isFinite(v) ? (100 * v).toFixed(2) + '%' : 'unknown';
 const value = (m, v) => m.id === 'autonomy_score' && Number.isFinite(v) ? v.toFixed(3) + '/100' : percent(v);
@@ -40,7 +42,7 @@ export function summarizeGa4(reports) {
     detail:'Use growth-status --full or private data/connections.json for landing/source/medium rows and source windows.'};
 }
 
-export function compactGrowth(o) {
+export function compactGrowth(o, {stateRoot,now=new Date()}={}) {
   const connections = o.growth.connections ?? {};
   const asc = connections.app_store_connect;
   return { search: o.growth.search, aio: o.growth.aio, bing:o.growth.bing, decision_trace:o.growth.decision_trace, measurements:o.growth.measurements, mentions:compactMentions(o.growth.mentions),
@@ -50,6 +52,7 @@ export function compactGrowth(o) {
     acquisition: connections.appsflyer ? { population: connections.appsflyer.population,
       metrics: connections.appsflyer.quality?.additive_metrics, caveats: connections.appsflyer.quality?.notes } : null,
     ga4: summarizeGa4(connections.ga4?.reports),
+    site_acquisition: stateRoot ? currentSiteAcquisition({stateRoot,now}) : siteAcquisition(connections,o.growth.cta_measurement),
     cta_measurement: compactCtaMeasurement(o.growth.cta_measurement),
     revenue: asc?.revenue ? Object.fromEntries(Object.entries(asc.revenue.granularities).map(([k,v]) => [k,
       { current: v.current ? { from: v.current.from, to: v.current.to, state: v.current.state, totals: v.current.totals } : null,
@@ -64,7 +67,7 @@ export function saveReview(o, { stateRoot, cadence = 'daily', now = new Date() }
   const key = cadenceKey(cadence, now), file = path.join(dir, cadence + '-' + key + '.json');
   const baseline = JSON.parse(fs.readFileSync(path.join(stateRoot, 'metrics-baseline.json')));
   const comparison = compareMetrics(baseline, o.formal_metrics);
-  const payload = { growth: compactGrowth(o), comparison, human_touches: o.human_touches,
+  const payload = { growth: compactGrowth(o,{stateRoot,now}), comparison, human_touches: o.human_touches,
     native_resource_usage:nativeResourceStatus({stateRoot,now}),
     failures: o.automation.failures.map(reportFailure), failure_summary:failureReportingSummary(o.automation.failures),
     discovery_gaps: o.automation.discovery_gaps, next: opportunities(o)[0] ?? null };
@@ -78,6 +81,7 @@ export function saveReview(o, { stateRoot, cadence = 'daily', now = new Date() }
     failure_execution_context:payload.failures.map(j=>[j.id,j.reporting_context.execution_state,j.reporting_context.category]),
     next: payload.next?.id, search: payload.growth.search, aio, bing:payload.growth.bing,
     cta_measurement: payload.growth.cta_measurement,
+    site_acquisition: acquisitionMaterial(payload.growth.site_acquisition),
     decision_trace: payload.growth.decision_trace,
     measurements: payload.growth.measurements,
     mentions:payload.growth.mentions?{status:payload.growth.mentions.status,sha256:payload.growth.mentions.evidence?.sha256,decisions:payload.growth.mentions.decisions}:null,
@@ -110,6 +114,7 @@ export function saveReview(o, { stateRoot, cadence = 'daily', now = new Date() }
     'Compare only periods actually covered by the existing source. Ninety-day GA4/BigQuery history is currently insufficient; no invented historical totals or cross-source install/revenue attribution.',
     'Review channel contribution, activation/retention, data coverage, cost per verified output, repeated failure classes and H3–H5 handoffs. Use evidence in data/connections.json and audit.json to select the next action; pricing, release, consent and irreversible changes retain their own approval gates.');
   if(payload.growth.bing)lines.push(...bingReport(payload.growth.bing));
+  lines.push(...acquisitionReport(payload.growth.site_acquisition));
   let legacy = '';
   if (cadence === 'weekly') legacy = execFileSync(process.execPath, ['growth/scripts/weekly-report.mjs'], { cwd: ROOT, encoding: 'utf8', timeout: 30000 }) + '\n\n---\n\n';
   const markdown = path.join(dir, cadence + '-' + key + '.md');

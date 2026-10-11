@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/en/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: 'en'});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>iOS 26 SpeechAnalyzer المفردات المخصصة: استخدم الناسخ الأيمن</title>
+  <meta name="description" content="iOS 26 contextualStrings موثق ل DictationTranscriber. تعرف على حدوده، وتعيين سلوك السياق، وكيفية اختيار وحدة الكلام الصحيحة.">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="iOS 26 SpeechAnalyzer المفردات المخصصة: استخدم الناسخ الأيمن">
+  <meta property="og:description" content="Apple مستندات AnalysisContext.contextualStrings for DictationTranscriber. إليك ما يعنيه ذلك لاختيار وحدة SpeechAnalyzer والحدود والترحيل.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-18T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/ar/blog/ios26-speechanalyzer-custom-vocabulary">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog.png">
+  <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Simple Memo - for Obsidian"><meta property="og:locale" content="ar_SA">
+  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="iOS 26 SpeechAnalyzer المفردات المخصصة: استخدم الناسخ الأيمن">
+  <meta name="twitter:description" content="contextualStrings موجودة في iOS 26 - ولكن اختيار الوحدة مهم.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog.png">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ar/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/ios26-speechanalyzer-custom-vocabulary">
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "inLanguage": "ar",
+  "headline": "iOS 26 لم يقتل المفردات المخصصة - أنت تضيفها إلى الوحدة الخاطئة",
+  "description": "كيف يعمل AnalysisContext.contextualStrings مع DictationTranscriber، وحدوده، ودلالات استبدال setContext، وكيفية الاختيار بين وحدات الكلام iOS 26.",
+  "image": "https://simplememofast.com/assets/img/og/blog.png",
+  "url": "https://simplememofast.com/ar/blog/ios26-speechanalyzer-custom-vocabulary",
+  "datePublished": "2026-09-18",
+  "dateModified": "2026-09-18",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Simple Memo - ل Obsidian",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "محلل الكلام"
+    },
+    {
+      "@type": "Thing",
+      "name": "DictationTranscriber"
+    },
+    {
+      "@type": "Thing",
+      "name": "تحليل سياق السلاسل السياقية"
+    }
+  ],
+  "keywords": "iOS 26، SpeechAnalyzer، DictationTranscriber، SpeechTranscriber، contextualStrings، custom vocabulary، Swift"
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "الصفحة الرئيسية",
+      "item": "https://simplememofast.com/ar/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "مدونة",
+      "item": "https://simplememofast.com/ar/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "iOS 26 لم يقتل المفردات المخصصة - أنت تضيفها إلى الوحدة الخاطئة",
+      "item": "https://simplememofast.com/ar/blog/ios26-speechanalyzer-custom-vocabulary"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/ar/blog/ios26-speechanalyzer-custom-vocabulary#webpage",
+  "inLanguage": "ar",
+  "name": "iOS 26 SpeechAnalyzer المفردات المخصصة: استخدم الناسخ الأيمن",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/ar/#website"
+  },
+  "url": "https://simplememofast.com/ar/blog/ios26-speechanalyzer-custom-vocabulary"
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700;font-size:.95rem}.global-nav__logo img{border-radius:8px}
+    .global-nav__links{display:flex;align-items:center;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;padding:.4rem .7rem;min-height:48px;display:inline-flex;align-items:center}
+    .global-nav__actions{display:flex;align-items:center;gap:.5rem}.global-nav__cta{background:linear-gradient(135deg,#007AFF,#5856D6);color:#fff!important;text-decoration:none;font-size:.875rem;font-weight:700;padding:.45rem 1rem;border-radius:20px;min-height:48px;display:inline-flex;align-items:center}
+    .nav-cta-mobile,.global-nav__hamburger{display:none}.global-nav__hamburger{background:none;border:0;color:#fff;font-size:1.5rem;min-width:48px;min-height:48px}
+    @media(max-width:768px){.global-nav__links,.global-nav__cta{display:none}.global-nav__hamburger{display:block}.global-nav__links.open{display:flex;flex-direction:column;position:absolute;top:56px;left:0;right:0;background:rgba(10,12,18,.97);padding:.5rem 1rem 1rem}.global-nav__links.open .nav-cta-mobile{display:block}}
+    .article-meta{font-size:.875rem;color:var(--text-muted);margin-bottom:2rem}.article-body h2{font-size:1.4rem;margin:2.5rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}.article-body h3{font-size:1.1rem;margin:2rem 0 .75rem}
+    .article-body p,.article-body li{font-size:.95rem;line-height:1.85;color:var(--text-secondary)}.article-body a{color:var(--accent)}.article-body code{background:rgba(100,180,255,.08);padding:.15rem .4rem;border-radius:4px}.article-body pre{background:#0d1424;border:1px solid rgba(148,178,230,.18);border-radius:12px;padding:16px 18px;overflow-x:auto}.article-body pre code{background:none;padding:0;color:#dbe6ff}
+    .callout{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:10px;padding:1rem 1.25rem;margin:1.5rem 0}.article-body table{display:block;overflow-x:auto;width:100%;border-collapse:collapse;margin:1.25rem 0}.article-body th,.article-body td{border:1px solid var(--border);padding:.55rem .7rem;text-align:left;vertical-align:top}
+  </style>
+  <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
+  <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="الملاحة الرئيسية" data-site-header=""><div class="global-nav__inner">
+<a class="global-nav__logo site-brand" href="/ar/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>مع Obsidian</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/ar/guides/">أدلة الاستخدام</a><a href="/ar/use-cases/">حالات الاستخدام</a><a href="/ar/vs/">المقارنة</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks"><li><a href="/ar/guides/">أدلة الاستخدام</a></li><li><a href="/ar/use-cases/">حالات الاستخدام</a></li><li><a href="/ar/vs/">المقارنة</a></li><li><a href="/ar/methods/">الأساليب</a></li><li><a href="/ar/blog/">مدونة</a></li><li><a href="/ar/glossary/">مسرد المصطلحات</a></li><li><a href="/ar/faq">الأسئلة الشائعة</a></li><li><a href="/ar/about/">عن المطوّر</a></li><li><a href="/ar/devlog/">سجل التطوير</a></li><li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">تنزيل</a></li></ul>
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="العربية · اختر اللغة"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>AR</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ar" dir="rtl"><p class="site-language-title">اختر اللغة</p><div class="site-language-grid"><a href="/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ar" aria-current="page"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/tr/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">تنزيل</a><button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="القائمة"><span>القائمة</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button></div>
+</div></nav>
+<main class="page-content"><div class="container">
+<h1 class="page-content__title sd-title">iOS 26 لم يقتل المفردات المخصصة - أنت تضيفها إلى الوحدة الخاطئة</h1>
+<p class="article-meta">بواسطة <a href="/ar/about/">AI ATAKA</a> · تاريخ النشر: سبتمبر 18، 2026</p>
+<div class="page-content__body article-body">
+<p><strong>لم تختف المفردات المخصصة من مجموعة SpeechAnalyzer الجديدة في Apple.</strong> التفاصيل المهمة هي اختيار الوحدة. يوثق Apple <code>AnalysisContext.contextualStrings</code> على وجه التحديد مع <code>DictationTranscriber</code>. إذا كنت تبني حول <code>SpeechTranscriber</code>، فلا تفترض أن إرفاق نفس السياق يمنحك نفس سلوك المفردات.</p>
+<div class="callout"><p><strong>نسخة مختصرة:</strong> اختر <code>DictationTranscriber</code> عندما تكون العبارات السياقية جزءا من تصميم التعرف الخاص بك. اجعل القائمة قصيرة، واجعل العبارات مختصرة، وتعامل معها على أنها تلميحات متحيزة بدلا من بدائل مضمونة.</p></div>
+
+<h2 id="reading-01" data-ce-number="01">هناك وحدتان للنسخ - وهما غير قابلتين للتبديل</h2>
+<p>إطار عمل الكلام iOS 26 يجعل النسخ معياريا. <code>SpeechTranscriber</code> هو ناسخ Apple للأغراض العامة للمحادثة العادية. <code>DictationTranscriber</code> أقرب إلى إملاء النظام ويعرض ضوابط دقة إضافية.</p>
+<div class="sd-table" tabindex="0" role="region" aria-label="جدول قابل للتمرير"><table><thead><tr><th>تحتاج</th><th>وحدة التقييم أولا</th><th>لماذا</th></tr></thead><tbody>
+<tr><td>محادثة عامة / نسخ طويل</td><td><code>SpeechTranscriber</code></td><td>Apple يصفها بأنها وحدة تحويل الكلام إلى نص للأغراض العامة.</td></tr>
+<tr><td>إملاء قصير بأسماء أو مصطلحات خاصة بالتطبيق</td><td><code>DictationTranscriber</code></td><td>Apple يوثق صراحة <code>AnalysisContext.contextualStrings</code> مع هذه الوحدة.</td></tr>
+<tr><td>النطق المخصص / نموذج اللغة</td><td><code>DictationTranscriber</code></td><td>كما أنه يعرض تلميحا مخصصا لمحتوى اللغة المدعوم ب <code>SFSpeechLanguageModel</code>.</td></tr>
+</tbody></table></div>
+
+<h2 id="reading-02" data-ce-number="02">كيف تعمل السلاسل السياقية بالفعل</h2>
+<p><code>AnalysisContext.contextualStrings</code> هو قاموس يتم تجميعه حسب علامات السلسلة السياقية. يقول Apple أنه يمكن استخدام هذه الكلمات أو العبارات مع <code>DictationTranscriber</code> لتحسين احتمالية التعرف على الأسماء أو المنتجات أو الأماكن أو مصطلحات المجال أو الكلمات غير العادية الخاصة بالتطبيق.</p>
+<pre tabindex="0"><code>let context = AnalysisContext()
+context.contextualStrings[.general] = [
+    "Simple Memo",
+    "Obsidian",
+    "SpeechAnalyzer"
+]
+
+try await analyzer.setContext(context)</code></pre>
+<p>ثلاثة حدود مهمة في الممارسة العملية:</p>
+<ul>
+<li><strong>حافظ على العبارات موجزة.</strong> توصي Apple بكلمة أو كلمتين كلما أمكن ذلك.</li>
+<li><strong>احتفظ بالمجموع عند عبارات 100 أو أقل عبر جميع العلامات.</strong></li>
+<li><strong>هذه تلميحات وليست ضمانات.</strong> التعرف على تحيز API؛ فهو لا يعد بنسخ دقيق.</li>
+</ul>
+
+<h2 id="reading-03" data-ce-number="03">setContext يحل محل السياق - لا يضي</h2>
+<p><code>SpeechAnalyzer.setContext(_:)</code> يحل محل كائن السياق الحالي للمحلل. إذا كنت ترغب في الحفاظ على العبارات السابقة أثناء إضافة مجموعة جديدة، فقم بإنشاء السياق الجديد الكامل الذي تريد استخدامه وتعيين ذلك.</p>
+<pre tabindex="0"><code>let next = AnalysisContext()
+next.contextualStrings[.general] = baseTerms + currentScreenTerms
+try await analyzer.setContext(next)</code></pre>
+<p>هذا يجعل العلامات مفيدة أيضا: يمكنك الحفاظ على الفئات في حالتك الخاصة وإعادة بناء السياق عمدا بدلا من التعامل مع مكالمات <code>setContext</code> المتكررة كإضافات تدريجية.</p>
+
+<h2 id="reading-04" data-ce-number="04">ماذا عن SpeechTranscriber؟</h2>
+<p>لا توثق وثائق Apple الحالية ل <code>SpeechTranscriber</code> <code>contextualStrings</code> كأحد عناصر التحكم في الدقة في تلك الوحدة. على النقيض من ذلك، تخبر وثائق <code>DictationTranscriber</code> المطورين صراحة بإنشاء <code>AnalysisContext</code> وإضافة كلمات إلى <code>contextualStrings</code>.</p>
+<p>هذا التمييز هو حدود التنفيذ الآمنة: <strong>لا تصمم خط أنابيب <code>SpeechTranscriber</code> حول المفردات السياقية ما لم تكن قد تحققت بشكل مستقل من السلوك الدقيق الذي تحتاجه على نظام التشغيل المستهدف والمنطقة والجهاز.</strong></p>
+
+<h2 id="reading-05" data-ce-number="05">إذا كنت بحاجة إلى مفردات في خطاب طويل اليوم</h2>
+<p>لا توجد قاعدة هجرة عالمية. إذا كان مسار <code>SFSpeechRecognizer</code> الحالي يعتمد بالفعل على <code>contextualStrings</code>، فيجب التعامل مع الانتقال إلى iOS 26 على أنه تمرين اختيار الوحدة النمطية واختبار الانحدار بدلا من إعادة تسمية API الميكانيكية.</p>
+<ol>
+<li>اختبر ما إذا كان <code>DictationTranscriber</code> يناسب المدة والكمون واللغة ونطاق الجهاز الذي تحتاجه.</li>
+<li>إذا كنت بحاجة إلى مفردات أكثر ثراء، فقم بتقييم خيار نموذج اللغة المخصص.</li>
+<li>إذا لم يحافظ أي من مسارات الوحدة الجديدة على السلوك الذي يعتمد عليه منتجك، فاحتفظ بمسار <code>SFSpeechRecognizer</code> المثبت لحالة الاستخدام هذه أثناء ترحيل مسارات أخرى بشكل منفصل.</li>
+</ol>
+
+<h2 id="reading-06" data-ce-number="06">قاعدة القرار الأدنى</h2>
+<div class="callout"><p><strong>المحادثة أولا:</strong> تبدأ ب <code>SpeechTranscriber</code>. <strong>المفردات أولا:</strong> ابدأ بتقييم <code>DictationTranscriber</code>. إذا كانت المفردات حاسمة، فقم بقياس التعرف على الكلمات الفعلية والمحليات التي تشحنها بدلا من افتراض التكافؤ بين الوحدات.</p></div>
+
+<h2 id="reading-07" data-ce-number="07">دليل التنفيذ ذي الصلة</h2>
+<p>بالنسبة لخط أنابيب الميكروفون المباشر - أصول النموذج، وتحويل PCM، والنتائج المتقلبة مقابل النتائج النهائية، وسلوك التوقف / الانتهاء، وSwift 6 التزامن - راجع <a href="/ar/blog/ios26-speechanalyzer-live-mic">دليل الميكروفون المباشر الكامل iOS 26 SpeechAnalyzer</a>. العينة القابلة للتشغيل موجودة على <a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic" rel="noopener">GitHub (MIT)</a>.</p>
+
+<h2 id="reading-08" data-ce-number="08">المصادر الأولية</h2>
+<ul>
+<li><a href="https://developer.apple.com/documentation/speech/analysiscontext/contextualstrings" rel="noopener noreferrer">Apple: AnalysisContext.contextualStrings</a></li>
+<li><a href="https://developer.apple.com/documentation/speech/dictationtranscriber" rel="noopener noreferrer">Apple: DictationTranscriber</a></li>
+<li><a href="https://developer.apple.com/documentation/speech/speechtranscriber" rel="noopener noreferrer">Apple: SpeechTranscriber</a></li>
+<li><a href="https://developer.apple.com/documentation/speech/speechanalyzer/setcontext(_:)" rel="noopener noreferrer">Apple: SpeechAnalyzer.setContext(_:)</a></li>
+</ul>
+</div></div></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ar" dir="rtl"><a class="site-brand" href="/ar/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>مع Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">ملاحظة صغيرة. خطوة تالية.</p><p class="site-footer-description">أرسل الملاحظات من iPhone إلى Obsidian والبريد الإلكتروني.</p></div></div><!-- /site-chrome:intro --><div class="container">
+<nav class="footer__nav" aria-label="روابط التذييل">
+<div class="footer__col"><p class="footer__col-title">المنتج</p><a href="/ar/download/" class="footer__link">تنزيل</a><a href="/ar/use-cases/" class="footer__link">حالات الاستخدام</a><a href="/ar/guides/" class="footer__link">أدلة الاستخدام</a></div>
+<div class="footer__col"><p class="footer__col-title">مقارنة وتبديل</p><a href="/ar/captio-alternative/" class="footer__link">Captio بديل</a><a href="/ar/vs/" class="footer__link">المقارنة</a></div>
+<div class="footer__col"><p class="footer__col-title">قراءة</p><a href="/ar/about/" class="footer__link">عن المطوّر</a><a href="/ar/devlog/" class="footer__link">سجل التطوير</a><a href="/ar/blog/" class="footer__link">مدونة</a></div>
+<div class="footer__col"><p class="footer__col-title">الدعم</p><a href="/ar/terms" class="footer__link">الشروط</a><a href="/ar/privacy" class="footer__link">الخصوصية</a><a href="/ar/faq" class="footer__link">الأسئلة الشائعة</a><a href="/ar/contact" class="footer__link">تواصل معنا</a></div>
+</nav>
+<nav class="footer__social" aria-label="الروابط الاجتماعية"><a href="https://x.com/simplememofast" rel="me noopener" target="_blank" class="footer__link">X / تويتر</a><a href="https://github.com/simplememofast" rel="me noopener" target="_blank" class="footer__link">GitHub</a></nav>
+<p class="footer__copyright">© 2026 Simple Memo - for Obsidian / الجهة المشغّلة: YURIKA, K.K.</p>
+</div></footer>
+
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body></html>

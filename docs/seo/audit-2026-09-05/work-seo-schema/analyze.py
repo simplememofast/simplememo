@@ -1,6 +1,6 @@
 import json, re
 from collections import Counter, defaultdict
-S='/private/tmp/claude-501/-Users-hajimeataka-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad'
+S='/private/tmp/claude-501/-Users-<user>-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad'
 D=json.load(open(S+'/work-seo-schema/census.json')); R=D['results']
 print("=== (a) AggregateRating / SoftwareApplication locations")
 import os

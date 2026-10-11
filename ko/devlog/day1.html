@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/day1">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>【개발일지 Day1】Captio를 너무 좋아해서 다시 한 번 “그 체험”을 만들고 싶어졌습니다 | SimpleMemo</title>
+  <meta name="description" content="Captio의 경험을 분해하고, UIKit을 선택한 이유, 전송하면 사라지는 설계, 누수 방지를 위한 Outbox 아키텍처, 릴레이 API, 프라이버시 설계까지 모든 기술 판단을 기록한 개발 일지 Day1. 원터치 전송 및 누수 방지 설계를 공개합니다.">
+  <meta name="theme-color" content="#070b14">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="author" content="Obsidian連携シンプルメモ開発チーム">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- OGP -->
+  <meta property="og:title" content="【개발일지 Day1】Captio가 너무 좋아서, 다시 한 번 &quot;그 체험&quot;을 만들고 싶어졌습니다">
+  <meta property="og:description" content="Captio의 체험을 분해하고, UIKit·Outbox 아키텍처·Relay API·프라이버시 설계까지 모든 기술 판단을 기록한 개발 일지 Day1. 원터치 전송 및 누수 방지 설계.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://simplememofast.com/ko/devlog/day1">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-day1.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
+  <meta property="article:author" content="Obsidian連携シンプルメモ開発チーム">
+  <meta property="article:section" content="Development">
+  <meta property="article:tag" content="Captio">
+  <meta property="article:tag" content="UIKit">
+  <meta property="article:tag" content="Outbox Architecture">
+  <meta property="article:tag" content="Privacy">
+  <meta property="article:tag" content="Swift">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="【개발일지 Day1】Captio가 너무 좋아서, 다시 한 번 &quot;그 체험&quot;을 만들고 싶어졌습니다">
+  <meta name="twitter:description" content="Captio의 경험을 분해하고, UIKit·Outbox 아키텍처·Relay API·프라이버시 설계까지 모든 기술 판단을 기록한 개발 일지 Day1.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-day1.png">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ko/devlog/day1">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/day1">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/day1">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/day1">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/day1">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/day1">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/day1">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/day1">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/day1">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/day1">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/day1">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/day1">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BlogPosting -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/ko/devlog/day1#article",
+  "headline": "【개발일지 Day1】Captio가 너무 좋아서, 다시 한 번 \"그 체험\"을 만들고 싶어졌습니다",
+  "description": "Captio의 체험을 분해하고, UIKit·Outbox 아키텍처·Relay API·프라이버시 설계까지 모든 기술 판단을 기록한 개발 일지 Day1. 원터치 전송 및 누수 방지 설계.",
+  "url": "https://simplememofast.com/ko/devlog/day1",
+  "inLanguage": "ko",
+  "datePublished": "2026-02-13",
+  "dateModified": "2026-10-02",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://simplememofast.com/#organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/devlog-day1.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/ko/devlog/day1#webpage"
+  }
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "홈",
+      "item": "https://simplememofast.com/ko/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "개발 일지",
+      "item": "https://simplememofast.com/ko/devlog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "개발 일지 Day1",
+      "item": "https://simplememofast.com/ko/devlog/day1"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Speakable (AIO / Voice Search) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/ko/devlog/day1#webpage",
+  "inLanguage": "ko",
+  "name": "개발일지 Day1 — Captio가 너무 좋아서 다시 그 경험을 만들고 싶어졌습니다",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/ko/#website"
+  },
+  "url": "https://simplememofast.com/ko/devlog/day1"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container { display: flex; justify-content: flex-end; padding: 1.25rem 0; }
+    .lang-switcher { display: inline-flex; background: rgba(18, 26, 46, 0.95); border: 1px solid rgba(82, 160, 255, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .lang-switcher__btn { background: transparent; border: none; color: #c9d4ec; padding: 0.75rem 1.1rem;
+      min-height: 48px; border-radius: 19px; cursor: pointer; font-size: 0.8rem; font-weight: 400; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.02em; }
+    .lang-switcher__btn:hover { color: #f2f6ff; }
+    .lang-switcher__btn:focus-visible { outline: 2px solid #4da3ff; outline-offset: 2px; }
+    .lang-switcher__btn.active { background: rgba(82, 160, 255, 0.25); border: 1px solid rgba(82, 160, 255, 0.2); color: #fff; box-shadow: 0 0 12px rgba(82, 160, 255, 0.1); }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+    @media (prefers-reduced-motion: reduce) { .lang-switcher__btn { transition: none; } }
+
+    pre { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 16px 0; }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 0.85rem; color: #e0e0e0; }
+    .article-meta { text-align: center; margin-bottom: 30px; color: var(--text-muted); font-size: 0.85rem; }
+    .article-toc { background: rgba(18, 26, 46, 0.85); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 30px; }
+    .article-toc h2 { font-size: 0.95rem; margin-bottom: 12px; }
+    .article-toc ol { padding-left: 20px; }
+    .article-toc li { margin-bottom: 6px; }
+    .article-toc a { color: var(--accent); text-decoration: none; font-size: 0.875rem; }
+    .article-toc a:hover { text-decoration: underline; }
+    .related-topics { margin-top: 50px; }
+    .related-topics h2 { font-size: 1.1rem; margin-bottom: 16px; }
+    .related-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 600px) { .related-grid { grid-template-columns: 1fr 1fr; } }
+    .related-card { background: rgba(18, 26, 46, 0.85); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; text-decoration: none; color: inherit; display: block; transition: border-color 0.25s; }
+    .related-card:hover { border-color: rgba(82, 160, 255, 0.3); }
+    .related-card__title { font-size: 0.9rem; font-weight: 700; color: var(--text-primary, #fff); margin-bottom: 4px; }
+    .related-card__desc { font-size: 0.8rem; color: var(--text-secondary); }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="메인 내비게이션" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/ko/guides/">사용 가이드</a><a href="/ko/use-cases/">활용 사례</a><a href="/ko/vs/">비교</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/ko/guides/">사용 가이드</a></li>
+        <li><a href="/ko/use-cases/">활용 사례</a></li>
+        <li><a href="/ko/vs/">비교</a></li>
+        <li><a href="/ko/methods/"><span>메소드</span></a></li>
+        <li><a href="/ko/blog/"><span>블로그</span></a></li>
+        <li><a href="/ko/glossary/"><span>용어집</span></a></li>
+        <li><a href="/ko/faq">자주 묻는 질문</a></li>
+        <li><a href="/ko/about/">개발자 소개</a></li>
+        <li><a href="/ko/devlog/">개발 기록</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>다운로드</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="한국어 · 언어 선택"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>KO</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ko" dir="ltr"><p class="site-language-title">언어 선택</p><div class="site-language-grid"><a href="/devlog/day1" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/devlog/day1" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/devlog/day1" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/devlog/day1" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ko" aria-current="page"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/es/devlog/day1" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/devlog/day1" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/devlog/day1" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/devlog/day1" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/devlog/day1" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">다운로드</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="메뉴"><span>메뉴</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- ======================== -->
+      <!-- JAPANESE VERSION         -->
+      <!-- ======================== -->
+      <div>
+        <h1 class="page-content__title sd-title">【개발일지 Day1】Captio가 너무 좋아서, 다시 한 번 "그 체험"을 만들고 싶어졌습니다</h1>
+        <div class="article-meta">2026년2월13일</div>
+
+        <!-- Table of Contents -->
+        <nav class="article-toc">
+          <h2>목차</h2>
+          <ol>
+            <li><a href="#ja-intro">서론: Captio이라는 존재</a></li>
+            <li><a href="#ja-section1">Captio의 “무엇”이 좋았는지——체험을 분해해 보았습니다</a></li>
+            <li><a href="#ja-section2">아키텍트: 왜 SwiftUI가 아니라 UIKit인가</a></li>
+            <li><a href="#ja-section3">「보내면 사라짐」을 원터치로 구현하는 설계</a></li>
+            <li><a href="#ja-section4">오팔을 방지하는 Outbox 아키텍처</a></li>
+            <li><a href="#ja-section5">Relay API：메일함의 OAuth 연동에 의존하지 않는 전송</a></li>
+            <li><a href="#ja-section6">오늘 한 일: 작은 불편함을 하나씩 없애다</a></li>
+            <li><a href="#ja-section7">History의 표시 상태 불일치를 해결했습니다</a></li>
+            <li><a href="#ja-section8">프라이버시에 대한 편집증적인 고집</a></li>
+            <li><a href="#ja-section9">10 언어 지원: 전 세계의 Captio 사용자에게 전달하고 싶습니다</a></li>
+            <li><a href="#ja-section10">오늘의 배움: 제품은 “안심감” 설계입니다</a></li>
+            <li><a href="#ja-section11">다음 (Day2) 예고</a></li>
+          </ol>
+        </nav>
+
+        <div class="page-content__body">
+
+          <!-- Introduction -->
+          <section id="ja-intro">
+            <p>Captio이라는 앱을 알고 계십니까?</p>
+            <p>메모를 작성하고, 전송 버튼을 누릅니다. 그것만으로도 제 이메일 주소로 메모가 도착합니다. 시작하자마자 키보드가 표시되고, 쓰면 전송하고, 보내면 사라집니다. 불필요한 기능은 전혀 없습니다. 그저 그 정도의 앱이었습니다.</p>
+            <p>하지만 “그저 그것뿐”이 엄청나게 기분 좋았습니다.</p>
+            <p>통근 전철 안에서 떠오른 아이디어, 회의 중에 갑자기 떠오른 작업, 잠들기 전 머릿속에 스친 한마디——Captio가 그 모든 것을 즉시 메일함에 전달해 주었습니다. 메모 앱을 열고, 폴더를 선택하고, 제목을 붙이는... 번거로움이 전혀 없습니다. 그 “마찰 제로” 체험은 한 번 알게 되면 놓을 수 없게 되는 것이었습니다.</p>
+            <p>그 Captio가 서비스를 종료했습니다.</p>
+            <p>대체 앱을 몇 개 시도했지만, 모두 그 경험과는 거리가 멀었습니다. 시작이 느리고, UI에 불필요한 요소가 있으며, 전송 후에 메모가 남는 것—사소한 차이처럼 보일 수도 있지만, Captio가 만든 경험의 본질은 바로 그런 “소소한 일”의 누적이었습니다.</p>
+            <p>그래서, 직접 만들기로 했습니다. Captio의 체험을 다시 한 번.</p>
+            <p>이것은 “SimpleMemo”의 개발 일지 Day1입니다. 이 기사에서는 Captio의 경험을 분해하고, 이를 현대 기술 스택에서 어떻게 재현할지 모든 기술적 판단을 기록합니다.</p>
+          </section>
+
+          <!-- Section 1 -->
+          <section id="ja-section1" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-01">1. Captio의 “무엇”이 좋았는지——체험을 분해해 보았습니다</h2></div><div class="ce-chapter__body">
+            <p>Captio의 체험을 언어화하기 위해, 3을 하나의 요소로 분해해 보았습니다.</p>
+
+            <h3>요소 1：시작 즉시 입력（Instant Launch-to-Input）</h3>
+            <p>Captio를 실행하면 즉시 키보드가 표시되고 텍스트 입력이 가능해집니다. 스플래시 화면 뒤에 홈 화면이 표시되고, 그곳에서 메모 작성 버튼을 눌러......라는 절차가 없습니다. 시작=입력. 이 “시작부터 텍스트 입력이 가능해지기까지의 시간”을 우리는 <strong>Time-to-Text</strong>이라고 부릅니다. Captio의 그것은 체감으로 0.5초 이하였습니다.</p>
+
+            <h3>요소 2: 전송하면 바로 사라집니다(Instant Clear After Send)</h3>
+            <p>전송 버튼을 누르면 화면이 즉시 초기화됩니다. 전송 중...」의 진행 표시줄을 바라보며 기다릴 시간이 없습니다. 작성한 메모가 사라진 순간, “아, 보낼 수 있었구나”라는 안도감과 함께 다음 행동으로 옮길 수 있습니다. 이 “전송 버튼을 누른 후 UI가 클리어될 때까지의 시간”을 우리는 <strong>Send-to-Reset</strong>이라고 부릅니다. 목표는 기다리게 되었다고 느끼기 전에 화면이 비어 있는 것입니다.</p>
+
+            <h3>요소3：불필요한 것이 전혀 없습니다（Nothing Unnecessary）</h3>
+            <p>폴더 기능, 태그 기능, 리치 텍스트, 마크다운 지원——Captio에는 그 중 어느 것도 없었습니다. 텍스트 입력란과 전송 버튼만 있습니다. 이 청결함이 인지 부하를 제로에 가깝게 하고 있었다.「 무엇을 해야 할지 고민할 필요가 없는 앱. 그것이 Captio이었습니다.</p>
+
+            <p>이 3의 요소를 현대의 iOS 개발에서 재현합니다. 그것이 “SimpleMemo”의 미션이다.</p>
+          </div></section>
+
+          <!-- Section 2 -->
+          <section id="ja-section2" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-02">2. 아키텍처: 왜 SwiftUI가 아니라 UIKit인가</h2></div><div class="ce-chapter__body">
+            <p>2026년의 iOS 개발에서 SwiftUI가 아니라 UIKit을 선택하는 것이 이단적으로 보일 수도 있습니다. 하지만, 우리의 최우선 목표는 명확했습니다——<strong>Time-to-Text 500ms 이하</strong>.</p>
+
+            <p>SwiftUI의 `body` 재평가, `StateObject`의 초기화, `@Environment` 해결——이러한 오버헤드는 일반적인 앱 개발에서는 무시할 수 있는 범위이지만, “시작 즉시 입력”을 구현하기 위해서는 무시할 수 없습니다. 1ms에서도 빠르게 텍스트 필드에 포커스를 맞추고 싶습니다.</p>
+
+            <p>그곳에서 채택한 것은, <strong>Storyboard를 사용하지 않는 UIKit 직접 구축</strong>이다.</p>
+
+            <p>SceneDelegate에서 window를 생성하고, rootViewController에 직접 ComposeViewController를 설정합니다. Storyboard의 파싱 처리조차 건너뜁니다.</p>
+
+<pre tabindex="0"><code>// SceneDelegate.swift
+func scene(_ scene: UIScene,
+           willConnectTo session: UISceneSession,
+           options connectionOptions: UIScene.ConnectionOptions) {
+    guard let windowScene = (scene as? UIWindowScene) else { return }
+    let window = UIWindow(windowScene: windowScene)
+    window.rootViewController = ComposeViewController()
+    window.makeKeyAndVisible()
+    self.window = window
+}</code></pre>
+
+            <p>그리고 ComposeViewController의 `viewDidAppear`에서 즉시 텍스트 뷰에 포커스를 맞춥니다.</p>
+
+<pre tabindex="0"><code>// ComposeViewController.swift
+override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    textView.becomeFirstResponder()
+}</code></pre>
+
+            <p>이 2개의 코드만으로도 시작부터 키보드 표시까지의 경로가 가장 짧아집니다.</p>
+
+            <p>목표는 500ms 이하입니다. 이후 화면 녹화로 측정한 기록(2026년 8월 11일, iPhone 16e·웜 실행)에서는 아이콘을 탭한 뒤 키보드 표시가 완료할 때까지 0.4초였습니다. SwiftUI에서는 `@FocusState`와 body의 재평가 타이밍을 세밀하게 제어하기 어렵고, 이 경로를 좁히는 것이 어렵다고 판단했습니다(양자를 동일한 조건으로 측정하여 비교한 것은 아닙니다).</p>
+
+            <p>UIKit은 “오래된” 것일 수도 있습니다. 하지만 “빠릅니다”. 이 1점에서 UIKit은 지금도 가장 좋은 선택입니다.</p>
+          </div></section>
+
+          <!-- Section 3 -->
+          <section id="ja-section3" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-03">3. '보내면 사라짐'을 원터치로 구현하는 설계</h2></div><div class="ce-chapter__body">
+            <p>Captio의 “보내면 사라지는” 경험을 재현하기 위해 가장 중요한 설계 판단이 있습니다. 그것은 <strong>전송 애니메이션과 UI 클리어를 네트워크 응답으로부터 완전히 분리하는 것입니다.</strong></p>
+
+            <p>일반적인 앱의 전송 흐름은 다음과 같습니다:</p>
+            <ol>
+              <li>전송 버튼을 누르세요</li>
+              <li>로드 인디케이터를 표시</li>
+              <li>서버로부터의 응답을 기다립니다</li>
+              <li>성공하면 UI를 지우고, 실패하면 오류를 표시합니다</li>
+            </ol>
+
+            <p>이 흐름에서는 네트워크 지연이 그대로 UI 지연이 됩니다. 우리의 흐름은 다음과 같습니다:</p>
+            <ol>
+              <li>전송 버튼을 누르세요</li>
+              <li><strong>즉시</strong>UI를 클리어(애니메이션: 0.25초)</li>
+              <li>백그라운드에서 네트워크 전송</li>
+              <li>성공→조용히 Outbox에서 삭제 / 실패→백그라운드에서 재시도</li>
+            </ol>
+
+<pre tabindex="0"><code>// ComposeViewController.swift
+private func performSendAnimation() {
+    UIView.animate(withDuration: 0.25,
+                   delay: 0,
+                   options: .curveEaseOut) {
+        self.textView.alpha = 0
+        self.subjectField.alpha = 0
+    } completion: { _ in
+        self.textView.text = ""
+        self.subjectField.text = ""
+        self.textView.alpha = 1
+        self.subjectField.alpha = 1
+        self.textView.becomeFirstResponder()
+    }
+}</code></pre>
+
+            <p>사용자에게는 전송 버튼을 누른 순간 메모가 “사라져” 다음 메모를 작성할 수 있는 상태가 됩니다. 네트워크의 성공과 실패는 사용자가 눈에 보이지 않는 곳에서 처리됩니다.</p>
+
+            <p>「하지만, 전송에 실패하면 어떻게 하시겠습니까?」——그 의문에 답하는 것이 다음 섹션의 Outbox 아키텍처입니다.</p>
+          </div></section>
+
+          <!-- Section 4 -->
+          <section id="ja-section4" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-04">4. 누수를 방지하는 Outbox 아키텍처</h2></div><div class="ce-chapter__body">
+            <p>전송 UI를 네트워크 응답에서 분리한다는 것은, “UI는 클리어되었지만 실제로는 메일 전송에 실패하고 있었다”는 상황이 발생할 수 있다는 뜻입니다. 이는 절대 용납할 수 없습니다. 사용자가 “보냈다”고 생각한 메모가 실제로는 전송되지 않았습니다——이는 메모 앱에 치명적인 신뢰 상실입니다.</p>
+
+            <p>그곳에서 채택한 것이 <strong>Outbox 패턴</strong>이다.</p>
+
+            <p>메시지 전송 흐름은 다음과 같습니다:</p>
+            <ol>
+              <li><strong>전송 버튼 탭</strong>：메시지를 AES-GCM 암호화하여 Outbox(로컬 스토리지)에 저장</li>
+              <li><strong>UI 클리어</strong>：performSendAnimation으로 즉시 화면을 클리어</li>
+              <li><strong>백그라운드 전송</strong>：Outbox에서 메시지를 추출하여 릴레이 API에 전송</li>
+              <li><strong>성공</strong>：Outbox에서 메시지를 삭제</li>
+              <li><strong>실패</strong>：전송 대기열에 남겨두고, 나중에 다시 전송</li>
+              <li><strong>오프라인</strong>：NWPathMonitor로 연결을 감시하고, 복구 시 자동 재전송</li>
+            </ol>
+
+            <p>중요한 것은, <strong>네트워크 전송 전에 Outbox에 저장</strong>하는 순서입니다. 이로 인해 앱이 갑자기 충돌하더라도, 기기의 전원이 꺼져도, Outbox에 기록한 메시지는 남습니다.</p>
+
+            <p>Outbox에 저장된 메시지는 CryptoKit을 사용한 AES-GCM 암호화로 보호됩니다. 암호화 키는 Keychain에 저장되며, 앱의 샌드박스 외부에서는 접근할 수 없습니다.</p>
+
+<pre tabindex="0"><code>// OutboxManager.swift
+func enqueue(message: OutboxMessage) throws {
+    let key = try KeychainHelper.getOrCreateSymmetricKey()
+    let sealedBox = try AES.GCM.seal(
+        message.plainData,
+        using: key
+    )
+    let encrypted = EncryptedOutboxEntry(
+        id: message.id,
+        sealedData: sealedBox.combined!,
+        createdAt: Date(),
+        retryCount: 0
+    )
+    try persistenceStore.save(encrypted)
+}</code></pre>
+
+            <p>또한, 모든 것을 직접 구현했기 때문에 <strong>외부 라이브러리에 대한 의존은 제로</strong>이다. CryptoKit, NWPath Monitor, URLSession—모두 Apple 순정 프레임워크로 완료됩니다. 서드파티 라이브러리의 버전 관리 및 보안 감사에서 해방되는 것은 소규모 팀에게 큰 이점입니다.</p>
+          </div></section>
+
+          <!-- Section 5 -->
+          <section id="ja-section5" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-05">5. Relay API: 메일함의 OAuth 연동에 의존하지 않는 전송</h2></div><div class="ce-chapter__body">
+            <p>Captio의 전송 메커니즘은 공식적으로 공개되지 않았습니다. 개발사의 종료 공지가 제시한 이유는 앱의 안정성과 안전성을 유지하기 위한 노력을 계속할 수 없게 되었기 때문이며, 전송 방식은 그 이유에 제시되지 않았습니다. 다만 일반적인 논리로, 외부 메일 API에 의존하는 전송은 제공자의 요구 사항 변경 및 접근 제한의 영향을 받기 쉽습니다.</p>
+
+            <p>저희는 <strong>Cloudflare Workers + Resend API</strong>라는 구성을 선택했습니다.</p>
+
+            <p>Cloudflare Workers는 엣지 컴퓨팅 기반이며, 전 세계 사용자에게 가장 가까운 데이터 센터에서 코드가 실행됩니다. 일본으로부터의 요청은 일본의 엣지에서 처리되고, 미국으로부터의 요청은 미국의 엣지에서 처리됩니다. 이로 인해 기존의 서버리스(AWS Lambda 등)와 비교하여 콜드 스타트 문제가 거의 해결됩니다.</p>
+
+            <p>메일 전송에는 Resend API를 사용합니다. Resend는 개발자를 위한 메일 전송 API입니다.</p>
+
+            <h3>메일 인증 흐름</h3>
+            <p>사용자가 수신자 이메일 주소를 설정할 때, 6자리 인증 코드를 이용한 이메일 인증을 수행합니다. 이를 통해 제3자의 이메일 주소로의 부정 전송을 방지합니다.</p>
+
+            <h3>다층 레이트 제한</h3>
+            <p>부정 이용을 방지하기 위해 다층적인 레이트 제한을 구현하고 있습니다.</p>
+
+<pre tabindex="0"><code>// Cloudflare Worker - Rate Limit Configuration
+const RATE_LIMITS = {
+  devicePerMinute: 30,    // 1デバイスあたり1分30回
+  devicePerDay: 200,      // 1デバイスあたり1日200回
+  ipPerHour: 120,         // 1IPあたり1時間120回
+  globalPerDay: 300       // サービス全体で1日300回（調整可能）
+};</code></pre>
+
+            <p>디바이스 단위, IP 단위, 글로벌 단위의 3 레이어에 레이트 제한을 적용함으로써 단일 디바이스의 폭주와 봇넷 공격을 차단할 수 있습니다.</p>
+
+            <p><strong>2026-09 추가:</strong>단말기별 상한과 전체 1일 상한은 2026년 6월에 철거되었습니다. 현재 전송 상한은 IP 주소당 1 시간당 상한입니다.</p>
+
+            <h3>멱등성의 보증</h3>
+            <p>네트워크의 불안정으로 인한 중복 전송을 방지하기 위해 각 메시지에 UUID를 할당하고, Relay API 측에서 중복 검사를 수행합니다. 동일한 UUID 메시지가 재전송된 경우, 2 이후부터는 메일 전송을 수행하지 않고 성공 응답을 반환합니다. 이로 인해 Outbox 패턴의 재시도 메커니즘과 결합해도 사용자가 동일한 메모를 이중으로 수신하지 않습니다.</p>
+
+            <p><strong>2026-10 추가:</strong>현재 전송용 서버는 중복 확인을 직접 수행하지 않았습니다. 메시지 ID를 Resend에 대한 요청의 멱등 키(Idempotency-Key)로 전달하고, Resend가 동일한 키를 24시간 기억하며, 동일한 내용의 요청에 대해서는 이전과 동일한 응답을 반환합니다. 따라서 24 시간 동안 동일한 메모가 중복 전송되지 않습니다(자세한 내용은 <a href="/ko/devlog/relay-api-design">Relay API 설계</a>).</p>
+          </div></section>
+
+          <!-- Section 6 -->
+          <section id="ja-section6" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-06">6. 오늘 한 일: 작은 불편함을 하나씩 없애다</h2></div><div class="ce-chapter__body">
+            <p>Day1의 구현 작업의 대부분은 별 평가 대화 상자를 검토하는 데에 할애했습니다. App Store의 평가는 앱의 생명선이지만, 사용자 경험을 손상시키는 방식으로 평가를 요구해서는 안 됩니다.</p>
+
+            <h3>표시 조건의 재설계</h3>
+            <p>별 평가 대화 상자의 표시 조건을 다음과 같이 설정했습니다:</p>
+            <ul>
+              <li><strong>100통당 표시</strong>：앱을 충분히 사용한 사용자에게만 표시</li>
+              <li><strong>최소 14일 간격</strong>：이전에 표시된 이후 14일 이상 경과한 것</li>
+              <li><strong>닫은 후에는 30일 동안 표시되지 않습니다</strong>：사용자가 닫은 경우, 30일 동안은 다시 표시되지 않습니다</li>
+            </ul>
+
+            <h3>별 아이콘 탭 영역 수정</h3>
+            <p>Apple Human Interface Guidelines에서는 터치 타깃의 크기가 최소 44x44pt가 권장됩니다. 별 아이콘의 탭 영역이 이 기준을 충족하지 못했기 때문에 수정했습니다.</p>
+
+<pre tabindex="0"><code>// StarRatingView.swift
+private func createStarButton() -> UIButton {
+    let button = UIButton(type: .custom)
+    button.translatesAutoresizingMaskIntoConstraints = false
+    NSLayoutConstraint.activate([
+        button.widthAnchor.constraint(greaterThanOrEqualToConstant: 44),
+        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44)
+    ])
+    return button
+}</code></pre>
+
+            <h3>별 아이콘의 왜곡 수정</h3>
+            <p>UIStackView의 `.fillEqually` 배포가 원인으로 별 아이콘이 왜곡되어 있던 문제를 수정했습니다. `contentMode`를 `.scaleAspectFit`으로 설정하고, StackView의 distribution을 `.equalSpacing`으로 변경했습니다.</p>
+
+            <h3>평가 후 흐름</h3>
+            <ul>
+              <li><strong>5성</strong>：App Store의 리뷰 화면으로 이동（`SKStoreReviewController`）</li>
+              <li><strong>4성 이하</strong>：「감사합니다」의 토스트를 조용히 표시하고 종료합니다. 부정적인 리뷰를 App Store에 유도하지 마십시오.</li>
+            </ul>
+          </div></section>
+
+          <!-- Section 7 -->
+          <section id="ja-section7" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-07">7. History의 표시 상태 불일치를 해결했습니다</h2></div><div class="ce-chapter__body">
+            <p>전송 기록 화면(History)에서 어떤 버그를 발견했습니다. 전송이 완료되었음에도 불구하고 상태가 “전송 중”인 채로 변하지 않는 메시지가 있었습니다.</p>
+
+            <p>원인을 조사한 결과, 상태 업데이트 로직에 문제가 있는 것으로 확인되었습니다. 기존 구현에서는 메시지의 텍스트 내용을 키로 설정하여 상태를 업데이트했습니다. 하지만 동일한 내용의 메모를 여러 번 전송한 경우, 텍스트 기반 검색에서는 올바른 메시지를 식별할 수 없습니다.</p>
+
+            <p>수정은 단순명료했습니다. 텍스트 기반 검색을 <strong>ID 기반 상태 업데이트</strong>로 변경했습니다. 각 메시지에는 Outbox 저장 시 UUID가 할당되어 있으므로, 이 ID를 사용하여 History의 상태를 업데이트합니다.</p>
+
+<pre tabindex="0"><code>// HistoryManager.swift
+// Before: テキストベースの検索（バグの原因）
+// func updateStatus(forText text: String, status: SendStatus)
+
+// After: IDベースのステータス更新
+func updateStatus(forMessageId id: UUID, status: SendStatus) {
+    guard let index = entries.firstIndex(where: { $0.messageId == id }) else {
+        return
+    }
+    entries[index].status = status
+    persistEntries()
+}</code></pre>
+
+            <p>이 수정으로 인해, 동일한 내용의 메모를 몇 번 보내도 각각의 상태가 올바르게 표시되게 되었습니다.</p>
+          </div></section>
+
+          <!-- Section 8 -->
+          <section id="ja-section8" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-08">8. 프라이버시에 대한 편집증적인 집착</h2></div><div class="ce-chapter__body">
+            <p>메모 앱에는 개인 정보가 기록됩니다. 비밀번호, 개인적인 고민, 비즈니스 아이디어—사용자가 무엇을 쓸지는 예측할 수 없습니다. 그렇기 때문에 프라이버시 보호는 “충분”이 아니라 “과도함” 정도가 딱 좋습니다.</p>
+
+            <h3>앱 스위처에서의 프라이버시 오버레이</h3>
+            <p>iOS의 앱 스위처에서는 앱 화면이 썸네일로 표시됩니다. 앱 스위처 화면에서 메모 내용이 보이지 않도록, 앱이 백그라운드로 이동할 때 프라이버시 오버레이를 표시합니다.</p>
+
+            <p><strong>2026-09 추가:</strong>현재 앱에서는 이 보호가 활성화되어 있지 않습니다(표시용 처리는 소스에 남아 있지만 호출되지 않았습니다). 표시 중인 메모가 앱 스위처 이미지에 남아 있는 경우가 있습니다. 자세한 내용은 “프라이버시 설계” 기사를 확인해 주세요.</p>
+
+            <h3>일시 URL 세션</h3>
+            <p>일반적인 URL 세션은 캐시, 쿠키, 인증 정보를 디스크에 저장합니다. 우리는 `URLSessionConfiguration.ephemeral`를 사용함으로써 이러한 정보가 디스크에 전혀 남지 않도록 하고 있습니다. 통신 캐시로서 메모 내용이 스토리지에 남지 않도록 하기 위함이다.</p>
+
+            <h3>로그의 무해화</h3>
+            <p>개발 중인 디버그 로그에는 주의가 필요합니다. 보낸 메모의 내용을 로그에 출력한다는 겉보기에 무해해 보이는 처리가 보안 취약점이 될 수 있습니다. 우리의 정책은 명확합니다:</p>
+            <ul>
+              <li>메모의 내용은 DEBUG 빌드라 하더라도<strong>전혀 로그에 기록하지 않습니다</strong></li>
+              <li>오류 로그에서는 `localizedDescription`을 사용하지 않고, <strong>`type(of: error)`만</strong>을 기록</li>
+              <li>이유：`localizedDescription`에는 사용자 입력이 포함될 가능성이 있기 때문에</li>
+            </ul>
+
+<pre tabindex="0"><code>// NetworkManager.swift
+// BAD: エラーの詳細をログに出力
+// Logger.error("Send failed: \(error.localizedDescription)")
+
+// GOOD: エラーの型のみをログに出力
+Logger.error("Send failed: \(type(of: error))")</code></pre>
+
+            <p>편집증적으로 보일 수도 있습니다. 하지만 메모 앱을 신뢰하고 사용하도록 하려면 이 정도의 편집증이 필요하다고 생각합니다.</p>
+          </div></section>
+
+          <!-- Section 9 -->
+          <section id="ja-section9" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-09">9. 10 언어 지원: 전 세계 Captio 사용자에게 전달하고 싶습니다</h2></div><div class="ce-chapter__body">
+            <p>Captio는 영어권을 중심으로 전 세계에 사용자가 있었습니다. 그 전 사용자들에게 “SimpleMemo”을 전달하기 위해, 최초 출시부터 10 언어에 대응했습니다.</p>
+
+            <p>지원 언어: 일본어, 영어, 스페인어, 프랑스어, 독일어, 이탈리아어, 포르투갈어, 한국어, 중국어(간체), 아라비아어.</p>
+
+            <p><strong>2026-09 추가:</strong>현재 App Store 표기에서는 지원 언어가 일본어, 영어, 스페인어, 프랑스어, 독일어, 포르투갈어, 러시아어, 중국어(간체), 중국어(번체), 아랍어인 10 언어입니다. 위 목록의 이탈리아어와 한국어는 현재 표기에 포함되지 않습니다.</p>
+
+            <p>특히<strong>아라비아어의 RTL(Right-to-Left) 대응</strong>은 기술적인 도전이었습니다. 텍스트 방향뿐만 아니라 UI 레이아웃 전체를 미러링해야 합니다. Auto Layout의 `leading`/`trailing` 제약을 일관되게 사용함으로써 RTL 환경에서도 자연스러운 레이아웃을 구현하고 있습니다.</p>
+
+            <h3>앱 내 언어 전환</h3>
+            <p>iOS 16 이후의 앱 내 언어 전환에 더해, 독자적인 언어 전환 메커니즘도 구현하고 있습니다. 언어가 전환된 경우, ViewController를 `cross-dissolve` 트랜지션으로 교체함으로써 원활한 전환 경험을 제공합니다.</p>
+
+<pre tabindex="0"><code>// LanguageManager.swift
+func applyLanguageChange() {
+    guard let window = UIApplication.shared.connectedScenes
+        .compactMap({ $0 as? UIWindowScene })
+        .first?.windows.first else { return }
+
+    let newVC = ComposeViewController()
+    newVC.view.frame = window.bounds
+    UIView.transition(with: window,
+                      duration: 0.3,
+                      options: .transitionCrossDissolve,
+                      animations: {
+        window.rootViewController = newVC
+    })
+}</code></pre>
+          </div></section>
+
+          <!-- Section 10 -->
+          <section id="ja-section10" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-10">10. 오늘의 학습: 제품은 “안심감” 설계입니다</h2></div><div class="ce-chapter__body">
+            <p>Day1을(를) 끝내고 생각한 것은, 이 제품의 본질은 “안심감” 설계라는 것입니다.</p>
+
+            <p>기술적인 수치를 정리해 보겠습니다:</p>
+            <ul>
+              <li><strong>Time-to-Text</strong>：500ms 이하(목표)</li>
+              <li><strong>Send-to-Reset</strong>：기다림을 느끼지 않는 짧음(목표)</li>
+              <li><strong>메시지 누수</strong>：Outbox 패턴으로 방지</li>
+              <li><strong>암호화</strong>：AES-GCM（CryptoKit）</li>
+              <li><strong>외부 라이브러리 의존</strong>：제로</li>
+            </ul>
+
+            <p>하지만, 이러한 수치들은 모두 “안심감”이라는 하나의 목표로 집약됩니다.</p>
+
+            <p>시작이 빠릅니다→'언제든지 바로 쓸 수 있다'는 안심감. <br>을 보내면 사라집니다 → “처리된” 안심감. <br> 누수 방지 → “전송되지 않은 채 사라지지 않음” 안심감. <br> 암호화 → “아무도 볼 수 없는” 안심감.</p>
+
+            <p>Captio가 사랑받은 것은 기능이 뛰어났기 때문이 아니다。「 안심하고 사용할 수 있는 경험을 철저히 다듬어 왔기 때문이다. 그것을 이어받고 싶습니다.</p>
+          </div></section>
+
+          <!-- Section 11 -->
+          <section id="ja-section11" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-11">11. 다음 (Day2) 예고</h2></div><div class="ce-chapter__body">
+            <p>Day2에서는 다음 주제에 착수할 예정입니다:</p>
+            <ul>
+              <li><strong>전송 애니메이션의 세련됨</strong>：현재 0.25초 페이드아웃에서 보다 편안한 애니메이션으로</li>
+              <li><strong>History 상태 업데이트 타이밍 최적화</strong>：실시간 업데이트 vs 배치 업데이트 비교 검토</li>
+              <li><strong>성공 토스트가 정말 필요합니까? </strong>：전송 성공 피드백에 대해 “표시하지 않음”이라는 선택지 검토</li>
+            </ul>
+            <p>Captio의 “아무것도 없는” 청렴함을 목표로, Day2로 이어집니다.</p>
+          </div></section>
+
+        </div>
+      </div>
+
+      <!-- ======================== -->
+      <!-- ENGLISH VERSION          -->
+      <!-- ======================== -->
+
+      <!-- ======================== -->
+      <!-- RELATED TOPICS (shared)  -->
+      <!-- ======================== -->
+      <div class="related-topics">
+        <h2 id="reading-12" data-ce-number="12"> <span>관련 토픽 심층 탐구</span> </h2>
+        <div class="related-grid">
+          <a href="/ko/devlog/uikit-vs-swiftui" class="related-card">
+            <div class="related-card__title">
+              <span>UIKit vs SwiftUI：시작 속도를 위한 선택</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>2026년에 UIKit을 선택한 이유. Time-to-Text 500ms 이하를 목표로 한 아키텍처 설계.</span>
+
+            </div>
+          </a>
+          <a href="/ko/devlog/outbox-architecture" class="related-card">
+            <div class="related-card__title">
+              <span>Outbox 아키텍처: 누수 방지 설계</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>전송 즉시 UI가 클리어되지만, 전송되지 않은 메시지는 기기에 남아 재전송됩니다. AES-GCM 암호화 Outbox 패턴의 전체 내용.</span>
+
+            </div>
+          </a>
+          <a href="/ko/devlog/relay-api-design" class="related-card">
+            <div class="related-card__title">
+              <span>Relay API：Cloudflare Workers로 메일 전송 기반을 구축</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>메일함의 OAuth 연동에 의존하지 않는 전송. 에지에서 동작하는 중계 API(Cloudflare Workers)에서 Resend으로 전송합니다.</span>
+
+            </div>
+          </a>
+          <a href="/ko/devlog/privacy-first-design" class="related-card">
+            <div class="related-card__title">
+              <span>프라이버시 퍼스트 설계: 편집증적인 고집</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>ephemeral URLSession, 로그 처리, 앱 스위처의 현행 사양(메모를 자동으로 숨기는 기능은 활성화되어 있지 않습니다).</span>
+
+            </div>
+          </a>
+          <a href="/ko/captio-alternative/" class="related-card">
+            <div class="related-card__title">
+              <span>Captio 대체 앱 비교·이전 가이드</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>Captio에서의 이전 절차, 기능 비교표, FAQ. 전환을 고려하고 계신 분은 여기입니다.</span>
+
+            </div>
+          </a>
+          <a href="/ko/note-to-email/" class="related-card">
+            <div class="related-card__title">
+              <span>자신에게 이메일로 메모를 보내는 방법</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>생각난 아이디어를 바로 이메일로 보내. 메모→메일 활용 가이드.</span>
+
+            </div>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-13" data-ce-number="13"> <span>참고문헌</span> </h2></div><div class="ce-chapter__body">
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developer.apple.com/documentation/uikit" target="_blank" rel="noopener" style="color:var(--accent);">Apple 개발자 — UIKit 문서</a> — <span>UIKit 프레임워크의 공식 레퍼런스. SimpleMemo의 UI 구축에 사용</span></li>
+    <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — CryptoKit Documentation</a> — <span>AES-GCM 암호화에 의한 Outbox 데이터 보호 구현에 사용</span></li>
+    <li><a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener" style="color:var(--accent);">Cloudflare Workers Documentation</a> — <span>메일 릴레이API의 서버리스 기반으로 채택</span></li>
+    <li><a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener" style="color:var(--accent);">Chris Richardson — Pattern: Transactional outbox (microservices.io)</a> — <span>보내는 메시지를 먼저 전송 대기 표(Outbox)에 기록하고, 다른 처리가 전송하는 설계 패턴입니다. SimpleMemo는 같은 생각을 단말기 내에서 사용하고 있습니다</span></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc5321" target="_blank" rel="noopener" style="color:var(--accent);">RFC 5321 — Simple Mail Transfer Protocol (SMTP)</a> — <span>메일 전송 프로토콜의 표준 사양</span></li>
+  </ul>
+</div></section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/ko/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>다음 읽기</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Obsidian 연동으로 메모를 저장할 장소를 만들 수 있습니다</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>iPhone에서 연동 및 저장 위치를 설정하면, 전송한 메모를 Obsidian에도 남길 수 있습니다. </span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>관련 콘텐츠</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/ko/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio 대체 앱 비교</span></a></li>
+    <li><a href="/ko/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span> 블로그 기사 목록</span></a></li>
+    <li><a href="/ko/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>메모 앱 비교 목록</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ko" dir="ltr"><a class="site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">작은 메모, 다음 한 걸음.</p><p class="site-footer-description">iPhone에서 Obsidian과 이메일로 메모를 보내세요.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="푸터 탐색 메뉴">
+      <div class="footer__col">
+        <p class="footer__col-title">프로덕트</p>
+        <a href="/ko/download/" class="footer__link">다운로드</a>
+        <a href="/ko/" class="footer__link">홈</a>
+        <a href="/ko/how-to/" class="footer__link"><span>사용 방법</span> </a>
+        <a href="/ko/templates/" class="footer__link"><span>템플릿</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">비교·전환</p>
+        <a href="/ko/captio/" class="footer__link"><span>Captio식</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">읽을거리</p>
+        <a href="/ko/devlog/" class="footer__link">개발 기록</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">지원</p>
+        <a href="/ko/roadmap/" class="footer__link">공개 로드맵</a>
+        <a href="/ko/about/" class="footer__link">개발자 소개</a>
+        <a href="/ko/terms" class="footer__link"><span>이용 약관</span> </a>
+        <a href="/ko/privacy" class="footer__link">개인정보 보호</a>
+        <a href="/ko/contact" class="footer__link">문의</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 운영: YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

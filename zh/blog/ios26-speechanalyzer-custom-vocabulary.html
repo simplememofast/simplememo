@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/en/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: 'en'});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>iOS 26 语音分析器自定义词汇：使用正确的转录器</title>
+  <meta name="description" content="iOS 26 contextualStrings被记录为DictationTranscriber。 了解其局限性、setContext行为以及如何选择正确的语音模块。">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="iOS 26 语音分析器自定义词汇：使用正确的转录器">
+  <meta property="og:description" content="Apple文档AnalysisContext.contextualStrings for DictationTranscriber。 以下是SpeechAnalyzer模块选择、限制和迁移的含义。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-18T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh/blog/ios26-speechanalyzer-custom-vocabulary">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog.png">
+  <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Simple Memo - for Obsidian"><meta property="og:locale" content="zh_CN">
+  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="iOS 26 语音分析器自定义词汇：使用正确的转录器">
+  <meta name="twitter:description" content="上下文字符串存在于iOS 26中——但模块选择很重要。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog.png">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/ios26-speechanalyzer-custom-vocabulary">
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "inLanguage": "zh-Hans",
+  "headline": "iOS 26没有杀死自定义词汇——您将其添加到错误的模块",
+  "description": "AnalysisContext.contextualStrings如何与DictationTranscriber配合使用，其限制，setContext替换语义，以及如何在iOS 26语音模块之间进行选择。",
+  "image": "https://simplememofast.com/assets/img/og/blog.png",
+  "url": "https://simplememofast.com/zh/blog/ios26-speechanalyzer-custom-vocabulary",
+  "datePublished": "2026-09-18",
+  "dateModified": "2026-09-18",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Simple Memo - 用于Obsidian",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "语音分析器"
+    },
+    {
+      "@type": "Thing",
+      "name": "听写抄写器"
+    },
+    {
+      "@type": "Thing",
+      "name": "分析上下文上下文字符串"
+    }
+  ],
+  "keywords": "iOS 26，语音分析器，听写转录器，语音转录器，上下文字符串，自定义词汇，Swift"
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主页",
+      "item": "https://simplememofast.com/zh/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "博客",
+      "item": "https://simplememofast.com/zh/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "iOS 26没有杀死自定义词汇——您将其添加到错误的模块",
+      "item": "https://simplememofast.com/zh/blog/ios26-speechanalyzer-custom-vocabulary"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh/blog/ios26-speechanalyzer-custom-vocabulary#webpage",
+  "inLanguage": "zh-Hans",
+  "name": "iOS 26 语音分析器自定义词汇：使用正确的转录器",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh/#website"
+  },
+  "url": "https://simplememofast.com/zh/blog/ios26-speechanalyzer-custom-vocabulary"
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700;font-size:.95rem}.global-nav__logo img{border-radius:8px}
+    .global-nav__links{display:flex;align-items:center;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;padding:.4rem .7rem;min-height:48px;display:inline-flex;align-items:center}
+    .global-nav__actions{display:flex;align-items:center;gap:.5rem}.global-nav__cta{background:linear-gradient(135deg,#007AFF,#5856D6);color:#fff!important;text-decoration:none;font-size:.875rem;font-weight:700;padding:.45rem 1rem;border-radius:20px;min-height:48px;display:inline-flex;align-items:center}
+    .nav-cta-mobile,.global-nav__hamburger{display:none}.global-nav__hamburger{background:none;border:0;color:#fff;font-size:1.5rem;min-width:48px;min-height:48px}
+    @media(max-width:768px){.global-nav__links,.global-nav__cta{display:none}.global-nav__hamburger{display:block}.global-nav__links.open{display:flex;flex-direction:column;position:absolute;top:56px;left:0;right:0;background:rgba(10,12,18,.97);padding:.5rem 1rem 1rem}.global-nav__links.open .nav-cta-mobile{display:block}}
+    .article-meta{font-size:.875rem;color:var(--text-muted);margin-bottom:2rem}.article-body h2{font-size:1.4rem;margin:2.5rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}.article-body h3{font-size:1.1rem;margin:2rem 0 .75rem}
+    .article-body p,.article-body li{font-size:.95rem;line-height:1.85;color:var(--text-secondary)}.article-body a{color:var(--accent)}.article-body code{background:rgba(100,180,255,.08);padding:.15rem .4rem;border-radius:4px}.article-body pre{background:#0d1424;border:1px solid rgba(148,178,230,.18);border-radius:12px;padding:16px 18px;overflow-x:auto}.article-body pre code{background:none;padding:0;color:#dbe6ff}
+    .callout{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:10px;padding:1rem 1.25rem;margin:1.5rem 0}.article-body table{display:block;overflow-x:auto;width:100%;border-collapse:collapse;margin:1.25rem 0}.article-body th,.article-body td{border:1px solid var(--border);padding:.55rem .7rem;text-align:left;vertical-align:top}
+  </style>
+  <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
+  <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="主导航" data-site-header=""><div class="global-nav__inner">
+<a class="global-nav__logo site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh/guides/">使用指南</a><a href="/zh/use-cases/">使用场景</a><a href="/zh/vs/">对比</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks"><li><a href="/zh/guides/">使用指南</a></li><li><a href="/zh/use-cases/">使用场景</a></li><li><a href="/zh/vs/">对比</a></li><li><a href="/zh/methods/">方法</a></li><li><a href="/zh/blog/">博客</a></li><li><a href="/zh/glossary/">詞彙表</a></li><li><a href="/zh/faq">常见问题</a></li><li><a href="/zh/about/">关于开发者</a></li><li><a href="/zh/devlog/">开发日志</a></li><li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">下载</a></li></ul>
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="简体中文 · 选择语言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>简中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hans" dir="ltr"><p class="site-language-title">选择语言</p><div class="site-language-grid"><a href="/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hans" aria-current="page"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh-Hant/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">下载</a><button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="菜单"><span>菜单</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button></div>
+</div></nav>
+<main class="page-content"><div class="container">
+<h1 class="page-content__title sd-title">iOS 26没有杀死自定义词汇——您将其添加到错误的模块</h1>
+<p class="article-meta">作者：<a href="/zh/about/">AI ATAKA</a> · 发布时间：9月18，2026</p>
+<div class="page-content__body article-body">
+<p><strong>自定义词汇没有从Apple的新SpeechAnalyzer堆栈中消失。</strong>重要的细节是模块选择。 Apple专门用<code>DictationTranscriber</code>记录<code>AnalysisContext.contextualStrings</code>。 如果您是围绕<code>SpeechTranscriber</code>构建的，不要假设附加相同的上下文会为您提供相同的词汇行为。</p>
+<div class="callout"><p><strong>简短版本：</strong>当上下文短语是您识别设计的一部分时，请选择<code>DictationTranscriber</code>。 保持列表简短，保持短语简短，并将它们视为有偏见的暗示，而不是保证的替换。</p></div>
+
+<h2 id="reading-01" data-ce-number="01">有两个转录模块——它们不能互换</h2>
+<p>iOS 26的语音框架使转录变得模块化。 <code>SpeechTranscriber</code>是Apple的通用转录器，用于正常对话。 <code>DictationTranscriber</code>更接近系统听写，并暴露了额外的准确性控制。</p>
+<div class="sd-table" tabindex="0" role="region" aria-label="可滚动表"><table><thead><tr><th>需要</th><th>首先评估模块</th><th>为什么</th></tr></thead><tbody>
+<tr><td>一般对话/长篇转录</td><td><code>SpeechTranscriber</code></td><td>Apple将其描述为通用的语音转文本模块。</td></tr>
+<tr><td>带有特定于应用程序的名称或术语的简短听写</td><td><code>DictationTranscriber</code></td><td>Apple 明确记录了带有此模块的 <code>AnalysisContext.contextualStrings</code>。</td></tr>
+<tr><td>自定义发音/语言模型</td><td><code>DictationTranscriber</code></td><td>它还暴露了由<code>SFSpeechLanguageModel</code>支持的定制语言内容提示。</td></tr>
+</tbody></table></div>
+
+<h2 id="reading-02" data-ce-number="02">contextStrings的实际工作方式</h2>
+<p><code>AnalysisContext.contextualStrings</code>是一个按上下文字符串标签分组的字典。 Apple表示，这些单词或短语可以与<code>DictationTranscriber</code>一起使用，以提高识别特定于应用程序的名称、产品、地点、域术语或不寻常的单词的可能性。</p>
+<pre tabindex="0"><code>let context = AnalysisContext()
+context.contextualStrings[.general] = [
+    "Simple Memo",
+    "Obsidian",
+    "SpeechAnalyzer"
+]
+
+try await analyzer.setContext(context)</code></pre>
+<p>三个限制在实践中很重要：</p>
+<ul>
+<li><strong>保持短语简短。</strong> Apple尽可能推荐一个或两个单词。</li>
+<li><strong>在所有标签中将总数保持在100或更少的短语。</strong></li>
+<li><strong>这些是提示，不是保证。</strong>API有偏见的识别；它不承诺精确的转录。</li>
+</ul>
+
+<h2 id="reading-03" data-ce-number="03">setContext替换上下文——它不附加</h2>
+<p><code>SpeechAnalyzer.setContext(_:)</code>替换分析器的当前上下文对象。 如果您想在添加新组时保留早期的短语，请构建要使用的完整新上下文并进行设置。</p>
+<pre tabindex="0"><code>let next = AnalysisContext()
+next.contextualStrings[.general] = baseTerms + currentScreenTerms
+try await analyzer.setContext(next)</code></pre>
+<p>这也使标签变得有用：您可以在自己的状态下保持类别，并有意识地重建上下文，而不是将重复的<code>setContext</code>调用视为增量添加。</p>
+
+<h2 id="reading-04" data-ce-number="04">SpeechTranscriber怎么样？</h2>
+<p>Apple 的 <code>SpeechTranscriber</code> 當前文件未將 <code>contextualStrings</code> 記錄為該模組的精度控制之一。 相比之下，<code>DictationTranscriber</code>文档明确告诉开发人员创建<code>AnalysisContext</code>并在<code>contextualStrings</code>中添加单词。</p>
+<p>这种区别是安全的实现边界：<strong>不要围绕上下文词汇设计<code>SpeechTranscriber</code>管道，除非你在目标操作系统、区域设置和设备上独立验证了所需的确切行为。</strong></p>
+
+<h2 id="reading-05" data-ce-number="05">如果您今天需要长篇演讲的词汇</h2>
+<p>没有普遍的移民规则。 如果您现有的<code>SFSpeechRecognizer</code>路径已经依赖于<code>contextualStrings</code>，那么移动到iOS 26应被视为模块选择和回归测试练习，而不是机械的API重命名。</p>
+<ol>
+<li>测试<code>DictationTranscriber</code>是否符合您所需的持续时间、延迟、区域设置和设备范围。</li>
+<li>如果您需要更丰富的词汇，请评估其自定义语言模型选项。</li>
+<li>如果两个新模块路径都没有保留您的产品所依赖的行为，请保留该用例的经过验证的<code>SFSpeechRecognizer</code>路径，同时单独迁移其他路径。</li>
+</ol>
+
+<h2 id="reading-06" data-ce-number="06">最小决策规则</h2>
+<div class="callout"><p><strong>对话优先：</strong>从<code>SpeechTranscriber</code>开始。<strong>词汇优先：</strong>从评估<code>DictationTranscriber</code>开始。 如果词汇至关重要，请根据您发送的实际单词和区域来衡量识别，而不是假设模块之间的奇偶性。</p></div>
+
+<h2 id="reading-07" data-ce-number="07">相关实施指南</h2>
+<p>关于实时麦克风处理流程，包括模型资源、PCM 转换、暂定结果与最终结果、停止与收尾行为，以及 Swift 6 并发处理，请参阅<a href="/zh/blog/ios26-speechanalyzer-live-mic">完整的 iOS 26 SpeechAnalyzer 实时麦克风指南</a>。可运行示例位于 <a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic" rel="noopener">GitHub（MIT 许可证）</a>。</p>
+
+<h2 id="reading-08" data-ce-number="08">主要来源</h2>
+<ul>
+<li><a href="https://developer.apple.com/documentation/speech/analysiscontext/contextualstrings" rel="noopener noreferrer">Apple：分析上下文.上下文字符串</a></li>
+<li><a href="https://developer.apple.com/documentation/speech/dictationtranscriber" rel="noopener noreferrer">Apple：听写抄写器</a></li>
+<li><a href="https://developer.apple.com/documentation/speech/speechtranscriber" rel="noopener noreferrer">Apple：语音转录器</a></li>
+<li><a href="https://developer.apple.com/documentation/speech/speechanalyzer/setcontext(_:)" rel="noopener noreferrer">Apple：语音分析器.setContext(_:)</a></li>
+</ul>
+</div></div></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hans" dir="ltr"><a class="site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">记下一点想法，迈出下一步。</p><p class="site-footer-description">从 iPhone 向 Obsidian 和电子邮件发送笔记。</p></div></div><!-- /site-chrome:intro --><div class="container">
+<nav class="footer__nav" aria-label="页脚导航">
+<div class="footer__col"><p class="footer__col-title">产品</p><a href="/zh/download/" class="footer__link">下载</a><a href="/zh/use-cases/" class="footer__link">使用场景</a><a href="/zh/guides/" class="footer__link">使用指南</a></div>
+<div class="footer__col"><p class="footer__col-title">比较和切换</p><a href="/zh/captio-alternative/" class="footer__link">Captio替代</a><a href="/zh/vs/" class="footer__link">对比</a></div>
+<div class="footer__col"><p class="footer__col-title">阅读</p><a href="/zh/about/" class="footer__link">关于开发者</a><a href="/zh/devlog/" class="footer__link">开发日志</a><a href="/zh/blog/" class="footer__link">博客</a></div>
+<div class="footer__col"><p class="footer__col-title">支持</p><a href="/zh/terms" class="footer__link">条款</a><a href="/zh/privacy" class="footer__link">隐私</a><a href="/zh/faq" class="footer__link">常见问题</a><a href="/zh/contact" class="footer__link">联系我们</a></div>
+</nav>
+<nav class="footer__social" aria-label="社交链接"><a href="https://x.com/simplememofast" rel="me noopener" target="_blank" class="footer__link">X/推特</a><a href="https://github.com/simplememofast" rel="me noopener" target="_blank" class="footer__link">GitHub</a></nav>
+<p class="footer__copyright">© 2026 Simple Memo - for Obsidian / 运营：YURIKA, K.K.</p>
+</div></footer>
+
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body></html>

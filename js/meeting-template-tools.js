@@ -7,7 +7,8 @@
     if (!code || !status) return;
     button.hidden = false;
     button.addEventListener('click', async function () {
-      var en = code.closest('[data-lang]').getAttribute('data-lang') === 'en';
+      var languageElement = code.closest('[data-lang], [lang]');
+      var en = languageElement && (languageElement.getAttribute('data-lang') || languageElement.getAttribute('lang')) === 'en';
       button.disabled = true;
       status.textContent = '';
       try {

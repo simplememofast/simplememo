@@ -106,7 +106,8 @@ export function missingDates(dates) {
  * Findings about the export's integrity, worst first.
  *
  * Each is `{ level: 'bad' | 'warn', code, message, detail }`. `bad` means data
- * is missing or will be; `warn` means an attempt failed but the table already
+ * is missing or integrity cannot be established; `warn` means an attempt failed
+ * but the table already
  * holds that day. An empty array means the two destination tables are
  * gap-free, in step with each other, and no attempt is currently orphaned.
  */
@@ -139,6 +140,17 @@ export function exportHealth({ staging = [], siteDates = [], urlDates = [] } = {
   }
 
   for (const [namespace, table] of Object.entries(DESTINATION)) {
+    if (dates[namespace].size === 0) {
+      findings.push({
+        level: 'bad',
+        code: 'unobserved-namespace',
+        message: `${table}: no dates were observed for this property — export integrity is unverified`,
+        detail: 'The table exists but the supplied date query returned no dates for this namespace.'
+          + ' This does not establish the cause or a lost day. Retain the observation and investigate'
+          + ' before treating this property as healthy.',
+      });
+      continue;
+    }
     const holes = missingDates([...dates[namespace]]);
     if (holes.length) {
       findings.push({

@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/day1">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>[Development Diary Day1] Me gustó tanto Captio que quería hacer "esa experiencia" de nuevo | SimpleMemo</title>
+  <meta name="description" content="El diario de desarrollo Day1, que desmontó la experiencia de Captio y registró todas las decisiones técnicas, incluida la razón por la que eligió UIKit, el diseño que desaparece cuando se envía, la arquitectura de Outbox para evitar derrames, el Relay API y el diseño de privacidad. Se liberará la transmisión con un solo toque y el diseño para evitar derrames.">
+  <meta name="theme-color" content="#070b14">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="author" content="Obsidian連携シンプルメモ開発チーム">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- OGP -->
+  <meta property="og:title" content="[Development Diary Day1] Me gusta tanto Captio que quería hacer &quot;esa experiencia&quot; de nuevo">
+  <meta property="og:description" content="Un diario de desarrollo Day1 que desmonta la experiencia de Captio y registra todos los juicios técnicos de UIKit, la arquitectura de Outbox, Relay API y el diseño de privacidad. Transmisión y diseño con un solo toque para evitar derrames.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://simplememofast.com/es/devlog/day1">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-day1.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
+  <meta property="article:author" content="Obsidian連携シンプルメモ開発チーム">
+  <meta property="article:section" content="Development">
+  <meta property="article:tag" content="Captio">
+  <meta property="article:tag" content="UIKit">
+  <meta property="article:tag" content="Outbox Architecture">
+  <meta property="article:tag" content="Privacy">
+  <meta property="article:tag" content="Swift">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="[Development Diary Day1] Me gusta tanto Captio que quería hacer &quot;esa experiencia&quot; de nuevo">
+  <meta name="twitter:description" content="Day1, un diario de desarrollo que desmonta la experiencia de Captio y registra todos los juicios técnicos de UIKit, la arquitectura de Outbox, Relay API y el diseño de privacidad.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-day1.png">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/es/devlog/day1">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/day1">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/day1">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/day1">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/day1">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/day1">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/day1">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/day1">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/day1">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/day1">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/day1">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/day1">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BlogPosting -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/es/devlog/day1#article",
+  "headline": "[Development Diary Day1] Me gusta tanto Captio que quería hacer \"esa experiencia\" de nuevo",
+  "description": "Un diario de desarrollo Day1 que desmonta la experiencia de Captio y registra todos los juicios técnicos de UIKit, la arquitectura de Outbox, Relay API y el diseño de privacidad. Transmisión y diseño con un solo toque para evitar derrames.",
+  "url": "https://simplememofast.com/es/devlog/day1",
+  "inLanguage": "es",
+  "datePublished": "2026-02-13",
+  "dateModified": "2026-10-02",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://simplememofast.com/#organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/devlog-day1.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/es/devlog/day1#webpage"
+  }
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Inicio",
+      "item": "https://simplememofast.com/es/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Diario de desarrollo",
+      "item": "https://simplememofast.com/es/devlog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Día del diario de desarrollo1",
+      "item": "https://simplememofast.com/es/devlog/day1"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Speakable (AIO / Voice Search) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/es/devlog/day1#webpage",
+  "inLanguage": "es",
+  "name": "Development Diary Day1 - Me encanta Captio tanto que quería volver a hacer esa experiencia",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/es/#website"
+  },
+  "url": "https://simplememofast.com/es/devlog/day1"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container { display: flex; justify-content: flex-end; padding: 1.25rem 0; }
+    .lang-switcher { display: inline-flex; background: rgba(18, 26, 46, 0.95); border: 1px solid rgba(82, 160, 255, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .lang-switcher__btn { background: transparent; border: none; color: #c9d4ec; padding: 0.75rem 1.1rem;
+      min-height: 48px; border-radius: 19px; cursor: pointer; font-size: 0.8rem; font-weight: 400; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.02em; }
+    .lang-switcher__btn:hover { color: #f2f6ff; }
+    .lang-switcher__btn:focus-visible { outline: 2px solid #4da3ff; outline-offset: 2px; }
+    .lang-switcher__btn.active { background: rgba(82, 160, 255, 0.25); border: 1px solid rgba(82, 160, 255, 0.2); color: #fff; box-shadow: 0 0 12px rgba(82, 160, 255, 0.1); }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+    @media (prefers-reduced-motion: reduce) { .lang-switcher__btn { transition: none; } }
+
+    pre { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 16px 0; }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 0.85rem; color: #e0e0e0; }
+    .article-meta { text-align: center; margin-bottom: 30px; color: var(--text-muted); font-size: 0.85rem; }
+    .article-toc { background: rgba(18, 26, 46, 0.85); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 30px; }
+    .article-toc h2 { font-size: 0.95rem; margin-bottom: 12px; }
+    .article-toc ol { padding-left: 20px; }
+    .article-toc li { margin-bottom: 6px; }
+    .article-toc a { color: var(--accent); text-decoration: none; font-size: 0.875rem; }
+    .article-toc a:hover { text-decoration: underline; }
+    .related-topics { margin-top: 50px; }
+    .related-topics h2 { font-size: 1.1rem; margin-bottom: 16px; }
+    .related-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 600px) { .related-grid { grid-template-columns: 1fr 1fr; } }
+    .related-card { background: rgba(18, 26, 46, 0.85); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; text-decoration: none; color: inherit; display: block; transition: border-color 0.25s; }
+    .related-card:hover { border-color: rgba(82, 160, 255, 0.3); }
+    .related-card__title { font-size: 0.9rem; font-weight: 700; color: var(--text-primary, #fff); margin-bottom: 4px; }
+    .related-card__desc { font-size: 0.8rem; color: var(--text-secondary); }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Navegación principal" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/es/guides/">Guías</a><a href="/es/use-cases/">Casos de uso</a><a href="/es/vs/">Comparar</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/es/guides/">Guías</a></li>
+        <li><a href="/es/use-cases/">Casos de uso</a></li>
+        <li><a href="/es/vs/">Comparar</a></li>
+        <li><a href="/es/methods/"><span>Método</span></a></li>
+        <li><a href="/es/blog/"><span>Blog</span></a></li>
+        <li><a href="/es/glossary/"><span>Glosario</span></a></li>
+        <li><a href="/es/faq">Preguntas frecuentes</a></li>
+        <li><a href="/es/about/">Sobre el desarrollador</a></li>
+        <li><a href="/es/devlog/">Registro de desarrollo</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>Descargar</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Español · Elegir idioma"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ES</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="es" dir="ltr"><p class="site-language-title">Elegir idioma</p><div class="site-language-grid"><a href="/devlog/day1" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/devlog/day1" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/devlog/day1" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/devlog/day1" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/devlog/day1" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="es" aria-current="page"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/pt-BR/devlog/day1" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/devlog/day1" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/devlog/day1" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/devlog/day1" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">Descargar</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menú"><span>Menú</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- ======================== -->
+      <!-- JAPANESE VERSION         -->
+      <!-- ======================== -->
+      <div>
+        <h1 class="page-content__title sd-title">[Development Diary Day1] Me gusta tanto Captio que quería hacer "esa experiencia" de nuevo</h1>
+        <div class="article-meta">2026 año 2 mes 13 día</div>
+
+        <!-- Table of Contents -->
+        <nav class="article-toc">
+          <h2>Tabla de contenido</h2>
+          <ol>
+            <li><a href="#ja-intro">Introducción: La existencia de Captio</a></li>
+            <li><a href="#ja-section1">El "qué" de Captio fue bueno - Intenté desmontar la experiencia</a></li>
+            <li><a href="#ja-section2">Arquitectura: ¿Por qué es UIKit "en lugar de SwiftUI"</a></li>
+            <li><a href="#ja-section3">Diseña para realizar "enviar y desaparecer" con un solo toque</a></li>
+            <li><a href="#ja-section4">Arquitectura de la Outbox para evitar derrames</a></li>
+            <li><a href="#ja-section5">Relé API: Envío que no depende de la vinculación OAuth de los buzones</a></li>
+            <li><a href="#ja-section6">Lo que hice hoy: Borrar la pequeña sensación de incomodidad una por una</a></li>
+            <li><a href="#ja-section7">Historial de visualización de la incoherencia del estado de visualización resuelta</a></li>
+            <li><a href="#ja-section8">Obsesión por la privacidad</a></li>
+            <li><a href="#ja-section9">Soporte de idioma 10: Quiero entregarlo a usuarios de Captio en todo el mundo</a></li>
+            <li><a href="#ja-section10">Aprendizaje de hoy: El producto es un diseño de "sentido de seguridad"</a></li>
+            <li><a href="#ja-section11">La próxima vez (Day2) vista previa</a></li>
+          </ol>
+        </nav>
+
+        <div class="page-content__body">
+
+          <!-- Introduction -->
+          <section id="ja-intro">
+            <p>¿Conoces la aplicación llamada Captio?</p>
+            <p>Escribe una nota y pulsa el botón de enviar. Eso es todo lo que necesitas para recibir una nota a tu dirección de correo electrónico. En el momento en que lo inicies, se mostrará el teclado, y si escribes, envíalo, y si lo envías, desaparecerá. No hay funciones innecesarias en absoluto. Era una gran cantidad de aplicación.</p>
+            <p>Pero "eso es todo" fue increíblemente cómodo.</p>
+            <p>La idea que se me ocurrió en el tren de cercanías, la tarea que de repente me vino a la mente durante la reunión y la palabra que pasó por mi mente antes de irme a la cama - Captio inmediatamente los entregó todos a mi buzón. No hay problema para abrir la aplicación de notas, seleccionar una carpeta y añadir un título. La experiencia de "fricción cero" era algo que no podías dejar ir una vez que lo sabías.</p>
+            <p>El servicio Captio ha sido cancelado.</p>
+            <p>Probé varias aplicaciones alternativas, pero todas estaban lejos de esa experiencia. Inicio lento, hay elementos innecesarios en la interfaz de usuario, y las notas permanecen después de la transmisión - puede parecer una diferencia trivial, pero la esencia de la experiencia creada por Captio fue la acumulación de tales "cosas triviales".</p>
+            <p>Así que decidí hacerlo yo mismo. Vuelve a experimentar el Captio.</p>
+            <p>Este es el registro de desarrollo de "SimpleMemo" Day1. En este artículo, desmontaremos la experiencia Captio y registraremos todos los juicios técnicos sobre cómo reproducirla en una pila de tecnología moderna.</p>
+          </section>
+
+          <!-- Section 1 -->
+          <section id="ja-section1" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-01">1. "Qué" de Captio fue bueno - Intenté desmontar la experiencia</h2></div><div class="ce-chapter__body">
+            <p>Para verbalizar la experiencia de Captio, traté de dividirla en dos elementos de 3.</p>
+
+            <h3>Elemento 1: Lanzamiento instantáneo a entrada</h3>
+            <p>Cuando inicias Captio, el teclado se muestra inmediatamente y es posible introducir texto. La pantalla de inicio se muestra después de la pantalla de bienvenida, y no hay ningún procedimiento para presionar el botón de creación de notas desde allí. Inicio = Entrada. Llamamos a esto "tiempo desde el inicio hasta la entrada de texto" <strong>Time-to-Text</strong>. El Captio fue menos de 0.5 segundos en experiencia.</p>
+
+            <h3>Elemento 2: Borrado instantáneo después del envío (Bojado instantáneo después del envío)</h3>
+            <p>Cuando presiones el botón de enviar, la pantalla se borrará inmediatamente. " Enviando..." No tengo tiempo para esperar mientras miro fijamente la barra de progreso. En el momento en que la nota que escribiste desaparece, puedes pasar a la siguiente acción con una sensación de seguridad de "Oh, pude enviarla". Llamamos a esto "el tiempo de presionar el botón de enviar a la interfaz de usuario se borra" <strong>Send-to-Reset</strong>. El objetivo es vaciar la pantalla antes de que sientas que has estado esperando.</p>
+
+            <h3>Elemento 3: Nada innecesario (Nada innecesario)</h3>
+            <p>Función de carpeta, función de etiqueta, texto enriquecido, soporte de rebajas - ninguno de ellos estaba disponible en Captio. Solo hay un campo de entrada de texto y un botón de enviar. Esta limpieza acercó la carga cognitiva a cero. Una aplicación que no tiene que pensar en qué hacer. Era Captio.</p>
+
+            <p>Este elemento 3 se reproduce en el desarrollo moderno iOS. Esa es la misión de "SimpleMemo".</p>
+          </div></section>
+
+          <!-- Section 2 -->
+          <section id="ja-section2" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-02">2. Arquitectura: ¿Por qué es UIKit "no SwiftUI"?</h2></div><div class="ce-chapter__body">
+            <p>En el desarrollo de iOS en 2026, puede parecer extraño elegir UIKit en lugar de SwiftUI. Sin embargo, nuestro objetivo de máxima prioridad era claro: <strong>Tiempo para enviar mensajes de texto 500ms o menos</strong>.</p>
+
+            <p>Reevaluación `body` de SwiftUI, inicialización `StateObject`, resolución `@Environment` - estos gastos generales se pueden ignorar en el desarrollo normal de aplicaciones, pero no se pueden ignorar para lograr el "inicio y la entrada". Quiero centrarme en el campo de texto rápidamente, incluso con 1ms.</p>
+
+            <p>Lo que se adoptó allí es la construcción directa de <strong>UIKit sin usar Storyboard</strong>.</p>
+
+            <p>Crea una ventana con SceneDelegate y establece el ComposeViewController directamente en el rootViewController. Omita incluso el proceso de análisis de Storyboard.</p>
+
+<pre tabindex="0"><code>// SceneDelegate.swift
+func scene(_ scene: UIScene,
+           willConnectTo session: UISceneSession,
+           options connectionOptions: UIScene.ConnectionOptions) {
+    guard let windowScene = (scene as? UIWindowScene) else { return }
+    let window = UIWindow(windowScene: windowScene)
+    window.rootViewController = ComposeViewController()
+    window.makeKeyAndVisible()
+    self.window = window
+}</code></pre>
+
+            <p>y con `viewDidAppear` en ComposeViewController, enfóquese instantáneamente en la vista de texto.</p>
+
+<pre tabindex="0"><code>// ComposeViewController.swift
+override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    textView.becomeFirstResponder()
+}</code></pre>
+
+            <p>Solo con este código 2, el camino desde el inicio hasta la pantalla del teclado es el más corto.</p>
+
+            <p>El objetivo es 500ms o menos. En el registro medido más tarde por grabación de pantalla (2026 8 11, iPhone 16e, inicio en caliente), fue 0.4 segundos desde el toque del icono hasta la pantalla del teclado. En SwiftUI, es difícil controlar el tiempo de `@FocusState` y la reevaluación del cuerpo en detalle, y es difícil empaquetar este camino (los dos no se midieron y compararon en las mismas condiciones).</p>
+
+            <p>UIKit puede ser "viejo". Sin embargo, "rápido". En este punto 1, UIKit sigue siendo la mejor opción.</p>
+          </div></section>
+
+          <!-- Section 3 -->
+          <section id="ja-section3" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-03">3. Un diseño que se da cuenta de que "desaparece cuando se envía" con un solo toque</h2></div><div class="ce-chapter__body">
+            <p>Existe el juicio de diseño más importante para reproducir la experiencia de "desaparece cuando se envía" del Captio. Es para separar completamente la animación de transmisión <strong> y la limpieza de la interfaz de usuario de la respuesta de red</strong>.</p>
+
+            <p>El flujo de transmisión de las aplicaciones comunes es el siguiente:</p>
+            <ol>
+              <li>Presione el botón de enviar</li>
+              <li>Mostrar indicador de carga</li>
+              <li>Esperando una respuesta del servidor</li>
+              <li>Borrar la interfaz de usuario si tiene éxito, mostrar el error si falla</li>
+            </ol>
+
+            <p>En este flujo, el retraso de red se convierte en el retraso de la interfaz de usuario tal como está. Nuestro flujo es así:</p>
+            <ol>
+              <li>Presione el botón de enviar</li>
+              <li><strong>inmediatamente</strong>borrar interfaz de usuario (animación: 0.25 segundos)</li>
+              <li>Transmisión de red en segundo plano</li>
+              <li>Éxito → Eliminar silenciosamente de la Outbox / Fallado → Reintentar en segundo plano</li>
+            </ol>
+
+<pre tabindex="0"><code>// ComposeViewController.swift
+private func performSendAnimation() {
+    UIView.animate(withDuration: 0.25,
+                   delay: 0,
+                   options: .curveEaseOut) {
+        self.textView.alpha = 0
+        self.subjectField.alpha = 0
+    } completion: { _ in
+        self.textView.text = ""
+        self.subjectField.text = ""
+        self.textView.alpha = 1
+        self.subjectField.alpha = 1
+        self.textView.becomeFirstResponder()
+    }
+}</code></pre>
+
+            <p>Para los usuarios, en el momento en que se presiona el botón de enviar, la nota "desaparece" y pueden escribir la siguiente nota. El éxito o el fracaso de la red se maneja en un lugar invisible para el usuario.</p>
+
+            <p>"¿Pero qué pasa si la transmisión falla?" - La respuesta a esa pregunta es la arquitectura de la Outbox en la siguiente sección.</p>
+          </div></section>
+
+          <!-- Section 4 -->
+          <section id="ja-section4" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-04">4. Arquitectura de la Outbox para evitar derrames</h2></div><div class="ce-chapter__body">
+            <p>Separar la interfaz de usuario de transmisión de la respuesta de red significa que puede ocurrir una situación en la que "la interfaz de usuario se borró, pero la transmisión de correo electrónico realmente falló". Esto es absolutamente inaceptable. La nota que el usuario pensó que fue "envió" en realidad no se envió, esto es una pérdida fatal de confianza para la aplicación de notas.</p>
+
+            <p>El <strong>Patrón de Outbox</strong> se adoptó allí.</p>
+
+            <p>El flujo de envío de mensajes es el siguiente:</p>
+            <ol>
+              <li><strong>Toque el botón de enviar</strong>: Cifre el mensaje AES-GCM y guárdelo en la Outbox (almacenamiento local)</li>
+              <li><strong>UI clear</strong>: Borra la pantalla al instante con performSendAnimation</li>
+              <li><strong>Transmisión en segundo plano</strong>: Extrae un mensaje de la Outbox y envíelo a Relay API</li>
+              <li><strong>Éxito</strong>: Eliminar mensaje de la Outbox</li>
+              <li><strong>Fallo</strong>: Déjalo esperando la transmisión y vuelve a enviarlo más tarde</li>
+              <li><strong>Offline</strong>: Supervise la conexión con NWPathMonitor y vuelva a enviarla automáticamente cuando se restablezca</li>
+            </ol>
+
+            <p>Lo importante es <strong>guardarlo en la Outbox antes de transmitirlo a la red</strong>. Como resultado, incluso si la aplicación se bloquea repentinamente o el dispositivo se apaga, el mensaje escrito en la Outbox permanecerá.</p>
+
+            <p>Los mensajes almacenados en la Outbox están protegidos por el cifrado AES-GCM utilizando CryptoKit. La clave de cifrado se almacena en el llavero y no se puede acceder a ella desde fuera del sandbox de la aplicación.</p>
+
+<pre tabindex="0"><code>// OutboxManager.swift
+func enqueue(message: OutboxMessage) throws {
+    let key = try KeychainHelper.getOrCreateSymmetricKey()
+    let sealedBox = try AES.GCM.seal(
+        message.plainData,
+        using: key
+    )
+    let encrypted = EncryptedOutboxEntry(
+        id: message.id,
+        sealedData: sealedBox.combined!,
+        createdAt: Date(),
+        retryCount: 0
+    )
+    try persistenceStore.save(encrypted)
+}</code></pre>
+
+            <p>Además, debido a que todo lo implementas por ti mismo, <strong>la dependencia de las bibliotecas externas es cero</strong>. CryptoKit, NWPathMonitor, URLSession - todos completados con el marco Apple original. Estar libre del control de versiones de la biblioteca de terceros y la auditoría de seguridad es una gran ventaja para los equipos pequeños.</p>
+          </div></section>
+
+          <!-- Section 5 -->
+          <section id="ja-section5" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-05">5. Retransmisión API: Envío que no depende de la cooperación de OAuth en el buzón</h2></div><div class="ce-chapter__body">
+            <p>El mecanismo de transmisión de Captio no se revela oficialmente. La razón del anuncio de terminación del desarrollador es que ya no puede continuar pasando tiempo para mantener la estabilidad y seguridad de la aplicación, y el método de transmisión no se cita como una razón. Sin embargo, en general, el envío confiando en el correo electrónico externo API se ve fácilmente afectado por los cambios en los requisitos del proveedor y las restricciones de acceso.</p>
+
+            <p>Elegimos la configuración <strong>Cloudflare Workers + Resend API</strong>.</p>
+
+            <p>Cloudflare Workers es una plataforma informática de borde que ejecuta código en el centro de datos más cercano a los usuarios de todo el mundo. Las solicitudes de Japón se procesan en el borde de Japón, y las solicitudes de los Estados Unidos se procesan en el borde de los Estados Unidos. Esto casi elimina el problema del arranque en frío en comparación con el sin servidor convencional (AWS Lambda, etc.).</p>
+
+            <p>Para enviar correo se usa la API de Resend. Resend es una API de envío de correo para desarrolladores.</p>
+
+            <h3>Flujo de autenticación de correo electrónico</h3>
+            <p>Cuando el usuario establece la dirección de correo electrónico de destino, la autenticación de correo electrónico se realiza con el código de autenticación 6 dígitos. Esto evita el envío no autorizado a direcciones de correo electrónico de terceros.</p>
+
+            <h3>Límite de velocidad multicapa</h3>
+            <p>Se implementan restricciones de velocidad multicapa para evitar el uso no autorizado.</p>
+
+<pre tabindex="0"><code>// Cloudflare Worker - Rate Limit Configuration
+const RATE_LIMITS = {
+  devicePerMinute: 30,    // 1デバイスあたり1分30回
+  devicePerDay: 200,      // 1デバイスあたり1日200回
+  ipPerHour: 120,         // 1IPあたり1時間120回
+  globalPerDay: 300       // サービス全体で1日300回（調整可能）
+};</code></pre>
+
+            <p>Al limitar la velocidad en la capa 3 en un dispositivo, IP y global, puede bloquear fugas y ataques de botnet en un solo dispositivo.</p>
+
+            <p><strong>2026-09 Postscript: </strong> El límite superior para cada terminal y el límite superior del día total 1 se eliminaron en 2026 6. El límite máximo de transmisión actual es el límite superior por 1 horas por dirección IP.</p>
+
+            <h3>Garantía de igualdad de poder</h3>
+            <p>Para evitar la transmisión duplicada debido a la inestabilidad de la red, asigne un UUID a cada mensaje y realice una comprobación de duplicado en el lado de Relay API. Si se reenvía el mismo mensaje UUID, después del tiempo 2, devolverá una respuesta exitosa sin enviar un correo electrónico. Como resultado, incluso si se combina con el mecanismo de reintento del patrón de Outbox, el usuario no recibirá la misma nota dos veces.</p>
+
+            <p><strong>Actualización de 2026-10:</strong> el servidor de envío actual no comprueba por sí mismo los duplicados. Pasa el identificador del mensaje como Idempotency-Key en la solicitud a Resend. Resend recuerda la misma clave durante 24 horas y devuelve la respuesta anterior ante una solicitud con el mismo contenido. Así se evita enviar de nuevo la misma nota durante 24 horas. Consulta el <a href="/es/devlog/relay-api-design">diseño de la Relay API</a>.</p>
+          </div></section>
+
+          <!-- Section 6 -->
+          <section id="ja-section6" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-06">6. Lo que hice hoy: Borrar la pequeña sensación de incomodidad uno por uno</h2></div><div class="ce-chapter__body">
+            <p>Gran parte del trabajo de implementación de Day1 se pasó revisando el diálogo de calificación por estrellas. La evaluación de App Store es la línea de vida de la aplicación, pero no busque la evaluación de una manera que perjudique la experiencia del usuario.</p>
+
+            <h3>Rediseño de las condiciones de visualización</h3>
+            <p>Las condiciones de visualización del cuadro de diálogo de clasificación por estrellas se establecen de la siguiente manera:</p>
+            <ul>
+              <li><strong>Mostrado cada 100</strong>: Mostrar solo a los usuarios que han utilizado la aplicación lo suficiente</li>
+              <li><strong>Intervalo mínimo de 14 días</strong>: Más de un 14 ha pasado desde la última pantalla</li>
+              <li><strong>No volver a mostrar durante 30 días tras cerrarlo</strong>: si el usuario lo cierra, no se muestra de nuevo durante 30 días</li>
+            </ul>
+
+            <h3>Corrección del área de toque del icono de la estrella</h3>
+            <p>Apple Las directrices de interfaz humana recomiendan que el tamaño mínimo del objetivo táctil sea 44x44pt. El área de toque del icono de la estrella no cumpía con este estándar, por lo que se corrigió.</p>
+
+<pre tabindex="0"><code>// StarRatingView.swift
+private func createStarButton() -> UIButton {
+    let button = UIButton(type: .custom)
+    button.translatesAutoresizingMaskIntoConstraints = false
+    NSLayoutConstraint.activate([
+        button.widthAnchor.constraint(greaterThanOrEqualToConstant: 44),
+        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44)
+    ])
+    return button
+}</code></pre>
+
+            <h3>Corrección de distorsión del icono de estrella</h3>
+            <p>UIStackView. `contentMode` se estableció en `.scaleAspectFit`, y la distribución de StackView se cambió a `.equalSpacing`.</p>
+
+            <h3>Flujo después de la evaluación</h3>
+            <ul>
+              <li><strong>5 estrellas</strong>: Transición a la pantalla de revisión de App Store (`SKStoreReviewController`)</li>
+              <li><strong>4 estrellas o menos</strong>: Muestra silenciosamente el brindis de "Gracias" y termina. No conduzca a reseñas negativas a App Store.</li>
+            </ul>
+          </div></section>
+
+          <!-- Section 7 -->
+          <section id="ja-section7" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-07">7. Se ha resuelto la inconsistencia del estado de visualización del historial</h2></div><div class="ce-chapter__body">
+            <p>Noté un error en la pantalla del historial de transmisión (Historial). Había un mensaje de que el estado seguía siendo "Enviando" a pesar de que la transmisión estaba completa.</p>
+
+            <p>Como resultado de la investigación de la causa, se descubrió que había un problema con la lógica de actualización de estado. En implementaciones anteriores, el contenido de texto del mensaje se utilizó como clave para actualizar el estado. Sin embargo, si envía una nota con el mismo contenido más de una vez, una búsqueda basada en texto no puede identificar el mensaje correcto.</p>
+
+            <p>La corrección fue sencilla y clara. Se cambió la búsqueda basada en texto a <strong>Actualización de estado basada en ID</strong>. A cada mensaje se le asigna un UUID al guardar la Outbox, así que use este ID para actualizar el estado del historial.</p>
+
+<pre tabindex="0"><code>// HistoryManager.swift
+// Before: テキストベースの検索（バグの原因）
+// func updateStatus(forText text: String, status: SendStatus)
+
+// After: IDベースのステータス更新
+func updateStatus(forMessageId id: UUID, status: SendStatus) {
+    guard let index = entries.firstIndex(where: { $0.messageId == id }) else {
+        return
+    }
+    entries[index].status = status
+    persistEntries()
+}</code></pre>
+
+            <p>Con esta corrección, no importa cuántas veces envíes una nota con el mismo contenido, el estado de cada una ahora se muestra correctamente.</p>
+          </div></section>
+
+          <!-- Section 8 -->
+          <section id="ja-section8" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-08">8. Obsesión panorámica con la privacidad</h2></div><div class="ce-chapter__body">
+            <p>La información privada está escrita en la aplicación de notas. Contraseñas, preocupaciones personales, ideas de negocios: es imposible predecir lo que escribirán los usuarios. Es por eso que la protección de la privacidad no es "suficiente", pero "excesiva" es la adecuada.</p>
+
+            <h3>Superposición de privacidad en el conmutador de aplicaciones</h3>
+            <p>En el conmutador de aplicaciones iOS, la pantalla de la aplicación se muestra como una miniatura. Muestra una superposición de privacidad cuando la aplicación migra al fondo para que el contenido de la nota no se pueda ver desde la pantalla del conmutador de aplicaciones.</p>
+
+            <p><strong>2026-09 Postscript: </strong>Esta protección no está habilitada en la aplicación actual (el procesamiento de la pantalla permanece en la fuente, pero no se llama). La nota que se muestra puede permanecer en la imagen del conmutador de aplicaciones. Para obtener más información, consulte el artículo sobre "Diseño de privacidad".</p>
+
+            <h3>Sesión URL efímera</h3>
+            <p>La sesión de URL normal almacena caché, cookies e información de autenticación en el disco. Al usar `URLSessionConfiguration.ephemeral`, nos aseguramos de que esta información no permanezca en el disco en absoluto. Esto es para evitar que el contenido de la nota permanezca en el almacenamiento como una caché de comunicación.</p>
+
+            <h3>Tracos inofensivos</h3>
+            <p>Tenga cuidado con la depuración de registros bajo desarrollo. " El proceso aparentemente inofensivo de "proportar el contenido de la nota enviada al registro" puede ser un agujero de seguridad. Nuestra política es clara:</p>
+            <ul>
+              <li>El contenido de la nota <strong>no está registrado en absoluto, incluso si es una compilación de DEBUG</strong></li>
+              <li>El registro de errores no utiliza `localizedDescription`, solo se registra <strong>`type(of: error)`</strong></li>
+              <li>Razón: Porque `localizedDescription` puede contener la entrada del usuario</li>
+            </ul>
+
+<pre tabindex="0"><code>// NetworkManager.swift
+// BAD: エラーの詳細をログに出力
+// Logger.error("Send failed: \(error.localizedDescription)")
+
+// GOOD: エラーの型のみをログに出力
+Logger.error("Send failed: \(type(of: error))")</code></pre>
+
+            <p>Puede parecer paranoico. Sin embargo, creo que este grado de paranoia es necesario para confiar y usar la aplicación de notas.</p>
+          </div></section>
+
+          <!-- Section 9 -->
+          <section id="ja-section9" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-09">9. Soporte de idioma 10: Quiero entregar a usuarios de Captio en todo el mundo</h2></div><div class="ce-chapter__body">
+            <p>Captio tenía usuarios en todo el mundo, principalmente en países de habla inglesa. Para entregar "SimpleMemo" a los antiguos usuarios, el lenguaje 10 fue compatible desde la primera versión.</p>
+
+            <p>Idiomas admitidos: japonés, inglés, español, francés, alemán, italiano, portugués, coreano, chino (simplificado), árabe.</p>
+
+            <p><strong>2026-09 Epospítula: </strong> En la notación actual App Store, los idiomas admitidos son japonés, inglés, español, francés, alemán, portugués, ruso, chino (simplificado), chino (tradicional) y árabe 10. Los italianos y coreanos de la lista anterior no están incluidos en la notación actual.</p>
+
+            <p>Especialmente <strong>El soporte árabe de RTL (de derecha a izquierda)</strong> fue un desafío técnico. No solo la dirección del texto, sino también todo el diseño de la interfaz de usuario debe reflejarse. Al utilizar constantemente la restricción "liderar"/`trailing" de Auto Layout, se da cuenta de un diseño natural incluso en un entorno RTL.</p>
+
+            <h3>Cambio de idioma en la aplicación</h3>
+            <p>Además del cambio de idioma en la aplicación después de iOS 16, también implementa su propio mecanismo de cambio de idioma. Cuando se cambia el idioma, el ViewController se reemplaza con la transición `cross-dislove` para proporcionar una experiencia de cambio fluida.</p>
+
+<pre tabindex="0"><code>// LanguageManager.swift
+func applyLanguageChange() {
+    guard let window = UIApplication.shared.connectedScenes
+        .compactMap({ $0 as? UIWindowScene })
+        .first?.windows.first else { return }
+
+    let newVC = ComposeViewController()
+    newVC.view.frame = window.bounds
+    UIView.transition(with: window,
+                      duration: 0.3,
+                      options: .transitionCrossDissolve,
+                      animations: {
+        window.rootViewController = newVC
+    })
+}</code></pre>
+          </div></section>
+
+          <!-- Section 10 -->
+          <section id="ja-section10" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-10">10. El aprendizaje de hoy: El producto es un diseño de "sentido de seguridad"</h2></div><div class="ce-chapter__body">
+            <p>Después de terminar Day1, lo que creo es que la esencia de este producto es un diseño de "sentido de seguridad".</p>
+
+            <p>Resuma los números técnicos:</p>
+            <ul>
+              <li><strong>Tiempo de texto</strong>: 500ms o menos (objetivo)</li>
+              <li><strong>Send-to-Reset</strong>: Brevedad que no se siente esperando (obo)</li>
+              <li><strong>Mensaje derramado</strong>: Prevenir con el patrón de la Outbox</li>
+              <li><strong>Cifrado</strong>: AES-GCM (CryptoKit)</li>
+              <li><strong> Dependencia de la biblioteca externa</strong>: Cero</li>
+            </ul>
+
+            <p>Sin embargo, todas estas cifras se resumen en un objetivo llamado "seguridad".</p>
+
+            <p>Inicio rápido → "Puedes escribir inmediatamente en cualquier momento" tranquilidad. <br> Desaparece cuando lo envías → "Procesado" sensación de seguridad. <br> Contramedidas contra derrames → "No desaparecerá sin transmisión" tranquilidad. <br> Cifrado → "Nadie puede ver" tranquilidad.</p>
+
+            <p>El Captio fue amado no por su excelente función. Porque la experiencia de "usar con tranquilidad" fue completamente pulida. Quiero hacerme cargo de eso.</p>
+          </div></section>
+
+          <!-- Section 11 -->
+          <section id="ja-section11" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-11">11. La próxima vez (Day2) vista previa</h2></div><div class="ce-chapter__body">
+            <p>Day2 planea trabajar en los siguientes temas:</p>
+            <ul>
+              <li><strong>Sofisticación de la animación de transmisión</strong>: Desde el desvanecimiento del segundo 0.25 actual a una animación más cómoda</li>
+              <li><strong>Optimización del tiempo de las actualizaciones de estado del historial</strong>: Comparación de actualizaciones en tiempo real con actualizaciones por lotes</li>
+              <li><strong>¿De verdad necesitas un brindis exitoso? </strong>: Consideración de la opción "no mostrar" para una retroalimentación de transmisión exitosa</li>
+            </ul>
+            <p>Apuntando a la elegancia de "nada" de Captio, continúe con Day2.</p>
+          </div></section>
+
+        </div>
+      </div>
+
+      <!-- ======================== -->
+      <!-- ENGLISH VERSION          -->
+      <!-- ======================== -->
+
+      <!-- ======================== -->
+      <!-- RELATED TOPICS (shared)  -->
+      <!-- ======================== -->
+      <div class="related-topics">
+        <h2 id="reading-12" data-ce-number="12"> <span>Temas relacionados con la profundización</span> </h2>
+        <div class="related-grid">
+          <a href="/es/devlog/uikit-vs-swiftui" class="related-card">
+            <div class="related-card__title">
+              <span>UIKit vs SwiftUI: Selección para la velocidad de inicio</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>La razón por la que elegí UIKit en 2026. Diseño de arquitectura dirigido a Time-to-Text 500ms o menos.</span>
+
+            </div>
+          </a>
+          <a href="/es/devlog/outbox-architecture" class="related-card">
+            <div class="related-card__title">
+              <span>Arquitectura de la Outbox: diseño para evitar derrames</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>La interfaz se vacía al enviar, pero los mensajes pendientes permanecen en el dispositivo y se reintentan. Explicamos el patrón Outbox con cifrado AES-GCM.</span>
+
+            </div>
+          </a>
+          <a href="/es/devlog/relay-api-design" class="related-card">
+            <div class="related-card__title">
+              <span>Relay API: Construye una plataforma de entrega de correo electrónico con los trabajadores de Cloudflare</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>Envío sin depender de una conexión OAuth al buzón. Una API de retransmisión en el edge, en Cloudflare Workers, envía mediante Resend.</span>
+
+            </div>
+          </a>
+          <a href="/es/devlog/privacy-first-design" class="related-card">
+            <div class="related-card__title">
+              <span>Diseño de privacidad primero: compromiso paranoico</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>URLSession efímera, manejo de registros y especificaciones actuales del conmutador de aplicaciones (la función de ocultar notas automáticamente no está habilitada).</span>
+
+            </div>
+          </a>
+          <a href="/es/captio-alternative/" class="related-card">
+            <div class="related-card__title">
+              <span>Captio Guía de comparación y migración de aplicaciones alternativas</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>Procedimiento de migración de Captio, tabla de comparación de funciones, preguntas frecuentes. Haga clic aquí si está considerando la transferencia.</span>
+
+            </div>
+          </a>
+          <a href="/es/note-to-email/" class="related-card">
+            <div class="related-card__title">
+              <span>Cómo enviarte una nota por correo electrónico</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>Envía por correo electrónico la idea que se te ocurrió inmediatamente. Memo → Guía de uso del correo electrónico.</span>
+
+            </div>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-13" data-ce-number="13"> <span>Referencias</span> </h2></div><div class="ce-chapter__body">
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developer.apple.com/documentation/uikit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Desarrollador — Documentación de UIKit</a> — <span>Referencia oficial al marco UIKit. Se utiliza para construir la interfaz de usuario de SimpleMemo</span></li>
+    <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener" style="color:var(--accent);">Desarrollador Apple — Documentación de CryptoKit</a> — <span>Utilizado para implementar la protección de datos de Outbox con cifrado AES-GCM</span></li>
+    <li><a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener" style="color:var(--accent);">Documentación de los trabajadores de Cloudflare</a> — <span>Aducido como una plataforma sin servidor para la retransmisión de correo API</span></li>
+    <li><a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener" style="color:var(--accent);">Chris Richardson — Patrón: Outbox transaccional (microservices.io)</a> — <span>Un patrón de diseño en el que el mensaje que se enviará se escribe primero en la mesa de espera (Outbox) y se envía mediante otro proceso. SimpleMemo utiliza la misma forma de pensar en el terminal</span></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc5321" target="_blank" rel="noopener" style="color:var(--accent);">RFC 5321 — Protocolo simple de transferencia de correo (SMTP)</a> — <span>Especificación estándar del protocolo de transmisión de correo</span></li>
+  </ul>
+</div></section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/es/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>Siguiente lectura</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Crea un lugar para almacenar notas con la colaboración Obsidian</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span> Si estableces el enlace y guardas el destino en iPhone, también puedes dejar las notas enviadas a Obsidian. </span></span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>Contenido relacionado</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/es/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Comparación de aplicaciones alternativas Captio</span></a></li>
+    <li><a href="/es/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Todos los artículos del blog</span></a></li>
+    <li><a href="/es/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Lista de comparación de aplicaciones de memos</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="es" dir="ltr"><a class="site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Una pequeña nota. Un paso más.</p><p class="site-footer-description">Envía notas desde tu iPhone a Obsidian y por correo electrónico.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="Navegación del pie de página">
+      <div class="footer__col">
+        <p class="footer__col-title">Producto</p>
+        <a href="/es/download/" class="footer__link">Descargar</a>
+        <a href="/es/" class="footer__link">Inicio</a>
+        <a href="/es/how-to/" class="footer__link"><span>Guías</span> </a>
+        <a href="/es/templates/" class="footer__link"><span>Templo</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Comparar y cambiar</p>
+        <a href="/es/captio/" class="footer__link"><span>Fúrmula Captio</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Lecturas</p>
+        <a href="/es/devlog/" class="footer__link">Registro de desarrollo</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Soporte</p>
+        <a href="/es/roadmap/" class="footer__link">Hoja de ruta pública</a>
+        <a href="/es/about/" class="footer__link">Sobre el desarrollador</a>
+        <a href="/es/terms" class="footer__link"><span>Términos de uso</span> </a>
+        <a href="/es/privacy" class="footer__link">Privacidad</a>
+        <a href="/es/contact" class="footer__link">Contacto</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Operado por YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

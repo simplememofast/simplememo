@@ -9,6 +9,7 @@ import csv
 import hashlib
 import io
 import json
+import re
 import tempfile
 from collections import Counter
 from datetime import date
@@ -39,6 +40,10 @@ def asset(path):
 
 
 def put(path, text):
+    if path.endswith(".html"):
+        from sync_page_design import transform as design
+        from sync_shared_chrome import transform
+        text = transform(design(text, path), path)
     outputs[path] = text.rstrip() + "\n"
 
 
@@ -48,6 +53,36 @@ def table(headers, records):
 
 def links(items):
     return '<div class="actions">' + "".join(f'<a class="button secondary" href="{e(url)}">{e(label)}</a>' for url, label in items) + "</div>"
+
+
+def capture_inbox_page(html, body, copyright_line):
+    """Apply the Japanese tool's maintained shell to generated source content."""
+    shell = (ROOT / "scripts/templates/obsidian-inbox-capture-ja.html.tmpl").read_text()
+    shell = re.sub(r"\{\{asset:([^}]+)\}\}", lambda m: asset(m[1]), shell)
+    head, shell_body = shell.split("</head>\n", 1)
+    extra_head = head.removeprefix("<head>\n")
+    hero_match = re.match(r'<p class="eyebrow">(.*?)</p><h1>(.*?)</h1><p class="lead">(.*?)</p>', body, re.S)
+    if not hero_match:
+        raise ValueError("Inbox source must start with its label, heading and introduction")
+    label, title, intro = hero_match.groups()
+    title = title.replace("思いつきを、", '<span class="cs-phrase">思いつきを、</span>').replace("使いやすい", '<span class="cs-phrase">使いやすい</span>').replace("Inboxの形に。", '<span class="cs-phrase">Inboxの形に。</span>')
+    rest = body[hero_match.end():]
+    tool_end = rest.index("</noscript>") + len("</noscript>")
+    tool, rest = rest[:tool_end], rest[tool_end:]
+    tool = tool.replace("<pre>", '<pre tabindex="0" role="region" aria-label="テキスト例">')
+    parts = re.split(r"<h2>(.*?)</h2>", rest, flags=re.S)
+    if parts[0].strip() or len(parts) % 2 != 1:
+        raise ValueError("Inbox instructions must be top-level heading/content pairs")
+    chapters = [("Markdownを作る", tool)] + list(zip(parts[1::2], parts[2::2]))
+    routes = ''.join(f'<a class="ce-route" href="#chapter-{i}"><span>{i:02d}</span><b>{heading}</b></a>' for i, (heading, _) in enumerate(chapters[:3], 1))
+    content = ''.join(f'<section class="lp-section ce-chapter{" ce-chapter--wide" if i == 1 else ""}"><div class="ce-chapter__head"><h2 id="chapter-{i}" data-ce-number="{i:02d}">{heading}</h2></div><div class="ce-chapter__body">{text}</div></section>' for i, (heading, text) in enumerate(chapters, 1))
+    concept = '<figure class="ce-stage cn-concept" aria-hidden="true"><p class="ce-stage-label">MARKDOWN / WORKSPACE</p><div class="cn-concept-list">' + ''.join(f'<div class="cn-concept-row"><span>{i:02d}</span><strong>{text}</strong></div>' for i, text in enumerate(["例文を編集", "形式を選ぶ", "コピー・保存"], 1)) + '</div><figcaption class="ce-stage-foot">このページの使い方</figcaption></figure>'
+    hero = f'<header class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy"><p class="lp-hero__label">{label}</p><h1 class="lp-hero__title">{title}</h1><p class="lp-hero__sub">{intro}</p><a class="ce-read-link" href="#chapter-1">本文を読む <span aria-hidden="true">↓</span></a></div><nav class="ce-routes" aria-label="読みたい内容から選ぶ">{routes}</nav>{concept}</header>'
+    main = f'<main id="main" class="resource-main cs-workspace"><div class="container">{hero}<div class="ce-article">{content}</div></div></main>'
+    shell_body = shell_body.replace("{{main}}", main).replace("{{copyright}}", e(copyright_line))
+    if "{{" in shell_body or "{{" in extra_head:
+        raise ValueError("Unresolved capture shell placeholder")
+    return html[:html.index("</head>")] + extra_head + "</head>\n" + shell_body
 
 
 def page(path, title, description, body, ja, en, lang, tool=False):
@@ -108,7 +143,13 @@ def page(path, title, description, body, ja, en, lang, tool=False):
 <a href="{prefix}/autopilot/">{'Operations research' if english else '運営の実測値'}</a>
 </nav><p>{e(copyright_line)}</p></div></footer>
 </body></html>"""
-    return replace_i18n_lines(html, build_block(lang, BASE + path, [("ja", BASE + ja), ("en", BASE + en)], BASE + ja))
+    if tool and lang == "ja":
+        html = capture_inbox_page(html, body, copyright_line)
+    from localization_registry import alternates_for
+    rel = path.lstrip('/') + ('index.html' if path.endswith('/') else '.html')
+    alternatives = alternates_for(rel) or {"ja": ja, "en": en}
+    return replace_i18n_lines(html, build_block(lang, BASE + path,
+        [(locale, BASE + url) for locale, url in alternatives.items()], BASE + ja))
 
 
 def csv_text(headers, records):
@@ -119,9 +160,11 @@ def csv_text(headers, records):
     return out.getvalue()
 
 
+# Quoting one header field leaves the parsed CSV identical while changing its
+# ETag. That refreshes an old immutable response with the new noindex header.
 put("assets/downloads/autopilot-runs-2026-09-02.csv", csv_text(
     ["run_id", "date_jst", "route", "attempted", "outcome", "pr", "intervention_kinds"],
-    [[r["run_id"], r["date_jst"], r["route"], str(r["attempted"]).lower(), r["outcome"], r["pr"] or "", "|".join(r["intervention_kinds"])] for r in rows]))
+    [[r["run_id"], r["date_jst"], r["route"], str(r["attempted"]).lower(), r["outcome"], r["pr"] or "", "|".join(r["intervention_kinds"])] for r in rows]).replace("intervention_kinds\n", '"intervention_kinds"\n', 1))
 
 
 def chart(path, title, series, denominator, note):
@@ -211,27 +254,29 @@ for lang in ("ja", "en"):
         ("Offline behavior" if english else "オフライン時", "Email queues in Outbox; folder append can run locally" if english else "メールはOutboxで待機。フォルダ追記は端末内で実行可能"),
     ]
     if english:
-        body = f"""<p class="eyebrow">For writers and reviewers</p><h1>Product facts, visuals, and the original sources.</h1><p class="lead">A compact kit for covering email-to-self capture, Siri, Obsidian workflows, or the operations of a small app. Descriptions are ready to copy; setup conditions and source data are linked alongside them.</p><p class="stamp">Updated 5 September 2026 · Maintained by the Simple Memo development team</p>
+        body = f"""<p class="eyebrow">For writers and reviewers</p><h1>Product facts, visuals, and the original sources.</h1><p class="lead">A compact kit for covering email-to-self capture, Siri, Obsidian workflows, or the operations of a small app. Descriptions are ready to copy; setup conditions and source data are linked alongside them.</p><p class="stamp">Updated 1 October 2026 · Maintained by the Simple Memo development team</p>
 <h2>A short product description</h2><div class="quote">{e(summaries[lang])}</div>
 {links([(f'/assets/downloads/simplememo-facts-{lang}.txt','Download description (TXT)'),('/en/obsidian/','Obsidian setup'),('/en/siri/','Siri setup')])}
 <h2>Check the facts before reviewing</h2>{table(['Item','What the product does'],facts)}
 <p>The vault picker and the URL-scheme fallback behave differently. With no compatible folder selected, the fallback may open Obsidian. Apple Watch hands off the append to the iPhone. Cloud synchronization can add delay. Normal email sending is not end-to-end encrypted email; local encryption and transport security are separate properties. Read the <a href="/en/privacy-architecture/">privacy architecture</a> before making privacy claims.</p>
 <p>Use the <a href="/en/obsidian/">current setup guide</a> and <a href="/en/">product page</a> for availability and pricing. This kit deliberately avoids a competing-app speed table: warm and cold starts, different definitions of “ready,” and human actions are not interchangeable.</p>
-<h2>Setup screens and explanatory videos</h2><p>These are published Siri setup screens. They show the setup guide; their labels are not a promise that every OS version presents the same interface.</p>{screen_html}
-<figure><video controls playsinline preload="none" poster="/assets/video/obsidian-append-poster.jpg" aria-label="Japanese explanatory animation of the note-to-Obsidian workflow"><source src="/assets/video/obsidian-append.mp4" type="video/mp4"></video><figcaption>Japanese explanatory animation: capture a memo, send it to yourself, and append it to the selected vault. This is an illustration, not a timed recording from an iPhone.</figcaption></figure>
-{links([('/assets/video/obsidian-append.mp4','Obsidian illustration (MP4)'),('/assets/video/siri-airpods.mp4','Siri illustration (MP4)'),('/assets/img/app-icon-256.png','App icon (PNG)')])}
+<h2>Setup screens and explanatory videos</h2><p>These are published Siri setup screens. They show the setup guide; their labels are not a promise that every OS version presents the same interface. Phrases in the images such as “Phone stays pocketed”, “Works the same on every AirPods” and “‘Hey Siri’ always works” are earlier wording, not a guarantee for every device state. See the <a href="/en/siri/">Siri guide</a> for the current conditions.</p>{screen_html}
+<figure><video controls playsinline preload="none" poster="{asset('assets/video/obsidian-append-poster.jpg')}" aria-label="Japanese explanatory animation of the note-to-Obsidian workflow"><source src="{asset('assets/video/obsidian-append.mp4')}" type="video/mp4"></video><figcaption>Japanese explanatory animation of the normal mode, which keeps a memo both in your email and in the selected vault. The vault append does not travel through the email. This is an illustration, not a timed recording from an iPhone.</figcaption></figure>
+{links([(asset('assets/video/obsidian-append.mp4'),'Obsidian illustration (MP4)'),(asset('assets/video/siri-airpods.mp4'),'Siri illustration (MP4)'),('/assets/img/app-icon-256.png','App icon (PNG)')])}
+<p>The Siri illustration is a slideshow of the Japanese in-app guide screens. It is not a recording of email receipt or vault storage, and its on-screen phrases meaning “arrives in email and Obsidian at the same time” and “not lost offline” are earlier wording. Email and the vault are separate paths; see the <a href="/en/siri/">Siri guide</a>.</p>
 <h2>Three angles with material to inspect</h2><ul><li><strong>Returning to email-to-self:</strong> a current option for readers who previously used Captio. See the <a href="/en/captio-alternative/">Captio alternative guide</a>; this is not an official successor.</li><li><strong>Capture before organizing:</strong> inspect the <a href="/en/obsidian/">Obsidian guide</a> and try the <a href="/en/resources/obsidian-inbox/">standalone Inbox Markdown tool</a>.</li><li><strong>What AI operations actually delivered:</strong> the <a href="/en/autopilot/">23-day report</a> includes failed runs, intervention definitions, CSV data, and three reusable charts.</li></ul>
 <h2>Using the material</h2><p>When covering Simple Memo, these product descriptions and original illustrations can be used with their context intact. Identify explanatory animations as animations. Screenshots may contain third-party trademarks; this kit does not grant rights in those trademarks or imply endorsement. Please retain the dates and denominators when citing research, and link readers to the relevant source page.</p><p>For additional screenshots, an interview, or a reproducibility question, <a href="/en/contact">contact the developer</a>. Editorial conclusions and link choices belong to the publisher.</p>"""
     else:
-        body = f"""<p class="eyebrow">紹介・レビュー・取材向け</p><h1>紹介に必要な説明と、確かめられる原本を。</h1><p class="lead">自分宛メールメモ、Siri、Obsidian連携、小さなアプリのAI運営。記事で扱う切り口ごとに、説明文・画面・対応条件・実測資料をまとめました。</p><p class="stamp">2026年9月5日更新 ／ シンプルメモ開発チーム</p>
+        body = f"""<p class="eyebrow">紹介・レビュー・取材向け</p><h1>紹介に必要な説明と、確かめられる原本を。</h1><p class="lead">自分宛メールメモ、Siri、Obsidian連携、小さなアプリのAI運営。記事で扱う切り口ごとに、説明文・画面・対応条件・実測資料をまとめました。</p><p class="stamp">2026年10月1日更新 ／ シンプルメモ開発チーム</p>
 <h2>そのまま使える製品説明</h2><div class="quote">{e(summaries[lang])}</div>
 {links([(f'/assets/downloads/simplememo-facts-{lang}.txt','説明文をダウンロード（TXT）'),('/obsidian/','Obsidianの設定'),('/siri/','Siriの設定')])}
 <h2>紹介前に確認できる製品情報</h2>{table(['項目','内容'],facts)}
 <p>対応するフォルダを選べない場合はURLスキーム経由となり、Obsidianが開くことがあります。Apple Watchからの追記はiPhoneが担当します。クラウド同期には時間差が生じます。メール配送をエンドツーエンド暗号化と表現しないでください。端末内の暗号化と通信経路は別の性質です。詳細は<a href="/privacy-architecture/">プライバシー設計</a>で確認できます。</p>
 <p>料金や現在の提供状況は<a href="/">製品ページ</a>、動作条件は<a href="/obsidian/">設定ガイド</a>を参照してください。起動速度を比較する場合は、ウォーム／コールド起動や「入力可能」の定義を揃える必要があります。</p>
-<h2>設定画面と説明動画</h2><p>公開済みのSiri設定ガイド画面です。OSのバージョンによって表示が異なる場合があります。</p>{screen_html}
-<figure><video controls playsinline preload="none" poster="/assets/video/obsidian-append-poster.jpg" aria-label="メモからObsidianへの流れを説明するアニメーション"><source src="/assets/video/obsidian-append.mp4" type="video/mp4"></video><figcaption>入力→自分宛メール→保管庫への追記を説明するアニメーションです。実機録画・速度の測定映像ではありません。</figcaption></figure>
-{links([('/assets/video/obsidian-append.mp4','Obsidianの説明動画（MP4）'),('/assets/video/siri-airpods.mp4','Siriの説明動画（MP4）'),('/assets/img/app-icon-256.png','アプリアイコン（PNG）')])}
+<h2>設定画面と説明動画</h2><p>公開済みのSiri設定ガイド画面です。OSのバージョンによって表示が異なる場合があります。画像内の「iPhoneはポケットのまま」「どのAirPodsでも同じです」は従来の表現で、すべての端末状態での動作を保証するものではありません。現在の条件は<a href="/siri/">Siriのページ</a>のとおりです。</p>{screen_html}
+<figure><video controls playsinline preload="none" poster="{asset('assets/video/obsidian-append-poster.jpg')}" aria-label="メモからObsidianへの流れを説明するアニメーション"><source src="{asset('assets/video/obsidian-append.mp4')}" type="video/mp4"></video><figcaption>通常モードで、メモをメールとObsidianの両方に残す流れを説明するアニメーションです。メールを経由して保管庫へ転送する仕組みではありません。実機録画・速度の測定映像ではありません。</figcaption></figure>
+{links([(asset('assets/video/obsidian-append.mp4'),'Obsidianの説明動画（MP4）'),(asset('assets/video/siri-airpods.mp4'),'Siriの説明動画（MP4）'),('/assets/img/app-icon-256.png','アプリアイコン（PNG）')])}
+<p>Siriの説明動画は、アプリ内ガイドの画面を使ったスライドショーです。メールの受信や保管庫への保存を記録した映像ではなく、画面内の「メールとObsidianに、同時に届く」「圏外でも消えない」も従来の表現です。メールと保管庫は別の経路です。<a href="/siri/">Siriのページ</a>で確認してください。</p>
 <h2>検証資料がある3つの切り口</h2><ul><li><strong>自分宛メールで残す：</strong><a href="/captio-alternative/">Captioの代替を探す人向けガイド</a>。正式な後継・承継製品ではありません。</li><li><strong>整理する前に、残す手間を減らす：</strong><a href="/obsidian/">Obsidianへの追記手順</a>と、アプリなしでも使える<a href="/resources/obsidian-inbox/">Inbox用Markdownツール</a>があります。</li><li><strong>AI運営は何を出荷できたか：</strong><a href="/autopilot/">運営の実測ページ</a>と<a href="/en/autopilot/">英語レポート</a>に、失敗例、集計条件、CSV、引用用図表を用意しています。</li></ul>
 <h2>素材を使うとき</h2><p>シンプルメモを紹介する記事では、文脈を保ったうえで説明文と独自の説明図をご利用いただけます。説明動画はアニメーションと明記してください。画面内の第三者の商標について権利を付与するものではなく、提携・推奨を意味しません。実測の引用時は期間と分母を併記し、読者が検証できる原本ページを案内してください。</p><p>追加の画面、取材、検証方法に関するご相談は<a href="/contact">お問い合わせフォーム</a>へ。記事の評価やリンクの選択は掲載者に委ねます。</p>"""
     put(prefix.lstrip("/") + ("/" if prefix else "") + "press/index.html", page(prefix + "/press/", title, desc, body, "/press/", "/en/press/", lang))
@@ -273,7 +318,7 @@ for lang in ("ja", "en"):
 <h2>そのまま保存できるひな形</h2><p>記録欄と見返しの問いだけを置いたMarkdownです。テンプレート用プラグインは不要で、日付の例は自分の運用に合わせて置き換えます。</p>{downloads}
 <h2>キャプチャ方法を同じ条件で比べる</h2><p>CSVは記入用の実測シートで、測定結果ではありません。Obsidianへの直接入力、Appleショートカット、シンプルメモ、自分宛メール、共有シートの5方式を例に、各10試行の空欄を用意しました。同じ保存先まで到達するには、方式ごとの追加設定が必要になる場合があります。自分の設定を記録してください。</p><p>端末とOSを揃え、「どの操作から、何ができるまで」を測るか先に決めます。ウォーム起動とコールド起動は分け、失敗も残します。操作数、入力開始までの時間、保存先に現れるまでの時間は別に計測します。50試行で利用者全体を代表できるとは扱いません。既存の<a href="/blog/benchmark-methodology">測定方法の説明</a>も参照できます。</p>
 <h3>試行ごとの証拠を残す</h3><p>編集欄を空にし、個人情報を含まないテスト文を使います。アプリのbuildと配布経路、入力経路、通信状態、設定・認証の完了状態を記録してください。開始操作から保存先の本文が見えるまでを同じ動画に収めます。録画の参照情報は手元で管理し、共有するシートに私的なメモやアカウント識別子を含めないでください。</p><p>開始操作、入力可能な状態、送信操作、保存先で初めて本文を確認できた時点を、同じ動画の先頭からの秒数で記録します。指で隠れた時点や録画外の時点は空欄にし、スクリーンショットの時計やサーバーイベントの時計で補いません。編集欄の消去やアプリ内履歴だけでは到着を確認できません。保存先への到着時間は、両端が見える場合だけ「保存先の表示時点−送信操作時点」で算出します。失敗・未確認とその理由も残します。各方式10行は記入の出発点であり、統計上必要な試行数の推奨ではありません。</p>
-<h2>例文作成から、自動で残す運用へ</h2><p>iPhoneから保管庫へ自動で追記する場合は、<a href="/obsidian/">シンプルメモのObsidian設定ガイド</a>をご覧ください。フォルダ選択、Inbox・デイリーノートの使い分け、オフライン時、Obsidianが開く代替経路を説明しています。音声入力は<a href="/siri/">Siriの設定</a>へ。フォルダやノート名は自分の運用に合わせて選べます。</p><p>使い方を記事で紹介するときは、読者が例を変更できるこのページを案内できます。製品説明や設定画面は<a href="/press/">紹介用資料</a>にまとめています。</p>"""
+<h2>例文作成から、自動で残す運用へ</h2><p>ショートカットからObsidianのノートを開いたり追記したりするURLが必要なら、<a href="/resources/obsidian-uri/">Obsidian URIジェネレーター</a>を使えます。このMarkdownツールとは別に、保管庫名やノートのパスをURI用にエンコードします。</p><p>iPhoneから保管庫へ自動で追記する場合は、<a href="/obsidian/">シンプルメモのObsidian設定ガイド</a>をご覧ください。フォルダ選択、Inbox・デイリーノートの使い分け、オフライン時、Obsidianが開く代替経路を説明しています。音声入力は<a href="/siri/">Siriの設定</a>へ。フォルダやノート名は自分の運用に合わせて選べます。</p><p>使い方を記事で紹介するときは、読者が例を変更できるこのページを案内できます。製品説明や設定画面は<a href="/press/">紹介用資料</a>にまとめています。</p>"""
     put(prefix.lstrip("/") + ("/" if prefix else "") + "resources/obsidian-inbox/index.html", page(prefix + "/resources/obsidian-inbox/", title, desc, body, "/resources/obsidian-inbox/", "/en/resources/obsidian-inbox/", lang, tool=True))
     put(f"assets/downloads/obsidian-inbox-{lang}.md", "# Inbox\n\n## " + tr("Capture","記録") + "\n\n- [ ] " + tr("An idea to revisit","あとで見返したいアイデア") + "\n\n## " + tr("Review","見返す") + "\n\n- " + tr("What needs a next action?","次の行動が必要なものは？") + "\n- " + tr("What is worth keeping?","残しておきたいものは？") + "\n- " + tr("What can I delete?","削除できるものは？") + "\n")
     put(f"assets/downloads/obsidian-daily-{lang}.md", "# YYYY-MM-DD\n\n## " + tr("Capture","記録") + "\n\n- HH:mm " + tr("Replace this example with a thought.","この例を、残したいことに置き換える。") + "\n\n## " + tr("End-of-day review","1日の終わりに") + "\n\n- " + tr("One thing to do tomorrow:","明日やることを1つ：") + "\n- " + tr("One thing to remember:","覚えておきたいことを1つ：") + "\n")
@@ -304,7 +349,15 @@ def selftest():
         (root / "report.html").write_text(expected["report.html"])
         (root / "runs.csv").write_text("attempted,shipped\n28,20\n")
         assert output_differences(root, expected) == ["runs.csv"], "changed downloaded data must fail"
-    print("Citation selftest: missing outputs, matching outputs, changed page, and changed CSV verified.")
+    source_body = '<p class="eyebrow">Example</p><h1>Updated heading</h1><p class="lead">Updated intro</p><div class="tool-grid"><input id="memo"></div><noscript>Static download</noscript><h2>Updated instructions</h2><p>Source content marker</p>'
+    rendered = capture_inbox_page('<html><head><title>Kept</title></head><body>Old</body></html>', source_body, 'Example & Company')
+    assert '<title>Kept</title>' in rendered and 'Updated heading</h1>' in rendered
+    assert rendered.count('Source content marker') == 1 and 'Updated instructions' in rendered
+    assert 'id="memo"' in rendered and 'Static download' in rendered
+    assert 'Example &amp; Company' in rendered and '{{' not in rendered
+    assert 'button{display:none!important}' in rendered
+    assert asset('assets/css/capture-sixth.css') in rendered
+    print("Citation selftest: output drift, source propagation, tool IDs, no-JavaScript fallback, and asset versions verified.")
 
 
 if __name__ == "__main__":

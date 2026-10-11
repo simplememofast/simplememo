@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/en/blog/ios26-speechanalyzer-live-mic">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- Google tag (gtag.js) - deferred for LCP -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: 'en'});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>iOS 26 SpeechAnalyzer Live Mic: Pengaturan, Hasil, dan Penyelesaian Masalah</title>
+  <meta name="description" content="Hubungkan iOS 26 SpeechAnalyzer ke mikrofon langsung: periksa aset model, format PCM, hasil akhir, kosakata DictationTranscriber, dan batas validasi sampel.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="iOS 26 SpeechAnalyzer Live Mic: Pengaturan, Hasil, dan Penyelesaian Masalah">
+  <meta property="og:description" content="Hubungkan iOS 26 SpeechAnalyzer ke mikrofon langsung: periksa aset model, format PCM, hasil akhir, kosakata DictationTranscriber, dan batas validasi sampel.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-06-16T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/id/blog/ios26-speechanalyzer-live-mic">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Simple Memo - for Obsidian">
+  <meta property="og:locale" content="id_ID">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="iOS 26 SpeechAnalyzer Live Mic: Pengaturan, Hasil, dan Penyelesaian Masalah">
+  <meta name="twitter:description" content="Hubungkan iOS 26 SpeechAnalyzer ke mikrofon langsung: periksa aset model, format PCM, hasil akhir, kosakata DictationTranscriber, dan batas validasi sampel.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog.png">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- Canonical -->
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/id/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/ios26-speechanalyzer-live-mic">
+
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "inLanguage": "id",
+  "headline": "iOS 26 SpeechAnalyzer Live Mic: Pengaturan, Hasil, dan Penyelesaian Masalah",
+  "description": "Hubungkan iOS 26 SpeechAnalyzer ke mikrofon langsung: periksa aset model, format PCM, hasil akhir, kosakata DictationTranscriber, dan batas validasi sampel.",
+  "image": "https://simplememofast.com/assets/img/og/blog.png",
+  "url": "https://simplememofast.com/id/blog/ios26-speechanalyzer-live-mic",
+  "datePublished": "2026-06-16",
+  "dateModified": "2026-09-09",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Simple Memo - untuk Obsidian",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Obsidian連携シンプルメモ"
+    ]
+  },
+  "proficiencyLevel": "Expert",
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "Penganalyzer Pidato"
+    },
+    {
+      "@type": "Thing",
+      "name": "Transkrip Pidato"
+    },
+    {
+      "@type": "Thing",
+      "name": "iOS 26 ucapan-ke-teks"
+    }
+  ],
+  "keywords": "iOS 26, SpeechAnalyzer, SpeechTranscriber, AVAudioEngine, pidato-ke-teks pada perangkat, migrasi SFSpeechRecognizer"
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Rumah",
+      "item": "https://simplememofast.com/id/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://simplememofast.com/id/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "iOS 26 SpeechAnalyzer Live Mic: Pengaturan, Hasil, dan Penyelesaian Masalah",
+      "item": "https://simplememofast.com/id/blog/ios26-speechanalyzer-live-mic"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/id/blog/ios26-speechanalyzer-live-mic#webpage",
+  "inLanguage": "id",
+  "name": "iOS 26 SpeechAnalyzer Live Mic: Pengaturan, Hasil, dan Penyelesaian Masalah",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/id/#website"
+  },
+  "url": "https://simplememofast.com/id/blog/ios26-speechanalyzer-live-mic"
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "id",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Apakah SpeechAnalyzer berfungsi secara offline?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "SpeechTranscriber memproses audio di perangkat, tetapi model yang diperlukan harus tersedia. Aset sudah dapat hadir sebelum peluncuran pertama aplikasi Anda. Periksa dan siapkan sebelum sesi offline; jangan berasumsi bahwa setiap peluncuran pertama harus diunduh atau bahwa model yang diinstal sebelumnya akan selalu tersedia."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Bisakah saya menambahkan kosakata khusus?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Apple dokumen AnalysisContext.contextualStrings untuk DictationTranscriber, dan modul itu juga memperlihatkan petunjuk konten bahasa yang disesuaikan. Ini bukan dokumentasi dari fitur yang sama untuk SpeechTranscriber. Pilih modul dengan hati-hati dan uji kata-kata dan lokal yang Anda butuhkan."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Mengapa aplikasi merekam tetapi tidak menampilkan teks?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Periksa dukungan perangkat dan lokal, status aset, input mikrofon, format penganalisa opsional, output konverter, urutan input, dan konsumen hasil. Munculkan kesalahan yang sebenarnya alih-alih memperlakukan setiap hasil kosong sebagai masalah format."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Bagaimana cara menjaga kata-kata terakhir saat berhenti?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Berhenti memproduksi audio, selesaikan kelanjutan input, dan biarkan penganalisa menyelesaikan hingga akhir input. Menjaga konsumen hasil tetap hidup untuk menerima hasil akhir. Pembatalan adalah jalur pembuangan terpisah, bukan pengganti penyelesaian normal."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apakah sampel ini berjalan di Apple Watch?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tidak. Sesi mikrofon yang ditautkan adalah contoh iOS 26, dan SpeechAnalyzer tidak tersedia di watchOS. Aplikasi Watch dapat menggunakan input teks sistem seperti TextFieldLink; yang menyajikan antarmuka input sistem dan tidak membuktikan bahwa perekaman dikte telah dimulai."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apa yang telah divalidasi untuk sampel?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Repositori yang terhubung merekam empat tes konverter dan Simulator iOS dibangun pada September 9, 2026, termasuk dua regresi untuk penyimpanan penyangga sumber yang digunakan kembali. Tidak ada pengujian ulang perangkat fisik yang diklaim. Pembantu persiapan panduan ini diperiksa dengan Xcode 26.6 di Swift 6 menyelesaikan mode konkurensi ketat pada bulan September 9. Pemeriksaan ini tidak menetapkan akurasi mikrofon, perilaku unduhan model, atau latensi."
+      }
+    }
+  ],
+  "@id": "https://simplememofast.com/id/blog/ios26-speechanalyzer-live-mic#faq"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+    /* Article-specific styles */
+    .article-meta { font-size: .875rem; color: var(--text-muted); margin-bottom: 2rem; }
+    .article-meta a { color: var(--accent); text-decoration: none; }
+    .article-body h2 { font-size: 1.4rem; font-weight: 700; margin: 2.5rem 0 1rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    .article-body h3 { font-size: 1.1rem; font-weight: 600; margin: 2rem 0 .75rem; }
+    .article-body p { font-size: .95rem; line-height: 1.85; color: var(--text-secondary); margin-bottom: 1.25rem; }
+    .article-body ul, .article-body ol { margin: 1rem 0 1.5rem 1.25rem; font-size: .95rem; color: var(--text-secondary); line-height: 1.85; }
+    .article-body li { margin-bottom: .5rem; }
+    .article-body strong { color: var(--text); }
+    .article-body a { color: var(--accent); text-decoration: none; }
+    .article-body a:hover { text-decoration: underline; }
+    .article-body code { background: rgba(100,180,255,.08); padding: .15rem .4rem; border-radius: 4px; font-size: .85rem; color: var(--accent); }
+    .article-body pre { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; overflow-x: auto; margin: 1.5rem 0; font-size: .85rem; line-height: 1.7; }
+    .article-body pre code { background: none; padding: 0; color: var(--text-secondary); }
+    .callout { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+    .callout p { margin: 0; }
+    .callout-warning { border-left-color: #f85149; }
+    .timeline-list { list-style: none; margin: 1.5rem 0; padding: 0; }
+    .timeline-list li { position: relative; padding: 0 0 1.5rem 2rem; border-left: 2px solid var(--border); font-size: .95rem; line-height: 1.85; color: var(--text-secondary); }
+    .timeline-list li:last-child { padding-bottom: 0; border-left-color: transparent; }
+    .timeline-list li::before { content: ''; position: absolute; left: -5px; top: .5rem; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .timeline-list li strong { color: var(--text); }
+    .arch-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.5rem; margin: 1.5rem 0; text-align: center; font-family: monospace; font-size: .9rem; line-height: 2; color: var(--text-secondary); overflow-x: auto; }
+    .disclosure { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-top: 2.5rem; font-size: .875rem; color: var(--text-muted); line-height: 1.7; }
+
+    /* article code blocks */
+    .article-body pre{background:#0d1424;border:1px solid rgba(148,178,230,.18);border-radius:12px;
+      padding:16px 18px;overflow-x:auto;margin:1.25rem 0;font-size:.82rem;line-height:1.6;}
+    .article-body pre code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#dbe6ff;white-space:pre;}
+    .article-body :not(pre)>code{background:rgba(148,178,230,.12);padding:.1em .4em;border-radius:5px;
+      font-size:.88em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+    .article-body table{display:block;overflow-x:auto;width:100%;border-collapse:collapse;margin:1.25rem 0;font-size:.9rem;}
+    .speech-table-scroll{max-width:100%;overflow-x:auto;margin:1.25rem 0;}
+    .article-body #speech-debug-table{display:table;min-width:640px;margin:0;}
+    .speech-table-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+    .article-body th,.article-body td{border:1px solid var(--border);padding:.55rem .7rem;text-align:left;vertical-align:top;}
+    .article-body th{color:var(--text-muted);font-weight:700;}
+    .article-body .callout{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);
+      border-radius:10px;padding:1rem 1.25rem;margin:1.5rem 0;}
+</style>
+  <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
+  <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="Navigasi utama" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/id/guides/">Panduan</a><a href="/id/use-cases/">Contoh penggunaan</a><a href="/id/vs/">Bandingkan</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/id/guides/">Panduan</a></li>
+        <li><a href="/id/use-cases/">Contoh penggunaan</a></li>
+        <li><a href="/id/vs/">Bandingkan</a></li>
+        <li><a href="/id/methods/">Metode</a></li>
+        <li><a href="/id/blog/">Blog</a></li>
+        <li><a href="/id/glossary/">Glosarium</a></li>
+        <li><a href="/id/faq">Pertanyaan umum</a></li>
+        <li><a href="/id/about/">Tentang pengembang</a></li>
+        <li><a href="/id/devlog/">Catatan pengembangan</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">Unduh</a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Bahasa Indonesia · Pilih bahasa"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ID</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="id" dir="ltr"><p class="site-language-title">Pilih bahasa</p><div class="site-language-grid"><a href="/blog/ios26-speechanalyzer-live-mic" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/ios26-speechanalyzer-live-mic" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/blog/ios26-speechanalyzer-live-mic" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/blog/ios26-speechanalyzer-live-mic" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/ios26-speechanalyzer-live-mic" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/blog/ios26-speechanalyzer-live-mic" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/ios26-speechanalyzer-live-mic" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="id" aria-current="page"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ar/blog/ios26-speechanalyzer-live-mic" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/ios26-speechanalyzer-live-mic" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">Unduh</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menu"><span>Menu</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+<main class="page-content">
+    <div class="container">
+
+      <h1 class="page-content__title sd-title">iOS 26 SpeechAnalyzer Live Mic: Pengaturan, Hasil, dan Penyelesaian Masalah</h1>
+
+      <p class="article-meta"> Oleh <a href="/id/about/">AI ATAKA</a> · Diterbitkan: Juni 16, 2026 · Diperbarui: September 9, 2026 </p>
+
+      <div class="page-content__body article-body">
+
+<p class="tldr"><strong>Untuk alur mikrofon langsung iOS 26, periksa dukungan perangkat dan lokal, siapkan aset model, dapatkan format PCM yang kompatibel, lalu terima hasil pengenalan sambil memasukkan audio.</strong> Bedakan penyelesaian normal dari pembatalan agar kata-kata terakhir dapat difinalkan. Panduan ini mengikuti dokumentasi API dari Apple dan <a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic" rel="noopener">contoh mikrofon langsung SimpleMemo</a> saat ini; tersedia juga alat bantu persiapan yang dapat diunduh secara terpisah.</p>
+<nav class="speech-toc" aria-label="Bagian artikel"><a href="#speech-sample">Jalankan contoh</a><a href="#speech-prepare">Siapkan penganalisa</a><a href="#speech-audio">Mikrofon umpan PCM</a><a href="#speech-finish">Tangani hasil dan hentikan</a><a href="#speech-vocabulary">Dukungan kosakata</a><a href="#speech-debug">Penyelesaian Masalah</a><a href="#speech-validation">Lingkup validasi</a></nav>
+<section id="speech-sample" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-01" data-ce-number="01">Mulai dengan sampel lengkap, lalu periksa jalur pipa</h2></div><div class="ce-chapter__body">
+<p>Repositori berlisensi <a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic" rel="noopener">MIT</a> mengekspos <code>SpeechSession</code> sebagai paket Swift untuk aplikasi host iOS 26. Tambahkan repositori di bawah ketergantungan paket Xcode dan tautkan produk <code>SpeechAnalyzerLiveMic</code>. README-nya menunjukkan tampilan SwiftUI yang menampilkan <code>finalizedText</code>, merender <code>volatileText</code> secara terpisah, dan menonaktifkan Mulai saat sesi sedang dipersiapkan.</p>
+<p>Untuk proyek aplikasi lengkap, ikuti rute XcodeGen README. Atau, salin sumber aplikasi yang disediakan ke dalam aplikasi iOS 26 yang baru. Gunakan satu rute integrasi sehingga Anda tidak menentukan jenis yang sama dua kali. Paket tidak mengimplementasikan penyimpanan catatan, pengiriman email, atau integrasi Obsidian.</p>
+<p>Contoh yang ditautkan meminta mikrofon dan otorisasi pengenalan ucapan. Aplikasi hostnya harus menyediakan <code>NSMicrophoneUsageDescription</code> dan <code>NSSpeechRecognitionUsageDescription</code>; menambahkan paket tidak dapat menyediakan deskripsi host tersebut. Menjelaskan penggunaan izin, menunjukkan penolakan dan status persiapan, dan membiarkan pengguna memilih kapan merekam. Penolong di bawah ini tidak meminta izin atau menyalakan mikrofon.</p>
+<p><a href="https://developer.apple.com/documentation/speech/bringing-advanced-speech-to-text-capabilities-to-your-app" rel="noopener">sampel transkripsi langsung resmi Apple</a> dan <a href="https://developer.apple.com/videos/play/wwdc2025/277/" rel="noopener">sesi WWDC25</a> adalah referensi yang berguna untuk arsitektur. Modul koordinat <code>SpeechAnalyzer</code>; itu adalah API tambahan untuk sistem yang didukung, bukan alasan untuk menganggap semua kode <code>SFSpeechRecognizer</code> yang ada sudah usang.</p></div></section>
+<section id="speech-prepare" class="ce-chapter sd-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="reading-02" data-ce-number="02">Siapkan dukungan, aset, dan format sebelum merekam</h2></div><div class="ce-chapter__body">
+<p><a href="https://developer.apple.com/documentation/speech/speechtranscriber" rel="noopener">SpeechTranscriber</a> menyediakan perangkat runtime dan pemeriksaan lokal. Pemeriksaan versi iOS saja tidak cukup. Pembantu berikut mengembalikan transkrip, penganalisa, dan format audio yang dikonfigurasi, atau melemparkan kesalahan persiapan tertentu.</p>
+<p><a href="/assets/downloads/speech-analyzer-preparation.swift?v=7a01961842" download="speech-analyzer-preparation.swift">Unduh bantuan persiapan Swift lengkap</a>. File lengkap termasuk impor, hasil dan jenis kesalahan, dan penolong petunjuk DictationTranscriber yang dibahas di bawah ini. Ini adalah komponen pengaturan, bukan aplikasi perekaman lengkap.</p><pre tabindex="0"><code>@available(iOS 26.0, *)
+@MainActor
+public func prepareSpeechAnalyzer(
+    requestedLocale: Locale,
+    naturalFormat: AVAudioFormat? = nil
+) async throws -&gt; PreparedSpeechAnalyzer {
+    guard SpeechTranscriber.isAvailable else {
+        throw SpeechPreparationError.deviceUnavailable
+    }
+    guard let locale = await SpeechTranscriber.supportedLocale(
+        equivalentTo: requestedLocale
+    ) else {
+        throw SpeechPreparationError.unsupportedLocale
+    }
+
+    let transcriber = SpeechTranscriber(
+        locale: locale,
+        preset: .progressiveTranscription
+    )
+    // The system may already have the asset; nil means no install is needed.
+    // A request can automatically reserve the locale or throw if no slot is free.
+    if let request = try await AssetInventory.assetInstallationRequest(
+        supporting: [transcriber]
+    ) {
+        try await request.downloadAndInstall()
+    }
+    try Task.checkCancellation()
+    guard await AssetInventory.status(forModules: [transcriber]) == .installed else {
+        throw SpeechPreparationError.assetsNotInstalled
+    }
+    guard let format = await SpeechAnalyzer.bestAvailableAudioFormat(
+        compatibleWith: [transcriber], considering: naturalFormat
+    ) else {
+        throw SpeechPreparationError.noCompatibleFormat
+    }
+
+    let analyzer = SpeechAnalyzer(modules: [transcriber])
+    try await analyzer.prepareToAnalyze(in: format)
+    return PreparedSpeechAnalyzer(
+        locale: locale, transcriber: transcriber,
+        analyzer: analyzer, audioFormat: format
+    )
+}</code></pre>
+<p><a href="https://developer.apple.com/documentation/speech/assetinventory" rel="noopener">AssetInventory</a> mengelola model sistem bersama. Sebuah model mungkin sudah diinstal oleh sistem atau aplikasi lain. <a href="https://developer.apple.com/documentation/speech/assetinventory/assetinstallationrequest(supporting:)" rel="noopener">Permintaan instalasi</a> mengembalikan <code>nil</code> ketika tidak ada instalasi yang diperlukan; jika tidak, itu dapat memesan lokal dan memulai pengunduhan. Batas reservasi juga dapat menghasilkan kesalahan. Kelola reservasi di seluruh fitur aplikasi Anda, dan lepaskan lokal saat tidak lagi diperlukan daripada merilis model yang masih digunakan di tempat lain di aplikasi Anda.</p>
+<p>Sebelum offline, siapkan lokal yang diperlukan dan verifikasi kesiapan. Aset model hidup di luar bundel aplikasi, tetapi masih menggunakan penyimpanan sistem dan dapat berubah seiring waktu. Tampilkan kemajuan unduhan dan pembatalan di UI host. “Pengenalan pada perangkat” tidak berarti “tidak ada persiapan atau akses jaringan yang diperlukan.”</p></div></section>
+<section id="speech-audio" class="ce-chapter sd-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="reading-03" data-ce-number="03">Umpankan PCM dalam format yang diterima penganalisa</h2></div><div class="ce-chapter__body">
+<pre tabindex="0"><code>AVAudioEngine microphone tap
+  -&gt; owned PCM / conversion for the selected format
+  -&gt; AsyncStream&lt;AnalyzerInput&gt;
+  -&gt; SpeechAnalyzer + SpeechTranscriber
+  -&gt; result consumer and UI state</code></pre>
+<p>Setelah mengaktifkan sesi audio, periksa format sebenarnya dari simpul input. Jangan membuat kode keras laju sampel karena perangkat atau rute sering menggunakan laju itu sebelumnya. Berikan format alami ke <a href="https://developer.apple.com/documentation/speech/speechanalyzer/bestavailableaudioformat(compatiblewith:considering:)" rel="noopener"><code>bestAvailableAudioFormat(compatibleWith:considering:)</code></a> bila sesuai dan buka bungkus hasil opsionalnya. Apple mendokumentasikan bahwa penganalisa tidak secara transparan mengambil sampel ulang atau mengubah input.</p>
+<p><code>AudioBufferConverter</code> repositori mengembalikan penyangga yang sudah cocok tidak berubah dan menggunakan <code>AVAudioConverter</code> ketika format berbeda. Konversi diperlukan untuk format yang tidak cocok, bukan sebagai langkah ekstra selimut untuk setiap penyangga. Periksa panjang bingkai keluaran dan laporkan kesalahan konversi; secara diam-diam menjatuhkan setiap penyangga yang gagal dapat membuat UI rekaman tampak sehat saat tidak menghasilkan teks.</p>
+<p>Berikan audio yang diantre kebijakan kepemilikan yang eksplisit. Konverter sampel yang diperbarui mengembalikan penyimpanan PCM independen bahkan ketika format sudah cocok, sehingga penggunaan kembali input nanti tidak menimpa audio yang diantri. Penyangga yang disediakan oleh panggilan balik audio tidak boleh diasumsikan tetap tidak dapat diubah setelah panggilan balik kembali. Jika Anda mengantri untuk digunakan nanti, atur salinan milik yang sesuai atau jalur pipa yang masa pakai penyangganya dikontrol. Jauhkan mutasi UI per-buffer dari panggilan balik audio. Untuk produksi, tentukan juga bagaimana Anda mengikat pekerjaan yang diantri dan menangani kelebihan beban atau perubahan rute.</p>
+<p>Dalam Swift 6, menangkap variabel lokal tidak dengan sendirinya membuktikan bahwa jalur pipa aman untuk utas. Konverter sampel saat ini memiliki kontrak utas pemrosesan tunggal dan pemegang <code>@unchecked Sendable</code> yang dilindungi kunci pribadi untuk satu panggilan balik konverter. Itu tidak membuat semua penyangga PCM atau konverter umumnya aman untuk dibagikan di seluruh utas. Baca kontrak itu sebelum mengadaptasi sampel.</p></div></section>
+<section id="speech-finish" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-04" data-ce-number="04">Ganti hasil volatile; selesaikan input sebelum menyelesaikan</h2></div><div class="ce-chapter__body">
+<p>Dengan hasil progresif diaktifkan, hasil volatile dapat merevisi teks untuk rentang audio. Jangan menambahkan setiap hasil parsial sebagai kalimat baru. Sampel sederhana menyimpan teks yang diselesaikan dan ekor volatile yang dapat diganti. Untuk pengeditan yang lebih kaya, sejajarkan pembaruan dengan rentang audio dan pertahankan segmen akhir secara terpisah. Apple menjelaskan perilaku ini di bagian <a href="https://developer.apple.com/videos/play/wwdc2025/277/" rel="noopener">hasil dari sesi WWDC</a>.</p>
+<ol class="speech-stop-steps"><li>Pada tindakan Berhenti normal, berhenti menghasilkan audio mikrofon baru dan lepaskan ketukan sekali.</li><li>Selesaikan kelanjutan input <code>AsyncStream</code> sehingga penganalisa dapat melihat akhir input.</li><li>Tunggu <code>finalizeAndFinishThroughEndOfInput()</code>, sementara tugas hasil-konsumen tetap aktif.</li><li>Tunggu hingga konsumsi hasil selesai, lalu lakukan teks akhir dan lepaskan sumber daya sesi.</li></ol>
+<p><a href="https://developer.apple.com/documentation/speech/speechanalyzer/finalizeandfinishthroughendofinput()" rel="noopener">Finalisasi menunggu penghentian input dan konsumsi</a>. Memanggilnya sementara produser tidak pernah selesai bisa pergi Berhenti menunggu. Membatalkan tugas hasil dengan segera juga dapat kehilangan ekor yang ingin Anda simpan. Tindakan Batalkan yang membuang ucapan harus menggunakan jalur pembatalan yang disengaja daripada berpura-pura itu adalah hasil akhir yang dinormalisasi.</p>
+<p>Paket publik tetap menjadi sampel pembelajaran. <code>stop()</code> saat ini menyelesaikan dan kemudian membatalkan konsumen; itu tidak mengekspos pengakuan penyelesaian konsumen yang terpisah. Jika mempertahankan setiap hasil akhir penting, sesuaikan siklus hidup itu dan ujilah. Juga uji Berhenti saat persiapan sedang berlangsung, ketuk berulang, lihat pemecatan, interupsi, dan mulai ulang setelah kesalahan.</p></div></section>
+<section id="speech-vocabulary" class="ce-chapter sd-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="reading-05" data-ce-number="05">Dukungan kosakata tergantung pada modul transkripsi</h2></div><div class="ce-chapter__body">
+<p>Tidak akurat untuk mengatakan bahwa Pidato baru API tidak memiliki dukungan kosakata kontekstual. Dokumen Apple <a href="https://developer.apple.com/documentation/speech/analysiscontext/contextualstrings" rel="noopener"><code>AnalysisContext.contextualStrings</code></a> untuk <strong>DictationTranscriber</strong>. Dokumentasi merekomendasikan frasa singkat dan paling banyak frasa 100 di seluruh tag. Itu bukan janji bahwa petunjuk yang sama menyesuaikan <code>SpeechTranscriber</code>.</p>
+<pre tabindex="0"><code>// For an analyzer configured with DictationTranscriber.
+let context = AnalysisContext()
+context.contextualStrings[.general] = [&quot;Obsidian&quot;, &quot;Yurica&quot;]
+try await analyzer.setContext(context)</code></pre>
+<p><a href="https://developer.apple.com/documentation/speech/speechanalyzer/setcontext(_:)" rel="noopener"><code>setContext(_:)</code></a> menggantikan konteks saat ini, jadi pertahankan atau gabungkan konteks aplikasi yang ada saat dibutuhkan. Pembantu yang dapat diunduh menolak lebih dari frasa 100 alih-alih memotongnya secara diam-diam. Petunjuk frasa berbeda dari opsi model bahasa yang disesuaikan juga didokumentasikan untuk DictationTranscriber, dan tidak ada jaminan pengenalan yang benar dari setiap nama. Pilih dan uji modul dan bahasa yang dibutuhkan oleh aplikasi Anda.</p></div></section>
+<section id="speech-debug" class="ce-chapter sd-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="reading-06" data-ce-number="06">Saat merekam tidak menghasilkan teks, cari tahap yang gagal</h2></div><div class="ce-chapter__body">
+<div class="speech-table-scroll sd-table" tabindex="0" role="region" aria-label="Pemecahan masalah saluran ucapan"><table id="speech-debug-table"><thead><tr><th scope="col">Gejala</th><th scope="col">Periksa selanjutnya</th><th scope="col">Bukti yang berguna</th></tr></thead><tbody>
+<tr><th scope="row">Persiapan gagal</th><td>Dukungan perangkat, lokal yang dinormalisasi, status aset, dan kesalahan reservasi/unduh</td><td>OS dan perangkat, lokal yang diminta/dipilih, domain dan kode kesalahan</td></tr>
+<tr><th scope="row">Mic UI aktif, tidak ada buffer</th><td>Izin, aktivasi sesi audio, rute, memulai mesin, dan siklus hidup ketukan</td><td>Apakah panggilan balik tiba; laju sampel input dan jumlah saluran</td></tr>
+<tr><th scope="row">Penyangga tiba, tidak ada teks</th><td>Format yang kompatibel, output konverter bukan nol, input yang dihasilkan dan tugas hasil aktif</td><td>Jumlah bingkai input/output dan kesalahan pipa aktual pertama</td></tr>
+<tr><th scope="row">Kata-kata berulang</th><td>Apakah revisi volatile ditambahkan dan bukan diganti</td><td>Rentang audio hasil dan bendera final/volatile</td></tr>
+<tr><th scope="row">Kata-kata terakhir menghilang</th><td>Penyelesaian input dan masa pakai konsumen selama finalisasi</td><td>Waktu input terakhir, penyelesaian finalisasi dan penerimaan hasil akhir</td></tr>
+<tr><th scope="row">Peluncuran offline gagal</th><td>Kesiapan model yang diperlukan pada perangkat dan lokal tersebut</td><td>Status aset sebelum terputus dan kesalahan pengaturan muncul</td></tr>
+</tbody></table></div>
+<p>Untuk diagnostik, mulailah dengan pengaturan waktu tahap, jumlah bingkai, lokal, dan informasi kesalahan. Rekaman mentah dan teks yang dikenali tidak diperlukan untuk setiap entri log. Jika pengguna membagikan reproduksi, mintalah frasa uji singkat yang tidak sensitif dan konfigurasi yang relevan daripada percakapan pribadi.</p></div></section>
+<section id="speech-validation" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-07" data-ce-number="07">Apa yang diperiksa, dan apa yang harus diukur pada perangkat</h2></div><div class="ce-chapter__body">
+<p>Artikel ini diperiksa terhadap dokumentasi Apple dan Xcode 26.6 pada bulan September 9, 2026. Pembantu yang dapat diunduh melewati pemeriksaan tipe Swift 6 dengan konkurensi ketat lengkap untuk target Simulator iOS 26. Ini tidak merekam audio, dan pemeriksaan ini tidak menunjukkan akurasi ucapan, pemasangan aset yang berhasil, atau sesi mikrofon ujung ke ujung.</p>
+<p>Sampel publik di <a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic/tree/1befcce6c60c0361dbf8cb25ba35fa482f3ec8ba" rel="noopener">revisi 1befcce</a> lulus empat tes konverter PCM dan Build Simulator iOS pada September 9. Dua tes menggunakan kembali penyangga sumber setelah konversi dan mengonfirmasi bahwa mono float dan output bilangan bulat stereo interleaved tetap utuh; keduanya gagal terhadap implementasi passthrough format pencocokan sebelumnya. README-nya secara eksplisit mengatakan bahwa refactor paket belum diuji ulang pada perangkat fisik iOS. Angka latensi historis sebelumnya di halaman ini bukan patokan untuk paket saat ini.</p>
+<p>Untuk aplikasi Anda sendiri, rekam perangkat, OS, lokal, rute audio, kesiapan model, dan batas waktu yang tepat. Ukur teks volatile pertama, teks akhir pertama, dan penyelesaian normal-stop secara terpisah. Bandingkan sesi dengan aset yang siap dengan sesi yang memerlukan persiapan. Ulangi frasa tidak sensitif yang tetap, dan periksa kata-kata terakhir yang hilang atau diduplikasi serta kecepatan. Jangan menyimpulkan perilaku Neural Engine atau batas perangkat keras dari satu hasil pengaturan waktu.</p>
+<p>Pada Apple Watch, gunakan alur input teks sistem terpisah jika sesuai dengan aplikasi Anda. <a href="https://developer.apple.com/documentation/swiftui/textfieldlink" rel="noopener"><code>TextFieldLink</code></a> membuka antarmuka sistem; itu tidak menetapkan bahwa dikte sudah direkam. SpeechAnalyzer tidak tersedia di watchOS, dan paket iOS bukan merupakan implementasi mikrofon Watch.</p></div></section>
+<section id="speech-faq" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-08" data-ce-number="08">Pertanyaan yang sering diajukan</h2></div><div class="ce-chapter__body">
+<details class="speech-faq-item"><summary>Apakah SpeechAnalyzer berfungsi secara offline?</summary><p>SpeechTranscriber memproses audio di perangkat, tetapi model yang diperlukan harus tersedia. Aset sudah dapat hadir sebelum peluncuran pertama aplikasi Anda. Periksa dan siapkan sebelum sesi offline; jangan berasumsi bahwa setiap peluncuran pertama harus diunduh atau bahwa model yang diinstal sebelumnya akan selalu tersedia.</p></details>
+<details class="speech-faq-item"><summary>Bisakah saya menambahkan kosakata khusus?</summary><p>Apple dokumen AnalysisContext.contextualStrings untuk DictationTranscriber, dan modul itu juga memperlihatkan petunjuk konten bahasa yang disesuaikan. Ini bukan dokumentasi dari fitur yang sama untuk SpeechTranscriber. Pilih modul dengan hati-hati dan uji kata-kata dan lokal yang Anda butuhkan.</p></details>
+<details class="speech-faq-item"><summary>Mengapa aplikasi merekam tetapi tidak menampilkan teks?</summary><p>Periksa dukungan perangkat dan lokal, status aset, input mikrofon, format penganalisa opsional, output konverter, urutan input, dan konsumen hasil. Munculkan kesalahan yang sebenarnya alih-alih memperlakukan setiap hasil kosong sebagai masalah format.</p></details>
+<details class="speech-faq-item"><summary>Bagaimana cara menjaga kata-kata terakhir saat berhenti?</summary><p>Berhenti memproduksi audio, selesaikan kelanjutan input, dan biarkan penganalisa menyelesaikan hingga akhir input. Menjaga konsumen hasil tetap hidup untuk menerima hasil akhir. Pembatalan adalah jalur pembuangan terpisah, bukan pengganti penyelesaian normal.</p></details>
+<details class="speech-faq-item"><summary>Apakah sampel ini berjalan di Apple Watch?</summary><p>Tidak. Sesi mikrofon yang ditautkan adalah contoh iOS 26, dan SpeechAnalyzer tidak tersedia di watchOS. Aplikasi Watch dapat menggunakan input teks sistem seperti TextFieldLink; yang menyajikan antarmuka input sistem dan tidak membuktikan bahwa perekaman dikte telah dimulai.</p></details>
+<details class="speech-faq-item"><summary>Apa yang telah divalidasi untuk sampel?</summary><p>Repositori yang terhubung merekam empat tes konverter dan Simulator iOS dibangun pada September 9, 2026, termasuk dua regresi untuk penyimpanan penyangga sumber yang digunakan kembali. Tidak ada pengujian ulang perangkat fisik yang diklaim. Pembantu persiapan panduan ini diperiksa dengan Xcode 26.6 di Swift 6 menyelesaikan mode konkurensi ketat pada bulan September 9. Pemeriksaan ini tidak menetapkan akurasi mikrofon, perilaku unduhan model, atau latensi.</p></details>
+</div></section><section id="speech-product" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-09" data-ce-number="09">Bagaimana ini berhubungan dengan Simple Memo</h2></div><div class="ce-chapter__body"><p>Panduan ini dan sampel gratis dikelola oleh pengembang SimpleMemo. <a href="/id/voice-input/">panduan input suara aplikasi</a> menjelaskan alur kerja produk. Sampel itu sendiri tidak mengirim email dan tidak menyimpan apa pun ke Obsidian. Di Simple Memo, email memerlukan pengaturan dan verifikasi penerima, dan <a href="/id/obsidian/">Obsidian menyimpan memerlukan integrasi dan pengaturan tujuan</a>. Pengenalan ucapan lokal tidak menjelaskan perilaku privasi atau penyampaian tindakan selanjutnya yang dilakukan aplikasi Anda.</p><p>Terkait: <a href="/id/blog/offline-first-comparison">arsitektur memo pertama offline</a>. Langkah selanjutnya untuk pengembang adalah menjalankan sampel lengkap dengan frasa uji dan memverifikasi persiapan, hasil, dan berhenti di perangkat dan lokal yang mereka rencanakan untuk didukung.</p></div></section>
+
+      </div>
+    </div>
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/id/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> Baca selanjutnya </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> Berikan catatan Anda di suatu tempat untuk terakumulasi </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> Atur integrasi dan target pada iPhone untuk juga menyimpan catatan Anda di Obsidian. </span> </a>
+  </aside>
+
+  </main>
+
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="id" dir="ltr"><a class="site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Catatan kecil. Langkah berikutnya.</p><p class="site-footer-description">Kirim catatan dari iPhone ke Obsidian dan email.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="Navigasi footer">
+      <div class="footer__col">
+        <p class="footer__col-title">Produk</p>
+        <a href="/id/download/" class="footer__link">Unduh</a>
+        <a href="/id/" class="footer__link">Beranda</a>
+        <a href="/id/send-email-to-yourself/" class="footer__link">Aplikasi Email Diri Sendiri</a>
+        <a href="/id/use-cases/" class="footer__link">Contoh penggunaan</a>
+        <a href="/id/guides/" class="footer__link">Panduan</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Bandingkan &amp; Ganti</p>
+        <a href="/id/captio-alternative/" class="footer__link">Alternatif Captio</a>
+        <a href="/id/note-to-email/" class="footer__link">Catatan ke email</a>
+        <a href="/id/vs/" class="footer__link">Bandingkan</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Baca</p>
+        <a href="/id/about/" class="footer__link">Tentang pengembang</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Dukungan</p>
+        <a href="/id/roadmap/" class="footer__link">Rencana pengembangan</a>
+        <a href="/id/devlog/" class="footer__link">Catatan pengembangan</a>
+        <a href="/id/faq" class="footer__link">Pertanyaan umum</a>
+        <a href="/id/privacy" class="footer__link">Privasi</a>
+        <a href="/id/contact" class="footer__link">Hubungi kami</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Dikelola oleh YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

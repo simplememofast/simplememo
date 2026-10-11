@@ -8,6 +8,7 @@ import './company-automation-health.test.mjs';
 import './company-aio.test.mjs';
 import './company-cta-measurement.test.mjs';
 import './company-decision.test.mjs';
+import './company-evaluation.test.mjs';
 import './company-measurement.test.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -238,9 +239,90 @@ test('denominator pruning never appears as an operating improvement', () => {
 test('human starts count distinct runs and unobserved handoffs stay unknown', () => {
   const value = humanTouchMetrics({ runs: [{ attempted: true, outcome: 'shipped', interventions: [{ kind: 'bootstrap' }, { kind: 'request' }] },
     { attempted: true, outcome: 'shipped' }] });
-  assert.equal(value.manual_starts, 1); assert.equal(value.unknown_successes, 1);
+  assert.equal(value.manual_starts, null); assert.equal(value.recorded_manual_starts, 1);
+  assert.equal(value.unknown_successes, 1);
   assert.equal(value.recorded_zero_touch_completion_rate, null);
   assert.equal(value.human_blocked_runs, null);
+});
+
+test('helper-only classifier changes invalidate run and score comparisons without changing their primary source SHA', t => {
+  const root = path.resolve(import.meta.dirname, '../..'), mirror = path.join(directory(t), 'mirror');
+  fs.mkdirSync(mirror);
+  for (const folder of ['scripts', 'data']) fs.cpSync(path.join(root, folder), path.join(mirror, folder), { recursive: true });
+  fs.mkdirSync(path.join(mirror, 'growth/lib'), { recursive: true });
+  fs.copyFileSync(path.join(root, 'growth/lib/company-metrics.mjs'), path.join(mirror, 'growth/lib/company-metrics.mjs'));
+  const helper = 'scripts/lib/intervention-observation.mjs', primary = 'scripts/autonomy-score.mjs';
+  const observe = () => JSON.parse(execFileSync(process.execPath, ['--input-type=module', '-e', `
+    import { formalMetrics } from './growth/lib/company-metrics.mjs';
+    import { loadContext, score } from './scripts/autonomy-score.mjs';
+    const runs = { runs: [{ run_id: 'dependency-fixture', date_jst: '2026-09-30', route: 'owner-session', source: 'session',
+      attempted: true, outcome: 'shipped', pr: 1, lane: 'E', action: 'new', interventions: null }] };
+    const ctx = loadContext({ today: '2026-09-30' });
+    console.log(JSON.stringify(formalMetrics({ runs, costs: { runs: [] },
+      autonomy: score({ ...ctx, runsDoc: runs, history: [] }), now: new Date('2026-09-30T00:00:00Z') })));
+  `], { cwd: mirror, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024 }));
+  const before = observe(), raw = fs.readFileSync(path.join(mirror, helper), 'utf8');
+  const missing = "if (value === null) return unknown('not_observed');";
+  assert(raw.includes(missing));
+  // The permissive mutant exists only in the disposable mirror. A fresh process
+  // observes the actual changed classifier instead of a cached import.
+  fs.writeFileSync(path.join(mirror, helper), raw.replace(missing,
+    "if (value === null) return { state: 'recorded_zero', reason: null, events: [], invalid_entries: 0 };"));
+  const after = observe(), comparison = compareMetrics(before, after);
+  assert.equal(before.sources[primary], after.sources[primary]);
+  assert.equal(after.sources[primary], hash(fs.readFileSync(path.join(mirror, primary))));
+  assert.equal(after.sources[helper], hash(fs.readFileSync(path.join(mirror, helper))));
+  assert.notEqual(before.sources[helper], after.sources[helper]);
+  assert(after.metrics.find(m => m.id === 'autonomy_score').value > before.metrics.find(m => m.id === 'autonomy_score').value);
+  for (const id of ['ai_completion_rate', 'autonomy_score']) {
+    const b = before.metrics.find(m => m.id === id), a = after.metrics.find(m => m.id === id);
+    assert.equal(b.source_sha256, a.source_sha256);
+    assert.equal(a.source_sha256, after.sources[a.source]);
+    assert.deepEqual(a.source_dependencies, { [helper]: after.sources[helper] });
+    assert.notEqual(b.source_dependency_fingerprint, a.source_dependency_fingerprint);
+    const result = comparison.metrics.find(m => m.id === id);
+    assert.equal(result.comparable, false); assert.equal(result.delta, null);
+  }
+  for (const id of ['ai_execution_rate', 'overall_automation_rate', 'ai_involvement_rate', 'coverage_rate', 'reachable_automation', 'boundary_delegation']) {
+    const result = comparison.metrics.find(m => m.id === id);
+    assert.equal(result.comparable, true); assert.equal(result.delta, 0);
+  }
+  const legacy = structuredClone(before);
+  delete legacy.sources[helper];
+  for (const metric of legacy.metrics) { delete metric.source_dependencies; delete metric.source_dependency_fingerprint; }
+  for (const id of ['ai_completion_rate', 'autonomy_score']) {
+    assert.equal(compareMetrics(legacy, before).metrics.find(m => m.id === id).comparable, false);
+    for (const change of [{ source_dependencies: null }, { source_dependencies: {} }, { source_dependency_fingerprint: '0'.repeat(64) }]) {
+      const malformed = structuredClone(before); Object.assign(malformed.metrics.find(m => m.id === id), change);
+      assert.equal(compareMetrics(malformed, before).metrics.find(m => m.id === id).comparable, false);
+    }
+  }
+  assert.equal(compareMetrics(legacy, before).metrics.find(m => m.id === 'overall_automation_rate').comparable, true);
+});
+
+test('recorded intervention observations preserve mixed positive evidence and unknown totals', () => {
+  const zero = { attempted: true, outcome: 'shipped', interventions: [] };
+  const positive = { attempted: true, outcome: 'shipped', interventions: [{ kind: 'request', note: 'observed' }] };
+  assert.equal(humanTouchMetrics({ runs: [zero, positive] }).recorded_zero_touch_completion_rate, 0.5);
+  for (const interventions of [undefined, null, false, 0, '', {}, [null], [{ kind: 'unknown' }]]) {
+    const source = { runs: [zero, positive, { attempted: true, outcome: 'shipped', interventions }] };
+    const before = JSON.stringify(source), value = humanTouchMetrics(source);
+    assert.equal(value.recorded_zero_touch_completion_rate, null);
+    assert.equal(value.recorded_touches_per_successful_output, null);
+    assert.equal(value.manual_starts, null);
+    assert.equal(value.recorded_manual_starts, 1);
+    assert.equal(value.unknown_successes, 1);
+    assert.equal(value.successful_outputs, 3);
+    assert.equal(value.intervention_observation.shipped.recorded_zero_runs, 1);
+    assert.equal(value.intervention_observation.shipped.actual_zero_touch_proven, null);
+    assert.equal(JSON.stringify(source), before);
+  }
+  const partial = humanTouchMetrics({ runs: [{ attempted: true, outcome: 'shipped', interventions: [{ kind: 'request' }, null] }] });
+  assert.equal(partial.recorded_manual_starts, 1);
+  assert.equal(partial.manual_starts, null);
+  assert.equal(partial.intervention_observation.shipped.recorded_event_count, 1);
+  assert.throws(() => humanTouchMetrics(null), /unreadable or malformed/);
+  assert.throws(() => humanTouchMetrics({}), /unreadable or malformed/);
 });
 
 test('permission gates outrank high scores; legacy keep is not invented WIN', () => {
@@ -350,9 +432,9 @@ test('a saved integration and open PR are not execution success',()=>{
 });
 
 test('operational delivery requires exact Pages deployment and fresh public status while scripts stay blocked',async()=>{
-  const merge={merge_sha:'merged'};
-  let head='merged',body='new status',internalStatus=404;
-  const call=(name)=>name==='gh'?JSON.stringify({check_runs:[{id:1,name:'Cloudflare Pages',status:'completed',conclusion:'success',head_sha:head}]}):'new status';
+  const merge={merge_sha:'a'.repeat(40)};
+  let head=merge.merge_sha,body='new status',internalStatus=404;
+  const call=(name)=>name==='gh'?JSON.stringify({total_count:1,check_runs:[{id:1,name:'Cloudflare Pages',status:'completed',conclusion:'success',head_sha:head}]}):'new status';
   const remote=async url=>url.includes('/scripts/')?{status:internalStatus}:{ok:true,url,text:async()=>body};
   const proof=await verifyOperationalDelivery(merge,call,remote);
   assert.equal(proof.artifact_source,'data/autopilot-status.json');assert.equal(proof.internal_script_status,404);
@@ -360,7 +442,30 @@ test('operational delivery requires exact Pages deployment and fresh public stat
   await assert.rejects(()=>verifyActionDelivery(undefined,merge,call,remote),/same-site artifact/);
   body='old status';await assert.rejects(()=>verifyOperationalDelivery(merge,call,remote),/differs/);
   body='new status';internalStatus=200;await assert.rejects(()=>verifyOperationalDelivery(merge,call,remote),/publication boundary/);
-  internalStatus=404;head='different';await assert.rejects(()=>verifyOperationalDelivery(merge,call,remote),/exact-commit/);
+  internalStatus=404;head='different';await assert.rejects(()=>verifyOperationalDelivery(merge,call,remote),/exact-commit|mismatched check/);
+});
+
+test('operational delivery finds a buried deployment but rejects a newer failure and incomplete inventories',async()=>{
+  const merge={merge_sha:'b'.repeat(40)};
+  const deployment={id:1,name:'Cloudflare Pages',status:'completed',conclusion:'success',head_sha:merge.merge_sha};
+  let checks=[...Array.from({length:41},(_,i)=>({...deployment,id:100+i,name:'unrelated'})),deployment];
+  let partial=false,remoteCalls=0;
+  const call=(name,args)=>{
+    if(name!=='gh')return 'original status';
+    const url=new URL(args[1],'https://api.github.test/');
+    const filtered=url.searchParams.has('check_name')?checks.filter(c=>c.name===url.searchParams.get('check_name')):checks;
+    const size=Number(url.searchParams.get('per_page')??30);
+    return JSON.stringify({total_count:filtered.length,check_runs:partial?[]:filtered.slice(0,size)});
+  };
+  const remote=async url=>{remoteCalls++;return url.includes('/scripts/')?{status:404}:{ok:true,url,text:async()=> 'original status'};};
+  assert.equal((await verifyOperationalDelivery(merge,call,remote)).pages_check_id,1);
+  assert.equal(remoteCalls,2);
+  checks=[deployment,{...deployment,id:2,conclusion:'failure'}];remoteCalls=0;
+  await assert.rejects(()=>verifyOperationalDelivery(merge,call,remote),/exact-commit/);
+  assert.equal(remoteCalls,0,'a failed deployment cannot proceed to public output verification');
+  checks=[deployment];partial=true;
+  await assert.rejects(()=>verifyOperationalDelivery(merge,call,remote),/incomplete/);
+  assert.equal(remoteCalls,0);
 });
 
 test('integration proof rejects historical or mismatched ledger rows and retains the human request',()=>{

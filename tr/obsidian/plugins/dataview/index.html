@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/plugins/dataview/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Dataview eklentisi nasıl kullanılır - Sorguya göre depolama aramaya giriş [2026] | SimpleMemo</title>
+  <meta name="description" content="Resmi özelliklerden Dataview&#x27;in DQL, satır içi ve DataviewJS açıklaması. LIST・TABLE・TASK・CALENDAR&#x27;ın çıktı formatı ile yazma yöntemi arasındaki farkı düzenleyin. İndirme sayısı, 2026 yıl 8 ayının satın alma değeri olarak gösterilir ve mevcut geliştirme durumundan ve gerçek makine çalışmasından ayrı olarak açıklanır.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Dataview eklentisi nasıl kullanılır - Sorguya göre depolama aramaya giriş [2026] | SimpleMemo">
+  <meta property="og:description" content="Resmi özelliklerden Dataview&#x27;in DQL, satır içi ve DataviewJS açıklaması. LIST・TABLE・TASK・CALENDAR&#x27;ın çıktı formatı ile yazma yöntemi arasındaki farkı düzenleyin. İndirme sayısı, 2026 yıl 8 ayının satın alma değeri olarak gösterilir ve mevcut geliştirme durumundan ve gerçek makine çalışmasından ayrı olarak açıklanır.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-22T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/tr/obsidian/plugins/dataview/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-plugins-dataview.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="tr_TR">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Dataview eklentisi nasıl kullanılır - Sorguya göre kasa aramaya giriş [2026]">
+  <meta name="twitter:description" content="Resmi özelliklerden Dataview&#x27;in DQL, satır içi ve DataviewJS açıklaması. LIST・TABLE・TASK・CALENDAR&#x27;ın çıktı formatı ile yazma yöntemi arasındaki farkı düzenleyin. İndirme sayısı, 2026 yıl 8 ayının satın alma değeri olarak gösterilir ve mevcut geliştirme durumundan ve gerçek makine çalışmasından ayrı olarak açıklanır.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-plugins-dataview.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/tr/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/plugins/dataview/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Ana sayfa",
+      "item": "https://simplememofast.com/tr/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian entegrasyonu",
+      "item": "https://simplememofast.com/tr/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Eklentilere giriş",
+      "item": "https://simplememofast.com/tr/obsidian/plugins/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "Veri görünümü",
+      "item": "https://simplememofast.com/tr/obsidian/plugins/dataview/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/tr/obsidian/plugins/dataview/#article",
+  "inLanguage": "tr",
+  "headline": "Dataview eklentisi nasıl kullanılır - Sorguya göre kasa aramaya giriş",
+  "description": "Resmi özelliklerden Dataview'in DQL, satır içi ve DataviewJS açıklaması. LIST・TABLE・TASK・CALENDAR'ın çıktı formatı ile yazma yöntemi arasındaki farkı düzenleyin. İndirme sayısı, 2026 yıl 8 ayının satın alma değeri olarak gösterilir ve mevcut geliştirme durumundan ve gerçek makine çalışmasından ayrı olarak açıklanır.",
+  "url": "https://simplememofast.com/tr/obsidian/plugins/dataview/",
+  "datePublished": "2026-08-22",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-plugins-dataview.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/tr/obsidian/plugins/dataview/"
+  }
+}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/tr/obsidian/plugins/dataview/#faq",
+  "inLanguage": "tr",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Dataview için eklenti nedir?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Bir veritabanı gibi kasayı (Vault) aramanıza izin veren bir eklentidir. Notun ön madde ve satır içi alanına yazılan meta veriler iki 4 yazma yöntemiyle işlenebilir: DQL, satır içi ifade, DataviewJS ve satır içi JS ifadesi. DQL'nin çıktı formatı, DataviewJS ile aynı sınıflandırmaya sahip olmayan LIST・TABLE・TASK・CALENDAR'dır."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Ne kadar veri görünümü kullanılıyor?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Obsidian Resmi indirme verileri doğrudan 2026 yıl 8 ay 22'te elde edildi ve bu verilerde 4805635 vaka vardı3(1 Excalidraw・2 Şabloncu) idi. Ek olarak, \"kayıtlı eklenti 6,840\" kayıt listesindeki vaka sayısıdır ve sıralamayı hesaplayan indirme verilerinden ayrı bir dosyadır."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Dataview hala geliştiriliyor mu?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Mevcut geliştirme durumu, yalnızca bu sayfadaki 2026 yıl 8 ay 22'nin istatistiklerinin ve sürümünün satın alma kaydı ile belirlenemez. İstatistiklerin güncelleme tarihi ve saati, kodun güncelleme tarihi ve saatinden farklıdır. Lütfen resmi sürümü kontrol edin ve geçmişi değiştirin ve kullandığınız Obsidian sürümüyle deneyin. Bu düzeltmede, mevcut sürüm yüklenmedi ve işlem onaylandı."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Dataview yazmanın temel yolu nedir?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Notun ön maddesine (YAML) veya gövdede \"alan adı:: değer\" şeklinde yazılmış satır içi alana meta veriler ekleyin. Üstüne üstlükdataviewEkran biçimini ve koşullarını kod bloğuna yazın. Örneğin, liste ve tablodaki notları ve GÖREV'teki notlardaki görevleri görüntüleyebilirsiniz."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "DataviewJS güvenli bir şekilde kullanılabilir mi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Resmi README'ye göre, DataviewJS diğer Obsidian eklentileriyle aynı izinlerle çalışır, bu nedenle dosyaları ve ağ iletişimini yeniden yazmak ve silmek mümkündür. Yalnızca kendi kodunuzu veya güvenilir distribütörlerden gelen komut dosyalarını kullanmanız önerilir. Normal DQL sorguları korumalı alana alınır ve kasaya yazılamaz."
+      }
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/tr/obsidian/plugins/dataview/#webpage",
+  "inLanguage": "tr",
+  "name": "Dataview eklentisi nasıl kullanılır - Sorguya göre depolama aramaya giriş [2026] | SimpleMemo",
+  "url": "https://simplememofast.com/tr/obsidian/plugins/dataview/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/tr/#website"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;min-width:0}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em;word-break:normal;white-space:pre}
+
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:26%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/capture-next.css?v=4e62584640">
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full capture-next site-designed" data-design-family="refined">
+<a class="ce-skip" href="#main-content">Ana içeriğe geç</a>
+  <!-- Global Navigation -->
+  <nav aria-label="Ana gezinme" class="global-nav" data-site-header="">
+<div class="global-nav__inner">
+<a class="global-nav__logo site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/tr/guides/">Kılavuzlar</a><a href="/tr/use-cases/">Kullanım örnekleri</a><a href="/tr/vs/">Karşılaştır</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+<li><a href="/tr/guides/">Kılavuzlar</a></li>
+<li><a href="/tr/use-cases/">Kullanım örnekleri</a></li>
+<li><a href="/tr/vs/">Karşılaştır</a></li>
+<li><a href="/tr/methods/"><span>Yöntemler</span></a></li>
+<li><a href="/tr/blog/"><span>Blog</span></a></li>
+<li><a href="/tr/glossary/"><span>Sözlük</span></a></li>
+<li><a href="/tr/faq">Sık sorulan sorular</a></li>
+<li><a href="/tr/about/">Geliştirici hakkında</a></li>
+<li><a href="/tr/devlog/">Geliştirme günlüğü</a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="obsidian" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>İndir</span></a></li>
+</ul>
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="Türkçe · Dil seçin"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>TR</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="tr" dir="ltr"><p class="site-language-title">Dil seçin</p><div class="site-language-grid"><a href="/obsidian/plugins/dataview/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/plugins/dataview/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/plugins/dataview/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/plugins/dataview/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/plugins/dataview/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/plugins/dataview/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/plugins/dataview/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/plugins/dataview/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/plugins/dataview/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="tr" aria-current="page"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true">✓</span></span></div></div></details>
+<a class="global-nav__cta" data-cta-cluster="obsidian" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">İndir</a>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menü"><span>Menü</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+</div>
+</div>
+</nav>
+
+<main class="page-content" id="main-content">
+<div class="container">
+<!-- Hero -->
+<div class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy">
+<div class="lp-hero__label">
+<span>Obsidian Eklenti Açıklaması — Veri Görünümü</span>
+</div>
+<h1 class="lp-hero__title"> <span>Dataview nasıl kullanılır - Bir veritabanı gibi depolama alanı arayın</span> </h1>
+<p class="lp-hero__sub"> <span> 2026 yıl 8 ay 22 tarihinde elde edilen verilerde, Dataview <a href="/tr/obsidian/plugins/">indirme sayısı 3</a> idi. Bu sayfada, <strong> resmi GitHub deposunun README, bildirimini ve resmi indirme verilerini</strong> doğrudan alır ve yalnızca neler yapılabileceğini, ne kadar kullanıldığını ve 4 sorgularının doğrulanabilecek ölçüde nasıl yazılacağını özetler. </span> </p>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;"> <span>Yazar: <a href="/tr/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> ・ Yayınlandı: <time datetime="2026-08-22">2026 yıl 8 ay 22 gün</time> ・ Açıklama düzeltmesi: <time datetime="2026-09-30">2026 yıl 9 ay 30 gün</time> (İstatistikler 8 ay 22 gün'ün satın alma kaydıdır)</span> </p>
+<a class="ce-read-link" href="#capture-section-1">İçeriği oku <span aria-hidden="true">↓</span></a></div><nav aria-label="Okumak istediğiniz konuyu seçin" class="ce-routes"><a class="ce-route" href="#capture-section-1"><span>01</span><b>Neler yapabilirsiniz</b></a><a class="ce-route" href="#capture-section-3"><span>02</span><b>4 sorgusu</b></a><a class="ce-route" href="#capture-section-4"><span>03</span><b>Güvenli kullanım için</b></a></nav><figure aria-hidden="true" class="ce-stage cn-concept"><p class="ce-stage-label">VERİ GÖRÜNÜMÜ / DÖRT MOD</p><div class="cn-concept-list"><div class="cn-concept-row"><span>01</span><strong>LİSTE</strong></div><div class="cn-concept-row"><span>02</span><strong>TABLO</strong></div><div class="cn-concept-row"><span>03</span><strong>GÖREV</strong></div><div class="cn-concept-row"><span>04</span><strong>TAKVİM</strong></div></div><figcaption class="ce-stage-foot">Karşılaştırılacak perspektifin görüntüsü</figcaption></figure></div><div class="ce-article"><details class="ce-index"><summary>Bu sayfanın içindekiler tablosu</summary><nav aria-label="İçindekiler"><a href="#capture-section-1">Dataview eklentisi ne yapar?</a><a href="#capture-section-2">2026 yıl 8 ay 22 satın alma kaydı — indirmeler ve sürümler</a><a href="#capture-section-3">4 sorgu modları — resmi README örneğinden</a><a href="#capture-section-4">DataviewJS güvenliği ile ilgili notlar</a><a href="#capture-section-5">Bir sorgu yazmadan önce, önce 1 satırını nereye bırakacağınızı belirleyin</a><a href="#capture-section-6">Sık sorulan sorular</a><a href="#capture-section-7">İlgili sayfalar</a></nav></details>
+<!-- Answer block (AIO) -->
+<section class="lp-section ce-chapter" data-answer-block="obsidian-dataview-what-is-it" style="padding-top:1rem;"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="01" id="capture-section-1"><span>Dataview için eklenti nedir? </span></h2></div><div class="ce-chapter__body">
+
+<div>
+<p><strong> Kasayı (Vault) bir veritabanıymış gibi aramanızı sağlayan bir eklentidir. </strong> Notun ön maddesine ve satır içi alanına yazılan meta veriler, DQL, satır içi ifade, DataviewJS ve satır içi JS ifadesinin 4 yazma yönteminde işlenebilir. DQL'nin çıktı formatı, DataviewJS ile aynı sınıflandırmaya sahip olmayan LIST・TABLE・TASK・CALENDAR'dır. Resmi indirme verilerinde (2026 yıl 8 ay 22), 4805635 vakalarıyla 3. sırada yer aldı (kayıt defterindeki toplam kayıt sayısı 6,840'dir, ancak sıralama, dosyaların indirme sayısı verilerindeki bundan farklı olan sıralamadır).</p>
+<p>Geliştirmenin devamını veya durmasını veya mevcut işlemi yalnızca indirme istatistiklerinin güncelleme tarihi ve saatine göre belirlemek mümkün değildir. Aşağıdaki sayı ve versiyon, mevcut değer değil, 2026 yıl 8 ay 22'nin satın alma kayıtlarıdır.</p>
+</div>
+</div></section>
+<!-- Measured: downloads, rank, release status -->
+<section class="lp-section ce-chapter ce-chapter--wide" id="measured"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="02" id="capture-section-2"> <span>2026 yıl 8 ay 22 satın alma kaydı — indirmeler ve sürümler</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span> Obsidian Resmi distribütör (GitHub: <code>obsidianmd/obsidian-releases</code>) tarafından yayınlanan <code>community-plugin-stats.json</code> ve Dataview'ın kendi deposunun <code>manifest.json</code>'sı (GitHub: <code>blacksmithgu/obsidian-dataview</code>) bu ortamda doğrudan <code>raw.githubusercontent.com</code> aracılığıyla satın alındı. </span> </p>
+<div aria-labelledby="capture-section-2" class="ce-table-scroll" role="region" tabindex="0">
+<table class="rt-table">
+<thead>
+<tr>
+<th scope="col"><span>Öğe</span></th>
+<th scope="col"><span>Ölçülen gerçek değer</span></th>
+<th scope="col"><span>Kaynak</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row"><span>İndirme sayısı ve sıralama</span></th>
+<td data-label="Değer">4,805,635<span>(<strong>3 indirme verilerinde</strong>. 1. sıra Excalidraw・2. sıra Şabloncu)</span></td>
+<td data-label="Kaynak"><code>community-plugin-stats.json</code></td>
+</tr>
+<tr>
+<th scope="row"><span>Kayıt defterindeki toplam kayıtlı eklenti sayısı</span></th>
+<td data-label="Değer"><span>6,840. <strong> Sıralama sayısından farklı bir dosyadır</strong> ve indirme sayısı bundan biraz daha azdır (çünkü istatistiklerde görünmeyen bir eklenti vardır). </span></td>
+<td data-label="Kaynak"><code>community-plugins.json</code></td>
+</tr>
+<tr>
+<th scope="row"><span>Önceki ölçümden fark (2026-08-21)</span></th>
+<td data-label="Değer"><span>±0. Ancak bu, "1 vakalarının 24 saatte artmadığı" anlamına gelmez <strong></strong>. 2'ün satın alınması sırasında dağıtılan JSON'ün kendisi yeniden oluşturulmadı ve <a href="/tr/obsidian/plugins/">önceki sayfa</a> ile aynı anlık görüntüyü okumanın doğru yolu okundu. </span></td>
+<td data-label="Kaynak"><code>community-plugin-stats.json</code></td>
+</tr>
+<tr>
+<th scope="row"><span>İndirme sayısının tarihini ve saatini güncelleyin</span></th>
+<td data-label="Değer">2025-04-07 19:17 UTC<span>(ölçüm sırasında yaklaşık 16 ay önce)</span></td>
+<td data-label="Kaynak"><code>community-plugin-stats.json</code> <span>'in</span><code>updated</code><span>alanı</span></td>
+</tr>
+<tr>
+<th scope="row"><span>ana şube sürümü</span></th>
+<td data-label="Değer">0.5.68<span>(minAppVersion 0.13.11・isDesktopOnly: false)</span></td>
+<td data-label="Kaynak"><code>manifest.json</code></td>
+</tr>
+<tr>
+<th scope="row"><span>GitHub Satın alma sırasında en son etiketi yayınlar</span></th>
+<td data-label="Değer">0.5.70<span>(beta notasyonu)</span></td>
+<td data-label="Kaynak">github.com/blacksmithgu/obsidian-dataview/releases</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p> <span> O sırada edinilen ana sürüm 0.5.68 idi ve Sürümler etiketi 0.5.70 (beta) idi. İstatistiksel dosyanın güncelleme tarihi ve saati ve bu 2 sayıları arasındaki fark tek başına geliştirme, kararlılık ve mevcut uyumluluğun askıya alınmasını tamamlayamaz. Lütfen <a href="https://github.com/blacksmithgu/obsidian-dataview/releases" rel="noopener" target="_blank"> resmi sürümü</a>'deki mevcut sürümü ve değişiklikleri kontrol edin. </span> </p>
+</div></section>
+<!-- Four query modes -->
+<section class="lp-section ce-chapter ce-chapter--wide" id="query-modes"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="03" id="capture-section-3"> <span>4 sorgu modları — resmi README örneğinden</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span>Resmî README, 4 yazım türünü ayırır: DQL, satır içi ifadeler, DataviewJS ve satır içi JS ifadeleri. DQL <a href="https://blacksmithgu.github.io/obsidian-dataview/queries/query-types/" rel="noopener" target="_blank">çıktı biçimleri</a> LIST (liste), TABLE (tablo), TASK (görev) ve CALENDAR (tarih takvimi) şeklindedir. Aşağıdaki README örneklerini bu çalışmada da gerçek uygulamada çalıştırmadık.</span> </p>
+<div class="reason-cards" style="grid-template-columns:1fr;">
+<div class="reason-card">
+<div class="reason-card__title">1. <span>DQL (Dataview Sorgu Dili)</span></div>
+<p class="reason-card__desc"><span>SQL'e benzer özel bir notasyon. Temel kullanımlar için uygundur. </span></p>
+<pre class="note-sample" tabindex="0" aria-label="Kod örneği (yatay olarak kaydırılabilir)"><code>```dataview
+TABLE file.name AS "File", rating AS "Rating" FROM #book
+```</code></pre>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">2. <span>Satır içi yazı</span></div>
+<p class="reason-card__desc"><span> Metne gömülü ve önizlemede değerlendirildi. </span></p>
+<pre class="note-sample" tabindex="0" aria-label="Kod örneği (yatay olarak kaydırılabilir)"><code>We are on page `= this.file.name`.</code></pre>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">3. Veri görünümüJS</div>
+<p class="reason-card__desc"><span> JavaScript API'i tam olarak kullanabilen en güçlü mod. </span></p>
+<pre class="note-sample" tabindex="0" aria-label="Kod örneği (yatay olarak kaydırılabilir)"><code>```dataviewjs
+dv.taskList(dv.pages().file.tasks.where(t =&gt; !t.completed));
+```</code></pre>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">4. <span>Satır İçi JS türü</span></div>
+<p class="reason-card__desc"><span>Satır içi JavaScript sürümü. Herhangi bir JS'yi yerinde yürütebilirsiniz. </span></p>
+<pre class="note-sample" tabindex="0" aria-label="Kod örneği (yatay olarak kaydırılabilir)"><code>This page was last modified at `$= dv.current().file.mtime`.</code></pre>
+</div>
+</div>
+<p class="lp-section__lead" style="margin-top:1rem;"> <span> Verilerin giriş tarafı 2 türüdür. Notun başındaki YAML ön maddesinde (<code>---</code> ile çevrili) veya metinde <code>フィールド名:: 値</code> yazan satır içi alanda, her ikisi de Dataview tarafından okunur ve sorguya tabidir. Giriş kullanıcı arayüzünü bağlamanın ve YAML'yi gerçek sorguya kaydetmenin bir örneği, <a href="/tr/obsidian/properties/"> özelliğini değiştiren ve Dataview'un listesini değiştiren gerçek makine örneğinde </a> bulunabilir. </span> </p>
+<pre class="note-sample" tabindex="0" aria-label="Kod örneği (yatay olarak kaydırılabilir)"><code>---
+alias: "document"
+last-reviewed: 2021-08-17
+thoughts:
+  rating: 8
+  reviewable: false
+---</code></pre>
+<pre class="note-sample" tabindex="0" aria-label="Kod örneği (yatay olarak kaydırılabilir)"><code>Basic Field:: Value
+**Bold Field**:: Nice!
+You can also write [field:: inline fields]; multiple [field2:: on the same line].</code></pre>
+</div></section>
+<!-- Security note -->
+<section class="lp-section ce-chapter" id="security"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="04" id="capture-section-4"> <span>DataviewJS güvenliği hakkında notlar</span> </h2></div><div class="ce-chapter__body">
+
+<div class="tip-box">
+<div class="tip-box__title"><span>Resmi README'den</span></div>
+<p style="margin:0;"><span>DataviewJS güçlüdür ve diğer Obsidian eklentileriyle aynı yetkiyle çalışır. Başka bir deyişle, dosyaları ve ağ iletişimini yeniden yazmak, oluşturmak, silmek mümkündür. <strong>Resmi olarak yalnızca kendiniz yazdığınız kodu veya içeriği anlayan güvenilir bir distribütörden gelen komut dosyasını kullanmanız önerilir</strong>. Öte yandan, normal Dataview sorguları (DQL) korumal alana alınır ve kasaya değiştirilemez (yapılabilecekler sınırlıdır). </span></p>
+</div>
+</div></section>
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="05" id="capture-section-5"> <span>Bir sorgu yazmadan önce, önce 1 satırını nereye bırakacağınıza karar verin</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span>Dataview, kasadaki notları ve meta verileri arar ve toplar. SimpleMemo'den girilen notu bırakmak istiyorsanız, bağlantıyı açın, erişilebilir klasörü ve depolama hedefini ayarlayın ve yazma testini kontrol edin. Bir tarih notu veya sabit bir Gelen Kutusu seçebilirsiniz. Lütfen e-postanın geldiğini kontrol edin ve notu ayrı olarak kaydedin ve Dataview için otomatik olarak alan oluşturan işlevden ayırın. </span> </p>
+<div class="cta-box">
+<div class="cta-box__title"><span>İlk olarak, sorgunun hedefi olmak için 1 satırını oluşturun</span></div>
+<p class="cta-box__desc"><span> Girilen notun depolama hedefini ve işbirliği koşullarını onayladıktan sonra kullanabilirsiniz. İndirme ücretsizdir. </span></p>
+<a aria-label="App Store üzerinden indirin" class="app-store-badge" data-cta-cluster="obsidian" data-cta-placement="mid" data-cta-position="mid" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"> <img alt="App Store üzerinden indirin" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="109"/> </a>
+<div class="cta-qr">
+<img alt="App Store üzerinden indirme QR kodu" height="132" loading="lazy" src="/assets/img/qr-obsidian-plugins-dataview-ja.svg?v=3b79301257" width="132"/>
+<small><span>PC'niz varsa akıllı telefonunuzla okuyun</span></small>
+</div>
+</div>
+</div></section>
+<!-- FAQ -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="06" id="capture-section-6"> <span>Sıkça Sorulan Sorular</span> </h2></div><div class="ce-chapter__body">
+
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span>Dataview için eklenti nedir? </span></summary>
+<div class="faq-answer"><span>Bir veritabanı gibi kasayı (Vault) aramanıza izin veren bir eklentidir. Notun ön madde ve satır içi alanına yazılan meta veriler iki 4 yazma yöntemiyle işlenebilir: DQL, satır içi ifade, DataviewJS ve satır içi JS ifadesi. DQL'nin çıktı formatı, DataviewJS ile aynı sınıflandırmaya sahip olmayan LIST・TABLE・TASK・CALENDAR'dır.</span></div>
+</details>
+</div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span>Ne kadar veri görünümü kullanılıyor? </span></summary>
+<div class="faq-answer"><span>Obsidian Resmi indirme verileri doğrudan 2026 yıl 8 ay 22'te elde edildi ve bu verilerde 4805635 vaka vardı<strong>3</strong>(1 Excalidraw・2 Şabloncu) idi. Ek olarak, "kayıtlı eklenti 6,840" kayıt listesindeki vaka sayısıdır ve sıralamayı hesaplayan indirme verilerinden ayrı bir dosyadır.</span></div>
+</details>
+</div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span>Dataview hala geliştiriliyor mu? </span></summary>
+<div class="faq-answer"><span>Mevcut geliştirme durumu, yalnızca bu sayfadaki 2026 yıl 8 ay 22'nin istatistiklerinin ve sürümünün satın alma kaydı ile belirlenemez. İstatistiklerin güncelleme tarihi ve saati, kodun güncelleme tarihi ve saatinden farklıdır. Lütfen resmi sürümü kontrol edin ve geçmişi değiştirin ve kullandığınız Obsidian sürümüyle deneyin. Bu düzeltmede, mevcut sürüm yüklenmedi ve işlem onaylandı.</span></div>
+</details>
+</div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span>Dataview yazmanın temel yolu nedir? </span></summary>
+<div class="faq-answer"><span>Notun ön maddesine (YAML) veya gövdede "alan adı:: değer" şeklinde yazılmış satır içi alana meta veriler ekleyin. Üstüne üstlük<code>dataview</code>Ekran biçimini ve koşullarını kod bloğuna yazın. Örneğin, liste ve tablodaki notları ve GÖREV'teki notlardaki görevleri görüntüleyebilirsiniz.</span></div>
+</details>
+</div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span>DataviewJS güvenli bir şekilde kullanılabilir mi? </span></summary>
+<div class="faq-answer"><span>Resmi README'ye göre, DataviewJS diğer Obsidian eklentileriyle aynı izinlerle çalışır, bu nedenle dosyaları ve ağ iletişimini yeniden yazmak ve silmek mümkündür. Yalnızca kendi kodunuzu veya güvenilir distribütörlerden gelen komut dosyalarını kullanmanız önerilir. Normal DQL sorguları korumalı alana alınır ve kasaya yazılamaz.</span></div>
+</details>
+</div>
+</div></section>
+<!-- Verification environment (§28) -->
+<section class="lp-section" style="padding-top:1rem;">
+<div class="tip-box" style="background:rgba(100,180,255,.05);border-color:rgba(100,180,255,.18);">
+<div class="tip-box__title"><span>Doğrulama ortamı ve doğrulama aralığı</span></div>
+<p style="margin:0;"><span> 2026 yıl 9 ay 30'deki resmi README ve Sorgu Türlerinin açıklamasını yeniden okudum ve yazma ve çıktı biçimlerinin sınıflandırmasını düzelttim. İndirme sayısı, kayıt sayısı ve o sıradaki sürüm 2026 8 22'in satın alma kaydını tutuyor ve bu sefer geri alınmadı. Dataview kurulumu, sorgu yürütme, mevcut sürümün uyumluluğu, SimpleMemo'dan giriş ve başka bir terminalle senkronizasyon bu gerçek makine doğrulamasına dahil değildir. </span></p>
+</div>
+</section>
+<!-- Internal Links -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="07" id="capture-section-7"> <span>İlgili sayfalar</span> </h2></div><div class="ce-chapter__body">
+
+<div class="internal-links">
+<a href="/tr/obsidian/plugins/"><span>Eklentilere giriş (6,812 parçadan gerçek ölçüm üst 10)</span></a>
+<a href="/tr/obsidian/what-is-vault/"><span>Depolama alanı nedir (Vault) (gerçek ölçüm)</span></a>
+<a href="/tr/obsidian/getting-started/"><span>Obsidian ile başlangıç: gerçek ekranlarla kılavuz</span></a>
+<a href="/tr/obsidian/"><span>Obsidian işbirliği detayları</span></a>
+<a href="/tr/glossary/"><span> Sözlük</span></a>
+<a href="/tr/faq"><span>Sık sorulan sorular</span></a>
+</div>
+</div></section>
+</div></div>
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+<div class="container">
+<h2 style="font-size:1.1rem;margin-bottom:1rem;"> <span>Referanslar ve veri kaynakları</span> </h2>
+<ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+<li><a href="https://github.com/blacksmithgu/obsidian-dataview" rel="noopener" style="color:var(--accent);" target="_blank">blacksmithgu/obsidian-dataview(GitHub)</a> — <span>Dataview resmi deposu. README.md・manifest.json, <code>raw.githubusercontent.com</code> aracılığıyla doğrudan 2026-08-22'e alınır</span></li>
+<li><a href="https://github.com/obsidianmd/obsidian-releases" rel="noopener" style="color:var(--accent);" target="_blank">obsidianmd/obsidian-releas(GitHub)</a> — <span>Obsidian resmi distribütörü. <code>community-plugin-stats.json</code> (indirme sayısı) ve <code>community-plugins.json</code> (kayıt listesi, 6,840 vakaları) doğrudan 2026-08-22'e alınır</span></li>
+<li><a href="/tr/obsidian/plugins/" style="color:var(--accent);">Obsidian eklentisine giriş (bu site)</a> — <span>Toplam eklenti sayısı 6,812 parça (2026-08-21 gerçek ölçüm) ・En iyi 10 sıralama orijinal sayfası</span></li>
+<li><a data-cta-cluster="obsidian" data-cta-placement="bottom" data-cta-position="bottom" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" rel="noopener" style="color:var(--accent);" target="_blank">SimpleMemo — App Store</a> — <span>App Store indirme sayfası</span></li>
+</ul>
+<p style="font-size:.8rem;color:var(--text-muted);margin-top:1rem;line-height:1.7;"><span>Obsidian, Dynalist Inc.'dir. Bu bir ticari markadır. Bu site, Obsidian projesine bağlı olmayan bağımsız bir ortamdır ve SimpleMemo, YURIKA, K.K. tarafından geliştirilen bağımsız bir uygulamadır. Dataview, blacksmithgu (Michael Brenan) tarafından geliştirilen üçüncü taraf bir eklentidir ve bu site geliştiricilerini veya hak sahiplerini garanti etmez veya tavsiye etmez. </span></p>
+</div>
+</section>
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1. -->
+<aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="explore" href="/tr/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>Sonraki okuma</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Obsidian işbirliğiyle notları saklamak için bir yer oluşturun</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span> Bağlantıyı iPhone'de ayarlar ve hedefi kaydederseniz gönderilen notu Obsidian'ye de bırakabilirsiniz. </span> </span> </a>
+</aside>
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+<div class="container">
+<h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>İlgili içerikler</span> </h3>
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/tr/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Memo Uygulaması Karşılaştırma Listesi</span></a></li>
+<li><a href="/tr/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Tüm yöntemler</span></a></li>
+<li><a href="/tr/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Tüm blog yazıları</span></a></li>
+<li><a href="/tr/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Sık sorulan sorular</span></a></li>
+</ul>
+</div>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="tr" dir="ltr"><a class="site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Küçük bir not. Bir sonraki adım.</p><p class="site-footer-description">iPhone'unuzdan Obsidian'a ve e-postaya not gönderin.</p></div></div><!-- /site-chrome:intro -->
+<div class="container">
+<nav aria-label="Alt bilgi gezinmesi" class="footer__nav">
+<div class="footer__col">
+<p class="footer__col-title">Ürün</p>
+<a class="footer__link" href="/tr/download/">İndir</a>
+<a class="footer__link" href="/tr/">Ana sayfa</a>
+<a class="footer__link" href="/tr/apple-watch/">Apple Watch</a>
+<a class="footer__link" href="/tr/obsidian/">Obsidian entegrasyonu</a>
+<a class="footer__link" href="/tr/use-cases/">Kullanım örnekleri</a>
+<a class="footer__link" href="/tr/guides/">Kılavuzlar</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Karşılaştırmalar ve geçiş</p>
+<a class="footer__link" href="/tr/note-to-email/">E-postaya not gönderme</a>
+<a class="footer__link" href="/tr/vs/">Karşılaştır</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Destek</p>
+<a class="footer__link" href="/tr/roadmap/">Açık yol haritası</a>
+<a class="footer__link" href="/tr/devlog/">Geliştirme günlüğü</a>
+<a class="footer__link" href="/tr/about/">Geliştirici hakkında</a>
+<a class="footer__link" href="/tr/faq">Sık sorulan sorular</a>
+<a class="footer__link" href="/tr/privacy">Gizlilik</a>
+<a class="footer__link" href="/tr/contact">İletişim</a>
+</div>
+</nav>
+<p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / İşleten: YURIKA, K.K.</p>
+</div>
+</footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

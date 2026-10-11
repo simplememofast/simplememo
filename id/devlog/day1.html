@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/day1">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>[Hari Buku Harian Pengembangan1] Saya sangat mencintai Captio sehingga saya ingin menciptakan "pengalaman itu" lagi | SimpleMemo</title>
+  <meta name="description" content="Log pengembangan Day1 mencatat semua penilaian teknis, termasuk alasan untuk memilih pengalaman Captio, desain yang menghilang saat dikirim, arsitektur Outbox untuk mencegah tumpahan, Relay API, dan desain privasi. Transmisi satu ketukan dan desain untuk mencegah tumpahan akan dilepaskan.">
+  <meta name="theme-color" content="#070b14">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="author" content="Obsidian連携シンプルメモ開発チーム">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- OGP -->
+  <meta property="og:title" content="[Development Diary Day1] Saya sangat menyukai Captio sehingga saya ingin membuat &quot;pengalaman itu&quot; lagi">
+  <meta property="og:description" content="Harian pengembangan1, yang membongkar pengalaman Captio dan mencatat semua penilaian teknis, termasuk UIKit, arsitektur Outbox, Relay API, dan desain privasi. Transmisi satu ketukan dan desain untuk mencegah tumpahan.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://simplememofast.com/id/devlog/day1">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-day1.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="id_ID">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
+  <meta property="article:author" content="Obsidian連携シンプルメモ開発チーム">
+  <meta property="article:section" content="Development">
+  <meta property="article:tag" content="Captio">
+  <meta property="article:tag" content="UIKit">
+  <meta property="article:tag" content="Outbox Architecture">
+  <meta property="article:tag" content="Privacy">
+  <meta property="article:tag" content="Swift">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="[Development Diary Day1] Saya sangat menyukai Captio sehingga saya ingin membuat &quot;pengalaman itu&quot; lagi">
+  <meta name="twitter:description" content="Buku harian pengembangan Day1 yang membongkar pengalaman Captio dan mencatat semua keputusan teknis dari UIKit, arsitektur Outbox, Relay API, dan desain privasi.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-day1.png">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/id/devlog/day1">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/day1">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/day1">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/day1">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/day1">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/day1">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/day1">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/day1">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/day1">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/day1">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/day1">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/day1">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BlogPosting -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/id/devlog/day1#article",
+  "headline": "[Development Diary Day1] Saya sangat menyukai Captio sehingga saya ingin membuat \"pengalaman itu\" lagi",
+  "description": "Harian pengembangan1, yang membongkar pengalaman Captio dan mencatat semua penilaian teknis, termasuk UIKit, arsitektur Outbox, Relay API, dan desain privasi. Transmisi satu ketukan dan desain untuk mencegah tumpahan.",
+  "url": "https://simplememofast.com/id/devlog/day1",
+  "inLanguage": "id",
+  "datePublished": "2026-02-13",
+  "dateModified": "2026-10-02",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://simplememofast.com/#organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/devlog-day1.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/id/devlog/day1#webpage"
+  }
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Beranda",
+      "item": "https://simplememofast.com/id/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Buku Harian Pengembangan",
+      "item": "https://simplememofast.com/id/devlog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Hari Buku Harian Pengembangan1",
+      "item": "https://simplememofast.com/id/devlog/day1"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Speakable (AIO / Voice Search) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/id/devlog/day1#webpage",
+  "inLanguage": "id",
+  "name": "Hari Buku Harian Pengembangan1 - Saya sangat mencintai Captio sehingga saya ingin menciptakan pengalaman itu lagi",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/id/#website"
+  },
+  "url": "https://simplememofast.com/id/devlog/day1"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container { display: flex; justify-content: flex-end; padding: 1.25rem 0; }
+    .lang-switcher { display: inline-flex; background: rgba(18, 26, 46, 0.95); border: 1px solid rgba(82, 160, 255, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .lang-switcher__btn { background: transparent; border: none; color: #c9d4ec; padding: 0.75rem 1.1rem;
+      min-height: 48px; border-radius: 19px; cursor: pointer; font-size: 0.8rem; font-weight: 400; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.02em; }
+    .lang-switcher__btn:hover { color: #f2f6ff; }
+    .lang-switcher__btn:focus-visible { outline: 2px solid #4da3ff; outline-offset: 2px; }
+    .lang-switcher__btn.active { background: rgba(82, 160, 255, 0.25); border: 1px solid rgba(82, 160, 255, 0.2); color: #fff; box-shadow: 0 0 12px rgba(82, 160, 255, 0.1); }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+    @media (prefers-reduced-motion: reduce) { .lang-switcher__btn { transition: none; } }
+
+    pre { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 16px 0; }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 0.85rem; color: #e0e0e0; }
+    .article-meta { text-align: center; margin-bottom: 30px; color: var(--text-muted); font-size: 0.85rem; }
+    .article-toc { background: rgba(18, 26, 46, 0.85); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 30px; }
+    .article-toc h2 { font-size: 0.95rem; margin-bottom: 12px; }
+    .article-toc ol { padding-left: 20px; }
+    .article-toc li { margin-bottom: 6px; }
+    .article-toc a { color: var(--accent); text-decoration: none; font-size: 0.875rem; }
+    .article-toc a:hover { text-decoration: underline; }
+    .related-topics { margin-top: 50px; }
+    .related-topics h2 { font-size: 1.1rem; margin-bottom: 16px; }
+    .related-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 600px) { .related-grid { grid-template-columns: 1fr 1fr; } }
+    .related-card { background: rgba(18, 26, 46, 0.85); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; text-decoration: none; color: inherit; display: block; transition: border-color 0.25s; }
+    .related-card:hover { border-color: rgba(82, 160, 255, 0.3); }
+    .related-card__title { font-size: 0.9rem; font-weight: 700; color: var(--text-primary, #fff); margin-bottom: 4px; }
+    .related-card__desc { font-size: 0.8rem; color: var(--text-secondary); }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Navigasi utama" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/id/guides/">Panduan</a><a href="/id/use-cases/">Contoh penggunaan</a><a href="/id/vs/">Bandingkan</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/id/guides/">Panduan</a></li>
+        <li><a href="/id/use-cases/">Contoh penggunaan</a></li>
+        <li><a href="/id/vs/">Bandingkan</a></li>
+        <li><a href="/id/methods/"><span>Metode</span></a></li>
+        <li><a href="/id/blog/"><span>Blog</span></a></li>
+        <li><a href="/id/glossary/"><span>Glosarium</span></a></li>
+        <li><a href="/id/faq">Pertanyaan umum</a></li>
+        <li><a href="/id/about/">Tentang pengembang</a></li>
+        <li><a href="/id/devlog/">Catatan pengembangan</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>Unduh</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Bahasa Indonesia · Pilih bahasa"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ID</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="id" dir="ltr"><p class="site-language-title">Pilih bahasa</p><div class="site-language-grid"><a href="/devlog/day1" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/devlog/day1" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/devlog/day1" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/devlog/day1" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/devlog/day1" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/devlog/day1" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/devlog/day1" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="id" aria-current="page"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ar/devlog/day1" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/devlog/day1" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">Unduh</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menu"><span>Menu</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- ======================== -->
+      <!-- JAPANESE VERSION         -->
+      <!-- ======================== -->
+      <div>
+        <h1 class="page-content__title sd-title">[Development Diary Day1] Saya sangat menyukai Captio sehingga saya ingin membuat "pengalaman itu" lagi</h1>
+        <div class="article-meta">2026 tahun 2 bulan 13 hari</div>
+
+        <!-- Table of Contents -->
+        <nav class="article-toc">
+          <h2>Daftar isi</h2>
+          <ol>
+            <li><a href="#ja-intro">Pendahuluan: Keberadaan Captio</a></li>
+            <li><a href="#ja-section1">Apa" dari Captio itu bagus - Saya mencoba memecah pengalamannya</a></li>
+            <li><a href="#ja-section2">Arsitektur: Mengapa UIKit dan bukan SwiftUI</a></li>
+            <li><a href="#ja-section3">Desain untuk mewujudkan "menghilang saat dikirim" dengan satu ketukan</a></li>
+            <li><a href="#ja-section4">Arsitektur Outbox untuk mencegah tumpahan</a></li>
+            <li><a href="#ja-section5">Relay API: Transmisi yang tidak bergantung pada kerja sama OAuth di kotak surat</a></li>
+            <li><a href="#ja-section6">Apa yang saya lakukan hari ini: Hapus sedikit rasa tidak nyaman satu per satu</a></li>
+            <li><a href="#ja-section7">Inkonsistensi status tampilan riwayat telah diatasi</a></li>
+            <li><a href="#ja-section8">Komitmen Panoid terhadap privasi</a></li>
+            <li><a href="#ja-section9">Dukungan bahasa 10: Saya ingin menyampaikan kepada pengguna Captio di seluruh dunia</a></li>
+            <li><a href="#ja-section10">Pembelajaran hari ini: Produk ini adalah desain "rasa aman"</a></li>
+            <li><a href="#ja-section11">Lain kali (Hari2) pratinjau</a></li>
+          </ol>
+        </nav>
+
+        <div class="page-content__body">
+
+          <!-- Introduction -->
+          <section id="ja-intro">
+            <p>Apakah Anda tahu aplikasi bernama Captio?</p>
+            <p>Tulis catatan dan tekan tombol kirim. Itu saja yang Anda butuhkan untuk menerima memo ke alamat email Anda. Saat Anda memulainya, keyboard akan ditampilkan, dan jika Anda menulis, kirimkan, dan jika Anda mengirimkannya, itu akan hilang. Tidak ada fungsi yang tidak perlu sama sekali. Itu hanya sebagian besar dari sebuah aplikasi.</p>
+            <p>Tapi "hanya itu saja" sangat nyaman.</p>
+            <p>Ide-ide yang saya dapatkan di kereta komuter, tugas-tugas yang tiba-tiba terlintas dalam pikiran selama rapat, dan kata-kata yang terlintas dalam pikiran saya sebelum tidur - Captio mengirimkan semuanya segera ke kotak surat saya. Tidak ada kerumitan untuk membuka aplikasi memo, memilih folder, dan menambahkan judul. Pengalaman "nol gesekan" adalah sesuatu yang tidak bisa Anda lepaskan begitu Anda mengetahuinya.</p>
+            <p>Captio telah menghentikan layanan.</p>
+            <p>Saya mencoba beberapa aplikasi alternatif, tetapi tidak ada yang jauh dari pengalaman itu. Startup lambat, ada elemen yang tidak perlu di UI, dan catatan tetap ada setelah transmisi - ini mungkin tampak seperti perbedaan sepele, tetapi inti dari pengalaman yang dibuat oleh Captio adalah akumulasi "hal-hal sepele" seperti itu.</p>
+            <p>Jadi saya memutuskan untuk membuatnya sendiri. Rasakan Captio lagi.</p>
+            <p>Ini adalah log pengembangan dari "SimpleMemo" Day1. Dalam artikel ini, kami akan membongkar pengalaman Captio dan mencatat semua penilaian teknis tentang cara mereproduksinya dalam tumpukan teknologi modern.</p>
+          </section>
+
+          <!-- Section 1 -->
+          <section id="ja-section1" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-01">1 "Apa" dari Captio bagus - Saya mencoba membongkar pengalamannya</h2></div><div class="ce-chapter__body">
+            <p>Untuk mengucapkan pengalaman Captio, saya mencoba memecahnya menjadi dua elemen 3.</p>
+
+            <h3>Elemen 1: Peluncuran-ke-Input Instan</h3>
+            <p>Saat Anda memulai Captio, keyboard akan segera ditampilkan dan Anda dapat memasukkan teks. Layar utama ditampilkan setelah layar splash, dan tidak ada prosedur untuk menekan tombol pembuatan memo dari sana. Mulai = Masukan. Kami menyebut ini "waktu dari startup ke input teks" <strong>Time-to-Text</strong>. Captio kurang dari 0.5 detik dalam pengalaman.</p>
+
+            <h3>Elemen 2: Menghilang segera setelah mengirim (Instan Jelas Setelah Mengirim)</h3>
+            <p>Saat Anda menekan tombol kirim, layar akan segera dihapus. " Mengirim..." Saya tidak punya waktu untuk menunggu sambil menatap bilah kemajuan. Saat catatan yang Anda tulis menghilang, Anda dapat melanjutkan ke tindakan berikutnya dengan rasa aman "Oh, saya bisa mengirimkannya". Kami menyebut ini "waktu dari menekan tombol kirim ke UI dihapus" <strong>Send-to-Reset</strong>. Tujuannya adalah untuk mengosongkan layar sebelum Anda merasa telah menunggu.</p>
+
+            <h3>Elemen 3: Tidak Ada Yang Tidak Perlu (Tidak Ada Yang Tidak Perlu)</h3>
+            <p>Fungsi folder, fungsi tag, teks kaya, dukungan penurunan harga - tidak ada yang tersedia di Captio. Hanya ada bidang input teks dan tombol kirim. Kerapian ini membawa beban kognitif mendekati nol. Aplikasi yang tidak perlu memikirkan apa yang harus dilakukan. Itu adalah Captio.</p>
+
+            <p>Elemen 3 ini direproduksi dalam pengembangan iOS modern. Itulah misi dari "SimpleMemo".</p>
+          </div></section>
+
+          <!-- Section 2 -->
+          <section id="ja-section2" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-02">2. Arsitektur: Mengapa "UIKit" daripada SwiftUI</h2></div><div class="ce-chapter__body">
+            <p>Dalam pengembangan iOS di 2026, mungkin tampak sesat untuk memilih UIKit daripada SwiftUI. Namun, tujuan prioritas utama kami jelas - <strong>Time-to-Text 500ms atau kurang</strong>.</p>
+
+            <p>Evaluasi ulang `tubuh` SwiftUI, inisialisasi `StateObject`, resolusi `@Environment` - biaya overhead ini dapat diabaikan dalam pengembangan aplikasi normal, tetapi tidak dapat diabaikan untuk mencapai "mulai-dan-masukan". Saya ingin fokus pada bidang teks dengan cepat bahkan dengan 1ms.</p>
+
+            <p>Apa yang diadopsi di sana adalah <strong>konstruksi langsung UIKit yang tidak menggunakan Storyboard</strong>.</p>
+
+            <p>Buat jendela dengan SceneDelegate dan atur CompositeViewController langsung ke rootViewController. Lewati bahkan proses penguraian Storyboard.</p>
+
+<pre tabindex="0"><code>// SceneDelegate.swift
+func scene(_ scene: UIScene,
+           willConnectTo session: UISceneSession,
+           options connectionOptions: UIScene.ConnectionOptions) {
+    guard let windowScene = (scene as? UIWindowScene) else { return }
+    let window = UIWindow(windowScene: windowScene)
+    window.rootViewController = ComposeViewController()
+    window.makeKeyAndVisible()
+    self.window = window
+}</code></pre>
+
+            <p>dan dengan `viewDidAppear` di ComposeViewController, langsung fokus pada tampilan teks.</p>
+
+<pre tabindex="0"><code>// ComposeViewController.swift
+override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    textView.becomeFirstResponder()
+}</code></pre>
+
+            <p>Dengan kode 2 ini saja, jalur dari startup ke tampilan keyboard adalah yang terpendek.</p>
+
+            <p>Targetnya adalah 500ms atau kurang. Dalam catatan yang diukur kemudian dengan perekaman layar (2026 8 11, iPhone 16e, awal hangat), itu adalah 0.4 detik dari ketukan ikon ke tampilan keyboard. Di SwiftUI, sulit untuk mengontrol waktu `@FocusState` dan evaluasi ulang tubuh secara detail, dan sulit untuk mengemas jalur ini (keduanya tidak diukur dan dibandingkan dalam kondisi yang sama).</p>
+
+            <p>UIKit mungkin "tua". Namun, "cepat". Pada titik 1 ini, UIKit masih menjadi pilihan terbaik.</p>
+          </div></section>
+
+          <!-- Section 3 -->
+          <section id="ja-section3" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-03">3. Desain untuk mewujudkan "kirim dan hilang" dengan satu ketukan</h2></div><div class="ce-chapter__body">
+            <p>Ada penilaian desain yang paling penting untuk mereproduksi pengalaman "kirim dan hilang" Captio. Ini adalah untuk sepenuhnya memisahkan animasi transmisi <strong> dan pembersihan UI dari respons jaringan</strong>.</p>
+
+            <p>Alur transmisi aplikasi umum adalah sebagai berikut:</p>
+            <ol>
+              <li>Tekan tombol kirim</li>
+              <li>Tampilkan indikator pemuatan</li>
+              <li>Menunggu respons dari server</li>
+              <li>Bersihkan UI jika berhasil, tampilkan kesalahan jika gagal</li>
+            </ol>
+
+            <p>Dalam alur ini, penundaan jaringan menjadi penundaan UI sebagaimana adanya. Aliran kami seperti ini:</p>
+            <ol>
+              <li>Tekan tombol kirim</li>
+              <li><strong>segera</strong>membersihkan UI (animasi: 0.25 detik)</li>
+              <li>Transmisi jaringan di latar belakang</li>
+              <li>Berhasil → Diam-diam hapus dari Outbox / Gagal → Coba lagi di latar belakang</li>
+            </ol>
+
+<pre tabindex="0"><code>// ComposeViewController.swift
+private func performSendAnimation() {
+    UIView.animate(withDuration: 0.25,
+                   delay: 0,
+                   options: .curveEaseOut) {
+        self.textView.alpha = 0
+        self.subjectField.alpha = 0
+    } completion: { _ in
+        self.textView.text = ""
+        self.subjectField.text = ""
+        self.textView.alpha = 1
+        self.subjectField.alpha = 1
+        self.textView.becomeFirstResponder()
+    }
+}</code></pre>
+
+            <p>Untuk pengguna, saat Anda menekan tombol kirim, catatan "menghilang" dan Anda dapat menulis catatan berikutnya. Keberhasilan atau kegagalan jaringan ditangani di tempat yang tidak terlihat oleh pengguna.</p>
+
+            <p>"Tetapi bagaimana jika transmisi gagal?" - Jawaban atas pertanyaan itu adalah arsitektur Outbox di bagian berikutnya.</p>
+          </div></section>
+
+          <!-- Section 4 -->
+          <section id="ja-section4" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-04">4 Arsitektur Outbox untuk mencegah tumpahan</h2></div><div class="ce-chapter__body">
+            <p>Memisahkan UI transmisi dari respons jaringan berarti bahwa situasi bahwa "UI telah dihapus, tetapi transmisi email sebenarnya gagal" dapat terjadi. Ini benar-benar tidak dapat diterima. Catatan yang menurut pengguna "terkirim" sebenarnya tidak terkirim - ini adalah kehilangan kepercayaan yang fatal untuk aplikasi memo.</p>
+
+            <p>Yang diadopsi di sana adalah <strong>pola Outbox</strong>.</p>
+
+            <p>Aliran transmisi pesan adalah sebagai berikut:</p>
+            <ol>
+              <li><strong>Ketuk tombol kirim</strong>: Enkripsi pesan dengan AES-GCM dan simpan di Outbox (penyimpanan lokal)</li>
+              <li><strong>Hapus UI</strong>: Bersihkan layar secara instan dengan performSendAnimation</li>
+              <li><strong>Transmisi latar belakang</strong>: Ekstrak pesan dari Outbox dan kirimkan ke Relay API</li>
+              <li><strong>Sukses</strong>: Hapus pesan dari Outbox</li>
+              <li><strong>Kegagalan</strong>: Biarkan menunggu transmisi dan kirim ulang nanti</li>
+              <li><strong>Offline</strong>: Pantau koneksi dengan NWPathMonitor dan secara otomatis mengirim ulang saat dipulihkan</li>
+            </ol>
+
+            <p>Yang penting adalah <strong>untuk menyimpannya ke Outbox</strong> sebelum mengirim jaringan. Akibatnya, bahkan jika aplikasi tiba-tiba mogok atau daya terminal mati, pesan yang ditulis ke Outbox akan tetap ada.</p>
+
+            <p>Pesan yang disimpan di Outbox dilindungi enkripsi AES-GCM menggunakan CryptoKit. Kunci enkripsi disimpan di Keychain dan tidak dapat diakses dari luar sandbox aplikasi.</p>
+
+<pre tabindex="0"><code>// OutboxManager.swift
+func enqueue(message: OutboxMessage) throws {
+    let key = try KeychainHelper.getOrCreateSymmetricKey()
+    let sealedBox = try AES.GCM.seal(
+        message.plainData,
+        using: key
+    )
+    let encrypted = EncryptedOutboxEntry(
+        id: message.id,
+        sealedData: sealedBox.combined!,
+        createdAt: Date(),
+        retryCount: 0
+    )
+    try persistenceStore.save(encrypted)
+}</code></pre>
+
+            <p>Juga, karena semuanya diimplementasikan oleh Anda sendiri, <strong>ketergantungan pada perpustakaan eksternal adalah nol</strong>. CryptoKit, NWPathMonitor, URLSession - semuanya diselesaikan dengan kerangka kerja Apple yang asli. Bebas dari kontrol versi perpustakaan pihak ketiga dan audit keamanan adalah keuntungan besar bagi tim kecil.</p>
+          </div></section>
+
+          <!-- Section 5 -->
+          <section id="ja-section5" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-05">5. Relay API: Transmisi yang tidak bergantung pada tautan OAuth dari kotak surat</h2></div><div class="ce-chapter__body">
+            <p>Mekanisme transmisi Captio belum diungkapkan secara resmi. Alasan pengumuman penghentian pengembang adalah karena tidak lagi dapat terus menghabiskan waktu untuk menjaga stabilitas dan keamanan aplikasi, dan metode transmisi tidak dikutip sebagai alasan. Namun, secara umum, pengiriman dengan mengandalkan email eksternal API mudah dipengaruhi oleh perubahan persyaratan penyedia dan pembatasan akses.</p>
+
+            <p>Kami memilih konfigurasi <strong>Pekerja Cloudflare + Resend API</strong>.</p>
+
+            <p>Cloudflare Workers adalah platform komputasi tepi yang mengeksekusi kode di pusat data terdekat dengan pengguna di seluruh dunia. Permintaan dari Jepang diproses di tepi Jepang, dan permintaan dari Amerika Serikat diproses di tepi Amerika Serikat. Ini hampir menghilangkan masalah awal dingin dibandingkan dengan serverless konvensional (AWS Lambda, dll.).</p>
+
+            <p>Gunakan Resend API untuk mengirim email. Resend adalah email API untuk pengembang.</p>
+
+            <h3>Alur otentikasi email</h3>
+            <p>Saat pengguna menetapkan alamat email tujuan, autentikasi email dilakukan dengan kode autentikasi digit 6. Ini mencegah pengiriman yang tidak sah ke alamat email pihak ketiga.</p>
+
+            <h3>Batas tarif berlapis-lapis</h3>
+            <p>Batas tarif berlapis-lapis diterapkan untuk mencegah penggunaan yang tidak sah.</p>
+
+<pre tabindex="0"><code>// Cloudflare Worker - Rate Limit Configuration
+const RATE_LIMITS = {
+  devicePerMinute: 30,    // 1デバイスあたり1分30回
+  devicePerDay: 200,      // 1デバイスあたり1日200回
+  ipPerHour: 120,         // 1IPあたり1時間120回
+  globalPerDay: 300       // サービス全体で1日300回（調整可能）
+};</code></pre>
+
+            <p>Dengan menerapkan batas tarif pada lapisan 3 pada perangkat, IP, dan global, Anda dapat memblokir pelarian dan serangan botnet pada satu perangkat.</p>
+
+            <p><strong>2026-09 Postscript: </strong> Batas atas untuk setiap terminal dan batas atas untuk seluruh hari 1 telah dihapus di 2026 6. Batas transmisi maksimum saat ini adalah batas atas per 1 jam per alamat IP.</p>
+
+            <h3>Jaminan kesetaraan daya</h3>
+            <p>Untuk mencegah transmisi duplikat karena ketidakstabilan jaringan, tetapkan UUID ke setiap pesan dan lakukan pemeriksaan duplikat di sisi Relay API. Jika pesan UUID yang sama dikirim ulang, setelah waktu 2, itu akan mengembalikan respons yang berhasil tanpa mengirim email. Ini mencegah pengguna menerima memo yang sama dua kali ketika dikombinasikan dengan mekanisme coba lagi dari pola Outbox.</p>
+
+            <p><strong>2026-10 Postscript: </strong>Server transmisi saat ini tidak memeriksa duplikasi itu sendiri. Berikan ID pesan sebagai Idempotency-Key dari permintaan ke Resend, dan Resend mengingat kunci yang sama untuk jam 24, dan mengembalikan respons yang sama seperti sebelumnya untuk permintaan konten yang sama. Oleh karena itu, memo yang sama tidak akan dikirim berulang kali selama jam 24 (untuk detailnya, <a href="/id/devlog/relay-api-design">Desain Relay API</a>).</p>
+          </div></section>
+
+          <!-- Section 6 -->
+          <section id="ja-section6" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-06">6. Apa yang saya lakukan hari ini: Hapus ketidaknyamanan kecil satu per satu</h2></div><div class="ce-chapter__body">
+            <p>Sebagian besar pekerjaan implementasi Day1 dihabiskan untuk meninjau dialog peringkat bintang. Evaluasi App Store adalah garis hidup dari aplikasi, tetapi jangan mencari evaluasi dengan cara yang merusak pengalaman pengguna.</p>
+
+            <h3>Desain ulang kondisi tampilan</h3>
+            <p>Kondisi tampilan dialog peringkat bintang diatur sebagai berikut:</p>
+            <ul>
+              <li><strong>Ditampilkan untuk setiap 100</strong>: Ditampilkan hanya untuk pengguna yang telah sepenuhnya menggunakan aplikasi</li>
+              <li><strong> Interval hari minimum 14</strong>: Lebih dari 14 telah berlalu sejak terakhir kali ditampilkan</li>
+              <li><strong>30 tidak akan ditampilkan selama sehari setelah penutupan</strong>: Jika pengguna menutupnya, 30 tidak akan ditampilkan lagi selama sehari</li>
+            </ul>
+
+            <h3>Mengubah area ketuk ikon bintang</h3>
+            <p>Apple Panduan Antarmuka Manusia merekomendasikan minimum 44x44pt untuk ukuran target sentuh. Area ketukan ikon bintang tidak memenuhi standar ini, jadi itu diperbaiki.</p>
+
+<pre tabindex="0"><code>// StarRatingView.swift
+private func createStarButton() -> UIButton {
+    let button = UIButton(type: .custom)
+    button.translatesAutoresizingMaskIntoConstraints = false
+    NSLayoutConstraint.activate([
+        button.widthAnchor.constraint(greaterThanOrEqualToConstant: 44),
+        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44)
+    ])
+    return button
+}</code></pre>
+
+            <h3>Perbaiki distorsi ikon bintang</h3>
+            <p>Memperbaiki masalah di mana ikon bintang terdistorsi karena distribusi `.fillEqually` dari UIStackView. `contentMode` diatur ke `.scaleAspectFit`, dan distribusi StackView diubah menjadi `.equalSpacing`.</p>
+
+            <h3>Aliran setelah evaluasi</h3>
+            <ul>
+              <li><strong>5 stars</strong>: Transisi ke layar ulasan App Store (`SKStoreReviewController`)</li>
+              <li><strong>4 bintang atau kurang</strong>: Diam-diam menampilkan bersulang "Terima kasih" dan mengakhiri. Jangan membawa ulasan negatif ke App Store.</li>
+            </ul>
+          </div></section>
+
+          <!-- Section 7 -->
+          <section id="ja-section7" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-07">7. Ketidakkonsistenan status tampilan riwayat telah diselesaikan</h2></div><div class="ce-chapter__body">
+            <p>Saya melihat sebuah bug pada layar riwayat transmisi (Riwayat). Ada pesan bahwa statusnya tetap "Mengirim" meskipun transmisi telah selesai.</p>
+
+            <p>Sebagai hasil dari penyelidikan penyebabnya, ditemukan bahwa ada masalah dengan logika pembaruan status. Dalam implementasi sebelumnya, konten teks pesan digunakan sebagai kunci untuk memperbarui status. Namun, jika Anda mengirim catatan dengan konten yang sama lebih dari satu kali, pencarian berbasis teks tidak dapat mengidentifikasi pesan yang benar.</p>
+
+            <p>Koreksinya sederhana dan jelas. Mengubah pencarian berbasis teks menjadi <strong>pembaruan status berbasis ID</strong>. Setiap pesan diberi UUID saat menyimpan Outbox, jadi gunakan ID ini untuk memperbarui status Riwayat.</p>
+
+<pre tabindex="0"><code>// HistoryManager.swift
+// Before: テキストベースの検索（バグの原因）
+// func updateStatus(forText text: String, status: SendStatus)
+
+// After: IDベースのステータス更新
+func updateStatus(forMessageId id: UUID, status: SendStatus) {
+    guard let index = entries.firstIndex(where: { $0.messageId == id }) else {
+        return
+    }
+    entries[index].status = status
+    persistEntries()
+}</code></pre>
+
+            <p>Dengan koreksi ini, tidak peduli berapa kali Anda mengirim catatan dengan konten yang sama, status masing-masing sekarang ditampilkan dengan benar.</p>
+          </div></section>
+
+          <!-- Section 8 -->
+          <section id="ja-section8" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-08">8. Obsesi Panoid dengan privasi</h2></div><div class="ce-chapter__body">
+            <p>Informasi pribadi ditulis ke aplikasi memo. Kata sandi, kekhawatiran pribadi, ide bisnis - tidak mungkin untuk memprediksi apa yang akan ditulis pengguna. Itulah mengapa perlindungan privasi tidak "cukup" tetapi "berlebihan" tepat.</p>
+
+            <h3>Lapisan privasi di pengalih aplikasi</h3>
+            <p>Di pengalih aplikasi iOS, layar aplikasi ditampilkan sebagai thumbnail. Menampilkan lapisan privasi saat aplikasi bermigrasi ke latar belakang sehingga konten catatan tidak dapat dilihat dari layar pengalih aplikasi.</p>
+
+            <p><strong>2026-09 Postscript: </strong>Perlindungan ini tidak diaktifkan di aplikasi saat ini (pemrosesan tampilan tetap ada di sumber, tetapi tidak dipanggil). Memo yang ditampilkan mungkin tetap berada di gambar pengalih aplikasi. Untuk informasi lebih lanjut, silakan lihat artikel tentang "Desain Privasi".</p>
+
+            <h3>Sesi URL sementara</h3>
+            <p>Sesi URL Normal menyimpan cache, cookie, dan informasi otentikasi di disk. Dengan menggunakan `URLSessionConfiguration.ephemeral`, kami memastikan bahwa informasi ini tidak ada di disk sama sekali. Ini untuk mencegah isi memo tetap berada di penyimpanan sebagai cache komunikasi.</p>
+
+            <h3>Log tidak berbahau</h3>
+            <p>Hati-hati tentang log debugging dalam pengembangan. " Proses yang tampaknya tidak berbahaya untuk "mengeluarkan isi dari memo yang dikirim ke log" dapat menjadi lubang keamanan. Kebijakan kami jelas:</p>
+            <ul>
+              <li>Isi memo tidak dicatat dalam <strong>log meskipun itu adalah build DEBUG</strong></li>
+              <li>Log kesalahan tidak menggunakan `localizedDescription`, hanya <strong>`type(of: error)` yang dicatat</strong></li>
+              <li>Alasan: Karena `localizedDescription` mungkin berisi masukan pengguna</li>
+            </ul>
+
+<pre tabindex="0"><code>// NetworkManager.swift
+// BAD: エラーの詳細をログに出力
+// Logger.error("Send failed: \(error.localizedDescription)")
+
+// GOOD: エラーの型のみをログに出力
+Logger.error("Send failed: \(type(of: error))")</code></pre>
+
+            <p>Ini mungkin terlihat paranoid. Namun, saya pikir tingkat paranoia ini diperlukan untuk mempercayai dan menggunakan aplikasi memo.</p>
+          </div></section>
+
+          <!-- Section 9 -->
+          <section id="ja-section9" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-09">9. Dukungan bahasa 10: Saya ingin mengirimkannya ke pengguna Captio di seluruh dunia</h2></div><div class="ce-chapter__body">
+            <p>Captio memiliki pengguna di seluruh dunia, terutama di negara-negara berbahasa Inggris. Untuk menyampaikan "SimpleMemo" kepada pengguna sebelumnya, bahasa 10 didukung sejak rilis pertama.</p>
+
+            <p>Bahasa yang didukung: Jepang, Inggris, Spanyol, Prancis, Jerman, Italia, Portugis, Korea, Cina (Sederhana), Arab.</p>
+
+            <p><strong>2026-09 Postscript: </strong> Dalam notasi App Store saat ini, bahasa yang didukung adalah bahasa Jepang, Inggris, Spanyol, Prancis, Jerman, Portugis, Rusia, Cina (sederhana), Cina (tradisional), dan bahasa Arab 10. Bahasa Italia dan Korea dalam daftar di atas tidak termasuk dalam notasi saat ini.</p>
+
+            <p>Terutama <strong>Dukungan RTL Arab (Kanan-ke-Kiri)</strong> adalah tantangan teknis. Tidak hanya arah teks, tetapi juga seluruh tata letak UI perlu dicerminkan. Dengan secara konsisten menggunakan kendala `leading`/`trailing` dari Auto Layout, itu mewujudkan tata letak alami bahkan di lingkungan RTL.</p>
+
+            <h3>Pengalihan bahasa dalam aplikasi</h3>
+            <p>Selain peralihan bahasa dalam aplikasi setelah iOS 16, mekanisme peralihan bahasa yang unik juga diterapkan. Ketika bahasa dialihkan, ViewController diganti dengan transisi `cross-dissolve` untuk memberikan pengalaman peralihan yang lancar.</p>
+
+<pre tabindex="0"><code>// LanguageManager.swift
+func applyLanguageChange() {
+    guard let window = UIApplication.shared.connectedScenes
+        .compactMap({ $0 as? UIWindowScene })
+        .first?.windows.first else { return }
+
+    let newVC = ComposeViewController()
+    newVC.view.frame = window.bounds
+    UIView.transition(with: window,
+                      duration: 0.3,
+                      options: .transitionCrossDissolve,
+                      animations: {
+        window.rootViewController = newVC
+    })
+}</code></pre>
+          </div></section>
+
+          <!-- Section 10 -->
+          <section id="ja-section10" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-10">10. Pembelajaran hari ini: Produk adalah desain "rasa aman"</h2></div><div class="ce-chapter__body">
+            <p>Setelah menyelesaikan Day1, yang saya pikirkan adalah bahwa esensi dari produk ini adalah desain "rasa aman".</p>
+
+            <p>Mari kita rangkum angka-angka teknisnya:</p>
+            <ul>
+              <li><strong>Waktu-ke-Teks</strong>: 500ms atau kurang (target)</li>
+              <li><strong>Send-to-Reset</strong>: Singkatan yang tidak terasa menunggu (tujuan)</li>
+              <li><strong>Tumpahan pesan</strong>: Cegah dengan pola Outbox</li>
+              <li><strong>Enkripsi</strong>: AES-GCM (CryptoKit)</li>
+              <li><strong>Ketergantungan perpustakaan eksternal</strong>: Nol</li>
+            </ul>
+
+            <p>Namun, semua angka ini dirangkum menjadi satu tujuan "rasa aman".</p>
+
+            <p>Mulai cepat → "Anda dapat menulis segera kapan saja" ketenangan pikiran. <br> Menghilang saat Anda mengirimkannya → "Diproses" rasa aman. <br> Penanggulangan tumpahan → "Itu tidak akan hilang tanpa transmisi" ketenangan pikiran. <br> Enkripsi → "Tidak ada yang bisa melihat" ketenangan pikiran.</p>
+
+            <p>Captio dicintai bukan karena fungsinya yang luar biasa. Karena pengalaman "penggunaan dengan ketenangan pikiran" benar-benar dipoles. Saya ingin mengambil alih itu.</p>
+          </div></section>
+
+          <!-- Section 11 -->
+          <section id="ja-section11" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-11">11. Lain kali (Day2) pratinjau</h2></div><div class="ce-chapter__body">
+            <p>Day2 berencana untuk mengerjakan topik-topik berikut:</p>
+            <ul>
+              <li><strong>Kecanggihan animasi transmisi</strong>: Dari 0.25 detik saat ini memudar menjadi animasi yang lebih nyaman</li>
+              <li><strong>Optimasi waktu pembaruan status Riwayat</strong>: Perbandingan pembaruan waktu nyata vs pembaruan batch</li>
+              <li><strong>Apakah Anda benar-benar membutuhkan roti panggang yang sukses? </strong>: Pertimbangan opsi "jangan tampilkan" untuk umpan balik transmisi yang berhasil</li>
+            </ul>
+            <p>Bertujuan untuk keanggunan "tidak ada" dari Captio, lanjutkan ke Day2.</p>
+          </div></section>
+
+        </div>
+      </div>
+
+      <!-- ======================== -->
+      <!-- ENGLISH VERSION          -->
+      <!-- ======================== -->
+
+      <!-- ======================== -->
+      <!-- RELATED TOPICS (shared)  -->
+      <!-- ======================== -->
+      <div class="related-topics">
+        <h2 id="reading-12" data-ce-number="12"> <span>Topik Terkait Penggalian Mendalam</span> </h2>
+        <div class="related-grid">
+          <a href="/id/devlog/uikit-vs-swiftui" class="related-card">
+            <div class="related-card__title">
+              <span>UIKit vs SwiftUI: Pilihan untuk kecepatan mulai</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>Alasan mengapa saya memilih UIKit di 2026. Desain arsitektur ditujukan pada Time-to-Text 500ms atau kurang.</span>
+
+            </div>
+          </a>
+          <a href="/id/devlog/outbox-architecture" class="related-card">
+            <div class="related-card__title">
+              <span>Arsitektur Outbox: Desain untuk mencegah tumpahan</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>UI dihapus segera setelah dikirim, tetapi pesan yang tidak terkirim tetap ada di terminal dan dikirim ulang. Gambaran lengkap dari pola enkripsi AES-GCM Outbox.</span>
+
+            </div>
+          </a>
+          <a href="/id/devlog/relay-api-design" class="related-card">
+            <div class="related-card__title">
+              <span>Relay API: Membangun basis transmisi email dengan Pekerja Cloudflare</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>Kirim tanpa mengandalkan kerja sama OAuth di kotak surat. Kirim dengan Resend dari relai API (Pekerja Cloudflare) yang bergerak di tepi.</span>
+
+            </div>
+          </a>
+          <a href="/id/devlog/privacy-first-design" class="related-card">
+            <div class="related-card__title">
+              <span>Desain Privasi Pertama: Komitmen Paranoid</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>Sesi URL sementara, penanganan log, spesifikasi saat ini dari pengalih aplikasi (fungsi menyembunyikan catatan secara otomatis tidak diaktifkan).</span>
+
+            </div>
+          </a>
+          <a href="/id/captio-alternative/" class="related-card">
+            <div class="related-card__title">
+              <span>Panduan Perbandingan dan Migrasi Aplikasi Alternatif Captio</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>Prosedur migrasi dari Captio, tabel perbandingan fungsi, FAQ. Klik di sini jika Anda mempertimbangkan untuk mentransfer.</span>
+
+            </div>
+          </a>
+          <a href="/id/note-to-email/" class="related-card">
+            <div class="related-card__title">
+              <span>Cara mengirim catatan kepada diri sendiri melalui email</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>Segera kirimkan ide yang Anda dapatkan melalui email. Memo → Panduan pemanfaatan email.</span>
+
+            </div>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-13" data-ce-number="13"> <span>Referensi</span> </h2></div><div class="ce-chapter__body">
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developer.apple.com/documentation/uikit" target="_blank" rel="noopener" style="color:var(--accent);">Pengembang Apple — Dokumentasi UIKit</a> — <span>Referensi resmi untuk kerangka kerja UIKit. Digunakan untuk membangun UI SimpleMemo</span></li>
+    <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener" style="color:var(--accent);">Pengembang Apple — Dokumentasi CryptoKit</a> — <span>AES-GCM Digunakan untuk mengimplementasikan perlindungan data Outbox dengan enkripsi</span></li>
+    <li><a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener" style="color:var(--accent);">Dokumentasi Pekerja Cloudflare</a> — <span>Dilantik sebagai platform tanpa server untuk relai surat API</span></li>
+    <li><a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener" style="color:var(--accent);">Chris Richardson — Pola: Kotak keluar transaksional (microservices.io)</a> — <span>Pola desain di mana pesan yang akan dikirim pertama kali ditulis di meja tunggu (Outbox) dan dikirim oleh proses lain. SimpleMemo menggunakan cara berpikir yang sama di terminal</span></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc5321" target="_blank" rel="noopener" style="color:var(--accent);">RFC 5321 — Simple Mail Transfer Protocol (SMTP)</a> — <span>Spesifikasi Standar untuk Mail Transmission Protocol</span></li>
+  </ul>
+</div></section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/id/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"><span>Baca selanjutnya</span></span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"><span>Siapkan tempat untuk mengumpulkan catatan dengan integrasi Obsidian</span></span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"><span>Atur integrasi dan tujuan penyimpanan di iPhone agar catatan yang dikirim juga tersimpan di Obsidian.</span></span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>Konten terkait</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/id/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Perbandingan Aplikasi Alternatif Captio</span></a></li>
+    <li><a href="/id/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Daftar artikel blog</span></a></li>
+    <li><a href="/id/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Daftar Perbandingan Aplikasi Memo</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="id" dir="ltr"><a class="site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Catatan kecil. Langkah berikutnya.</p><p class="site-footer-description">Kirim catatan dari iPhone ke Obsidian dan email.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="Navigasi footer">
+      <div class="footer__col">
+        <p class="footer__col-title">Produk</p>
+        <a href="/id/download/" class="footer__link">Unduh</a>
+        <a href="/id/" class="footer__link">Beranda</a>
+        <a href="/id/how-to/" class="footer__link"><span>Panduan</span> </a>
+        <a href="/id/templates/" class="footer__link"><span>Templat</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Perbandingan dan perpindahan aplikasi</p>
+        <a href="/id/captio/" class="footer__link"><span>Metode Captio</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Bacaan</p>
+        <a href="/id/devlog/" class="footer__link">Catatan pengembangan</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Bantuan</p>
+        <a href="/id/roadmap/" class="footer__link">Rencana pengembangan</a>
+        <a href="/id/about/" class="footer__link">Tentang pengembang</a>
+        <a href="/id/terms" class="footer__link"><span>Ketentuan penggunaan</span> </a>
+        <a href="/id/privacy" class="footer__link">Privasi</a>
+        <a href="/id/contact" class="footer__link">Hubungi kami</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Dikelola oleh YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

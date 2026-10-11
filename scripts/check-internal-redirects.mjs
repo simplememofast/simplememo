@@ -290,6 +290,19 @@ if (process.argv.includes("--selftest")) {
   process.exit(runScenarios(SCENARIOS) === 0 ? 0 : 1);
 }
 
+// Resolve one internal link (edge middleware first, then the static tree) and
+// record a finding if it does not land in one hop. Both the href/src loop and
+// the JSON-LD/meta loop below share `cache`, so each path+query resolves once.
+async function checkLink(from, raw, pathPart, query) {
+  const key = query ? `${pathPart}?${query}` : pathPart;
+  if (!cache.has(key)) {
+    const viaEdge = await edge(key);
+    cache.set(key, viaEdge ?? staticResolve(pathPart));
+  }
+  const problem = cache.get(key);
+  if (problem) findings.push({ from, link: raw, problem });
+}
+
 for (const file of files) {
   const html = readFileSync(file, "utf8");
   const from = path.relative(ROOT, file);
@@ -319,13 +332,7 @@ for (const file of files) {
     if (pathPart.includes("{")) continue;
     if (EDGE_ONLY.has(pathPart)) continue;
 
-    const key = query ? `${pathPart}?${query}` : pathPart;
-    if (!cache.has(key)) {
-      const viaEdge = await edge(key);
-      cache.set(key, viaEdge ?? staticResolve(pathPart));
-    }
-    const problem = cache.get(key);
-    if (problem) findings.push({ from, link: raw, problem });
+    await checkLink(from, raw, pathPart, query);
   }
 
   // Same check for the absolute self-URLs in JSON-LD and <meta content>.
@@ -336,13 +343,7 @@ for (const file of files) {
     metaCount++;
     if (EDGE_ONLY.has(pathPart)) continue;
 
-    const key = query ? `${pathPart}?${query}` : pathPart;
-    if (!cache.has(key)) {
-      const viaEdge = await edge(key);
-      cache.set(key, viaEdge ?? staticResolve(pathPart));
-    }
-    const problem = cache.get(key);
-    if (problem) findings.push({ from, link: raw, problem });
+    await checkLink(from, raw, pathPart, query);
   }
 }
 

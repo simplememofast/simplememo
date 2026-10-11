@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/en/blog/ios26-speechanalyzer-live-mic">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- Google tag (gtag.js) - deferred for LCP -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: 'en'});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>iOS 26 SpeechAnalyzer Live Mic: الإعداد والنتائج واستكشاف الأخطاء وإصلاحها</title>
+  <meta name="description" content="قم بتوصيل iOS 26 SpeechAnalyzer بميكروفون مباشر: تحقق من أصول النموذج وتنسيق PCM والنتائج النهائية ومفردات DictationTranscriber وحدود التحقق من صحة العينة.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="iOS 26 SpeechAnalyzer Live Mic: الإعداد والنتائج واستكشاف الأخطاء وإصلاحها">
+  <meta property="og:description" content="قم بتوصيل iOS 26 SpeechAnalyzer بميكروفون مباشر: تحقق من أصول النموذج وتنسيق PCM والنتائج النهائية ومفردات DictationTranscriber وحدود التحقق من صحة العينة.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-06-16T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/ar/blog/ios26-speechanalyzer-live-mic">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Simple Memo - for Obsidian">
+  <meta property="og:locale" content="ar_SA">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="iOS 26 SpeechAnalyzer Live Mic: الإعداد والنتائج واستكشاف الأخطاء وإصلاحها">
+  <meta name="twitter:description" content="قم بتوصيل iOS 26 SpeechAnalyzer بميكروفون مباشر: تحقق من أصول النموذج وتنسيق PCM والنتائج النهائية ومفردات DictationTranscriber وحدود التحقق من صحة العينة.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog.png">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- Canonical -->
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ar/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/ios26-speechanalyzer-live-mic">
+
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "inLanguage": "ar",
+  "headline": "iOS 26 SpeechAnalyzer Live Mic: الإعداد والنتائج واستكشاف الأخطاء وإصلاحها",
+  "description": "قم بتوصيل iOS 26 SpeechAnalyzer بميكروفون مباشر: تحقق من أصول النموذج وتنسيق PCM والنتائج النهائية ومفردات DictationTranscriber وحدود التحقق من صحة العينة.",
+  "image": "https://simplememofast.com/assets/img/og/blog.png",
+  "url": "https://simplememofast.com/ar/blog/ios26-speechanalyzer-live-mic",
+  "datePublished": "2026-06-16",
+  "dateModified": "2026-09-09",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Simple Memo - ل Obsidian",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Obsidian連携シンプルメモ"
+    ]
+  },
+  "proficiencyLevel": "Expert",
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "محلل الكلام"
+    },
+    {
+      "@type": "Thing",
+      "name": "ناسخ الكلام"
+    },
+    {
+      "@type": "Thing",
+      "name": "iOS 26 الكلام إلى النص"
+    }
+  ],
+  "keywords": "iOS 26، SpeechAnalyzer، SpeechTranscriber، AVAudioEngine، على الجهاز الكلام إلى نص، ترحيل SFSpeechRecognizer"
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "الصفحة الرئيسية",
+      "item": "https://simplememofast.com/ar/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "مدونة",
+      "item": "https://simplememofast.com/ar/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "iOS 26 SpeechAnalyzer Live Mic: الإعداد والنتائج واستكشاف الأخطاء وإصلاحها",
+      "item": "https://simplememofast.com/ar/blog/ios26-speechanalyzer-live-mic"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/ar/blog/ios26-speechanalyzer-live-mic#webpage",
+  "inLanguage": "ar",
+  "name": "iOS 26 SpeechAnalyzer Live Mic: الإعداد والنتائج واستكشاف الأخطاء وإصلاحها",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/ar/#website"
+  },
+  "url": "https://simplememofast.com/ar/blog/ios26-speechanalyzer-live-mic"
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "ar",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "هل يعمل محلل الكلام في وضع عدم الاتصال؟",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "SpeechTranscriber يعالج الصوت على الجهاز، ولكن يجب أن يكون طرازه المطلوب متاحا. يمكن أن تكون الأصول موجودة بالفعل قبل الإطلاق الأول لتطبيقك. تحقق منها وأعدها قبل جلسة غير متصلة بالإنترنت؛ لا تفترض أنه يجب تنزيل كل إطلاق أول أو أن النموذج المثبت مسبقا سيظل متاحا دائما."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "هل يمكنني إضافة مفردات مخصصة؟",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "توثيق Apple AnalysisContext.contextualStrings for DictationTranscriber، وتعرض هذه الوحدة أيضا تلميحا مخصصا للمحتوى باللغة. هذه ليست وثائق لنفس الميزة ل SpeechTranscriber. اختر الوحدة النمطية عمدا واختبر الكلمات واللوقعة التي تحتاجها."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "لماذا يسجل التطبيق ولكنه لا يعرض أي نص؟",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "تحقق من دعم الجهاز واللغة، وحالة الأصول، وإدخال الميكروفون، وتنسيق المحلل الاختياري، وإخراج المحول، وتسلسل الإدخال، ومستهلك النتيجة. يظهر الخطأ الفعلي بدلا من التعامل مع كل نتيجة فارغة كمشكلة في التنسيق."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "كيف يمكنني الحفاظ على الكلمات الأخيرة عند التوقف؟",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "توقف عن إنتاج الصوت، وأكمل استمرار الإدخال، واترك المحلل يضع اللمسات الأخيرة حتى نهاية الإدخال. حافظ على المستهلك الناتج على قيد الحياة للحصول على النتائج النهائية. الإلغاء هو مسار تجاهل منفصل، وليس بديلا عن الإكمال العادي."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "هل تعمل هذه العينة على Apple Watch؟",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "لا. جلسة الميكروفون المرتبطة هي مثال iOS 26، وSpeechAnalyzer غير متوفر على watchOS. يمكن لتطبيق Watch استخدام إدخال نص النظام مثل TextFieldLink؛ الذي يقدم واجهة إدخال النظام ولا يثبت أن تسجيل الإملاء قد بدأ."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "ما الذي تم التحقق من صحته للعينة؟",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "يسجل المستودع المرتبط أربعة اختبارات محول وبناء جهاز محاكاة iOS في سبتمبر 9، 2026، بما في ذلك انحدارين لتخزين المخزن المؤقت للمصدر المعاد استخدامه. لم يتم المطالبة بإعادة اختبار الجهاز الفعلي. تم فحص مساعد إعداد هذا الدليل باستخدام Xcode 26.6 في Swift 6 وضع التزامن الصارم الكامل في سبتمبر 9. لا تثبت هذه الفحوصات دقة الميكروفون أو سلوك تنزيل النموذج أو وقت الاستجابة."
+      }
+    }
+  ],
+  "@id": "https://simplememofast.com/ar/blog/ios26-speechanalyzer-live-mic#faq"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+    /* Article-specific styles */
+    .article-meta { font-size: .875rem; color: var(--text-muted); margin-bottom: 2rem; }
+    .article-meta a { color: var(--accent); text-decoration: none; }
+    .article-body h2 { font-size: 1.4rem; font-weight: 700; margin: 2.5rem 0 1rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    .article-body h3 { font-size: 1.1rem; font-weight: 600; margin: 2rem 0 .75rem; }
+    .article-body p { font-size: .95rem; line-height: 1.85; color: var(--text-secondary); margin-bottom: 1.25rem; }
+    .article-body ul, .article-body ol { margin: 1rem 0 1.5rem 1.25rem; font-size: .95rem; color: var(--text-secondary); line-height: 1.85; }
+    .article-body li { margin-bottom: .5rem; }
+    .article-body strong { color: var(--text); }
+    .article-body a { color: var(--accent); text-decoration: none; }
+    .article-body a:hover { text-decoration: underline; }
+    .article-body code { background: rgba(100,180,255,.08); padding: .15rem .4rem; border-radius: 4px; font-size: .85rem; color: var(--accent); }
+    .article-body pre { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; overflow-x: auto; margin: 1.5rem 0; font-size: .85rem; line-height: 1.7; }
+    .article-body pre code { background: none; padding: 0; color: var(--text-secondary); }
+    .callout { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+    .callout p { margin: 0; }
+    .callout-warning { border-left-color: #f85149; }
+    .timeline-list { list-style: none; margin: 1.5rem 0; padding: 0; }
+    .timeline-list li { position: relative; padding: 0 0 1.5rem 2rem; border-left: 2px solid var(--border); font-size: .95rem; line-height: 1.85; color: var(--text-secondary); }
+    .timeline-list li:last-child { padding-bottom: 0; border-left-color: transparent; }
+    .timeline-list li::before { content: ''; position: absolute; left: -5px; top: .5rem; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .timeline-list li strong { color: var(--text); }
+    .arch-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.5rem; margin: 1.5rem 0; text-align: center; font-family: monospace; font-size: .9rem; line-height: 2; color: var(--text-secondary); overflow-x: auto; }
+    .disclosure { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-top: 2.5rem; font-size: .875rem; color: var(--text-muted); line-height: 1.7; }
+
+    /* article code blocks */
+    .article-body pre{background:#0d1424;border:1px solid rgba(148,178,230,.18);border-radius:12px;
+      padding:16px 18px;overflow-x:auto;margin:1.25rem 0;font-size:.82rem;line-height:1.6;}
+    .article-body pre code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#dbe6ff;white-space:pre;}
+    .article-body :not(pre)>code{background:rgba(148,178,230,.12);padding:.1em .4em;border-radius:5px;
+      font-size:.88em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+    .article-body table{display:block;overflow-x:auto;width:100%;border-collapse:collapse;margin:1.25rem 0;font-size:.9rem;}
+    .speech-table-scroll{max-width:100%;overflow-x:auto;margin:1.25rem 0;}
+    .article-body #speech-debug-table{display:table;min-width:640px;margin:0;}
+    .speech-table-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+    .article-body th,.article-body td{border:1px solid var(--border);padding:.55rem .7rem;text-align:left;vertical-align:top;}
+    .article-body th{color:var(--text-muted);font-weight:700;}
+    .article-body .callout{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);
+      border-radius:10px;padding:1rem 1.25rem;margin:1.5rem 0;}
+</style>
+  <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
+  <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="الملاحة الرئيسية" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/ar/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>مع Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/ar/guides/">أدلة الاستخدام</a><a href="/ar/use-cases/">حالات الاستخدام</a><a href="/ar/vs/">المقارنة</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/ar/guides/">أدلة الاستخدام</a></li>
+        <li><a href="/ar/use-cases/">حالات الاستخدام</a></li>
+        <li><a href="/ar/vs/">المقارنة</a></li>
+        <li><a href="/ar/methods/">الأساليب</a></li>
+        <li><a href="/ar/blog/">مدونة</a></li>
+        <li><a href="/ar/glossary/">مسرد المصطلحات</a></li>
+        <li><a href="/ar/faq">الأسئلة الشائعة</a></li>
+        <li><a href="/ar/about/">عن المطوّر</a></li>
+        <li><a href="/ar/devlog/">سجل التطوير</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">تنزيل</a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="العربية · اختر اللغة"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>AR</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ar" dir="rtl"><p class="site-language-title">اختر اللغة</p><div class="site-language-grid"><a href="/blog/ios26-speechanalyzer-live-mic" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/ios26-speechanalyzer-live-mic" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/blog/ios26-speechanalyzer-live-mic" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/blog/ios26-speechanalyzer-live-mic" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/ios26-speechanalyzer-live-mic" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/blog/ios26-speechanalyzer-live-mic" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/ios26-speechanalyzer-live-mic" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/ios26-speechanalyzer-live-mic" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ar" aria-current="page"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/tr/blog/ios26-speechanalyzer-live-mic" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">تنزيل</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="القائمة"><span>القائمة</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+<main class="page-content">
+    <div class="container">
+
+      <h1 class="page-content__title sd-title">iOS 26 SpeechAnalyzer Live Mic: الإعداد والنتائج واستكشاف الأخطاء وإصلاحها</h1>
+
+      <p class="article-meta"> بواسطة <a href="/ar/about/">AI ATAKA</a> · تاريخ النشر: يونيو 16، 2026 · تم التحديث: سبتمبر 9، 2026 </p>
+
+      <div class="page-content__body article-body">
+
+<p class="tldr"><strong>للحصول على خط أنابيب ميكروفون iOS 26 مباشر، تحقق من الجهاز ودعم اللغة، وقم بإعداد أصول النموذج، واحصل على تنسيق PCM متوافق، واستهلك نتائج التعرف أثناء تغذية الصوت.</strong> تعامل مع الإكمال العادي بشكل منفصل عن الإلغاء حتى تصبح الكلمات الأخيرة نهائية. يتبع هذا الدليل وثائق API الخاصة ب Apple وعينة الميكروفون الحية <a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic" rel="noopener">SimpleMemo الحالية</a>؛ كما يتضمن مساعد إعداد قابل للتنزيل بشكل منفصل.</p>
+<nav class="speech-toc" aria-label="أقسام المقالة"><a href="#speech-sample">قم بتشغيل المثال</a><a href="#speech-prepare">إعداد المحلل</a><a href="#speech-audio">تغذية الميكروفون PCM</a><a href="#speech-finish">التعامل مع النتائج وتوقف</a><a href="#speech-vocabulary">دعم المفردات</a><a href="#speech-debug">استكشاف الأخطاء وإصلاحها</a><a href="#speech-validation">نطاق التحقق من الصحة</a></nav>
+<section id="speech-sample" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-01" data-ce-number="01">ابدأ بالعينة الكاملة، ثم افحص خط الأنابيب</h2></div><div class="ce-chapter__body">
+<p>يعرض <a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic" rel="noopener">المستودع المرخص من MIT</a> <code>SpeechSession</code> كحزمة Swift لتطبيق مضيف iOS 26. أضف المستودع تحت تبعيات حزمة Xcode واربط منتج <code>SpeechAnalyzerLiveMic</code>. يعرض README عرض SwiftUI الذي يعرض <code>finalizedText</code>، ويعرض <code>volatileText</code> بشكل منفصل، ويعطل البدء أثناء إعداد الجلسة.</p>
+<p>للحصول على مشروع تطبيق كامل، اتبع مسار XcodeGen الخاص ب README. بدلا من ذلك، انسخ مصادر التطبيق المقدمة إلى تطبيق iOS 26 جديد. استخدم مسار تكامل واحد حتى لا تحدد نفس الأنواع مرتين. لا تنفذ الحزمة تخزين الملاحظات أو تسليم البريد الإلكتروني أو تكامل Obsidian.</p>
+<p>تطلب العينة المرتبطة ترخيص الميكروفون والتعرف على الكلام. يجب أن يوفر تطبيقه المضيف <code>NSMicrophoneUsageDescription</code> و<code>NSSpeechRecognitionUsageDescription</code>؛ لا يمكن لإضافة الحزمة توفير أوصاف المضيف هذه. اشرح استخدام الإذن، وأظهر حالات الرفض والإعداد، واسمح للمستخدم باختيار وقت التسجيل. لا يطلب المساعد أدناه الإذن أو يبدأ تشغيل الميكروفون.</p>
+<p>Apple's <a href="https://developer.apple.com/documentation/speech/bringing-advanced-speech-to-text-capabilities-to-your-app" rel="noopener">official live-transcrips sample</a> and <a href="https://developer.apple.com/videos/play/wwdc2025/277/" rel="noopener">WWDC25 session</a> هي مراجع مفيدة للهندسة المعمارية. وحدات إحداثيات <code>SpeechAnalyzer</code>؛ إنها API إضافية للأنظمة المدعومة، وليس سببا لافتراض أن جميع رموز <code>SFSpeechRecognizer</code> الحالية عفا عليها الزمن.</p></div></section>
+<section id="speech-prepare" class="ce-chapter sd-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="reading-02" data-ce-number="02">إعداد الدعم والأصول والتنسيق قبل التسجيل</h2></div><div class="ce-chapter__body">
+<p><a href="https://developer.apple.com/documentation/speech/speechtranscriber" rel="noopener">SpeechTranscriber</a> يوفر جهاز وقت التشغيل والفحوصات المحلية. فحص إصدار iOS وحده غير كاف. يقوم المساعد التالي بإرجاع ناسخ ومحلل وتنسيق صوت تم تكوينه، أو يلقي خطأ إعداد محدد.</p>
+<p><a href="/assets/downloads/speech-analyzer-preparation.swift?v=7a01961842" download="speech-analyzer-preparation.swift">قم بتنزيل مساعد إعداد Swift الكامل</a>. يتضمن الملف الكامل الواردات وأنواع النتائج والأخطاء ومساعد تلميح DictationTranscriber الذي تمت مناقشته أدناه. هذا مكون إعداد، وليس تطبيق تسجيل كامل.</p><pre tabindex="0"><code>@available(iOS 26.0, *)
+@MainActor
+public func prepareSpeechAnalyzer(
+    requestedLocale: Locale,
+    naturalFormat: AVAudioFormat? = nil
+) async throws -&gt; PreparedSpeechAnalyzer {
+    guard SpeechTranscriber.isAvailable else {
+        throw SpeechPreparationError.deviceUnavailable
+    }
+    guard let locale = await SpeechTranscriber.supportedLocale(
+        equivalentTo: requestedLocale
+    ) else {
+        throw SpeechPreparationError.unsupportedLocale
+    }
+
+    let transcriber = SpeechTranscriber(
+        locale: locale,
+        preset: .progressiveTranscription
+    )
+    // The system may already have the asset; nil means no install is needed.
+    // A request can automatically reserve the locale or throw if no slot is free.
+    if let request = try await AssetInventory.assetInstallationRequest(
+        supporting: [transcriber]
+    ) {
+        try await request.downloadAndInstall()
+    }
+    try Task.checkCancellation()
+    guard await AssetInventory.status(forModules: [transcriber]) == .installed else {
+        throw SpeechPreparationError.assetsNotInstalled
+    }
+    guard let format = await SpeechAnalyzer.bestAvailableAudioFormat(
+        compatibleWith: [transcriber], considering: naturalFormat
+    ) else {
+        throw SpeechPreparationError.noCompatibleFormat
+    }
+
+    let analyzer = SpeechAnalyzer(modules: [transcriber])
+    try await analyzer.prepareToAnalyze(in: format)
+    return PreparedSpeechAnalyzer(
+        locale: locale, transcriber: transcriber,
+        analyzer: analyzer, audioFormat: format
+    )
+}</code></pre>
+<p><a href="https://developer.apple.com/documentation/speech/assetinventory" rel="noopener">AssetInventory</a> يدير نماذج النظام المشتركة. قد يكون النموذج مثبتا بالفعل بواسطة النظام أو تطبيق آخر. <a href="https://developer.apple.com/documentation/speech/assetinventory/assetinstallationrequest(supporting:)" rel="noopener">طلب التثبيت</a> يرجع <code>nil</code> عندما لا تكون هناك حاجة إلى التثبيت؛ وإلا فإنه يمكن حجز اللغة وبدء التنزيل. يمكن أن تؤدي حدود الحجز أيضا إلى حدوث خطأ. قم بإدارة الحجوزات عبر ميزات تطبيقك، وأصدر لغة عندما لم تعد هناك حاجة إليها بدلا من إصدار نموذج لا يزال قيد الاستخدام في مكان آخر في تطبيقك.</p>
+<p>قبل عدم الاتصال بالإنترنت، قم بإعداد اللغة المطلوبة وتحقق من الاستعداد. تعيش أصول النموذج خارج حزمة التطبيقات، ولكنها لا تزال تستهلك تخزين النظام ويمكن أن تتغير بمرور الوقت. أظهر تقدم التنزيل والإلغاء في واجهة المستخدم المضيفة. "التعرف على الجهاز" لا يعني "لا حاجة إلى إعداد أو الوصول إلى الشبكة."</p></div></section>
+<section id="speech-audio" class="ce-chapter sd-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="reading-03" data-ce-number="03">تغذية PCM بالتنسيق الذي يقبله المحلل</h2></div><div class="ce-chapter__body">
+<pre tabindex="0"><code>AVAudioEngine microphone tap
+  -&gt; owned PCM / conversion for the selected format
+  -&gt; AsyncStream&lt;AnalyzerInput&gt;
+  -&gt; SpeechAnalyzer + SpeechTranscriber
+  -&gt; result consumer and UI state</code></pre>
+<p>بعد تنشيط الجلسة الصوتية، افحص التنسيق الفعلي لعقدة الإدخال. لا تقم بتشفير معدل العينة لأن الجهاز أو الطريق غالبا ما يستخدم هذا المعدل من قبل. قم بتمرير تنسيق طبيعي إلى <a href="https://developer.apple.com/documentation/speech/speechanalyzer/bestavailableaudioformat(compatiblewith:considering:)" rel="noopener"><code>bestAvailableAudioFormat(compatibleWith:considering:)</code></a> عند الاقتضاء وقم بفك نتيجته الاختيارية. يوثق Apple أن المحلل لا يعيد أخذ عينات أو يحول المدخلات بشفافية.</p>
+<p>يقوم المستودع <code>AudioBufferConverter</code> بإرجاع المخزن المؤقت المطابق بالفعل دون تغيير ويستخدم <code>AVAudioConverter</code> عندما تختلف التنسيقات. التحويل مطلوب للتنسيقات غير المتطابقة، وليس كخطوة إضافية شاملة لكل مخزن مؤقت. تحقق من طول إطار الإخراج وأخطاء تحويل التقرير؛ يمكن أن يؤدي إسقاط كل مخزن مؤقت فاشل بصمت إلى جعل واجهة مستخدم التسجيل تبدو صحية أثناء عدم إنتاج أي نص.</p>
+<p>امنح الصوت في قائمة الانتظار سياسة ملكية صريحة. يقوم محول العينة المحدث بإرجاع تخزين PCM مستقل حتى عندما تتطابق التنسيقات بالفعل، لذلك لا تقوم إعادة استخدام الإدخال لاحقا بالكتابة فوق الصوت في قائمة الانتظار. يجب عدم افتراض أن المخزن المؤقت الذي يوفره رد الاتصال الصوتي يظل ثابتا بعد عودة رد الاتصال. إذا قمت بوضعه في قائمة الانتظار لاستخدامه لاحقا، فقم بترتيب نسخة مملوكة مناسبة أو خط أنابيب يتم التحكم في عمر المخزن المؤقت الخاص به. احتفظ بطفرات واجهة المستخدم لكل مخزن من المخزن المؤقت بعيدا عن رد الاتصال الصوتي. بالنسبة للإنتاج، حدد أيضا كيفية ربط العمل في قائمة الانتظار والتعامل مع الحمل الزائد أو تغييرات الطريق.</p>
+<p>في Swift 6، التقاط المتغيرات المحلية لا يثبت في حد ذاته أن خط الأنابيب آمن للخيوط. يحتوي محول العينة الحالي على عقد خيط معالجة واحد وحامل <code>@unchecked Sendable</code> خاص محمي بالقفل لرد اتصال محول واحد. لا يجعل جميع مخازن PCM أو المحول آمنا بشكل عام للمشاركة عبر مؤشرات الترابط. اقرأ هذا العقد قبل تكييف العينة.</p></div></section>
+<section id="speech-finish" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-04" data-ce-number="04">استبدال النتائج المتقلبة؛ إنهاء الإدخال قبل الانتهاء</h2></div><div class="ce-chapter__body">
+<p>مع تمكين النتائج التدريجية، يمكن للنتيجة المتقلبة مراجعة النص لنطاق الصوت. لا تقم بإضاف كل نتيجة جزئية كجملة جديدة. تحتفظ العينة البسيطة بالنص النهائي والذيل المتطاير القابل للاستبدال. لتحرير أكثر ثراء، قم بمحاذاة التحديثات مع نطاقات الصوت والحفاظ على الأجزاء النهائية بشكل منفصل. يصف Apple هذا السلوك في جزء <a href="https://developer.apple.com/videos/play/wwdc2025/277/" rel="noopener">النتائج من جلسة WWDC</a>.</p>
+<ol class="speech-stop-steps"><li>في إجراء الإيقاف العادي، توقف عن إنتاج صوت ميكروفون جديد وأزل الصنبور مرة واحدة.</li><li>قم بإنهاء استمرار إدخال <code>AsyncStream</code> حتى يتمكن المحلل من رؤية نهاية الإدخال.</li><li>انتظر <code>finalizeAndFinishThroughEndOfInput()</code>، بينما تظل مهمة المستهلك الناتجة حية.</li><li>انتظر حتى يكتمل استهلاك النتائج، ثم التزم بالنص النهائي وموارد جلسة الإصدار.</li></ol>
+<p><a href="https://developer.apple.com/documentation/speech/speechanalyzer/finalizeandfinishthroughendofinput()" rel="noopener">ينتظر الانتهاء إنهاء المدخلات والاستهلاك</a>. الاتصال به بينما لا ينتهي المنتج أبدا يمكن أن يترك التوقف عن الانتظار. يمكن أن يؤدي إلغاء مهمة النتيجة على الفور أيضا إلى فقدان الذيل الذي كنت تنوي حفظه. يجب أن يستخدم إجراء الإلغاء الذي يتجاهل النطق مسار إلغاء متعمد بدلا من التظاهر بأنه نتيجة نهائية طبيعية.</p>
+<p>تظل الحزمة العامة عينة تعليمية. يضع <code>stop()</code> الحالي اللمسات الأخيرة ثم يلغي المستهلك؛ ولا يعرض إقرارا منفصلا بإتمام المستهلك. إذا كان الاحتفاظ بكل نتيجة نهائية مهما، فقم بتكييف دورة الحياة هذه واختبارها. اختبر أيضا إيقاف أثناء الإعداد، والنقرات المتكررة، وعرض الفصل، والمقاطعة، وإعادة التشغيل بعد حدوث خطأ.</p></div></section>
+<section id="speech-vocabulary" class="ce-chapter sd-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="reading-05" data-ce-number="05">يعتمد دعم المفردات على وحدة النسخ</h2></div><div class="ce-chapter__body">
+<p>من غير الدقيق القول إن الكلام الجديد API لا يحتوي على دعم للمفردات السياقية. وثائق Apple <a href="https://developer.apple.com/documentation/speech/analysiscontext/contextualstrings" rel="noopener"><code>AnalysisContext.contextualStrings</code></a> ل <strong>DictationTranscriber</strong>. توصي الوثائق بعبارات موجزة وعلى الأكثر عبارات 100 عبر العلامات. هذا ليس وعدا بأن نفس التلميحات تخصص <code>SpeechTranscriber</code>.</p>
+<pre tabindex="0"><code>// For an analyzer configured with DictationTranscriber.
+let context = AnalysisContext()
+context.contextualStrings[.general] = [&quot;Obsidian&quot;, &quot;Yurica&quot;]
+try await analyzer.setContext(context)</code></pre>
+<p><a href="https://developer.apple.com/documentation/speech/speechanalyzer/setcontext(_:)" rel="noopener"><code>setContext(_:)</code></a> يحل محل السياق الحالي، لذا احتفظ بأي سياق تطبيق موجود أو دمجه عند الحاجة. يرفض المساعد القابل للتنزيل أكثر من عبارات 100 بدلا من اقتطاعها بصمت. تختلف تلميحات العبارة عن خيار نموذج اللغة المخصص الموثق أيضا ل DictationTranscriber، ولا يضمن أي منهما التعرف الصحيح على كل اسم. اختر الوحدة واللغة التي يحتاجها تطبيقك واختبرها.</p></div></section>
+<section id="speech-debug" class="ce-chapter sd-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="reading-06" data-ce-number="06">عندما لا ينتج التسجيل أي نص، حدد موقع المرحلة الفاشلة</h2></div><div class="ce-chapter__body">
+<div class="speech-table-scroll sd-table" tabindex="0" role="region" aria-label="استكشاف أخطاء خط أنابيب الكلام وإصلاحها"><table id="speech-debug-table"><thead><tr><th scope="col">الأعراض</th><th scope="col">تحقق من التالي</th><th scope="col">أدلة مفيدة</th></tr></thead><tbody>
+<tr><th scope="row">فشل الإعداد</th><td>دعم الجهاز، لغة طبيعية، حالة الأصول وأخطاء الحجز/التنزيل</td><td>نظام التشغيل والجهاز، اللغة المطلوبة/المحددة، مجال الخطأ والرمز</td></tr>
+<tr><th scope="row">Mic UI نشطة، لا توجد مخازن</th><td>الإذن، تنشيط الجلسة الصوتية، الطريق، بدء تشغيل المحرك والنقر على دورة الحياة</td><td>ما إذا كانت معاودة الاتصال تصل؛ معدل عينة الإدخال وعدد القنوات</td></tr>
+<tr><th scope="row">المخازن المؤقتة تصل، لا يوجد نص</th><td>تنسيق متوافق، إخراج محول غير صفري، مدخلات أسفرت ومهمة نتائج نشطة</td><td>عدد إطارات الإدخال/الإخراج وأول خطأ فعلي في خط الأنابيب</td></tr>
+<tr><th scope="row">تكرر الكلمات</th><td>ما إذا كان يتم إلحاق المراجعات المتقلبة بدلا من استبدالها</td><td>نطاقات الصوت النتيجة والأعلام النهائية/المتقلبة</td></tr>
+<tr><th scope="row">الكلمات الأخيرة تختفي</th><td>إكمال المدخلات وعمر المستهلك أثناء الانتهاء</td><td>آخر وقت إدخال، الانتهاء من اللمسات الأخيرة وإيصال النتيجة النهائية</td></tr>
+<tr><th scope="row">فشل الإطلاق في وضع عدم الاتصال</th><td>جاهزية النموذج المطلوب على هذا الجهاز واللجمة</td><td>حالة الأصل قبل قطع الاتصال وخطأ الإعداد السطحي</td></tr>
+</tbody></table></div>
+<p>بالنسبة للتشخيصات، ابدأ بتوقيتات المرحلة، وعدد الإطارات، واللغة، ومعلومات الخطأ. ليست هناك حاجة للتسجيلات الأولية والنص المعترف به لكل إدخال سجل. إذا شارك المستخدم نسخة، فاطلب عبارة اختبار قصيرة غير حساسة والتكوين ذي الصلة بدلا من محادثة خاصة.</p></div></section>
+<section id="speech-validation" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-07" data-ce-number="07">ما تم فحصه، وما يجب قياسه على الجهاز</h2></div><div class="ce-chapter__body">
+<p>تم التحقق من هذه المقالة مقابل وثائق Apple و Xcode 26.6 في سبتمبر 9، 2026. يجتاز المساعد القابل للتنزيل التحقق من نوع Swift 6 مع التزامن الصارم الكامل لهدف محاكاة iOS 26. لا يسجل الصوت، ولا يوضح هذا الفحص دقة الكلام أو التثبيت الناجح للأصول أو جلسة ميكروفون من البداية إلى النهاية.</p>
+<p>اجتازت العينة العامة في <a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic/tree/1befcce6c60c0361dbf8cb25ba35fa482f3ec8ba" rel="noopener">revision 1befcce</a> أربعة اختبارات لتحويل PCM وبناء محاكي iOS في سبتمبر 9. يعيد اختباران استخدام المخزن المؤقت للمصدر بعد التحويل ويؤكدان أن إخراج العدد الصحيح الاستريو العائم الأحادي والمتداخل لا يزال سليما؛ كلاهما يفشل ضد تنفيذ تمرير تنسيق المطابقة السابق. يقول README صراحة إن إعادة هيكلة الحزمة لم يتم إعادة اختبارها على جهاز iOS الفعلي. أرقام الكمون التاريخية سابقا في هذه الصفحة ليست معيارا للحزمة الحالية.</p>
+<p>بالنسبة لتطبيقك الخاص، سجل الجهاز، ونظام التشغيل، واللون، ومسار الصوت، وجاهزية النموذج، وحدود التوقيت الدقيقة. قم بقياس النص المتطاير الأول، والنص النهائي الأول، والإكمال العادي بشكل منفصل. قارن جلسة مع الأصول الجاهزة مقابل جلسة تتطلب إعدادا. كرر عبارة ثابتة غير حساسة، وافحص الكلمات النهائية المفقودة أو المكررة وكذلك السرعة. لا تستنتج سلوك المحرك العصبي أو حد الأجهزة من نتيجة توقيت واحدة.</p>
+<p>على Apple Watch، استخدم تدفق إدخال نص نظام منفصل إذا كان يناسب تطبيقك. <a href="https://developer.apple.com/documentation/swiftui/textfieldlink" rel="noopener"><code>TextFieldLink</code></a> يفتح واجهة النظام؛ لا يثبت أن الإملاء يسجل بالفعل. SpeechAnalyzer غير متوفر على watchOS، وحزمة iOS ليست تطبيق ميكروفون Watch.</p></div></section>
+<section id="speech-faq" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-08" data-ce-number="08">الأسئلة الشائعة</h2></div><div class="ce-chapter__body">
+<details class="speech-faq-item"><summary>هل يعمل محلل الكلام في وضع عدم الاتصال؟</summary><p>SpeechTranscriber يعالج الصوت على الجهاز، ولكن يجب أن يكون طرازه المطلوب متاحا. يمكن أن تكون الأصول موجودة بالفعل قبل الإطلاق الأول لتطبيقك. تحقق منها وأعدها قبل جلسة غير متصلة بالإنترنت؛ لا تفترض أنه يجب تنزيل كل إطلاق أول أو أن النموذج المثبت مسبقا سيظل متاحا دائما.</p></details>
+<details class="speech-faq-item"><summary>هل يمكنني إضافة مفردات مخصصة؟</summary><p>توثيق Apple AnalysisContext.contextualStrings for DictationTranscriber، وتعرض هذه الوحدة أيضا تلميحا مخصصا للمحتوى باللغة. هذه ليست وثائق لنفس الميزة ل SpeechTranscriber. اختر الوحدة النمطية عمدا واختبر الكلمات واللوقعة التي تحتاجها.</p></details>
+<details class="speech-faq-item"><summary>لماذا يسجل التطبيق ولكنه لا يعرض أي نص؟</summary><p>تحقق من دعم الجهاز واللغة، وحالة الأصول، وإدخال الميكروفون، وتنسيق المحلل الاختياري، وإخراج المحول، وتسلسل الإدخال، ومستهلك النتيجة. يظهر الخطأ الفعلي بدلا من التعامل مع كل نتيجة فارغة كمشكلة في التنسيق.</p></details>
+<details class="speech-faq-item"><summary>كيف يمكنني الحفاظ على الكلمات الأخيرة عند التوقف؟</summary><p>توقف عن إنتاج الصوت، وأكمل استمرار الإدخال، واترك المحلل يضع اللمسات الأخيرة حتى نهاية الإدخال. حافظ على المستهلك الناتج على قيد الحياة للحصول على النتائج النهائية. الإلغاء هو مسار تجاهل منفصل، وليس بديلا عن الإكمال العادي.</p></details>
+<details class="speech-faq-item"><summary>هل تعمل هذه العينة على Apple Watch؟</summary><p>لا. جلسة الميكروفون المرتبطة هي مثال iOS 26، وSpeechAnalyzer غير متوفر على watchOS. يمكن لتطبيق Watch استخدام إدخال نص النظام مثل TextFieldLink؛ الذي يقدم واجهة إدخال النظام ولا يثبت أن تسجيل الإملاء قد بدأ.</p></details>
+<details class="speech-faq-item"><summary>ما الذي تم التحقق من صحته للعينة؟</summary><p>يسجل المستودع المرتبط أربعة اختبارات محول وبناء جهاز محاكاة iOS في سبتمبر 9، 2026، بما في ذلك انحدارين لتخزين المخزن المؤقت للمصدر المعاد استخدامه. لم يتم المطالبة بإعادة اختبار الجهاز الفعلي. تم فحص مساعد إعداد هذا الدليل باستخدام Xcode 26.6 في Swift 6 وضع التزامن الصارم الكامل في سبتمبر 9. لا تثبت هذه الفحوصات دقة الميكروفون أو سلوك تنزيل النموذج أو وقت الاستجابة.</p></details>
+</div></section><section id="speech-product" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-09" data-ce-number="09">كيف يرتبط هذا ب Simple Memo</h2></div><div class="ce-chapter__body"><p>يتم الحفاظ على هذا الدليل والعينة المجانية بواسطة مطور SimpleMemo. يصف <a href="/ar/voice-input/">دليل الإدخال الصوتي</a> التطبيق سير عمل المنتج. لا ترسل العينة نفسها أي بريد إلكتروني ولا تحفظ شيئا إلى Obsidian. في Simple Memo، يتطلب البريد الإلكتروني إعداد المستلم والتحقق منه، ويتطلب حفظ <a href="/ar/obsidian/">Obsidian إعدادات التكامل والوجهة</a>. لا يصف التعرف على الكلام المحلي الخصوصية أو سلوك التسليم لأي إجراء لاحق يقوم به تطبيقك.</p><p>ذات صلة: <a href="/ar/blog/offline-first-comparison">بنية المذكرة الأولى غير المتصلة</a>. الخطوة التالية للمطور هي تشغيل العينة الكاملة باستخدام عبارة اختبار والتحقق من الإعداد والنتائج والتوقف على الجهاز واللغة التي يخططون لدعمها.</p></div></section>
+
+      </div>
+    </div>
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/ar/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> اقرأ التالي </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> أعط ملاحظاتك في مكان ما لتجميع </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> قم بإعداد التكامل والهدف على iPhone لحفظ ملاحظاتك أيضا في Obsidian. </span> </a>
+  </aside>
+
+  </main>
+
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ar" dir="rtl"><a class="site-brand" href="/ar/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>مع Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">ملاحظة صغيرة. خطوة تالية.</p><p class="site-footer-description">أرسل الملاحظات من iPhone إلى Obsidian والبريد الإلكتروني.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="روابط التذييل">
+      <div class="footer__col">
+        <p class="footer__col-title">المنتج</p>
+        <a href="/ar/download/" class="footer__link">تنزيل</a>
+        <a href="/ar/" class="footer__link">الرئيسية</a>
+        <a href="/ar/send-email-to-yourself/" class="footer__link">أرسل تطبيقات البريد الإلكتروني الخاصة بنفسك</a>
+        <a href="/ar/use-cases/" class="footer__link">حالات الاستخدام</a>
+        <a href="/ar/guides/" class="footer__link">أدلة الاستخدام</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">مقارنة وتبديل</p>
+        <a href="/ar/captio-alternative/" class="footer__link">Captio بديل</a>
+        <a href="/ar/note-to-email/" class="footer__link">الملاحظات عبر البريد</a>
+        <a href="/ar/vs/" class="footer__link">المقارنة</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">قراءة</p>
+        <a href="/ar/about/" class="footer__link">عن المطوّر</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">الدعم</p>
+        <a href="/ar/roadmap/" class="footer__link">خطة التطوير العامة</a>
+        <a href="/ar/devlog/" class="footer__link">سجل التطوير</a>
+        <a href="/ar/faq" class="footer__link">الأسئلة الشائعة</a>
+        <a href="/ar/privacy" class="footer__link">الخصوصية</a>
+        <a href="/ar/contact" class="footer__link">تواصل معنا</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / الجهة المشغّلة: YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

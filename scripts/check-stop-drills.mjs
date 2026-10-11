@@ -39,6 +39,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { selftestTally } from './lib/tally.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const LEDGER_PATH = path.join(ROOT, 'data/stop-drills.json');
@@ -166,8 +167,7 @@ export function declarationProblem(declared, measured) {
 }
 
 function selftest() {
-  let total = 0; const failures = [];
-  const t = (n, c) => { total += 1; if (!c) failures.push(n); console.log(`  ${c ? 'ok  ' : 'FAIL'} ${n}`); };
+  const { t, finish } = selftestTally();
   const yes = () => true;
 
   const mech = (over = {}) => ({
@@ -227,9 +227,7 @@ function selftest() {
   t('null も同じ（未記入と欠測を分けない）',
     (declarationProblem(null, 2) || '').includes('正が消える'));
 
-  if (failures.length) { console.log(`\nselftest: ${total}件中 ${failures.length}件 失敗 — ${failures.join(' / ')}`); return 1; }
-  console.log(`\nselftest: 全${total}件 通過`);
-  return 0;
+  return finish();
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);

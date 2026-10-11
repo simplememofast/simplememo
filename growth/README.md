@@ -76,8 +76,9 @@ node growth/scripts/analyze.mjs --json          # for piping
 # experiments
 node growth/scripts/experiments.mjs due
 node growth/scripts/experiments.mjs add --page /obsidian/ --type title_test --evaluate 2026-09-06
-node growth/scripts/experiments.mjs evaluate <id> --decision keep --snapshot <label> --note "comparison and limitations"
-# Other metrics / measurement diagnosis: growth/EXPERIMENT_EVIDENCE.md
+# --snapshot: eligible single-page or exact query-page GSC CTR/position/impressions only
+node growth/scripts/experiments.mjs evaluate <id> --decision <decision> --snapshot <label> --note "comparison and limitations"
+# Other scopes, metrics and diagnostics: growth/EXPERIMENT_EVIDENCE.md
 node growth/scripts/experiments.mjs evaluate <id> --decision measurement_failed --review /private/review.json
 
 # what CI runs

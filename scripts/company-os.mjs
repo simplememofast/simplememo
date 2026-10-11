@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { DEFAULT_STATE, observe, auditObservation, persistRun } from '../growth/lib/company-loop.mjs';
 import { compareMetrics } from '../growth/lib/company-metrics.mjs';
-import { collectData } from '../growth/lib/company-data.mjs';
+import { collectData,currentSiteAcquisition } from '../growth/lib/company-data.mjs';
 import { compactGrowth, saveReview } from '../growth/lib/company-review.mjs';
 import { finishIntegration, finishExistingRun, bindExistingRun } from '../growth/lib/company-proof.mjs';
 import { followUp } from '../growth/lib/company-followup.mjs';
@@ -16,6 +16,7 @@ import {recordAutomationDiagnosis} from '../growth/lib/company-automation-diagno
 import {reportFailure,failureReportingSummary} from '../growth/lib/company-automation-health.mjs';
 import {recordAppleAdsObservation} from '../growth/lib/company-connection-observations.mjs';
 import {prepareCompanyDecision,decisionTraceStatus} from '../growth/lib/company-decision.mjs';
+import {prepareExperimentEvaluation,executeExperimentEvaluation,finishExperimentEvaluation} from '../growth/lib/company-evaluation.mjs';
 import {prepareMeasurement,registerMeasurement,measurementComparison,evaluateMeasurement,measurementStatus} from '../growth/lib/company-measurement.mjs';
 
 const args = process.argv.slice(2);
@@ -40,6 +41,10 @@ if(command==='record-apple-ads-observation') {
   result=measurementStatus({stateRoot});
 } else if(command==='prepare-decision') {
   result=prepareCompanyDecision({stateRoot,id:option('run'),evidenceFile:option('evidence')});
+} else if(command==='prepare-evaluation') {
+  result=prepareExperimentEvaluation({stateRoot,id:option('run'),evidenceFile:option('evidence')});
+} else if(command==='execute-evaluation') {
+  result=await executeExperimentEvaluation({stateRoot,id:option('run')});
 } else if(command==='decision-trace') {
   result=decisionTraceStatus({stateRoot});
 } else if(command==='record-automation-diagnosis') {
@@ -85,10 +90,13 @@ if(command==='record-apple-ads-observation') {
 } else if (command === 'finish') {
   const evidenceFile=option('evidence');
   const kind=JSON.parse(fs.readFileSync(evidenceFile)).kind;
-  const finish=kind==='autopilot_run'?finishExistingRun:finishIntegration;
+  const finish=kind==='autopilot_run'?finishExistingRun:
+    kind==='experiment_evaluation'?finishExperimentEvaluation:finishIntegration;
   result = await finish({ stateRoot, id: option('run'), evidenceFile });
 } else if (command === 'collect') {
   result = await collectData({ stateRoot, analytics: args.includes('--analytics') });
+} else if (command === 'acquisition-status') {
+  result=currentSiteAcquisition({stateRoot});
 } else if (['run', 'autonomy-lift', 'growth-autopilot'].includes(command)) {
   result = persistRun({ stateRoot, cadence: option('cadence', 'daily'), origin: option('origin', 'manual') });
 } else {
@@ -103,7 +111,7 @@ if(command==='record-apple-ads-observation') {
       stage_observability:observabilityStatus({stateRoot}), source_failures: o.failures };
   } else if (['autonomy-audit', 'growth-audit'].includes(command)) result = auditObservation(o);
   else if (command === 'review') result = saveReview(o, { stateRoot, cadence: option('cadence', 'daily') });
-  else if (command === 'growth-status') result = args.includes('--full') ? { ...o.growth, pipeline_health: o.automation, source_failures: o.failures } : compactGrowth(o);
+  else if (command === 'growth-status') result = args.includes('--full') ? { ...o.growth, site_acquisition:currentSiteAcquisition({stateRoot}), pipeline_health: o.automation, source_failures: o.failures } : compactGrowth(o,{stateRoot});
   else if (command === 'content-gap') result = o.growth.content_gaps;
   else if (command === 'aio-audit') result = o.growth.aio;
   else throw new Error('Unknown company command');

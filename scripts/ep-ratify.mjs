@@ -28,15 +28,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { todayJst } from './lib/jst.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const ACTIONS_PATH = path.join(ROOT, 'data/autopilot-actions.json');
 export const POLICY_PATH = path.join(ROOT, 'data/autonomy-score.json');
 export const MIN_EVIDENCE_CHARS = 12;
 
-export function todayJst(now = new Date()) {
-  return new Date(now.getTime() + 9 * 3600 * 1000).toISOString().slice(0, 10);
-}
+export { todayJst };
 
 /** 委任で数えている判定（accepted_modes に無い mode）か。判定者の記録が無い行は対象外（数えられていない）。 */
 export function isDelegatedReview(review, policy) {
@@ -111,7 +110,6 @@ function readJson(p) { return JSON.parse(fs.readFileSync(p, 'utf8')); }
 
 function selftest() {
   let n = 0, bad = 0;
-  const ok = (name, fn) => { n += 1; try { fn(); } catch (e) { bad += 1; console.error(`  ✗ ${name}\n      ${e.message}`); } };
   const eq = (got, want, msg) => { n += 1; if (JSON.stringify(got) !== JSON.stringify(want)) { bad += 1; console.error(`  ✗ ${msg}\n      got=${JSON.stringify(got)} want=${JSON.stringify(want)}`); } };
   const throws = (name, fn, re) => { n += 1; try { fn(); bad += 1; console.error(`  ✗ ${name}: 落ちなかった`); } catch (e) { if (!re.test(e.message)) { bad += 1; console.error(`  ✗ ${name}: 別の理由で落ちた: ${e.message}`); } } };
   const P = { ep: { precision_review: { accepted_modes: ['human'], delegations: [{ mode: 'owner_delegated', reviewer: 'codex' }] } } };

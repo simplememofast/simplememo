@@ -9,30 +9,30 @@
   <link rel="dns-prefetch" href="https://apps.apple.com">
   <!-- Google tag (gtag.js) - deferred for LCP -->
   <script>
-    window.addEventListener('load', function() {
+    (function() {
       if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
-      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
-      ric(function() {
-        var s = document.createElement('script');
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
-        s.async = true;
-        document.head.appendChild(s);
-        s.onload = function() {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
-        };
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
       });
-    });
+    })();
   </script>
-  <title>0.4秒速記寄信 — Captio替代 | Simple Memo - for Obsidian</title>
-  <meta name="description" content="最快的自寄郵件備忘錄應用（iPhone）。0.4秒啟動，一鍵將筆記寄送到自己的信箱，裝置端 AES-GCM 加密，離線自動重寄。支援 Obsidian 同步與裝置端語音輸入，是 Captio 的最佳替代品。 新增 AI 自動加上標籤：裝置端 AI 自動補上標題、標籤與類型。">
+  <title>一鍵速記寄信 — Captio替代 | Simple Memo - for Obsidian</title>
+  <meta name="description" content="iPhone 的自寄郵件備忘錄應用。0.4秒啟動（熱啟動，iPhone 16e 實測），一鍵將筆記寄送到自己的信箱，裝置端 AES-GCM 加密，離線時保留在裝置上並自動重寄。支援 Obsidian 同步與裝置端語音輸入（iOS 26 以上、支援的語言），可作為 Captio 的替代選擇。 新增 AI 自動加上標籤：設定 Obsidian 並開啟「AI Auto-Tagging」後，裝置端 AI 會補上標題、標籤與類型。">
   <meta name="theme-color" content="#070b14">
 
   <!-- OGP -->
-  <meta property="og:title" content="0.4秒速記寄信 — Captio替代 | Simple Memo - for Obsidian">
-  <meta property="og:description" content="最快的自寄郵件備忘錄應用。0.4秒啟動，一鍵寄送到信箱。Captio最佳替代品。 新增 AI 自動加上標籤：裝置端 AI 自動補上標題、標籤與類型。">
+  <meta property="og:title" content="一鍵速記寄信 — Captio替代 | Simple Memo - for Obsidian">
+  <meta property="og:description" content="自寄郵件備忘錄應用。0.4秒即可輸入（熱啟動，iPhone 16e 實測），一鍵寄送到信箱。Captio 的替代選擇。 新增 AI 自動加上標籤：設定 Obsidian 並開啟「AI Auto-Tagging」後，裝置端 AI 會補上標題、標籤與類型。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://simplememofast.com/zh-Hant/">
   <meta property="og:image" content="https://simplememofast.com/assets/img/og/zh-Hant.png">
@@ -44,8 +44,8 @@
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@simplememofast">
-  <meta name="twitter:title" content="0.4秒速記寄信 — Captio替代 | Simple Memo - for Obsidian">
-  <meta name="twitter:description" content="最快的自寄郵件備忘錄應用。0.4秒啟動，一鍵寄送到信箱。Captio最佳替代品。 新增 AI 自動加上標籤：裝置端 AI 自動補上標題、標籤與類型。">
+  <meta name="twitter:title" content="一鍵速記寄信 — Captio替代 | Simple Memo - for Obsidian">
+  <meta name="twitter:description" content="自寄郵件備忘錄應用。0.4秒即可輸入（熱啟動，iPhone 16e 實測），一鍵寄送到信箱。Captio 的替代選擇。 新增 AI 自動加上標籤：設定 Obsidian 並開啟「AI Auto-Tagging」後，裝置端 AI 會補上標題、標籤與類型。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/zh-Hant.png">
 
   <!-- Favicon -->
@@ -154,21 +154,11 @@
       align-items: center;
     }
     .global-nav__cta:hover { opacity: 0.85; }
-    .global-nav__hamburger {
-      display: none;
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 1.5rem;
-      cursor: pointer;
-      min-width: 48px;
-      min-height: 48px;
-      padding: 0.5rem;
-      line-height: 1;
-    }
     @media (max-width: 768px) {
-      .global-nav__cta { display: none; }
-      .global-nav__hamburger { display: block; }
+      .global-nav__cta { display: inline-flex !important; }
+    }
+    @media (max-width: 480px) {
+      .global-nav__brand { display: none; }
     }
 
     /* Tighter hero on mobile to keep CTA above fold */
@@ -225,49 +215,35 @@
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebPage","name":"0.4秒速記寄信 — Captio替代 | Simple Memo - for Obsidian","url":"https://simplememofast.com/zh-Hant/","inLanguage":"zh-Hant","isPartOf":{"@id":"https://simplememofast.com/#website"},"dateModified":"2026-06-10","description":"Simple Memo - for Obsidian 是一款一鍵把備忘錄寄到自己信箱的 iOS App，這是其繁體中文官方頁面。"}
+  {"@context":"https://schema.org","@type":"WebPage","name":"一鍵速記寄信 — Captio替代 | Simple Memo - for Obsidian","url":"https://simplememofast.com/zh-Hant/","inLanguage":"zh-Hant","isPartOf":{"@id":"https://simplememofast.com/#website"},"dateModified":"2026-10-04","description":"Simple Memo - for Obsidian 是一款一鍵把備忘錄寄到自己信箱的 iOS App，這是其繁體中文官方頁面。"}
   </script>
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Simple Memo - for Obsidian","legalName":"株式会社ユリカ","alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"],"url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"sameAs":["https://apps.apple.com/jp/app/id6758438948","https://x.com/simplememofast","https://note.com/simplememo","https://zenn.dev/simplememo","https://github.com/simplememofast","https://github.com/simplememofast/simplememo-ios","https://www.indiehackers.com/post/i-built-simplememofast-a-captio-style-app-to-email-yourself-notes-instantly-e6225127d8"]}</script>
-  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "@id": "https://simplememofast.com/#app", "name": "Obsidian連携シンプルメモ", "alternateName": ["Simple Memo - for Obsidian", "Simple Memo", "シンプルメモ", "Captio式シンプルメモ", "SimpleMemoFast", "Obsidian連携シンプルメモ - 最速の音声入力"], "operatingSystem": "iOS 16.0+", "applicationCategory": "UtilitiesApplication", "url": "https://simplememofast.com/", "mainEntityOfPage": "https://simplememofast.com/zh-Hant/", "inLanguage": "zh-Hant", "isAccessibleForFree": true, "publisher": {"@id": "https://simplememofast.com/#organization"}, "image": "https://simplememofast.com/assets/img/app-icon-256.png", "softwareVersion": "5.8.9", "offers": [{"@type": "Offer", "price": "0", "priceCurrency": "USD", "name": "Free", "description": "Up to 3 sends per day (free forever)", "availability": "https://schema.org/InStock"}, {"@type": "Offer", "name": "Premium Monthly", "description": "$2.99/month, unlimited sends", "price": "2.99", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}, {"@type": "Offer", "name": "Premium Yearly", "description": "$29.99/year, unlimited sends", "price": "29.99", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}], "downloadUrl": "https://apps.apple.com/us/app/id6758438948", "datePublished": "2026-02-12", "dateModified": "2026-07-25", "aggregateRating": {"@type": "AggregateRating", "ratingValue": "4.2", "ratingCount": "25", "bestRating": "5", "worstRating": "1"}, "sameAs": ["https://x.com/simplememofast", "https://note.com/simplememo", "https://zenn.dev/simplememo", "https://github.com/simplememofast", "https://github.com/simplememofast/simplememo-ios", "https://alternativeto.net/software/simple-memo--captio-style/", "https://apps.apple.com/jp/app/id6758438948", "https://prtimes.jp/main/html/rd/p/000000001.000182412.html", "https://prtimes.jp/main/html/rd/p/000000003.000182412.html", "https://www.indiehackers.com/post/i-built-simplememofast-a-captio-style-app-to-email-yourself-notes-instantly-e6225127d8"], "featureList": ["AI 自動加上標籤（裝置端 AI 產生標題、標籤與類型）"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Simple Memo - for Obsidian","legalName":"株式会社ユリカ","alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"],"url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"sameAs":["https://apps.apple.com/jp/app/id6758438948","https://x.com/simplememofast","https://note.com/simplememo","https://zenn.dev/simplememo","https://github.com/simplememofast","https://www.indiehackers.com/post/i-built-simplememofast-a-captio-style-app-to-email-yourself-notes-instantly-e6225127d8"]}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "@id": "https://simplememofast.com/#app", "name": "Obsidian連携シンプルメモ", "alternateName": ["Simple Memo - for Obsidian", "Simple Memo", "シンプルメモ", "Captio式シンプルメモ", "SimpleMemoFast", "シンプルメモ - Obsidian連携・高速音声入力"], "operatingSystem": "iOS 16.0+", "applicationCategory": "UtilitiesApplication", "url": "https://simplememofast.com/", "mainEntityOfPage": "https://simplememofast.com/zh-Hant/", "inLanguage": "zh-Hant", "isAccessibleForFree": true, "publisher": {"@id": "https://simplememofast.com/#organization"}, "image": "https://simplememofast.com/assets/img/app-icon-256.png", "softwareVersion": "5.9.12", "offers": [{"@type": "Offer", "price": "0", "priceCurrency": "USD", "name": "Free", "description": "Up to 3 sends per day (no time limit)", "availability": "https://schema.org/InStock"}, {"@type": "Offer", "name": "Premium Monthly", "description": "$2.99/month, unlimited sends", "price": "2.99", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}, {"@type": "Offer", "name": "Premium Yearly", "description": "$29.99/year, unlimited sends", "price": "29.99", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}], "downloadUrl": "https://apps.apple.com/us/app/id6758438948", "datePublished": "2026-02-12", "aggregateRating": {"@type": "AggregateRating", "ratingValue": "4.1", "ratingCount": "27", "bestRating": "5", "worstRating": "1"}, "sameAs": ["https://x.com/simplememofast", "https://note.com/simplememo", "https://zenn.dev/simplememo", "https://github.com/simplememofast", "https://alternativeto.net/software/simple-memo--captio-style/", "https://apps.apple.com/jp/app/id6758438948", "https://prtimes.jp/main/html/rd/p/000000001.000182412.html", "https://prtimes.jp/main/html/rd/p/000000003.000182412.html", "https://www.indiehackers.com/post/i-built-simplememofast-a-captio-style-app-to-email-yourself-notes-instantly-e6225127d8"], "featureList": ["AI 自動加上標籤（裝置端 AI 產生標題、標籤與類型）"]}</script>
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"FAQPage","inLanguage":"zh-Hant","mainEntity":[
-    {"@type":"Question","name":"Simple Memo 是什麼？","acceptedAnswer":{"@type":"Answer","text":"Simple Memo 是一款極速的 iOS 備忘錄 App，讓你只要輕觸一下，就能把筆記寄送到自己的電子信箱。App在0.4秒內完成啟動，從打開到寄出都快速流暢，特別適合隨手記下臨時想到的點子、待辦事項或重要資訊。"}},
-    {"@type":"Question","name":"支援哪些電子信箱服務？","acceptedAnswer":{"@type":"Answer","text":"只要是支援 SMTP 的電子信箱都可以使用，包括 Gmail、Outlook、iCloud、Yahoo 等主流服務。你只需要設定好自己的收件信箱，就能把備忘錄寄到平常慣用的信箱中。"}},
-    {"@type":"Question","name":"離線時也能使用嗎？","acceptedAnswer":{"@type":"Answer","text":"可以。即使在沒有網路的情況下，你寫好的備忘錄也會先加密暫存在寄件匣中排隊等待。一旦裝置重新連上網路，系統就會自動把它們寄出，你完全不必手動操作，也不用擔心內容遺失。"}},
-    {"@type":"Question","name":"我的備忘錄會被保護隱私嗎？","acceptedAnswer":{"@type":"Answer","text":"會。所有備忘錄都在裝置本機以 AES-GCM 加密處理，內容絕不會儲存在我們的伺服器上。你的筆記只屬於你自己，隱私受到完整保護。"}},
+    {"@type":"Question","name":"Simple Memo 是什麼？","acceptedAnswer":{"@type":"Answer","text":"Simple Memo 是一款快速的 iOS 備忘錄 App，讓你只要輕觸一下，就能把筆記寄送到自己的電子信箱。輕觸圖示 0.4 秒後即可輸入（熱啟動，iPhone 16e 實測），從打開到寄出都快速流暢，特別適合隨手記下臨時想到的點子、待辦事項或重要資訊。"}},
+    {"@type":"Question","name":"支援哪些電子信箱服務？","acceptedAnswer":{"@type":"Answer","text":"只要是能收信的地址都可以使用，包括 Gmail、Outlook、iCloud、Yahoo、公司信箱等。不需要輸入密碼或 SMTP 設定，在 App 中設定收件地址並完成驗證即可。"}},
+    {"@type":"Question","name":"離線時也能使用嗎？","acceptedAnswer":{"@type":"Answer","text":"可以。在沒有網路時寄出的備忘錄，會先加密暫存在裝置上的寄件匣中排隊等待。一旦裝置重新連上網路，系統就會自動把它們寄出。自動重寄有次數上限；達到上限的備忘錄，可在「歷史」中長按並選擇「重新傳送」。"}},
+    {"@type":"Question","name":"我的備忘錄會被保護隱私嗎？","acceptedAnswer":{"@type":"Answer","text":"會。裝置上的寄件匣與傳送紀錄以 AES-GCM 加密。備忘錄正文只在寄送時經過我們的寄送伺服器，不會長期保存。電子郵件本身並非端到端加密。"}},
     {"@type":"Question","name":"Yahoo奇摩信箱或公司信箱也能用嗎？","acceptedAnswer":{"@type":"Answer","text":"可以。Simple Memo 不依賴任何信箱服務商的專用 API，而是以一般電子郵件的形式寄送，所以收件地址可以是 Yahoo奇摩信箱、Gmail、Outlook，甚至公司或學校信箱等任何電子郵件地址。把你慣用的地址設成收件人即可。"}},
-    {"@type":"Question","name":"App 介面有中文嗎？","acceptedAnswer":{"@type":"Answer","text":"目前 App 介面提供日文與英文。不過畫面非常簡單，幾乎沒有語言門檻；備忘錄內容本身可以用包含繁體中文在內的任何語言書寫與寄送。本網站提供繁體中文版本。"}}
+    {"@type":"Question","name":"App 介面有中文嗎？","acceptedAnswer":{"@type":"Answer","text":"有。App 支援包含繁體中文在內的 10 種語言，可在 App 的設定畫面中切換。備忘錄內容本身可以用任何語言書寫與寄送。"}}
   ]}
   </script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-home capture-full" data-design-family="home">
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="Main navigation">
+  <nav class="global-nav" aria-label="Main navigation" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/zh-Hant/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager">
-        Simple Memo - for Obsidian
-      </a>
+      <a class="global-nav__logo site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a>
       <div class="global-nav__actions">
-        <details class="lang-dropdown" onkeydown="if(event.key==='Escape'){this.open=false;this.querySelector('summary').focus()}" onfocusout="if(!this.contains(event.relatedTarget))this.open=false">
-          <summary class="lang-dropdown__toggle" aria-label="繁：切換語言">繁</summary>
-          <div class="lang-dropdown__menu">
-            <a href="/">日本語</a>
-            <a href="/en/">English</a>
-            <a href="/zh/">简体中文</a>
-            <a href="/zh-Hant/" class="active" aria-current="page">繁體中文</a>
-            <a href="/ko/">한국어</a>
-            <a href="/es/">Español</a>
-            <a href="/pt-BR/">Português</a>
-            <a href="/id/">Indonesia</a>
-            <a href="/ar/">العربية</a>
-            <a href="/tr/">Türkçe</a>
-          </div>
-        </details>
-        <a data-cta-variant="v1" data-cta-cluster="home" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8" class="global-nav__cta">
-          下載
-        </a>
-        <button class="global-nav__hamburger" aria-label="選單" onclick="window.location.href='https://apps.apple.com/us/app/id6758438948'">☰</button>
+        <details class="site-languages"><summary aria-label="繁體中文 · 選擇語言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>繁中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hant" dir="ltr"><p class="site-language-title">選擇語言</p><div class="site-language-grid"><a href="/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hant" aria-current="page"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ko/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="home" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">下載</a>
       </div>
     </div>
   </nav>
@@ -283,24 +259,24 @@
         一鍵輕觸，直達信箱。
       </h1>
       <p class="hero__subtitle">
-        0.4秒將備忘錄寄到你的信箱。
+        一鍵將備忘錄寄到你的信箱。
       </p>
-      <a data-cta-variant="v1" data-cta-cluster="home" data-cta-placement="hero" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__hero&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
+      <a data-cta-variant="v1" data-cta-cluster="home" data-cta-placement="hero" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
         <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="eager">
       </a>
-        <p style="font-size:.8rem;color:var(--text-muted);margin-top:.5rem;">★ 4.2 · App Store 25 則評分</p>
+        <p style="font-size:.8rem;color:var(--text-muted);margin-top:.5rem;"><a data-cta-variant="v1" data-cta-cluster="home" data-cta-placement="reference" href="https://apps.apple.com/jp/app/id6758438948" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px;">★ 4.1 · 日本 App Store 27 則評分</a></p>
     </div>
   </section>
 
   <!-- AI Auto-Tagging Banner (newest feature) -->
-  <section class="ai-tags-banner" id="ai-tags" style="padding:1.5rem 0 0.5rem;">
+  <section class="ai-tags-banner ce-home-section" id="ai-tags" style="padding:1.5rem 0 0.5rem;">
     <div class="container">
       <div class="aib">
         <div class="aib__inner">
           <div class="aib__body">
             <p class="aib__badge"><b>NEW</b><span>AI 自動加上標籤 — 現已推出</span></p>
             <h2 class="aib__title">只要<span class="aib__c">開口說</span>。<br><span class="aib__v">AI</span> 幫你整理。</h2>
-            <p class="aib__sub">說一句話，<strong>標籤自動完成</strong>。裝置端 AI 讀懂備忘內容，為它加上<strong>標題、標籤與類型</strong>，再送到你的信箱與 <strong>Obsidian</strong>。</p>
+            <p class="aib__sub">說一句話，<strong>標籤自動完成</strong>。裝置端 AI 讀懂備忘內容，為它加上<strong>標題、標籤與類型</strong>，再附加到 <strong>Obsidian</strong>；郵件主旨也會使用這個簡短標題。需先設定 Obsidian，並在 App 設定中開啟「AI Auto-Tagging」。</p>
             <a href="/en/ai-tags/" class="aib__go" hreflang="en" aria-label="了解 AI 自動加上標籤">了解 AI 自動加上標籤 →</a>
           </div>
           <div class="aib__stage" aria-hidden="true">
@@ -316,18 +292,18 @@
           </div>
         </div>
         <ul class="aib__feats">
-          <li><b>🎤 只要開口說</b><span>裝置端 AI 轉寫</span></li>
+          <li><b>🎤 只要開口說</b><span>裝置端 AI 轉寫（iOS 26 以上，支援的語言）</span></li>
           <li><b>🏷️ 自動加上標籤</b><span>AI 讀懂內容並分類</span></li>
           <li><b>💎 Obsidian 整合</b><span>自動附加到筆記</span></li>
         </ul>
-        <p class="aib__note">AI 標籤處理完全在你的 iPhone 上進行，備忘內容不會被傳送到外部伺服器。</p>
+        <p class="aib__note">AI 標籤處理完全在你的 iPhone 上進行，備忘內容不會為了加上標籤而被傳送到外部伺服器。</p>
       </div>
     </div>
   </section>
 
 
   <!-- Features Section -->
-  <section class="features">
+  <section class="features ce-home-section">
     <div class="container">
       <h2 class="section-title reveal">
         <span class="section-label">功能</span>
@@ -336,9 +312,9 @@
       <div class="feature-cards">
         <div class="feature-card feature-card--highlight reveal reveal-delay-1">
           <div class="feature-card__content">
-            <h3 class="feature-card__title">⚡ 0.4秒啟動</h3>
+            <h3 class="feature-card__title">⚡ 0.4秒即可輸入（熱啟動，iPhone 16e 實測）</h3>
             <p class="feature-card__description">
-              極速啟動，瞬間開始記錄。<br>從想法到寄送，只需0.4秒。
+              輕觸圖示，馬上開始記錄。<br>從想法到寄送，只需一鍵。
             </p>
           </div>
         </div>
@@ -346,7 +322,7 @@
           <div class="feature-card__content">
             <h3 class="feature-card__title">📧 一鍵寄送到信箱</h3>
             <p class="feature-card__description">
-              輕觸一下即可寄送到你的收件匣。<br>無需資料夾或複雜設定，標籤交給 AI 自動加上。
+              輕觸一下即可寄送到你的收件匣。<br>無需資料夾或複雜設定。設定 Obsidian 並開啟「AI Auto-Tagging」後，標籤也交給 AI 自動加上。
             </p>
           </div>
         </div>
@@ -354,7 +330,7 @@
           <div class="feature-card__content">
             <h3 class="feature-card__title">🔒 AES-GCM加密</h3>
             <p class="feature-card__description">
-              本機寄件匣與傳送紀錄在裝置上以 AES-GCM 加密。郵件傳送本身並非端到端加密。<br>備忘錄永遠不會儲存在伺服器上。
+              本機寄件匣與傳送紀錄在裝置上以 AES-GCM 加密。郵件傳送本身並非端到端加密。<br>備忘錄正文不會長期保存在伺服器上。
             </p>
           </div>
         </div>
@@ -363,7 +339,7 @@
   </section>
 
   <!-- How It Works Section -->
-  <section class="how-to-use">
+  <section class="how-to-use ce-home-section">
     <div class="container">
       <h2 class="section-title reveal">
         <span class="section-label">使用方式</span>
@@ -373,9 +349,9 @@
         <div class="step reveal reveal-delay-1">
           <div class="step__content">
             <div class="step__number">1</div>
-            <h3 class="step__title">0.4秒瞬間開啟</h3>
+            <h3 class="step__title">0.4秒即可輸入（熱啟動，iPhone 16e 實測）</h3>
             <p class="step__description">
-              輕觸圖示，App在0.4秒內完成啟動並準備就緒。無需等待載入，也不必先登入或開啟任何畫面，靈感閃現的當下就能立刻動筆。
+              輕觸圖示 0.4 秒後即可輸入（熱啟動，iPhone 16e 實測）。無需等待載入，也不必先登入或開啟任何畫面，靈感閃現的當下就能立刻動筆。
             </p>
           </div>
         </div>
@@ -384,7 +360,7 @@
             <div class="step__number">2</div>
             <h3 class="step__title">直接寫下你的備忘錄</h3>
             <p class="step__description">
-              只要輸入純文字即可，不需要建立資料夾或手動整理分類，標籤由 AI 自動加上。介面乾淨單純，讓你專注於把想法寫下來，而不是煩惱該放在哪裡。
+              只要輸入純文字即可，不需要建立資料夾或手動整理分類；設定 Obsidian 並開啟「AI Auto-Tagging」後，標籤也由 AI 自動加上。介面乾淨單純，讓你專注於把想法寫下來，而不是煩惱該放在哪裡。
             </p>
           </div>
         </div>
@@ -393,7 +369,7 @@
             <div class="step__number">3</div>
             <h3 class="step__title">一鍵寄到自己的信箱</h3>
             <p class="step__description">
-              輕觸一下，備忘錄就會寄送到你的電子信箱。即使在離線狀態下也能使用——內容會先暫存在寄件匣中排隊，待恢復網路連線後自動重新寄出，絕不漏掉任何一則。
+              輕觸一下，備忘錄就會寄送到你的電子信箱。即使在離線狀態下也能使用——內容會先暫存在寄件匣中排隊，待恢復網路連線後自動重新寄出。
             </p>
           </div>
         </div>
@@ -402,7 +378,7 @@
   </section>
 
   <!-- Use Cases Section -->
-  <section class="features">
+  <section class="features ce-home-section">
     <div class="container">
       <h2 class="section-title reveal">
         <span class="section-label">使用情境</span>
@@ -413,7 +389,7 @@
           <div class="feature-card__content">
             <h3 class="feature-card__title">🚇 捷運通勤途中隨手記</h3>
             <p class="feature-card__description">
-              在捷運上突然想到一件事，等你打開筆記 App、選好資料夾，靈感常常已經不見了。Simple Memo 0.4秒開啟，單手輸入、一鍵寄出就完成。即使列車進入隧道沒有訊號，內容也會暫存在寄件匣，恢復連線後自動寄出。
+              在捷運上突然想到一件事，等你打開筆記 App、選好資料夾，靈感常常已經不見了。Simple Memo 0.4秒開啟（熱啟動，iPhone 16e 實測），單手輸入、一鍵寄出就完成。即使列車進入隧道沒有訊號，內容也會暫存在寄件匣，恢復連線後自動寄出。
             </p>
           </div>
         </div>
@@ -438,32 +414,32 @@
   </section>
 
   <!-- FAQ Section -->
-  <section class="faq">
+  <section class="faq ce-home-section">
     <div class="container">
       <h2 class="section-title reveal">常見問題</h2>
       <div class="faq-list">
         <details class="faq-item">
           <summary class="faq-item__question">Simple Memo 是什麼？</summary>
           <div class="faq-item__answer">
-            <p>Simple Memo 是一款極速的 iOS 備忘錄 App，讓你只要輕觸一下，就能把筆記寄送到自己的電子信箱。App在0.4秒內完成啟動，從打開到寄出都快速流暢，特別適合隨手記下臨時想到的點子、待辦事項或重要資訊。</p>
+            <p>Simple Memo 是一款快速的 iOS 備忘錄 App，讓你只要輕觸一下，就能把筆記寄送到自己的電子信箱。輕觸圖示 0.4 秒後即可輸入（熱啟動，iPhone 16e 實測），從打開到寄出都快速流暢，特別適合隨手記下臨時想到的點子、待辦事項或重要資訊。</p>
           </div>
         </details>
         <details class="faq-item">
           <summary class="faq-item__question">支援哪些電子信箱服務？</summary>
           <div class="faq-item__answer">
-            <p>只要是支援 SMTP 的電子信箱都可以使用，包括 Gmail、Outlook、iCloud、Yahoo 等主流服務。你只需要設定好自己的收件信箱，就能把備忘錄寄到平常慣用的信箱中。</p>
+            <p>只要是能收信的地址都可以使用，包括 Gmail、Outlook、iCloud、Yahoo、公司信箱等。不需要輸入密碼或 SMTP 設定，在 App 中設定收件地址並完成驗證即可。</p>
           </div>
         </details>
         <details class="faq-item">
           <summary class="faq-item__question">離線時也能使用嗎？</summary>
           <div class="faq-item__answer">
-            <p>可以。即使在沒有網路的情況下，你寫好的備忘錄也會先加密暫存在寄件匣中排隊等待。一旦裝置重新連上網路，系統就會自動把它們寄出，你完全不必手動操作，也不用擔心內容遺失。</p>
+            <p>可以。在沒有網路時寄出的備忘錄，會先加密暫存在裝置上的寄件匣中排隊等待。一旦裝置重新連上網路，系統就會自動把它們寄出。自動重寄有次數上限；達到上限的備忘錄，可在「歷史」中長按並選擇「重新傳送」。</p>
           </div>
         </details>
         <details class="faq-item">
           <summary class="faq-item__question">我的備忘錄會被保護隱私嗎？</summary>
           <div class="faq-item__answer">
-            <p>會。所有備忘錄都在裝置本機以 AES-GCM 加密處理，內容絕不會儲存在我們的伺服器上。你的筆記只屬於你自己，隱私受到完整保護。</p>
+            <p>會。裝置上的寄件匣與傳送紀錄以 AES-GCM 加密。備忘錄正文只在寄送時經過我們的寄送伺服器，不會長期保存。電子郵件本身並非端到端加密。</p>
           </div>
         </details>
         <details class="faq-item">
@@ -475,7 +451,7 @@
         <details class="faq-item">
           <summary class="faq-item__question">App 介面有中文嗎？</summary>
           <div class="faq-item__answer">
-            <p>目前 App 介面提供日文與英文。不過畫面非常簡單，幾乎沒有語言門檻；備忘錄內容本身可以用包含繁體中文在內的任何語言書寫與寄送。本網站提供繁體中文版本。</p>
+            <p>有。App 支援包含繁體中文在內的 10 種語言，可在 App 的設定畫面中切換。備忘錄內容本身可以用任何語言書寫與寄送。</p>
           </div>
         </details>
       </div>
@@ -483,13 +459,13 @@
   </section>
 
   <!-- App Store CTA Section -->
-  <section class="pricing" style="padding:3rem 0;">
+  <section class="pricing ce-home-section" style="padding:3rem 0;">
     <div class="container" style="text-align:center;">
       <h2 class="section-title reveal">
         立即下載
       </h2>
-      <p style="font-size:1rem;color:var(--text-secondary);margin-bottom:1.5rem;">每天最多 3 則，永久免費。無限寄送可升級 Premium。</p>
-      <a data-cta-variant="v1" data-cta-cluster="home" data-cta-placement="bottom" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__bottom&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
+      <p style="font-size:1rem;color:var(--text-secondary);margin-bottom:1.5rem;">每天最多 3 則，免費且不限使用期限。無限寄送可升級 Premium。</p>
+      <a data-cta-variant="v1" data-cta-cluster="home" data-cta-placement="bottom" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
         <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
       </a>
     </div>
@@ -497,7 +473,7 @@
 
   </main>
 
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hant" dir="ltr"><a class="site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">記下一點想法，邁出下一步。</p><p class="site-footer-description">從 iPhone 將筆記傳送至 Obsidian 和電子郵件。</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
       <nav class="footer__social" aria-label="Social links">
         <a href="https://x.com/simplememofast" rel="me noopener" target="_blank" class="footer__link">X / Twitter</a>
@@ -505,7 +481,7 @@
         <a href="https://github.com/simplememofast" rel="me noopener" target="_blank" class="footer__link">GitHub</a>
       </nav>
       <div class="footer__copyright">
-        <p class="footer__copyright-main">© 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ</p>
+        <p class="footer__copyright-main">© 2026 Simple Memo - for Obsidian / 營運：YURIKA, K.K.</p>
       </div>
     </div>
   </footer>
@@ -513,7 +489,7 @@
   <!-- Sticky Mobile CTA -->
   <div class="sticky-cta" id="stickyCta">
     <div class="sticky-cta__inner">
-      <a data-cta-variant="v1" data-cta-cluster="home" data-cta-placement="bottom" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__bottom&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
+      <a data-cta-variant="v1" data-cta-cluster="home" data-cta-placement="bottom" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
         <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="eager">
       </a>
     </div>

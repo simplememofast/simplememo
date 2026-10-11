@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/vs/logseq/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Perbandingan dengan Logseq — SimpleMemo | Perbandingan aplikasi memo</title>
+  <meta name="description" content="Bandingkan Logseq dan SimpleMemo berdasarkan peran penyimpanan dan input. Kami akan memeriksa perbedaan antara versi file tradisional Logseq OG dan versi DB menggunakan SQLite, cadangan termasuk penambahan Cepat, sinkronisasi, lampiran, pembatasan ekspor Markdown, dan langkah-langkah untuk diperiksa sebelum migrasi dalam dokumen resmi.">
+  <meta name="robots" content="max-snippet:-1, max-image-preview:large">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="SimpleMemo vs Logseq - Perbandingan menyeluruh aplikasi memo">
+  <meta property="og:description" content="Bandingkan Logseq dan SimpleMemo berdasarkan peran penyimpanan dan input. Kami akan memeriksa perbedaan antara versi file tradisional Logseq OG dan versi DB menggunakan SQLite, cadangan termasuk penambahan Cepat, sinkronisasi, lampiran, pembatasan ekspor Markdown, dan langkah-langkah untuk diperiksa sebelum migrasi dalam dokumen resmi.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-06T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/id/vs/logseq/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/vs-logseq.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="id_ID">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="SimpleMemo vs Logseq - Perbandingan menyeluruh aplikasi memo">
+  <meta name="twitter:description" content="Bandingkan Logseq dan SimpleMemo berdasarkan peran penyimpanan dan input. Kami akan memeriksa perbedaan antara versi file tradisional Logseq OG dan versi DB menggunakan SQLite, cadangan termasuk penambahan Cepat, sinkronisasi, lampiran, pembatasan ekspor Markdown, dan langkah-langkah untuk diperiksa sebelum migrasi dalam dokumen resmi.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/vs-logseq.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/id/vs/logseq/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/vs/logseq/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/vs/logseq/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/vs/logseq/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/vs/logseq/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/vs/logseq/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/vs/logseq/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/vs/logseq/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/vs/logseq/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/vs/logseq/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/vs/logseq/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/vs/logseq/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/id/vs/logseq/#article",
+  "inLanguage": "id",
+  "image": "https://simplememofast.com/assets/img/og/vs-logseq.png",
+  "headline": "SimpleMemo vs Logseq - Perbandingan menyeluruh aplikasi memo",
+  "description": "Bandingkan Logseq dan SimpleMemo berdasarkan peran penyimpanan dan input. Kami akan memeriksa perbedaan antara versi file tradisional Logseq OG dan versi DB menggunakan SQLite, cadangan termasuk penambahan Cepat, sinkronisasi, lampiran, pembatasan ekspor Markdown, dan langkah-langkah untuk diperiksa sebelum migrasi dalam dokumen resmi.",
+  "url": "https://simplememofast.com/id/vs/logseq/",
+  "datePublished": "2026-03-06",
+  "dateModified": "2026-09-09",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/id/vs/logseq/"
+  }
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Beranda",
+      "item": "https://simplememofast.com/id/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Perbandingan aplikasi Memo",
+      "item": "https://simplememofast.com/id/vs/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "vs Logseq",
+      "item": "https://simplememofast.com/id/vs/logseq/"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/id/vs/logseq/#webpage",
+  "inLanguage": "id",
+  "name": "Perbandingan SimpleMemo vs Logseq",
+  "url": "https://simplememofast.com/id/vs/logseq/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/id/#website"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}[data-lang="en"]{display:none}[data-lang].active{display:block}span[data-lang].active{display:inline}.lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}.lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}.lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}.compare-table{width:100%;border-collapse:collapse;margin:1.5rem 0 2rem;font-size:.875rem}.compare-table th,.compare-table td{padding:.75rem 1rem;text-align:left;border-bottom:1px solid var(--border)}.compare-table th{color:var(--text-muted);font-weight:400;font-size:.875rem;text-transform:uppercase;letter-spacing:.05em}.compare-table td:first-child{font-weight:700;color:var(--text-secondary);white-space:nowrap}.compare-table .yes{color:#3fb950}.compare-table .no{color:#f85149}.faq-item{border-bottom:1px solid var(--border)}.faq-details{padding:0}.faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}.faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}.faq-details[open] .faq-summary::after{transform:rotate(45deg)}.faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}.cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}.cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}.cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}.diff-list{list-style:none;margin:1.5rem 0 2rem;padding:0}.diff-list li{padding:1.25rem 1.25rem 1.25rem 4rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7;position:relative}.diff-list li .diff-num{position:absolute;left:1.25rem;top:1.25rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}.diff-list li strong{color:var(--text)}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}.internal-links a:hover{border-color:var(--accent)}.choose-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}@media(max-width:600px){.choose-grid{grid-template-columns:1fr}}.choose-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}.choose-card__title{font-size:1rem;font-weight:700;margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}.choose-card ul{list-style:none;padding:0;margin:0;font-size:.87rem;color:var(--text-secondary);line-height:1.8}.choose-card ul li::before{content:"&#10003; ";color:#3fb950;font-weight:700}@media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  .logseq-scroll{max-width:100%;overflow-x:auto;margin:1.5rem 0}.logseq-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:3px}.logseq-scroll table{width:100%;min-width:680px;border-collapse:collapse;font-size:.93rem}.logseq-scroll th,.logseq-scroll td{padding:.8rem;border:1px solid var(--border);vertical-align:top;text-align:left;line-height:1.9}.logseq-scroll th{background:var(--surface)}.logseq-scroll caption{text-align:left;padding:.5rem 0;color:var(--text-muted);font-size:.85rem}.lp-section>p,.lp-section>ol{line-height:1.9;color:var(--text-secondary)}.lp-section li{margin:.8rem 0}.lp-section .faq-details{padding:1rem 0;border-bottom:1px solid var(--border)}.lp-section .faq-summary{font-weight:700;cursor:pointer;line-height:1.8}.lp-section .faq-answer{padding:1rem 0;line-height:1.9;color:var(--text-secondary)}
+</style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2"/>
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be"/>
+<link rel="stylesheet" href="/assets/css/capture-next.css?v=4e62584640"/>
+<link rel="stylesheet" href="/assets/css/capture-third.css?v=ce878a94dc"/>
+<link rel="stylesheet" href="/assets/css/capture-fourth.css?v=b5c0888897"/>
+<link rel="stylesheet" href="/assets/css/capture-sixth.css?v=384c55dbee"/>
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/id/vs/logseq/#faq","inLanguage":"id","mainEntity":[{"@type":"Question","name":"Apakah Anda ingin menyimpan semua Logseq dalam file Markdown?","acceptedAnswer":{"@type":"Answer","text":"Tidak. Versi file sebelumnya dibagi menjadi Logseq OG, dan versi DB menggunakan basis data SQLite. Ekspor Markdown dari versi DB tidak dalam format yang mempertahankan semua properti dan stempel waktu."}},{"@type":"Question","name":"Apa yang Anda lakukan sebelum mencoba versi DB dengan grafik yang ada?","acceptedAnswer":{"@type":"Answer","text":"Tinggalkan salinan independen dari grafik asli dan coba dengan grafik uji kecil yang tidak penting. Jika Anda tidak hanya membutuhkan SQLite tetapi juga lampiran, pilih ekspor termasuk SQLite DB dan aset dan periksa impor ke dalam grafik terpisah."}},{"@type":"Question","name":"Dapatkah saya menggunakan plug-in sebelumnya seperti dalam versi DB?","acceptedAnswer":{"@type":"Answer","text":"Periksa kompatibilitas satu per satu. Pasar Resmi \"Mendukung DB?\" Silakan periksa apakah plug-in yang Anda gunakan mendukung grafik DB dengan melihat tampilan yang kompatibel dengan DB."}},{"@type":"Question","name":"Apakah plug-in diperlukan untuk input cepat Logseq?","acceptedAnswer":{"@type":"Answer","text":"Dokumen resmi versi DB memiliki \"Penambahan cepat\" bawaan yang mengirimkan catatan singkat ke jurnal saat ini. Pintu masuk berbeda untuk versi dan terminal, jadi silakan periksa dengan aplikasi saat ini sebelum mencari plug-in tambahan."}},{"@type":"Question","name":"Apakah tidak akan ada kehilangan data jika saya menggunakan sinkronisasi resmi?","acceptedAnswer":{"@type":"Answer","text":"Sinkronisasi bukan pengganti cadangan. README resmi adalah versi beta untuk versi DB, dan alfa untuk versi seluler baru dan RTC, memandu kemungkinan kehilangan data dan cadangan independen. Periksa versi dan rute sinkronisasi yang akan digunakan."}},{"@type":"Question","name":"Jika saya menggunakan SimpleMemo, apakah itu akan secara otomatis ditambahkan ke Logseq?","acceptedAnswer":{"@type":"Answer","text":"Contoh gabungan di halaman ini adalah cara mentransfer teks yang diterima ke kotak masuk email ke Logseq jika perlu. Itu tidak menunjukkan fungsi penulisan otomatis ke DB atau grafik Logseq, atau kemampuan untuk memigrasikan seluruh grafik."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full capture-next capture-third capture-fourth capture-sixth site-designed" data-design-family="refined">
+  <!-- Global Navigation -->
+  <nav aria-label="Navigasi utama" class="global-nav" data-site-header="">
+<div class="global-nav__inner">
+<a class="global-nav__logo site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/id/guides/">Panduan</a><a href="/id/use-cases/">Contoh penggunaan</a><a href="/id/vs/">Bandingkan</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+<li><a href="/id/guides/">Panduan</a></li>
+<li><a href="/id/use-cases/">Contoh penggunaan</a></li>
+<li><a href="/id/vs/">Bandingkan</a></li>
+<li><a href="/id/methods/"><span>Metode</span></a></li>
+<li><a href="/id/blog/"><span>Blog</span></a></li>
+<li><a href="/id/glossary/"><span>Glosarium</span></a></li>
+<li><a href="/id/faq">Pertanyaan umum</a></li>
+<li><a href="/id/about/">Tentang pengembang</a></li>
+<li><a href="/id/devlog/">Catatan pengembangan</a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="vs" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>Unduh</span></a></li>
+</ul>
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="Bahasa Indonesia · Pilih bahasa"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ID</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="id" dir="ltr"><p class="site-language-title">Pilih bahasa</p><div class="site-language-grid"><a href="/vs/logseq/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/vs/logseq/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/vs/logseq/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/vs/logseq/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/vs/logseq/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/vs/logseq/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/vs/logseq/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="id" aria-current="page"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ar/vs/logseq/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/vs/logseq/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+<a class="global-nav__cta" data-cta-cluster="vs" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">Unduh</a>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menu"><span>Menu</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+</div>
+</div>
+</nav>
+
+<main class="page-content"><div class="container"><header class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy">
+<div class="lp-hero__label"><span>Perbandingan aplikasi Memo</span></div>
+<h1 class="lp-hero__title"><span>SimpleMemo dan Logseq<br/> Perbedaan input, penyimpanan, dan migrasi</span></h1>
+<p class="lp-hero__sub"><span>Jika Anda ingin mengembangkan pengetahuan dengan Logseq, pertama-tama periksa versi yang Anda gunakan. Prosedur untuk menyimpan dan memigrasi berbeda antara OG yang menangani file Markdown dan versi DB yang menggunakan SQLite. SimpleMemo dibandingkan sebagai pintu masuk untuk meninggalkan teks yang diperlukan di kotak masuk, dll. </span></p>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>Penulis: <a href="/id/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Diterbitkan: <time datetime="2026-03-06">2026 tahun 3 bulan 6 hari</time> ・ Diperbarui: <time datetime="2026-09-09">2026 tahun 9 bulan 9 hari</time></span> </p>
+<a class="ce-read-link" href="#heading-logseq-versions">Baca isi halaman <span aria-hidden="true">↓</span></a></div><nav aria-label="Pilih topik yang ingin dibaca" class="ce-routes"><a class="ce-route" href="#heading-logseq-versions"><span>01</span><b>Pertama membedakan antara versi OG dan DB</b></a><a class="ce-route" href="#heading-logseq-capture"><span>02</span><b>Mulai dengan memo harian dan Tambahkan cepat</b></a><a class="ce-route" href="#heading-logseq-sync"><span>03</span><b>Siapkan sinkronisasi dan cadangan secara terpisah</b></a></nav><figure aria-hidden="true" class="ce-stage cn-concept"><p class="ce-stage-label">LOGSEQ / PANDUAN LAPANGAN</p><div class="cn-concept-list"><div class="cn-concept-row"><span>01</span><strong>Versi OG dan DB</strong></div><div class="cn-concept-row"><span>02</span><strong>Sinkronisasi dan pencadangan</strong></div><div class="cn-concept-row"><span>03</span><strong>Coba migrasi dengan jumlah kecil</strong></div></div><figcaption class="ce-stage-foot">Titik konfirmasi sebelum operasi</figcaption></figure></header><div class="ce-article">
+
+<!-- 意図の分岐: このページはSimpleMemo vs Logseq。Obsidian vs Logseqを探して
+         着地した検索者（「logseq obsidian 比較」系クエリ）を実験記事へ送る。 -->
+<div style="background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:8px;padding:1rem 1.25rem;margin:0 0 1rem;font-size:.92rem;line-height:1.8;">
+<span><strong>Perbandingan antara Obsidian dan Logseq</strong>? Eksperimen yang membuka folder yang sama dengan kedua aplikasi dibandingkan dengan jumlah sebenarnya dari jumlah plug-in <a href="/id/obsidian/compare/logseq/" style="color:var(--accent);">Verifikasi Perbandingan Obsidian vs Logseq [2026]</a> . Halaman ini adalah perbandingan antara SimpleMemo dan Logseq.</span>
+</div>
+<section class="lp-section ce-chapter ce-chapter--wide" id="logseq-versions"><div class="ce-chapter__head"><h2 data-ce-number="01" id="heading-logseq-versions"><span>Pertama membedakan antara versi OG dan DB</span></h2></div><div class="ce-chapter__body"><p><span>Dalam repositori resmi, graf berbasis berkas telah dipisahkan ke Logseq OG. 2.0.1 yang diterbitkan pada tanggal 13 bulan 7 tahun 2026 merupakan versi DB beta. Penjelasan tentang penyimpanan berkas, Org, dan plugin pada versi lama tidak boleh langsung diterapkan pada versi DB.</span></p><div aria-labelledby="heading-logseq-versions" class="logseq-scroll ce-table-scroll" role="region" tabindex="0"><table><caption id="logseq-versions-caption"><span>Periksa versi file dan versi DB secara terpisah. Anda dapat menggulir ke samping. </span></caption><thead><tr><th scope="col"><span>item</span></th><th scope="col">Logseq OG</th><th scope="col">Logseq DB</th></tr></thead><tbody><tr><th scope="row"><span>Pusat pelestarian</span></th><td><span>Markdown・Grafik berkas organisasi</span></td><td><span> Grafik DB SQLite. Lampiran juga menangani aset</span></td></tr><tr><th scope="row"><span>Kirim pesan</span></th><td><span> dengan editor lain. Periksa sintaks unik</span></td><td><span>Beberapa informasi hilang dalam output standar Markdown</span></td></tr><tr><th scope="row"><span>Fungsi yang ada</span></th><td><span>Periksa versi dan plug-in yang Anda gunakan</span></td><td><span>Perubahan seperti Org tidak didukung. Periksa plug-in yang kompatibel dengan DB</span></td></tr><tr><th scope="row"><span>Persiapan sebelum mencoba</span></th><td><span>Tinggalkan salinan terpisah dari seluruh grafik dan lampirannya</span></td><td><span>Grafik uji penting dan DB dan ekspor lampiran</span></td></tr></tbody></table></div><p><a href="https://github.com/logseq/docs/blob/master/db-version-changes.md" rel="noopener" target="_blank"><span>Resmi: Apa yang telah berubah dalam versi DB</span></a></p><p><a href="https://github.com/logseq/logseq/releases/tag/2.0.1" rel="noopener" target="_blank"><span>Resmi: Rilis beta 2.0.1</span></a></p></div></section>
+<section class="lp-section ce-chapter" id="logseq-capture"><div class="ce-chapter__head"><h2 data-ce-number="02" id="heading-logseq-capture"><span>Mulai dengan catatan harian dan penambahan cepat</span></h2></div><div class="ce-chapter__body"><p><span>Logseq adalah alat yang mengumpulkan pemikiran dengan blok dan referensi berpoin. Tidak perlu menautkan semuanya dari awal, menulis catatan singkat dalam memo harian, dan kemudian mengaitkannya dalam situasi di mana Anda menggunakannya. </span></p><p><span> Penambahan cepat bawaan yang dikirim ke jurnal saat ini secara resmi dipandu dalam versi DB. " Penjelasan bahwa "plug-in selalu diperlukan untuk input cepat" tidak sesuai. Buka pintu masuk di terminal yang Anda gunakan dan coba masukkan, simpan, dan tampilkan kembali. </span></p><p><a href="https://github.com/logseq/docs/blob/master/db-version.md#search-commands" rel="noopener" target="_blank"><span>Resmi: Deskripsi tambahan cepat</span></a></p></div></section>
+<section class="lp-section ce-chapter" id="logseq-sync"><div class="ce-chapter__head"><h2 data-ce-number="03" id="heading-logseq-sync"><span> Siapkan sinkronisasi dan pencadangan secara terpisah</span></h2></div><div class="ce-chapter__body"><p><span> README resmi menjelaskan versi DB sebagai beta, versi seluler baru dan RTC sebagai alfa, dan memandu kemungkinan kehilangan data dan cadangan. Mengaktifkan sinkronisasi saja tidak mencegah penghapusan yang tidak disengaja dan kehilangan data. Pertama, cobalah dengan grafik kecil yang tidak menyertakan isi produksi. </span></p><p><span>Periksa instruksi untuk versi yang Anda gunakan tanpa mencampur pengaturan sinkronisasi versi file dan versi DB. Apakah catatan dapat ditemukan di tujuan sinkronisasi atau apakah salinan independen dapat dibaca kembali adalah konfirmasi lain. </span></p><p><a href="https://github.com/logseq/logseq#-database-version" rel="noopener" target="_blank"><span>Resmi: Tahap pengembangan dan panduan grafik uji</span></a></p></div></section>
+<section class="lp-section ce-chapter" id="logseq-export"><div class="ce-chapter__head"><h2 data-ce-number="04" id="heading-logseq-export"><span>Gunakan cadangan DB dan ekspor Markdown secara terpisah</span></h2></div><div class="ce-chapter__body"><p><span> Dalam versi DB dari grafik Ekspor, Anda dapat memilih "Ekspor SQLite DB dan aset" untuk meringkas DB dan lampiran. Ekspor standar Markdown digunakan untuk menghasilkan teks yang mudah dibaca, tetapi tidak mempertahankan semua atribut atau stempel waktu. Jangan hanya membuat Markdown untuk migrasi sebagai satu-satunya cadangan. </span></p><p><span>Coba Impor → SQLite + aset (.zip) dengan grafik terpisah baru sambil meninggalkan grafik asli dan periksa apakah Anda dapat membuka konten yang diperlukan. Saat mengubah grafik file lama ke DB, harap juga periksa Org non-dukungan, konversi status tugas, dan beberapa kueri dan penyematan pembatasan impor. </span></p><p><a href="https://github.com/logseq/docs/blob/master/db-version.md#graph-export" rel="noopener" target="_blank"><span>Resmi: Format ekspor dan impor</span></a></p></div></section>
+<section class="lp-section ce-chapter ce-chapter--wide" id="logseq-checks"><div class="ce-chapter__head"><h2 data-ce-number="05" id="heading-logseq-checks"><span>Item 6 untuk melihat sejumlah kecil sebelum migrasi</span></h2></div><div class="ce-chapter__body"><div aria-labelledby="heading-logseq-checks" class="logseq-scroll ce-table-scroll" role="region" tabindex="0"><table><caption id="logseq-checks-caption"><span>Item 6 dilihat dengan sedikit migrasi. Anda dapat menggulir ke samping. </span></caption><thead><tr><th scope="col"><span>Item konfirmasi</span></th><th scope="col"><span>Konten untuk diperiksa</span></th></tr></thead><tbody><tr><th scope="row"><span>Teks dan hierarki</span></th><td><span>Dapatkah Anda membaca paragraf, poin-poin, dan blok anak</span></td></tr><tr><th scope="row"><span>referensi dan tautan</span></th><td><span> Apakah referensi ke halaman atau blok akan menuju ke lokasi yang diinginkan</span></td></tr><tr><th scope="row"><span>Atribut dan tugas</span></th><td><span>Bagaimana nilai, tanggal jatuh tempo, dan status diubah</span></td></tr><tr><th scope="row"><span>lampiran</span></th><td><span>Apakah Anda ingin membuka file PDF, gambar, dan audio yang sebenarnya</span></td></tr><tr><th scope="row"><span>Cari dan pasang</span></th><td><span>Bisakah Anda menggunakan pencarian yang diperlukan dan plug-in yang kompatibel dengan DB</span></td></tr><tr><th scope="row"><span>Baca kembali</span></th><td><span>Dapatkah saya menampilkan kembali catatan yang diperlukan dari mengimpornya ke grafik lain</span></td></tr></tbody></table></div><p><span>Tabel ini untuk mengonfirmasi transisi. Ini bukan tabel yang memverifikasi bahwa semua grafik memiliki hasil yang sama. Data asli akan ditinggalkan sampai konfirmasi selesai. </span></p></div></section>
+<section class="lp-section ce-chapter" id="logseq-trial"><div class="ce-chapter__head"><h2 data-ce-number="06" id="heading-logseq-trial"><span>Prosedur 5 sebelum mengubah operasi</span></h2></div><div class="ce-chapter__body"><ol><li><span> Rekam versi dan metode penyimpanan Logseq yang Anda gunakan, dan cadangkan grafik asli ke lokasi terpisah. </span></li><li><span> Siapkan teks, tugas, lampiran, dan tautan untuk setiap 1 dalam grafik tes kecil yang tidak penting. </span></li><li>Periksa item 6 di <span> dan impor ekspor yang diperlukan ke grafik lain dan buka. </span></li><li><span> Jika Anda ingin menggunakannya bersama-sama, buat catatan singkat dan periksa apakah Anda dapat menemukannya di tujuan penyimpanan Logseq terakhir. </span></li><li><span>Setelah mencatat ketidakkonsistenan dan fungsi yang hilang, tentukan penanganan data produksi. </span></li></ol></div></section>
+<section class="lp-section ce-chapter" id="logseq-memo"><div class="ce-chapter__head"><h2 data-ce-number="07" id="heading-logseq-memo"><span>Saat menggunakan SimpleMemo</span></h2></div><div class="ce-chapter__body"><p><span>Jika Anda biasanya melihat kembali kotak masuk email Anda, ada cara untuk meninggalkan kalimat pendek di sana dan mentransfer hanya apa yang Anda butuhkan ke memo harian Logseq. Pada saat menyalin, pastikan Anda mengetahui teks dan tujuannya. Kedatangan email dan penyimpanan ke Logseq adalah operasi yang berbeda, dan add-on otomatis tidak diasumsikan. </span></p><p><span>, Anda dapat mengatur tujuan <a data-cta-cluster="vs" data-cta-placement="mid" data-cta-position="mid" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">SimpleMemo</a> dan memeriksanya dari kedatangan kasus 1. Itu tidak digunakan untuk mengganti atau memigrasi grafik. </span></p><p><span><a href="/id/note-to-email/">langkah-langkah untuk mengirim email pertama</a> dan <a href="/id/obsidian/compare/logseq/">perbandingan versi file sebelumnya</a>. </span></p></div></section>
+<section class="lp-section ce-chapter" id="logseq-faq"><div class="ce-chapter__head"><h2 data-ce-number="08" id="heading-logseq-faq"><span>Pertanyaan yang Sering Diajukan</span></h2></div><div class="ce-chapter__body"><div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Apakah Anda ingin menyimpan semua Logseq dalam file Markdown?</summary><div class="faq-answer"><p>Tidak. Versi file sebelumnya dibagi menjadi Logseq OG, dan versi DB menggunakan basis data SQLite. Ekspor Markdown dari versi DB tidak dalam format yang mempertahankan semua properti dan stempel waktu.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Apa yang Anda lakukan sebelum mencoba versi DB dengan grafik yang ada?</summary><div class="faq-answer"><p>Tinggalkan salinan independen dari grafik asli dan coba dengan grafik uji kecil yang tidak penting. Jika Anda tidak hanya membutuhkan SQLite tetapi juga lampiran, pilih ekspor termasuk SQLite DB dan aset dan periksa impor ke dalam grafik terpisah.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Dapatkah saya menggunakan plug-in sebelumnya seperti dalam versi DB?</summary><div class="faq-answer"><p>Periksa kompatibilitas satu per satu. Pasar Resmi "Mendukung DB?" Silakan periksa apakah plug-in yang Anda gunakan mendukung grafik DB dengan melihat tampilan yang kompatibel dengan DB.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Apakah plug-in diperlukan untuk input cepat Logseq?</summary><div class="faq-answer"><p>Dokumen resmi versi DB memiliki "Penambahan cepat" bawaan yang mengirimkan catatan singkat ke jurnal saat ini. Pintu masuk berbeda untuk versi dan terminal, jadi silakan periksa dengan aplikasi saat ini sebelum mencari plug-in tambahan.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Apakah tidak akan ada kehilangan data jika saya menggunakan sinkronisasi resmi?</summary><div class="faq-answer"><p>Sinkronisasi bukan pengganti cadangan. README resmi adalah versi beta untuk versi DB, dan alfa untuk versi seluler baru dan RTC, memandu kemungkinan kehilangan data dan cadangan independen. Periksa versi dan rute sinkronisasi yang akan digunakan.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Jika saya menggunakan SimpleMemo, apakah itu akan secara otomatis ditambahkan ke Logseq?</summary><div class="faq-answer"><p>Contoh gabungan di halaman ini adalah cara mentransfer teks yang diterima ke kotak masuk email ke Logseq jika perlu. Itu tidak menunjukkan fungsi penulisan otomatis ke DB atau grafik Logseq, atau kemampuan untuk memigrasikan seluruh grafik.</p></div></details></div></div></div></section>
+<section class="lp-section ce-chapter" id="logseq-scope"><div class="ce-chapter__head"><h2 data-ce-number="09" id="heading-logseq-scope"><span>Rentang konfirmasi</span></h2></div><div class="ce-chapter__body"><p><span>2026 tahun 9 bulan 9 mengkonfirmasi repositori resmi, penjelasan dan perubahan versi DB, rilis 2.0.1. Prosedur dalam artikel ini bukan laporan yang telah menyelesaikan migrasi dengan mesin yang sebenarnya kali ini. Penulisnya adalah pengembang SimpleMemo. </span></p></div></section>
+<div class="cta-box">
+<div class="cta-box__title"><span>Pintu masuk ke memo untuk melihat kembali melalui email</span></div>
+<div class="cta-box__desc"><span>Atur penerima, periksa kedatangan memo singkat, dan mulai gunakan.</span></div>
+<a aria-label="Unduh dari App Store" class="app-store-badge" data-cta-cluster="vs" data-cta-placement="bottom" data-cta-position="bottom" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><img alt="Unduh dari App Store" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="109"/></a>
+<div class="cta-qr">
+<img alt="Kode QR untuk mengunduh melalui App Store" height="132" loading="lazy" src="/assets/img/qr-vs-logseq-ja.svg?v=977b245661" width="132"/>
+<small><span>Jika Anda memiliki PC, bacalah dengan ponsel cerdas Anda</span></small>
+</div>
+</div>
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="10" id="chapter-10"><span>Halaman terkait</span></h2></div><div class="ce-chapter__body">
+
+<div class="internal-links">
+<a href="/id/vs/"><span>Daftar Perbandingan Aplikasi Memo</span></a>
+<a href="/id/obsidian/compare/logseq/"><span>Perbandingan dan pengujian Obsidian vs Logseq</span></a>
+<a href="/id/vs/obsidian/"><span>vs Obsidian</span></a>
+<a href="/id/vs/roam-research/"><span>vs Roam Research</span></a>
+<a href="/id/vs/notion/"><span>vs Notion</span></a>
+<a href="/id/vs/anytype/"><span>vs Anytype</span></a>
+<a href="/id/vs/tana/"><span>vs Tana</span></a>
+<a href="/id/captio-alternative/"><span>Panduan Alternatif Captio</span></a>
+</div>
+</div></section>
+<aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="compare" href="/id/blog/fastest-memo-app-benchmark" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"><span>Baca selanjutnya</span></span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"><span>Setelah membandingkan, lihat hasil pengukurannya</span></span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"><span>Lihat tabel pengukuran waktu membuka aplikasi catatan utama hingga siap mengetik.</span></span> </a>
+</aside><section class="related-links ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="11" id="chapter-11"> <span>Konten terkait</span> </h2></div><div class="ce-chapter__body">
+
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/id/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Perbandingan Aplikasi Alternatif Captio</span></a></li>
+<li><a href="/id/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Cara mengirim email ke diri sendiri</span></a></li>
+<li><a href="/id/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Pertanyaan umum</span></a></li>
+<li><a href="/id/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Panduan cara menggunakan</span></a></li>
+</ul>
+</div></section></div></div>
+<!-- SEO: Auto-generated related content links -->
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+
+
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="id" dir="ltr"><a class="site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Catatan kecil. Langkah berikutnya.</p><p class="site-footer-description">Kirim catatan dari iPhone ke Obsidian dan email.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav aria-label="Navigasi footer" class="footer__nav">
+<div class="footer__col">
+<p class="footer__col-title">Produk</p>
+<a class="footer__link" href="/id/download/">Unduh</a>
+<a class="footer__link" href="/id/">Beranda</a>
+<a class="footer__link" href="/id/use-cases/">Contoh penggunaan</a>
+<a class="footer__link" href="/id/guides/">Panduan</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Perbandingan dan perpindahan aplikasi</p>
+<a class="footer__link" href="/id/captio-alternative/"><span>Alternatif Captio</span></a>
+<a class="footer__link" href="/id/note-to-email/">Catatan ke email</a>
+<a class="footer__link" href="/id/vs/">Bandingkan</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Bantuan</p>
+<a class="footer__link" href="/id/roadmap/">Rencana pengembangan</a>
+<a class="footer__link" href="/id/devlog/">Catatan pengembangan</a>
+<a class="footer__link" href="/id/about/">Tentang pengembang</a>
+<a class="footer__link" href="/id/faq">Pertanyaan umum</a>
+<a class="footer__link" href="/id/privacy">Privasi</a>
+<a class="footer__link" href="/id/contact">Hubungi kami</a>
+</div>
+</nav><p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Dikelola oleh YURIKA, K.K.</p></div></footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

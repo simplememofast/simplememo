@@ -173,3 +173,70 @@ note・X・Reddit・Indie Hackers の定期投稿タスクが「次に何を書�
 - **X向け**: 故障2件が毎朝「未修理」で上がっていた。直すPRはすでにマージ済み。足りなかったのは、それを踏んで最後まで走った実行のほう。台帳は修理済みをコードではなく記録で判定するので、確かめる実行が無い限り開いたままになる。誤報ではなく、未確認という意味。
 - **英語圏向け**: Two failures kept showing up as unrepaired every morning. The fixes had already been merged days earlier. What was missing was a run that went all the way through with those fixes in place. The ledger decides "repaired" from the record, not from the code, so without a confirming run it stays open. That is not a false alarm — it means nobody has checked yet.
 - **使わない表現**: 「台帳が誤検知していた」と書かない（判定は設計どおりで、確認材料が無かっただけ）。「自己修復が働いた」とも書かない（原因を直したのは別の回で、この回がしたのは確認と記帳）。
+
+---
+
+## S-20260922-obsidian-install-guide
+
+- **対象URL**: https://simplememofast.com/obsidian/getting-started/
+- **媒体**: note / X
+- **分類**: readers
+- **一行の主張**: 導入記事の冒頭で、読者が自分のOSの公式ダウンロード先と最初の操作を見つけられるようにした。
+- **引用できる数字**
+  - 2026-09-22：Windows・Macの導入手順を公式資料で確認（出典: obsidian/getting-started/index.html、https://obsidian.md/help/install）。
+  - 2026-08-12：Linux版1.13.6の実画面6枚は当時の検証記録（出典: obsidian/getting-started/index.html）。
+- **note向け**: 読者が最初に必要とするダウンロード先を先に置き、詳しい実画面の解説へつなぐ。公式資料の確認日と実機検証日を分けると、どこまで試した手順かが伝わる。
+- **X向け**: Obsidianの導入記事に、Windows・Macの公式ダウンロード先と手順を冒頭からたどれる案内を追加。過去のLinux実画面は撮影日を残し、今回確認した公式資料と区別しました。
+- **英語圏向け**: An installation guide should begin with the official download and the reader's OS. We separated current documentation from dated hands-on Linux screenshots, so readers can see what was tested.
+- **使わない表現**: 全OSを実機検証した、検索流入が増えた、インストール数が増えたという未確認の主張。クリックをインストールと呼ぶ表現。
+
+
+## S-20260923-note-to-email
+
+- **対象URL**: https://simplememofast.com/note-to-email/
+- **媒体**: note / X / reddit
+- **分類**: readers
+- **一行の主張**: 自分宛メールの到着確認と、書いた用事の完了を分けて説明する。
+- **引用できる数字**: 2026-09-23、送信・受信確認・作業管理を区別する案内へ更新（出典: note-to-email/index.html）。速度や検索効果の新しい実測値はない。
+- **note向け**: 受信箱に集める習慣が自分に合うかを考え、見返す時間とタスクの移し先を決める。
+- **X向け**: 自分にメールでメモを送ったら、まず受信箱で到着を確認。届くことと、用事が終わることは別です。見返す時間と、実行するタスクの置き場所を決めて使います。
+- **英語圏向け**: Confirm that a self-email arrived, then track the task separately. A delivered note is a record, not a completed task.
+- **使わない表現**: 必ず気づく／確認忘れゼロ／管理コストゼロ／記録すれば完了／速度や検索効果の未検証の向上。
+
+
+## S-20261002-voice-input-conditions
+
+- **対象URL**: https://simplememofast.com/voice-input/
+- **媒体**: note / X
+- **分類**: readers
+- **一行の主張**: 音声入力の利用条件を、本文だけでなく検索タイトルでも確認できるようにした。
+- **引用できる数字**: 2026-10-02確認：既存本文のiOS 26以降・対応機種と言語・初回準備の説明に見出しを合わせた（出典: voice-input/index.html）。新しい実機検証や検索効果の実測ではない。
+- **note向け**: 便利さの説明と同じ場所に利用条件を置き、読み始める前に自分の環境で使えるか判断できる案内にする。
+- **X向け**: 音声メモの案内を読む前に、対応するiPhoneとiOSの条件を確認。シンプルメモの音声入力ページは、既存本文にある利用条件を検索タイトルにも揃えました。
+- **英語圏向け**: The voice-input page title now exposes the iPhone and iOS requirements already explained in its body. Search and installation effects remain unmeasured.
+- **使わない表現**: 全機種対応、初回設定不要、検索順位やインストールの改善、今回新しく実機確認したという表現。
+
+## S-20261003-email-yourself-guide
+
+- **対象URL**: https://simplememofast.com/blog/email-yourself-memo
+- **媒体**: note / X
+- **分類**: readers
+- **一行の主張**: メールで自分にメモを送る記事の検索タイトルを、本文のGmail・Outlookの手順に揃えた。
+- **引用できる数字**: 2026-10-03確認：本文は宛先入力から受信確認までの5手順を案内（出典: blog/email-yourself-memo.html）。今回変更したのは検索タイトルで、新しい速度や検索効果の実測はない。
+- **note向け**: 記事を開く前に読める説明も、本文で確かめられる操作と同じ範囲に揃える。
+- **X向け**: 自分にメールでメモを残すなら、送信後の受信確認まで。iPhoneのGmail・Outlookの手順を案内する記事の検索タイトルを、本文の内容に揃えました。
+- **英語圏向け**: The search title now describes the existing iPhone Gmail and Outlook self-email guide. Delivery checks remain part of the guide; search impact is unmeasured.
+- **使わない表現**: すべてワンタップ、到着保証、今回の実機検証、検索流入・インストール・売上が増えたという未確認の主張。
+
+
+## S-20261004-second-brain-guide
+
+- **対象URL**: https://simplememofast.com/methods/second-brain/
+- **媒体**: note / X
+- **分類**: readers
+- **一行の主張**: セカンドブレイン記事の検索タイトルを、本文のCODE・PARAと1件から試す手順に揃えた。
+- **引用できる数字**: 2026-10-04本文確認：CODEの4段階とPARAの4分類、1週間の記入用シートを掲載（出典: methods/second-brain/index.html）。今回の変更はタイトルで、実機検証や生産性・検索効果の実測ではない。
+- **note向け**: メモの数や道具を増やす前に、1件を出典から実際の利用へつなぐ試し方を考える。
+- **X向け**: 集めたメモをあとで使うために、まず1件。セカンドブレイン記事の検索タイトルを、本文のCODE・PARAと1件からの試し方に揃えました。
+- **英語圏向け**: The title now describes the existing CODE/PARA guide and its one-note exercise. Productivity and search effects remain unmeasured.
+- **使わない表現**: 生産性向上の保証、今回の実機検証、完全な実践の証明、検索流入や売上が改善したという未確認の主張。

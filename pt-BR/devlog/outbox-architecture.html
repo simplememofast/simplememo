@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/outbox-architecture">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Arquitetura Outbox: Design para Evitar Derramamentos de Mensagens | Diário de Desenvolvimento SimpleMemo</title>
+  <meta name="description" content="No momento em que você pressiona o botão enviar, a interface do usuário é limpa, mas a mensagem não enviada permanece no terminal e é reenviada. Explicaremos o fluxo de design do padrão Outbox, a implementação do SendManager, criptografia AES-GCM, retransmissão automática e detecção de retorno de linha pelo NWPath Monitor.">
+  <meta name="theme-color" content="#070b14">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- OGP -->
+  <meta property="og:title" content="Arquitetura Outbox: Design para Evitar Derramamentos de Mensagens | Diário de Desenvolvimento SimpleMemo">
+  <meta property="og:description" content="No momento em que você pressiona o botão enviar, a interface do usuário é apagada, mas a mensagem não transmitida permanece no terminal e é reenviada. A imagem completa da arquitetura Outbox com criptografia AES-GCM, retransmissão automática e detecção de recuperação de linha NWPathMonitor.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/pt-BR/devlog/outbox-architecture">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png?v=7e2bb21d30">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Arquitetura Outbox: Design para Evitar Derramamentos de Mensagens | Diário de Desenvolvimento SimpleMemo">
+  <meta name="twitter:description" content="No momento em que você pressiona o botão enviar, a interface do usuário é apagada, mas a mensagem não transmitida permanece no terminal e é reenviada. A imagem completa da arquitetura Outbox com criptografia AES-GCM, retransmissão automática e detecção de recuperação de linha NWPathMonitor.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png?v=7e2bb21d30">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/pt-BR/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/outbox-architecture">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: Speakable (AIO / Voice Search) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/pt-BR/devlog/outbox-architecture#webpage",
+  "inLanguage": "pt-BR",
+  "name": "Outbox Arquitetura: Design para evitar derramamentos",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/pt-BR/#website"
+  },
+  "url": "https://simplememofast.com/pt-BR/devlog/outbox-architecture"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container { display: flex; justify-content: flex-end; padding: 1.25rem 0; }
+    .lang-switcher { display: inline-flex; background: rgba(18, 26, 46, 0.95); border: 1px solid rgba(82, 160, 255, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .lang-switcher__btn { background: transparent; border: none; color: #c9d4ec; padding: 0.75rem 1.1rem;
+      min-height: 48px; border-radius: 19px; cursor: pointer; font-size: 0.8rem; font-weight: 400; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.02em; }
+    .lang-switcher__btn:hover { color: #f2f6ff; }
+    .lang-switcher__btn:focus-visible { outline: 2px solid #4da3ff; outline-offset: 2px; }
+    .lang-switcher__btn.active { background: rgba(82, 160, 255, 0.25); border: 1px solid rgba(82, 160, 255, 0.2); color: #fff; box-shadow: 0 0 12px rgba(82, 160, 255, 0.1); }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+    pre { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 16px 0; }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 0.85rem; color: #e0e0e0; }
+    .flow-list { list-style: none; padding: 0; counter-reset: flow; }
+    .flow-list li { counter-increment: flow; padding: 10px 0 10px 40px; position: relative; border-left: 2px solid rgba(82, 160, 255, 0.2); margin-left: 12px; }
+    .flow-list li::before { content: counter(flow); position: absolute; left: -14px; top: 8px; width: 26px; height: 26px; background: rgba(82, 160, 255, 0.15); border: 1px solid rgba(82, 160, 255, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--accent); }
+    .related-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 16px; }
+    @media (min-width: 600px) { .related-grid { grid-template-columns: 1fr 1fr; } }
+    .related-card { background: rgba(18, 26, 46, 0.85); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-decoration: none; color: inherit; display: block; transition: border-color 0.25s; }
+    .related-card:hover { border-color: rgba(82, 160, 255, 0.3); }
+    .related-card__title { font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+    .related-card__desc { font-size: 0.8rem; color: var(--text-secondary); }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+
+  <!-- JSON-LD: TechArticle -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "@id": "https://simplememofast.com/pt-BR/devlog/outbox-architecture#article",
+  "inLanguage": "pt-BR",
+  "headline": "Outbox Arquitetura: Projetada para não derramar mensagens",
+  "description": "No momento em que você pressiona o botão enviar, a interface do usuário é apagada, mas a mensagem não transmitida permanece no terminal e é reenviada. A imagem completa da arquitetura Outbox com criptografia AES-GCM, retransmissão automática e detecção de recuperação de linha NWPathMonitor.",
+  "url": "https://simplememofast.com/pt-BR/devlog/outbox-architecture",
+  "datePublished": "2026-02-13",
+  "dateModified": "2026-10-04",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png?v=7e2bb21d30",
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/pt-BR/devlog/outbox-architecture"
+  },
+  "keywords": [
+    "Padrão Outbox",
+    "Offline Primeiro iOS",
+    "primeira arquitetura offline",
+    "Criptografia AES-GCM iOS",
+    "Mensagens contra-medidas de derramamento"
+  ],
+  "proficiencyLevel": "Expert",
+  "dependencies": "Apple CryptoKit, Network.framework, BackgroundTasks"
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Início",
+      "item": "https://simplememofast.com/pt-BR/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Diário de Desenvolvimento",
+      "item": "https://simplememofast.com/pt-BR/devlog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "arquitetura Outbox",
+      "item": "https://simplememofast.com/pt-BR/devlog/outbox-architecture"
+    }
+  ]
+}</script>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Navegação principal" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/pt-BR/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/pt-BR/guides/">Guias</a><a href="/pt-BR/use-cases/">Casos de uso</a><a href="/pt-BR/vs/">Comparar</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/pt-BR/guides/">Guias</a></li>
+        <li><a href="/pt-BR/use-cases/">Casos de uso</a></li>
+        <li><a href="/pt-BR/vs/">Comparar</a></li>
+        <li><a href="/pt-BR/methods/"><span>Métodos</span></a></li>
+        <li><a href="/pt-BR/blog/"><span>Blog</span></a></li>
+        <li><a href="/pt-BR/glossary/"><span>Glossário</span></a></li>
+        <li><a href="/pt-BR/faq">Perguntas frequentes</a></li>
+        <li><a href="/pt-BR/about/">Sobre o desenvolvedor</a></li>
+        <li><a href="/pt-BR/devlog/">Registro de desenvolvimento</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>Baixar</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Português · Escolher idioma"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>PT</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="pt-BR" dir="ltr"><p class="site-language-title">Escolher idioma</p><div class="site-language-grid"><a href="/devlog/outbox-architecture" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/devlog/outbox-architecture" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/devlog/outbox-architecture" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/devlog/outbox-architecture" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/devlog/outbox-architecture" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/devlog/outbox-architecture" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="pt-BR" aria-current="page"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/id/devlog/outbox-architecture" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/devlog/outbox-architecture" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/devlog/outbox-architecture" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">Baixar</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menu"><span>Menu</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+  <!-- Header -->
+<!-- Content -->
+  <main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title sd-title"> <span>Arquitetura Outbox: Projetada para evitar que mensagens sejam derramadas</span> </h1>
+      <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>Autor: <a href="/pt-BR/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a></span> </p>
+
+      <!-- ======================== -->
+      <!-- Japanese Content         -->
+      <!-- ======================== -->
+      <div class="">
+        <p class="page-content__date">2026 ano 2 mês 13 dia</p>
+        <div class="page-content__body">
+
+          <!-- Section 1 -->
+          <h2 id="reading-01" data-ce-number="01">Tarefa: Para evitar o derramamento de mensagens, mesmo que você as limpe imediatamente</h2>
+          <p>No SimpleMemo, a interface do usuário é limpa no momento em que o usuário toca no botão enviar e pode começar imediatamente a escrever a próxima nota. Esta é a UX que é a raiz do estilo Captio.</p>
+          <p>No entanto, a rede real tem uma latência de 300ms~2 segundos, pode falhar e pode estar offline em primeiro lugar. Muitos aplicativos aguardam a resposta da rede antes de limpar a interface do usuário. É seguro, mas o UX é ruim. Pelo contrário, se você limpar imediatamente, há o risco de perder a mensagem.</p>
+          <p><strong>O padrão Outbox</strong> resolve esse requisito conflitante ao mesmo tempo. A mensagem é armazenada permanentemente no armazenamento criptografado local (Outbox) no momento do toque de transmissão, a interface do usuário é imediatamente apagada e a transmissão de rede é realizada em segundo plano. Se a transmissão for bem-sucedida, exclua-a do Outbox e, se falhar, ela tentará novamente automaticamente. Como resultado, <strong> deixa a mensagem não transmitida no terminal e a reenvia</strong>, e a latência da experiência está próxima de zero.</p>
+
+          <!-- Section 2 -->
+          <h2 id="reading-02" data-ce-number="02">Fluxo de design de padrão Outbox</h2>
+          <p>O seguinte é todo o fluxo desde tocar no botão enviar até que a mensagem seja enviada.</p>
+          <ol class="flow-list">
+            <li><strong>Toque em transmissão → Primeiro, criptografe AES-GCM para Outbox e salve-o permanentemente</strong><br> No momento em que o usuário toca no botão enviar, a mensagem é criptografada com AES-GCM 256bit e armazenada permanentemente no armazenamento local do dispositivo. A interface do usuário não será apagada até que esta etapa seja concluída. Em outras palavras, o armazenamento Outbox será o primeiro quebra-mar a evitar derramamentos.</li>
+            <li><strong>Limpe a interface do usuário imediatamente (o usuário pode começar a escrever a seguinte nota)</strong><br>Outbox Quando o salvamento for bem-sucedido, limpe a visualização de texto e reproduza a animação de transmissão. Do ponto de vista do usuário, é sinônimo de "envisado". Não estou esperando por nenhuma resposta da rede. O objetivo do Send-to-Reset é ser curto sem sentir espera (0.25 segundos, incluindo animação).</li>
+            <li><strong>Envie um e-mail via Relay API em segundo plano</strong>Em paralelo com a limpeza <br>UI, o SendManager envia uma solicitação HTTP para o Relay API em Trabalhadores Cloudflare. Este processo é completamente assíncrono e não bloqueia o segmento principal.</li>
+            <li><strong>Se for bem-sucedido, exclua do Outbox</strong><br>Relay Se você receber uma resposta 200 do API, exclua com segurança a mensagem correspondente do Outbox. Isso completa o ciclo de vida da mensagem.</li>
+            <li><strong>Se falhar, será reenviado automaticamente</strong><br> No caso de um erro de rede ou erro de servidor, deixe-o aguardando transmissão, quando a linha for retornada, quando o aplicativo for aberto, processamento em segundo plano (BGTaskScheduler. O momento da execução é decidido por iOS) e reenviá-lo. Há um limite superior no número de vezes para reenviar automaticamente.</li>
+            <li><strong> Se estiver offline, o NWPathMonitor detecta o retorno da linha e a reenvia automaticamente</strong> Se você estiver offline no momento do envio do <br>, o NWPathMonitor do Network.framework monitora o status da linha e, quando detecta o retorno do Wi-Fi ou celular, ele reenvia automaticamente a mensagem não transmitida do Outbox (como no 5 acima, há um limite superior no número de reenvios automáticos).</li>
+          </ol>
+
+          <!-- Section 3 -->
+          <h2 id="reading-03" data-ce-number="03">Código do Gerenciador de envio</h2>
+          <p>A função <code>send()</code> do SendManager é o ponto de entrada do padrão Outbox. Primeiro, salve-o no Outbox, faça fila se não houver conexão de rede e execute a transmissão imediatamente se houver uma conexão.</p>
+<pre tabindex="0"><code>func send(message: String, completion: @escaping (SendResult) -&gt; Void) {
+    // まずOutboxに保存（クラッシュや圏外で失わないように）
+    let outboxMessage: OutboxMessage
+    do {
+        outboxMessage = try OutboxManager.shared.add(body: message)
+    } catch {
+        DispatchQueue.main.async { completion(.failure(error)) }
+        return
+    }
+
+    // ネットワーク接続がない場合はキューに入れたことを通知
+    guard NetworkMonitor.shared.isConnected else {
+        BackgroundTaskManager.shared.scheduleRetryTask()
+        DispatchQueue.main.async { completion(.queued) }
+        return
+    }
+
+    // 送信処理を実行
+    performSend(message: message, outboxId: outboxMessage.id, ...)
+}</code></pre>
+          <p>O ponto importante é que o <code>OutboxManager.shared.add(body:)</code> grava no armazenamento persistente de forma síncrona. Quando esta chamada é bem-sucedida, a mensagem é armazenada com segurança no terminal. Não importa qual seja o resultado da transmissão de rede, a mensagem permanecerá no Outbox.</p>
+
+          <!-- Section 4 -->
+          <h2 id="reading-04" data-ce-number="04">Implementação da criptografia AES-GCM</h2>
+          <p>Mensagens armazenadas no Outbox são notas privadas para os usuários. Embora seja um armazenamento local, não pode ser armazenado em texto simples. Usando o AES-GCM do Apple CryptoKit, é uma implementação que não usa nenhum SDK externo para criptografia.</p>
+          <ul>
+            <li><strong>Apple CryptoKit</strong> — Disponível para iOS 13 e posterior. Não use SDK externo para processamento de criptografia (somente Apple genuíno).</li>
+            <li><strong>Chave simétrica 256-bit</strong> — Salvar nas Chaves.</li>
+            <li><strong>Criptografia com autenticação</strong> — AES-GCM garante a confidencialidade e a integridade dos dados ao mesmo tempo. Dados adulterados são detectados no momento da descriptografia.</li>
+          </ul>
+<pre tabindex="0"><code>enum OutboxEncryption {
+    private static var encryptionKey: SymmetricKey {
+        if let existingKey = KeychainHelper.load(key: "outbox_encryption_key") {
+            return SymmetricKey(data: existingKey)
+        }
+        let newKey = SymmetricKey(size: .bits256)
+        let keyData = newKey.withUnsafeBytes { Data($0) }
+        KeychainHelper.save(key: "outbox_encryption_key", data: keyData)
+        return newKey
+    }
+
+    static func encrypt(_ plainText: String) throws -&gt; Data {
+        guard let data = plainText.data(using: .utf8) else {
+            throw OutboxError.encryptionFailed
+        }
+        let sealedBox = try AES.GCM.seal(data, using: encryptionKey)
+        guard let combined = sealedBox.combined else {
+            throw OutboxError.encryptionFailed
+        }
+        return combined
+    }
+}</code></pre>
+          <p>A chave é criada automaticamente quando necessário pela primeira vez e armazenada no Keychain. A configuração de salvamento é "apenas este dispositivo, lido após o primeiro desbloqueio" (kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly), que não pode ser lido de outros aplicativos e não se move do backup para outro terminal. Se você desbloqueá-lo uma vez após a reinicialização, também poderá lê-lo no processamento em segundo plano durante o bloqueio. Além disso, o exemplo de código acima é uma versão simplificada no momento da redação do artigo, e o código atual não cria uma nova chave, tratando-a como "sem chave" quando o chaveiro não lê.</p>
+
+          <!-- Section 5 -->
+          <h2 id="reading-05" data-ce-number="05">O significado de configurar o caminho de dados apenas com Apple genuíno</h2>
+          <p>Todas as estruturas usadas na arquitetura Outbox são nativas da Apple.</p>
+          <ul>
+            <li><strong>CryptoKit</strong> — Criptografia AES-GCM. Nenhuma biblioteca de criptografia de terceiros é necessária.</li>
+            <li><strong>Network.framework</strong> — Monitoramento do status da linha com o NWPathMonitor. A biblioteca Reachability não é necessária.</li>
+            <li><strong>BackgroundTasks</strong> — Retentação de fundo por BGTaskScheduler.</li>
+          </ul>
+          <p>O fato de não haver biblioteca externa no caminho de espera tem os seguintes significados.</p>
+          <ul>
+            <li><strong>Não afetado por atualizações externas</strong> — O processamento de aguardar a transmissão não para de funcionar devido à atualização ou encerramento da biblioteca de terceiros.</li>
+            <li><strong>Segurança</strong> - O código de terceiros não entra no processamento (criptografia, armazenamento, transmissão) que toca o corpo do memorando que aguarda para ser enviado.</li>
+          </ul>
+          <p>Além disso, todo o aplicativo também usa um SDK externo (Google sign-in, Firebase, AppsFlyer) (consulte <a href="/pt-BR/devlog/privacy-first-design"> Privacy First Design</a>). O "apenas genuíno Apple" mencionado aqui é sobre o caminho dos dados que aguardam para serem transmitidos.</p>
+
+          <!-- Section 6 -->
+          <h2 id="reading-06" data-ce-number="06">Separação da limpeza da interface do usuário e transmissão de rede</h2>
+          <p>O valor verdadeiro do padrão Outbox está na separação completa da camada de interface do usuário e da camada de rede. Vamos dar uma olhada no manipulador de toque do botão de envio.</p>
+<pre tabindex="0"><code>@objc private func sendButtonTapped() {
+    PerformanceLogger.shared.beginSendToReset()
+    let message = textView.text ?? ""
+    isSending = true
+    sendBarButton.isEnabled = false
+
+    // Animation → UI clear (does NOT wait for network!)
+    performSendAnimation {
+        self.clearTextView()
+        PerformanceLogger.shared.endSendToReset()
+    }
+
+    // Send is async. Does not block UI.
+    SendManager.shared.send(message: message) { [weak self] result in
+        self?.isSending = false
+        self?.updateSendButtonState()
+        switch result {
+        case .success:
+            PerformanceLogger.shared.logEvent(name: "SendSuccess")
+        case .failure(let error):
+            self?.handleSendError(error)
+        case .queued:
+            self?.showQueuedFeedback()
+        }
+    }
+}</code></pre>
+          <p><code>performSendAnimation</code> e <code>SendManager.shared.send</code> são executados de forma completamente independente. A animação é concluída em 0.25 segundos e a visualização de texto é limpa. A transmissão de rede prossegue de forma assíncrona em segundo plano e não bloqueia a interface do usuário.</p>
+          <p>O objetivo do Send-to-Reset é <strong>shortness que não parece esperar</strong>. 0.25 segundos incluindo animação. Imediatamente após tocar no botão enviar, o usuário pode começar a escrever a próxima nota. Este é o estilo Captio UX.</p>
+
+          <!-- FAQ -->
+          <h2 id="reading-07" data-ce-number="07">Perguntas frequentes</h2>
+
+          <h3>P. O que acontece com as notas enviadas offline?</h3>
+          <p>É criptografado e salvo pelo Outbox e é reenviado automaticamente quando a linha é restaurada (detectada pelo NWPathMonitor), quando o aplicativo é aberto e o processamento em segundo plano é acionado. Há um limite superior no número de vezes para reenviar automaticamente e, para notas que atingiram o limite superior, pressione e segure em "Histórico" e selecione "Reenviar".</p>
+
+          <h3>Q. As notas não serão perdidas mesmo se eu fechar o aplicativo?</h3>
+          <p>Outbox é um armazenamento permanente. Mesmo que você feche o aplicativo ou reinicie o iPhone, ele permanecerá. Na próxima vez que o aplicativo for iniciado, ou a tarefa em segundo plano será retentada automaticamente.</p>
+
+          <h3>Q. Por que você escolheu o AES-GCM?</h3>
+          <p>Apple CryptoKit é suportado nativamente, e a detecção de adulteração também é possível com Criptografia Autenticada. O fato de não haver necessidade de uma biblioteca externa para processar criptografia também é uma vantagem.</p>
+
+          <h3>P. Qual é o número de novas tentativas em caso de falha de transmissão?</h3>
+          <p>Será enviado novamente automaticamente. O gatilho é o processamento em segundo plano quando a linha é retornada, quando o aplicativo é aberto (BGTaskScheduler. O tempo de execução é determinado por iOS). Os memorandos que não puderam ser enviados serão enviados novamente sem excluí-los da espera de transmissão, mas há um limite para o número de vezes que o reenvio automático.</p>
+
+          <!-- Related Articles -->
+          <h2 id="reading-08" data-ce-number="08">Artigos relacionados</h2>
+          <div class="related-grid">
+            <a href="/pt-BR/devlog/day1" class="related-card">
+              <div class="related-card__title">[Day1] Eu amo tanto Captio que quero fazer "essa experiência" novamente</div>
+              <div class="related-card__desc">Transmissão e design com um toque para evitar derramamentos. Tudo começou aqui.</div>
+            </a>
+            <a href="/pt-BR/devlog/" class="related-card">
+              <div class="related-card__title">Lista do diário de desenvolvimento</div>
+              <div class="related-card__desc">Registro completo da tomada de decisão técnica e reprodução de experiência do Captio.</div>
+            </a>
+            <a href="/pt-BR/devlog/uikit-vs-swiftui" class="related-card">
+              <div class="related-card__title">UIKit vs SwiftUI: Seleção para velocidade de inicialização</div>
+              <div class="related-card__desc">A razão pela qual escolhi o UIKit no 2026. Projeto de arquitetura voltado para Time-to-Text 500ms ou menos.</div>
+            </a>
+            <a href="/pt-BR/devlog/relay-api-design" class="related-card">
+              <div class="related-card__title">Relay API: Construa uma plataforma de transmissão de e-mail com trabalhadores Cloudflare</div>
+              <div class="related-card__desc">Envie sem depender da integração OAuth da caixa de correio. Envie com Resend do relé API (Cloudflare Trabalhadores) que se move na borda.</div>
+            </a>
+            <a href="/pt-BR/devlog/privacy-first-design" class="related-card">
+              <div class="related-card__title">Design de Privacidade em Primeiro Lugar: Compromisso Paranóico</div>
+              <div class="related-card__desc">URLFêmera Sessão, manipulação de log, especificações atuais do switcher de aplicativos.</div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================== -->
+      <!-- English Content          -->
+      <!-- ======================== -->
+
+    </div>
+
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-09" data-ce-number="09"> <span>Referências</span> </h2></div><div class="ce-chapter__body">
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developer.apple.com/documentation/cryptokit/aes/gcm" target="_blank" rel="noopener" style="color:var(--accent);">Apple Desenvolvedor — AES.GCM (CryptoKit)</a> — <span>Outbox Referência Oficial para Criptografia de Autenticação AES-GCM Usada para Criptografar Dados</span></li>
+    <li><a href="https://developer.apple.com/documentation/network/nwpathmonitor" target="_blank" rel="noopener" style="color:var(--accent);">Apple Desenvolvedor — NWPathMonitor (Network Framework)</a> — <span>Usado para detecção offline e monitoramento de status da rede</span></li>
+    <li><a href="https://developer.apple.com/documentation/backgroundtasks/bgtaskscheduler" target="_blank" rel="noopener" style="color:var(--accent);">Apple Desenvolvedor — BGTaskScheduler</a> — <span>Usado para reenviar o agendamento de processamento em segundo plano</span></li>
+    <li><a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener" style="color:var(--accent);">Chris Richardson — Padrão: Caixa de saída transacional (microservices.io)</a> — <span>Explanação do padrão transacional Outbox (escreva a mensagem a ser enviada na mesa de espera no mesmo processo, e outro processo é enviado)</span></li>
+  </ul>
+</div></section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/pt-BR/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>Leia a seguir</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Crie um lugar para suas notas com a integração Obsidian</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>Configure a integração e o destino no iPhone para guardar as notas enviadas também no Obsidian.</span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>Conteúdo relacionado</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/pt-BR/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio Comparação de Aplicativos Alternativos</span></a></li>
+    <li><a href="/pt-BR/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Artigos do blog</span></a></li>
+    <li><a href="/pt-BR/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Comparações de aplicativos de notas</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <!-- Footer -->
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="pt-BR" dir="ltr"><a class="site-brand" href="/pt-BR/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Uma pequena nota. Um próximo passo.</p><p class="site-footer-description">Envie notas do seu iPhone para o Obsidian e por e-mail.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="Navegação do rodapé">
+      <div class="footer__col">
+        <p class="footer__col-title">Produto</p>
+        <a href="/pt-BR/download/" class="footer__link">Baixar</a>
+        <a href="/pt-BR/" class="footer__link">Início</a>
+        <a href="/pt-BR/how-to/" class="footer__link"><span>Como usar</span> </a>
+        <a href="/pt-BR/templates/" class="footer__link"><span>Modelos</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Comparações e migração</p>
+        <a href="/pt-BR/captio/" class="footer__link"><span>Método Captio</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Artigos</p>
+        <a href="/pt-BR/devlog/" class="footer__link">Registro de desenvolvimento</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Suporte</p>
+        <a href="/pt-BR/roadmap/" class="footer__link">Roteiro público</a>
+        <a href="/pt-BR/about/" class="footer__link">Sobre o desenvolvedor</a>
+        <a href="/pt-BR/terms" class="footer__link"><span>Termos de Uso</span> </a>
+        <a href="/pt-BR/privacy" class="footer__link">Privacidade</a>
+        <a href="/pt-BR/contact" class="footer__link">Contato</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Operado por YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

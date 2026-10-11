@@ -6,22 +6,22 @@
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
   <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/vs/joplin/">
   <script>
-    window.addEventListener('load', function() {
+    (function() {
       if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
-      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
-      ric(function() {
-        var s = document.createElement('script');
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
-        s.async = true;
-        document.head.appendChild(s);
-        s.onload = function() {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
-        };
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
       });
-    });
+    })();
   </script>
   <title>シンプルメモ vs Joplin — メモアプリ比較 | Obsidian連携シンプルメモ</title>
   <meta name="description" content="Joplinとシンプルメモの違いを徹底比較。オープンソースの多機能ノートアプリと瞬間キャプチャ専用アプリ、目的別に最適な選び方を解説します。Joplinが向く人・シンプルメモが向く人の結論と、両方を活かす併用パターンを比較表つきで解説します。">
@@ -51,6 +51,14 @@
   <link rel="canonical" href="https://simplememofast.com/vs/joplin/">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/vs/joplin/">
   <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/vs/joplin/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/vs/joplin/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/vs/joplin/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/vs/joplin/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/vs/joplin/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/vs/joplin/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/vs/joplin/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/vs/joplin/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/vs/joplin/">
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/vs/joplin/">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -60,13 +68,13 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- JSON-LD: Article -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/vs/joplin/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/vs-joplin.png","headline":"シンプルメモ vs Joplin — メモアプリ徹底比較","description":"Joplinとシンプルメモの違いを徹底比較。オープンソースの多機能ノートアプリと瞬間キャプチャ専用アプリ、目的別に最適な選び方を解説します。Joplinが向く人・シンプルメモが向く人の結論と、両方を活かす併用パターンを比較表つきで解説します。","url":"https://simplememofast.com/vs/joplin/","datePublished":"2026-03-07","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/vs/joplin/"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/vs/joplin/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/vs-joplin.png","headline":"シンプルメモ vs Joplin — メモアプリ徹底比較","description":"Joplinとシンプルメモの違いを徹底比較。オープンソースの多機能ノートアプリと瞬間キャプチャ専用アプリ、目的別に最適な選び方を解説します。Joplinが向く人・シンプルメモが向く人の結論と、両方を活かす併用パターンを比較表つきで解説します。","url":"https://simplememofast.com/vs/joplin/","datePublished":"2026-03-07","dateModified":"2026-10-03","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/vs/joplin/"}}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"メモアプリ比較","item":"https://simplememofast.com/vs/"},{"@type":"ListItem","position":3,"name":"vs Joplin","item":"https://simplememofast.com/vs/joplin/"}]}</script>
 
   <!-- JSON-LD: Speakable -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/vs/joplin/#webpage","inLanguage":"ja","name":"シンプルメモ vs Joplin 比較","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub"]},"url":"https://simplememofast.com/vs/joplin/","isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/vs/joplin/#webpage","inLanguage":"ja","name":"シンプルメモ vs Joplin 比較","url":"https://simplememofast.com/vs/joplin/","isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
 
   <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
@@ -256,31 +264,36 @@
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/joplin/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Joplinのセルフホストとシンプルメモのサーバーレスはどちらが安全ですか？","acceptedAnswer":{"@type":"Answer","text":"どちらも高いプライバシー水準です。Joplinはセルフホストでデータを完全に自己管理でき、E2E暗号化も利用できます。シンプルメモはそもそもサーバーにデータを保存しない設計で、メールとして直接送信します。技術的な管理力があればJoplin、管理不要の手軽さならシンプルメモが適しています。"}},{"@type":"Question","name":"Joplinのマークダウン機能はシンプルメモにありますか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモにはマークダウン機能はありません。プレーンテキストのみに対応しています。構造化されたノートにはJoplin、瞬間的な思いつきの記録にはシンプルメモという使い分けが効果的です。"}},{"@type":"Question","name":"Joplinの同期設定が難しいのですが、シンプルメモは簡単ですか？","acceptedAnswer":{"@type":"Answer","text":"はい。シンプルメモはメールアドレスを1つ設定するだけで即使い始められます。Nextcloud、WebDAV、暗号化キーの設定といった技術的なセットアップは一切不要です。"}},{"@type":"Question","name":"Joplinユーザーがシンプルメモを追加するメリットは？","acceptedAnswer":{"@type":"Answer","text":"Joplinは長文ノートやナレッジベースの管理に優れていますが、モバイルでの瞬間キャプチャは数ステップ必要です。シンプルメモを併用すると、移動中の思いつきを0.4秒でメール送信し、後でJoplinに整理するワークフローが可能になります。"}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/joplin/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Joplinのセルフホストとシンプルメモの送信方式はどちらが安全ですか？","acceptedAnswer":{"@type":"Answer","text":"プライバシーの考え方が異なります（JoplinはE2E暗号化を選べ、シンプルメモのメールはE2E暗号化ではありませんが本文をサーバーに恒常的に保存しません）。Joplinはセルフホストでデータを完全に自己管理でき、E2E暗号化も利用できます。シンプルメモはメモ本文をサーバーに恒常的に保存しない設計で、メールとして送信します。技術的な管理力があればJoplin、管理不要の手軽さならシンプルメモが適しています。"}},{"@type":"Question","name":"Joplinのマークダウン機能はシンプルメモにありますか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモにはマークダウン機能はありません。プレーンテキストのみに対応しています。構造化されたノートにはJoplin、瞬間的な思いつきの記録にはシンプルメモという使い分けが効果的です。"}},{"@type":"Question","name":"Joplinの同期設定が難しいのですが、シンプルメモは簡単ですか？","acceptedAnswer":{"@type":"Answer","text":"はい。シンプルメモはメールアドレスを1つ設定するだけで即使い始められます。Nextcloud、WebDAV、暗号化キーの設定といった技術的なセットアップは一切不要です。"}},{"@type":"Question","name":"Joplinユーザーがシンプルメモを追加するメリットは？","acceptedAnswer":{"@type":"Answer","text":"Joplinは長文ノートやナレッジベースの管理に優れていますが、モバイルでの瞬間キャプチャは数ステップ必要です。シンプルメモを併用すると、移動中の思いつきをすぐにメールで送り、後でJoplinに整理するワークフローが可能になります。"}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="メインナビゲーション">
+  <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
-      <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
-        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
+      <a class="global-nav__logo site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/guides/">使い方</a><a href="/use-cases/">活用事例</a><a href="/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/">使い方</a></li>
+        <li><a href="/use-cases/">活用事例</a></li>
+        <li><a href="/vs/">比較</a></li>
         <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
         <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
         <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
-        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
-        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
+        <li><a href="/faq">よくある質問</a></li>
+        <li><a href="/about/">開発者について</a></li>
+        <li><a href="/devlog/">開発記録</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/vs/joplin/" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/vs/joplin/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
-        <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="日本語 · 言語を選択"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>JA</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ja" dir="ltr"><p class="site-language-title">言語を選択</p><div class="site-language-grid"><span class="site-language-current" data-site-locale="ja" aria-current="page"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/en/vs/joplin/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/vs/joplin/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/vs/joplin/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/vs/joplin/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/vs/joplin/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/vs/joplin/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/vs/joplin/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/vs/joplin/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/vs/joplin/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
           <span lang="ja">ダウンロード</span>
         </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="メニュー"><span>メニュー</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
   </nav>
@@ -291,7 +304,7 @@
     <div class="container">
 
       <!-- Hero -->
-      <div class="lp-hero">
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
         <div class="lp-hero__label">
           <span lang="ja">メモアプリ比較</span>
 
@@ -301,7 +314,7 @@
 
         </h1>
         <p class="lp-hero__sub">
-          <span lang="ja">Joplinはオープンソースで高いプライバシー性を持つ本格的なノート管理アプリです。Markdownサポート、セルフホスト同期、プラグインエコシステムなど豊富な機能を備えています。一方、シンプルメモは「思いついた瞬間 → 0.4秒で入力 → メール送信」という一点に完全特化。目的が異なる2つのアプリを公平に比較します。</span>
+          <span lang="ja">Joplinはオープンソースで高いプライバシー性を持つ本格的なノート管理アプリです。Markdownサポート、セルフホスト同期、プラグインエコシステムなど豊富な機能を備えています。一方、シンプルメモは「思いついた瞬間 → 0.4秒（iPhone 16e・ウォーム起動の実測）で入力開始 → メール送信」という一点に完全特化。目的が異なる2つのアプリを公平に比較します。</span>
 
         </p>
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
@@ -309,73 +322,73 @@
 
         </p>
         <p style="font-size:.95rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:1rem auto 0;font-style:italic;">
-          <span lang="ja">両アプリの起動速度をiPhone 15 Proで100回ずつ計測した結果、Joplinは平均2.1秒、シンプルメモは平均0.4秒でした。ノート管理と瞬間キャプチャでは求められるレスポンスが根本的に異なると実感しています。</span>
+          <span lang="ja">Joplinの起動時間は本サイトでは計測していません。シンプルメモは開発者の計測（iPhone 16e・ウォーム起動）で、タップから入力できるまで0.4秒でした。ノート管理と瞬間キャプチャでは、求められる速さが異なります。</span>
 
         </p>
-      </div>
+      </div><nav class="sd-hero-index" aria-label="このページの内容"><p>このページの内容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Joplinとは</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>オープンソースメモアプリの光と影</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>比較表：シンプルメモ vs Joplin</span><span aria-hidden="true">↗</span></a></nav></div>
 
       <!-- Entity Definition -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
           <span lang="ja">Joplinとは</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
-          <span lang="ja">Joplinは、GPLライセンスで公開されているオープンソースのノートアプリです。iOS、Android、Windows、Mac、Linuxに対応するクロスプラットフォームアプリで、Markdownでの記述、ノートブック・タグによる整理、全文検索、Webクリッパー拡張機能などを備えています。同期先はNextcloud、WebDAV、OneDrive、Joplin Cloud（有料）から選択可能で、エンドツーエンド暗号化にも対応しています。Evernoteからのインポート機能も搭載しており、Evernoteからの移行先として人気があります。コミュニティ主導で開発が進められ、プラグインによる機能拡張も可能です。ただし、多機能なぶんアプリの起動や操作はやや重く、瞬間的なメモキャプチャには向いていません。Joplin Cloudは月額2.99ユーロから利用でき、アプリ自体は完全無料で使えます。</span>
+          <span lang="ja">Joplinは、AGPL-3.0ライセンスで公開されているオープンソースのノートアプリです。iOS、Android、Windows、Mac、Linuxに対応するクロスプラットフォームアプリで、Markdownでの記述、ノートブック・タグによる整理、全文検索、Webクリッパー拡張機能などを備えています。同期先はJoplin Cloud（有料）、Dropbox、OneDrive、Nextcloud、WebDAV、S3などから選択可能で、エンドツーエンド暗号化にも対応しています。Evernoteからのインポート機能も搭載しており、Evernoteからの移行先として人気があります。コミュニティ主導で開発が進められ、プラグインによる機能拡張も可能です。Joplinの起動や操作の速さは、本サイトでは計測していません。Joplin Cloudは月額2.99ユーロから利用でき、アプリ自体は完全無料で使えます。</span>
 
         </p>
-      </section>
+      </div></section>
 
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
           <span lang="ja">オープンソースメモアプリの光と影</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
-          <span lang="ja">Joplinはオープンソース（GPLライセンス）であることを大きな特徴としています。ソースコードが公開されているため、セキュリティの透明性が高く、コミュニティによるプラグイン開発も活発です。暗号化の実装を誰でも検証でき、プライバシーを重視するユーザーにとって信頼の根拠になります。しかし、オープンソースであることは万能ではありません。コミュニティ主導の開発は、UXの一貫性が犠牲になることがあります。デスクトップ版とモバイル版でUIの品質に差があったり、プラグイン同士の互換性問題が発生したりすることがあります。特にモバイルアプリのパフォーマンスは、商用アプリと比べるとやや重い印象があります。大量のノートがある場合、起動や検索に時間がかかることがあります。もう一つの課題は同期の設定です。Joplinは同期先としてNextcloud、WebDAV、OneDrive、Joplin Cloudなどを選択できますが、Nextcloud/WebDAVの設定にはサーバーのURL、認証情報、フォルダパスの入力が必要です。技術に詳しいユーザーにとっては問題ありませんが、そうでないユーザーにとっては最初のハードルが高いと言えます。Obsidian連携シンプルメモはこれらの複雑さを排除しています。メールアドレスを入力するだけでセットアップ完了。同期の設定不要、プラグインの管理不要、サーバーの心配不要。ネイティブiOSアプリとして0.4秒で起動し、ワンタップで暗号化されたメモをメールに送信します。オープンソースの透明性は得られませんが、「設定ゼロで即座にメモを送れる」という実用性においては、Obsidian連携シンプルメモが圧倒的に優位です。</span>
+          <span lang="ja">Joplinはオープンソース（AGPL-3.0ライセンス）であることを大きな特徴としています。ソースコードが公開されているため、セキュリティの透明性が高く、コミュニティによるプラグイン開発も活発です。暗号化の実装を誰でも検証でき、プライバシーを重視するユーザーにとって信頼の根拠になります。しかし、オープンソースであることは万能ではありません。コミュニティ主導の開発は、UXの一貫性が犠牲になることがあります。デスクトップ版とモバイル版でUIの品質に差があったり、プラグイン同士の互換性問題が発生したりすることがあります。モバイルアプリの起動や検索の速さは、本サイトでは計測していません。もう一つの課題は同期の設定です。Joplinは同期先としてNextcloud、WebDAV、OneDrive、Joplin Cloudなどを選択できますが、Nextcloud/WebDAVの設定にはサーバーのURL、認証情報、フォルダパスの入力が必要です。技術に詳しいユーザーにとっては問題ありませんが、そうでないユーザーにとっては最初のハードルが高いと言えます。Obsidian連携シンプルメモはこれらの複雑さを排除しています。メールアドレスを登録して確認すればセットアップ完了。同期の設定不要、プラグインの管理不要、サーバーの心配不要。ネイティブiOSアプリとして、タップから0.4秒で入力でき（ウォーム起動）、ワンタップでメモをメールに送ります（送信待ちと送信履歴は端末内でAES-GCM暗号化。メール自体はE2E暗号化ではありません）。オープンソースの透明性は得られませんが、「送信先を設定・確認するだけですぐメモを送れる」手軽さでは、Obsidian連携シンプルメモが向いています。</span>
 
         </p>
-      </section>
+      </div></section>
 
       <!-- Comparison Table -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
           <span lang="ja">比較表：シンプルメモ vs Joplin</span>
 
-        </h2>
-        <div style="overflow-x:auto">
+        </h2></div><div class="ce-chapter__body">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table lang="ja" class="compare-table">
             <thead><tr><th scope="col">項目</th><th scope="col">Obsidian連携シンプルメモ</th><th scope="col">Joplin</th></tr></thead>
             <tbody>
-              <tr><th scope="row">起動速度</th><td class="yes">0.4秒（即入力可）</td><td>2〜3秒（ノート一覧読み込み後）</td></tr>
+              <tr><th scope="row">起動速度（iPhone 16e・ウォーム起動の実測）</th><td class="yes">0.4秒（即入力可）</td><td>未計測</td></tr>
               <tr><th scope="row">ワンタップ送信</th><td class="yes">あり（メール直送）</td><td class="no">なし（メール送信機能なし）</td></tr>
               <tr><th scope="row">メール送信</th><td class="yes">ワンタップで直接送信</td><td class="no">非対応（OS共有経由のみ）</td></tr>
               <tr><th scope="row">Markdown</th><td class="no">なし（プレーンテキスト）</td><td class="yes">フル対応（エディタ＆プレビュー）</td></tr>
               <tr><th scope="row">オフライン対応</th><td class="yes">Outbox自動再送</td><td class="yes">ローカルファースト設計</td></tr>
               <tr><th scope="row">暗号化</th><td class="yes">AES-GCM（端末内）</td><td class="yes">E2E暗号化（全同期先）</td></tr>
-              <tr><th scope="row">オープンソース</th><td class="no">プロプライエタリ</td><td class="yes">GPL（完全オープン）</td></tr>
+              <tr><th scope="row">オープンソース</th><td class="no">プロプライエタリ</td><td class="yes">AGPL-3.0（アプリ）</td></tr>
               <tr><th scope="row">クロスプラットフォーム</th><td class="no">iOSのみ</td><td class="yes">iOS/Android/Win/Mac/Linux</td></tr>
-              <tr><th scope="row">同期方式</th><td class="yes">メール（サーバー保存なし）</td><td class="yes">Nextcloud/WebDAV/Joplin Cloud</td></tr>
+              <tr><th scope="row">同期方式</th><td class="yes">メール（自分の受信箱へ）</td><td class="yes">Joplin Cloud/Dropbox/OneDrive/Nextcloud/WebDAV/S3など</td></tr>
               <tr><th scope="row">プラグイン</th><td class="no">なし</td><td class="yes">豊富なエコシステム</td></tr>
               <tr><th scope="row">Webクリッパー</th><td class="no">なし</td><td class="yes">ブラウザ拡張あり</td></tr>
-              <tr><th scope="row">無料プラン</th><td class="yes">1日3通まで（ずっと無料）</td><td class="yes">アプリ完全無料</td></tr>
+              <tr><th scope="row">無料プラン</th><td class="yes">1日3通まで（利用期間の制限なし）</td><td class="yes">アプリ完全無料</td></tr>
             </tbody>
           </table>
 
         </div>
-      </section>
+      </div></section>
 
       <!-- 5 Key Differences -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
           <span lang="ja">4つのオープンソースとの違い</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <ul lang="ja" class="diff-list">
           <li>
             <span class="diff-num">1</span>
-            <strong>セルフホスト vs サーバーレス</strong><br>
-            Joplinはセルフホスト（Nextcloud、WebDAV）やJoplin Cloudでデータを同期する設計です。シンプルメモはメモ本文をどのサーバーにも保存せず、メールとして直接送信します。Joplinはデータの完全所有、シンプルメモはサーバーレスの簡潔さという異なる哲学です。
+            <strong>セルフホスト vs 本文を自社サーバーに残さない送信</strong><br>
+            Joplinはセルフホスト（Nextcloud、WebDAV）やJoplin Cloudでデータを同期する設計です。シンプルメモはメモ本文を開発元のサーバーに恒常的に保存せず、送信時だけ中継（Relay API）と配信事業者を経由してメールとして届けます。Joplinはデータの完全所有、シンプルメモは本文をサーバーに恒常的に保存しない簡潔さという異なる哲学です。
           </li>
           <li>
             <span class="diff-num">2</span>
@@ -385,29 +398,29 @@
           <li>
             <span class="diff-num">3</span>
             <strong>同期設定の複雑さ</strong><br>
-            Joplinの同期はNextcloudやWebDAVの設定、暗号化キーの管理など初期セットアップに技術知識が必要です。シンプルメモはメールアドレスを1つ入力するだけで即使い始められます。技術者にはJoplinの柔軟性が、非技術者にはシンプルメモの手軽さが向いています。
+            JoplinでNextcloudやWebDAVを同期先に選ぶ場合は、サーバーのURLや認証情報の設定が必要です（Joplin Cloud・Dropbox・OneDriveも選べ、E2E暗号化は任意で有効にします）。シンプルメモはメールアドレスを1つ登録して確認すれば、すぐに使い始められます。技術者にはJoplinの柔軟性が、非技術者にはシンプルメモの手軽さが向いています。
           </li>
           <li>
             <span class="diff-num">4</span>
             <strong>モバイルUXの洗練度</strong><br>
-            Joplinのモバイルアプリはデスクトップ版の機能をモバイルに移植した設計で、ノート一覧→選択→編集の複数ステップが必要です。シンプルメモはモバイル専用設計で、起動0.4秒→入力→ワンタップ送信という最短フローを実現しています。
+            Joplinのモバイルアプリはノート一覧が中心で、新しいノートは作成ボタンから始めます。シンプルメモはモバイル専用設計で、起動0.4秒（ウォーム起動）→入力→ワンタップ送信という短い手順です。
           </li>
         </ul>
 
-      </section>
+      </div></section>
 
       <!-- Who Should Choose Which -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
           <span lang="ja">どちらを選ぶべきか</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div lang="ja" class="choose-grid">
           <div class="choose-card">
             <div class="choose-card__title">Obsidian連携シンプルメモ向き</div>
             <ul>
               <li>思いついた瞬間にメモをメールで送りたい</li>
-              <li>会議中・移動中に0.4秒でメモを取りたい</li>
+              <li>会議中・移動中にすぐメモを取りたい</li>
               <li>メモの管理はメール受信トレイで行いたい</li>
               <li>Markdownやノート整理は不要</li>
               <li>iPhoneだけで完結させたい</li>
@@ -428,22 +441,22 @@
           </div>
         </div>
 
-      </section>
+      </div></section>
 
       <!-- FAQ -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
           <span lang="ja">よくある質問</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div lang="ja">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Joplinのセルフホストとシンプルメモのサーバーレスはどちらが安全ですか？</summary><div class="faq-answer"><p>どちらも高いプライバシー水準です。Joplinはセルフホストでデータを完全に自己管理でき、E2E暗号化も利用できます。シンプルメモはそもそもサーバーにデータを保存しない設計で、メールとして直接送信します。技術的な管理力があればJoplin、管理不要の手軽さならシンプルメモが適しています。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Joplinのセルフホストとシンプルメモの送信方式はどちらが安全ですか？</summary><div class="faq-answer"><p>プライバシーの考え方が異なります（JoplinはE2E暗号化を選べ、シンプルメモのメールはE2E暗号化ではありませんが本文をサーバーに恒常的に保存しません）。Joplinはセルフホストでデータを完全に自己管理でき、E2E暗号化も利用できます。シンプルメモはメモ本文をサーバーに恒常的に保存しない設計で、メールとして送信します。技術的な管理力があればJoplin、管理不要の手軽さならシンプルメモが適しています。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Joplinのマークダウン機能はシンプルメモにありますか？</summary><div class="faq-answer"><p>シンプルメモにはマークダウン機能はありません。プレーンテキストのみに対応しています。構造化されたノートにはJoplin、瞬間的な思いつきの記録にはシンプルメモという使い分けが効果的です。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Joplinの同期設定が難しいのですが、シンプルメモは簡単ですか？</summary><div class="faq-answer"><p>はい。シンプルメモはメールアドレスを1つ設定するだけで即使い始められます。Nextcloud、WebDAV、暗号化キーの設定といった技術的なセットアップは一切不要です。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Joplinユーザーがシンプルメモを追加するメリットは？</summary><div class="faq-answer"><p>Joplinは長文ノートやナレッジベースの管理に優れていますが、モバイルでの瞬間キャプチャは数ステップ必要です。シンプルメモを併用すると、移動中の思いつきを0.4秒でメール送信し、後でJoplinに整理するワークフローが可能になります。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Joplinユーザーがシンプルメモを追加するメリットは？</summary><div class="faq-answer"><p>Joplinは長文ノートやナレッジベースの管理に優れていますが、モバイルでの瞬間キャプチャは数ステップ必要です。シンプルメモを併用すると、移動中の思いつきをすぐにメールで送り、後でJoplinに整理するワークフローが可能になります。</p></div></details></div>
         </div>
 
-      </section>
+      </div></section>
 
       <!-- CTA -->
       <div class="cta-box">
@@ -452,21 +465,21 @@
 
         </div>
         <div class="cta-box__desc">
-          <span lang="ja">同期設定ゼロ。インストールして即メモ送信。ダウンロードは無料。</span>
+          <span lang="ja">同期の設定は不要。メールアドレスを登録して確認すれば、すぐに送れます。ダウンロードは無料。</span>
 
         </div>
-        <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="mid" lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+        <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="mid" lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
         </a>
 
       </div>
 
       <!-- Internal Links -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">
           <span lang="ja">関連ページ</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="internal-links">
           <a href="/vs/">
             <span lang="ja">メモアプリ比較一覧</span>
@@ -497,7 +510,7 @@
 
           </a>
         </div>
-      </section>
+      </div></section>
 
     </div>
 
@@ -535,7 +548,6 @@
   <h3 style="font-size:1rem;margin-bottom:0.75rem">参考文献</h3>
   <ul style="font-size:.875rem;line-height:3.5;list-style:none;padding:0">
     <li><a href="https://joplinapp.org/" target="_blank" rel="noopener">Joplin 公式サイト</a></li>
-    <li>Wirecutter ベストメモアプリレビュー</li>
     <li><a href="https://apps.apple.com/us/app/joplin/id1315599797" target="_blank" rel="noopener">Joplin - App Store</a></li>
     <li><a href="https://en.wikipedia.org/wiki/Joplin_(software)" target="_blank" rel="noopener">Joplin (ソフトウェア) - Wikipedia</a></li>
   </ul>
@@ -543,30 +555,30 @@
 
 </main>
 
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ja" dir="ltr"><a class="site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a><div><p class="site-footer-title">思いついたことを、次の一歩へ。</p><p class="site-footer-description">Obsidianとメールに、メモを送るiPhoneアプリ。</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
-        <a href="/" class="footer__link"><span lang="ja">ホーム</span> </a>
-        <a href="/use-cases/" class="footer__link"><span lang="ja">使い方</span> </a>
-        <a href="/guides/" class="footer__link"><span lang="ja">ガイド</span> </a>
+        <a href="/download/" class="footer__link">ダウンロード</a>
+        <a href="/" class="footer__link">ホーム</a>
+        <a href="/use-cases/" class="footer__link">活用事例</a>
+        <a href="/guides/" class="footer__link">使い方</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
         <a href="/captio-alternative/" class="footer__link"><span lang="ja">Captio代替</span> </a>
-        <a href="/note-to-email/" class="footer__link"><span lang="ja">メモ→メール</span> </a>
-        <a href="/vs/" class="footer__link"><span lang="ja">アプリ比較</span> </a>
+        <a href="/note-to-email/" class="footer__link">メモをメールへ</a>
+        <a href="/vs/" class="footer__link">比較</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span lang="ja">公開ロードマップ</span></a>
-        <a href="/devlog/" class="footer__link"><span lang="ja">開発記録</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
-        <a href="/faq" class="footer__link"><span lang="ja">FAQ</span> </a>
-        <a href="/privacy" class="footer__link"><span lang="ja">プライバシー</span> </a>
-        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span> </a>
+        <a href="/roadmap/" class="footer__link">公開ロードマップ</a>
+        <a href="/devlog/" class="footer__link">開発記録</a>
+        <a href="/about/" class="footer__link">開発者について</a>
+        <a href="/faq" class="footer__link">よくある質問</a>
+        <a href="/privacy" class="footer__link">プライバシー</a>
+        <a href="/contact" class="footer__link">お問い合わせ</a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -575,12 +587,7 @@
     </div>
   </footer>
 
-  <script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

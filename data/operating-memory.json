@@ -1411,6 +1411,36 @@
         ],
         "new_guardrail": "**blocker が外れたら、その先を一次資料で1回確かめてから executor を動かす。**とくに外部サービスへ何かを送る行は、送る前に「送ってよい条件」の記述を取ってくる。欠けている値の既定を自分で決めない"
       }
+    },
+    {
+      "id": "om-2026-10-02-cli-tla-cycle",
+      "seeded": true,
+      "area": "⑩ AgentOps",
+      "signal": "APIバックアップの候補v2を元のCLI子プロセスで検査したところ、39件中36件PASS・3件FAILとなり、3つのCLI子プロセスがexit13で終了した。",
+      "hypothesis": "backup-d1.mjsのmain分岐で待つ動的importと、restore-drill.mjsからbackup-d1.mjsへの静的importが循環していた。ヘルパーとしてのimportではmain分岐に入らないため、同じ起動経路を確認できない。",
+      "decision": "未受理のv2と失敗証跡を保存し、純関数の静的import1行を追加、main内のawait動的import2行だけを削除する。テスト期待値やSQL/FK/REST・復旧の人間再開条件は変更しない。",
+      "execution": {
+        "repo": "simplememo-api",
+        "pr": "https://github.com/simplememofast/simplememo-api/pull/381",
+        "commit": "fdde81b62a8cc1dd9b7e48a981c178dafabd30f2",
+        "files": [
+          "scripts/backup-d1.mjs",
+          "test/restore.test.ts"
+        ]
+      },
+      "verification": "修正前v2の実36PASS/3FAILを保持。3行のimport修正後、同じ39件がローカルNode24.19.0で39/39PASS、通常PRのNode22.23.3でも39/39PASS。PR381の通常CIと実マージ後main CIの各3チェックが成功し、mainの4ファイルと試験済みtreeの一致を別途確認した。",
+      "outcome": "実CLI起動の不具合を修正して通常経路で配送した。この学習レコードは後追いの追加であり、再発を予防した実績、Companyの無介入実行、H0、実自律率、本番backup/restore/人間再開の成功は証明していない。",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "dynamic-main-await-can-deadlock-cyclic-cli-imports",
+        "text": "逆向きの静的importを含むCLIでmain分岐にawait importを追加する場合、モジュールをヘルパーとしてimportする検査だけで実CLIの成功を判断しない。元のCLI入口を子プロセスとして、隔離したオフラインfixtureで確認する。循環import一般を禁止するのではなく、main起動時に待機が閉じる経路を検査する。",
+        "changed": [
+          "docs/operating-memory/api-cli-import-cycle-20261002.md",
+          "../simplememo-api/scripts/backup-d1.mjs",
+          "../simplememo-api/test/restore.test.ts"
+        ],
+        "new_guardrail": "test/restore.test.tsの実CLI子プロセス検査（legacy manifest欠測、正常--out、改変rawの--restore）を保持する。元CLI入口でexit・期待拒否・出力を確かめ、wrapper-importや構文検査だけを代用しない。今回v2からv3で39件の期待値は緩和していない。"
+      }
     }
   ]
 }

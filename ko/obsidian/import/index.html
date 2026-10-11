@@ -1,0 +1,512 @@
+<!doctype html><html lang="ko"><head>
+<script src="/js/i18n/ko/messages.c10b3b710ae9.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/import/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Obsidian로의 전환 가이드 — Notion/Evernote/Apple Notes에서 | SimpleMemo</title>
+  <meta name="description" content="공식 Importer 3.1.9을 Linux 버전 Obsidian에서 실행하고, Notion의 HTML ZIP에서 4 노트와 5 이미지, Evernote ENEX에서 3 노트를 저장합니다. 접기·인라인·블록 링크의 변화를 원본 데이터와 비교하고, Apple Notes는 macOS 조건과 미검증 범위를 명시합니다.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Obsidian로의 전환 가이드 — Notion/Evernote/Apple Notes에서 | SimpleMemo">
+  <meta property="og:description" content="공식 Importer 3.1.9을 Linux 버전 Obsidian에서 실행하고, Notion의 HTML ZIP에서 4 노트와 5 이미지, Evernote ENEX에서 3 노트를 저장합니다. 접기·인라인·블록 링크의 변화를 원본 데이터와 비교하고, Apple Notes는 macOS 조건과 미검증 범위를 명시합니다.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-01T08:07:09+09:00">
+  <meta property="og:url" content="https://simplememofast.com/ko/obsidian/import/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-import.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ko_KR">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian로의 전환 가이드 — Notion/Evernote/Apple Notes에서 | SimpleMemo">
+  <meta name="twitter:description" content="공식 Importer 3.1.9을 Linux 버전 Obsidian에서 실행하고, Notion의 HTML ZIP에서 4 노트와 5 이미지, Evernote ENEX에서 3 노트를 저장합니다. 접기·인라인·블록 링크의 변화를 원본 데이터와 비교하고, Apple Notes는 macOS 조건과 미검증 범위를 명시합니다.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-import.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ko/obsidian/import/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/import/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/import/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/import/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/import/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/import/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/import/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/import/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/import/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/import/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/import/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/import/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  
+
+  <!-- JSON-LD: Article -->
+  
+
+  <!-- JSON-LD: FAQPage -->
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    /* 中央揃えの和文は行頭が毎行ずれて読みにくい。狭い画面では左揃えにし、
+       行が2〜3行に収まる広い画面だけ中央のままにする。 */
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    /* ── 「開かず」の段階 ──────────────────────────────
+       この記事の骨子。読者が言う「開かず」と記事が指す「開かず」は
+       ずれていることが多いので、先に3段階へ分解して合意を取る。 */
+    .lv{display:grid;grid-template-columns:auto 1fr;gap:0 1.1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.3rem 1.3rem;margin:.85rem 0}
+    .lv__n{grid-row:1/3;width:2.6rem;height:2.6rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;align-self:start}
+    .lv__t{font-size:1.05rem;font-weight:700;line-height:1.55;margin:0 0 .4rem}
+    .lv__d{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0}
+    @media(max-width:520px){
+      .lv{grid-template-columns:1fr;gap:.6rem}
+      .lv__n{grid-row:auto}
+    }
+
+    /* 原因ブロック */
+    .cz{background:var(--surface);border:1px solid var(--border);border-left:3px solid rgba(255,183,52,.55);border-radius:var(--radius-sm);padding:1.35rem 1.3rem;margin:1rem 0}
+    .cz__n{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#ffc76b;margin-bottom:.4rem}
+    .cz__t{font-size:1.05rem;font-weight:700;line-height:1.6;margin:0 0 .55rem}
+    .cz p{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0 0 .7rem}
+    .cz p:last-child{margin-bottom:0}
+    .cz ol,.cz ul{margin:.2rem 0 .7rem;padding-left:1.35rem;font-size:.95rem;line-height:1.9;color:var(--text-secondary)}
+    .cz li{margin-bottom:.3rem}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em}
+
+    /* ── 比較表 ────────────────────────────────────────
+       狭い画面で列を縦に割ると見出し列が語中で折り返して読めなくなる
+       ので、行ごとのカードに組み替えて全幅を使わせる（/siri/ と同じ流儀）。 */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:26%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  
+<style>.answer{font-size:1.05rem;line-height:1.9;border-left:3px solid #70d9e5;padding-left:1rem}.hero-graphic{width:100%;height:auto;display:block;border-radius:14px;margin:1.7rem auto 0;max-width:54rem}.shot{margin:1.5rem 0;border:1px solid var(--border);background:var(--surface);border-radius:12px;overflow:hidden}.shot img{display:block;width:100%;height:auto}.shot figcaption{padding:.9rem 1rem;color:var(--text-secondary);font-size:.9rem;line-height:1.8}.shot figcaption a{display:inline-flex;min-height:44px;align-items:center;color:var(--accent-bright)}.import-table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.95rem}.import-table th,.import-table td{border:1px solid var(--border);padding:.8rem;text-align:left;vertical-align:top;line-height:1.8;overflow-wrap:anywhere}.import-table th{background:var(--surface)}.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;background:#0d1525;border:1px solid var(--border);border-radius:10px;padding:1.1rem;line-height:1.8;font-size:.92rem;box-sizing:border-box;max-width:100%}.capture-code code{background:none;border:0;padding:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:1em;color:#e4eefc}.code-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-top:1.2rem}.copy-button{min-height:44px;border-radius:8px;padding:.55rem .9rem;border:1px solid #4589d6;color:#fff;background:#14376d;cursor:pointer}.download-row{display:flex;flex-wrap:wrap;gap:.7rem;margin:1rem 0}.download-row a,.toc-links a,.internal-links a{display:inline-flex;min-height:44px;align-items:center;padding:.5rem .85rem;border-radius:8px;border:1px solid var(--border);overflow-wrap:anywhere}.scope-note{padding:1rem 1.1rem;border-radius:10px;background:var(--surface);border:1px solid var(--border);line-height:1.85}.proof-details{padding:1rem;border:1px solid var(--border);border-radius:10px;margin:1rem 0}.proof-details summary{cursor:pointer;min-height:44px;line-height:1.7}.toc-links{display:flex;flex-wrap:wrap;gap:.6rem}.source-list{line-height:1.9}.receipt-line{font-size:.9rem;color:var(--text-secondary);overflow-wrap:anywhere}.steps-list{line-height:1.9}.steps-list li{margin:.5rem 0}.code-heading h3{font-size:1rem;margin:0;overflow-wrap:anywhere}a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #70d9e5;outline-offset:3px}@media(max-width:600px){.import-table,.import-table tbody,.import-table tr,.import-table th,.import-table td{display:block}.import-table thead{display:none}.import-table tr{margin:.85rem 0;border:1px solid var(--border);border-radius:8px;overflow:hidden}.import-table th,.import-table td{border:0;padding:.7rem}.import-table td::before{content:attr(data-label);display:block;font-weight:700;color:var(--text-secondary);margin-bottom:.3rem}.capture-code{padding:.8rem;font-size:.85rem}.proof-details{padding:.8rem}.lp-hero__title{overflow-wrap:anywhere}}</style><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Obsidian로의 전환 가이드 — Notion/Evernote/Apple Notes부터",
+  "description": "공식 Importer 3.1.9을 Linux 버전 Obsidian에서 실행하고, Notion의 HTML ZIP에서 4 노트와 5 이미지, Evernote ENEX에서 3 노트를 저장합니다. 접기·인라인·블록 링크의 변화를 원본 데이터와 비교하고, Apple Notes는 macOS 조건과 미검증 범위를 명시합니다.",
+  "datePublished": "2026-10-01T08:07:09+09:00",
+  "dateModified": "2026-10-01",
+  "image": "https://simplememofast.com/assets/img/og/obsidian-import.png",
+  "mainEntityOfPage": "https://simplememofast.com/ko/obsidian/import/",
+  "author": {
+    "@type": "Organization",
+    "name": "SimpleMemo"
+  }
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/ko/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian로의 전환 가이드 — Notion/Evernote/Apple Notes부터",
+      "item": "https://simplememofast.com/ko/obsidian/import/"
+    }
+  ]
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Notion에서는 어느 가져오기 방식을 선택하시겠습니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "이 검증은 Notion → File import입니다. Notion 계정은 토큰과 통신을 사용하는 별도의 경로이며, 실행되지 않습니다. 실제 화면은 File import에 대해 데이터베이스를 보유하지 않는다고 설명하고 있습니다. 데이터베이스·수식의 완전 이전은 이 결과의 범위를 벗어납니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Notion의 ZIP을 먼저 압축 해제하시겠습니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "이 공식 fixture는 ZIP 안에 다른 ZIP이 1개 있는 구성이며, 외부 ZIP을 그대로 Choose file로 선택할 수 있었습니다. 4개의 ID가 있는 HTML는 노트가 되었으며, ID가 없는 index.html은 노트가 되지 않았습니다. 임의의 ZIP 구성으로 성공한다는 증거가 아닙니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "0이 실패하면 원본 외관도 동일합니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "동일하다고는 할 수 없습니다. 이 예에서는 접힌 내용이 일반적인 제목·리스트로 전개되고, 들여쓰기가 포함된 단락은 일반 단락이 되었습니다. 0 failed는 처리 건수 표시입니다. 외관, 첨부, 링크를 각각 확인합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Notion의 제목이나 블록에 대한 링크가 페이지 링크가 되는 이유는 무엇입니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "이번 원본 HTML은 표시 문자열에 블록 ID가 있더라도 href에 앵커가 없으며, 출력은 [[Formatting Tests]]였습니다. 원래 export에서 손실된 위치는 Importer만으로는 복원되지 않습니다. 마이그레이션 전의 export와 출력 모두를 확인합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Evernote의 코드 들여쓰기가 남아 있습니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "이 ENEX의 3 예에서는 공백 4·8개, 빈 행, 코드 내 백슬래시와 기호가 남았습니다. NBSP는 일반 공백으로 변경되고, 4·8개의 들여쓰기가 일치했습니다. 첨부 파일이나 모든 서식, 모든 노트를 시도한 결과가 아닙니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apple Notes도 이 환경에서 가져올 수 있습니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "이 고정 소스가 macOS의 데스크톱 환경인지 확인합니다. 검증한 환경은 Linux이므로 Apple Notes의 실제 가져오기는 시도하지 않았습니다. Mac에서의 성공이나 완전 전환은 이 검증만으로는 판단할 수 없습니다."
+      }
+    }
+  ],
+  "inLanguage": "ko",
+  "@id": "https://simplememofast.com/ko/obsidian/import/#faq"
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="메인 내비게이션" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/ko/guides/">사용 가이드</a><a href="/ko/use-cases/">활용 사례</a><a href="/ko/vs/">비교</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/ko/guides/">사용 가이드</a></li>
+        <li><a href="/ko/use-cases/">활용 사례</a></li>
+        <li><a href="/ko/vs/">비교</a></li>
+        <li><a href="/ko/methods/"><span>메소드</span></a></li>
+        <li><a href="/ko/blog/"><span>블로그</span></a></li>
+        <li><a href="/ko/glossary/"><span>용어집</span></a></li>
+        <li><a href="/ko/faq">자주 묻는 질문</a></li>
+        <li><a href="/ko/about/">개발자 소개</a></li>
+        <li><a href="/ko/devlog/">개발 기록</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>다운로드</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="한국어 · 언어 선택"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>KO</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ko" dir="ltr"><p class="site-language-title">언어 선택</p><div class="site-language-grid"><a href="/obsidian/import/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/import/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/import/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/import/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ko" aria-current="page"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/es/obsidian/import/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/import/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/import/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/import/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/import/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="global-nav__cta">다운로드</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="메뉴"><span>메뉴</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content"><article class="container"><header class="lp-hero sd-hero sd-hero--media"><p class="lp-hero__label">Obsidian · 노트를 옮기다</p><h1 class="lp-hero__title">Obsidian로의 전환 가이드 — Notion/Evernote/Apple Notes부터</h1><p class="lp-hero__sub">이전 후에 어려워지는 것은 노트 수보다 첨부 파일·링크·본문의 표시 방식입니다. 공식 Importer에서 Notion의 HTML ZIP과 Evernote의 ENEX를 실제로 가져와 원본 데이터와 저장된 Markdown을 비교했습니다.</p><p>검증일: 2026년 9월 30일(UTC) · Linux 버전 Obsidian 1.13.7 · Importer 3.1.9</p><img class="hero-graphic sd-hero-media" src="/assets/img/og/obsidian-import.png" width="1200" height="630" fetchpriority="high" decoding="async" alt="공식 Importer의 고정 검증. Notion은 4 노트와 5 이미지이며, Evernote는 3 노트이고, Apple Notes는 macOS 조건의 소스 확인만"></header>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="result"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">꺼낸 수와 남지 않은 형태를 구분합니다</h2></div><div class="ce-chapter__body"><p class="answer"><strong>Notion은 4 노트+5 이미지이며, Evernote는 3 노트를 저장할 수 있었습니다. 다만, Notion의 접힘과 단락의 들여쓰기는 그대로 남지 않습니다. </strong> Apple Notes는 Linux에서 실제 가져오기를 검증하지 않았습니다.</p><p class="scope-note">입력은 공식 저장소의 고정 커밋에 있는 테스트용 fixture입니다. 저자는 자신의 Notion/Evernote 계정에서 실제로 내보내는 데이터가 아닙니다. 이 기사에서는 이 작은 예시에서 무엇이 남아 있는지, 무엇을 수정해야 하는지를 보여드립니다.</p>
+<div class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표"><table class="import-table"><thead><tr><th>이전원</th><th>선택한 경로</th><th>실제 결과</th></tr></thead><tbody><tr><th scope="row">Notion</th><td data-label="경로">Notion → 파일 가져오기 → HTML의 ZIP</td><td data-label="결과">4 import / 5 attachments / 0 failed。 부모와 자녀 페이지와 이미지를 저장합니다. 접기와 들여쓰기는 변합니다.</td></tr><tr><th scope="row">Evernote</th><td data-label="경로">Evernote (.enex) → ENEX 1건</td><td data-label="결과">3 import / 0 attachments / 0 failed. 3 종류의 코드 예시의 들여쓰기와 기호를 대조합니다.</td></tr><tr><th scope="row">Apple Notes</th><td data-label="경로">고정 소스의 macOS 조건을 확인하십시오</td><td data-label="결과">실제 가져오기는 아직 검증되지 않았습니다. Mac에서의 성공을 나타내는 결과가 아닙니다.</td></tr></tbody></table></div>
+<nav class="toc-links" aria-label="이 기사 목차"><a href="#prepare">연습용 Vault을 준비합니다</a><a href="#notion">Notion</a><a href="#changes">무너지는 부위</a><a href="#evernote">Evernote</a><a href="#apple">Apple Notes</a><a href="#downloads">원 입력 및 저장 예시</a><a href="#faq">자주 묻는 질문</a></nav></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="prepare"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">연습용 Vault으로, Importer 버전과 저장처를 확인합니다</h2></div><div class="ce-chapter__body"><p>먼저 빈 연습용 Vault을 준비하고, 소수의 노트에서 출력을 확인합니다. Obsidian의 도입과 Vault 생성은 <a href="/ko/obsidian/getting-started/">다운로드 및 설치의 부모 가이드</a>에서 다루고 있습니다.</p><ol class="steps-list"><li>Settings → Community plugins에서 Importer를 활성화합니다. 이 예시의 실제 화면은 <strong>Importer v3.1.9</strong>입니다.</li><li>Ctrl+P로 Command palette를 열고, <strong>Importer: Import notes</strong>를 선택합니다.</li><li>이동 원본 형식을 선택하고, 입력 파일과 Output 폴더를 확인합니다. 실행 전 미리보기도 읽습니다.</li><li><strong>Start import</strong>를 선택하고, 완료 표시의 노트·첨자·failed 건수와 Vault에 저장된 파일을 각각 확인합니다.</li></ol>
+<p class="scope-note">이번 초기 준비는 공식 릴리스의 main.js·manifest.json·styles.css를 격리된 Vault에 수동으로 배치하고, 활성화 이후 실제 GUI로 조작했습니다. Community plugins의 Browse → Install을 클릭하여 도입한 검증이 아닙니다. 선정한 3.1.9 이외의 버전에서 동일한 결과가 나오는 경우도 아직 검증되지 않았습니다.</p><figure class="shot"><img src="/assets/img/obsidian-import/enabled.png" loading="lazy" decoding="async" alt="Community plugins의 Importer v3.1.9와 ON의 실제 화면"><figcaption>실제로 활성화한 Importer v3.1.9. 스위치의 ON과 버전 표시를 관찰했습니다. <a href="/assets/img/obsidian-import/enabled.png" target="_blank" rel="noopener">원문 PNG 열기</a></figcaption></figure><details class="proof-details"><summary>Obsidian과 Installer의 실제 버전 화면</summary><figure class="shot"><img src="/assets/img/obsidian-import/version.png" loading="lazy" decoding="async" alt="General의 Obsidian 및 Installer 버전 1.13.7"><figcaption>General에서 Version 1.13.7 / Installer version 1.13.7을 한 번 확인했습니다. <a href="/assets/img/obsidian-import/version.png" target="_blank" rel="noopener">원문 PNG 열기</a></figcaption></figure></details></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="notion"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">Notion은 HTML의 ZIP을 File import에 전달합니다</h2></div><div class="ce-chapter__body"><p>이 버전의 Notion에는 두 개의 경로가 있습니다. 이번에는 <strong>File import</strong>를 선택했습니다. 화면은 “토큰이나 인터넷 연결은 필요 없으며”, “데이터베이스를 보유하지 않는다”고 설명하고 있습니다. Notion 계정의 데이터베이스·수식 이전은 별도의 경로이며, 이 검증에서는 실행되지 않았습니다.</p><figure class="shot"><img src="/assets/img/obsidian-import/notion-route.png" loading="lazy" decoding="async" alt="Notion의 account import와 File import의 실제 선택 화면"><figcaption>Notion account (recommended)와 File import가 별도로 표시된 실제 화면. 검증한 것은 아래의 File import입니다. <a href="/assets/img/obsidian-import/notion-route.png" target="_blank" rel="noopener">원 PNG 열기</a></figcaption></figure><ol class="steps-list"><li>Notion을 선택한 후, File import를 선택합니다. 실제 화면은 HTML 형식의 export를 안내했습니다. 자신의 마이그레이션에서는 공식 export 절차에 따라 파일을 준비합니다.</li><li><strong>Choose file</strong>에서 ZIP을 선택합니다. 검증에서는 OS 파일 선택 화면에서 공식 fixture의 <strong>notion-testspace.zip</strong>을 선택했습니다. 외부 ZIP 안에 다른 ZIP이 1개 있는 구성도 그대로 읽어들일 수 있었습니다.</li><li>Folders to import를 확인하고 계속하십시오. 이번에는 모든 대상을 선택한 초기 상태 그대로 진행했습니다.</li><li>Output folder는<strong>Notion</strong>、Attachment location은<strong>Vault folder</strong>、Save parent pages in subfolders는<strong>ON</strong>였습니다. 기존 노트가 없는 빈 Vault의 예시입니다. 업데이트의 덮어쓰기 및 경쟁 처리는 검증하지 않았습니다.</li><li>다음 화면에서는 Save Notion ID를 ON하고, Single line breaks를 OFF한 뒤, 템플릿을 선택하지 않은 초기 상태에서 미리보기를 읽고, Start import를 1번 선택했습니다.</li></ol><figure class="shot"><img src="/assets/img/obsidian-import/notion-settings.png" loading="lazy" decoding="async" alt="Notion의 Output 폴더와 첨부 위치 및 상위 페이지 저장 설정"><figcaption>실행 전 출력 설정. 첨부된 Vault 폴더는 이 빈 Vault에서 루트에 이미지를 저장했습니다. <a href="/assets/img/obsidian-import/notion-settings.png" target="_blank" rel="noopener">원문 PNG를 엽니다</a></figcaption></figure><figure class="shot"><img src="/assets/img/obsidian-import/notion-finished.png" loading="lazy" decoding="async" alt="Notion import complete의 4 imported 5 attachments 0 failed"><figcaption>실제 완료 표시. 4 노트와 5 첨부 파일을 저장했으며, 실패한 것은 0였습니다. <a href="/assets/img/obsidian-import/notion-finished.png" target="_blank" rel="noopener">원 PNG 열기</a></figcaption></figure><p>상위 페이지는 <code>Notion/Notion-Testspace/Notion-Testspace.md</code>이며, 하위 페이지는 동일한 하위에 들어갔습니다. Attachment Tests는 또한 동일한 이름의 폴더 안에 있습니다. 부모 본문의 3 링크는 이 Vault의 해당 자식 노트에 고유하게 대응합니다.</p><div class="code-heading"><h3>실기 저장한 Notion 부모 페이지의 전체 본문</h3><button class="copy-button" type="button" data-copy="notion-parent">본문을 복사</button></div><pre class="capture-code" tabindex="0"><code data-code="notion-parent">---
+notion-id: 1590080aa5a3802488c2e857dea7aa7d
+---
+**Notion-Testspace** is a Notion workspace created by [@felciabatta](https://github.com/felciabatta) to test the [Obsidian Importer](https://github.com/obsidianmd/obsidian-importer) plugin.
+
+This workspace has been exported to HTML format, [as described here](https://help.obsidian.md/import/notion), and comprises a single parent-page (this one) and the following sub-pages:
+
+[[Block Reference]]
+
+[[Formatting Tests]]
+
+When importing to Obsidian, if you leave _**Output folder**_ blank all the pages will be stored in a single parent-folder called _**Notion-Testspace**_.
+
+---
+
+[[Attachment Tests]]</code></pre><p>5의 JPEG는 원본 ZIP 이미지와 bytes·SHA256이 일치했습니다. 파일 이름의 URL 인코딩이 디코딩되었으며, <code>кошки-самые-лучшие.jpg</code>도 저장되어 있습니다. 원래 export에서 이미 <code>----.jpg</code>가 된 이름은 그 이름 그대로입니다.</p><div class="code-heading"><h3>실용 저장한 첨부 노트의 본문 전체</h3><button class="copy-button" type="button" data-copy="notion-attachment">본문을 복사</button></div><pre class="capture-code" tabindex="0"><code data-code="notion-attachment">---
+notion-id: 15f0080aa5a380c6b16cfed449a03a8b
+---
+# Filenames
+
+The files below are included to test filenames with special characters — sometimes Notion url-encodes these, sometimes the filenames are entirely destroyed.
+
+![[felis-catus.jpg]]
+
+![[кошки-самые-лучшие.jpg]]
+
+![[----.jpg]]
+
+![[kocky-jsou-nejlepsi.jpg]]
+
+![[name-with-percents-006300610074.jpg]]</code></pre><figure class="shot"><img src="/assets/img/obsidian-import/notion-reopen.png" loading="lazy" decoding="async" alt="Notion의 Attachment Tests를 실제 GUI로 다시 열어낸 원본 화면"><figcaption>Attachment Tests를 열고, 다른 노트로 이동한 후, 파일 목록에서 한 번 다시 연 화면. 본문 377 바이트는 최초 표시 시와 재개방 후 일치했습니다. 화면에 이미지의 상단이 표시되어 있습니다. <a href="/assets/img/obsidian-import/notion-reopen.png" target="_blank" rel="noopener">원문 PNG 열기</a></figcaption></figure></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="changes"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">Notion으로 형태가 바뀐 세 가지 실례</h2></div><div class="ce-chapter__body"><div class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표"><table class="import-table"><thead><tr><th>원 데이터의 형태</th><th>저장한 결과</th><th>이전 후 확인</th></tr></thead><tbody><tr><th scope="row">접이 제목·토글 리스트</th><td data-label="저장 결과">숨겨진 본문은 남아 있으며, 일반 헤드라인·목록으로 전개됩니다. 원본 details/summary의 접힘 구조는 남지 않습니다.</td><td data-label="확인">본문을 읽을 수 있는지 확인하고, 필요하면 Obsidian 측의 제목 및 목록 접기를 사용합니다.</td></tr><tr><th scope="row">들여쓰기가 포함된 단락</th><td data-label="저장 결과">원 HTML의 중첩된 들여쓰기 단락이 일반적인 독립 단락으로 변환되었습니다. 들여쓰기에 의한 계층의 외관이 변합니다.</td><td data-label="확인">계층을 남기고 싶은 단락을 찾아서 항목으로 수정할지 판단합니다.</td></tr><tr><th scope="row">제목·블록에 대한 단독 링크</th><td data-label="저장 결과">예시의 출력은 <code>[[Formatting Tests]]</code>입니다. 원래 HTML의 href에 위치 앵커가 이미 없습니다.</td><td data-label="확인">원본 export와 출력을 모두 확인하고, 필요한 위치에 대한 링크를 다시 추가합니다. Importer만의 오류라고 판단하지 않습니다.</td></tr></tbody></table></div>
+<p>예를 들어 원본 HTML의 접이식 안에 있는 <code>With a hidden text block.</code>과 <code>…with hidden content!</code>는 저장된 Markdown에도 남아 있습니다. 다만 일반적인 제목·목록의 본문으로 되어 있습니다. 원본 화면의 외관을 완전히 복제한 결과가 아닙니다.</p><figure class="shot"><img src="/assets/img/obsidian-import/notion-block.png" loading="lazy" decoding="async" alt="가져온 Block Reference의 목차와 일반 헤드라인의 실제 화면"><figcaption>Block Reference를 실제 GUI로 연 원본 화면. 목차 링크와 제목의 상단을 관찰했습니다. 하단의 모든 요소에 대한 그리기와 클릭을 확인한 화면으로는 취급하지 않습니다. <a href="/assets/img/obsidian-import/notion-block.png" target="_blank" rel="noopener">원문 PNG 열기</a></figcaption></figure><p>Formatting Tests에 있는 단독 링크는 표시 문자열에 Notion의 블록 ID가 있더라도, 원래 HTML의 href가 페이지만을 가리키고 있었습니다. 저장 예시의 “Link to heading”과 “Link to text block”은 모두 페이지 링크입니다. 목차에서 제목으로 연결되는 링크는 별도의 예시이며, Markdown에 제목 링크가 생성되었지만 전체 링크의 실제 클릭을 시도한 결과는 아닙니다.</p><p>또한, 외부 웹 이미지 URL은 저장 본문에 남아 있습니다. 이번 검증에서는 외부 통신을 중단했기 때문에 해당 외부 이미지 표시가 아직 검증되지 않았습니다. 로컬의 5 이미지와는 별도로 확인하고 있습니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="evernote"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">Evernote는 ENEX를 선택하고, 코드의 들여쓰기를 비교합니다</h2></div><div class="ce-chapter__body"><ol class="steps-list"><li>Importer를 다시 Command palette에서 열고, <strong>Evernote (.enex)</strong>를 선택합니다. 실제 화면에서는 노트북별 ENEX 수출을 안내했습니다.</li><li><strong>Choose files</strong>에서 ENEX를 선택합니다. 이 예에서는 공식 fixture의 <strong>code-block-indentation.enex</strong>를 OS의 파일 선택 화면에서 전달했습니다.</li><li>Output folder는 <strong>Evernote</strong>, Attachment location은 <strong>Vault folder</strong>, 템플릿은 선택되지 않았습니다. Continue에서 Preview를 읽고, Start import를 1번 선택했습니다.</li><li>완료 표시: 3 imported / 0 attachments / 0 failed. 저장 대상인 <code>Evernote/code-block-indentation/</code>에 3 노트가 생겼습니다.</li></ol><figure class="shot"><img src="/assets/img/obsidian-import/evernote-settings.png" loading="lazy" decoding="async" alt="Evernote 실행 전 출력 폴더 Evernote 및 첨부 설정"><figcaption>실행 전 Evernote의 출력 설정. ENEX 이름에 해당하는 서브 폴더에 본문이 들어갔습니다. <a href="/assets/img/obsidian-import/evernote-settings.png" target="_blank" rel="noopener">원문 PNG 열기</a></figcaption></figure><figure class="shot"><img src="/assets/img/obsidian-import/evernote-finished.png" loading="lazy" decoding="async" alt="Evernote import complete의 3 imported 0 attachments 0 failed"><figcaption>실제 완료 표시. 3 노트를 저장하고, 첨부 파일은 0이며, 실패한 것은 0였습니다. 입력에도 첨부 파일이 없습니다. <a href="/assets/img/obsidian-import/evernote-finished.png" target="_blank" rel="noopener">원문 PNG 열기</a></figcaption></figure><p>빈칸의 예는 4·8개의 들여쓰기와 빈 줄을 유지했습니다. NBSP의 예는 일반 공백으로 바뀌었지만, 4·8개의 들여쓰기는 일치합니다. 백슬래시, <code>*</code>, <code>_</code>를 포함하는 문자열도 코드 블록 내의 문자로 남아 있었습니다.</p><div class="code-heading"><h3>공백 들여쓰기를 포함한 실제 저장 전체 텍스트</h3><button class="copy-button" type="button" data-copy="evernote-spaces">본문을 복사</button></div><pre class="capture-code" tabindex="0"><code data-code="evernote-spaces">```python
+def f(x):
+    if x:
+
+        return 1
+    return 0    # aligned
+```
+</code></pre><div class="code-heading"><h3>백슬래시와 Markdown 기호를 포함한 실제 저장 전체 텍스트</h3><button class="copy-button" type="button" data-copy="evernote-backslashes">본문을 복사</button></div><pre class="capture-code" tabindex="0"><code data-code="evernote-backslashes">```bash
+grep -o &#x27;a\\*b&#x27; file \\
+  | sed &#x27;s/_x_/*y*/&#x27;
+```
+</code></pre><figure class="shot"><img src="/assets/img/obsidian-import/evernote-reopen.png" loading="lazy" decoding="async" alt="Evernote의 공백 들여쓰기를 실제 GUI에서 다시 연 코드 표시"><figcaption>Indented with spaces를 열고, 다른 2 노트로 이동한 후, 파일 목록에서 한 번 다시 연 화면. 본문 78 바이트는 처음과 재개장 후에 일치했습니다. <a href="/assets/img/obsidian-import/evernote-reopen.png" target="_blank" rel="noopener">원문 PNG 열기</a></figcaption></figure><p>이 3 예제에는 생성된 frontmatter가 없습니다. 생성·업데이트 일시 및 태그 등 모든 메타데이터, Evernote 첨부, 임의의의 서식 유지는 아직 검증되지 않았습니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="apple"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">Apple Notes는 macOS 조건과 미검증을 명시합니다</h2></div><div class="ce-chapter__body"><p>공식 고정 소스는 <code>Platform.isMacOS</code>과 데스크톱 환경을 확인하고 있습니다. 이번에 실행한 것은 Linux 버전 Obsidian이므로, Apple Notes의 실제 가져오기는 시도하지 않았습니다. 소스에서 대응 조건을 읽을 수 있는 것과 Mac에서 실제로 이전할 수 있었던 것은 별개입니다.</p><p>Apple Notes에서 이동하는 경우, 공식 <a href="https://help.obsidian.md/import/apple-notes" target="_blank" rel="noopener">Apple Notes의 이전 절차</a>와 대상 환경을 확인해 주세요. 이 페이지의 Notion/Evernote의 성공 건수를 Apple Notes의 실제 기기 성공으로 사용할 수 없습니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="downloads"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">공식의 작은 입력과 실제 저장 예시를 비교</h2></div><div class="ce-chapter__body"><p>재현용 입력 2건은 공식 리포지토리의 동일한 고정 커밋에 있는 테스트 fixture입니다. 제 계정의 내보내기가 아닙니다. 연습용 Vault에서 동일한 입력을 시도하거나, 아래의 저장된 본문을 비교하는 데 사용할 수 있습니다.</p><div class="download-row"><a class="fixture-download" data-file="notion-fixture" href="/assets/downloads/obsidian-import/notion-testspace.zip" download>notion-testspace.zip（공식fixture）</a><a class="fixture-download" data-file="evernote-fixture" href="/assets/downloads/obsidian-import/code-block-indentation.enex" download>code-block-indentation.enex（공식fixture）</a></div><p>저장 예시는 실제로 GUI에서 생성한 Markdown의 원본 바이트입니다. ZIP에는 본문 7만 포함하고 있습니다. 이미지, 플러그인 본체, 설정, 입력fixture는 포함되지 않습니다. 첨부된 노트의 링크를 이미지와 함께 표시하고 싶으시면, 원본 입력을 자신의 연습용 Vault로 Importer에서 가져와 확인합니다.</p><div class="download-row"><a class="md-download" data-file="notion-parent" href="/assets/downloads/obsidian-import/notion-parent.md" download="notion-parent.md">Notion-Testspace.md（651 바이트）</a><a class="md-download" data-file="notion-attachment" href="/assets/downloads/obsidian-import/notion-attachment.md" download="notion-attachment.md">Attachment Tests.md（377 바이트）</a><a class="md-download" data-file="notion-block" href="/assets/downloads/obsidian-import/notion-block.md" download="notion-block.md">Block Reference.md（2287 바이트）</a><a class="md-download" data-file="notion-formatting" href="/assets/downloads/obsidian-import/notion-formatting.md" download="notion-formatting.md">Formatting Tests.md（9423 바이트）</a><a class="md-download" data-file="evernote-spaces" href="/assets/downloads/obsidian-import/evernote-spaces.md" download="evernote-spaces.md">Indented with spaces.md（78 바이트）</a><a class="md-download" data-file="evernote-NBSP" href="/assets/downloads/obsidian-import/evernote-NBSP.md" download="evernote-NBSP.md">Indented with non-breaking spaces.md（51 바이트）</a><a class="md-download" data-file="evernote-backslashes" href="/assets/downloads/obsidian-import/evernote-backslashes.md" download="evernote-backslashes.md">Backslashes and markdown in code.md（57 바이트）</a><a class="zip-download" href="/assets/downloads/obsidian-import/actual-imported-markdown-examples.zip" download="actual-imported-markdown-examples.zip">실저장 Markdown7건의 ZIP</a></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">이전 전후 확인 및 FAQ</h2></div><div class="ce-chapter__body"><details class="faq-item"><summary class="faq-summary">Notion에서는 어느 가져오기 방식을 선택하시겠습니까?</summary><div class="faq-answer">이 검증은 Notion → File import입니다. Notion 계정은 토큰과 통신을 사용하는 별도의 경로이며, 실행되지 않습니다. 실제 화면은 File import에 대해 데이터베이스를 보유하지 않는다고 설명하고 있습니다. 데이터베이스·수식의 완전 이전은 이 결과의 범위를 벗어납니다.</div></details><details class="faq-item"><summary class="faq-summary">Notion의 ZIP을 먼저 압축 해제하시겠습니까?</summary><div class="faq-answer">이 공식 fixture는 ZIP 안에 다른 ZIP이 1개 있는 구성이며, 외부 ZIP을 그대로 Choose file로 선택할 수 있었습니다. 4개의 ID가 있는 HTML는 노트가 되었으며, ID가 없는 index.html은 노트가 되지 않았습니다. 임의의 ZIP 구성으로 성공한다는 증거가 아닙니다.</div></details><details class="faq-item"><summary class="faq-summary">0이 실패하면 원본 외관도 동일합니까?</summary><div class="faq-answer">동일하다고는 할 수 없습니다. 이 예에서는 접힌 내용이 일반적인 제목·리스트로 전개되고, 들여쓰기가 포함된 단락은 일반 단락이 되었습니다. 0 failed는 처리 건수 표시입니다. 외관, 첨부, 링크를 각각 확인합니다.</div></details><details class="faq-item"><summary class="faq-summary">Notion의 제목이나 블록에 대한 링크가 페이지 링크가 되는 이유는 무엇입니까?</summary><div class="faq-answer">이번 원본 HTML은 표시 문자열에 블록 ID가 있더라도 href에 앵커가 없으며, 출력은 [[Formatting Tests]]였습니다. 원래 export에서 손실된 위치는 Importer만으로는 복원되지 않습니다. 마이그레이션 전의 export와 출력 모두를 확인합니다.</div></details><details class="faq-item"><summary class="faq-summary">Evernote의 코드 들여쓰기가 남아 있습니까?</summary><div class="faq-answer">이 ENEX의 3 예에서는 공백 4·8개, 빈 행, 코드 내 백슬래시와 기호가 남았습니다. NBSP는 일반 공백으로 변경되고, 4·8개의 들여쓰기가 일치했습니다. 첨부 파일이나 모든 서식, 모든 노트를 시도한 결과가 아닙니다.</div></details><details class="faq-item"><summary class="faq-summary">Apple Notes도 이 환경에서 가져올 수 있습니까?</summary><div class="faq-answer">이 고정 소스가 macOS의 데스크톱 환경인지 확인합니다. 검증한 환경은 Linux이므로 Apple Notes의 실제 가져오기는 시도하지 않았습니다. Mac에서의 성공이나 완전 전환은 이 검증만으로는 판단할 수 없습니다.</div></details></div></section>
+<p class="receipt-line">공개일: 2026년10월01일</p><section class="lp-section ce-chapter sd-chapter" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">확인 범위와 공식 자료</h2></div><div class="ce-chapter__body"><ul><li>Linux 버전 Obsidian/Installer 1.13.7, Importer v3.1.9의 실제 화면. 공식 release assets3건을 수동으로 배치한 격리 Vault로 GUI에서 활성화했습니다.</li><li>Notion 파일 가져오기와 Evernote ENEX를 각각 1회, 실제 OS 파일 선택 및 Start import에서 실행합니다. 저장한 7 노트와 5 로컬 이미지, 유한한 본문·링크·레이아웃 예시를 원본 fixture와 대조했습니다.</li><li>Notion의 첨부 노트와 Evernote의 공백 코드 노트를 동일한 부팅 내 파일 목록에서 다시 열어 bytes 일치를 확인합니다. 앱을 재부팅한 후 재오픈은 아직 검증되지 않았습니다.</li><li>PNG·입력fixture·저장 Markdown은 원본 바이트를 유지하고 있습니다. 보조 코드는 준비와 읽기에 사용되며, 가져오기 및 출력 파일 생성은 plugin API로 대체하지 않습니다.</li></ul><p>준비된 profile ID 오류, 클릭 대상 selector 대기 실패, 파일 선택 시 첫 번째 Return만으로는 닫히지 않은 사실을 유지하고 있습니다. 실제 선택 확정은 OS 화면의 Open 버튼으로 진행했습니다. 앱은 GUI Close 후 실제 대기에서 0을 종료했으며, Xorg는 모든 프로세스에 SIGTERM을 입력하고 실제 대기 0이었습니다. 컨트롤러는 끝부분의 Xlib 종료 처리에서 EXIT 1로 설정되어 있으며, 전체가 정상 종료된 것은 아닙니다. 자세한 내용은 <a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/importer-20260930.md">검증 기록</a>에 정리하겠습니다.</p><p class="scope-note">실제 계정의 export, Notion account/API·데이터베이스·수식, Apple Notes 실행, 전체 메타데이터/전체 레이아웃/임의의의 대규모 데이터, 기타 OS, iOS, Sync, SimpleMemo, 속도·안전성·생산성의 효과는 검증되지 않았습니다.</p><ul class="source-list"><li><a href="https://github.com/obsidianmd/obsidian-importer/releases/tag/3.1.9" target="_blank" rel="noopener">Importer 3.1.9 공식 릴리스</a></li><li><a href="https://github.com/obsidianmd/obsidian-importer/blob/054df1d3f8e368b7c2add22c3bae26d96e721901/README.md" target="_blank" rel="noopener">고정 커밋의 공식 README</a></li><li><a href="https://github.com/obsidianmd/obsidian-importer/blob/054df1d3f8e368b7c2add22c3bae26d96e721901/tests/notion/notion-testspace.zip" target="_blank" rel="noopener">Notion 공식fixture의 원본</a></li><li><a href="https://github.com/obsidianmd/obsidian-importer/blob/054df1d3f8e368b7c2add22c3bae26d96e721901/tests/evernote/code-block-indentation.enex" target="_blank" rel="noopener">Evernote 공식fixture의 원본</a></li><li><a href="https://github.com/obsidianmd/obsidian-importer/blob/054df1d3f8e368b7c2add22c3bae26d96e721901/src/formats/apple-notes.ts#L120" target="_blank" rel="noopener">Apple Notes의 고정 source・OS 조건</a></li></ul><p class="receipt-line">선정판의 source와 공식 배포물의 대조를 수행했지만, source에서 동일한 빌드를 재현한 검증은 아닙니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="next"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-10" data-ce-number="10">다음은, 옮긴 노트를 매일 사용하는 입구를 만들겠습니다</h2></div><div class="ce-chapter__body"><p>이전 후에는 노트의 수·첨부·링크·가독성을 확인하고, 필요한 본문을 수정합니다. Vault이나 노트 간 링크를 처음 사용하는 분은, 부모 가이드에서 Obsidian의 기본 조작을 확인할 수 있습니다.</p><div class="internal-links"><a data-next-step="getting-started" href="/ko/obsidian/getting-started/">Obsidian의 도입 및 기본 조작으로</a><a href="/ko/obsidian/daily-note/">일상의 메모를 데일리 노트로</a></div></div></section></article></main><script>document.querySelectorAll('[data-copy]').forEach(function(b){b.addEventListener('click',async function(){var e=document.querySelector('[data-code="'+b.getAttribute('data-copy')+'"]');try{await navigator.clipboard.writeText(e.textContent);b.textContent=globalThis.SimpleMemoI18n.text("コピーしました");setTimeout(function(){b.textContent=globalThis.SimpleMemoI18n.text("本文をコピー")},1600)}catch(err){b.textContent=globalThis.SimpleMemoI18n.text("コピーできませんでした")}})});</script><footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ko" dir="ltr"><a class="site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">작은 메모, 다음 한 걸음.</p><p class="site-footer-description">iPhone에서 Obsidian과 이메일로 메모를 보내세요.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="푸터 탐색 메뉴">
+      <div class="footer__col">
+        <p class="footer__col-title">프로덕트</p>
+        <a href="/ko/download/" class="footer__link">다운로드</a>
+        <a href="/ko/" class="footer__link">홈</a>
+        <a href="/ko/apple-watch/" class="footer__link">Apple Watch</a>
+        <a href="/ko/obsidian/" class="footer__link">Obsidian 연동</a>
+        <a href="/ko/use-cases/" class="footer__link">활용 사례</a>
+        <a href="/ko/guides/" class="footer__link">사용 가이드</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">비교·전환</p>
+        <a href="/ko/note-to-email/" class="footer__link">메모를 이메일로</a>
+        <a href="/ko/vs/" class="footer__link">비교</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">지원</p>
+        <a href="/ko/roadmap/" class="footer__link">공개 로드맵</a>
+        <a href="/ko/devlog/" class="footer__link">개발 기록</a>
+        <a href="/ko/about/" class="footer__link">개발자 소개</a>
+        <a href="/ko/faq" class="footer__link">자주 묻는 질문</a>
+        <a href="/ko/privacy" class="footer__link">개인정보 보호</a>
+        <a href="/ko/contact" class="footer__link">문의</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 운영: YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

@@ -4069,3 +4069,85 @@ p=0.20。`publishing_day_rate` は5件の決済のうち p=0.70/0.55/0.35/0.25 �
 `check-viewport-overflow --check`（動的）は回していない。WebKitGTK でも測っていない。
 
 `ROUTINE_MCP_PROBE: not_applicable Actions経路のためCCRのMCPは対象外`
+
+
+## 2026-09-20 - Native daily observations; complete measurement scope rejected
+
+- Engine Codex, automation obsidian, scheduled06:00JST verified from scheduler and saved RRULE; task01a0bb78-4965-7242-bedf-29a93d1b0bf9. Initial preflight admitted and rechecked before atomic daily claim.
+- Candidate1: align email-yourself-memo title with its existing Gmail/Outlook how-to body. Original GSC2026-08-20..09-16:9clicks/603impressions. HTML-only measurement preparation was incomplete and unused. Complete mandatory sitemap/distribution scope rejected by aio-2026-08-11-answer-blocks ownership. No declaration, bind, experiment registration or article implementation. Other content targets share the same required-generated-scope obstacle; changing candidate names cannot bypass it.
+- Candidate2: VFU diagnosis. Exact latest failed row retained:2invalid recipients,3hard suppressions,1unavailable token. Latest hourly result errors/eligible/sent each0 does not prove repair. No safe code cause demonstrated; no message replay, recipient edits or token replacement. Current reason is null, so the specialized cap-stop suppression gate remains unsatisfied.
+- GSC original encrypted handoff and AppsFlyer original reader verified; ASC outputs reused. GA4 request468e5600-69fa-4e32-ab55-598cdd9cf0b8 resumed under the same UUID, run35469267276 verified. Bing W38 browser evidence reused; API partial is a separate source. No new source/scheduler or fabricated missing zero.
+- Existing weekly AI slot2026-09-16T06:47JST collected by this original daily owner:run c043bb65-92ee-4dc3-b031-9ba006bb2396,5valid questions, unaided mentions0/4. Private originals retained. Observation publication is not a treatment, Growth win or business shipment.
+- One observe-profile service-notice query covered last48h/max49rows, all49inactive; latest errors0/eligible0. More than48h since prior saved observation: the earlier uncovered interval remains unknown. No active notice in retained rows and no task134 score credit.
+- Daily, existing Weekly appendix and follow-up refreshed; existing Monthly retained. AppsFlyer7-day evaluation is not yet due at this06:00slot. Existing human requests not repeated.
+- Canonical run attempted:true/no_artifact; this PR only publishes observations and bookkeeping. Company business execution remains unfinished. Codex billedUSD null; Claude actual-cost ledger unchanged. Full-scope policy blocker retained privately without changing permissions, scores or experiment ownership.
+
+
+## 2026-09-22 — Refresh: Obsidian installation guide (owner Goal)
+
+- Evidence: admitted GSC 2026-08-23..09-19, exact page 1371 impressions / 9 clicks. Installation query 314 impressions / 0 clicks; download query 154 / 1. Email-yourself has 632 impressions / 10 clicks and lower modeled click headroom.
+- Change: expose official downloads and OS-specific steps before the historical Linux tutorial; align metadata. Keep historical screenshot dates, canonical, hreflang, CTA and analytics intact.
+- Primary source: https://obsidian.md/help/install, checked 2026-09-22. Windows/Mac/mobile execution remains untested.
+- PR: #1527; this branch record counts as shipped only after validated merge. Owner-requested session, not scheduled execution or a repair-stop override.
+- Measurement: gsc-obsidian-install-20260922-r2, post 2026-09-23..10-20, evaluate from 10-23. September 19 language URL split and traffic composition can confound comparison. No causal SEO or installation uplift claimed.
+- Declaration: first plan included an unchanged sitemap index and was retired before implementation publication. Its history remains intact; revised declaration was pushed and bound before the registry-only commit and implementation.
+- QA: SEO 0 errors / existing llms freshness warning; static structure, CTA, URL, experiment, authority and public-copy checks passed. Browser target overflow 0 at 320/390/800/1280px, completed-draft adversarial review found no blocker. Chrome broad rendering: 1798 measured combinations, zero overflow/failures. WebKitWebDriver is unavailable, so WebKit is not verified. Exact-head CI is tracked in the PR.
+- Costs: no new paid service or separate source query. Actual Codex dollars unavailable; no zero-cost entry added. Shared initial setup and broad QA overhead must not recur for every small refresh.
+
+
+## 2026-09-23 — Refresh: self-email clarity (owner Goal)
+
+- Compare: /note-to-email/ has 549 impressions/10 clicks; /blog/email-yourself-memo has 632/10 but already explains sending and receipt. No additional paid source query or model probe.
+- Change: clarify sending, receipt checking and task follow-through; remove unsupported guarantees and the sharing image's unqualified speed comparison. Existing neutral app icon, CTA and analytics retained.
+- PR: #1534. Branch record becomes a shipment only after exact-head validated merge. Manual owner request and original owner-session gate; not scheduled execution and no actions repair-stop override.
+- Prospective declaration f69196a6, registry-only commit 8c2aeef7, then implementation. Experiment gsc-note-to-email-20260923: September 23–October 20 Pacific, evaluation October 23; baseline 10/549, minimum 500 post impressions. Descriptive only, no causal or installation gain claimed.
+- QA: SEO zero errors / pre-existing llms freshness warning; FAQ, CTA, product constants, benchmark, URL and public-copy checks; independent review found no blocker; Chrome target viewport checks 320/390/800/1280px have zero overflow. Exact-head CI and public readback follow.
+- Actual Codex cost remains unavailable; no zero-dollar expense entry or new subscription. Implementation/validation checkpoint is 90 minutes. Waiting is not credited as productive work.
+
+
+## 2026-10-01 — Native attempt admitted; final measurement scope blocked
+
+- Codex automation obsidian, scheduled06:00JST confirmed from scheduler/RRULE; actual task01a0f41e-d80a-7a70-b927-485e8385da0e. Initial-turn preflight passed; fresh execution-right recheck and atomic shared claim completed. The owner-authorized one-use bootstrap was consumed, not a general stop release or a historical repair.
+- Compared VFU diagnosis (historical failures, no proven current code fix; latest reason null), mature next-step experiment (original target metric unavailable), CTA diagnosis (30 sessions missing timed page views in bounded GA4 scan), fastest-voice-memo (changed after baseline), second-brain and voice-input. Selected voice-input title clarity from existing187impressions/1click,2026-08-31..09-27; no new section/consolidation inferred from sparse query rows.
+- Initial declaration omitted mandatory story seed; own registration was reverted and contract properly retired before page edits. Complete r2 declaration26917c9c was pushed and Company-bound, then registry-only44866455, then one metadata draft. Its local tests passed: SEO0errors/49existing warnings, experiment/evidence, public copy, FAQ, constants, CTA, links; Chrome320/390/800/1280px overflow0. No new device verification or measured business uplift.
+- Final decision-ci rejected data/decision-rejections/voice-input-title-20261001.json as an undeclared measurement path: the retirement procedure requires that record but the measurement bookkeeping allowlist excludes it. Protected verifier unchanged. Draft preserved privately; page, support edits and this run's registration reverted; both contracts retired with reasons. PR#1799 now carries observation/bookkeeping only. Canonical outcome attempted:true/no_artifact; do not finish the Company receipt or count an article shipment.
+- Existing GSC/Bing API/AppsFlyer verified, ASC reused, GA4 pending request resumed under the same UUID. BingW40 visible DOM retained with account/property/task/period/hashes; complete verified, rounded K stays null. Current-week fixed AI probe already on main, so no duplicate paid probe. Daily/Weekly/Monthly/follow-up saved privately; GA4 quality defects remain, not zero.
+- One service-notice observe read: last48h/max49 returned48inactive rows; latest fresh/errors0/eligible0. Prior observation interval exceeded48h, so uncovered time remains unknown. No task134 score or delivery claim.
+- Codex actualUSD null with reason retained privately, no Claude cost-ledger append. One business attempt; no additional schedule, model job, force push, reset, auth expansion, or second exception. Required next work: separately repair the protected verifier/procedure mismatch under authorized ownership, then obtain an eligible future run; never backdate or reuse the consumed one-use permit.
+- Subsequent owner-requested repair and record publication: PR#1806 corrects retirement JSON scope and isolates recovery fixtures; current tests10/10 and related Company tests43/43 pass, including replay of the original blocked diff. The public operating display is regenerated from the same ledgers and unchanged formula. Original PR#1799 is retained as closed-unmerged evidence once this repair is verified. The original no_artifact, retired experiments and consumed permission remain; this manual follow-up grants no new natural attempt or business publication.
+
+
+## 2026-10-01 — Owner-requested backlog recovery and repair linkage
+
+- Current owner request: resolve all ten items in the October 1 direct-owner alert. This authorizes manual verification/reconciliation and ordinary admission after demonstrated repair; it supplies no exception to stop, budget, occupancy, prospective-contract or publication gates.
+- Run ap-20261001-owner-session-owner-backlog-recovery; PR#1813. Connect the existing PR1506 bounded-support fix to the September20 measurement conflict and PR1806 retirement-scope fix to the October1 rejection. Current34 measurement/support regressions, real-Git decision tests and10 recovery boundary tests pass. Original no_artifact results remain unchanged. This record is a shipment only after exact-head validated merge and production readback.
+- No repair-attempt reset, emergency-stop mutation or consumed-permit renewal. Repair attempts increase; another no_artifact recurrence still escalates at the unchanged limit. Derived containment ends only because both outstanding recurrences have verified repairs. Future natural business delivery remains unproven.
+- Seven usage-limit requests close through the unchanged same-route attempted-run recovery condition, with no repair_of for quota failures. Review3bf435d is commit-specific: recover only the missing explanation and retain the later AppsFlyer MSA/source-history repair.
+- Cron issue1587 remains open until its existing all-workflow recovery verifier confirms the actual executions. No duplicate schedule, model probe or external notification is added. Human intervention and unknown Codex monetary actual remain explicit.
+
+
+## 2026-10-02 — Codex主系06:00 / レーンA・音声入力の利用条件
+
+- 実タスク: 01a0f946-1d12-7883-aa89-0718772a5b85、automation obsidian、route actions。予約記録とDAILY06:00規則を照合。初回preflight許可、共有claim取得。消費済み例外の再利用・停止や予算の解除なし。
+- 候補比較: VFUは既存の失敗IDのまま、現行reason=nullを復旧としない。GA4の34着地不明セッションも欠測として保持。Growthではvoice-inputのタイトルに本文のiPhone/iOS26条件がない点を選び、second-brainの広い定義変更より範囲を限定。事前契約voice-input-title-20261002とCompany bind後に測定登録のみを先行コミット。
+- GSC 09/01〜09/28: 対象185表示・0クリック、平均順位8.135。可視の検索語結合は10表示だけなので記事追加や統合の根拠にしない。CTAの対象1/1は小標本かつ品質ブロックで成果根拠にしない。
+- PR1853: title/description/SNS/Article/WebPageと既存アイコン、対象sitemap・配信/記事ネタの種を同期。本文・CTA・計測を保持。0 SEO errors/54既存warnings、Chrome4幅で横漏れ0・画像読込み確認。出荷は最終SHA CI・マージ・本番一致後に成立。
+- 観測: GSC/BingAPI/AppsFlyer検証、ASC既存出力再利用、同一UUIDのGA4再開。BingW40と当週固定AI観測は再利用。service_notice_monitor直近48時間48行はinactiveで最新鮮度と数値0を確認。過去の観測空白は消さない。
+- 実験: GSC新規28日窓10/02〜10/29・11/01評価。10/03・10/23の既存実験を維持。AppsFlyer自然日5/7はINCONCLUSIVE。Codex実費USDは未取得null、Claude実費台帳への追記なし。
+
+
+## 2026-10-03 — Refresh: self-email guide search title
+
+- Native owner: obsidian; actions; planned06:00JST; task01a0fe6a-df2f-7403-a65a-d60d3297e89d. Scheduler row, initial turn, fresh preflight and unique daily claim verified. Original gate receipt6cb53b7e33e56517b7b815605fc93291c6c778e6ffb7b1bd4a21fcb8d66161ae.
+- Compared VFU diagnosis, the second-brain page and this exact page. The retained VFU failure matches the current last-failure timestamp and gives no safe replay/recipient/token repair. Health issue1902 was raised before the daily slot; no observer rule was changed. Its intake patch remains private for the original Act because it is outside this sealed measurement scope.
+- One action: replace the one-tap app promise in the search title with the Gmail/Outlook steps already present in the article. Body, CTA, canonical and tracking unchanged. No new device or speed claim.
+- Prospective value contract email-yourself-title-20261003; Company f2bfe354-ab83-4ed6-998f-6213c9a8bd75 bound before implementation. Registry-only registration commit preserves original rows and their order before the first page edit; no later registry formatting change.
+- GSC source36946659155: 2026-09-02..09-29,576impressions/9clicks. Original plan freezes10-03..10-30 and11-02 review; publishing_day_rate forecasts only an operational publishing day. No causal search, install or revenue effect claimed.
+- PR #1903 pending: final-head SEO Validation, actual merge and served-byte match are required. SEO0errors/58existingwarnings; relevant static gates passed. TargetChrome320/390/900/1100px: overflow0 and no broken images. FullChrome sweep pending; localWebKit unavailable and not passed.
+- DailyGSC/BingAPI/AppsFlyer verified; ASC reused; sameGA4request resumed and verified. BingW40 and current Sep30 AI probe reused; no paid requery. service_notice_monitor:49rows/48h, latestfresh/errors0/eligible0, inactive with no active/failure row. Earlier historical gap remains.
+- AppsFlyer6/7natural days remainsINCONCLUSIVE. ExistingOct3CTA primary-metric conflicts and mature-period requirements remain; UTC evaluation date has not arrived. Oct23SEO windows unchanged. Priorvoice-input publication remains successful but Companyfinish unavailable.
+- CodexactualUSD unavailable: private null with reason; no Claudeactual-cost append. Execution, publication and later business outcome stay separate. No owner intervention observed in this scheduled turn; this does not establish complete H0 measurement.
+
+
+## 2026-10-04 — Refresh: second-brain guide title
+- Native owner obsidian, actions route, planned 06:00 JST, task 01a10392-c32e-78e3-a7ca-fb2d158f0351. Scheduler inventory, initial preflight and preclaim readback passed; unique shared daily branch obtained. No stop or budget override. - Compared the 815-impression/11-click method guide with the 251-impression/3-click Roam comparison. The title emphasized email and Obsidian while H1/body teach CODE/PARA and a one-note exercise. One action aligns five metadata title fields; body, description, CTA, canonical and tracking stay unchanged. - Prospective contract second-brain-title-20261004 and Company b0898ee2-79f3-40c8-9078-715106f1e91f were sealed and bound before implementation. Registered experiment gsc-second-brain-title-20261004 in a separate registry-only commit before the page edit; no subsequent registry formatting change. - GSC source37081053944 covers09/02..09/29. Post window10/04..10/31 and evaluation11/03 are fixed. Operational publishing_day_rate is separate from SEO, acquisition and profit. Sampled search results are context, not causal or ranking proof. - VFU retains its old failure and latest reason=null; no reproduced safe repair or resend. CTA original export has32 missing landings, all without timestamped page views in its bounded scan; source-limit diagnosis is private and quality remains blocked. No data filled or discarded. - Daily GSC/AppsFlyer and resumed same-request GA4 verified; ASC reused; BingAPI partial retained. BingW40 and Sep30 fixed AI observation reused. Service notice48h/49rows: latest fresh, errors0/eligible0, no active or failure; historical observation gap retained. - AppsFlyer operational follow-up now reports7/7distinct verified native collection days and KEEP. This is pipeline acceptance, not complete parent zero-touch or business impact. Goal notification native-evidence issue remains under verification. Existing experiment windows and original failures retained. - PR1959: publication pending final-head SEO Validation, merge and served-byte match. LocalSEO0errors/60warnings and relevant static gates pass. Browser evidence and final completion remain separate. CodexactualUSD null/unavailable; Claude cost ledger unchanged; no observed owner intervention is not proof of complete H0 observation.

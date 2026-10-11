@@ -94,8 +94,15 @@ def check_paths(paths):
 
 
 def semantic_state(doc):
+    def routine_state(row):
+        # Individual-read clocks establish freshness, not a new state every hour.
+        # Keep status, endpoint, identity and the immutable last verified history.
+        if row.get('observation_state') != 'unavailable':
+            return row
+        return {**row, 'source_observation': {
+            k: v for k, v in row.get('source_observation', {}).items() if k != 'observed_at'}}
     return {
-        'routines': sorted(doc['routines'], key=lambda r: r['id']),
+        'routines': sorted((routine_state(r) for r in doc['routines']), key=lambda r: r['id']),
         'findings': sorted(({'id': f['id'], 'what': f['what']} for f in doc['open_findings']), key=lambda r: r['id']),
         'stops': doc['intentional_stops'],
         'codex': {k: v for k, v in doc.get('codex_observation', {}).items() if k != 'observed_at'},
@@ -357,6 +364,23 @@ class Tests(unittest.TestCase):
         self.assertFalse(should_publish(a, b))
         b['codex_observation']['runs'].append({'initial': 'in_progress'})
         self.assertTrue(should_publish(a, b))
+
+    def test_unavailable_read_clock_keeps_daily_publication_cadence(self):
+        a = {'observed_at': '2026-09-22T00:00:00Z', 'open_findings': [], 'intentional_stops': [],
+             'routines': [{'id': 'trig_old', 'observation_state': 'unavailable',
+                           'source_observation': {'http_status': 404, 'observed_at': '2026-09-22T00:00:00Z'},
+                           'last_verified': {'observed_at': '2026-09-19T00:00:00Z'}}]}
+        b = json.loads(json.dumps(a))
+        b['observed_at'] = b['routines'][0]['source_observation']['observed_at'] = '2026-09-22T01:00:00Z'
+        self.assertFalse(should_publish(a, b))
+        b['observed_at'] = '2026-09-23T00:00:00Z'
+        self.assertTrue(should_publish(a, b))
+        b['observed_at'] = '2026-09-22T01:00:00Z'
+        b['routines'][0]['source_observation']['http_status'] = 403
+        self.assertTrue(should_publish(a, b))
+        b['routines'][0]['source_observation']['http_status'] = 404
+        b['routines'][0]['last_verified']['observed_at'] = '2026-09-20T00:00:00Z'
+        self.assertTrue(should_publish(a, b), 'Historical evidence must remain semantically significant')
 
     def test_credential_is_only_in_observer_environment(self):
         calls = []

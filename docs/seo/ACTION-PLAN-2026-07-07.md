@@ -16,7 +16,7 @@ Source: `FULL-AUDIT-REPORT-2026-07-07.md` (score 92/100, up from 88). Priorities
 
 ## Medium (fix within 1 month)
 
-6. **Homepage entity graph**: fix/collapse the duplicate `#organization` (`index.html:91`, `en/index.html:89`) — align first block's sameAs to the canonical 8 (drop live-404 qiita-org, add prtimes) or merge to a single definition; drop qiita-org from the 2 Person blocks; remove/replace live-404 `github.com/hajimeataka` in 7 author sameAs blocks (pending owner decision on restoring the handle).
+6. **Homepage entity graph**: fix/collapse the duplicate `#organization` (`index.html:91`, `en/index.html:89`) — align first block's sameAs to the canonical 8 (drop live-404 qiita-org, add prtimes) or merge to a single definition; drop qiita-org from the 2 Person blocks; remove/replace live-404 `github.com/<personal-handle>` in 7 author sameAs blocks (pending owner decision on restoring the handle).
 7. **Sensitive-path exposure**: extend the `functions/_middleware.js:59-64` 404-block (currently `/docs/`) to `/CLAUDE.md`, `/scripts/*`, `/tools/.env.example` (verified no secrets today — ops-intel hygiene). While in the file: fix the stale comment at :32-36.
 8. **Cargo-cult font preloads (10 pages)**: `vs/mem`, `vs/anytype`, `vs/tana`, `vs/heptabase`, `blog/information-organization-guide`, `blog/email-self-task-management`, `blog/email-management-tips`, `use-cases/researchers`, `use-cases/writers`, `use-cases/designers` preload ~161KB NotoSansJP with zero @font-face. Delete the pair — or better, migrate these fully-inline pages to style.min.css (they also use `var(--accent)` with no definition anywhere).
 9. **CF Web Analytics is dead site-wide**: CSP blocks `static.cloudflareinsights.com/beacon.min.js` (1 console error/page, zero data collected). Either add the host to script-src + connect-src in `_headers`, or owner turns off the injection (dashboard). Decide, don't leave half-on.
@@ -41,7 +41,7 @@ Source: `FULL-AUDIT-REPORT-2026-07-07.md` (score 92/100, up from 88). Priorities
 - **GSC disavow re-upload** — docs/disavow.txt, now 286 domains (attack ongoing 3–5/day).
 - **GSC reindex** after items 1–5 land: en/send-email-to-yourself + the 3 hidden-EN pages + the 12 parity pages.
 - **paji.me redirect flattening** (CF-1, ~5 min) and **Scrape Shield Email Obfuscation OFF** (~1 min).
-- **CF Web Analytics** decision (item 9) · **PSI API key** (3rd audit without field data) · **github.com/hajimeataka** handle decision (item 6).
+- **CF Web Analytics** decision (item 9) · **PSI API key** (3rd audit without field data) · **github.com/<personal-handle>** handle decision (item 6).
 
 ## Measurement (continuity)
 

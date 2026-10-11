@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/outbox-architecture">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Arsitektur Outbox: Desain untuk menghindari tumpahan pesan | Buku Harian Pengembangan SimpleMemo</title>
+  <meta name="description" content="Saat Anda menekan tombol kirim, UI akan dihapus, tetapi pesan yang tidak terkirim tetap ada di terminal dan dikirim ulang. Kami akan menjelaskan alur desain pola Outbox, implementasi SendManager, enkripsi AES-GCM, transmisi ulang otomatis, dan deteksi pengembalian baris oleh NWPath Monitor.">
+  <meta name="theme-color" content="#070b14">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- OGP -->
+  <meta property="og:title" content="Arsitektur Outbox: Desain untuk menghindari tumpahan pesan | Buku Harian Pengembangan SimpleMemo">
+  <meta property="og:description" content="Saat Anda menekan tombol kirim, UI akan dihapus, tetapi pesan yang tidak terkirim tetap ada di terminal dan dikirim ulang. Gambaran lengkap arsitektur Outbox dengan enkripsi AES-GCM, transmisi ulang otomatis, dan deteksi pemulihan saluran NWPathMonitor.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/id/devlog/outbox-architecture">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png?v=7e2bb21d30">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="id_ID">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Arsitektur Outbox: Desain untuk menghindari tumpahan pesan | Buku Harian Pengembangan SimpleMemo">
+  <meta name="twitter:description" content="Saat Anda menekan tombol kirim, UI akan dihapus, tetapi pesan yang tidak terkirim tetap ada di terminal dan dikirim ulang. Gambaran lengkap arsitektur Outbox dengan enkripsi AES-GCM, transmisi ulang otomatis, dan deteksi pemulihan saluran NWPathMonitor.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png?v=7e2bb21d30">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/id/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/outbox-architecture">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: Speakable (AIO / Voice Search) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/id/devlog/outbox-architecture#webpage",
+  "inLanguage": "id",
+  "name": "Arsitektur Outbox: Desain untuk mencegah tumpahan",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/id/#website"
+  },
+  "url": "https://simplememofast.com/id/devlog/outbox-architecture"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container { display: flex; justify-content: flex-end; padding: 1.25rem 0; }
+    .lang-switcher { display: inline-flex; background: rgba(18, 26, 46, 0.95); border: 1px solid rgba(82, 160, 255, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .lang-switcher__btn { background: transparent; border: none; color: #c9d4ec; padding: 0.75rem 1.1rem;
+      min-height: 48px; border-radius: 19px; cursor: pointer; font-size: 0.8rem; font-weight: 400; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.02em; }
+    .lang-switcher__btn:hover { color: #f2f6ff; }
+    .lang-switcher__btn:focus-visible { outline: 2px solid #4da3ff; outline-offset: 2px; }
+    .lang-switcher__btn.active { background: rgba(82, 160, 255, 0.25); border: 1px solid rgba(82, 160, 255, 0.2); color: #fff; box-shadow: 0 0 12px rgba(82, 160, 255, 0.1); }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+    pre { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 16px 0; }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 0.85rem; color: #e0e0e0; }
+    .flow-list { list-style: none; padding: 0; counter-reset: flow; }
+    .flow-list li { counter-increment: flow; padding: 10px 0 10px 40px; position: relative; border-left: 2px solid rgba(82, 160, 255, 0.2); margin-left: 12px; }
+    .flow-list li::before { content: counter(flow); position: absolute; left: -14px; top: 8px; width: 26px; height: 26px; background: rgba(82, 160, 255, 0.15); border: 1px solid rgba(82, 160, 255, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--accent); }
+    .related-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 16px; }
+    @media (min-width: 600px) { .related-grid { grid-template-columns: 1fr 1fr; } }
+    .related-card { background: rgba(18, 26, 46, 0.85); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-decoration: none; color: inherit; display: block; transition: border-color 0.25s; }
+    .related-card:hover { border-color: rgba(82, 160, 255, 0.3); }
+    .related-card__title { font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+    .related-card__desc { font-size: 0.8rem; color: var(--text-secondary); }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+
+  <!-- JSON-LD: TechArticle -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "@id": "https://simplememofast.com/id/devlog/outbox-architecture#article",
+  "inLanguage": "id",
+  "headline": "Arsitektur Outbox: Dirancang agar pesan tidak tumpah",
+  "description": "Saat Anda menekan tombol kirim, UI akan dihapus, tetapi pesan yang tidak terkirim tetap ada di terminal dan dikirim ulang. Gambaran lengkap arsitektur Outbox dengan enkripsi AES-GCM, transmisi ulang otomatis, dan deteksi pemulihan saluran NWPathMonitor.",
+  "url": "https://simplememofast.com/id/devlog/outbox-architecture",
+  "datePublished": "2026-02-13",
+  "dateModified": "2026-10-04",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png?v=7e2bb21d30",
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/id/devlog/outbox-architecture"
+  },
+  "keywords": [
+    "Pola Outbox",
+    "iOS Pertama Offline",
+    "arsitektur pertama offline",
+    "Enkripsi AES-GCM iOS",
+    "Penanggulangan tumpahan pesan"
+  ],
+  "proficiencyLevel": "Expert",
+  "dependencies": "Apple CryptoKit, Network.framework, BackgroundTasks"
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Beranda",
+      "item": "https://simplememofast.com/id/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Buku Harian Pengembangan",
+      "item": "https://simplememofast.com/id/devlog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Arsitektur Outbox",
+      "item": "https://simplememofast.com/id/devlog/outbox-architecture"
+    }
+  ]
+}</script>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Navigasi utama" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/id/guides/">Panduan</a><a href="/id/use-cases/">Contoh penggunaan</a><a href="/id/vs/">Bandingkan</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/id/guides/">Panduan</a></li>
+        <li><a href="/id/use-cases/">Contoh penggunaan</a></li>
+        <li><a href="/id/vs/">Bandingkan</a></li>
+        <li><a href="/id/methods/"><span>Metode</span></a></li>
+        <li><a href="/id/blog/"><span>Blog</span></a></li>
+        <li><a href="/id/glossary/"><span>Glosarium</span></a></li>
+        <li><a href="/id/faq">Pertanyaan umum</a></li>
+        <li><a href="/id/about/">Tentang pengembang</a></li>
+        <li><a href="/id/devlog/">Catatan pengembangan</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>Unduh</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Bahasa Indonesia · Pilih bahasa"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ID</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="id" dir="ltr"><p class="site-language-title">Pilih bahasa</p><div class="site-language-grid"><a href="/devlog/outbox-architecture" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/devlog/outbox-architecture" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/devlog/outbox-architecture" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/devlog/outbox-architecture" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/devlog/outbox-architecture" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/devlog/outbox-architecture" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/devlog/outbox-architecture" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="id" aria-current="page"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ar/devlog/outbox-architecture" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/devlog/outbox-architecture" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">Unduh</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menu"><span>Menu</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+  <!-- Header -->
+<!-- Content -->
+  <main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title sd-title"> <span>Arsitektur Outbox: Dirancang agar pesan tidak tumpah</span> </h1>
+      <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>Penulis: <a href="/id/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a></span> </p>
+
+      <!-- ======================== -->
+      <!-- Japanese Content         -->
+      <!-- ======================== -->
+      <div class="">
+        <p class="page-content__date">2026 tahun 2 bulan 13 hari</p>
+        <div class="page-content__body">
+
+          <!-- Section 1 -->
+          <h2 id="reading-01" data-ce-number="01">Masalah: Untuk menghindari tumpahan pesan bahkan jika Anda segera menghapus transmisi</h2>
+          <p>Di SimpleMemo, UI dihapus saat pengguna mengetuk tombol kirim dan dapat segera mulai menulis catatan berikutnya. Ini adalah UX yang merupakan akar dari gaya Captio.</p>
+          <p>Namun, jaringan asli memiliki latensi 300ms~2 detik, mungkin gagal, dan mungkin offline sejak awal. Banyak aplikasi menunggu respons jaringan sebelum menghapus UI. Itu aman, tetapi UX buruk. Sebaliknya, jika Anda segera membersihkannya, ada risiko kehilangan pesannya.</p>
+          <p><strong>Pola Outbox</strong> menyelesaikan persyaratan yang bertentangan ini pada saat yang bersamaan. Pesan disimpan secara permanen di penyimpanan terenkripsi lokal (Outbox) pada saat ketukan transmisi, UI segera dihapus, dan transmisi jaringan dilakukan di latar belakang. Jika transmisi berhasil, hapus dari Outbox, dan jika gagal, secara otomatis akan mencoba lagi. Akibatnya, <strong> meninggalkan pesan yang tidak terkirim di terminal dan mengirimkannya kembali</strong>, dan latensi pengalaman mendekati nol.</p>
+
+          <!-- Section 2 -->
+          <h2 id="reading-02" data-ce-number="02">Alur desain pola Outbox</h2>
+          <p>Berikut ini adalah keseluruhan alur dari mengetuk tombol kirim hingga mengirim pesan.</p>
+          <ol class="flow-list">
+            <li><strong>Kirim ketukan → Pertama, enkripsi AES-GCM ke Outbox dan simpan secara permanen</strong><br> Saat pengguna mengetuk tombol kirim, pesan dienkripsi dengan AES-GCM 256bit dan disimpan secara permanen di penyimpanan lokal perangkat. UI tidak akan dihapus sampai langkah ini selesai. Dengan kata lain, penyimpanan Outbox akan menjadi pemecah gelombang pertama untuk mencegah tumpahan.</li>
+            <li><strong>Segera hapus UI (pengguna dapat mulai menulis catatan berikutnya)</strong><br>Outbox Saat penyimpanan berhasil, hapus tampilan teks dan putar animasi transmisi. Dari sudut pandang pengguna, itu identik dengan "terkirim". Saya tidak menunggu respons jaringan apa pun. Tujuan dari Send-to-Reset adalah menjadi singkat tanpa merasa menunggu (0.25 detik termasuk animasi).</li>
+            <li><strong>Kirim email melalui Relay API di latar belakang</strong><br>UI Secara paralel dengan kliring, SendManager mengirimkan permintaan HTTP ke Relay API pada Pekerja Cloudflare. Proses ini sepenuhnya asinkron dan tidak memblokir utas utama.</li>
+            <li><strong>Jika berhasil, hapus dari Outbox</strong><br>Relay Setelah menerima respons 200 dari API, hapus pesan yang sesuai dari Outbox dengan aman. Ini melengkapi siklus hidup pesan.</li>
+            <li><strong>Jika gagal, itu akan secara otomatis mengirim ulang</strong>Dalam kasus kesalahan jaringan <br> atau kesalahan server, biarkan menunggu transmisi, ketika saluran kembali, ketika aplikasi dibuka, pemrosesan latar belakang (BGTaskScheduler. Waktu eksekusi ditentukan oleh iOS) dan mengirimkannya kembali. Ada batas atas pada berapa kali untuk mengirim ulang secara otomatis.</li>
+            <li><strong>Saat offline, NWPathMonitor mendeteksi pemulihan saluran dan secara otomatis mengirim ulang</strong>Saat offline pada saat mengirim <br>, NWPathMonitor dari Network.framework memantau status saluran, dan ketika Wi-Fi dan pemulihan seluler terdeteksi, pesan yang tidak terkirim dari Outbox secara otomatis dikirim kembali (seperti 5 di atas, ada batas atas untuk jumlah pembatalan otomatis).</li>
+          </ol>
+
+          <!-- Section 3 -->
+          <h2 id="reading-03" data-ce-number="03">Kode SendManager</h2>
+          <p>Fungsi <code>send()</code> dari SendManager adalah titik masuk untuk pola Outbox. Pertama, simpan ke Outbox, antrian jika tidak ada koneksi jaringan, dan segera jalankan transmisi jika ada koneksi.</p>
+<pre tabindex="0"><code>func send(message: String, completion: @escaping (SendResult) -&gt; Void) {
+    // まずOutboxに保存（クラッシュや圏外で失わないように）
+    let outboxMessage: OutboxMessage
+    do {
+        outboxMessage = try OutboxManager.shared.add(body: message)
+    } catch {
+        DispatchQueue.main.async { completion(.failure(error)) }
+        return
+    }
+
+    // ネットワーク接続がない場合はキューに入れたことを通知
+    guard NetworkMonitor.shared.isConnected else {
+        BackgroundTaskManager.shared.scheduleRetryTask()
+        DispatchQueue.main.async { completion(.queued) }
+        return
+    }
+
+    // 送信処理を実行
+    performSend(message: message, outboxId: outboxMessage.id, ...)
+}</code></pre>
+          <p>Poin penting adalah <code>OutboxManager.shared.add(body:)</code> menulis ke penyimpanan persisten secara sinkron. Ketika panggilan ini berhasil, pesan disimpan dengan aman di terminal. Apa pun hasil transmisi jaringannya, pesannya akan tetap ada di Outbox.</p>
+
+          <!-- Section 4 -->
+          <h2 id="reading-04" data-ce-number="04">Implementasi enkripsi AES-GCM</h2>
+          <p>Pesan yang disimpan di Outbox adalah memo pribadi pengguna. Meskipun itu adalah penyimpanan lokal, itu tidak dapat disimpan dalam teks biasa. Menggunakan Apple CryptoKit's AES-GCM, ini adalah sebuah implementasi yang tidak menggunakan SDK eksternal untuk enkripsi.</p>
+          <ul>
+            <li><strong>Apple CryptoKit</strong> — Tersedia untuk iOS 13 atau yang lebih baru. Jangan gunakan SDK eksternal untuk pemrosesan enkripsi (hanya Apple asli).</li>
+            <li><strong>Kunci simetris 256 bit</strong> — disimpan di Keychain.</li>
+            <li><strong>Enkripsi dengan otentikasi</strong> — AES-GCM menjamin kerahasiaan dan integritas data secara bersamaan. Data yang dirusak terdeteksi pada saat dekripsi.</li>
+          </ul>
+<pre tabindex="0"><code>enum OutboxEncryption {
+    private static var encryptionKey: SymmetricKey {
+        if let existingKey = KeychainHelper.load(key: "outbox_encryption_key") {
+            return SymmetricKey(data: existingKey)
+        }
+        let newKey = SymmetricKey(size: .bits256)
+        let keyData = newKey.withUnsafeBytes { Data($0) }
+        KeychainHelper.save(key: "outbox_encryption_key", data: keyData)
+        return newKey
+    }
+
+    static func encrypt(_ plainText: String) throws -&gt; Data {
+        guard let data = plainText.data(using: .utf8) else {
+            throw OutboxError.encryptionFailed
+        }
+        let sealedBox = try AES.GCM.seal(data, using: encryptionKey)
+        guard let combined = sealedBox.combined else {
+            throw OutboxError.encryptionFailed
+        }
+        return combined
+    }
+}</code></pre>
+          <p>Kunci dibuat otomatis saat pertama kali dibutuhkan dan disimpan di Keychain. Pengaturan penyimpanannya adalah “hanya perangkat ini, dapat dibaca setelah pertama kali dibuka kuncinya” (kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly). Aplikasi lain tidak dapat membacanya, dan pemulihan cadangan tidak memindahkannya ke perangkat lain. Setelah perangkat dibuka kuncinya sekali sesudah dimulai ulang, proses latar belakang dapat membacanya meskipun perangkat kembali terkunci. Contoh kode di atas merupakan versi sederhana saat artikel ditulis. Dalam kode saat ini, kegagalan membaca Keychain tidak dianggap sebagai ketiadaan kunci dan tidak menyebabkan pembuatan kunci baru.</p>
+
+          <!-- Section 5 -->
+          <h2 id="reading-05" data-ce-number="05">Arti dari mengonfigurasi jalur data hanya dengan Apple asli</h2>
+          <p>Semua kerangka kerja yang digunakan dalam arsitektur Outbox berasal dari Apple.</p>
+          <ul>
+            <li><strong>CryptoKit</strong> — Enkripsi AES-GCM. Tidak diperlukan perpustakaan enkripsi pihak ketiga.</li>
+            <li><strong>Network.framework</strong> - Pemantauan status jalur dengan NWPathMonitor. Perpustakaan Reachability tidak diperlukan.</li>
+            <li><strong>BackgroundTasks</strong> — Latar belakang coba lagi oleh BGTaskScheduler.</li>
+          </ul>
+          <p>Fakta bahwa tidak ada perpustakaan eksternal di jalur tunggu memiliki arti sebagai berikut.</p>
+          <ul>
+            <li><strong>Tidak terpengaruh oleh pembaruan eksternal</strong> — Proses menunggu transmisi tidak berhenti bekerja karena pembaruan atau penghentian perpustakaan pihak ketiga.</li>
+            <li><strong>Keamanan</strong> - Kode pihak ketiga tidak memasukkan pemrosesan (enkripsi, penyimpanan, transmisi) yang menyentuh isi memo yang menunggu untuk dikirim.</li>
+          </ul>
+          <p>Selain itu, seluruh aplikasi juga menggunakan SDK eksternal (Google sign-in, Firebase, AppsFlyer) (lihat <a href="/id/devlog/privacy-first-design"> Desain Privasi Pertama</a>). "Apple hanya asli" yang disebutkan di sini adalah tentang jalur data yang menunggu untuk dikirimkan.</p>
+
+          <!-- Section 6 -->
+          <h2 id="reading-06" data-ce-number="06">Pemisahan pembersihan UI dan transmisi jaringan</h2>
+          <p>Nilai sebenarnya dari pola Outbox terletak pada pemisahan lengkap lapisan UI dan lapisan jaringan. Mari kita lihat pegangan ketuk tombol kirim.</p>
+<pre tabindex="0"><code>@objc private func sendButtonTapped() {
+    PerformanceLogger.shared.beginSendToReset()
+    let message = textView.text ?? ""
+    isSending = true
+    sendBarButton.isEnabled = false
+
+    // Animation → UI clear (does NOT wait for network!)
+    performSendAnimation {
+        self.clearTextView()
+        PerformanceLogger.shared.endSendToReset()
+    }
+
+    // Send is async. Does not block UI.
+    SendManager.shared.send(message: message) { [weak self] result in
+        self?.isSending = false
+        self?.updateSendButtonState()
+        switch result {
+        case .success:
+            PerformanceLogger.shared.logEvent(name: "SendSuccess")
+        case .failure(let error):
+            self?.handleSendError(error)
+        case .queued:
+            self?.showQueuedFeedback()
+        }
+    }
+}</code></pre>
+          <p><code>performSendAnimation</code> dan <code>SendManager.shared.send</code> dieksekusi sepenuhnya secara independen. Animasi selesai dalam 0.25 detik, dan tampilan teks dihapus. Transmisi jaringan berlangsung secara asinkron di latar belakang dan tidak memblokir UI sama sekali.</p>
+          <p>Tujuan dari Send-to-Reset adalah <strong>kependekan yang tidak terasa menunggu</strong>. 0.25 detik termasuk animasi. Segera setelah mengetuk tombol kirim, pengguna dapat mulai menulis catatan berikutnya. Ini adalah UX gaya Captio.</p>
+
+          <!-- FAQ -->
+          <h2 id="reading-07" data-ce-number="07">Pertanyaan umum</h2>
+
+          <h3>Q. Apa yang terjadi pada catatan yang dikirim secara offline?</h3>
+          <p>Ini dienkripsi dan disimpan di Outbox, dan secara otomatis mengirim ulang ketika saluran dipulihkan (terdeteksi oleh NWPathMonitor), ketika aplikasi dibuka, dan pemrosesan latar belakang. Ada batas atas pada jumlah waktu untuk mengirim ulang secara otomatis, dan untuk catatan yang telah mencapai batas atas, tekan dan tahan di "Riwayat" dan pilih "Kirim Ulang".</p>
+
+          <h3>Q. Apakah catatan tidak akan hilang bahkan jika saya menutup aplikasi?</h3>
+          <p>Outbox adalah penyimpanan persisten. Bahkan jika Anda menutup aplikasi atau memulai ulang iPhone, itu akan tetap ada. Lain kali aplikasi diluncurkan, atau tugas latar belakang akan secara otomatis mencoba lagi.</p>
+
+          <h3>Q. Mengapa Anda memilih AES-GCM?</h3>
+          <p>Apple CryptoKit didukung secara asli, dan deteksi gangguan juga dimungkinkan dengan Enkripsi yang Diautentikasi. Fakta bahwa tidak perlu perpustakaan eksternal untuk memproses enkripsi juga merupakan keuntungan.</p>
+
+          <h3>Q. Berapa jumlah perlukaan ulang jika terjadi kegagalan transmisi?</h3>
+          <p>Ini akan dikirim lagi secara otomatis. Pemicunya adalah pemrosesan latar belakang ketika baris dikembalikan, ketika aplikasi dibuka (BGTaskScheduler. Waktu eksekusi ditentukan oleh iOS). Memo yang tidak dapat dikirim akan dikirim lagi tanpa menghapusnya dari menunggu pengiriman, tetapi ada batasan berapa kali pengiriman ulang otomatis.</p>
+
+          <!-- Related Articles -->
+          <h2 id="reading-08" data-ce-number="08">Artikel terkait</h2>
+          <div class="related-grid">
+            <a href="/id/devlog/day1" class="related-card">
+              <div class="related-card__title">[Day1] Saya sangat menyukai Captio sehingga saya ingin membuat "pengalaman itu" lagi</div>
+              <div class="related-card__desc">Transmisi satu ketukan dan desain untuk mencegah tumpahan. Semuanya dimulai di sini.</div>
+            </a>
+            <a href="/id/devlog/" class="related-card">
+              <div class="related-card__title">Daftar buku harian pengembangan</div>
+              <div class="related-card__desc">Catatan lengkap pengambilan keputusan teknis dan reproduksi pengalaman Captio.</div>
+            </a>
+            <a href="/id/devlog/uikit-vs-swiftui" class="related-card">
+              <div class="related-card__title">UIKit vs SwiftUI: Pilihan untuk kecepatan mulai</div>
+              <div class="related-card__desc">Alasan mengapa saya memilih UIKit di 2026. Desain arsitektur ditujukan pada Time-to-Text 500ms atau kurang.</div>
+            </a>
+            <a href="/id/devlog/relay-api-design" class="related-card">
+              <div class="related-card__title">Relay API: Membangun basis transmisi email dengan Pekerja Cloudflare</div>
+              <div class="related-card__desc">Kirim tanpa mengandalkan kerja sama OAuth di kotak surat. Kirim dengan Resend dari relai API (Pekerja Cloudflare) yang bergerak di tepi.</div>
+            </a>
+            <a href="/id/devlog/privacy-first-design" class="related-card">
+              <div class="related-card__title">Desain Privasi Pertama: Komitmen Paranoid</div>
+              <div class="related-card__desc">Sesi URL sementara, spesifikasi saat ini untuk penanganan log, dan pengalih aplikasi.</div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================== -->
+      <!-- English Content          -->
+      <!-- ======================== -->
+
+    </div>
+
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-09" data-ce-number="09"> <span>Referensi</span> </h2></div><div class="ce-chapter__body">
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developer.apple.com/documentation/cryptokit/aes/gcm" target="_blank" rel="noopener" style="color:var(--accent);">Pengembang Apple — AES.GCM (CryptoKit)</a> — <span>Referensi Resmi Outbox untuk Enkripsi Otentikasi AES-GCM Digunakan untuk Enkripsi Data</span></li>
+    <li><a href="https://developer.apple.com/documentation/network/nwpathmonitor" target="_blank" rel="noopener" style="color:var(--accent);">Pengembang Apple — NWPathMonitor (Kerangka Kerja Jaringan)</a> — <span>Digunakan untuk deteksi offline dan pemantauan status jaringan</span></li>
+    <li><a href="https://developer.apple.com/documentation/backgroundtasks/bgtaskscheduler" target="_blank" rel="noopener" style="color:var(--accent);">Pengembang Apple — BGTaskScheduler</a> — <span>Digunakan untuk mengirim ulang penjadwalan pemrosesan di latar belakang</span></li>
+    <li><a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener" style="color:var(--accent);">Chris Richardson — Pola: Kotak keluar transaksional (microservices.io)</a> — <span>Penjelasan pola transaksional Outbox (tulis pesan yang Anda kirim dalam proses yang sama di meja tunggu, dan proses lain mengirimkannya)</span></li>
+  </ul>
+</div></section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/id/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"><span>Baca selanjutnya</span></span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"><span>Siapkan tempat untuk mengumpulkan catatan dengan integrasi Obsidian</span></span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"><span>Atur integrasi dan tujuan penyimpanan di iPhone agar catatan yang dikirim juga tersimpan di Obsidian.</span></span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>Konten terkait</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/id/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Perbandingan Aplikasi Alternatif Captio</span></a></li>
+    <li><a href="/id/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Daftar artikel blog</span></a></li>
+    <li><a href="/id/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Daftar Perbandingan Aplikasi Memo</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <!-- Footer -->
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="id" dir="ltr"><a class="site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Catatan kecil. Langkah berikutnya.</p><p class="site-footer-description">Kirim catatan dari iPhone ke Obsidian dan email.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="Navigasi footer">
+      <div class="footer__col">
+        <p class="footer__col-title">Produk</p>
+        <a href="/id/download/" class="footer__link">Unduh</a>
+        <a href="/id/" class="footer__link">Beranda</a>
+        <a href="/id/how-to/" class="footer__link"><span>Panduan</span> </a>
+        <a href="/id/templates/" class="footer__link"><span>Templat</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Perbandingan dan perpindahan aplikasi</p>
+        <a href="/id/captio/" class="footer__link"><span>Metode Captio</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Bacaan</p>
+        <a href="/id/devlog/" class="footer__link">Catatan pengembangan</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Bantuan</p>
+        <a href="/id/roadmap/" class="footer__link">Rencana pengembangan</a>
+        <a href="/id/about/" class="footer__link">Tentang pengembang</a>
+        <a href="/id/terms" class="footer__link"><span>Ketentuan penggunaan</span> </a>
+        <a href="/id/privacy" class="footer__link">Privasi</a>
+        <a href="/id/contact" class="footer__link">Hubungi kami</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Dikelola oleh YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

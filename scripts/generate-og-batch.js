@@ -18,7 +18,7 @@ const { chromium } = require('playwright');
 const OUTPUT_DIR = path.resolve(__dirname, '..', 'assets', 'img', 'og');
 
 const IMAGES = [
-  { file: 'send-email-to-yourself.png', title: '8 Best Apps to Email Yourself (2026)', icon: '📧' },
+  { file: 'send-email-to-yourself.png', title: 'How to Email Yourself on iPhone:\n8 Ways Compared (2026)', icon: '📧' },
   { file: 'blog-captio-shutdown-alternatives.png', title: 'Captio Shut Down? Best Alternatives', icon: '🔄' },
   { file: 'blog-how-to-email-yourself-note-iphone.png', title: 'How to Email Yourself a Note on iPhone', icon: '📱' },
   { file: 'blog-fastest-note-app-iphone-2026.png', title: 'Fastest Note Apps for iPhone 2026', icon: '⚡' },
@@ -37,11 +37,13 @@ const IMAGES = [
   { file: 'obsidian-what-is-vault.png', title: 'Obsidianの保管庫とは\n実体はただのフォルダ', icon: '📁' },
   { file: 'obsidian-plugins.png', title: 'プラグイン6,812個から\n実測トップ10', icon: '🔌' },
   { file: 'obsidian-plugins-dataview.png', title: 'Dataviewの使い方\nクエリ入門', icon: '🔍' },
+  { file: 'obsidian-plugins-templater.png', title: 'Templaterの使い方\nデイリーノートの設定', icon: '📄' },
+  { file: 'obsidian-plugins-quickadd.png', title: 'QuickAddの使い方\nInboxへ追記する設定', icon: '📝' },
   { file: 'obsidian-pricing.png', title: 'Obsidianの料金\n無料でどこまで使える？', icon: '💰' },
   { file: 'obsidian-sync.png', title: 'Obsidianの同期方法\niCloud/Sync/Git/Syncthing', icon: '🔄' },
   { file: 'obsidian-sync-icloud.png', title: 'ObsidianをiCloudで同期\n設定手順とつまずきどころ', icon: '☁️' },
   { file: 'obsidian-sync-official.png', title: 'Obsidian SyncのStandard/Plus\n必要なのはどちらか', icon: '🔄' },
-  { file: 'obsidian-airpods.png', title: 'AirPodsに話すだけで\nObsidianへ残す', icon: '🎧' },
+  { file: 'obsidian-airpods.png', title: 'AirPodsからSiriで\nObsidianへ残す', icon: '🎧' },
   { file: 'blog-obsidian-voice-fastest-route.png', title: 'Obsidianに音声で挿す\n最速の経路', icon: '🎙️' },
   { file: 'data-voice-shift.png', title: '「音声シフト」定点調査\nメモは書くものから話すものへ', icon: '📊' },
 ];

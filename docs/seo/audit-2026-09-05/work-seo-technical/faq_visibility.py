@@ -3,7 +3,7 @@
 Method: strip whitespace + JP/EN punctuation, then substring match in either direction (tolerates prefixes like 'Q.' and trailing '?')."""
 import json,re,glob,os,collections
 from bs4 import BeautifulSoup
-W="/private/tmp/claude-501/-Users-hajimeataka-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad/wt"
+W="/private/tmp/claude-501/-Users-<user>-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad/wt"
 os.chdir(W)
 files=[f for f in glob.glob("**/*.html",recursive=True) if not f.startswith(("node_modules/","docs/","fixtures/","scripts/","tools/","growth/",".git/","admin/"))]
 n=lambda t: re.sub(r"[\s？?！!。、，,．.「」『』（）()：:／/・\-—–…\"'“”‘’]+","",t)

@@ -7,22 +7,22 @@
   <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/privacy-first-design">
     <!-- Google tag (gtag.js) -->
   <script>
-    window.addEventListener('load', function() {
+    (function() {
       if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
-      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
-      ric(function() {
-        var s = document.createElement('script');
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
-        s.async = true;
-        document.head.appendChild(s);
-        s.onload = function() {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
-        };
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
       });
-    });
+    })();
   </script>
   <title>プライバシーファースト設計：メモアプリにおける偏執的なこだわり | Obsidian連携シンプルメモ 開発日誌</title>
   <meta name="description" content="iPhone版シンプルメモのプライバシー設計を解説。AES-GCMの端末内暗号化、通信キャッシュ、診断ログ、利用解析の範囲と、アプリスイッチャーでメモを隠さない現行仕様・メール配送の制限を説明します。Keychainの鍵管理、保存先に残る情報、AppsFlyerと自社解析の識別子による関連付けも明記します。">
@@ -52,6 +52,14 @@
   <link rel="canonical" href="https://simplememofast.com/devlog/privacy-first-design">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/privacy-first-design">
   <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/privacy-first-design">
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/privacy-first-design">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -61,13 +69,13 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- JSON-LD: BlogPosting -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/devlog/privacy-first-design#article","headline":"プライバシーファースト設計：メモアプリにおける偏執的なこだわり","description":"iPhone版シンプルメモのプライバシー設計を解説。AES-GCMの端末内暗号化、通信キャッシュ、診断ログ、利用解析の範囲と、アプリスイッチャーでメモを隠さない現行仕様・メール配送の制限を説明します。Keychainの鍵管理、保存先に残る情報、AppsFlyerと自社解析の識別子による関連付けも明記します。","url":"https://simplememofast.com/devlog/privacy-first-design","inLanguage":"ja","datePublished":"2026-02-13","dateModified":"2026-09-06","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Obsidian連携シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/privacy-first-design#webpage"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/devlog/privacy-first-design#article","headline":"プライバシーファースト設計：メモアプリにおける偏執的なこだわり","description":"iPhone版シンプルメモのプライバシー設計を解説。AES-GCMの端末内暗号化、通信キャッシュ、診断ログ、利用解析の範囲と、アプリスイッチャーでメモを隠さない現行仕様・メール配送の制限を説明します。Keychainの鍵管理、保存先に残る情報、AppsFlyerと自社解析の識別子による関連付けも明記します。","url":"https://simplememofast.com/devlog/privacy-first-design","inLanguage":"ja","datePublished":"2026-02-13","dateModified":"2026-09-24","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Obsidian連携シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/privacy-first-design#webpage"}}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"開発日誌","item":"https://simplememofast.com/devlog/"},{"@type":"ListItem","position":3,"name":"プライバシーファースト設計","item":"https://simplememofast.com/devlog/privacy-first-design"}]}</script>
 
   <!-- JSON-LD: Speakable (AIO / Voice Search) -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/devlog/privacy-first-design#webpage","inLanguage":"ja","name":"プライバシーファースト設計：偏執的なこだわり","isPartOf":{"@id":"https://simplememofast.com/#website"},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".page-content__title"]},"url":"https://simplememofast.com/devlog/privacy-first-design"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/devlog/privacy-first-design#webpage","inLanguage":"ja","name":"プライバシーファースト設計：偏執的なこだわり","isPartOf":{"@id":"https://simplememofast.com/#website"},"url":"https://simplememofast.com/devlog/privacy-first-design"}</script>
 
   <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
@@ -389,30 +397,35 @@
   </style>
 
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="メインナビゲーション">
+  <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
-      <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
-        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
+      <a class="global-nav__logo site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/guides/">使い方</a><a href="/use-cases/">活用事例</a><a href="/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/">使い方</a></li>
+        <li><a href="/use-cases/">活用事例</a></li>
+        <li><a href="/vs/">比較</a></li>
         <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
         <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
         <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
-        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
-        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
+        <li><a href="/faq">よくある質問</a></li>
+        <li><a href="/about/">開発者について</a></li>
+        <li><a href="/devlog/">開発記録</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/devlog/privacy-first-design" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/devlog/privacy-first-design" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
-        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="日本語 · 言語を選択"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>JA</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ja" dir="ltr"><p class="site-language-title">言語を選択</p><div class="site-language-grid"><span class="site-language-current" data-site-locale="ja" aria-current="page"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/en/devlog/privacy-first-design" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/devlog/privacy-first-design" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/devlog/privacy-first-design" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/devlog/privacy-first-design" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/devlog/privacy-first-design" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/devlog/privacy-first-design" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/devlog/privacy-first-design" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/devlog/privacy-first-design" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/devlog/privacy-first-design" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
           <span lang="ja">ダウンロード</span>
         </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="メニュー"><span>メニュー</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
   </nav>
@@ -421,7 +434,7 @@
 
 <main class="page-content">
     <div class="container">
-      <h1 class="page-content__title">
+      <h1 class="page-content__title sd-title">
         <span lang="ja">プライバシーファースト設計：メモアプリにおける偏執的なこだわり</span>
 
       </h1>
@@ -435,23 +448,23 @@
       <div lang="ja" class="">
         <div class="article-body">
 
-          <h2>1. なぜメモアプリにプライバシーが重要なのか</h2>
+          <h2 id="reading-01">1. なぜメモアプリにプライバシーが重要なのか</h2>
           <p>仕事のアイデア、個人的な下書き、日々の記録。メモアプリには、人に見せる前の情報が集まる。素早く書けることと同じくらい、どこに保存され、どこへ送られるかを理解できることが大切だ。</p>
           <p>この記事では、端末内の暗号化、通信キャッシュ、画面表示、診断ログと利用解析を分けて説明する。ひとつの保護が、ほかの経路の保護も保証するわけではない。</p>
           <div class="philosophy-highlight">
             <strong>2026年9月6日更新：</strong>公開版と同じバージョン（5.8.17）のソースを照合し、画面保護・ログ・利用解析の説明を訂正した。できることと制限の両方を記す。
           </div>
 
-          <h2>2. アプリスイッチャーでメモを自動的に隠す機能は有効ではない</h2>
+          <h2 id="reading-02">2. アプリスイッチャーでメモを自動的に隠す機能は有効ではない</h2>
           <p>iOSは、アプリがバックグラウンドへ移った後の画面をスナップショットとして使う。Appleは、画面に機密情報がある場合は背景へ移る際に取り除くよう案内している。</p>
           <p>確認した5.8.17のソースでは、<code>sceneWillResignActive</code>と<code>sceneDidEnterBackground</code>はドラフト保存を行い、プライバシーオーバーレイの表示処理を呼ばない。以前の表示用関数は残っているが、有効な保護として動作する経路ではない。</p>
           <p><strong>表示中のメモがアプリスイッチャーの画像に残る可能性がある。</strong>Outboxを暗号化していても、画面画像が隠れるわけではない。この記事の旧版にあった「常にメモ内容を隠す」という説明を訂正する。</p>
 
-          <h2>3. ephemeral URLSession：通信キャッシュのディスク保存を抑える</h2>
+          <h2 id="reading-03">3. ephemeral URLSession：通信キャッシュのディスク保存を抑える</h2>
           <p>標準の<code>URLSession</code>は、キャッシュ、Cookie、認証情報をディスクに保存する。一般的なアプリではこれは便利な機能だが、メモアプリでは不要であり、リスクになりうる。</p>
           <p>通信キャッシュが端末に残るということは、どのURLにいつアクセスしたかの痕跡がディスク上に存在するということだ。Cookieが保存されるということは、セッション情報が端末に残るということだ。</p>
           <p>このアプリでは、<code>URLSessionConfiguration.ephemeral</code>を使用する。</p>
-          <pre><code>private let session: URLSession = {
+          <pre tabindex="0"><code>private let session: URLSession = {
     let config = URLSessionConfiguration.ephemeral
     config.httpCookieAcceptPolicy = .never
     config.httpShouldSetCookies = false
@@ -466,31 +479,31 @@
           </ul>
           <p>これはURLSessionのキャッシュなどに関する保護であり、アプリが別途保存・送信する利用イベントや、サーバー側の送信記録をなくす機能ではない。利用解析の識別子による関連付けも、この設定とは別に行われる。</p>
 
-          <h2>4. 性能計測ログの出力範囲</h2>
+          <h2 id="reading-04">4. 性能計測ログの出力範囲</h2>
           <p><code>PerformanceLogger</code>のログ出力は、<code>#if DEBUG</code>で囲まれている。DEBUGが定義されないビルドでは、このロガーのログ出力処理は含まれない。</p>
           <p>このロガーの<code>logError</code>は、エラーの詳細文ではなく型を記録する。たとえば<code>URLError</code>という種類を使い、ファイルパスやユーザー入力を含む可能性のある<code>localizedDescription</code>をそのまま出さない。</p>
           <p>一方、<code>logEvent</code>に渡すイベント名や追加文字列を自動ですべて無害化する仕組みではない。呼び出し元でメールアドレス・メモ本文・認証情報を渡さないことが必要になる。</p>
           <p><strong>この説明を、アプリ・外部SDK・OS全体の「ログゼロ」という保証には広げない。</strong>自社の利用イベント送信とAppsFlyerは別の仕組みとして有効になっている。取得範囲は本記事の利用解析FAQと<a href="/privacy#technical">プライバシーポリシー</a>で説明する。</p>
 
-          <h2>5. AES-GCM暗号化Outboxの保護範囲</h2>
+          <h2 id="reading-05">5. AES-GCM暗号化Outboxの保護範囲</h2>
           <p>送信待ちのメモは、端末内のOutboxというキューで管理する。保存時にはAppleのCryptoKitを使ってAES-GCMで暗号化する。新しい暗号鍵は256ビットで生成する。</p>
           <p>鍵はKeychainに保管し、<code>kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly</code>を使う。この設定では、再起動後の初回ロック解除から次の再起動までアクセスでき、別の端末へのバックアップ復元では鍵が移行しない。アプリは暗号化・復号のために鍵を読み出す。</p>
           <p>これは保存データの保護であり、表示中の画面を隠したり、あらゆる端末侵害からの安全を保証したりするものではない。機種変更前には、必要なメモが保存先に届いていることを確認してほしい。</p>
           <p>メール送信を使う場合、本文は当社のRelay APIと配送基盤で処理され、受信箱にはメールとして残る。<strong>端末内の暗号化は、メール配送のエンドツーエンド暗号化（E2EE）を意味しない。</strong>詳細は<a href="/privacy#technical">プライバシーポリシー</a>と<a href="/privacy-architecture/">データの通り道</a>で説明している。</p>
           <p>送信待ちキューについては、<a href="/devlog/outbox-architecture">Outboxアーキテクチャの解説</a>を参照。</p>
 
-          <h2>6. メモ本文の保護と外部SDKの役割</h2>
+          <h2 id="reading-06">6. メモ本文の保護と外部SDKの役割</h2>
           <p>iOSアプリ内では、メモ本文の暗号化にCryptoKit、鍵保管にKeychain、本文の送信にURLSessionを使う。Network.frameworkは接続状態の監視、BackgroundTasksはバックグラウンド送信のスケジューリングを担う。</p>
           <p>一方、アプリは外部SDKも使う。GoogleSignInとFirebase AuthenticationはGoogleアカウントによる任意のメール自動入力に使い、Firebase App Checkは起動時に初期化してバックエンドAPIを保護する。AppsFlyerは獲得・利用解析に使い、自社解析と共通のインストール識別子を設定する。</p>
           <p>メモ本文をイベント項目に含めない設計でも、識別子や送信記録の関連付けは残る。SDKを含む利用解析の範囲は、本文の暗号化とは別に確認する必要がある。項目と用途は<a href="/privacy#technical">プライバシーポリシー</a>で説明している。</p>
 
-          <h2>7. 保護の範囲を明示する</h2>
+          <h2 id="reading-07">7. 保護の範囲を明示する</h2>
           <p>端末内の暗号化、通信キャッシュの扱い、利用解析は、それぞれ異なる役割を持つ。Outboxの暗号化やephemeral URLSessionがあっても、利用イベントの収集がなくなるわけではない。</p>
           <p>メモを素早く残せることと、取得する情報を理解できることの両方を大切にする。利用解析の送信先、識別子、関連付けの範囲を説明し、アプリの変更に合わせて見直す。</p>
 
           <!-- FAQ Section -->
           <div class="faq-section">
-            <h2>よくある質問</h2>
+            <h2 id="reading-08" data-ce-number="08">よくある質問</h2>
 
             <div class="faq-item">
               <div class="faq-item__question">Q. メモの内容はサーバーに保存されますか？</div>
@@ -520,7 +533,7 @@
 
           <!-- Related Articles -->
           <div class="related-section">
-            <h2 class="related-section__title">関連記事</h2>
+            <h2 class="related-section__title" id="reading-09" data-ce-number="09">関連記事</h2>
             <div class="related-grid">
               <a href="/devlog/day1" class="related-card">
                 <div class="related-card__title">【Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった</div>
@@ -531,7 +544,7 @@
                 <div class="related-card__desc">Obsidian連携シンプルメモの技術的な意思決定の記録。</div>
               </a>
               <a href="/devlog/outbox-architecture" class="related-card">
-                <div class="related-card__title">Outboxアーキテクチャ：取りこぼしゼロ設計</div>
+                <div class="related-card__title">Outboxアーキテクチャ：取りこぼしを防ぐ設計</div>
                 <div class="related-card__desc">送信待ちメモを管理するキューと、AES-GCMで暗号化するOutbox設計の解説。</div>
               </a>
               <a href="/devlog/relay-api-design" class="related-card">
@@ -547,11 +560,11 @@
 
     </div>
 
-<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-  <h2 style="font-size:1.1rem;margin-bottom:1rem;">
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-10" data-ce-number="10">
     <span lang="ja">参考文献</span>
 
-  </h2>
+  </h2></div><div class="ce-chapter__body">
   <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
     <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — CryptoKit Documentation</a> — <span lang="ja">AES-GCM暗号化によるOutboxデータ保護の実装に使用</span></li>
     <li><a href="https://developer.apple.com/documentation/foundation/urlsession" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — URLSession Documentation</a> — <span lang="ja">エフェメラル（一時的）セッションによるネットワーク通信でプライバシーを確保</span></li>
@@ -560,7 +573,7 @@
     <li><a href="https://developer.apple.com/documentation/uikit/preparing-your-ui-to-run-in-the-background" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Preparing Your UI to Run in the Background</a> — <span lang="ja">アプリスイッチャー用スナップショットと画面上の情報</span></li>
     <li><a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Keychain Access After First Unlock, This Device Only</a> — <span lang="ja">鍵のアクセス条件と他端末への移行制限</span></li>
   </ul>
-</section>
+</div></section>
 
 <!-- SEO: Auto-generated related content links -->
   <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
@@ -593,13 +606,13 @@
 </section>
 </main>
 
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ja" dir="ltr"><a class="site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a><div><p class="site-footer-title">思いついたことを、次の一歩へ。</p><p class="site-footer-description">Obsidianとメールに、メモを送るiPhoneアプリ。</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
-        <a href="/" class="footer__link"><span lang="ja">ホーム</span> </a>
+        <a href="/download/" class="footer__link">ダウンロード</a>
+        <a href="/" class="footer__link">ホーム</a>
         <a href="/how-to/" class="footer__link"><span lang="ja">使い方</span> </a>
         <a href="/templates/" class="footer__link"><span lang="ja">テンプレ</span> </a>
       </div>
@@ -609,15 +622,15 @@
       </div>
       <div class="footer__col">
         <p class="footer__col-title">読みもの</p>
-        <a href="/devlog/" class="footer__link"><span lang="ja">開発日誌</span> </a>
+        <a href="/devlog/" class="footer__link">開発記録</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span lang="ja">公開ロードマップ</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
+        <a href="/roadmap/" class="footer__link">公開ロードマップ</a>
+        <a href="/about/" class="footer__link">開発者について</a>
         <a href="/terms" class="footer__link"><span lang="ja">利用規約</span> </a>
-        <a href="/privacy" class="footer__link"><span lang="ja">プライバシーポリシー</span> </a>
-        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span> </a>
+        <a href="/privacy" class="footer__link">プライバシー</a>
+        <a href="/contact" class="footer__link">お問い合わせ</a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -626,12 +639,7 @@
     </div>
   </footer>
 
-  <script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

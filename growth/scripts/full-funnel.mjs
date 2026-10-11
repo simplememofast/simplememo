@@ -30,12 +30,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { ROOT, listSnapshots, loadSnapshot } from '../lib/gsc.mjs';
+import { flagReader } from '../lib/cli.mjs';
 
 const argv = process.argv.slice(2);
-const flag = (n, d = null) => {
-  const i = argv.indexOf(`--${n}`);
-  return i >= 0 && argv[i + 1] && !argv[i + 1].startsWith('--') ? argv[i + 1] : d;
-};
+const flag = flagReader(argv);
 const write = argv.includes('--write');
 const month = flag('month', new Date().toISOString().slice(0, 7));
 if (!/^\d{4}-\d{2}$/.test(month)) {

@@ -30,6 +30,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, broken, run } from './lib/selftest.mjs';
+import { validateOneReleaseLocalQuality } from './lib/one-release-local-quality.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const LEDGER_PATH = path.join(ROOT, 'data/release-gate.json');
@@ -65,7 +66,7 @@ export function hoursSince(iso, now) {
  *
  * 見るのは「出してよい中身か」。Apple の審査そのものは見ない（まだ始まっていない）。
  */
-export function evaluateSubmission({ policy, build, ci, releaseNotes, review, doneToday = 0, now } = {}) {
+export function evaluateSubmission({ policy, build, ci, quality_alternative, releaseNotes, review, doneToday = 0, now } = {}) {
   const g = commonGate(policy, doneToday);
   if (g) return g;
 
@@ -114,10 +115,18 @@ export function evaluateSubmission({ policy, build, ci, releaseNotes, review, do
         + '（承認後は自動で出るので、ここを通すと止める機会が無い）');
   }
 
+  // One-version evidence remains separate from Cloud/device conclusions.
+  let alternative = null;
+  if (quality_alternative !== undefined && quality_alternative !== null) {
+    alternative = validateOneReleaseLocalQuality(quality_alternative, { purpose: 'submission', build, ci, now });
+    if (!alternative.accepted) return hold(`限定品質証跡を受け入れない: ${alternative.errors.join(',')}`);
+    if (policy.require_ci_green !== true || policy.require_phased_release !== true
+        || review.release_type !== 'MANUAL') return hold('限定経路でもCI/PHASED/MANUALの条件を維持する');
+  }
   // CI。**「読めなかった」を「緑」と読み替えない**
   if (policy.require_ci_green === true) {
     if (!ci || typeof ci !== 'object') return unknown('CI の結果');
-    if (ci.conclusion !== 'success') {
+    if (ci.conclusion !== 'success' && !alternative?.accepted) {
       return hold(`CI が success でない（${ci.conclusion ?? '不明'}）`);
     }
     if (ci.sha !== build.sha) {
@@ -135,7 +144,7 @@ export function evaluateSubmission({ policy, build, ci, releaseNotes, review, do
     if (typeof v !== 'string' || v.trim() === '') return hold(`リリースノートが無い: ${loc}`);
   }
 
-  // TestFlight で実際に載って、寝かせたか
+  // TestFlightがVALIDであること。提出前の独自待機はpolicyで0h、実機確認は別に要求する。
   if (build.testflight_state !== 'VALID') {
     return build.testflight_state === undefined
       ? unknown('TestFlight の処理状態')
@@ -153,6 +162,7 @@ export function evaluateSubmission({ policy, build, ci, releaseNotes, review, do
   if (typeof build.open_blockers !== 'number') return unknown('未解決のブロッカー件数');
   if (build.open_blockers > 0) return hold(`未解決のブロッカーが ${build.open_blockers} 件`);
 
+  if (!alternative?.accepted) {
   // **実機での事前確認は機械には代われない。**
   // 権限表はここを human_only に残している（「後ではなく先に」）。
   // 門から外すのではなく、**人が確認したことを門が要求する。**
@@ -168,7 +178,26 @@ export function evaluateSubmission({ policy, build, ci, releaseNotes, review, do
     return hold('実機で確認したのが別のコミット — **見たものと出すものを一致させる**');
   }
 
+  }
+  if (alternative?.accepted) return { decision: 'submit', version: build.version,
+    quality_basis: 'one_release_local_quality.v1', consume_once_for: 'submission',
+    consumption_required: true, cloud_success_claimed: false, physical_success_claimed: false,
+    why: '限定された別型の品質証跡と通常の提出条件を満たしている' };
+
   return { decision: 'submit', version: build.version, why: '提出の条件をすべて満たしている' };
+}
+
+/** Stage1 only; this decision never authorizes submission or publication. */
+export function evaluateIntegration({ policy, build, ci, quality_alternative, doneToday = 0, now } = {}) {
+  const g = commonGate(policy, doneToday);
+  if (g) return g;
+  if (policy.require_ci_green !== true) return hold('CIの必須判定を解除しない');
+  const q = validateOneReleaseLocalQuality(quality_alternative, { purpose: 'integration', build, ci, now });
+  if (!q.accepted) return hold(`統合用の限定品質証跡を受け入れない: ${q.errors.join(',')}`);
+  return { decision: 'integrate', version: build.version, source_sha: build.sha,
+    quality_basis: 'one_release_local_quality.v1', consume_once_for: 'integration',
+    consumption_required: true, cloud_success_claimed: false, physical_success_claimed: false,
+    why: 'PR659の固定headについて一統合の条件を満たしている' };
 }
 
 /**
@@ -353,8 +382,21 @@ function selftest() {
         `ASC の実ロケールは ja（release_notes/ja-JP/ はフォルダ名）: ${JSON.stringify(locales)}`);
     }],
     ['TestFlight が VALID でなければ出さない', () => heldS({ build: { ...subOk().build, testflight_state: 'PROCESSING' } }, 'VALID')],
-    ['**寝かせが足りなければ出さない**', () => {
-      const b = { ...subOk().build, testflight_available_at: ago(1) };
+    ['提出前待機は0時間', () => {
+      assert(doc.policy.min_testflight_soak_hours === 0);
+      for (const h of [0, 1, 23]) {
+        const c = subOk(); c.build.testflight_available_at = ago(h);
+        assert(evaluateSubmission(c).decision === 'submit', `待機${h}hで提出できない`);
+      }
+    }],
+    ['正の待機を指定したpolicyでは不足時にhold', () => {
+      const c = subOk(); c.policy.min_testflight_soak_hours = 24;
+      c.build.testflight_available_at = ago(1);
+      const r = evaluateSubmission(c);
+      assert(r.decision === 'hold' && r.why.includes('寝ていない'), JSON.stringify(r));
+    }],
+    ['待機0時間でも未来のTestFlight利用可能時刻はhold', () => {
+      const b = { ...subOk().build, testflight_available_at: ago(-1) };
       heldS({ build: b }, '寝ていない');
     }],
     ['寝かせの起点が読めなければ hold', () => {

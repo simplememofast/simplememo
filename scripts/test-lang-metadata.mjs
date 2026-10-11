@@ -4,7 +4,7 @@ import vm from 'node:vm';
 
 const source = fs.readFileSync(new URL('../js/lang.js', import.meta.url), 'utf8');
 
-function page({ served = 'ja', stored = null, missingMeta = false } = {}) {
+function page({ served = 'ja', stored = null, missingMeta = false, staticNavigation = false } = {}) {
   const values = {
     'meta[name="description"]': 'Original search description',
     'meta[property="og:title"]': 'Original social title',
@@ -28,6 +28,7 @@ function page({ served = 'ja', stored = null, missingMeta = false } = {}) {
     readyState: 'complete',
     documentElement: { lang: served, getAttribute() { return this.lang; } },
     querySelector(selector) {
+      if (staticNavigation && selector === '.site-languages') return {};
       return elements.get(selector) || templates[/data-lang="(ja|en)"/.exec(selector)?.[1]] || null;
     },
     querySelectorAll() { return []; },
@@ -36,7 +37,7 @@ function page({ served = 'ja', stored = null, missingMeta = false } = {}) {
   const window = { location: { search: '', href: 'https://example.test/article' } };
   const localStorage = { getItem: () => stored, setItem: (_, value) => { stored = value; } };
   vm.runInNewContext(source, { document, window, localStorage, URL, URLSearchParams });
-  return { document, elements, switchTo: window.SimpleMemoLang.switch, values };
+  return { document, elements, switchTo: window.SimpleMemoLang?.switch, values };
 }
 
 for (const served of ['ja', 'en']) {
@@ -61,4 +62,11 @@ sparse.switchTo('en');
 sparse.switchTo('ja');
 assert.equal(sparse.document.title, 'Original canonical title');
 assert.equal(sparse.elements.size, 0);
-console.log('Language metadata: JA/EN return trips, saved preferences, distinct canonical metadata and absent tags passed.');
+const staticPage = page({ stored: 'en', staticNavigation: true });
+assert.equal(staticPage.switchTo, undefined);
+assert.equal(staticPage.document.documentElement.lang, 'ja');
+assert.equal(staticPage.document.title, 'Original canonical title');
+for (const [selector, original] of Object.entries(staticPage.values)) {
+  assert.equal(staticPage.elements.get(selector).content, original, selector);
+}
+console.log('Language metadata: JA/EN return trips, saved preferences, distinct canonical metadata, absent tags and static-language navigation passed.');

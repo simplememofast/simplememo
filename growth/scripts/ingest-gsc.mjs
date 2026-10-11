@@ -22,12 +22,10 @@ import path from 'node:path';
 import { parseGscExport, classifyGscColumns, parseDelimited } from '../lib/csv.mjs';
 import { ROOT, toPath } from '../lib/gsc.mjs';
 import { buildMeta, emptyBuckets, mergeByKey, summarise, writeSnapshot } from '../lib/snapshot.mjs';
+import { flagReader } from '../lib/cli.mjs';
 
 const argv = process.argv.slice(2);
-const flag = (n, d = null) => {
-  const i = argv.indexOf(`--${n}`);
-  return i >= 0 && argv[i + 1] && !argv[i + 1].startsWith('--') ? argv[i + 1] : d;
-};
+const flag = flagReader(argv);
 const dryRun = argv.includes('--dry-run');
 const label = flag('label', new Date().toISOString().slice(0, 10));
 const inputDir = path.resolve(ROOT, flag('dir', 'growth/input'));

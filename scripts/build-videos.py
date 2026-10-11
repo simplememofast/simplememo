@@ -30,7 +30,6 @@ Requires Pillow and an ffmpeg binary (npm ffmpeg-static, or FFMPEG env var).
 
 import argparse
 import json
-import math
 import os
 import shutil
 import subprocess
@@ -98,6 +97,9 @@ def _latin(ch):
     return ch.isascii() and (ch.isalnum() or ch in "'-.")
 
 
+NO_LINE_START = '、。，．）」』】！？ー・…'
+
+
 def wrap_ja(s, per_line):
     """
     Wrap on character count, since Japanese has no spaces — but never break
@@ -114,7 +116,8 @@ def wrap_ja(s, per_line):
             continue
         nxt = s[i + 1] if i + 1 < len(s) else ''
         mid_word = _latin(ch) and _latin(nxt)
-        if len(line) >= per_line and not mid_word:
+        # Never start a line with closing punctuation (「…に / 、同時に」).
+        if len(line) >= per_line and not mid_word and nxt not in NO_LINE_START:
             out.append(line)
             line = ''
         elif ch in '、。' and len(line) >= per_line - 4:
@@ -207,6 +210,10 @@ def benchmark_rows():
     page like any other, so it reads the same file instead of carrying a copy.
     Captions round half-up: the Drafts median is exactly 1.45 and Python's
     %.1f would print 1.4.
+
+    [2026-09-26] A row whose figure is not a median (Drafts: the fastest of five
+    runs, `ready_basis` in the ledger) carries a ※ so the frame can say so. The
+    chart otherwise puts one app's best run beside everyone else's median.
     """
     from decimal import Decimal, ROUND_HALF_UP
     with open(os.path.join(ROOT, 'data/benchmark.json'), encoding='utf-8') as f:
@@ -216,7 +223,8 @@ def benchmark_rows():
     for name in sorted(apps, key=lambda a: apps[a]['ready']):
         v = apps[name]['ready']
         shown = Decimal(str(v)).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
-        out.append((label.get(name, name), v, f'{shown}秒'))
+        mark = '※' if apps[name].get('ready_basis') else ''
+        out.append((label.get(name, name), v, f'{shown}秒{mark}'))
     return out
 
 
@@ -241,8 +249,7 @@ def bars_scene(bg, heading, note, rows, progress, highlight=None):
                                 fill=BLUE if is_hi else (58, 70, 112))
         if progress > 0.75:
             # The displayed string is carried per row, not formatted from the
-            # value: the app's own figure is published as 「約1秒」 and a bare
-            # "1秒" would state a precision the measurement does not have.
+            # value, so a row can carry a mark (※) as well as the rounding.
             text(d, (bar_x + full + 16, y + 20), shown,
                  22, is_hi, INK if is_hi else DIM, anchor='lm')
     return im
@@ -291,10 +298,19 @@ def fact_scene(bg, heading, before, after_rows, revealed):
 # them as separate files but compresses them to almost nothing.
 
 def build_launch(bg, icon, c):
-    """Launch-to-send timing, from the measured table in the benchmark post."""
+    """Tap-to-typing timing, from the measured table in the benchmark post.
+
+    [2026-09-26] The title frame used to say 「起動して、書いて、送る。そこまでで
+    約1秒。」 — a whole-capture figure left over from the June "~1s" copy. The
+    record only covers tap → ready to type on a warm launch; writing and sending
+    are not in it. The title now states that figure, read from the same ledger
+    as the bars, and says what it leaves out.
+    """
     frames = []
-    t = title_scene(bg, icon, 'BENCHMARK', ['起動して、書いて、送る。', 'そこまでで約1秒。'],
-                    '起動速度ベンチマーク2026の実測値より。数値はページに掲載の計測表と同じものです。')
+    rows = benchmark_rows()
+    ours = next(shown for name, _, shown in rows if name == 'Obsidian連携シンプルメモ')
+    t = title_scene(bg, icon, 'BENCHMARK', ['起動して、書いて、送る。', f'入力できるまで{ours}。'],
+                    'ベンチマーク2026の実測値（iPhone 16e・ウォーム起動）\n書く時間と送信は含みません。')
     for i in range(int(FPS * 0.6)):
         frames.append((fade(t, i / (FPS * 0.6)), 1 / FPS))
     frames.append((t, 2.6))
@@ -313,13 +329,13 @@ def build_launch(bg, icon, c):
     # Note that the correction cuts against us — Bear is now the nearest rival
     # at roughly 2.3x rather than 3x — and it is rendered anyway. A number that
     # only ever flatters us is the thing this file exists to avoid.
-    rows = benchmark_rows()
+    # 「各5回」 was wrong for two rows (Apple Notes 10 runs, Google Keep 4), and
+    # Drafts' bar is its fastest run, not a median — the note says both.
+    note = '出典: /blog/fastest-memo-app-benchmark（iPhone 16e・ウォーム起動・4〜10回の中央値。※Draftsは5回中の最速値）'
     for p in [0.15, 0.35, 0.6, 0.85, 1.0]:
-        frames.append((bars_scene(bg, 'タップから入力できるまで（実測）',
-                                  '出典: /blog/fastest-memo-app-benchmark（iPhone 16e・各5回・ウォーム起動）',
+        frames.append((bars_scene(bg, 'タップから入力できるまで（実測）', note,
                                   rows, p, highlight='Obsidian連携シンプルメモ'), 0.55))
-    frames.append((bars_scene(bg, 'タップから入力できるまで（実測）',
-                              '出典: /blog/fastest-memo-app-benchmark（iPhone 16e・各5回・ウォーム起動）',
+    frames.append((bars_scene(bg, 'タップから入力できるまで（実測）', note,
                               rows, 1.0, highlight='Obsidian連携シンプルメモ'), 2.6))
     frames.append((outro_scene(bg, icon, '思いついた速さのまま、残す。'), 2.4))
     return frames
@@ -348,12 +364,16 @@ def build_siri_airpods(bg, icon, c):
     # iPhoneはそのまま". A caption that describes a different screen is a
     # caption that is simply wrong, and beside a real screenshot it is worse
     # than wrong because the screenshot lends it credibility.
+    # The in-app guide grew from five screens to six (assets/img/siri/onboarding-1..6,
+    # 2026-09): screen 2 is now 「まず、Siriを呼ぶ」. Captions follow the screen each
+    # one sits beside, so the list is keyed by the file, not by the old order.
     slides = [
-        (1, 'AirPodsから、Obsidianへ', '話した内容が、いつものメールと保管庫に届く'),
-        (2, '合言葉は「シンプルメモで残す」', 'AirPodsのステム長押し、または「Hey Siri」から'),
-        (3, '「何をメモしますか？」に答えるだけ', '話した内容がそのまま本文になる。アプリは開かない'),
-        (4, 'メールとObsidianに、同時に届く', '行き先はアプリから送ったときとまったく同じ'),
-        (5, '3つだけ、確認しておく', 'ここが揃っていれば、あとは話しかけるだけ'),
+        (1, 'AirPodsから、Obsidianへ', '話した内容が、\nいつものメールと保管庫に届く'),
+        (2, 'まず、Siriを呼ぶ', '確実なのは「Hey Siri」。ステムの長押しは機種で違う'),
+        (3, '合言葉は\n「シンプルメモで残す」', 'Siriが応えたら、そのまま言うだけ'),
+        (4, '「何をメモしますか？」に\n答えるだけ', '話した内容がそのまま本文になる。アプリは開かない'),
+        (5, 'メールとObsidianに、同時に届く', '画面は従来の表現。\nメールと保管庫は別の経路で届く'),
+        (6, '3つだけ、確認しておく', 'ここが揃っていれば、あとは話しかけるだけ'),
     ]
     frames = [(title_scene(bg, icon, 'SIRI · AIRPODS', ['合言葉ひとつで、', 'ハンズフリー。'],
                            '以下はアプリ内のガイド画面です（実機のスクリーンショット）。'), 3.0)]
@@ -376,7 +396,7 @@ def build_siri_airpods(bg, icon, c):
                             radius=38, fill=(24, 31, 56), outline=CARD_EDGE, width=2)
         im.paste(shot, (px, py), mask)
         tx = px + shot.width + 78
-        text(d, (tx, 236), f'アプリ内ガイド {idx} / 5', 20, True, BLUE)
+        text(d, (tx, 236), f'アプリ内ガイド {idx} / {len(slides)}', 20, True, BLUE)
         y = 284
         for ln in wrap_ja(cap, 13):
             text(d, (tx, y), ln, 38, True, INK)
@@ -387,16 +407,16 @@ def build_siri_airpods(bg, icon, c):
             y += 36
         frames.append((im, 2.6))
     frames.append((caveat_scene(bg, '推奨する日本語の合言葉',
-                                ['「シンプルメモで残す」', '', 'AirPodsのステム長押しからも呼び出せます。'],
+                                ['「シンプルメモで残す」', '', 'ステムの長押しで呼べるかは、機種と設定で違います。'],
                                 tone=GREEN), 3.0))
-    frames.append((outro_scene(bg, icon, '手を使わずに、残す。'), 2.4))
+    frames.append((outro_scene(bg, icon, 'アプリを開かず、声で残す。'), 2.4))
     return frames
 
 
 def build_obsidian(bg, icon, c):
     frames = [(title_scene(bg, icon, 'OBSIDIAN連携', ['送ったメモが、', 'ノートに追記される。'],
-                           'メールで自分に送ると、Obsidianの保管庫のノートへ自動で追記されます。'), 3.2)]
-    steps = [('書く / 話す', 'メモを1つ'), ('メールで送信', '自分の受信箱へ'), ('追記', 'Obsidianのノートに')]
+                           'Obsidian連携を設定すると、送ったメモがメールとは別に、保管庫のノートへ追記されます。'), 3.2)]
+    steps = [('書く / 話す', 'メモを1つ'), ('送信', 'メールは自分の受信箱へ'), ('追記', 'メールとは別に、ノートへ')]
     for k in range(1, 4):
         frames.append((steps_scene(bg, 'メモがノートになるまで', steps, k, accent=PURPLE), 1.1))
     frames.append((steps_scene(bg, 'メモがノートになるまで', steps, 3, accent=PURPLE), 1.6))
@@ -404,13 +424,13 @@ def build_obsidian(bg, icon, c):
                                 ['メール本文は通常のSMTPで届きます。',
                                  'つまりエンドツーエンド暗号化ではありません。',
                                  '端末内のOutboxと送信履歴はAES-GCM-256で暗号化。']), 4.0))
-    frames.append((outro_scene(bg, icon, 'いつものメールが、保管庫の入口になる。'), 2.4))
+    frames.append((outro_scene(bg, icon, '送ったメモが、保管庫にも残る。'), 2.4))
     return frames
 
 
 def build_ai_tags(bg, icon, c):
     frames = [(title_scene(bg, icon, 'AIタグ自動追加', ['話すだけで、', 'AIが整える。'],
-                           'メモの内容をAIが読み、タイトル・タグ・種別を自動で付けます。2026年7月の無料アップデートで提供開始。'), 3.2)]
+                           'Obsidian連携でオンにすれば、AIがタイトル・タグ・種別を\n自動で付けます（既定はオフ）。\n2026年7月の無料アップデートで提供開始。'), 3.2)]
     memo = '来週の打ち合わせまでに見積もりを作り直す。先方は金額より納期を気にしていた。'
     after = [('タイトル（20文字以内）', '見積もり作り直し'),
              ('タグ（1〜3個）', '#打ち合わせ #見積もり'),
@@ -427,14 +447,14 @@ def build_ai_tags(bg, icon, c):
 
 
 VIDEOS = {
-    'launch-1s': (build_launch, '起動して書いて送るまで約1秒 — 実測ベンチマーク',
-                  'アプリの起動から送信までの3ステップと、入力を開始できるまでの実測時間を主要メモアプリと比較した図解動画です。数値は当サイトの計測表に基づきます。'),
+    'launch-1s': (build_launch, '起動して、書いて、送る — 入力できるまで0.4秒（実測ベンチマーク）',
+                  'アプリの起動から送信までの3ステップと、アイコンのタップから入力できるまでの実測時間（iPhone 16e・ウォーム起動）を主要メモアプリと比較した図解動画です（2026年9月26日更新）。数値は当サイトの計測表に基づき、書く時間と送信の時間は含みません。'),
     'apple-watch-voice': (build_apple_watch, 'Apple Watchで入力してiPhone経由で送る',
                           'Apple Watchの入力・送信を示す図解動画（2026年9月9日更新）。実機画面の録画ではありません。入力方法を選び、文章を確定し、受信箱で到着を確認します。メール送信はペアのiPhoneを経由し、Obsidianへの保存は連携・保存先の設定が必要です。'),
     'siri-airpods': (build_siri_airpods, 'Siriとその場のAirPodsでハンズフリーにメモを残す',
                      'アプリ内ガイドの実機スクリーンショットを使って、合言葉ひとつでAirPodsから音声メモを残す流れを紹介するスライドショー動画です。'),
     'obsidian-append': (build_obsidian, 'メモがObsidianのノートに追記されるまで',
-                        'メモをメールで自分に送ると、Obsidianの保管庫のノートへ自動で追記される流れを示した図解動画です。メール本文が通常のSMTPで届くため、エンドツーエンド暗号化ではない点も明示します。'),
+                        '通常モードでメモをメールに送り、別途Obsidianの保管庫へ追記する流れを示した図解動画です。メール経由で保管庫へ転送する仕組みではありません。メール本文は通常のSMTPで届くため、エンドツーエンド暗号化ではない点も明示します。'),
     'ai-tags': (build_ai_tags, 'AIがメモにタイトルとタグを自動で付ける',
                 'オンデバイスAIがメモを読み、20文字以内のタイトル・1〜3個のタグ・種別（todo／idea／log）を自動付与する様子を示した図解動画です。タグ付けは端末内で完結し、外部サーバーへの送信はありません。'),
 }

@@ -46,7 +46,11 @@ export async function collect({ token, fetchImpl = fetch, now = timestamp, maxPa
       assert(ID.test(row?.id) && !ids.has(row.id), 'Invalid or duplicate routine identity');
       assert(typeof row.enabled === 'boolean' && typeof row.name === 'string', 'Unknown routine state');
       assert(typeof row.ended_reason === 'string', 'Unknown routine lifecycle');
-      if (row.ended_reason) {
+      if (row.ended_reason === 'auto_disabled_session_gone') {
+        // The source session can disappear before a scheduled run fires.
+        // This proves disabling, never execution or successful completion.
+        assert(row.enabled === false, 'Session-gone routine must be disabled');
+      } else if (row.ended_reason) {
         assert(row.ended_reason === 'run_once_fired' && row.enabled === false && !row.cron_expression
           && time(row.run_once_at) && time(row.last_fired_at)
           && Date.parse(row.last_fired_at) >= Date.parse(row.run_once_at), 'Unverified ended routine');
@@ -86,6 +90,30 @@ export async function collect({ token, fetchImpl = fetch, now = timestamp, maxPa
   throw new Error('Routine inventory page limit reached');
 }
 
+// A missing record is not deletion or successful retirement. Individually read
+// only already registered IDs. A fresh 404 records missing visibility; active
+// routines stay registered with an open finding, never an inferred stop.
+export async function observeUnavailable(previous, observation, { token, fetchImpl = fetch, now = timestamp } = {}) {
+  assert(observation.complete === true, 'Complete inventory required before individual reads');
+  const current = new Set(observation.records.map(r => r.id));
+  const missing = previous.routines.filter(r => !current.has(r.id));
+  assert(missing.length <= 64, 'Missing registered routine read limit reached');
+  if (!missing.length) return observation;
+  assert(typeof token === 'string' && token.length > 0, 'Routine observation credential unavailable');
+  const unavailable = [];
+  for (const row of missing) {
+    assert(ID.test(row.id), 'Invalid registered routine identity');
+    const endpoint = '/v1/code/triggers/' + row.id;
+    const response = await fetchImpl('https://api.anthropic.com' + endpoint, {
+      method: 'GET', redirect: 'error', signal: AbortSignal.timeout(20000),
+      headers: { Authorization: `Bearer ${token}`, 'anthropic-version': '2023-06-01', 'anthropic-beta': 'ccr-triggers-2026-01-30' },
+    });
+    assert.equal(response.status, 404, 'Missing registered routine individual read is not a verified 404');
+    unavailable.push({ id: row.id, method: 'GET', endpoint, http_status: 404, observed_at: now() });
+  }
+  return { ...observation, observed_at: now(), inventory_observed_at: observation.observed_at, unavailable };
+}
+
 export function reconcileObservation(previous, observation) {
   assert(observation.complete === true && time(observation.observed_at), 'Complete observation required');
   assert(Date.parse(observation.observed_at) >= Date.parse(previous.observed_at), 'Older observation rejected');
@@ -95,7 +123,26 @@ export function reconcileObservation(previous, observation) {
   const ended = [], routines = [];
   for (const id of registered) {
     const row = current.get(id);
-    assert(row, 'Registered routine missing from the complete inventory');
+    if (!row) {
+      const prior = previous.routines.find(r => r.id === id);
+      const proof = observation.unavailable?.find(r => r.id === id);
+      assert(proof?.http_status === 404 && proof.method === 'GET'
+        && proof.endpoint === '/v1/code/triggers/' + id
+        && time(proof.observed_at) && time(observation.inventory_observed_at)
+        && Date.parse(proof.observed_at) >= Date.parse(observation.inventory_observed_at)
+        && Date.parse(proof.observed_at) <= Date.parse(observation.observed_at),
+      'Registered routine missing without current individual read evidence');
+      const last = prior.observation_state === 'unavailable' ? prior.last_verified
+        : { observed_at: previous.observed_at, routine: prior };
+      assert(last?.routine?.id === id && typeof last.routine.enabled === 'boolean'
+        && !last.routine.observation_state && time(last.observed_at),
+      'Missing routine requires a previously verified observation');
+      routines.push({ id, name: last.routine.name, enabled: null, cron_expression: null,
+        run_once_at: null, next_run_at: null, last_fired_at: null, last_run_status: null,
+        last_run_fired_at: null, last_run_finished_at: null, last_run_session_id: null,
+        observation_state: 'unavailable', source_observation: proof, last_verified: last });
+      continue;
+    }
     if (row.ended_reason) {
       ended.push(row);
       routines.push(row);
@@ -111,7 +158,7 @@ export function reconcileObservation(previous, observation) {
     const what = diagnose(row, { now, observedAt: now });
     const prior = oldFindings.get(row.id);
     if (stopIds.has(row.id)) {
-      assert(what === 'stopped', 'Intentional stop changed; operator decision required');
+      assert(what === 'stopped' || what === 'observation_unavailable', 'Intentional stop changed; operator decision required');
       continue;
     }
     if (what) {
@@ -125,6 +172,8 @@ export function reconcileObservation(previous, observation) {
           ?? row.next_run_at ?? null } : {}),
         why: prior?.what === what ? prior.why : what === 'completion_unverified'
           ? '単発の予約は発火後に終了したが、APIから実行結果を確認できない。成功・故障と断定せず、実行の終了証跡を待つ。'
+          : what === 'observation_unavailable'
+          ? '全件一覧に存在せず、個別GETも404。現在の実行結果は不明。登録と最後の実測、既存の異常履歴を保持し、未解消として追跡する。停止・削除・復旧成功とは判定しない。'
           : what === 'pending'
           ? '実APIはPENDING。実行は終了しておらず結果未確定。故障・復旧成功・依頼内容の達成には数えず、同じ実行の終了を次の観測で確認する。'
           : `実APIの観測で ${what}。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。`,
@@ -137,7 +186,8 @@ export function reconcileObservation(previous, observation) {
       assert(row.last_run_status === 'SUCCEEDED', 'A finding needs a successful run before closure');
       // 終了した単発予約のAPIはlast_runを省略することがある。省略前の実行IDを
       // 履歴から引き継ぎ、別の古い成功で未確認の実行を閉じない。
-      const priorRun = [previous.routines.find(r => r.id === row.id),
+      const priorRow = previous.routines.find(r => r.id === row.id);
+      const priorRun = [priorRow, priorRow?.last_verified?.routine,
         ...(prior.state_history ?? []).map(f => f.observation).reverse()].find(r => r?.last_run_fired_at);
       if (priorRun?.last_run_fired_at) {
         // A pending run can finish without changing its fire time. Failed or
@@ -158,7 +208,7 @@ export function reconcileObservation(previous, observation) {
     }
   }
   // 予約の終了だけでは台帳から除かない。成功を照合できた単発だけを退役する。
-  const completedIds = new Set(ended.filter(r => r.last_run_status === 'SUCCEEDED').map(r => r.id));
+  const completedIds = new Set(ended.filter(r => r.ended_reason === 'run_once_fired' && r.last_run_status === 'SUCCEEDED').map(r => r.id));
   const next = { ...previous, observed_at: observation.observed_at,
     routines: routines.filter(r => !completedIds.has(r.id)),
     open_findings: open, closed_findings: closed,
@@ -169,10 +219,11 @@ export function reconcileObservation(previous, observation) {
       scope: 'registered_simplememo_routines', total_records: observation.records.length,
       unregistered_current_count: observation.records.filter(r => !r.ended_reason && !registered.has(r.id)).length,
       ended_records: observation.records.filter(r => r.ended_reason).length,
+      unavailable_registered_count: routines.filter(r => r.observation_state === 'unavailable').length,
       ended_since_previous: ended.filter(r => completedIds.has(r.id) || !previous.routines.find(p => p.id === r.id)?.ended_reason)
         .map(({ id, name, ended_reason, last_fired_at, last_run_status, last_run_fired_at, last_run_finished_at, last_run_session_id }) =>
           ({ id, name, ended_reason, last_fired_at, last_run_status, last_run_fired_at, last_run_finished_at, last_run_session_id })),
-      note: '全ページを読み、登録済みのSimpleMemoタスクだけを同期。未登録タスクは件数のみ記録し、名前やプロンプトは公開しない。意図的な停止や予定は変更しない。' } };
+      note: '全ページを読み、登録済みのSimpleMemoタスクだけを同期。未登録タスクは件数のみ記録。登録タスクが一覧になく個別GETも404の場合、現状は参照不可と明示し、最後の実測を履歴に保持する。意図的停止以外は未解消として追跡する。削除・成功・現在の停止を断定せず、予定や停止の判断を変更しない。' } };
   const checked = validate(next, { now });
   assert.equal(checked.problems.length, 0, 'Observed routine ledger is inconsistent');
   return next;
@@ -263,6 +314,15 @@ async function selftest() {
   assert.equal(failedAgain.open_findings[0].state_history.length, 2);
   const oneShotRow = { ...row, id: 'trig_once', enabled: false, cron_expression: '',
     run_once_at: row.last_fired_at, ended_reason: 'run_once_fired', last_run: undefined };
+  const goneRow = { ...oneShotRow, ended_reason: 'auto_disabled_session_gone', last_fired_at: undefined };
+  const gone = await collect({ token: 'x', now: () => '2026-09-06T03:05:00Z',
+    fetchImpl: async () => fake([goneRow]) });
+  assert.equal(diagnose(gone.records[0], { now: Date.parse(gone.observed_at) }), 'stopped');
+  assert.equal(gone.records[0].last_run_status, null);
+  await assert.rejects(() => collect({ token: 'x', fetchImpl: async () => fake([{ ...goneRow, enabled: true }]) }),
+    /must be disabled/);
+  await assert.rejects(() => collect({ token: 'x', fetchImpl: async () => fake([{ ...goneRow, ended_reason: 'unknown_reason' }]) }),
+    /Unverified ended routine/);
   const endedUnknown = await collect({ token: 'x', now: () => '2026-09-06T03:05:00Z',
     fetchImpl: async () => fake([oneShotRow]) });
   const oneShotPrior = { ...prior, routines: [{ ...endedUnknown.records[0], enabled: true,
@@ -300,15 +360,73 @@ async function selftest() {
   assert.throws(() => reconcileObservation(prior, { ...observed, complete: false }), /Complete/);
   assert.throws(() => reconcileObservation(prior, { ...observed, observed_at: '2026-09-03T00:00:00Z' }), /Older/);
   assert.throws(() => reconcileObservation({ ...prior, intentional_stops: [{ id: row.id, why: 'owner stopped' }] }, observed), /Intentional/);
+  const stoppedPrior = structuredClone(prior);
+  stoppedPrior.routines[0].enabled = false;
+  stoppedPrior.intentional_stops = [{ id: row.id, why: 'Previously replaced; no execution expected' }];
+  const absent = { ...observed, records: [] };
+  const evidence = await observeUnavailable(stoppedPrior, absent, { token: 'test-only', now: () => observed.observed_at,
+    fetchImpl: async (url, options) => {
+      assert.equal(url, 'https://api.anthropic.com/v1/code/triggers/' + row.id);
+      assert.equal(options.method, 'GET'); assert.equal(options.redirect, 'error');
+      return { status: 404, json: () => { throw Error('Do not retain error response bodies'); } };
+    } });
+  const unavailable = reconcileObservation(stoppedPrior, evidence);
+  assert.equal(unavailable.routines.length, stoppedPrior.routines.length, 'Do not reduce the registered population');
+  assert.deepEqual(unavailable.intentional_stops, stoppedPrior.intentional_stops);
+  assert.equal(unavailable.open_budget, stoppedPrior.open_budget);
+  assert.equal(unavailable.closed_findings.length, 0, 'Unavailable is not recovery');
+  assert.equal(unavailable.routines[0].enabled, null);
+  assert.equal(unavailable.routines[0].last_run_status, null, 'Never expose historical success as current');
+  assert.equal(diagnose(unavailable.routines[0], { now: Date.parse(observed.observed_at) }), 'observation_unavailable');
+  assert.deepEqual(unavailable.routines[0].last_verified, { observed_at: stoppedPrior.observed_at, routine: stoppedPrior.routines[0] });
+  assert.equal(validate(unavailable, { now: Date.parse(observed.observed_at) }).warnings.length, 1);
+  const repeatedUnavailable = reconcileObservation(unavailable, evidence);
+  assert.deepEqual(repeatedUnavailable.routines[0].last_verified, unavailable.routines[0].last_verified, 'Do not refresh historical observation time');
+  assert.throws(() => reconcileObservation(stoppedPrior, absent), /missing/);
+  const missingActive = reconcileObservation(prior, evidence);
+  assert.equal(missingActive.open_findings[0].what, 'observation_unavailable');
+  assert.equal(missingActive.open_budget, 1);
+  assert.deepEqual(missingActive.intentional_stops, prior.intentional_stops);
+  assert.equal(missingActive.closed_findings.length, 0);
+  assert.deepEqual(missingActive.routines[0].last_verified.routine, prior.routines[0]);
+  assert.deepEqual(reconcileObservation(missingActive, evidence).routines[0].last_verified,
+    missingActive.routines[0].last_verified);
+  assert.throws(() => reconcileObservation(missingActive, observed), /newer successful/,
+    'A reappearing old success cannot resolve missing visibility');
+  const missingFailed = reconcileObservation(second, evidence);
+  assert.equal(missingFailed.open_findings[0].state_history.at(-1).what, second.open_findings[0].what);
+  assert.equal(missingFailed.open_findings[0].found_at, second.open_findings[0].found_at);
+  assert.equal(missingFailed.closed_findings.length, second.closed_findings.length);
+  const noFinding = structuredClone(missingActive); noFinding.open_findings = []; noFinding.open_budget = 0;
+  assert(validate(noFinding, { now: Date.parse(observed.observed_at) }).problems.length > 0);
+
+  assert.throws(() => reconcileObservation(unavailable, observed), /Intentional/);
+  const returned = structuredClone(observed); returned.records[0].enabled = false;
+  const readAgain = reconcileObservation(unavailable, returned);
+  assert.equal(readAgain.routines[0].observation_state, undefined);
+  for (const status of [200, 401, 403, 429, 500]) {
+    await assert.rejects(() => observeUnavailable(stoppedPrior, absent, { token: 'x', fetchImpl: async () => ({ status }) }), /verified 404/);
+  }
+  for (const mutate of [d => d.routines[0].enabled = false, d => d.routines[0].last_run_status = 'SUCCEEDED',
+    d => d.intentional_stops = [], d => d.routines[0].source_observation.http_status = 403,
+    d => d.routines[0].last_verified.routine.enabled = true,
+    d => d.routines[0].source_observation.observed_at = '2026-09-04T00:00:00Z']) {
+    const invalid = structuredClone(unavailable); mutate(invalid);
+    assert(validate(invalid, { now: Date.parse(observed.observed_at) }).problems.length > 0);
+  }
+  const { routineResolved } = await import('./lib/routine-actions.mjs');
+  assert.equal(routineResolved({ routine_id: row.id, observed_at: stoppedPrior.observed_at },
+    { routineDoc: unavailable, now: Date.parse(observed.observed_at) }).closed, false, 'Unavailable must not close a repair action');
   console.log('routine-observer: complete pagination, private-field exclusion, failure/pending transitions, verified completion and stop preservation passed');
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const task = process.argv.includes('--selftest') ? selftest : async () => {
     assert(process.argv.includes('--apply') || process.argv.includes('--probe'), 'Use --apply or --probe');
-    const observed = await collect({ token: process.env.CLAUDE_CODE_OAUTH_TOKEN });
     const file = path.join(ROOT, 'data/routine-runs.json');
     const prior = JSON.parse(fs.readFileSync(file, 'utf8'));
+    const options = { token: process.env.CLAUDE_CODE_OAUTH_TOKEN };
+    const observed = await observeUnavailable(prior, await collect(options), options);
     const next = reconcileObservation(prior, observed);
     if (process.argv.includes('--apply')) fs.writeFileSync(file, JSON.stringify(next, null, 2) + '\n');
     console.log(JSON.stringify({ observed_at: next.observed_at, pages: observed.pages, registered: next.routines.length,

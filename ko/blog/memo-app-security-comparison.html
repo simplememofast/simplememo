@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/blog/memo-app-security-comparison">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script><title>메모 앱의 보안 비교|공유·잠금·복구 확인 포인트</title>
+  <meta name="description" content="메모 앱의 안전성을 암호화뿐만 아니라 공유 권한·노트의 잠금·복구 방법과 비교합니다. Apple 메모, Google Keep, Notion, OneNote, CryptoPad와 SimpleMemo의 차이를 공식 자료로 정리하고, 오공유 방지를 위한 확인, 삭제 후 복원, 기기 교체 전 준비에 대해 설명합니다.">
+  <meta property="og:title" content="메모 앱의 보안 비교|공유·잠금·복구 확인 포인트">
+  <meta property="og:description" content="메모 앱의 안전성을 암호화뿐만 아니라 공유 권한·노트의 잠금·복구 방법과 비교합니다. Apple 메모, Google Keep, Notion, OneNote, CryptoPad와 SimpleMemo의 차이를 공식 자료로 정리하고, 오공유 방지를 위한 확인, 삭제 후 복원, 기기 교체 전 준비에 대해 설명합니다.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-02-27T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/ko/blog/memo-app-security-comparison">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog-memo-app-security-comparison.png?v=60b357fb03">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="메모 앱의 보안 비교|공유·잠금·복구 확인 포인트">
+  <meta name="twitter:description" content="메모 앱의 안전성을 암호화뿐만 아니라 공유 권한·노트의 잠금·복구 방법과 비교합니다. Apple 메모, Google Keep, Notion, OneNote, CryptoPad와 SimpleMemo의 차이를 공식 자료로 정리하고, 오공유 방지를 위한 확인, 삭제 후 복원, 기기 교체 전 준비에 대해 설명합니다.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-memo-app-security-comparison.png?v=60b357fb03">
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/ko/blog/memo-app-security-comparison#article",
+  "inLanguage": "ko",
+  "image": "https://simplememofast.com/assets/img/og/blog-memo-app-security-comparison.png?v=60b357fb03",
+  "headline": "메모 앱의 보안 비교|공유·잠금·복구 확인 포인트",
+  "description": "메모 앱의 안전성을 암호화뿐만 아니라 공유 권한·노트의 잠금·복구 방법과 비교합니다. Apple 메모, Google Keep, Notion, OneNote, CryptoPad와 SimpleMemo의 차이를 공식 자료로 정리하고, 오공유 방지를 위한 확인, 삭제 후 복원, 기기 교체 전 준비에 대해 설명합니다.",
+  "url": "https://simplememofast.com/ko/blog/memo-app-security-comparison",
+  "datePublished": "2026-02-27",
+  "dateModified": "2026-09-09",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/ko/blog/memo-app-security-comparison"
+  }
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "홈",
+      "item": "https://simplememofast.com/ko/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "블로그",
+      "item": "https://simplememofast.com/ko/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "메모 앱의 보안 비교",
+      "item": "https://simplememofast.com/ko/blog/memo-app-security-comparison"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/ko/blog/memo-app-security-comparison#webpage",
+  "inLanguage": "ko",
+  "name": "메모 앱의 보안 비교|공유·잠금·복구 확인 포인트",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/ko/#website"
+  },
+  "url": "https://simplememofast.com/ko/blog/memo-app-security-comparison"
+}</script>  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>.lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}[data-lang="en"]{display:none}[data-lang].active{display:block}span[data-lang].active{display:inline}.lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}.lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}.lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.tip-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;margin-bottom:1rem}.tip-card__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem}.tip-card__name{font-size:1.05rem;font-weight:700}.tip-card__rank{font-size:.875rem;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:12px;padding:.2rem .6rem;font-weight:700}.tip-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.75rem}.tip-card__example{font-size:.875rem;color:var(--text-secondary);line-height:1.7;background:rgba(100,180,255,.04);border-left:3px solid var(--accent);padding:.75rem 1rem;border-radius:0 6px 6px 0;margin-top:.5rem}.faq-item{border-bottom:1px solid var(--border)}.faq-details{padding:0}.faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}.faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}.faq-details[open] .faq-summary::after{transform:rotate(45deg)}.faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}.cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}.cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}.cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}.internal-links a:hover{border-color:var(--accent)}.step-number{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);border-radius:50%;font-size:.875rem;font-weight:700;color:var(--accent);margin-right:.5rem;flex-shrink:0}@media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+    .tldr{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:1.5rem;line-height:1.85}
+    .security-review,.table-hint{font-size:.875rem;color:var(--text-secondary);line-height:1.8}.lp-section p{line-height:1.85;margin:.75rem 0}.lp-section a{color:var(--accent);text-underline-offset:3px}
+    .lp-section[id]{scroll-margin-top:76px}.tip-card h3{font-size:1rem;line-height:1.7}
+    .security-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:8px;margin:1rem 0}.security-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+    .security-table{width:100%;min-width:860px;border-collapse:collapse;table-layout:fixed;font-size:.875rem}.security-table th,.security-table td{padding:.85rem;border:1px solid var(--border);text-align:left;vertical-align:top;line-height:1.8;overflow-wrap:anywhere}
+    .security-table th{background:rgba(100,180,255,.08);color:var(--accent)}.security-table th:first-child{width:17%}.security-table th:last-child{width:18%}.security-table tbody th{background:var(--surface);color:var(--text);position:sticky;left:0;z-index:1}.security-table caption{text-align:left;padding:1rem;font-weight:700}
+    .security-steps{padding-left:1.4rem;line-height:1.9}.security-steps li{margin:1rem 0}
+</style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+    <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ko/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/memo-app-security-comparison">
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/ko/blog/memo-app-security-comparison#faq","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"메모 앱의 보안은 암호화만으로 비교할 수 있습니까?","acceptedAnswer":{"@type":"Answer","text":"아니요. 공유 상대와 권한, 계정 로그인, 기기 및 노트 잠금, 복구 방법, 내보낸 복사본도 확인합니다. 암호화 방식의 이름만으로는 오공유나 데이터 손실을 방지할 수 있다고 판단할 수 없습니다."}},{"@type":"Question","name":"E2EE와 실시간 공동 편집을 동시에 수행하는 서비스가 있습니까?","acceptedAnswer":{"@type":"Answer","text":"CryptPad는 E2EE에서 문서를 공동 편집할 수 있습니다. 열람·편집 권한, 소유자, 공유 링크, 접근 목록을 확인해 주세요. E2EE라 하더라도, 허가받은 상대가 만든 복사본까지 회수할 수 있는 것은 아닙니다."}},{"@type":"Question","name":"Apple 메모의 잠금과 공동 편집을 동시에 사용할 수 있습니까?","acceptedAnswer":{"@type":"Answer","text":"잠금 설정이 있는 메모는 공동 편집이 불가능하므로, 공유하기 전에 메뉴에서 잠금 설정 자체를 삭제합니다. Face ID로 일시적으로 여는 것만으로는 동일하지 않습니다. iCloud의 고급 데이터 보호 및 공유 조건은 별도로 확인합니다."}},{"@type":"Question","name":"Notion에서 보기만 한 사람이 편집할 수 있는 이유는 무엇입니까?","acceptedAnswer":{"@type":"Answer","text":"다른 경로에서 넓은 권한이 부여될 가능성이 있습니다. Notion은 적용되는 권한 중 넓은 쪽을 우선시하기 위해 워크스페이스, 상위 페이지, 그룹 등에서의 접근도 확인합니다."}},{"@type":"Question","name":"비밀번호를 재설정하면 암호화한 메모를 복구할 수 있습니까?","acceptedAnswer":{"@type":"Answer","text":"제품 및 키의 관리 방식에 따라 다릅니다. Apple 메모의 고유 비밀번호를 재설정해도 오래된 잠겨 있는 메모는 열 수 없습니다. OneNote의 섹션 비밀번호는 Microsoft에서도 해제할 수 없습니다. 사용 중인 제품의 복구 방법을 먼저 확인해 주세요."}},{"@type":"Question","name":"기종 교체 전에 최소한 무엇을 확인해야 합니까?","acceptedAnswer":{"@type":"Answer","text":"동기화가 완료되고, 새 기기에서 본문과 첨부 파일을 열며, 필요한 잠금 및 복구 방법이 손에 있는지 확인합니다. 내보낸 데이터의 내용과 보호 상태도 확인하시고, 유일한 데이터와 키가 남아 있는 구형 단말기를 먼저 삭제하지 마십시오."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="메인 내비게이션" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/ko/guides/">사용 가이드</a><a href="/ko/use-cases/">활용 사례</a><a href="/ko/vs/">비교</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/ko/guides/">사용 가이드</a></li>
+        <li><a href="/ko/use-cases/">활용 사례</a></li>
+        <li><a href="/ko/vs/">비교</a></li>
+        <li><a href="/ko/methods/"><span>메소드</span></a></li>
+        <li><a href="/ko/blog/"><span>블로그</span></a></li>
+        <li><a href="/ko/glossary/"><span>용어집</span></a></li>
+        <li><a href="/ko/faq">자주 묻는 질문</a></li>
+        <li><a href="/ko/about/">개발자 소개</a></li>
+        <li><a href="/ko/devlog/">개발 기록</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>다운로드</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="한국어 · 언어 선택"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>KO</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ko" dir="ltr"><p class="site-language-title">언어 선택</p><div class="site-language-grid"><a href="/blog/memo-app-security-comparison" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/memo-app-security-comparison" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/blog/memo-app-security-comparison" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/blog/memo-app-security-comparison" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ko" aria-current="page"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/es/blog/memo-app-security-comparison" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/memo-app-security-comparison" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/memo-app-security-comparison" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/memo-app-security-comparison" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/memo-app-security-comparison" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">다운로드</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="메뉴"><span>메뉴</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content"><div class="container">
+    <div class="lp-hero sd-hero"><div class="sd-hero-copy"><div class="lp-hero__label"><span>보안</span></div><h1 class="lp-hero__title"><span>메모 앱의 <br> 보안 비교</span></h1><p class="lp-hero__sub"><span>메모를 보호하려면 암호화에 추가하여 “누구와 공유할지”, “지우면 복구할 수 있는지”, “키나 기기를 분실했을 때 어떻게 할지”를 확인해야 합니다. 6개의 앱·서비스를 일상적인 작업 및 복구 조건에 따라 비교합니다. </span></p>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>저자: <a href="/ko/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · 공개일: <time datetime="2026-03-06">2026년03월06일</time></span> </p></div><nav class="sd-hero-index" aria-label="이 페이지의 내용"><p>이 페이지의 내용</p><a href="#reading-01"><span aria-hidden="true">01</span><span>6 서비스를 공유 및 복구 조건으로 비교</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>계정·단말기·노트 잠금은 별도로 확인하십시오</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>오공유를 방지하기 위해 전송 전에 확인하시기 바랍니다</span><span aria-hidden="true">↗</span></a></nav></div>
+
+    <div class="tldr"><p><span><strong>선택 방법：</strong>가족 공동 리스트인 경우 공유 상대방의 편집 범위, 개인 메모인 경우 단말기와 노트 잠금, 업무 자료인 경우 조직의 권한·복구 규칙을 먼저 확인합니다. E2EE와 공동 편집을 병행하는 서비스도 있지만, 공유 상대방이 만든 복사본까지 회수할 수 있는 것은 아닙니다. </span></p></div>
+<p class="security-review"><span>최종 확인: <time datetime="2026-09-09">2026년9월9일</time>。 필자는 SimpleMemo의 개발자입니다. 공식 자료에 근거한 기능 및 절차 비교이며, 타사 앱을 감사한 결과나 안전성 인증이 아닙니다. </span></p><nav class="internal-links" aria-label="기사 내 목차"><a href="#security-comparison"><span>6 서비스 비교</span></a><a href="#sharing-check"><span>공유 전 확인</span></a><a href="#recovery-check"><span>삭제·기종 변경</span></a><a href="#secure-collaboration"><span>공동 편집과 E2EE</span></a></nav>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="security-comparison"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"><span>6 서비스를 공유 및 복구 조건으로 비교</span></h2></div><div class="ce-chapter__body"><div><p class="table-hint">표는 가로로 스크롤할 수 있습니다. 키보드에서도 오른쪽의 조건·출처를 확인할 수 있습니다.</p><div class="security-scroll sd-table" role="region" aria-label="6 서비스 보안 비교표" tabindex="0"><table class="security-table"><caption>용도와 확인 조건 (2026년 9월 9일)</caption><thead><tr><th scope="col">앱·서비스</th><th scope="col">사용 상황</th><th scope="col">확인 조건</th><th scope="col">공식 자료</th></tr></thead><tbody><tr><th scope="row">Apple메모 / Apple Notes</th><td>개인 메모에는 노트 잠금이 있습니다. 공동 편집할 메모는 잠금 설정을 해제해야 합니다.</td><td>iCloud 메모에서는 ADP 설정을 확인합니다. 공유 메모의 ADP에 의한 E2EE에는 모든 참가자의 활성화가 필요합니다. 고유 비밀번호 재설정에서는 오래된 잠긴 메모를 열 수 없습니다.</td><td><a href="https://support.apple.com/en-ie/102537">잠금 및 복구</a> · <a href="https://support.apple.com/en-us/102462">공유 조건</a> · <a href="https://support.apple.com/en-us/102651">ADP</a></td></tr><tr><th scope="row">Google Keep</th><td>공동 리스트와 메모를 함께 편집하는 용도. 공동 편집자는 메모의 내용을 편집할 수 있습니다.</td><td>보기만 해도 전달하고 싶다면, 공동 편집 초대와 별도의 앱으로 복사본을 보내는 작업을 구분하십시오. 아카이브는 삭제가 아닙니다.</td><td><a href="https://support.google.com/keep/answer/6101196?co=GENIE.Platform%3DiOS&amp;hl=en">공유 사양</a> · <a href="https://support.google.com/keep/answer/6262765?co=GENIE.Platform%3DDesktop&amp;hl=en">아카이브 및 삭제</a></td></tr><tr><th scope="row">Notion</th><td>페이지·게스트·워크스페이스 단위의 권한을 사용하여 공동 작업하는 용도.</td><td>여러 경로에 부여된 권한은 넓은 쪽이 우선됩니다. 상위 페이지를 Private로 이동하더라도, 하위 페이지에 부여된 권한은 별도로 확인합니다.</td><td><a href="https://www.notion.com/en-gb/help/sharing-and-permissions">공유 및 상속 권한</a></td></tr><tr><th scope="row">OneNote</th><td>노트북 내에서 비밀번호를 보호하는 섹션을 구분하는 용도.</td><td>섹션의 비밀번호를 잊어버리면 Microsoft에서도 해제할 수 없습니다. 잠금 중인 내용은 검색 대상이 아니므로, “사라졌다”고 판단하기 전에 상태를 확인하십시오.</td><td><a href="https://support.microsoft.com/en-us/onenote/onenote-help-and-learning/protect-your-notes-with-a-password">섹션 보호</a> · <a href="https://support.microsoft.com/en-us/onenote/onenote-help-and-learning/find-onenote-notes-pages-or-tabs">찾을 수 없는 노트</a></td></tr><tr><th scope="row">크립트패드</th><td>E2EE로 문서를 공동 편집하는 용도. 열람·편집 권한과 소유자가 설정한 접근 리스트를 사용할 수 있습니다.</td><td>공유 링크와 수신자를 확인합니다. 공유 상대에게는 편집 기록도 볼 수 있으므로, 과거 내용을 전달하고 싶지 않을 경우 새로운 복사본을 만들어 공유하십시오. 소유자가 없는 문서는 나중에 소유권을 관리할 수 없으며, 계정 비밀번호도 관리자가 재설정할 수 없습니다.</td><td><a href="https://docs.cryptpad.org/en/user_guide/share_and_access.html">공유와 소유자</a> · <a href="https://docs.cryptpad.org/en/user_guide/security.html">보호의 전제</a> · <a href="https://docs.cryptpad.org/en/FAQ.html">비밀번호 분실</a></td></tr><tr><th scope="row">SimpleMemo / Simple Memo</th><td>개인이 짧은 문장을 설정된 받은 편지함이나 연동 대상에 남기는 용도. 공동 편집 기능이 없습니다.</td><td>Outbox와 전송 기록은 단말기 내에서 암호화되지만, 메일 전송은 E2EE가 아닙니다. 수신자, 수신함, 연동 대상의 공유·저장 상태를 확인합니다.</td><td><a href="/ko/privacy#technical">기술 설명</a></td></tr></tbody></table></div></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="account-and-lock"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02"><span>계정·단말기·노트의 잠금은 별도로 확인하십시오</span></h2></div><div class="ce-chapter__body"><div><div class="tip-card"><h3>계정에 추가할 사람을 확인합니다</h3><p>해당 서비스에서 다중 인증 및 패스키를 설정하고, 복구용 이메일·전화번호, 로그인 중인 기기, 외부 앱에 대한 접근 권한을 검토합니다. 앱을 Face ID로 여는 설정만으로는 다른 기기에서의 계정 로그인을 제한한 것이 되지 않습니다.</p></div><div class="tip-card"><h3>화면 잠금과 암호화를 구분합니다</h3><p>단말기의 패스코드, 앱 전체의 잠금, 개별 노트 암호화는 대상이 다릅니다. 화면을 닫았을 때 재잠금과 알림·제목 표시도 확인합니다. OneNote에서는 비밀번호 보호 섹션을 열어 둔 상태로 유지하는 시간을 설정할 수 있습니다. <a href="https://support.microsoft.com/en-us/onenote/onenote-help-and-learning/protect-your-notes-with-a-password">OneNote의 잠금 설정</a>。</p></div><p>암호 방식 및 E2EE의 대상 범위는 별도의 기사인 <a href="/ko/blog/memo-app-encryption-comparison">10 앱의 암호화 비교</a>에 정리되었습니다. AES의 키 길이만으로는 오공유나 복구까지 해결할 수 없습니다.</p></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="sharing-check"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"><span>오류 공유를 방지하기 위해 전송 전에 확인하십시오</span></h2></div><div class="ce-chapter__body"><div><ol class="security-steps"><li><strong>「공동 편집」과「복사 보내기」를 구분합니다. </strong> 공동 편집에서는 이후의 변경도 동일한 문서에 반영됩니다. PDF나 이메일로 전달되는 복사본은 별도의 저장물이 되며, 원래 공유를 중단해도 회수할 수 있는 것은 아닙니다.</li><li><strong>상대와 권한을 확인합니다. </strong>조회만으로 충분하다면 편집 권한을 부여하지 않고, 필요한 사람에게만 공유합니다. Keep의 공동 편집은 상대방도 편집할 수 있는 방식이므로, 보기만 하는 공유와는 구별됩니다.</li><li><strong>부모·자녀 페이지와 공개 링크도 볼 수 있습니다. </strong>Notion 등에서는 개인 설정뿐만 아니라 워크스페이스 및 상위 페이지의 권한에도 영향을 미칩니다. 비공개로 이동한 상위 페이지만 보고, 하위 페이지도 모두 닫았다고 판단하지 마십시오.</li><li><strong>더미의 내용으로 보이는 방식을 확인합니다. </strong>공개 링크는 로그인하지 않은 브라우저이며, 제한된 공유는 허가된 수신자 측에서 볼 수 있는 범위와 편집 가능한 범위를 확인합니다. 자신의 관리자 화면에서 열기만으로는 확인할 수 없습니다.</li></ol></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="recovery-check"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04"><span>지운 메모·키 분실·기종 교체 대비</span></h2></div><div class="ce-chapter__body"><div><div class="tip-card"><h3>삭제와 아카이브를 구분하기</h3><p>Google Keep은 삭제 후 7일 이내라면 복원할 수 있습니다. iCloud 메모는 “최근 삭제한 항목”에 있는, 삭제 후 30일 이내의 메모를 대상으로 합니다. 완전히 삭제된 것을 반드시 되돌릴 수 있다는 의미는 아닙니다. 먼저 계정과 저장 대상이 일치하는지, 아카이브나 잠금 중인 섹션에 있는지 확인합니다. <a href="https://support.google.com/keep/answer/6262765?co=GENIE.Platform%3DDesktop&amp;hl=en">Keep의 절차</a>、<a href="https://support.apple.com/en-gb/guide/icloud/mm2f42f05cb9/icloud">iCloud 메모의 절차</a>。</p></div><div class="tip-card"><h3>출고는 “원대로 되돌릴 수 있다”와 동일하지 않습니다</h3><p>Notion은 플랜에 따라 편집 기록의 복원 및 내보내기를 안내하고 있지만, 내보낸 데이터를 다시 업로드하는 것만으로는 워크스페이스를 즉시 재현할 수 있는 것은 아닙니다. 첨부·계층·링크가 필요한 형태로 남아 있는지, 소량의 샘플로 확인합니다. <a href="https://www.notion.com/help/back-up-your-data">Notion의 백업 설명</a>、<a href="https://www.notion.com/help/export-your-content">내보내기 절차</a>。</p></div><div class="tip-card"><h3>구 단말기를 삭제하기 전에, 새 단말기로 1건을 엽니다</h3><p>동기화를 완료하고, 새로운 기기에서 본문과 첨부 파일을 열 수 있는지 확인합니다. 암호화 비밀번호와 복구 수단도 준비하고, 내보낸 복사본은 저장 대상의 권한과 암호화를 확인해 주세요. 유일한 키와 데이터가 구형 단말기에 남아 있는 상태에서는 해당 단말기를 초기화하지 마십시오.</p></div></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="secure-collaboration"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05"><span>보안과 공동 편집을 동시에 구현할 수 있는 메모 소프트웨어는? </span></h2></div><div class="ce-chapter__body"><div><p><strong>CryptPad는 E2EE에서 문서를 공동 편집하는 옵션입니다. </strong>열람·편집 권한, 소유자, 접근 리스트를 확인하고 사용합니다. 편집 기록도 공유되므로, 과거 내용을 숨겨야 할 경우 새로운 복사본을 만든 후 공유합니다. 다만, 제공자의 웹 앱 및 단말기를 신뢰한다는 전제와 공유 링크의 취급, 허가한 상대방에 의한 복제는 남게 됩니다. <a href="https://docs.cryptpad.org/en/user_guide/security.html">CryptPad 보호의 전제</a>、<a href="https://docs.cryptpad.org/en/FAQ.html#how-secure-is-cryptpad">이력 공유에 관한 FAQ</a>와<a href="https://docs.cryptpad.org/en/user_guide/share_and_access.html">공유·접근에 대한 설명</a>을 확인해 주세요.</p><p>Notion의 권한 관리, Apple 메모 공유, OneNote의 섹션 보호는 각각 별개의 메커니즘입니다. 조직에서 사용할 경우, 필요한 공동 편집, 참가자의 단말기, 관리자에 의한 복구, 외부 공유 규칙이 맞는지에 따라 선택합니다. E2EE와 공동 편집은 양립할 수 없으며, 어떤 용도에서도 하나의 제품이 가장 안전하다고 단정할 수 없습니다.</p></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="personal-capture"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06"><span>자신에게 메모해도, 수신인과 도착지를 확인합니다</span></h2></div><div class="ce-chapter__body"><div><p>SimpleMemo는 개인 받은 편지함이나 설정한 연동 대상에 문서를 남기는 앱입니다. 첫 번째에는 기밀 정보를 포함하지 않은 1건을 발송하고, 수신자와 본문을 수신함에서 확인합니다. Obsidian 연동을 사용할 경우, 설정한 Vault 노트에도 도착했는지 확인해 주세요.</p><p>Outbox와 전송 기록은 단말기 내에서 암호화되지만, 메일 본문은 전송 API와 외부 배포 플랫폼을 통해 수신 메일로 저장됩니다. 메일 계정의 공유 및 자동 전달, Vault의 동기화·공유는 별도로 확인이 필요합니다. <a href="/ko/note-to-email/#delivery-check">메일 도착 확인</a>、<a href="/ko/privacy-architecture/">데이터 경로</a>.</p></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="security-faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07"><span>자주 묻는 질문</span></h2></div><div class="ce-chapter__body"><div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">메모 앱의 보안은 암호화만으로 비교할 수 있습니까?</summary><div class="faq-answer"><p>아니요. 공유 상대와 권한, 계정 로그인, 기기 및 노트 잠금, 복구 방법, 내보낸 복사본도 확인합니다. 암호화 방식의 이름만으로는 오공유나 데이터 손실을 방지할 수 있다고 판단할 수 없습니다.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">E2EE와 실시간 공동 편집을 동시에 수행하는 서비스가 있습니까?</summary><div class="faq-answer"><p>CryptPad는 E2EE에서 문서를 공동 편집할 수 있습니다. 열람·편집 권한, 소유자, 공유 링크, 접근 목록을 확인해 주세요. E2EE라 하더라도, 허가받은 상대가 만든 복사본까지 회수할 수 있는 것은 아닙니다.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Apple 메모의 잠금과 공동 편집을 동시에 사용할 수 있습니까?</summary><div class="faq-answer"><p>잠금 설정이 있는 메모는 공동 편집이 불가능하므로, 공유하기 전에 메뉴에서 잠금 설정 자체를 삭제합니다. Face ID로 일시적으로 여는 것만으로는 동일하지 않습니다. iCloud의 고급 데이터 보호 및 공유 조건은 별도로 확인합니다.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Notion에서 보기만 한 사람이 편집할 수 있는 이유는 무엇입니까?</summary><div class="faq-answer"><p>다른 경로에서 넓은 권한이 부여될 가능성이 있습니다. Notion은 적용되는 권한 중 넓은 쪽을 우선시하기 위해 워크스페이스, 상위 페이지, 그룹 등에서의 접근도 확인합니다.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">비밀번호를 재설정하면 암호화한 메모를 복구할 수 있습니까?</summary><div class="faq-answer"><p>제품 및 키의 관리 방식에 따라 다릅니다. Apple 메모의 고유 비밀번호를 재설정해도 오래된 잠겨 있는 메모는 열 수 없습니다. OneNote의 섹션 비밀번호는 Microsoft에서도 해제할 수 없습니다. 사용 중인 제품의 복구 방법을 먼저 확인해 주세요.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">기종 교체 전에 최소한 무엇을 확인해야 합니까?</summary><div class="faq-answer"><p>동기화가 완료되고, 새 기기에서 본문과 첨부 파일을 열며, 필요한 잠금 및 복구 방법이 손에 있는지 확인합니다. 내보낸 데이터의 내용과 보호 상태도 확인하시고, 유일한 데이터와 키가 남아 있는 구형 단말기를 먼저 삭제하지 마십시오.</p></div></details></div></div></div></section>
+<section class="lp-section ce-chapter sd-chapter">
+  <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08"> <span>관련 기사</span> </h2></div><div class="ce-chapter__body">
+  <div class="internal-links">
+    <a href="/ko/blog/best-memo-apps-2026"> <span>【2026년】추천 메모 앱 10선 목적별 철저 비교</span> </a>
+    <a href="/ko/blog/how-to-choose-memo-app"> <span>메모 앱 선택 방법 완전 가이드 5개의 기준으로 실패하지 않음</span> </a>
+    <a href="/ko/blog/free-memo-apps-ranking"> <span>무료로 사용할 수 있는 메모 앱 순위 2026</span> </a>
+  </div>
+</div></section>
+
+<div class="cta-box"><div class="cta-box__title"><span>자신의 저장처에 짧은 메모를 남기세요</span></div><div class="cta-box__desc"><span>먼저 목적지를 설정하고, 1건의 도착을 확인합니다. 받은 편지함이나 Obsidian에 남기는 사용 방법을 시작할 수 있습니다.</span></div><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="bottom" data-cta-position="bottom" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="App Store에서 다운로드"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="App Store에서 다운로드" loading="lazy"></a></div>
+
+    <section class="lp-section ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09"><span>관련 페이지</span></h2></div><div class="ce-chapter__body"><div class="internal-links"><a href="/ko/blog/memo-app-encryption-comparison"><span>메모 앱의 암호화를 비교</span></a><a href="/ko/blog/free-memo-apps-ranking"><span>무료 메모 앱 순위</span></a><a href="/ko/blog/offline-memo-apps"><span>오프라인 메모 앱</span></a><a href="/ko/blog/memo-taking-tips"><span>메모 작성 요령 10선</span></a><a href="/ko/blog/minimalist-digital-memo"><span>미니멀리스트의 메모 기술</span></a><a href="/ko/blog/productivity-methods-comparison"><span>생산성 메서드 비교</span></a><a href="/ko/glossary/e2e-encryption/"><span>용어: E2E 암호화</span></a><a href="/ko/glossary/aes-gcm/"><span>용어: AES-GCM</span></a><a href="/ko/blog/"><span>블로그 목록</span></a></div></div></section>
+  </div>
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="compare" href="/ko/blog/fastest-memo-app-benchmark" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>다음에 읽는</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>비교 다음에는 실제 측정값을 확인합니다</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>주요 메모 앱의 실행 및 입력 시작까지 실제 측정한 표가 있습니다. </span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>관련 콘텐츠</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/ko/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio 대체 앱 비교</span></a></li>
+    <li><a href="/ko/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>자신에게 이메일을 보내는 방법</span></a></li>
+    <li><a href="/ko/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>메모 앱 비교 목록</span></a></li>
+    <li><a href="/ko/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>사용 방법 가이드</span></a></li>
+  </ul>
+</section>
+<!-- Author Bio -->
+<aside class="author-bio" style="margin:3rem auto 2rem;max-width:800px;padding:1.5rem 2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;gap:1.25rem;align-items:flex-start;">
+  <img src="/assets/img/app-icon-56.png" alt="Simple Memo - Obsidian용" width="48" height="48" loading="lazy" style="border-radius:50%;flex-shrink:0;margin-top:.2rem;">
+  <div>
+    <p style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">AI ATAKA</p>
+    <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;"><span>SimpleMemo의 개발자. iPhone에서 설정한 이메일 주소와 연동 대상 노트에 글을 남기는 앱을 개발하고 있습니다. </span></p>
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+      <a href="/ko/about/" style="font-size:.8rem;color:var(--accent);text-decoration:none;">프로필</a>
+      <a href="https://x.com/simplememofast" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">X / 트위터</a>
+      <a href="https://github.com/simplememofast" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">GitHub</a>
+    </div>
+  </div>
+</aside>
+</main>
+
+      <section class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+        <h3 style="font-size:1rem;margin-bottom:0.75rem">참고문헌</h3>
+        <ul style="font-size:0.85rem;line-height:1.6;list-style:none;padding:0">
+        <li><a href="https://csrc.nist.gov/pubs/sp/800/38/d/final" target="_blank" rel="noopener">NIST (2007). SP 800-38D: GCM 작동 모드. 국립표준기술연구소.</a></li>
+        <li><a href="https://www.rfc-editor.org/rfc/rfc8446" target="_blank" rel="noopener">Rescorla, E. (2018). RFC 8446: 전송 계층 보안 (TLS) 프로토콜 버전 1.3. IETF.</a></li>
+        </ul>
+      </section>
+
+    <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ko" dir="ltr"><a class="site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">작은 메모, 다음 한 걸음.</p><p class="site-footer-description">iPhone에서 Obsidian과 이메일로 메모를 보내세요.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="푸터 탐색 메뉴">
+      <div class="footer__col">
+        <p class="footer__col-title">프로덕트</p>
+        <a href="/ko/download/" class="footer__link">다운로드</a>
+        <a href="/ko/" class="footer__link">홈</a>
+        <a href="/ko/use-cases/" class="footer__link">활용 사례</a>
+        <a href="/ko/guides/" class="footer__link">사용 가이드</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">비교·전환</p>
+        <a href="/ko/captio-alternative/" class="footer__link"><span>Captio 대체</span></a>
+        <a href="/ko/note-to-email/" class="footer__link">메모를 이메일로</a>
+        <a href="/ko/vs/" class="footer__link">비교</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">읽을거리</p>
+        <a href="/ko/blog/" class="footer__link"><span>블로그</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">지원</p>
+        <a href="/ko/roadmap/" class="footer__link">공개 로드맵</a>
+        <a href="/ko/devlog/" class="footer__link">개발 기록</a>
+        <a href="/ko/about/" class="footer__link">개발자 소개</a>
+        <a href="/ko/faq" class="footer__link">자주 묻는 질문</a>
+        <a href="/ko/privacy" class="footer__link">개인정보 보호</a>
+        <a href="/ko/contact" class="footer__link">문의</a>
+      </div>
+      </nav><p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 운영: YURIKA, K.K.</p></div></footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body></html>

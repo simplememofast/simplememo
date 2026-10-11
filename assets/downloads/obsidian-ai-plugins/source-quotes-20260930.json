@@ -1,0 +1,390 @@
+{
+  "kind": "Pinned official source excerpts; documentation/policy/source-code review, not runtime packet or backend audit",
+  "observed_at_utc": "2026-09-30T14:25:02.853705+00:00",
+  "source_receipt_sha256": "0f3367a4b9d106c57445bc3b2975ae58269c405b86fb5cc5232ece24064c5dbf",
+  "registry": {
+    "repo": "obsidianmd/obsidian-releases",
+    "commit": "2db5da29e67e7600176c8c9450fd1c36c3a6831b",
+    "path": "community-plugins.json",
+    "url": "https://github.com/obsidianmd/obsidian-releases/blob/2db5da29e67e7600176c8c9450fd1c36c3a6831b/community-plugins.json",
+    "sha256": "c4b896508cb3aa754c1ec42ddbbcaf996d0a1cad0dd5e5c4ff57ecf2ae2f3772",
+    "entries_observed": 8241
+  },
+  "quotes": [
+    {
+      "id": "Q01",
+      "plugin": "Copilot",
+      "version": "4.0.12",
+      "commit": "8c56781c43fd696e8b2707f170b1f2e2fc61f28b",
+      "file": "README.md",
+      "source_url": "https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/README.md#L29-L40",
+      "lines": [
+        29,
+        40
+      ],
+      "sha256": "44ca6417fcfce33c84af462a78e7c7cfd40f615b272c84f36a66616b2531bcf1",
+      "bytes": 11263,
+      "quote": "29: \n30: ---\n31: \n32: ## Choose your agent\n33: \n34: **Agent** is the main Copilot experience for multi-step work. It can inspect notes, use tools, create Obsidian files, and continue across several turns with permissions you control.\n35: \n36: - **opencode (recommended):** Let Copilot download and manage it, then use Copilot-hosted models, your own provider key, or a local model.\n37: - **Claude Code:** Connect an existing installation. Copilot detects common install locations and uses your Claude Code login.\n38: - **Codex:** Connect Codex through the `@agentclientprotocol/codex-acp` adapter and use your existing Codex login.\n39: \n40: Already pay for Claude or ChatGPT, or already have model API access? You can bring that access to Copilot without buying a Copilot plan. Provider terms and usage limits still apply."
+    },
+    {
+      "id": "Q02",
+      "plugin": "Copilot",
+      "version": "4.0.12",
+      "commit": "8c56781c43fd696e8b2707f170b1f2e2fc61f28b",
+      "file": "README.md",
+      "source_url": "https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/README.md#L145-L154",
+      "lines": [
+        145,
+        154
+      ],
+      "sha256": "44ca6417fcfce33c84af462a78e7c7cfd40f615b272c84f36a66616b2531bcf1",
+      "bytes": 11263,
+      "quote": "145: - Hosted models and cloud-backed features require network access.\n146: - **Privacy and data handling:**\n147:   - **Free use:** Messages and note context go to the LLM provider, local endpoint, or CLI agent you configure. Brevilabs does not receive them unless you invoke a Brevilabs-hosted feature, or upload a diagnostic report yourself.\n148:   - **Paid hosted services:** Brevilabs's backend and its vetted enterprise model providers process the full request. Hosted features receive the inputs they need, such as search queries, URLs, and files used by Quick Chat tools or Agent project context. The privacy policy says request content is processed transiently, not retained, and not used for training.\n149:   - **Diagnostic reports:** The zip you review under **Report an issue** reaches Brevilabs only when you choose to upload it. Unlike the requests above it is deliberately retained, so a maintainer can look it up later: it is stored privately, referenced only by an opaque report ID, carries no license key or account identity, and is deleted automatically after 60 days. The public issue carries the ID, never the bundle. The copy on your own machine is yours and is not part of that deletion.\n150:   - **User ID:** Hosted feature requests include a randomly generated UUID for service delivery, license abuse prevention, and rate limiting. It is not used for tracking, profiling, or analytics.\n151: - See the [privacy policy](https://www.obsidiancopilot.com/en/privacy) for full terms.\n152: - The Copilot plugin frontend is fully open source. The backend services that support hosted features are closed source and proprietary.\n153: - We offer a full refund within 14 days of purchase if you are not satisfied.\n154: "
+    },
+    {
+      "id": "Q03",
+      "plugin": "Copilot",
+      "version": "4.0.12",
+      "commit": "8c56781c43fd696e8b2707f170b1f2e2fc61f28b",
+      "file": "docs/copilot-plus-and-self-host.md",
+      "source_url": "https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/docs/copilot-plus-and-self-host.md#L75-L100",
+      "lines": [
+        75,
+        100
+      ],
+      "sha256": "fc63a01b5df202067a1e8cb0d70aab6aa3899fd3ca18648a82ecfb8e2a1ad4db",
+      "bytes": 9942,
+      "quote": "75: \n76: | Model source                | How access works                                               | Who processes the prompt                                        |\n77: | --------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------- |\n78: | **Copilot-hosted**          | Lite, Plus, or included Supporter access                       | Brevilabs and the enterprise model provider used for that model |\n79: | **Cloud BYOK**              | Your API key under BYOK                                        | The provider and endpoint you configured                        |\n80: | **Local BYOK**              | Ollama, LM Studio, or another local OpenAI-compatible endpoint | Your local endpoint                                             |\n81: | **opencode-reported model** | Authentication managed by opencode                             | The provider behind that opencode model                         |\n82: | **Claude**                  | Claude Code login or environment                               | Anthropic under your Claude account                             |\n83: | **Codex**                   | Codex CLI login through `codex-acp`                            | OpenAI under your Codex or ChatGPT account                      |\n84: \n85: A Claude or ChatGPT subscription is not an API key. Use the Claude or Codex Agent Chat setup for those subscriptions. Use BYOK only when you have API access or an OpenAI-compatible endpoint.\n86: \n87: ## Understand service data routes\n88: \n89: The selected model is only one possible route. A feature may call another service for the part of the task you asked it to perform:\n90: \n91: - A **Copilot-hosted Skill** sends the search query, URL, or document needed by that Skill to Brevilabs.\n92: - **Plus document processing** sends the supported document to Copilot's hosted processor.\n93: - In **Agent Chat**, **Miyo document processing** runs through the local Miyo CLI, so PDF and EPUB parsing stays on this computer even when search uses a remote Miyo server.\n94: - In **Quick Chat**, **Miyo document processing** uses the connected Miyo service. A configured remote Miyo server processes the document there rather than on this computer.\n95: - Saved **project context** that needs web, YouTube, or binary-file conversion can use Copilot's hosted project service. The Miyo Document Processor choice does not change that project route.\n96: - An agent can read a local note and include relevant text in the prompt sent to the selected model. Opening Agent Chat alone does not upload the whole vault.\n97: \n98: For a workflow that does not send task content to Brevilabs, use direct Markdown context, local tools or local Miyo, and a local model. Disable Copilot's cloud-backed Skills for every agent you use. Do not add web pages, YouTube links, or binary files as saved project context when their hosted conversion is outside your intended boundary.\n99: \n100: The [privacy policy](https://www.obsidiancopilot.com/en/privacy) describes how Copilot's hosted requests are processed. Your model provider and Miyo server have their own boundaries and terms."
+    },
+    {
+      "id": "Q04",
+      "plugin": "Copilot",
+      "version": "4.0.12",
+      "commit": "8c56781c43fd696e8b2707f170b1f2e2fc61f28b",
+      "file": "docs/copilot-plus-and-self-host.md",
+      "source_url": "https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/docs/copilot-plus-and-self-host.md#L103-L117",
+      "lines": [
+        103,
+        117
+      ],
+      "sha256": "fc63a01b5df202067a1e8cb0d70aab6aa3899fd3ca18648a82ecfb8e2a1ad4db",
+      "bytes": 9942,
+      "quote": "103: \n104: Supporter and eligible legacy licenses can open **Settings → Copilot → Self-Host** and enable **Self-Host Mode**.\n105: \n106: When it is on, Copilot:\n107: \n108: - Lets you supply Firecrawl, Perplexity, Parallel, or Exa credentials for web search.\n109: - With OpenCode selected, routes Agent Chat web searches through that selected provider while keeping its API key inside Obsidian. This does not require Obsidian's command line interface.\n110: - Disables OpenCode's native web-search and web-fetch tools so they cannot bypass the selected route. Full-page fetching through OpenCode is unavailable until the self-host providers share a supported fetch interface.\n111: - Lets you supply a Supadata key for YouTube transcripts.\n112: - Directs you to BYOK for local or self-hosted model endpoints.\n113: - Flags and sorts cloud agents and models below local or self-hosted choices.\n114: \n115: It does not disable the cloud. Claude, Codex, Copilot-hosted models, cloud BYOK providers, Firecrawl, Perplexity, Parallel, Exa, and Supadata can still send data to their services when you select them. The warnings make those routes visible so you can decide.\n116: \n117: You do not need Self-Host Mode to use a local BYOK model or local Miyo. Those are available independently."
+    },
+    {
+      "id": "Q05",
+      "plugin": "Copilot",
+      "version": "4.0.12",
+      "commit": "8c56781c43fd696e8b2707f170b1f2e2fc61f28b",
+      "file": "docs/vault-search-and-indexing.md",
+      "source_url": "https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/docs/vault-search-and-indexing.md#L17-L44",
+      "lines": [
+        17,
+        44
+      ],
+      "sha256": "1329c2678d8657ed7bb297c1affec3e889b7c70083d2ad4df811f36af95aae9a",
+      "bytes": 21999,
+      "quote": "17: - **File search** finds exact words, phrases, filenames, and paths with the active agent's normal tools. It needs no index.\n18: - **Obsidian-aware search** uses the Obsidian CLI skill when a question depends on Obsidian's index, such as links, backlinks, properties, tags, tasks, Bases, or the currently open note.\n19: - **Miyo semantic search** finds related ideas even when the notes use different words. It is useful for fuzzy recall, research across many notes, and large collections.\n20: \n21: You can ask naturally, such as “Find everything I have written about memory consolidation,” or say “Use Miyo” when you want semantic search explicitly. Search results become context for the model you selected, so the model still receives the excerpts Agent Chat uses in its answer.\n22: \n23: ## Connect Miyo\n24: \n25: Open **Settings → Copilot → Miyo** and choose one connection:\n26: \n27: - **Local** discovers Miyo on this device. Download and open Miyo, select **Connect**, and register the current vault if prompted. On mobile this option is disabled, because Copilot cannot discover a Miyo server on a phone or tablet.\n28: - **Remote server** connects using a server address such as `http://miyo-home:8742`. Enter the same Tailscale URL on your computers and select **Connect**. You do not need Miyo installed on the computer running Copilot.\n29: \n30: Selecting a connection option or editing the address leaves the current connection running. Select **Connect** to apply the chosen connection. The saved remote address and feature preferences are retained. An incomplete address is not saved as an active endpoint. Existing remote configurations remain selected after an upgrade.\n31: \n32: The badge beside the saved connection option shows **Connected**, **Checking…**, or **Offline**. It stays beside that option while you browse another. When the saved connection is selected, **Check connection** checks it again and **Disconnect** turns it off. Selecting another option or changing the remote address shows **Connect** instead.\n33: \n34: A remote server can be connected without the current vault being registered there. Manage folders on the Miyo host to make this vault available for search. Copilot does not send this computer's filesystem path to register it remotely.\n35: \n36: Turn on **Semantic search for agents** under **Powered by Miyo** to install the agent Skill. The switch appears on desktop only, since Agent Chat does not run on mobile; a connected mobile device still uses Miyo for Copilot Plus chat search and Relevant Notes. For remote connections, manage chat sources and Relay on the Miyo host. The **External apps** Connector is separate from Copilot's connection and does not set its server address.\n37: \n38: Indexing and search requests go to your selected Miyo server. **Disconnect** disables Copilot's Miyo backend; installed agent Skills keep their separate feature preferences.\n39: \n40: ## What Miyo availability means\n41: \n42: Copilot checks Miyo when a feature needs it and when you open the Miyo settings tab. It does not poll in the background or show an availability notice at startup. If a check is running, Settings shows **Checking…** instead of reusing an older **Connected** result.\n43: \n44: This table is the shared availability contract for the Miyo-only migration across Copilot. Free Chat never searches the vault automatically. \"Quick Chat\" below refers to Copilot Plus retrieval and its Miyo document processor."
+    },
+    {
+      "id": "Q06",
+      "plugin": "Copilot",
+      "version": "4.0.12",
+      "commit": "8c56781c43fd696e8b2707f170b1f2e2fc61f28b",
+      "file": "src/constants.ts",
+      "source_url": "https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/src/constants.ts#L759-L770",
+      "lines": [
+        759,
+        770
+      ],
+      "sha256": "320c2c1edd4abee27c988a1953e0e62d6d9c64577213399efe17700c1b9f0b23",
+      "bytes": 34330,
+      "quote": "759:   mistralApiKey: \"\",\n760:   deepseekApiKey: \"\",\n761:   siliconflowApiKey: \"\",\n762:   defaultChainType: ChainType.LLM_CHAIN,\n763:   defaultModelKey: ChatModels.OPENROUTER_GEMINI_2_5_FLASH + \"|\" + ChatModelProviders.OPENROUTERAI,\n764:   contextTurns: 15,\n765:   userSystemPrompt: \"\",\n766:   openAIProxyBaseUrl: \"\",\n767:   stream: true,\n768:   copilotFolder: DEFAULT_COPILOT_FOLDER,\n769:   // Every folder ever activated as the Copilot root (seeded with the legacy\n770:   // root in the v8 migration). Kept append-only so each historical root stays"
+    },
+    {
+      "id": "Q07",
+      "plugin": "Copilot",
+      "version": "4.0.12",
+      "commit": "8c56781c43fd696e8b2707f170b1f2e2fc61f28b",
+      "file": "src/constants.ts",
+      "source_url": "https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/src/constants.ts#L801-L812",
+      "lines": [
+        801,
+        812
+      ],
+      "sha256": "320c2c1edd4abee27c988a1953e0e62d6d9c64577213399efe17700c1b9f0b23",
+      "bytes": 34330,
+      "quote": "801:   lastDismissedVersion: null,\n802:   lastShownStartupVersion: null,\n803:   passMarkdownImages: true,\n804:   enableAutonomousAgent: true,\n805:   enableCustomPromptTemplating: true,\n806:   enableSelfHostMode: false,\n807:   enableMiyo: false,\n808:   enableMiyoSearchSkill: false,\n809:   miyoSearchAll: false,\n810:   relevantNotesLiveUpdate: true,\n811:   miyoServerUrl: \"\",\n812:   selfHostSearchProvider: \"firecrawl\","
+    },
+    {
+      "id": "Q08",
+      "plugin": "Copilot",
+      "version": "4.0.12",
+      "commit": "8c56781c43fd696e8b2707f170b1f2e2fc61f28b",
+      "file": "src/constants.ts",
+      "source_url": "https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/src/constants.ts#L842-L859",
+      "lines": [
+        842,
+        859
+      ],
+      "sha256": "320c2c1edd4abee27c988a1953e0e62d6d9c64577213399efe17700c1b9f0b23",
+      "bytes": 34330,
+      "quote": "842:   defaultSystemPromptTitle: \"\",\n843:   autoCompactThreshold: 128000,\n844:   convertedDocOutputFolder: DEFAULT_CONVERTED_DOC_OUTPUT_FOLDER,\n845:   agentMode: {\n846:     byok: {},\n847:     activeBackend: \"opencode\",\n848:     backends: {},\n849:     // On by default so the diagnostic frame log is already capturing when a\n850:     // user hits a bug and clicks \"Report an issue\" (it can't capture\n851:     // retroactively). The migration in src/settings/model.ts preserves an\n852:     // explicit prior choice, so anyone who turned it off stays off. The privacy\n853:     // disclosure lives in the Report-issue modal, shown only when the user\n854:     // chooses to share the log.\n855:     debugFullFrames: true,\n856:     // On by default: an agent turn can run for minutes, and the chime is the\n857:     // only thing that reaches a user who has looked away. Turned off in\n858:     // Basic → Agents.\n859:     notificationSound: true,"
+    },
+    {
+      "id": "Q09",
+      "plugin": "Copilot",
+      "version": "4.0.12",
+      "commit": "8c56781c43fd696e8b2707f170b1f2e2fc61f28b",
+      "file": "src/services/keychainService.ts",
+      "source_url": "https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/src/services/keychainService.ts#L239-L274",
+      "lines": [
+        239,
+        274
+      ],
+      "sha256": "2e622f8dd9514fd238138f7b71aa1d8bc0acc8d27ff3ffb272cc94a5c43f6fc3",
+      "bytes": 29305,
+      "quote": "239:   /** Whether the OS keychain is available in this Obsidian version. */\n240:   // DESIGN NOTE — intentionally only checks for the `secretStorage` object,\n241:   // not individual methods (`getSecret`/`setSecret`/`listSecrets`). Obsidian\n242:   // ships SecretStorage as a single API surface (1.11.4); there is no\n243:   // released version where the object exists but methods are missing.\n244:   // Capability-probing each method would add branching for a partial-API\n245:   // world that does not exist. If a future review flags this again, point\n246:   // them at this note.\n247:   isAvailable(): boolean {\n248:     return !!this.app.secretStorage;\n249:   }\n250: \n251:   /** Get the current vault namespace ID. */\n252:   getVaultId(): string {\n253:     return this.vaultId;\n254:   }\n255: \n256:   /**\n257:    * Set the vault namespace ID from persisted settings.\n258:    * Reason: called during load to replace the path-derived fallback with the\n259:    * stable persisted ID, so vault renames don't orphan keychain entries.\n260:    */\n261:   setVaultId(id: string): void {\n262:     this.vaultId = id;\n263:   }\n264: \n265:   /**\n266:    * Access SecretStorage with a runtime guard.\n267:    * Reason: replaces scattered non-null assertions with a single guard\n268:    * that produces a clear error when keychain is unavailable.\n269:    */\n270:   private get storage(): SecretStorage {\n271:     if (!this.app.secretStorage) {\n272:       throw new Error(\"OS keychain (SecretStorage) is not available.\");\n273:     }\n274:     return this.app.secretStorage;"
+    },
+    {
+      "id": "Q10",
+      "plugin": "Smart Connections",
+      "version": "4.7.2",
+      "commit": "92e8d56c668f7711054b3a9de16bb73c12e5fa83",
+      "file": "README.md",
+      "source_url": "https://github.com/brianpetro/obsidian-smart-connections/blob/92e8d56c668f7711054b3a9de16bb73c12e5fa83/README.md#L24-L41",
+      "lines": [
+        24,
+        41
+      ],
+      "sha256": "dc010d599913826c3dcdc88dd55a006ade5b5545f2f4609410cab722261f035f",
+      "bytes": 43950,
+      "quote": "24: > [!NOTE] What Smart Connections does  \n25: > Smart Connections uses local embeddings and your Smart Environment to surface notes that are semantically related to what you are working on right now. Start with the [overview](https://smartconnections.app/smart-connections/?utm_source=connections-readme), then jump into the [Connections view guide](https://smartconnections.app/smart-connections/list-feature/?utm_source=connections-readme), [Lookup guide](https://smartconnections.app/smart-connections/lookup/?utm_source=connections-readme), and [settings guide](https://smartconnections.app/smart-connections/settings/?utm_source=connections-readme) as your workflow gets deeper.\n26: \n27: ![connections-semantic-match-proof-editorial-hero-reviewed-1280x720-2026-07-29](images/connections-semantic-match-proof-editorial-hero-reviewed-1280x720-2026-07-29.png)\n28: \n29: ✔️ Zero-setup: ships with a local embedding model that just works  \n30: \n31: 🔐 Private and offline by default  \n32: \n33: 📲 Works on mobile devices  \n34: \n35: 📦 Ultra-lightweight bundle with minimal third party dependencies  \n36: \n37: 🔍 Streamlined codebase with minimal/no dependencies can be audited >3× faster than comparable AI plugins\n38: \n39: 🌐 Source available core, local-first data\n40: \n41: ⚔️ Mission driven, user aligned, community supported  "
+    },
+    {
+      "id": "Q11",
+      "plugin": "Smart Connections",
+      "version": "4.7.2",
+      "commit": "92e8d56c668f7711054b3a9de16bb73c12e5fa83",
+      "file": "README.md",
+      "source_url": "https://github.com/brianpetro/obsidian-smart-connections/blob/92e8d56c668f7711054b3a9de16bb73c12e5fa83/README.md#L98-L109",
+      "lines": [
+        98,
+        109
+      ],
+      "sha256": "dc010d599913826c3dcdc88dd55a006ade5b5545f2f4609410cab722261f035f",
+      "bytes": 43950,
+      "quote": "98: > [!TLDR] 3 step plan  \n99: > 1. **Install and enable** Smart Connections from Obsidian Community plugins.  \n100: > 2. **Keep writing**. The built in local model automatically indexes your vault.  \n101: > 3. **Open the Connections view** to see relevant notes and drag links directly into what you are working on.\n102: <details><summary><span style=\"--font-weight: var(--h3-weight); font-variant: var(--h3-variant); letter-spacing: var(--h3-letter-spacing); line-height: var(--h3-line-height); font-size: var(--h3-size); color: var(--h3-color); font-weight: var(--font-weight); font-style: var(--h3-style); font-family: var(--h3-font); cursor: pointer;\">Easy installation + zero-setup</span></summary>\n103: \n104: Find Smart Connections in the [Obsidian Community plugins](https://community.obsidian.md/plugins/smart-connections).  \n105: ![](/assets/SC-OP-install-and-enable-2025-05-20.png)\n106: \n107: #### Install and enable, that is it\n108: \n109: A local model starts creating embeddings right away. No extra apps, no CLI tools, and no API key required.  "
+    },
+    {
+      "id": "Q12",
+      "plugin": "Smart Connections",
+      "version": "4.7.2",
+      "commit": "92e8d56c668f7711054b3a9de16bb73c12e5fa83",
+      "file": "src/main.js",
+      "source_url": "https://github.com/brianpetro/obsidian-smart-connections/blob/92e8d56c668f7711054b3a9de16bb73c12e5fa83/src/main.js#L52-L99",
+      "lines": [
+        52,
+        99
+      ],
+      "sha256": "1007d5cf3dd4ca45fe1e2949dc17ba47e73d610abf28c47a733d1e03ecd06aa6",
+      "bytes": 8220,
+      "quote": "52: \n53:   onload() {\n54:     this.app.workspace.onLayoutReady(this.initialize.bind(this));\n55:     this.SmartEnv.create(this, this.smart_env_config);\n56:     this.addSettingTab(new this.ConnectionsSettingsTab(this.app, this));\n57:     add_smart_dice_icon();\n58:     this.register_item_views({skip_command_registration: true});\n59:   }\n60: \n61:   onunload() {\n62:     // console.log(\"Unloading Smart Connections plugin\");\n63:     this.connections_footer_view?.unload();\n64:     this.notices?.unload();\n65:     this.env?.unload_main?.(this);\n66:   }\n67: \n68:   async initialize() {\n69:     this.register_ribbon_actions();\n70:     this.smart_connections_view = null;\n71:     this.is_new_user().then(async (is_new) => {\n72:       if (!is_new) return;\n73:       window.setTimeout(() => {\n74:         StoryModal.open(this, {\n75:           title: 'Getting Started With Smart Connections',\n76:           url: 'https://smartconnections.app/story/smart-connections-getting-started/?utm_source=sc-op-new-user',\n77:         });\n78:       }, 1000);\n79:       await this.SmartEnv.wait_for({ loaded: true });\n80:       window.setTimeout(() => {\n81:         this.apply_connections_view_location();\n82:         this.open_connections_view();\n83:       }, 1000);\n84:       this.add_to_gitignore(\"\\n\\n# Ignore Smart Environment folder\\n.smart-env\");\n85:     });\n86:     await this.SmartEnv.wait_for({ loaded: true });\n87:     this.register_command_actions();\n88:     this.wrap_connections_view_open();\n89:     this.apply_connections_view_location();\n90:     this.register_connections_view_location_listener();\n91:     register_smart_connections_codeblock(this);\n92:     if (!this.connections_footer_view) {\n93:       this.registerEditorExtension(connections_footer_plugin);\n94:       this.connections_footer_view = new ConnectionsFooterView(this);\n95:     }\n96:     this.toggled_footer_connections();\n97:     await this.check_for_updates();\n98:   }\n99: "
+    },
+    {
+      "id": "Q13",
+      "plugin": "Smart Connections",
+      "version": "4.7.2",
+      "commit": "92e8d56c668f7711054b3a9de16bb73c12e5fa83",
+      "file": "src/main.js",
+      "source_url": "https://github.com/brianpetro/obsidian-smart-connections/blob/92e8d56c668f7711054b3a9de16bb73c12e5fa83/src/main.js#L144-L169",
+      "lines": [
+        144,
+        169
+      ],
+      "sha256": "1007d5cf3dd4ca45fe1e2949dc17ba47e73d610abf28c47a733d1e03ecd06aa6",
+      "bytes": 8220,
+      "quote": "144:   async check_for_updates() {\n145:     if (await this.is_new_plugin_version(this.manifest.version)) {\n146:       // console.log(\"opening release notes modal\");\n147:       try {\n148:         this.ReleaseNotesView.open(this.app.workspace, this.manifest.version);\n149:       } catch (error) {\n150:         console.error('Failed to open ReleaseNotesView', error);\n151:       }\n152:       await this.set_last_known_version(this.manifest.version);\n153:     }\n154:     window.setTimeout(this.check_for_update.bind(this), 3000);\n155:   }\n156: \n157:   async check_for_update() {\n158:     try {\n159:       const { json: response } = await requestUrl({\n160:         url: \"https://api.github.com/repos/brianpetro/obsidian-smart-connections/releases/latest\",\n161:         method: \"GET\",\n162:         headers: {\n163:           \"Content-Type\": \"application/json\",\n164:         },\n165:         contentType: \"application/json\",\n166:       });\n167:       const latest_release = response.tag_name;\n168:       if (latest_release !== this.manifest.version) {\n169:         if (!this.update_available || this.latest_release_version !== latest_release) {"
+    },
+    {
+      "id": "Q14",
+      "plugin": "Smart Connections",
+      "version": "4.7.2",
+      "commit": "92e8d56c668f7711054b3a9de16bb73c12e5fa83",
+      "file": "package.json",
+      "source_url": "https://github.com/brianpetro/obsidian-smart-connections/blob/92e8d56c668f7711054b3a9de16bb73c12e5fa83/package.json#L30-L62",
+      "lines": [
+        30,
+        62
+      ],
+      "sha256": "03df331d01085507368ffa12c670269388e5fefffa704006963c58462a35477a",
+      "bytes": 2271,
+      "quote": "30:   },\n31:   \"homepage\": \"https://smartconnections.app\",\n32:   \"devDependencies\": {\n33:     \"ava\": \"^6.0.1\",\n34:     \"esbuild\": \"^0.25.9\",\n35:     \"eslint\": \"^10.3.0\",\n36:     \"jsbrains\": \"github:brianpetro/jsbrains#ba80525b083cf515555cedbdc6294a2d0aa5da68\",\n37:     \"swagger-jsdoc\": \"^6.2.8\"\n38:   },\n39:   \"dependencies\": {\n40:     \"@codemirror/state\": \"6.5.0\",\n41:     \"@codemirror/view\": \"6.38.6\",\n42:     \"js-tiktoken\": \"^1.0.19\",\n43:     \"obsidian\": \"latest\",\n44:     \"obsidian-smart-env\": \"file:../obsidian-smart-env\",\n45:     \"smart-blocks\": \"file:../jsbrains/smart-blocks\",\n46:     \"smart-chat-model\": \"file:../jsbrains/smart-chat-model\",\n47:     \"smart-collections\": \"file:../jsbrains/smart-collections\",\n48:     \"smart-embed-model\": \"file:../jsbrains/smart-embed-model\",\n49:     \"smart-entities\": \"file:../jsbrains/smart-entities\",\n50:     \"smart-file-system\": \"file:../jsbrains/smart-fs\",\n51:     \"smart-http-request\": \"file:../jsbrains/smart-http-request\",\n52:     \"smart-model\": \"file:../jsbrains/smart-model\",\n53:     \"smart-notices\": \"file:../jsbrains/smart-notices\",\n54:     \"smart-settings\": \"file:../jsbrains/smart-settings\",\n55:     \"smart-sources\": \"file:../jsbrains/smart-sources\",\n56:     \"smart-utils\": \"file:../jsbrains/smart-utils\",\n57:     \"smart-view\": \"file:../jsbrains/smart-view\"\n58:   },\n59:   \"ava\": {\n60:     \"files\": [\n61:       \"*.test.js\",\n62:       \"smart-chat/*.test.js\","
+    },
+    {
+      "id": "Q15",
+      "plugin": "Text Generator",
+      "version": "0.8.7",
+      "commit": "4b9ddf876793d79ba680941d0d093471eaa150eb",
+      "file": "src/default-settings.ts",
+      "source_url": "https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/default-settings.ts#L4-L40",
+      "lines": [
+        4,
+        40
+      ],
+      "sha256": "2758dc6e0fef0456c6a6b7c1a62e2f8fd1db7880de86405e5948c88e6daeb27f",
+      "bytes": 3064,
+      "quote": "4: const DEFAULT_SETTINGS: TextGeneratorSettings = {\n5:   version: pkg.version as any,\n6:   endpoint: \"https://api.openai.com/v1\",\n7:   models: [],\n8:   api_key: \"\",\n9:   encrypt_keys: false,\n10:   selectedProvider: \"OpenAI Chat (Langchain)\",\n11:   max_tokens: 5000,\n12:   temperature: 0.7,\n13:   frequency_penalty: 0.5,\n14:   showStatusBar: true,\n15:   outputToBlockQuote: false,\n16:   freeCursorOnStreaming: false,\n17:   allowJavascriptRun: false,\n18:   experiment: false,\n19:   promptsPath: \"textgenerator/templates\",\n20:   textGenPath: \"textgenerator/\",\n21:   prefix: \"\\n\\n\",\n22:   tgSelectionLimiter: \"^\\\\*\\\\*\\\\*\",\n23:   stream: true,\n24:   context: {\n25:     customInstructEnabled: true,\n26:     includeClipboard: true,\n27:     customInstruct: `Title: {{title}}\n28:   \n29: Starred Blocks: {{starredBlocks}}\n30: \t  \n31: {{tg_selection}}`,\n32: \n33:     contextTemplate: `Title: {{title}}\n34: \t\n35: Starred Blocks: {{starredBlocks}}\n36: \t  \n37: {{tg_selection}}`,\n38:   },\n39:   requestTimeout: 300000,\n40:   options: {"
+    },
+    {
+      "id": "Q16",
+      "plugin": "Text Generator",
+      "version": "0.8.7",
+      "commit": "4b9ddf876793d79ba680941d0d093471eaa150eb",
+      "file": "src/default-settings.ts",
+      "source_url": "https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/default-settings.ts#L73-L102",
+      "lines": [
+        73,
+        102
+      ],
+      "sha256": "2758dc6e0fef0456c6a6b7c1a62e2f8fd1db7880de86405e5948c88e6daeb27f",
+      "bytes": 3064,
+      "quote": "73:     generateTitleInstructEnabled: false,\n74:     generateTitleInstruct: `Generate a title for the current document (do not use * \" \\\\ / < > : | ? .):\n75: {{substring content 0 255}}`,\n76: \n77:     includeAttachmentsInRequest: false,\n78:   },\n79: \n80:   autoSuggestOptions: {\n81:     customInstructEnabled: true,\n82:     customInstruct: `Continue the follwing text:\n83: Title: {{title}}\n84: {{query}}`,\n85:     systemPrompt: \"\",\n86:     isEnabled: false,\n87:     allowInNewLine: false,\n88:     delay: 300,\n89:     numberOfSuggestions: 5,\n90:     triggerPhrase: \"  \",\n91:     stop: \".\",\n92:     showStatus: true,\n93:     customProvider: false,\n94:     inlineSuggestions: false,\n95:     overrideTrigger: \" \",\n96:   },\n97: \n98:   slashSuggestOptions: {\n99:     isEnabled: false,\n100:     triggerPhrase: \"/\",\n101:   },\n102: "
+    },
+    {
+      "id": "Q17",
+      "plugin": "Text Generator",
+      "version": "0.8.7",
+      "commit": "4b9ddf876793d79ba680941d0d093471eaa150eb",
+      "file": "src/scope/context-manager.ts",
+      "source_url": "https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/scope/context-manager.ts#L355-L374",
+      "lines": [
+        355,
+        374
+      ],
+      "sha256": "793910e10f7ea4b3ce5a0f260081ba538d9d7cb5f9539c308333b953e15ac8a7",
+      "bytes": 44870,
+      "quote": "355:       {},\n356:       this.getFrontmatter(this.getMetaData(templatePath)),\n357:       contextObj.frontmatter\n358:     );\n359: \n360:     if (contextOptions.includeClipboard)\n361:       try {\n362:         blocks[\"clipboard\"] = await this.getClipboard();\n363:       } catch {\n364:         // empty\n365:       }\n366: \n367:     const options = {\n368:       selection,\n369:       selections,\n370:       ...blocks[\"frontmatter\"],\n371:       ...blocks[\"headings\"],\n372:       content: ctnt,\n373:       context,\n374:       ...blocks,"
+    },
+    {
+      "id": "Q18",
+      "plugin": "Text Generator",
+      "version": "0.8.7",
+      "commit": "4b9ddf876793d79ba680941d0d093471eaa150eb",
+      "file": "src/scope/context-manager.ts",
+      "source_url": "https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/scope/context-manager.ts#L404-L462",
+      "lines": [
+        404,
+        462
+      ],
+      "sha256": "793910e10f7ea4b3ce5a0f260081ba538d9d7cb5f9539c308333b953e15ac8a7",
+      "bytes": 44870,
+      "quote": "404:     const title =\n405:       vars[\"title\"] || vars[\"mentions\"]\n406:         ? (filePath\n407:             ? this.app.vault.getAbstractFileByPath(filePath)?.name ||\n408:               activeFile?.basename\n409:             : activeFile?.basename) || \"\"\n410:         : \"\";\n411: \n412:     const activeDocCache = this.getMetaData(filePath || \"\");\n413: \n414:     if (editor) {\n415:       //   context[\"line\"] = this.getConsideredContext(editor);\n416:       context[\"tg_selection\"] = await this.getTGSelection(editor);\n417: \n418:       const selections = await this.getSelections(editor);\n419:       const selection = await this.getSelection(editor);\n420: \n421:       context[\"selections\"] =\n422:         selection && selections.length == 0 ? [selection] : selections || [];\n423: \n424:       context[\"selection\"] = selection || \"\";\n425: \n426:       context[\"title\"] = title;\n427: \n428:       context[\"frontmatter\"] = this.getFrontmatter(activeDocCache) || \"\";\n429: \n430:       if (vars[\"previousWord\"])\n431:         context[\"previousWord\"] = await this.getPreviousWord(editor);\n432: \n433:       if (vars[\"nextWord\"])\n434:         context[\"nextWord\"] = await this.getNextWord(editor);\n435: \n436:       if (vars[\"beforeCursor\"])\n437:         context[\"beforeCursor\"] = await this.getBeforeCursor(editor);\n438: \n439:       if (vars[\"afterCursor\"])\n440:         context[\"afterCursor\"] = await this.getAfterCursor(editor);\n441: \n442:       if (vars[\"inverseSelection\"])\n443:         context[\"inverseSelection\"] = await this.getInverseSelection(editor);\n444: \n445:       if (vars[\"cursorParagraph\"])\n446:         context[\"cursorParagraph\"] = await this.getCursorParagraph(editor);\n447: \n448:       if (vars[\"cursorSentence\"])\n449:         context[\"cursorSentence\"] = await this.getCursorSentence(editor);\n450: \n451:       if (vars[\"content\"]) context[\"content\"] = await editor.getValue();\n452: \n453:       if (vars[\"highlights\"])\n454:         context[\"highlights\"] = editor ? await this.getHighlights(editor) : [];\n455:     }\n456: \n457:     if (vars[\"starredBlocks\"])\n458:       context[\"starredBlocks\"] =\n459:         (await this.getStarredBlocks(filePath || \"\")) || \"\";\n460: \n461:     if (vars[\"yaml\"])\n462:       context[\"yaml\"] = this.clearFrontMatterFromIgnored("
+    },
+    {
+      "id": "Q19",
+      "plugin": "Text Generator",
+      "version": "0.8.7",
+      "commit": "4b9ddf876793d79ba680941d0d093471eaa150eb",
+      "file": "src/main.ts",
+      "source_url": "https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/main.ts#L365-L373",
+      "lines": [
+        365,
+        373
+      ],
+      "sha256": "30d9fe0f274ee272f95517c2a176c0a7c27dc69b4f44400c4c61685895428331",
+      "bytes": 25847,
+      "quote": "365:     this.settings.LLMProviderOptionsKeysHashed ??= {};\n366: \n367:     this.loadApikeys();\n368:   }\n369: \n370:   async saveSettings() {\n371:     await this.saveData(\n372:       this.removeApikeys(this.settings as typeof this.settings)\n373:     );"
+    },
+    {
+      "id": "Q20",
+      "plugin": "Text Generator",
+      "version": "0.8.7",
+      "commit": "4b9ddf876793d79ba680941d0d093471eaa150eb",
+      "file": "src/main.ts",
+      "source_url": "https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/main.ts#L664-L712",
+      "lines": [
+        664,
+        712
+      ],
+      "sha256": "30d9fe0f274ee272f95517c2a176c0a7c27dc69b4f44400c4c61685895428331",
+      "bytes": 25847,
+      "quote": "664:   encryptAllKeys() {\n665:     // check if user have LLMProviderOptionsKeysHashed object (upgrading from older version)\n666:     this.settings.LLMProviderOptionsKeysHashed ??= {};\n667: \n668:     const keyList: string[] = [];\n669: \n670:     this.settings.api_key_encrypted = this.getEncryptedKey(\n671:       this.settings.api_key\n672:     );\n673: \n674:     // get all secret keys\n675:     Object.entries(this.settings?.LLMProviderOptions).forEach(([key1, l1]) => {\n676:       if (typeof l1 != \"object\") return;\n677:       Object.entries(l1).forEach(([key2, l2]) => {\n678:         if (key2.toLowerCase().includes(\"key\") && typeof l2 == \"string\") {\n679:           keyList.push(`${key1}.${key2}`);\n680:         }\n681:       });\n682:     });\n683: \n684:     keyList.forEach((pth) => {\n685:       const keyval =\n686:         (get(this.settings?.LLMProviderOptions, pth) as never as string) || \"\";\n687: \n688:       const encrypted = this.getEncryptedKey(keyval);\n689:       this.settings.LLMProviderOptionsKeysHashed[pth] = encrypted;\n690:     });\n691:   }\n692: \n693:   removeApikeys(settings: typeof this.settings): typeof this.settings {\n694:     const LLMProviderOptions = JSON.parse(\n695:       JSON.stringify(settings?.LLMProviderOptions)\n696:     ) as typeof this.settings.LLMProviderOptions;\n697: \n698:     // get all secret keys\n699:     Object.entries(LLMProviderOptions).forEach(([key1, l1]) => {\n700:       if (typeof l1 != \"object\") return;\n701:       Object.entries(l1).forEach(([key2, l2]) => {\n702:         if (key2.toLowerCase().includes(\"key\") && typeof l2 == \"string\") {\n703:           set(LLMProviderOptions, `${key1}.${key2}`, \"\");\n704:         }\n705:       });\n706:     });\n707: \n708:     return {\n709:       ...settings,\n710:       api_key: \"\",\n711:       LLMProviderOptions,\n712:     };"
+    },
+    {
+      "id": "Q21",
+      "plugin": "Text Generator",
+      "version": "0.8.7",
+      "commit": "4b9ddf876793d79ba680941d0d093471eaa150eb",
+      "file": "src/main.ts",
+      "source_url": "https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/main.ts#L742-L749",
+      "lines": [
+        742,
+        749
+      ],
+      "sha256": "30d9fe0f274ee272f95517c2a176c0a7c27dc69b4f44400c4c61685895428331",
+      "bytes": 25847,
+      "quote": "742:   getEncryptedKey(apiKey: string) {\n743:     if (!safeStorage?.isEncryptionAvailable() || !this.settings.encrypt_keys) {\n744:       return `${DecryptKeyPrefix}${apiKey}`;\n745:     }\n746: \n747:     return safeStorage.encryptString(apiKey) as Buffer;\n748:   }\n749: "
+    },
+    {
+      "id": "Q22",
+      "plugin": "Text Generator",
+      "version": "0.8.7",
+      "commit": "4b9ddf876793d79ba680941d0d093471eaa150eb",
+      "file": "src/constants.ts",
+      "source_url": "https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/constants.ts#L35-L39",
+      "lines": [
+        35,
+        39
+      ],
+      "sha256": "1a5d5d5776f03e45bc338b10d5fdebcd4dbb9e8189a25abfb1fcda7c51f4d5e6",
+      "bytes": 3582,
+      "quote": "35:   custom_header: true,\n36: };\n37: \n38: export const DecryptKeyPrefix = \"__@#key_prefix#@__\";\n39: "
+    },
+    {
+      "id": "Q23",
+      "plugin": "Text Generator",
+      "version": "0.8.7",
+      "commit": "4b9ddf876793d79ba680941d0d093471eaa150eb",
+      "file": "src/LLMProviders/langchain/ollama.tsx",
+      "source_url": "https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/LLMProviders/langchain/ollama.tsx#L14-L40",
+      "lines": [
+        14,
+        40
+      ],
+      "sha256": "b96e1bf567d9cd19a793b47019979da230e395b2fb4e5766d4a53da4d6173217",
+      "bytes": 3678,
+      "quote": "14: export default class LangchainOllamaProvider\n15:   extends LangchainBase\n16:   implements LLMProviderInterface {\n17:   static slug = \"ollama\" as const;\n18: \n19:   static provider = \"Langchain\";\n20:   static id = \"Ollama (Langchain)\" as const;\n21:   static displayName = \"Ollama\";\n22: \n23:   streamable = true;\n24:   llmPredict = true;\n25: \n26:   corsBypass = true;\n27: \n28:   id = LangchainOllamaProvider.id;\n29:   provider = LangchainOllamaProvider.provider;\n30:   originalId = LangchainOllamaProvider.id;\n31: \n32:   getConfig(options: LLMConfig): Partial<OllamaInput & BaseLLMParams> {\n33:     console.log(options);\n34:     return this.cleanConfig({\n35:       baseUrl: options.basePath,\n36: \n37:       // ------------Necessary stuff--------------\n38:       modelKwargs: options.modelKwargs,\n39:       model: options.model as any,\n40:       maxTokens: options.max_tokens,"
+    },
+    {
+      "id": "Q24",
+      "plugin": "Text Generator",
+      "version": "0.8.7",
+      "commit": "4b9ddf876793d79ba680941d0d093471eaa150eb",
+      "file": "src/LLMProviders/langchain/openaiChat.tsx",
+      "source_url": "https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/LLMProviders/langchain/openaiChat.tsx#L46-L74",
+      "lines": [
+        46,
+        74
+      ],
+      "sha256": "45359d0e110c1701e39b0f525728be8e6393bb34891f50ac4e1a04e32d193cef",
+      "bytes": 10771,
+      "quote": "46:       : autoDetected;\n47: \n48:     if (isThinking) {\n49:       return this.cleanConfig({\n50:         apiKey: options.api_key,\n51:         openAIApiKey: options.api_key,\n52:         modelKwargs: {\n53:           ...options.modelKwargs,\n54:           reasoning_effort: options.reasoningEffort || default_values.reasoningEffort,\n55:         },\n56:         modelName: options.model,\n57:         presencePenalty: +options.presence_penalty || 0,\n58:         n: options.n || 1,\n59:         stop: options.stop || undefined,\n60:         streaming: options.stream || false,\n61:         maxRetries: 3,\n62:         headers: options.headers || undefined,\n63:         bodyParams: {\n64:           max_completion_tokens: +options.max_tokens,\n65:         },\n66:       } as Partial<OpenAIChatInput>);\n67:     }\n68: \n69:     return this.cleanConfig({\n70:       apiKey: options.api_key,\n71:       openAIApiKey: options.api_key,\n72:       modelKwargs: options.modelKwargs,\n73:       modelName: options.model,\n74:       maxTokens: +options.max_tokens,"
+    }
+  ],
+  "verification": {
+    "actual_plugin_install": false,
+    "actual_settings_gui": false,
+    "model_generation": false,
+    "new_paid_ai_call": false,
+    "keys_obtained": false,
+    "external_ai_execution": false,
+    "provider_network_traffic_capture": false,
+    "privacy_backend_audit": false
+  },
+  "limits": [
+    "Source defaults are not current GUI settings.",
+    "Vendor claims are attributed, not independently validated.",
+    "No actual key, generated response, request capture, dependency-complete network or backend audit."
+  ]
+}

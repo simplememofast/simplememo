@@ -1,4 +1,4 @@
-const { chromium } = require('/Users/hajimeataka/simplememo/node_modules/playwright');
+const { chromium } = require('/Users/<user>/simplememo/node_modules/playwright');
 const fs = require('fs');
 const W = __dirname;
 const BASE = 'https://simplememofast.com';

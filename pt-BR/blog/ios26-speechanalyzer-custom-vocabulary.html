@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/en/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: 'en'});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>iOS 26 SpeechAnalyzer Vocabulário Personalizado: Use o Transcritor Certo</title>
+  <meta name="description" content="iOS 26 contextualStrings é documentado para DictationTranscriber. Aprenda seus limites, setContext behavior e como escolher o módulo de fala certo.">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="iOS 26 SpeechAnalyzer Vocabulário Personalizado: Use o Transcritor Certo">
+  <meta property="og:description" content="Apple documentos AnalysisContext.contextualStrings para DictationTranscriber. Aqui está o que isso significa para a escolha, limites e migração do módulo SpeechAnalyzer.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-18T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/pt-BR/blog/ios26-speechanalyzer-custom-vocabulary">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog.png">
+  <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Simple Memo - for Obsidian"><meta property="og:locale" content="pt_BR">
+  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="iOS 26 SpeechAnalyzer Vocabulário Personalizado: Use o Transcritor Certo">
+  <meta name="twitter:description" content="contextualStrings existe em iOS 26 — mas a escolha do módulo é importante.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog.png">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/pt-BR/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/ios26-speechanalyzer-custom-vocabulary">
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "inLanguage": "pt-BR",
+  "headline": "iOS 26 não matou o vocabulário personalizado — você está adicionando-o ao módulo errado",
+  "description": "Como AnalysisContext.contextualStrings funciona com DictationTranscriber, seus limites, semântica de substituição setContext e como escolher entre módulos de fala iOS 26.",
+  "image": "https://simplememofast.com/assets/img/og/blog.png",
+  "url": "https://simplememofast.com/pt-BR/blog/ios26-speechanalyzer-custom-vocabulary",
+  "datePublished": "2026-09-18",
+  "dateModified": "2026-09-18",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Simple Memo - para Obsidian",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "Analisador de fala"
+    },
+    {
+      "@type": "Thing",
+      "name": "Transcritor de Ditado"
+    },
+    {
+      "@type": "Thing",
+      "name": "AnáliseContextoStrings contextuais"
+    }
+  ],
+  "keywords": "iOS 26, SpeechAnalyzer, DictationTranscriber, SpeechTranscriber, contextualStrings, vocabulário personalizado, Swift"
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Casa",
+      "item": "https://simplememofast.com/pt-BR/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://simplememofast.com/pt-BR/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "iOS 26 não matou o vocabulário personalizado — você está adicionando-o ao módulo errado",
+      "item": "https://simplememofast.com/pt-BR/blog/ios26-speechanalyzer-custom-vocabulary"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/pt-BR/blog/ios26-speechanalyzer-custom-vocabulary#webpage",
+  "inLanguage": "pt-BR",
+  "name": "iOS 26 SpeechAnalyzer Vocabulário Personalizado: Use o Transcritor Certo",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/pt-BR/#website"
+  },
+  "url": "https://simplememofast.com/pt-BR/blog/ios26-speechanalyzer-custom-vocabulary"
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700;font-size:.95rem}.global-nav__logo img{border-radius:8px}
+    .global-nav__links{display:flex;align-items:center;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;padding:.4rem .7rem;min-height:48px;display:inline-flex;align-items:center}
+    .global-nav__actions{display:flex;align-items:center;gap:.5rem}.global-nav__cta{background:linear-gradient(135deg,#007AFF,#5856D6);color:#fff!important;text-decoration:none;font-size:.875rem;font-weight:700;padding:.45rem 1rem;border-radius:20px;min-height:48px;display:inline-flex;align-items:center}
+    .nav-cta-mobile,.global-nav__hamburger{display:none}.global-nav__hamburger{background:none;border:0;color:#fff;font-size:1.5rem;min-width:48px;min-height:48px}
+    @media(max-width:768px){.global-nav__links,.global-nav__cta{display:none}.global-nav__hamburger{display:block}.global-nav__links.open{display:flex;flex-direction:column;position:absolute;top:56px;left:0;right:0;background:rgba(10,12,18,.97);padding:.5rem 1rem 1rem}.global-nav__links.open .nav-cta-mobile{display:block}}
+    .article-meta{font-size:.875rem;color:var(--text-muted);margin-bottom:2rem}.article-body h2{font-size:1.4rem;margin:2.5rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}.article-body h3{font-size:1.1rem;margin:2rem 0 .75rem}
+    .article-body p,.article-body li{font-size:.95rem;line-height:1.85;color:var(--text-secondary)}.article-body a{color:var(--accent)}.article-body code{background:rgba(100,180,255,.08);padding:.15rem .4rem;border-radius:4px}.article-body pre{background:#0d1424;border:1px solid rgba(148,178,230,.18);border-radius:12px;padding:16px 18px;overflow-x:auto}.article-body pre code{background:none;padding:0;color:#dbe6ff}
+    .callout{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:10px;padding:1rem 1.25rem;margin:1.5rem 0}.article-body table{display:block;overflow-x:auto;width:100%;border-collapse:collapse;margin:1.25rem 0}.article-body th,.article-body td{border:1px solid var(--border);padding:.55rem .7rem;text-align:left;vertical-align:top}
+  </style>
+  <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
+  <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="Navegação principal" data-site-header=""><div class="global-nav__inner">
+<a class="global-nav__logo site-brand" href="/pt-BR/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/pt-BR/guides/">Guias</a><a href="/pt-BR/use-cases/">Casos de uso</a><a href="/pt-BR/vs/">Comparar</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks"><li><a href="/pt-BR/guides/">Guias</a></li><li><a href="/pt-BR/use-cases/">Casos de uso</a></li><li><a href="/pt-BR/vs/">Comparar</a></li><li><a href="/pt-BR/methods/">Métodos</a></li><li><a href="/pt-BR/blog/">Blog</a></li><li><a href="/pt-BR/glossary/">Glossário</a></li><li><a href="/pt-BR/faq">Perguntas frequentes</a></li><li><a href="/pt-BR/about/">Sobre o desenvolvedor</a></li><li><a href="/pt-BR/devlog/">Registro de desenvolvimento</a></li><li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">Baixar</a></li></ul>
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="Português · Escolher idioma"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>PT</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="pt-BR" dir="ltr"><p class="site-language-title">Escolher idioma</p><div class="site-language-grid"><a href="/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="pt-BR" aria-current="page"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/id/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">Baixar</a><button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menu"><span>Menu</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button></div>
+</div></nav>
+<main class="page-content"><div class="container">
+<h1 class="page-content__title sd-title">iOS 26 não matou o vocabulário personalizado — você está adicionando-o ao módulo errado</h1>
+<p class="article-meta">Por <a href="/pt-BR/about/">AI ATAKA</a> · Publicado: Setembro 18, 2026</p>
+<div class="page-content__body article-body">
+<p><strong>O vocabulário personalizado não desapareceu da nova pilha SpeechAnalyzer do Apple.</strong> O detalhe importante é a escolha do módulo. Apple documenta <code>AnalysisContext.contextualStrings</code> especificamente com <code>DictationTranscriber</code>. Se você está construindo em torno de <code>SpeechTranscriber</code>, não assuma que anexar o mesmo contexto lhe dá o mesmo comportamento de vocabulário.</p>
+<div class="callout"><p><strong>Versão curta:</strong> escolha <code>DictationTranscriber</code> quando as frases contextuais fizerem parte do seu design de reconhecimento. Mantenha a lista curta, mantenha as frases breves e trate-as como dicas tendenciosas em vez de substituições garantidas.</p></div>
+
+<h2 id="reading-01" data-ce-number="01">Existem dois módulos de transcrição — e eles não são intercambiáveis</h2>
+<p>A estrutura de fala do iOS 26 torna a transcrição modular. <code>SpeechTranscriber</code> é o transcritor de uso geral do Apple para conversas normais. O <code>DictationTranscriber</code> está mais próximo do ditado do sistema e expõe controles de precisão adicionais.</p>
+<div class="sd-table" tabindex="0" role="region" aria-label="Tabela rolável"><table><thead><tr><th>Necesssidade</th><th>Módulo para avaliar primeiro</th><th>Por que</th></tr></thead><tbody>
+<tr><td>Conversa geral / transcrição de formato longo</td><td><code>SpeechTranscriber</code></td><td>Apple o descreve como o módulo de fala para texto de propósito geral.</td></tr>
+<tr><td>ditado curto com nomes ou termos específicos do aplicativo</td><td><code>DictationTranscriber</code></td><td>Apple documenta explicitamente o <code>AnalysisContext.contextualStrings</code> com este módulo.</td></tr>
+<tr><td>Pronúncia personalizada / modelo de idioma</td><td><code>DictationTranscriber</code></td><td>Ele também expõe uma dica de conteúdo de idioma personalizado apoiada por <code>SFSpeechLanguageModel</code>.</td></tr>
+</tbody></table></div>
+
+<h2 id="reading-02" data-ce-number="02">Como contextualStrings realmente funciona</h2>
+<p><code>AnalysisContext.contextualStrings</code> é um dicionário agrupado por tags de string contextuais. Apple diz que essas palavras ou frases podem ser usadas com <code>DictationTranscriber</code> para melhorar a probabilidade de que nomes, produtos, lugares, terminologia de domínio ou palavras incomuns específicos de aplicativos sejam reconhecidos.</p>
+<pre tabindex="0"><code>let context = AnalysisContext()
+context.contextualStrings[.general] = [
+    "Simple Memo",
+    "Obsidian",
+    "SpeechAnalyzer"
+]
+
+try await analyzer.setContext(context)</code></pre>
+<p>Três limites importam na prática:</p>
+<ul>
+<li><strong>Mantenha as frases breves.</strong> Apple recomenda uma ou duas palavras sempre que possível.</li>
+<li><strong>Mantenha o total em 100 frases ou menos em todas as tags.</strong></li>
+<li><strong>Estas são dicas, não garantias.</strong> O reconhecimento viés API; não promete uma transcrição exata.</li>
+</ul>
+
+<h2 id="reading-03" data-ce-number="03">setContext substitui o contexto — ele não se anexa</h2>
+<p><code>SpeechAnalyzer.setContext(_:)</code> substitui o objeto de contexto atual do analisador. Se você quiser preservar frases anteriores ao adicionar um novo grupo, construa o novo contexto completo que deseja usar e defina-o.</p>
+<pre tabindex="0"><code>let next = AnalysisContext()
+next.contextualStrings[.general] = baseTerms + currentScreenTerms
+try await analyzer.setContext(next)</code></pre>
+<p>Isso também torna as tags úteis: você pode manter categorias em seu próprio estado e reconstruir o contexto deliberadamente, em vez de tratar chamadas <code>setContext</code> repetidas como adições incrementais.</p>
+
+<h2 id="reading-04" data-ce-number="04">E quanto ao SpeechTranscriber?</h2>
+<p>A documentação atual do Apple para <code>SpeechTranscriber</code> não documenta o <code>contextualStrings</code> como um dos controles de precisão desse módulo. Por outro lado, a documentação do <code>DictationTranscriber</code> diz explicitamente aos desenvolvedores para criar um <code>AnalysisContext</code> e adicionar palavras ao <code>contextualStrings</code>.</p>
+<p>Essa distinção é o limite de implementação segura: <strong>não projete um pipeline <code>SpeechTranscriber</code> em torno do vocabulário contextual, a menos que você tenha verificado de forma independente o comportamento exato que você precisa no seu sistema operacional, localidade e dispositivo de destino.</strong></p>
+
+<h2 id="reading-05" data-ce-number="05">Se você precisar de vocabulário em discurso longo hoje</h2>
+<p>Não existe uma regra de migração universal. Se o seu caminho <code>SFSpeechRecognizer</code> existente já depende do <code>contextualStrings</code>, a mudança para iOS 26 deve ser tratada como um exercício de seleção de módulo e teste de regressão, em vez de uma renomeação mecânica de API.</p>
+<ol>
+<li>Teste se o <code>DictationTranscriber</code> se encaixa na duração, latência, localidade e alcance do dispositivo que você precisa.</li>
+<li>Se você precisa de um vocabulário mais rico, avalie sua opção de modelo de linguagem personalizada.</li>
+<li>Se nenhum dos novos caminhos do módulos preservar o comportamento do qual seu produto depende, mantenha o caminho <code>SFSpeechRecognizer</code> comprovado para esse caso de uso enquanto você migra outros caminhos separadamente.</li>
+</ol>
+
+<h2 id="reading-06" data-ce-number="06">Regra de decisão mínima</h2>
+<div class="callout"><p><strong>Conversa-first:</strong> comece com <code>SpeechTranscriber</code>. <strong>Vocabulário-first:</strong> comece avaliando <code>DictationTranscriber</code>. Se o vocabulário for crítico, meça o reconhecimento nas palavras e locais reais que você envia, em vez de assumir a paridade entre os módulos.</p></div>
+
+<h2 id="reading-07" data-ce-number="07">Guia de implementação relacionado</h2>
+<p>Para o pipeline de microfone ao vivo — ativos do modelo, conversão de PCM, resultados voláteis vs finais, comportamento de parada/finalização e concorrência Swift 6 — consulte <a href="/pt-BR/blog/ios26-speechanalyzer-live-mic">o guia completo do iOS 26 SpeechAnalyzer ao vivo</a>. A amostra executável está em <a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic" rel="noopener">GitHub (MIT)</a>.</p>
+
+<h2 id="reading-08" data-ce-number="08">Fontes primárias</h2>
+<ul>
+<li><a href="https://developer.apple.com/documentation/speech/analysiscontext/contextualstrings" rel="noopener noreferrer">Apple: AnáliseContexto.Stringscontextuais</a></li>
+<li><a href="https://developer.apple.com/documentation/speech/dictationtranscriber" rel="noopener noreferrer">Apple: Transcritor de Ditado</a></li>
+<li><a href="https://developer.apple.com/documentation/speech/speechtranscriber" rel="noopener noreferrer">Apple: Transcritor de Fala</a></li>
+<li><a href="https://developer.apple.com/documentation/speech/speechanalyzer/setcontext(_:)" rel="noopener noreferrer">Apple: SpeechAnalyzer.setContext(_:)</a></li>
+</ul>
+</div></div></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="pt-BR" dir="ltr"><a class="site-brand" href="/pt-BR/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Uma pequena nota. Um próximo passo.</p><p class="site-footer-description">Envie notas do seu iPhone para o Obsidian e por e-mail.</p></div></div><!-- /site-chrome:intro --><div class="container">
+<nav class="footer__nav" aria-label="Navegação do rodapé">
+<div class="footer__col"><p class="footer__col-title">Produto</p><a href="/pt-BR/download/" class="footer__link">Baixar</a><a href="/pt-BR/use-cases/" class="footer__link">Casos de uso</a><a href="/pt-BR/guides/" class="footer__link">Guias</a></div>
+<div class="footer__col"><p class="footer__col-title">Comparar e Trocar</p><a href="/pt-BR/captio-alternative/" class="footer__link">Captio Alternativa</a><a href="/pt-BR/vs/" class="footer__link">Comparar</a></div>
+<div class="footer__col"><p class="footer__col-title">Ler</p><a href="/pt-BR/about/" class="footer__link">Sobre o desenvolvedor</a><a href="/pt-BR/devlog/" class="footer__link">Registro de desenvolvimento</a><a href="/pt-BR/blog/" class="footer__link">Blog</a></div>
+<div class="footer__col"><p class="footer__col-title">Suporte</p><a href="/pt-BR/terms" class="footer__link">Termos</a><a href="/pt-BR/privacy" class="footer__link">Privacidade</a><a href="/pt-BR/faq" class="footer__link">Perguntas frequentes</a><a href="/pt-BR/contact" class="footer__link">Contato</a></div>
+</nav>
+<nav class="footer__social" aria-label="Links sociais"><a href="https://x.com/simplememofast" rel="me noopener" target="_blank" class="footer__link">X/Twitter</a><a href="https://github.com/simplememofast" rel="me noopener" target="_blank" class="footer__link">GitHub</a></nav>
+<p class="footer__copyright">© 2026 Simple Memo - for Obsidian / Operado por YURIKA, K.K.</p>
+</div></footer>
+
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body></html>

@@ -104,17 +104,46 @@ export const ACTIONS = {
 };
 
 /**
+ * preflight（growth/scripts/bq-preflight.mjs）が自分で出す判定の行。**分類を2か所に持たない** ——
+ * 向こうがもう決めた分類を、本文の言葉探しより先に読む。本文の正規表現は、preflight が判定を
+ * 出す前に落ちた回（例外・API の失敗）のためにある。
+ */
+const VERDICTS = [
+  [/preflight failed: the export is stale/, 'stale_export'],
+  [/preflight failed: the export is current but its history is not whole/, 'partial_days'],
+  [/cannot authenticate to bigquery|the service account cannot read/, 'auth_expired'],
+  [/dataset \S+ does not exist|has not created its tables|export tables exist but are empty|no rows for site_url/, 'config_missing'],
+];
+
+/**
+ * 分類に使わない行。preflight は毎回、自分の資格情報（`Service account …@….iam.gserviceaccount.com`）と
+ * 件数（`… clicks · … impressions`）を出す。これを本文として読むと、`iam` や件数の中の `403`・`553` に
+ * 当たる。**2026-10-04 の SEO Daily（run 37162170273）では、2026-09-30 の欠測（機械で続けられる回）が
+ * 資格情報の名前のせいで「失効・人が要る」と記録された。**
+ */
+const NOISE = [
+  /^\s*service account \S+/,
+  /^\s*oauth user credential from /,
+  /^\s*project \S+ · dataset /,
+  /\bclicks · \d+ impressions\b/,
+  /^\s*✓ /,
+];
+
+/**
  * エラー本文を分類する。**分からないものを一過性に丸めない。**
  * ここで甘く分類すると、直らないものを3回叩いて同じ場所で止まる。
+ * 状態コードは**数として**照合する（`\b403\b`）。件数や日付の中の3桁に当てない。
  */
 export function classify(text) {
   const s = String(text ?? '').toLowerCase();
   if (!s.trim()) return 'unknown';
-  if (/invalid_grant|token has been expired|revoked|unauthorized|401|permission denied|403|iam|access denied/.test(s)) return 'auth_expired';
-  if (/not found: dataset|not found: table|404|does not exist|no such dataset/.test(s)) return 'config_missing';
-  if (/rate limit|quota exceeded|429|timeout|etimedout|econnreset|socket hang up|5\d\d|backend error|internal error|unavailable/.test(s)) return 'transient';
-  if (/stale|has not exported|no rows since|export stopped/.test(s)) return 'stale_export';
-  if (/missing day|gap|failed to land|orphaned staging/.test(s)) return 'partial_days';
+  for (const [re, cls] of VERDICTS) if (re.test(s)) return cls;
+  const body = s.split('\n').filter((line) => !NOISE.some((re) => re.test(line))).join('\n');
+  if (/invalid_grant|token has been expired|revoked|unauthorized|\b401\b|permission denied|permission_denied|permission \S+ denied|\b403\b|access denied|access_denied/.test(body)) return 'auth_expired';
+  if (/not found: dataset|not found: table|\b404\b|does not exist|no such dataset/.test(body)) return 'config_missing';
+  if (/rate limit|quota exceeded|\b429\b|timeout|etimedout|econnreset|socket hang up|\b5\d\d\b|backend error|internal error|unavailable/.test(body)) return 'transient';
+  if (/stale|has not exported|no rows since|export stopped/.test(body)) return 'stale_export';
+  if (/missing day|days? missing inside the history|not in the table|days apart|gap|failed to land|orphaned staging/.test(body)) return 'partial_days';
   return 'unknown';
 }
 
@@ -213,6 +242,37 @@ export function selftest() {
   eq(classify('missing day 2026-08-14 failed to land'), 'partial_days', '欠測を分類できない');
   eq(classify(''), 'unknown', '空文字を unknown にしていない');
   eq(classify('なにかよく分からない失敗'), 'unknown', '未知を一過性に丸めている');
+
+  // 2026-10-04 の SEO Daily（run 37162170273）の preflight の出力そのもの。2026-09-30 の欠測が、
+  // 資格情報の名前（…iam.gserviceaccount.com）のせいで auth_expired（人が要る）と記録された
+  const real = [
+    'Project yurika-simplememo · dataset searchconsole',
+    'Service account simplememo-seo-reader@yurika-simplememo.iam.gserviceaccount.com',
+    '',
+    '  ✓ export tables present: searchdata_site_impression, searchdata_url_impression, ExportLog',
+    '',
+    'Properties in the export:',
+    '  → sc-domain:simplememofast.com',
+    '      2026-08-10 .. 2026-10-01 · 1911 clicks · 106144 impressions',
+    '',
+    '  ✓ fresh — newest data 2026-10-01 (3 days behind, normal is 2–3)',
+    '  ✓ 53 days of history — enough for a 28-day window',
+    '',
+    '  ✗ searchdata_site_impression: 1 day missing inside the history — 2026-09-30',
+    '    A hole in the middle is not lag. Every window built on this table is short by these',
+    '    days, and averages over it are computed against the wrong denominator.',
+    '',
+    'Preflight FAILED: the export is current but its history is not whole.',
+  ].join('\n');
+  eq(classify(real), 'partial_days', '欠測の回を、資格情報の名前で失効に分類している');
+  const head = real.split('\n').slice(0, 8).join('\n');
+  eq(classify(`${head}\n\nPreflight FAILED: the export is stale.`), 'stale_export', '停止の回を、資格情報の名前で失効に分類している');
+  eq(classify(`${head}\nDataset yurika-simplememo.searchconsole does not exist.`), 'config_missing', 'データセット欠落を、資格情報の名前で失効に分類している');
+  eq(classify(`${head}\nError: 503 Backend Error`), 'transient', '判定の前に落ちた一過性を、資格情報の名前で失効に分類している');
+  eq(classify(`${head}\nThe service account cannot read yurika-simplememo.searchconsole.`), 'auth_expired', '本当の権限不足を失効に分類できない');
+  eq(classify(head.replace('1911 clicks · 106144', '553 clicks · 14030')), 'unknown', '件数の数字を状態コードとして読んでいる');
+  eq(classify('  ✗ searchdata_url_impression: 2 days missing inside the history — 2026-09-30, 2026-10-01'), 'partial_days', '欠測の行を欠測に分類できない');
+  eq(classify('Error: Permission bigquery.tables.list denied on dataset yurika-simplememo:searchconsole (or it may not exist).'), 'auth_expired', '`iam` を外したことで、BigQuery の権限不足の文を失効に分類できなくなった');
 
   // 人にしかできない手だけの回は「復旧した」にしない
   const auth = decide({ cls: 'auth_expired', today: '2026-08-26', fallback: { label: '2026-08-24', age_days: 2, stale: false } });

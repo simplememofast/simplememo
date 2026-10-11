@@ -4,7 +4,7 @@ import json, re, os, sys, glob, unicodedata
 from collections import Counter, defaultdict
 from bs4 import BeautifulSoup, Comment
 
-S = '/private/tmp/claude-501/-Users-hajimeataka-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad'
+S = '/private/tmp/claude-501/-Users-<user>-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad'
 WT = S + '/wt'; PAGES = S + '/crawl/pages'; W = S + '/work-seo-schema'
 CONST = json.load(open(WT + '/data/site-constants.json'))
 

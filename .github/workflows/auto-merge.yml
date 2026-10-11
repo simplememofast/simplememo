@@ -35,11 +35,21 @@ jobs:
       group: auto-merge-${{ github.event.workflow_run.head_branch }}
       cancel-in-progress: false
     steps:
+      - name: Checkout the trusted merge guard
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+          fetch-depth: 1
+
       - name: Merge the validated commit
         id: merge
         uses: actions/github-script@v7
         with:
           script: |
+            const {
+              approvedMergeOwner, completeCommitList, findUnapprovedPrincipals,
+            } = require(`${process.env.GITHUB_WORKSPACE}/scripts/merge-identity-check.js`);
             const run = context.payload.workflow_run;
             const branch = run.head_branch || '';
             const validatedSha = run.head_sha;
@@ -68,7 +78,12 @@ jobs:
               return;
             }
 
-            for (const pr of prs) {
+            for (const listedPr of prs) {
+              // The list endpoint is a summary and may omit commit count.
+              // Re-read the current PR before evaluating the merge gate.
+              const { data: pr } = await github.rest.pulls.get({
+                owner, repo, pull_number: listedPr.number,
+              });
               if (pr.base.ref !== 'main' || pr.head.repo?.full_name !== `${owner}/${repo}`) {
                 core.info(`#${pr.number}: unexpected repository or base branch`);
                 continue;
@@ -88,11 +103,55 @@ jobs:
                 continue;
               }
 
+              // GitHub credits the PR opener as the squash author. Check the
+              // public account profile, not just source-commit metadata.
+              const openerLogin = pr.user?.login;
+              if (openerLogin !== 'simplememofast') {
+                core.setFailed(`#${pr.number}: unapproved PR opener; merge withheld`);
+                return;
+              }
+              const { data: openerProfile } = await github.rest.users.getByUsername({
+                username: openerLogin,
+              });
+              if (!approvedMergeOwner(openerLogin, openerProfile)) {
+                core.setFailed(`#${pr.number}: unapproved PR opener profile; merge withheld`);
+                return;
+              }
+
+              // The PR commits endpoint cannot return beyond 250 commits.
+              // Fail closed rather than validate an incomplete subset.
+              if (!Number.isInteger(pr.commits) || pr.commits < 1 || pr.commits > 250) {
+                core.setFailed(`#${pr.number}: commit count unavailable or above review limit; merge withheld`);
+                return;
+              }
+
+              // GitHub's default squash message can credit every PR commit
+              // author. Validate all principals immediately before merge,
+              // including trailers, without logging rejected identity data.
+              const commits = await github.paginate(github.rest.pulls.listCommits, {
+                owner, repo, pull_number: pr.number, per_page: 100,
+              });
+              if (!completeCommitList(pr.commits, commits)) {
+                core.setFailed(`#${pr.number}: incomplete commit list; merge withheld`);
+                return;
+              }
+              const unapproved = findUnapprovedPrincipals(commits);
+              if (unapproved.length) {
+                core.setFailed(
+                  `#${pr.number}: unapproved commit identity in ${unapproved.length} field(s); merge withheld`
+                );
+                return;
+              }
+
               const { data: merged } = await github.rest.pulls.merge({
                 owner, repo,
                 pull_number: pr.number,
                 merge_method: 'squash',
                 sha: validatedSha,
+                // Do not copy unverified PR or source-commit prose into the
+                // public squash message. The PR remains the review record.
+                commit_title: `Merge validated PR #${pr.number}`,
+                commit_message: `Source PR: https://github.com/${owner}/${repo}/pull/${pr.number}\nValidated head: ${validatedSha}`,
               });
               mergedCount++;
               // merged.sha は main に積まれた squash コミット。後続の IndexNow

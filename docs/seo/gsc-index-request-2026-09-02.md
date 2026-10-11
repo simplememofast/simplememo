@@ -6,7 +6,7 @@
 1件目の `/glossary/e2e-encryption/`。サイトマップ（lastmod 2026-09-02）・内部リンク・FAQPage
 JSON-LD は本番で反映確認済み ＝ **リクエストだけが残りの打ち手**。
 
-**実行者:** Cowork（hajimeataka@gmail.com で GSC ドメインプロパティ `simplememofast.com` に
+**実行者:** Cowork（オーナーの個人の Google アカウントで GSC ドメインプロパティ `simplememofast.com` に
 ログイン済みのブラウザ環境）
 **所要:** 約5分・1日で完了（必須4件 + 任意3件 = 計7件、クォータ ~10件/日 の範囲内）
 **前提知識不要。** 手順どおりでOK。

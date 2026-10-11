@@ -6,22 +6,22 @@
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
   <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/guides/">
   <script>
-    window.addEventListener('load', function() {
+    (function() {
       if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
-      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
-      ric(function() {
-        var s = document.createElement('script');
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
-        s.async = true;
-        document.head.appendChild(s);
-        s.onload = function() {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
-        };
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
       });
-    });
+    })();
   </script>
   <title>Obsidian連携シンプルメモ ガイド・使い方 — セットアップから活用法まで</title>
   <meta name="description" content="Obsidian連携シンプルメモのガイド総合ハブ。Gmail・Outlook・iCloud・Yahoo!メール・Proton Mail・独自ドメインの設定ガイド、ワークフロー活用法、他アプリからの移行ガイドを一覧で紹介。初心者から上級者まで対応します。">
@@ -51,6 +51,14 @@
   <link rel="canonical" href="https://simplememofast.com/guides/">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/guides/">
   <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/guides/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/guides/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/guides/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/guides/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/guides/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/guides/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/guides/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/guides/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/guides/">
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/guides/">
 
   <!-- Favicon -->
@@ -61,7 +69,7 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- JSON-LD: CollectionPage -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","@id":"https://simplememofast.com/guides/#webpage","inLanguage":"ja","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".lp-section__lead"]},"name":"Obsidian連携シンプルメモ ガイド・使い方 — セットアップから活用法まで","description":"Obsidian連携シンプルメモのガイド総合ハブ。Gmail・Outlook・iCloud等のメール設定ガイド、ワークフロー活用法、他アプリからの移行ガイドを一覧で紹介。","url":"https://simplememofast.com/guides/","datePublished":"2026-03-05","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"hasPart":[{"@type":"Article","inLanguage":"ja","name":"Gmail設定ガイド","url":"https://simplememofast.com/guides/gmail/"},{"@type":"Article","inLanguage":"ja","name":"Outlook設定ガイド","url":"https://simplememofast.com/guides/outlook/"},{"@type":"Article","inLanguage":"ja","name":"iCloudメール設定ガイド","url":"https://simplememofast.com/guides/icloud/"},{"@type":"Article","inLanguage":"ja","name":"Yahoo!メール設定ガイド","url":"https://simplememofast.com/guides/yahoo-mail/"},{"@type":"Article","inLanguage":"ja","name":"Proton Mail設定ガイド","url":"https://simplememofast.com/guides/proton-mail/"},{"@type":"Article","inLanguage":"ja","name":"独自ドメインメール設定ガイド","url":"https://simplememofast.com/guides/custom-domain/"},{"@type":"Article","inLanguage":"ja","name":"自分にメール送るアプリの使い方","url":"https://simplememofast.com/blog/email-yourself-memo"},{"@type":"Article","inLanguage":"ja","name":"メール×セルフタスク管理術","url":"https://simplememofast.com/blog/email-self-task-management"},{"@type":"Article","inLanguage":"ja","name":"Captio終了後の移行ガイド","url":"https://simplememofast.com/blog/captio-discontinued"},{"@type":"Article","inLanguage":"ja","name":"LINE Keep代替アプリへの移行","url":"https://simplememofast.com/blog/line-keep-alternative"}],"isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","@id":"https://simplememofast.com/guides/#webpage","inLanguage":"ja","name":"Obsidian連携シンプルメモ ガイド・使い方 — セットアップから活用法まで","description":"Obsidian連携シンプルメモのガイド総合ハブ。Gmail・Outlook・iCloud等のメール設定ガイド、ワークフロー活用法、他アプリからの移行ガイドを一覧で紹介。","url":"https://simplememofast.com/guides/","datePublished":"2026-03-05","dateModified":"2026-10-04","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"hasPart":[{"@type":"Article","inLanguage":"ja","name":"Gmail設定ガイド","url":"https://simplememofast.com/guides/gmail/"},{"@type":"Article","inLanguage":"ja","name":"Outlook設定ガイド","url":"https://simplememofast.com/guides/outlook/"},{"@type":"Article","inLanguage":"ja","name":"iCloudメール設定ガイド","url":"https://simplememofast.com/guides/icloud/"},{"@type":"Article","inLanguage":"ja","name":"Yahoo!メール設定ガイド","url":"https://simplememofast.com/guides/yahoo-mail/"},{"@type":"Article","inLanguage":"ja","name":"Proton Mail設定ガイド","url":"https://simplememofast.com/guides/proton-mail/"},{"@type":"Article","inLanguage":"ja","name":"独自ドメインメール設定ガイド","url":"https://simplememofast.com/guides/custom-domain/"},{"@type":"Article","inLanguage":"ja","name":"自分にメール送るアプリの使い方","url":"https://simplememofast.com/blog/email-yourself-memo"},{"@type":"Article","inLanguage":"ja","name":"メール×セルフタスク管理術","url":"https://simplememofast.com/blog/email-self-task-management"},{"@type":"Article","inLanguage":"ja","name":"Captio終了後の移行ガイド","url":"https://simplememofast.com/blog/captio-discontinued"},{"@type":"Article","inLanguage":"ja","name":"LINE Keep代替アプリへの移行","url":"https://simplememofast.com/blog/line-keep-alternative"}],"isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">
@@ -242,31 +250,35 @@
     }
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
-
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="メインナビゲーション">
+  <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
-      <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
-        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
+      <a class="global-nav__logo site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/guides/">使い方</a><a href="/use-cases/">活用事例</a><a href="/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/">使い方</a></li>
+        <li><a href="/use-cases/">活用事例</a></li>
+        <li><a href="/vs/">比較</a></li>
         <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
         <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
         <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
-        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
-        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
+        <li><a href="/faq">よくある質問</a></li>
+        <li><a href="/about/">開発者について</a></li>
+        <li><a href="/devlog/">開発記録</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/guides/" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/guides/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
-        <a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="日本語 · 言語を選択"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>JA</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ja" dir="ltr"><p class="site-language-title">言語を選択</p><div class="site-language-grid"><span class="site-language-current" data-site-locale="ja" aria-current="page"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/en/guides/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/guides/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/guides/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/guides/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/guides/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/guides/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/guides/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/guides/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/guides/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
           <span lang="ja">ダウンロード</span>
         </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="メニュー"><span>メニュー</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
   </nav>
@@ -277,7 +289,7 @@
     <div class="container">
 
       <!-- Hero -->
-      <div class="lp-hero">
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
         <div class="lp-hero__label">
           <span lang="ja">ガイド総合ハブ</span>
 
@@ -290,39 +302,39 @@
           <span lang="ja">初めてObsidian連携シンプルメモを使う方から、ワークフローを最適化したい上級者まで。メール設定、日常の活用法、他アプリからの移行方法を網羅的にガイドします。</span>
 
         </p>
-      </div>
+      </div><nav class="sd-hero-index" aria-label="このページの内容"><p>このページの内容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>保存先と乗り換え先を選ぶ</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Obsidian連携シンプルメモを最大限に活用するために</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>セットアップガイド — メールプロバイダー別の初期設定</span><span aria-hidden="true">↗</span></a></nav></div>
 
-      <section class="lp-section">
-        <h2 class="lp-section__title">保存先と乗り換え先を選ぶ</h2>
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">保存先と乗り換え先を選ぶ</h2></div><div class="ce-chapter__body">
         <div style="display:flex;flex-wrap:wrap;gap:1rem;line-height:1.8;">
           <a href="/line-keep/">LINE Keep終了後のメモ保存先</a>
           <a href="/blog/open-source-memo-apps">オープンソースのメモアプリ比較</a>
           <a href="/blog/google-keep-shutdown">Google Keepの終了情報を確認する</a>
           <a href="/blog/email-yourself-app-comparison">自分にメールするアプリの比較</a>
         </div>
-      </section>
+      </div></section>
       <!-- Intro -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
           <span lang="ja">Obsidian連携シンプルメモを最大限に活用するために</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div lang="ja" class="intro-text">
           <p>Obsidian連携シンプルメモは「自分にメールでメモを送る」というシンプルなコンセプトのアプリです。しかし、そのシンプルさの中に、GTD（Getting Things Done）のキャプチャフェーズ、PKM（パーソナルナレッジマネジメント）のインプット段階、Inbox Zeroの実践など、さまざまな生産性メソッドとの相性が隠されています。</p>
           <p>このページでは、Obsidian連携シンプルメモに関するすべてのガイドを3つのカテゴリーに整理しています。初期設定を済ませたい方は「セットアップガイド」、日常のワークフローを改善したい方は「活用法ガイド」、他のメモアプリから乗り換えを検討している方は「移行ガイド」をご覧ください。</p>
-          <p>どのガイドも5分以内で読み終わる分量にまとめています。まずは気になるガイドから読み始めてみてください。</p>
+          <p>まずは気になるガイドから読み始めてみてください。</p>
         </div>
 
-      </section>
+      </div></section>
 
       <!-- Setup Guides -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
           <span lang="ja">セットアップガイド — メールプロバイダー別の初期設定</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
-          <span lang="ja">お使いのメールプロバイダーに合わせた設定手順をステップバイステップで解説。どのガイドも3分で設定完了します。</span>
+          <span lang="ja">お使いのメールプロバイダーに合わせた設定手順をステップバイステップで解説。どのガイドも、数ステップで設定できます。</span>
 
         </p>
         <div class="guide-cards">
@@ -393,7 +405,7 @@
 
             </div>
             <div class="guide-card__desc">
-              <span lang="ja">スイス発のプライバシー重視メール。AES-GCM暗号化との二重保護で最もプライベートなメモ環境を構築。</span>
+              <span lang="ja">スイス発のプライバシー重視メール。届いたメモはProtonのゼロアクセス暗号化で保存されます（届くまでの配送はE2E暗号化ではありません）。</span>
 
             </div>
             <span class="guide-card__arrow">
@@ -417,14 +429,14 @@
             </span>
           </a>
         </div>
-      </section>
+      </div></section>
 
       <!-- Workflow Guides -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
           <span lang="ja">活用法ガイド — ワークフロー・生産性向上</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
           <span lang="ja">Obsidian連携シンプルメモを日常のワークフローに組み込む方法を解説。GTD、タスク管理、アイデアキャプチャなど、目的別の活用法をご紹介します。</span>
 
@@ -482,7 +494,7 @@
 
             </div>
             <div class="guide-card__desc">
-              <span lang="ja">アイデアを逃さないための高速キャプチャワークフローを構築する方法。</span>
+              <span lang="ja">思いついたその場で書き留めるキャプチャワークフローの作り方。</span>
 
             </div>
             <span class="guide-card__arrow">
@@ -497,7 +509,7 @@
 
             </div>
             <div class="guide-card__desc">
-              <span lang="ja">話すだけでメモ。完全オンデバイスで外部送信なし・追加料金なし。起動時に自動オンも。</span>
+              <span lang="ja">話すだけでメモ（iOS 26以降の対応機種・言語）。完全オンデバイスで外部送信なし・追加料金なし。起動時に自動オンも。</span>
 
             </div>
             <span class="guide-card__arrow">
@@ -512,7 +524,7 @@
 
             </div>
             <div class="guide-card__desc">
-              <span lang="ja">開くだけで自動録音。下書き自動保存＋Obsidianローカル保存で、圏外でも消えない。通勤・サイクリング・ドライブに（安全運用）。</span>
+              <span lang="ja">設定すれば、開くだけで自動録音（iOS 26以降の対応機種・言語）。下書き自動保存＋Obsidianローカル保存で、圏外でも端末に残る。通勤・サイクリング・ドライブに（安全運用）。</span>
 
             </div>
             <span class="guide-card__arrow">
@@ -527,7 +539,7 @@
 
             </div>
             <div class="guide-card__desc">
-              <span lang="ja">送ったメモをObsidianのデイリーノート／Inboxノートに自動追記。プラグイン不要・アプリを開かずバックグラウンドで記録。</span>
+              <span lang="ja">送ったメモをObsidianのデイリーノート／Inboxノートに自動追記。プラグイン不要。保管庫のフォルダを選んでおけば、Obsidianを開かずに記録。</span>
 
             </div>
             <span class="guide-card__arrow">
@@ -557,7 +569,7 @@
 
             </div>
             <div class="guide-card__desc">
-              <span lang="ja">書きかけのメモは打つそばから端末内に暗号化保存。アプリを閉じても落ちても次回起動で続きから。</span>
+              <span lang="ja">書きかけのメモは、入力が止まると端末内に暗号化して保存。アプリを閉じても落ちても、次回起動で最後に保存したところから。</span>
 
             </div>
             <span class="guide-card__arrow">
@@ -566,14 +578,14 @@
             </span>
           </a>
         </div>
-      </section>
+      </div></section>
 
       <!-- Migration Guides -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
           <span lang="ja">移行ガイド — 他アプリからの乗り換え</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
           <span lang="ja">使っていたアプリがサービス終了した方、もっとシンプルなツールを探している方向け。スムーズな移行方法を解説します。</span>
 
@@ -625,7 +637,7 @@
             </span>
           </a>
         </div>
-      </section>
+      </div></section>
 
       <!-- CTA -->
       <div class="cta-box">
@@ -634,21 +646,21 @@
 
         </div>
         <div class="cta-box__desc">
-          <span lang="ja">ダウンロードは無料。ガイドに沿って3分で設定完了します。</span>
+          <span lang="ja">ダウンロードは無料。ガイドに沿って、すぐに設定できます。</span>
 
         </div>
-        <a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="bottom" lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__bottom&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+        <a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="bottom" lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
         </a>
 
       </div>
 
       <!-- Related Pages -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
           <span lang="ja">関連ページ</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="internal-links">
           <a href="/comparison/"><span lang="ja">比較コンテンツハブ</span></a>
           <a href="/captio-alternative/"><span lang="ja">Captio代替アプリ</span></a>
@@ -657,7 +669,7 @@
           <a href="/faq"><span lang="ja">よくあるご質問</span></a>
           <a href="/privacy"><span lang="ja">プライバシーポリシー</span></a>
         </div>
-      </section>
+      </div></section>
 
     </div>
   <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
@@ -679,19 +691,19 @@
 
   </main>
 
-  <footer class="footer"><div class="container"><nav class="footer__nav" aria-label="Footer navigation">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ja" dir="ltr"><a class="site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a><div><p class="site-footer-title">思いついたことを、次の一歩へ。</p><p class="site-footer-description">Obsidianとメールに、メモを送るiPhoneアプリ。</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
-        <a href="/" class="footer__link"><span lang="ja">ホーム</span></a>
-        <a href="/use-cases/" class="footer__link"><span lang="ja">活用事例</span></a>
-        <a href="/guides/" class="footer__link"><span lang="ja">設定ガイド</span></a>
+        <a href="/download/" class="footer__link">ダウンロード</a>
+        <a href="/" class="footer__link">ホーム</a>
+        <a href="/use-cases/" class="footer__link">活用事例</a>
+        <a href="/guides/" class="footer__link">使い方</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
         <a href="/captio-alternative/" class="footer__link"><span lang="ja">Captio代替</span></a>
-        <a href="/note-to-email/" class="footer__link"><span lang="ja">メモ→メール</span></a>
-        <a href="/vs/" class="footer__link"><span lang="ja">アプリ比較</span></a>
+        <a href="/note-to-email/" class="footer__link">メモをメールへ</a>
+        <a href="/vs/" class="footer__link">比較</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">読みもの</p>
@@ -700,21 +712,17 @@
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
         <a href="/roadmap/" class="footer__link">公開ロードマップ</a>
-        <a href="/devlog/" class="footer__link"><span lang="ja">開発記録</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
-        <a href="/faq" class="footer__link"><span lang="ja">FAQ</span></a>
-        <a href="/privacy" class="footer__link"><span lang="ja">プライバシー</span></a>
-        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span></a>
+        <a href="/devlog/" class="footer__link">開発記録</a>
+        <a href="/about/" class="footer__link">開発者について</a>
+        <a href="/faq" class="footer__link">よくある質問</a>
+        <a href="/privacy" class="footer__link">プライバシー</a>
+        <a href="/contact" class="footer__link">お問い合わせ</a>
       </div>
       </nav><p class="footer__copyright">
         © 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ
       </p></div></footer>
 
-  <script>
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

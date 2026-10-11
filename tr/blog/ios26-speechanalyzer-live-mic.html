@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/en/blog/ios26-speechanalyzer-live-mic">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- Google tag (gtag.js) - deferred for LCP -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: 'en'});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>iOS 26 SpeechAnalyzer Canlı Mikrofon: Kurulum, Sonuçlar ve Sorun Giderme</title>
+  <meta name="description" content="iOS 26 SpeechAnalyzer&#x27;ı canlı bir mikrofona bağlayın: model varlıklarını, PCM formatını, nihai sonuçları, DictationTranscriber kelime dağarcığını ve örnek doğrulama sınırlarını kontrol edin.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="iOS 26 SpeechAnalyzer Canlı Mikrofon: Kurulum, Sonuçlar ve Sorun Giderme">
+  <meta property="og:description" content="iOS 26 SpeechAnalyzer&#x27;ı canlı bir mikrofona bağlayın: model varlıklarını, PCM formatını, nihai sonuçları, DictationTranscriber kelime dağarcığını ve örnek doğrulama sınırlarını kontrol edin.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-06-16T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/tr/blog/ios26-speechanalyzer-live-mic">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Simple Memo - for Obsidian">
+  <meta property="og:locale" content="tr_TR">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="iOS 26 SpeechAnalyzer Canlı Mikrofon: Kurulum, Sonuçlar ve Sorun Giderme">
+  <meta name="twitter:description" content="iOS 26 SpeechAnalyzer&#x27;ı canlı bir mikrofona bağlayın: model varlıklarını, PCM formatını, nihai sonuçları, DictationTranscriber kelime dağarcığını ve örnek doğrulama sınırlarını kontrol edin.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog.png">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- Canonical -->
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/tr/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/ios26-speechanalyzer-live-mic">
+
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "inLanguage": "tr",
+  "headline": "iOS 26 SpeechAnalyzer Canlı Mikrofon: Kurulum, Sonuçlar ve Sorun Giderme",
+  "description": "iOS 26 SpeechAnalyzer'ı canlı bir mikrofona bağlayın: model varlıklarını, PCM formatını, nihai sonuçları, DictationTranscriber kelime dağarcığını ve örnek doğrulama sınırlarını kontrol edin.",
+  "image": "https://simplememofast.com/assets/img/og/blog.png",
+  "url": "https://simplememofast.com/tr/blog/ios26-speechanalyzer-live-mic",
+  "datePublished": "2026-06-16",
+  "dateModified": "2026-09-09",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Simple Memo - Obsidian için",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Obsidian連携シンプルメモ"
+    ]
+  },
+  "proficiencyLevel": "Expert",
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "Konuşma Analizörü"
+    },
+    {
+      "@type": "Thing",
+      "name": "KonuşmaTranskriptörü"
+    },
+    {
+      "@type": "Thing",
+      "name": "iOS 26 konuşmadan metne"
+    }
+  ],
+  "keywords": "iOS 26, SpeechAnalyzer, SpeechTranscriber, AVAudioEngine, cihaz içi konuşmadan metne, SFSpeechRecognizer geçişi"
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Ana Sayfa",
+      "item": "https://simplememofast.com/tr/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://simplememofast.com/tr/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "iOS 26 SpeechAnalyzer Canlı Mikrofon: Kurulum, Sonuçlar ve Sorun Giderme",
+      "item": "https://simplememofast.com/tr/blog/ios26-speechanalyzer-live-mic"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/tr/blog/ios26-speechanalyzer-live-mic#webpage",
+  "inLanguage": "tr",
+  "name": "iOS 26 SpeechAnalyzer Canlı Mikrofon: Kurulum, Sonuçlar ve Sorun Giderme",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/tr/#website"
+  },
+  "url": "https://simplememofast.com/tr/blog/ios26-speechanalyzer-live-mic"
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "tr",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "SpeathAnalyzer çevrimdışı çalışıyor mu?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "SpeechTranscriber cihazda ses işler, ancak gerekli modeli mevcut olmalıdır. Varlıklar, uygulamanızın ilk başlatılmasından önce zaten mevcut olabilir. Çevrimdışı bir oturumdan önce bunları kontrol edin ve hazırlayın; her ilk başlatmanın indirilmesi gerektiğini veya önceden yüklenmiş bir modelin her zaman mevcut kalacağını varsaymayın."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Özel kelime ekleyebilir miyim?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Apple, DictationTranscriber için AnalysisContext.contextualStrings'i belgeler ve bu modül ayrıca özelleştirilmiş bir dil içerik ipucunu da ortaya çıkarır. Bu, SpeechTranscriber için aynı özelliğin dokümantasyonu değildir. Modülü bilerek seçin ve ihtiyacınız olan kelimeleri ve yereli test edin."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Neden uygulama kayıt yapıyor ancak metin göstermiyor?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Cihaz ve yerel ayar desteğini, varlık durumunu, mikrofon girişini, isteğe bağlı analizör formatını, dönüştürücü çıkışını, giriş sırasını ve sonuç tüketiciyi kontrol edin. Her boş sonucu bir biçim sorunu olarak ele almak yerine gerçek hatayı ortaya çıkarın."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Dururken son sözleri nasıl tutarım?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ses üretmeyi bırakın, giriş devamını tamamlayın ve analizörün girişin sonuna kadar sonuçlanmasına izin verin. Nihai sonuçları almak için sonuç tüketicisini canlı tutun. İptal, normal tamamlamanın yerine değil, ayrı bir atma yoludur."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Bu örnek Apple Watch'de çalışıyor mu?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Hayır. Bağlantılı mikrofon oturumu bir iOS 26 örneğidir ve SpeechAnalyzer watchOS'te kullanılamaz. Bir Watch uygulaması, bir sistem giriş arayüzü sunan ve dikte kaydının başladığını kanıtlamayan TextFieldLink gibi sistem metin girişini kullanabilir."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Örnek için ne doğrulandı?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Bağlantılı depo, yeniden kullanılan kaynak tampon depolama için iki regresyon da dahil olmak üzere Eylül 9, 2026'de dört dönüştürücü testi ve bir iOS Simülatörü derlemesi kaydeder. Fiziksel cihaz yeniden testi talep edilmedi. Bu kılavuzun hazırlık yardımcısı, Eylül 9'da Swift 6 tam katı eşzamanlılık modunda Xcode 26.6 ile tip kontrol edildi. Bu kontroller mikrofon doğruluğunu, model indirme davranışını veya gecikmeyi belirlemez."
+      }
+    }
+  ],
+  "@id": "https://simplememofast.com/tr/blog/ios26-speechanalyzer-live-mic#faq"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+    /* Article-specific styles */
+    .article-meta { font-size: .875rem; color: var(--text-muted); margin-bottom: 2rem; }
+    .article-meta a { color: var(--accent); text-decoration: none; }
+    .article-body h2 { font-size: 1.4rem; font-weight: 700; margin: 2.5rem 0 1rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    .article-body h3 { font-size: 1.1rem; font-weight: 600; margin: 2rem 0 .75rem; }
+    .article-body p { font-size: .95rem; line-height: 1.85; color: var(--text-secondary); margin-bottom: 1.25rem; }
+    .article-body ul, .article-body ol { margin: 1rem 0 1.5rem 1.25rem; font-size: .95rem; color: var(--text-secondary); line-height: 1.85; }
+    .article-body li { margin-bottom: .5rem; }
+    .article-body strong { color: var(--text); }
+    .article-body a { color: var(--accent); text-decoration: none; }
+    .article-body a:hover { text-decoration: underline; }
+    .article-body code { background: rgba(100,180,255,.08); padding: .15rem .4rem; border-radius: 4px; font-size: .85rem; color: var(--accent); }
+    .article-body pre { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; overflow-x: auto; margin: 1.5rem 0; font-size: .85rem; line-height: 1.7; }
+    .article-body pre code { background: none; padding: 0; color: var(--text-secondary); }
+    .callout { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+    .callout p { margin: 0; }
+    .callout-warning { border-left-color: #f85149; }
+    .timeline-list { list-style: none; margin: 1.5rem 0; padding: 0; }
+    .timeline-list li { position: relative; padding: 0 0 1.5rem 2rem; border-left: 2px solid var(--border); font-size: .95rem; line-height: 1.85; color: var(--text-secondary); }
+    .timeline-list li:last-child { padding-bottom: 0; border-left-color: transparent; }
+    .timeline-list li::before { content: ''; position: absolute; left: -5px; top: .5rem; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .timeline-list li strong { color: var(--text); }
+    .arch-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.5rem; margin: 1.5rem 0; text-align: center; font-family: monospace; font-size: .9rem; line-height: 2; color: var(--text-secondary); overflow-x: auto; }
+    .disclosure { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-top: 2.5rem; font-size: .875rem; color: var(--text-muted); line-height: 1.7; }
+
+    /* article code blocks */
+    .article-body pre{background:#0d1424;border:1px solid rgba(148,178,230,.18);border-radius:12px;
+      padding:16px 18px;overflow-x:auto;margin:1.25rem 0;font-size:.82rem;line-height:1.6;}
+    .article-body pre code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#dbe6ff;white-space:pre;}
+    .article-body :not(pre)>code{background:rgba(148,178,230,.12);padding:.1em .4em;border-radius:5px;
+      font-size:.88em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+    .article-body table{display:block;overflow-x:auto;width:100%;border-collapse:collapse;margin:1.25rem 0;font-size:.9rem;}
+    .speech-table-scroll{max-width:100%;overflow-x:auto;margin:1.25rem 0;}
+    .article-body #speech-debug-table{display:table;min-width:640px;margin:0;}
+    .speech-table-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+    .article-body th,.article-body td{border:1px solid var(--border);padding:.55rem .7rem;text-align:left;vertical-align:top;}
+    .article-body th{color:var(--text-muted);font-weight:700;}
+    .article-body .callout{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);
+      border-radius:10px;padding:1rem 1.25rem;margin:1.5rem 0;}
+</style>
+  <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
+  <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="Ana navigasyon" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/tr/guides/">Kılavuzlar</a><a href="/tr/use-cases/">Kullanım örnekleri</a><a href="/tr/vs/">Karşılaştır</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/tr/guides/">Kılavuzlar</a></li>
+        <li><a href="/tr/use-cases/">Kullanım örnekleri</a></li>
+        <li><a href="/tr/vs/">Karşılaştır</a></li>
+        <li><a href="/tr/methods/">Yöntemler</a></li>
+        <li><a href="/tr/blog/">Blog</a></li>
+        <li><a href="/tr/glossary/">Sözlük</a></li>
+        <li><a href="/tr/faq">Sık sorulan sorular</a></li>
+        <li><a href="/tr/about/">Geliştirici hakkında</a></li>
+        <li><a href="/tr/devlog/">Geliştirme günlüğü</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">İndir</a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Türkçe · Dil seçin"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>TR</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="tr" dir="ltr"><p class="site-language-title">Dil seçin</p><div class="site-language-grid"><a href="/blog/ios26-speechanalyzer-live-mic" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/ios26-speechanalyzer-live-mic" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/blog/ios26-speechanalyzer-live-mic" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/blog/ios26-speechanalyzer-live-mic" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/ios26-speechanalyzer-live-mic" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/blog/ios26-speechanalyzer-live-mic" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/ios26-speechanalyzer-live-mic" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/ios26-speechanalyzer-live-mic" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/ios26-speechanalyzer-live-mic" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="tr" aria-current="page"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true">✓</span></span></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">İndir</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menü"><span>Menü</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+<main class="page-content">
+    <div class="container">
+
+      <h1 class="page-content__title sd-title">iOS 26 SpeechAnalyzer Canlı Mikrofon: Kurulum, Sonuçlar ve Sorun Giderme</h1>
+
+      <p class="article-meta"> Yazan <a href="/tr/about/">AI ATAKA</a> · Yayınlanma: Haziran 16, 2026 · Güncelleme: Eylül 9, 2026 </p>
+
+      <div class="page-content__body article-body">
+
+<p class="tldr"><strong>Canlı bir iOS 26 mikrofon kanalı için cihaz ve yerel desteğini kontrol edin, model varlıklarını hazırlayın, uyumlu bir PCM formatı elde edin ve ses beslerken tanıma sonuçlarını tüketin.</strong> Son sözlerin kesinleşebilmesi için normal tamamlamayı iptalden ayrı olarak ele alın. Bu kılavuz, Apple'nin API belgelerini ve mevcut <a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic" rel="noopener">SimpleMemo canlı mikrofon örneğini</a> takip eder; ayrıca ayrı olarak indirilebilir bir hazırlık yardımcısı içerir.</p>
+<nav class="speech-toc" aria-label="Makale bölümleri"><a href="#speech-sample">Örneği çalıştırın</a><a href="#speech-prepare">Analizörü hazırlayın</a><a href="#speech-audio">Besleme mikrofonu PCM</a><a href="#speech-finish">Sonuçları ele al ve durdur</a><a href="#speech-vocabulary">Kelime desteği</a><a href="#speech-debug">Sorun Giderme</a><a href="#speech-validation">Doğrulama kapsamı</a></nav>
+<section id="speech-sample" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-01" data-ce-number="01">Tam örnekle başlayın, ardından boru hattını inceleyin</h2></div><div class="ce-chapter__body">
+<p><a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic" rel="noopener">MIT lisanslı depo</a>, <code>SpeechSession</code>'i bir iOS 26 ana bilgisayar uygulaması için bir Swift paketi olarak ortaya çıkarır. Depoyu Xcode'un paket bağımlılıklarının altına ekleyin ve <code>SpeechAnalyzerLiveMic</code> ürününü bağlayın. README, <code>finalizedText</code>'i görüntüleyen, <code>volatileText</code>'yı ayrı olarak oluşturan ve oturum hazırlanırken Başlat'ı devre dışı bırakan bir SwiftUI görünümünü gösterir.</p>
+<p>Tam bir uygulama projesi için README'nin XcodeGen rotasını takip edin. Alternatif olarak, sağlanan uygulama kaynaklarını yeni bir iOS 26 uygulamasına kopyalayın. Aynı türleri iki kez tanımlamamak için bir entegrasyon rotası kullanın. Paket not depolama, e-posta teslimi veya Obsidian entegrasyonu uygulamaz.</p>
+<p>Bağlantılı örnek, mikrofon ve konuşma-tanıma yetkisi talep ediyor. Ana bilgisayar uygulaması <code>NSMicrophoneUsageDescription</code> ve <code>NSSpeechRecognitionUsageDescription</code> sağlamalıdır; paketin eklenmesi bu ana bilgisayar açıklamalarını sağlayamaz. İzin kullanımını açıklayın, reddetme ve hazırlık durumlarını gösterin ve kullanıcının ne zaman kaydedeceğini seçmesine izin verin. Aşağıdaki yardımcı izin istemez veya mikrofonu başlatmaz.</p>
+<p>Apple'in <a href="https://developer.apple.com/documentation/speech/bringing-advanced-speech-to-text-capabilities-to-your-app" rel="noopener">resmi canlı transkripsiyon örneği</a> ve <a href="https://developer.apple.com/videos/play/wwdc2025/277/" rel="noopener">WWDC25 oturumu</a> mimari için yararlı referanslardır. <code>SpeechAnalyzer</code> koordinat modülleri; desteklenen sistemler için ek bir API'tür, mevcut tüm <code>SFSpeechRecognizer</code> kodunun eski olduğunu varsaymak için bir neden değildir.</p></div></section>
+<section id="speech-prepare" class="ce-chapter sd-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="reading-02" data-ce-number="02">Kayıt yapmadan önce destek, varlıklar ve biçimlendirme hazırlayın</h2></div><div class="ce-chapter__body">
+<p><a href="https://developer.apple.com/documentation/speech/speechtranscriber" rel="noopener">SpeechTranscriber</a> çalışma zamanı aygıtı ve yerel kontrolleri sağlar. Tek başına bir iOS sürüm kontrolü yetersizdir. Aşağıdaki yardımcı yapılandırılmış bir transkripsiyon, analizör ve ses biçimi döndürür veya belirli bir hazırlık hatası verir.</p>
+<p><a href="/assets/downloads/speech-analyzer-preparation.swift?v=7a01961842" download="speech-analyzer-preparation.swift">Tam Swift hazırlık yardımcısını indirin</a>. Tam dosya içe aktarmaları, sonuç ve hata türlerini ve aşağıda tartışılan DictationTranscriber ipucu yardımcısını içerir. Bu, eksiksiz bir kayıt uygulaması değil, bir kurulum bileşenidir.</p><pre tabindex="0"><code>@available(iOS 26.0, *)
+@MainActor
+public func prepareSpeechAnalyzer(
+    requestedLocale: Locale,
+    naturalFormat: AVAudioFormat? = nil
+) async throws -&gt; PreparedSpeechAnalyzer {
+    guard SpeechTranscriber.isAvailable else {
+        throw SpeechPreparationError.deviceUnavailable
+    }
+    guard let locale = await SpeechTranscriber.supportedLocale(
+        equivalentTo: requestedLocale
+    ) else {
+        throw SpeechPreparationError.unsupportedLocale
+    }
+
+    let transcriber = SpeechTranscriber(
+        locale: locale,
+        preset: .progressiveTranscription
+    )
+    // The system may already have the asset; nil means no install is needed.
+    // A request can automatically reserve the locale or throw if no slot is free.
+    if let request = try await AssetInventory.assetInstallationRequest(
+        supporting: [transcriber]
+    ) {
+        try await request.downloadAndInstall()
+    }
+    try Task.checkCancellation()
+    guard await AssetInventory.status(forModules: [transcriber]) == .installed else {
+        throw SpeechPreparationError.assetsNotInstalled
+    }
+    guard let format = await SpeechAnalyzer.bestAvailableAudioFormat(
+        compatibleWith: [transcriber], considering: naturalFormat
+    ) else {
+        throw SpeechPreparationError.noCompatibleFormat
+    }
+
+    let analyzer = SpeechAnalyzer(modules: [transcriber])
+    try await analyzer.prepareToAnalyze(in: format)
+    return PreparedSpeechAnalyzer(
+        locale: locale, transcriber: transcriber,
+        analyzer: analyzer, audioFormat: format
+    )
+}</code></pre>
+<p><a href="https://developer.apple.com/documentation/speech/assetinventory" rel="noopener">AssetInventory</a> paylaşılan sistem modellerini yönetir. Bir model zaten sistem veya başka bir uygulama tarafından yüklenmiş olabilir. <a href="https://developer.apple.com/documentation/speech/assetinventory/assetinstallationrequest(supporting:)" rel="noopener">Bir kurulum isteği</a> kurulum gerekmediğinde <code>nil</code> döndürür; aksi takdirde yerel ayarı rezerve edebilir ve bir indirme başlatabilir. Rezervasyon limitleri de bir hataya neden olabilir. Uygulamanızın özelliklerinde rezervasyonları yönetin ve uygulamanızın başka bir yerinde hala kullanımda olan bir modeli yayınlamak yerine artık ihtiyaç duyulmadığında bir yerel ayar bırakın.</p>
+<p>Çevrimdışı olmadan önce gerekli konumu hazırlayın ve hazır olduğunuzu doğrulayın. Model varlıklar uygulama paketinin dışında yaşar, ancak yine de sistem depolama alanını tüketir ve zaman içinde değişebilir. Ana bilgisayar kullanıcı arayüzünde indirme ilerlemesini ve iptalini göster. "Cihaz içi tanıma", "hazırlık veya ağ erişimine gerek olmadığı" anlamına gelmez.</p></div></section>
+<section id="speech-audio" class="ce-chapter sd-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="reading-03" data-ce-number="03">PCM'yi analizörün kabul ettiği biçimde besleme</h2></div><div class="ce-chapter__body">
+<pre tabindex="0"><code>AVAudioEngine microphone tap
+  -&gt; owned PCM / conversion for the selected format
+  -&gt; AsyncStream&lt;AnalyzerInput&gt;
+  -&gt; SpeechAnalyzer + SpeechTranscriber
+  -&gt; result consumer and UI state</code></pre>
+<p>Ses oturumunu etkinleştirdikten sonra, giriş düğümünün gerçek biçimini inceleyin. Bir örnekleme hızını sabit olarak kodlamayın, çünkü bir cihaz veya rota daha önce sıklıkla bu oranı kullandı. Uygun olduğunda <a href="https://developer.apple.com/documentation/speech/speechanalyzer/bestavailableaudioformat(compatiblewith:considering:)" rel="noopener"><code>bestAvailableAudioFormat(compatibleWith:considering:)</code></a>'a doğal bir format iletin ve isteğe bağlı sonucunu açın. Apple, analizörün girdiyi şeffaf bir şekilde yeniden örneklemediğini veya dönüştürmediğini belgeler.</p>
+<p>Deponun <code>AudioBufferConverter</code>'i, zaten eşleşen bir arabellek değişmeden döndürür ve biçimler farklı olduğunda <code>AVAudioConverter</code>'i kullanır. Her arabellek için genel bir ekstra adım olarak değil, uyumsuz formatlar için dönüşüm gereklidir. Çıktı kare uzunluğunu kontrol edin ve dönüşüm hatalarını bildirin; başarısız olan her arabellek sessizce düşürmek, bir kayıt kullanıcı arayüzünün metin üretmeden sağlıklı görünmesini sağlayabilir.</p>
+<p>Kuyruklu sese açık bir sahiplik politikası verin. Güncellenmiş örnek dönüştürücü, formatlar zaten eşleşse bile bağımsız PCM depolama alanı döndürür, bu nedenle girdinin daha sonra yeniden kullanılması sıradaki sesin üzerine yazmaz. Bir sesli geri arama tarafından sağlanan bir arabellek, geri arama geri döndükten sonra değişmez kaldığı varsayılmamalıdır. Daha sonra kullanmak üzere sıraya girerseniz, uygun bir kopya veya tampon ömrü kontrol edilen bir boru hattı düzenleyin. Arabellek başına kullanıcı arayüzü mutasyonlarını sesli geri aramadan uzak tutun. Üretim için, sıraya koyan işi nasıl bağladığınıza da karar verin ve aşırı yük veya rota değişikliklerini ele alın.</p>
+<p>Swift 6'de, yerel değişkenleri yakalamak tek başına bir boru hattının iş parçacığı güvenli olduğunu kanıtlamaz. Mevcut numunenin dönüştürücüsü, tek işlem iş parçacığı sözleşmesine ve bir dönüştürücü geri araması için özel kilit korumalı bir <code>@unchecked Sendable</code> tutucusuna sahiptir. Tüm PCM tamponlarını veya dönüştürücüyü iş parçacıkları arasında paylaşmak için genellikle güvenli hale getirmez. Örneği uyarlamadan önce bu sözleşmeyi okuyun.</p></div></section>
+<section id="speech-finish" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-04" data-ce-number="04">Döneklikli sonuçları değiştirin; sonlandırmadan önce girişi tamamlayın</h2></div><div class="ce-chapter__body">
+<p>Aşamalı sonuçlar etkinleştirildiğinde, uçucu bir sonuç bir ses aralığı için metni revize edebilir. Her kısmi sonucu yeni bir cümle olarak eklemeyin. Basit örnek, nihai metni ve değiştirilebilir uçucu bir kuyruğu tutar. Daha zengin düzenleme için güncellemeleri ses aralıklarıyla hizalayın ve son segmentleri ayrı ayrı koruyun. Apple, bu davranışı WWDC oturumunun <a href="https://developer.apple.com/videos/play/wwdc2025/277/" rel="noopener">sonuç bölümünde</a> açıklar.</p>
+<ol class="speech-stop-steps"><li>Normal bir Durdurma eyleminde, yeni mikrofon sesi üretmeyi durdurun ve dokunuşu bir kez kaldırın.</li><li>Analizörün girişin sonunu görebilmesi için <code>AsyncStream</code> giriş devamını bitirin.</li><li>Sonuç tüketici görevi canlı kalırken <code>finalizeAndFinishThroughEndOfInput()</code>'ı bekleyin.</li><li>Sonuç tüketiminin tamamlanmasını bekleyin, ardından son metni taahhüt edin ve oturum kaynaklarını yayınlayın.</li></ol>
+<p><a href="https://developer.apple.com/documentation/speech/speechanalyzer/finalizeandfinishthroughendofinput()" rel="noopener">Sonlandırma, girişin sonlandırılması ve tüketimini bekler</a>. Yapımcı hiç bitirmezken onu çağırmak Stop'u bekletebilir. Sonuç görevini hemen iptal etmek, kaydetmek istediğiniz kuyruğu da kaybedebilir. Bir ifadeyi atan bir İptal eylemi, normal bir kesinleşmiş sonuçmuş gibi davranmak yerine kasıtlı bir iptal yolu kullanmalıdır.</p>
+<p>Genel paket bir öğrenme örneği olmaya devam ediyor. Mevcut <code>stop()</code>, tüketiciyi tamamlar ve ardından iptal eder; ayrı bir tüketici tamamlama onayını ortaya çıkarmaz. Her nihai sonucu korumak önemliyse, bu yaşam döngüsünü uyarlayın ve test edin. Ayrıca hazırlık devam ederken Durdur'u test edin, tekrarlanan dokunuşlar, kapatmayı, kesintiyi görüntüleyin ve bir hatadan sonra yeniden başlatın.</p></div></section>
+<section id="speech-vocabulary" class="ce-chapter sd-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="reading-05" data-ce-number="05">Kelime desteği transkripsiyon modülüne bağlıdır</h2></div><div class="ce-chapter__body">
+<p>Yeni Speech API için bağlamsal sözcük desteği bulunmadığını söylemek doğru değildir. Apple, <strong>DictationTranscriber</strong> için <a href="https://developer.apple.com/documentation/speech/analysiscontext/contextualstrings" rel="noopener"><code>AnalysisContext.contextualStrings</code></a> desteğini belgeliyor. Belgelerde kısa ifadeler ve tüm etiketler genelinde en fazla 100 ifade öneriliyor. Bu, aynı ipuçlarının <code>SpeechTranscriber</code> özelleştirmesinde de kullanılabileceği anlamına gelmez.</p>
+<pre tabindex="0"><code>// For an analyzer configured with DictationTranscriber.
+let context = AnalysisContext()
+context.contextualStrings[.general] = [&quot;Obsidian&quot;, &quot;Yurica&quot;]
+try await analyzer.setContext(context)</code></pre>
+<p><a href="https://developer.apple.com/documentation/speech/speechanalyzer/setcontext(_:)" rel="noopener"><code>setContext(_:)</code></a> mevcut bağlamın yerini alır, bu nedenle gerektiğinde mevcut herhangi bir uygulama bağlamını koruyun veya birleştirin. İndirilebilir yardımcı, 100 ifadelerinden daha fazlasını sessizce kesmek yerine reddeder. İfade ipuçları, DictationTranscriber için de belgelenen özelleştirilmiş dil modeli seçeneğinden farklıdır ve ikisi de her ismin doğru tanınmasını garanti etmez. Uygulamanızın ihtiyaç duyduğu modülü ve dili seçin ve test edin.</p></div></section>
+<section id="speech-debug" class="ce-chapter sd-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="reading-06" data-ce-number="06">Kayıt metin üretmediğinde, başarısız aşamayı bulun</h2></div><div class="ce-chapter__body">
+<div class="speech-table-scroll sd-table" tabindex="0" role="region" aria-label="Konuşma kanalı sorunlarını giderme"><table id="speech-debug-table"><thead><tr><th scope="col">Belirti</th><th scope="col">Sıradakini kontrol et</th><th scope="col">Faydalı kanıt</th></tr></thead><tbody>
+<tr><th scope="row">Hazırlık başarısız</th><td>Cihaz desteği, normalleştirilmiş yerel, varlık durumu ve rezervasyon/indirme hataları</td><td>İşletim sistemi ve aygıt, istenen/seçilen yerel ayar, hata alanı ve kod</td></tr>
+<tr><th scope="row">Mikrofon kullanıcı arayüzü etkin, arabellek yok</th><td>İzin, sesli oturum aktivasyonu, rota, motor çalıştırma ve dokunma yaşam döngüsü</td><td>Geri aramaların gelip gelmediği; örnekleme hızını ve kanal sayısını girin</td></tr>
+<tr><th scope="row">Tamponlar geliyor, mesaj yok</th><td>Uyumlu format, sıfır olmayan dönüştürücü çıkışı, verilen girişler ve aktif sonuçlar görevi</td><td>Giriş/çıkış çerçeve sayıları ve ilk gerçek boru hattı hatası</td></tr>
+<tr><th scope="row">Kelimeler tekrarı</th><td>Uçucu revizyonların değiştirilmek yerine eklenip eklenmediği</td><td>Sonuç ses aralıkları ve son/uçucu bayraklar</td></tr>
+<tr><th scope="row">Son kelimeler kaybolur</th><td>Giriş tamamlama ve sonuçlandırma sırasında tüketici ömrü</td><td>Son giriş zamanı, sonuçlandırma tamamlama ve nihai sonuç makbuzu</td></tr>
+<tr><th scope="row">Çevrimdışı başlatma başarısız</th><td>Bu cihazda ve yerelde gerekli model hazırlığı</td><td>Kesilmeden önce varlık durumu ve ortaya çıkan kurulum hatası</td></tr>
+</tbody></table></div>
+<p>Tanılamalar için aşama zamanlamaları, kare sayıları, yerel ve hata bilgileri ile başlayın. Her günlük girişi için ham kayıtlar ve tanınan metin gerekli değildir. Bir kullanıcı bir reprodüksiyonu paylaşıyorsa, özel bir konuşma yerine kısa bir hassas olmayan test ifadesi ve ilgili yapılandırma isteyin.</p></div></section>
+<section id="speech-validation" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-07" data-ce-number="07">Ne kontrol edildi ve bir cihazda ne ölçülmeli</h2></div><div class="ce-chapter__body">
+<p>Bu makale Eylül 9, 2026 tarihinde Apple belgelerine ve Xcode 26.6 ile kontrol edildi. İndirilebilir yardımcı, bir iOS 26 Simülatör hedefi için tam sıkı eşzamanlılıkla Swift 6 tip kontrolünü geçer. Ses kaydetmez ve bu kontrol konuşma doğruluğunu, başarılı varlık kurulumunu veya uçtan uca mikrofon oturumunu göstermez.</p>
+<p><a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic/tree/1befcce6c60c0361dbf8cb25ba35fa482f3ec8ba" rel="noopener">revision 1befcce</a> adresindeki genel örnek, Eylül 9'de dört PCM dönüştürücü testini ve bir iOS Simülatör yapısını geçti. İki test, dönüşümden sonra kaynak arabelleğini yeniden kullanır ve mono float ve iç içe geçmiş stereo tamsayı çıkışının sağlam kaldığını doğrular; her ikisi de önceki eşleşen format geçiş uygulamasına karşı başarısız olur. README, paket refaktörünün fiziksel bir iOS cihazında yeniden test edilmediğini açıkça söylüyor. Bu sayfada daha önce bulunan geçmiş gecikme numaraları mevcut paket için bir kıyaslama değildir.</p>
+<p>Kendi uygulamanız için cihazı, işletim sistemini, yerel ayarı, ses rotasını, model hazırlığını ve tam zamanlama sınırlarını kaydedin. İlk uçucu metni, ilk son metni ve normal durdurma tamamlamayı ayrı ayrı ölçün. Hazır varlıklara sahip bir oturumu, hazırlık gerektiren bir oturumla karşılaştırın. Sabit, hassas olmayan bir ifadeyi tekrarlayın ve eksik veya yinelenen son kelimeleri ve hızı inceleyin. Bir zamanlama sonucundan Neural Engine davranışını veya donanım sınırını çıkarmayın.</p>
+<p>Apple Watch'de, uygulamanıza uyuyorsa ayrı bir sistem metin giriş akışı kullanın. <a href="https://developer.apple.com/documentation/swiftui/textfieldlink" rel="noopener"><code>TextFieldLink</code></a> sistem arayüzünü açar; diktenin zaten kaydedildiğini belirlemez. SpeechAnalyzer watchOS'te kullanılamıyor ve iOS paketi bir Watch mikrofon uygulaması değil.</p></div></section>
+<section id="speech-faq" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-08" data-ce-number="08">Sık sorulan sorular</h2></div><div class="ce-chapter__body">
+<details class="speech-faq-item"><summary>SpeathAnalyzer çevrimdışı çalışıyor mu?</summary><p>SpeechTranscriber cihazda ses işler, ancak gerekli modeli mevcut olmalıdır. Varlıklar, uygulamanızın ilk başlatılmasından önce zaten mevcut olabilir. Çevrimdışı bir oturumdan önce bunları kontrol edin ve hazırlayın; her ilk başlatmanın indirilmesi gerektiğini veya önceden yüklenmiş bir modelin her zaman mevcut kalacağını varsaymayın.</p></details>
+<details class="speech-faq-item"><summary>Özel kelime ekleyebilir miyim?</summary><p>Apple, DictationTranscriber için AnalysisContext.contextualStrings'i belgeler ve bu modül ayrıca özelleştirilmiş bir dil içerik ipucunu da ortaya çıkarır. Bu, SpeechTranscriber için aynı özelliğin dokümantasyonu değildir. Modülü bilerek seçin ve ihtiyacınız olan kelimeleri ve yereli test edin.</p></details>
+<details class="speech-faq-item"><summary>Neden uygulama kayıt yapıyor ancak metin göstermiyor?</summary><p>Cihaz ve yerel ayar desteğini, varlık durumunu, mikrofon girişini, isteğe bağlı analizör formatını, dönüştürücü çıkışını, giriş sırasını ve sonuç tüketiciyi kontrol edin. Her boş sonucu bir biçim sorunu olarak ele almak yerine gerçek hatayı ortaya çıkarın.</p></details>
+<details class="speech-faq-item"><summary>Dururken son sözleri nasıl tutarım?</summary><p>Ses üretmeyi bırakın, giriş devamını tamamlayın ve analizörün girişin sonuna kadar sonuçlanmasına izin verin. Nihai sonuçları almak için sonuç tüketicisini canlı tutun. İptal, normal tamamlamanın yerine değil, ayrı bir atma yoludur.</p></details>
+<details class="speech-faq-item"><summary>Bu örnek Apple Watch'de çalışıyor mu?</summary><p>Hayır. Bağlantılı mikrofon oturumu bir iOS 26 örneğidir ve SpeechAnalyzer watchOS'te kullanılamaz. Bir Watch uygulaması, bir sistem giriş arayüzü sunan ve dikte kaydının başladığını kanıtlamayan TextFieldLink gibi sistem metin girişini kullanabilir.</p></details>
+<details class="speech-faq-item"><summary>Örnek için ne doğrulandı?</summary><p>Bağlantılı depo, yeniden kullanılan kaynak tampon depolama için iki regresyon da dahil olmak üzere Eylül 9, 2026'de dört dönüştürücü testi ve bir iOS Simülatörü derlemesi kaydeder. Fiziksel cihaz yeniden testi talep edilmedi. Bu kılavuzun hazırlık yardımcısı, Eylül 9'da Swift 6 tam katı eşzamanlılık modunda Xcode 26.6 ile tip kontrol edildi. Bu kontroller mikrofon doğruluğunu, model indirme davranışını veya gecikmeyi belirlemez.</p></details>
+</div></section><section id="speech-product" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-09" data-ce-number="09">Bunun Simple Memo ile ilişkisi</h2></div><div class="ce-chapter__body"><p>Bu kılavuz ve ücretsiz örnek SimpleMemo geliştiricisi tarafından korunur. Uygulamanın <a href="/tr/voice-input/">sesli giriş kılavuzu</a> ürün iş akışını açıklar. Numunenin kendisi hiçbir e-posta göndermez ve Obsidian'e hiçbir şey kaydetmez. Simple Memo'de e-posta, alıcı kurulumu ve doğrulaması gerektirir ve <a href="/tr/obsidian/">Obsidian kaydetme entegrasyonu ve hedef ayarları gerektirir</a>. Yerel konuşma tanıma, uygulamanızın daha sonra gerçekleştirdiği herhangi bir eylemin gizlilik veya dağıtım davranışını tanımlamaz.</p><p>İlgili: <a href="/tr/blog/offline-first-comparison">çevrimdışı ilk not mimarisi</a>. Bir geliştirici için bir sonraki adım, tam örneği bir test ifadesiyle çalıştırmak ve desteklemeyi planladıkları cihazda ve bölgede hazırlığı, sonuçları ve durdurmayı doğrulamaktır.</p></div></section>
+
+      </div>
+    </div>
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/tr/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> Sonrakini okuyun </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> Notlarınızı biriktirecek bir yere verin </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> Notlarınızı Obsidian'e kaydetmek için iPhone'de entegrasyonu ve hedefi ayarlayın. </span> </a>
+  </aside>
+
+  </main>
+
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="tr" dir="ltr"><a class="site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Küçük bir not. Bir sonraki adım.</p><p class="site-footer-description">iPhone'unuzdan Obsidian'a ve e-postaya not gönderin.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="Alt bilgi gezinmesi">
+      <div class="footer__col">
+        <p class="footer__col-title">Ürün</p>
+        <a href="/tr/download/" class="footer__link">İndir</a>
+        <a href="/tr/" class="footer__link">Ana sayfa</a>
+        <a href="/tr/send-email-to-yourself/" class="footer__link">Kendinize E-posta Uygulamaları</a>
+        <a href="/tr/use-cases/" class="footer__link">Kullanım örnekleri</a>
+        <a href="/tr/guides/" class="footer__link">Kılavuzlar</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Karşılaştır ve Değiştir</p>
+        <a href="/tr/captio-alternative/" class="footer__link">Captio Alternatif</a>
+        <a href="/tr/note-to-email/" class="footer__link">E-postaya not gönderme</a>
+        <a href="/tr/vs/" class="footer__link">Karşılaştır</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Oku</p>
+        <a href="/tr/about/" class="footer__link">Geliştirici hakkında</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Destek</p>
+        <a href="/tr/roadmap/" class="footer__link">Açık yol haritası</a>
+        <a href="/tr/devlog/" class="footer__link">Geliştirme günlüğü</a>
+        <a href="/tr/faq" class="footer__link">Sık sorulan sorular</a>
+        <a href="/tr/privacy" class="footer__link">Gizlilik</a>
+        <a href="/tr/contact" class="footer__link">İletişim</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / İşleten: YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

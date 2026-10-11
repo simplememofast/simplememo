@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/en/blog/ios26-speechanalyzer-live-mic">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- Google tag (gtag.js) - deferred for LCP -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: 'en'});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>iOS 26 SpeechAnalyzer Live Mic：设置、结果和故障排除</title>
+  <meta name="description" content="将iOS 26 SpeechAnalyzer连接到实时麦克风：检查模型资产、PCM格式、最终结果、DictationTranscriber词汇和样本验证限制。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="iOS 26 SpeechAnalyzer Live Mic：设置、结果和故障排除">
+  <meta property="og:description" content="将iOS 26 SpeechAnalyzer连接到实时麦克风：检查模型资产、PCM格式、最终结果、DictationTranscriber词汇和样本验证限制。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-06-16T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh/blog/ios26-speechanalyzer-live-mic">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Simple Memo - for Obsidian">
+  <meta property="og:locale" content="zh_CN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="iOS 26 SpeechAnalyzer Live Mic：设置、结果和故障排除">
+  <meta name="twitter:description" content="将iOS 26 SpeechAnalyzer连接到实时麦克风：检查模型资产、PCM格式、最终结果、DictationTranscriber词汇和样本验证限制。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog.png">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- Canonical -->
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/ios26-speechanalyzer-live-mic">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/ios26-speechanalyzer-live-mic">
+
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "inLanguage": "zh-Hans",
+  "headline": "iOS 26 SpeechAnalyzer Live Mic：设置、结果和故障排除",
+  "description": "将iOS 26 SpeechAnalyzer连接到实时麦克风：检查模型资产、PCM格式、最终结果、DictationTranscriber词汇和样本验证限制。",
+  "image": "https://simplememofast.com/assets/img/og/blog.png",
+  "url": "https://simplememofast.com/zh/blog/ios26-speechanalyzer-live-mic",
+  "datePublished": "2026-06-16",
+  "dateModified": "2026-09-09",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Simple Memo - 用于Obsidian",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Obsidian連携シンプルメモ"
+    ]
+  },
+  "proficiencyLevel": "Expert",
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "语音分析器"
+    },
+    {
+      "@type": "Thing",
+      "name": "语音转录器"
+    },
+    {
+      "@type": "Thing",
+      "name": "iOS 26 語音轉文字"
+    }
+  ],
+  "keywords": "iOS 26，语音分析器，语音转录器，AV音频引擎，设备语音转文本，SFSpeechRecognizer迁移"
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主页",
+      "item": "https://simplememofast.com/zh/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "博客",
+      "item": "https://simplememofast.com/zh/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "iOS 26 SpeechAnalyzer Live Mic：设置、结果和故障排除",
+      "item": "https://simplememofast.com/zh/blog/ios26-speechanalyzer-live-mic"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh/blog/ios26-speechanalyzer-live-mic#webpage",
+  "inLanguage": "zh-Hans",
+  "name": "iOS 26 SpeechAnalyzer Live Mic：设置、结果和故障排除",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh/#website"
+  },
+  "url": "https://simplememofast.com/zh/blog/ios26-speechanalyzer-live-mic"
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "zh-Hans",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "SpeechAnalyzer离线工作吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "SpeechTranscriber在设备上处理音频，但其所需的型号必须可用。 资产可能在您的应用程序首次启动之前就已经存在。 在离线会话之前检查并准备它们；不要假设每次首次启动都必须下载，或者之前安装的模型将始终可用。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "我可以添加自定义词汇吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Apple文档AnalysisContext.contextualStrings for DictationTranscriber，该模块还公开了自定义语言内容提示。 这不是SpeechTranscriber的相同功能的文档。 仔细选择模块，并测试您需要的单词和区域设置。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "为什么应用程序会录制，但没有显示文本？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "检查设备和区域支持、资产状态、麦克风输入、可选分析仪格式、转换器输出、输入序列和结果消费者。 显示实际错误，而不是将每个空结果视为格式问题。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "停止时如何保留最后一句话？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "停止产生音频，完成输入延续，让分析器完成输入结束。 让结果消费者保持活力，以接收最终结果。 取消是一个单独的丢弃路径，而不是替代正常完成。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "这个样本在Apple Watch上运行吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "编号。 链接的麦克风会话是iOS 26示例，SpeechAnalyzer在watchOS上不可用。 Watch应用程序可以使用系统文本输入，例如TextFieldLink；它呈现了一个系统输入界面，但并不证明听写录音已经开始。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "样品的验证是什么？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "链接的存储库在9月9、2026上记录了四个转换器测试和iOS模拟器构建，包括两个重复使用源缓冲存储的回归。 没有要求进行物理设备重新测试。 本指南的准备助手在9月9使用Swift 6完全严格并发模式中的Xcode 26.6进行了类型检查。 这些检查不会确定麦克风的准确性、模型下载行为或延迟。"
+      }
+    }
+  ],
+  "@id": "https://simplememofast.com/zh/blog/ios26-speechanalyzer-live-mic#faq"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+    /* Article-specific styles */
+    .article-meta { font-size: .875rem; color: var(--text-muted); margin-bottom: 2rem; }
+    .article-meta a { color: var(--accent); text-decoration: none; }
+    .article-body h2 { font-size: 1.4rem; font-weight: 700; margin: 2.5rem 0 1rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    .article-body h3 { font-size: 1.1rem; font-weight: 600; margin: 2rem 0 .75rem; }
+    .article-body p { font-size: .95rem; line-height: 1.85; color: var(--text-secondary); margin-bottom: 1.25rem; }
+    .article-body ul, .article-body ol { margin: 1rem 0 1.5rem 1.25rem; font-size: .95rem; color: var(--text-secondary); line-height: 1.85; }
+    .article-body li { margin-bottom: .5rem; }
+    .article-body strong { color: var(--text); }
+    .article-body a { color: var(--accent); text-decoration: none; }
+    .article-body a:hover { text-decoration: underline; }
+    .article-body code { background: rgba(100,180,255,.08); padding: .15rem .4rem; border-radius: 4px; font-size: .85rem; color: var(--accent); }
+    .article-body pre { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; overflow-x: auto; margin: 1.5rem 0; font-size: .85rem; line-height: 1.7; }
+    .article-body pre code { background: none; padding: 0; color: var(--text-secondary); }
+    .callout { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+    .callout p { margin: 0; }
+    .callout-warning { border-left-color: #f85149; }
+    .timeline-list { list-style: none; margin: 1.5rem 0; padding: 0; }
+    .timeline-list li { position: relative; padding: 0 0 1.5rem 2rem; border-left: 2px solid var(--border); font-size: .95rem; line-height: 1.85; color: var(--text-secondary); }
+    .timeline-list li:last-child { padding-bottom: 0; border-left-color: transparent; }
+    .timeline-list li::before { content: ''; position: absolute; left: -5px; top: .5rem; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .timeline-list li strong { color: var(--text); }
+    .arch-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.5rem; margin: 1.5rem 0; text-align: center; font-family: monospace; font-size: .9rem; line-height: 2; color: var(--text-secondary); overflow-x: auto; }
+    .disclosure { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-top: 2.5rem; font-size: .875rem; color: var(--text-muted); line-height: 1.7; }
+
+    /* article code blocks */
+    .article-body pre{background:#0d1424;border:1px solid rgba(148,178,230,.18);border-radius:12px;
+      padding:16px 18px;overflow-x:auto;margin:1.25rem 0;font-size:.82rem;line-height:1.6;}
+    .article-body pre code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#dbe6ff;white-space:pre;}
+    .article-body :not(pre)>code{background:rgba(148,178,230,.12);padding:.1em .4em;border-radius:5px;
+      font-size:.88em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+    .article-body table{display:block;overflow-x:auto;width:100%;border-collapse:collapse;margin:1.25rem 0;font-size:.9rem;}
+    .speech-table-scroll{max-width:100%;overflow-x:auto;margin:1.25rem 0;}
+    .article-body #speech-debug-table{display:table;min-width:640px;margin:0;}
+    .speech-table-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+    .article-body th,.article-body td{border:1px solid var(--border);padding:.55rem .7rem;text-align:left;vertical-align:top;}
+    .article-body th{color:var(--text-muted);font-weight:700;}
+    .article-body .callout{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);
+      border-radius:10px;padding:1rem 1.25rem;margin:1.5rem 0;}
+</style>
+  <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
+  <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="主导航" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh/guides/">使用指南</a><a href="/zh/use-cases/">使用场景</a><a href="/zh/vs/">对比</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/zh/guides/">使用指南</a></li>
+        <li><a href="/zh/use-cases/">使用场景</a></li>
+        <li><a href="/zh/vs/">对比</a></li>
+        <li><a href="/zh/methods/">方法</a></li>
+        <li><a href="/zh/blog/">博客</a></li>
+        <li><a href="/zh/glossary/">詞彙表</a></li>
+        <li><a href="/zh/faq">常见问题</a></li>
+        <li><a href="/zh/about/">关于开发者</a></li>
+        <li><a href="/zh/devlog/">开发日志</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">下载</a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="简体中文 · 选择语言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>简中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hans" dir="ltr"><p class="site-language-title">选择语言</p><div class="site-language-grid"><a href="/blog/ios26-speechanalyzer-live-mic" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/ios26-speechanalyzer-live-mic" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hans" aria-current="page"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh-Hant/blog/ios26-speechanalyzer-live-mic" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/ios26-speechanalyzer-live-mic" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/blog/ios26-speechanalyzer-live-mic" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/ios26-speechanalyzer-live-mic" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/ios26-speechanalyzer-live-mic" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/ios26-speechanalyzer-live-mic" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/ios26-speechanalyzer-live-mic" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">下载</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="菜单"><span>菜单</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+<main class="page-content">
+    <div class="container">
+
+      <h1 class="page-content__title sd-title">iOS 26 SpeechAnalyzer Live Mic：设置、结果和故障排除</h1>
+
+      <p class="article-meta"> 作者：<a href="/zh/about/">AI ATAKA</a> · 发布时间：6月16，2026 ·更新时间：9月9，2026 </p>
+
+      <div class="page-content__body article-body">
+
+<p class="tldr"><strong>对于实时iOS 26麦克风管道，请检查设备和区域设置支持，准备模型资产，获取兼容的PCM格式，并在输入音频时消耗识别结果。</strong>将正常完成与取消分开处理，以便最后一句话可以成为最终。 本指南遵循Apple的API文档和当前的<a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic" rel="noopener">SimpleMemo现场麦克风样本</a>；它还包括一个可单独下载的准备助手。</p>
+<nav class="speech-toc" aria-label="文章部分"><a href="#speech-sample">运行示例</a><a href="#speech-prepare">准备分析仪</a><a href="#speech-audio">馈电麦克风PCM</a><a href="#speech-finish">处理结果并停止</a><a href="#speech-vocabulary">词汇支持</a><a href="#speech-debug">故障排除</a><a href="#speech-validation">验证范围</a></nav>
+<section id="speech-sample" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-01" data-ce-number="01">从完整的样本开始，然后检查管道</h2></div><div class="ce-chapter__body">
+<p><a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic" rel="noopener">MIT许可的存储库</a>将<code>SpeechSession</code>暴露为iOS 26主机应用程序的Swift包。 在Xcode的软件包依赖项下添加存储库，并链接<code>SpeechAnalyzerLiveMic</code>产品。 它的README显示一个SwiftUI视图，该视图显示<code>finalizedText</code>，单独渲染<code>volatileText</code>，并在会话准备时禁用开始。</p>
+<p>要获得完整的应用程序项目，请遵循README的XcodeGen路线。 或者，将提供的应用程序源复制到新的iOS 26应用程序中。 使用一个集成路线，这样您就不会两次定义相同的类型。 该软件包不实现笔记存储、电子邮件发送或Obsidian集成。</p>
+<p>链接的样本请求麦克风和语音识别授权。 其主机应用程序必须提供<code>NSMicrophoneUsageDescription</code>和<code>NSSpeechRecognitionUsageDescription</code>；添加软件包不能提供这些主机描述。 解释权限的使用，显示拒绝和准备状态，并让用户选择录制的时限。 下面的助手没有请求许可或启动麦克风。</p>
+<p>Apple的<a href="https://developer.apple.com/documentation/speech/bringing-advanced-speech-to-text-capabilities-to-your-app" rel="noopener">官方实时转录样本</a>和<a href="https://developer.apple.com/videos/play/wwdc2025/277/" rel="noopener">WWDC25会话</a>是架构的有用参考。 <code>SpeechAnalyzer</code>坐标模块；它是支持系统的附加API，不是假定所有现有的<code>SFSpeechRecognizer</code>代码都已過時的理由。</p></div></section>
+<section id="speech-prepare" class="ce-chapter sd-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="reading-02" data-ce-number="02">录制前准备支持、资产和格式</h2></div><div class="ce-chapter__body">
+<p><a href="https://developer.apple.com/documentation/speech/speechtranscriber" rel="noopener">SpeechTranscriber</a>提供运行时设备和区域设置检查。 仅检查iOS版本是不够的。 以下帮助程序返回配置的转录器、分析器和音频格式，或抛出特定的准备错误。</p>
+<p><a href="/assets/downloads/speech-analyzer-preparation.swift?v=7a01961842" download="speech-analyzer-preparation.swift">下载完整的Swift准备助手</a>。 完整的文件包括导入、结果和错误类型，以及下面讨论的DictationTranscriber提示助手。 这是一个设置组件，而不是完整的录音应用程序。</p><pre tabindex="0"><code>@available(iOS 26.0, *)
+@MainActor
+public func prepareSpeechAnalyzer(
+    requestedLocale: Locale,
+    naturalFormat: AVAudioFormat? = nil
+) async throws -&gt; PreparedSpeechAnalyzer {
+    guard SpeechTranscriber.isAvailable else {
+        throw SpeechPreparationError.deviceUnavailable
+    }
+    guard let locale = await SpeechTranscriber.supportedLocale(
+        equivalentTo: requestedLocale
+    ) else {
+        throw SpeechPreparationError.unsupportedLocale
+    }
+
+    let transcriber = SpeechTranscriber(
+        locale: locale,
+        preset: .progressiveTranscription
+    )
+    // The system may already have the asset; nil means no install is needed.
+    // A request can automatically reserve the locale or throw if no slot is free.
+    if let request = try await AssetInventory.assetInstallationRequest(
+        supporting: [transcriber]
+    ) {
+        try await request.downloadAndInstall()
+    }
+    try Task.checkCancellation()
+    guard await AssetInventory.status(forModules: [transcriber]) == .installed else {
+        throw SpeechPreparationError.assetsNotInstalled
+    }
+    guard let format = await SpeechAnalyzer.bestAvailableAudioFormat(
+        compatibleWith: [transcriber], considering: naturalFormat
+    ) else {
+        throw SpeechPreparationError.noCompatibleFormat
+    }
+
+    let analyzer = SpeechAnalyzer(modules: [transcriber])
+    try await analyzer.prepareToAnalyze(in: format)
+    return PreparedSpeechAnalyzer(
+        locale: locale, transcriber: transcriber,
+        analyzer: analyzer, audioFormat: format
+    )
+}</code></pre>
+<p><a href="https://developer.apple.com/documentation/speech/assetinventory" rel="noopener">AssetInventory</a>管理共享系统模型。 系统或其他应用程序可能已经安装了模型。<a href="https://developer.apple.com/documentation/speech/assetinventory/assetinstallationrequest(supporting:)" rel="noopener">安装请求</a>在不需要安装时返回<code>nil</code>；否则，它可以保留区域设置并启动下载。 预约限制也可能产生错误。 管理应用程序功能的预约，并在不再需要时发布区域设置，而不是发布应用程序中其他地方仍在使用的模型。</p>
+<p>在下线之前，准备所需的区域设置并验证准备情况。 模型资产在应用程序捆绑包之外，但仍然消耗系统存储，并且可能会随着时间的推移而变化。 在主机用户界面中显示下载进度和取消。 “设备识别”并不意味着“不需要准备或网络访问。”</p></div></section>
+<section id="speech-audio" class="ce-chapter sd-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="reading-03" data-ce-number="03">以分析器接受的格式提供PCM</h2></div><div class="ce-chapter__body">
+<pre tabindex="0"><code>AVAudioEngine microphone tap
+  -&gt; owned PCM / conversion for the selected format
+  -&gt; AsyncStream&lt;AnalyzerInput&gt;
+  -&gt; SpeechAnalyzer + SpeechTranscriber
+  -&gt; result consumer and UI state</code></pre>
+<p>激活音频会话后，检查输入节点的实际格式。 不要硬编码采样率，因为设备或路由以前经常使用该速率。 适当时将自然格式传递给<a href="https://developer.apple.com/documentation/speech/speechanalyzer/bestavailableaudioformat(compatiblewith:considering:)" rel="noopener"><code>bestAvailableAudioFormat(compatibleWith:considering:)</code></a>，并拆开其可选结果。 Apple记录了分析仪没有透明地重新采样或转换输入。</p>
+<p>存储库的<code>AudioBufferConverter</code>返回已匹配的缓冲区不变，并在格式不同时使用<code>AVAudioConverter</code>。 不匹配的格式需要转换，而不是作为每个缓冲区的全面额外步骤。 检查输出帧长度并报告转换错误；无声删除每个失败的缓冲区可以使录制用户界面看起来健康，同时不产生文本。</p>
+<p>为排队的音频提供明确的所有权政策。 即使格式已经匹配，更新后的样本转换器也会返回独立的PCM存储，因此以后重复使用输入不会覆盖排队的音频。 音频回调提供的缓冲区不得假定在回调返回后保持不变。 如果您将其排队供以后使用，请安排一个合适的自有副本或控制缓冲寿命的管道。 将每个缓冲区UI突变放在音频回调中。 對於生產，還要決定如何繫結排隊工作，並處理超載或路由更改。</p>
+<p>在Swift 6中，捕获局部变量本身并不能证明管道是线程安全的。 当前样本的转换器有一个单处理线程合同和一个私有锁保护的<code>@unchecked Sendable</code>支架，用于一个转换器回调。 它并不能使所有PCM缓冲区或转换器普遍安全跨线程共享。 在调整样品之前，请先阅读该合同。</p></div></section>
+<section id="speech-finish" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-04" data-ce-number="04">替换不稳定的结果；在最终确定之前完成输入</h2></div><div class="ce-chapter__body">
+<p>启用渐进式结果后，不稳定结果可以修改音频范围的文本。 不要将每个部分结果附加为新句子。 简单的样本保留了最终文本和可替换的易变尾部。 要进行更丰富的编辑，请将更新与音频范围对齐，并分别保留最终片段。 Apple 在 WWDC 会话的 <a href="https://developer.apple.com/videos/play/wwdc2025/277/" rel="noopener">结果部分</a> 中描述了此行为。</p>
+<ol class="speech-stop-steps"><li>在正常的停止操作中，停止产生新的麦克风音频，并移除一次水龙头。</li><li>完成<code>AsyncStream</code>输入延续，以便分析器可以看到输入的结束。</li><li>等待<code>finalizeAndFinishThroughEndOfInput()</code>，而结果-消费者任务仍然有效。</li><li>等待结果消耗完成，然后提交最终文本并发布会话资源。</li></ol>
+<p><a href="https://developer.apple.com/documentation/speech/speechanalyzer/finalizeandfinishthroughendofinput()" rel="noopener">定稿等待輸入終止和消耗</a>。 在制作人从未完成时打电话可以离开停止等待。 立即取消结果任务也可能丢失您打算保存的尾部。 丢弃话语的取消操作应使用故意取消路径，而不是假装它是正常的最终结果。</p>
+<p>公共包仍然是一個學習樣本。 它当前的<code>stop()</code>最终确定，然后取消消费者；它不会公开单独的消费者完成确认。 如果保留每个最终结果很重要，请调整该生命周期并进行测试。 还要测试在准备过程中停止、反复点击、视图关闭、中断和错误后重新启动。</p></div></section>
+<section id="speech-vocabulary" class="ce-chapter sd-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="reading-05" data-ce-number="05">词汇支持取决于转录模块</h2></div><div class="ce-chapter__body">
+<p>不能说新的 Speech API 不支持上下文词汇。Apple 为 <strong>DictationTranscriber</strong> 提供了 <a href="https://developer.apple.com/documentation/speech/analysiscontext/contextualstrings" rel="noopener"><code>AnalysisContext.contextualStrings</code></a> 的文档。文档建议使用简短短语，所有标签下的短语总数最多为 100 个。这并不意味着同样的提示也能用于定制 <code>SpeechTranscriber</code>。</p>
+<pre tabindex="0"><code>// For an analyzer configured with DictationTranscriber.
+let context = AnalysisContext()
+context.contextualStrings[.general] = [&quot;Obsidian&quot;, &quot;Yurica&quot;]
+try await analyzer.setContext(context)</code></pre>
+<p><a href="https://developer.apple.com/documentation/speech/speechanalyzer/setcontext(_:)" rel="noopener"><code>setContext(_:)</code></a>替换了当前上下文，因此在需要时保留或合并任何现有的应用程序上下文。 可下载的助手拒绝超过100的短语，而不是默默地截断它们。 短语提示与也为DictationTranscriber记录的自定义语言模型选项不同，两者都不保证正确识别每个名称。 选择并测试您的应用程序所需的模块和语言。</p></div></section>
+<section id="speech-debug" class="ce-chapter sd-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="reading-06" data-ce-number="06">当录音没有产生文本时，找到失败的阶段</h2></div><div class="ce-chapter__body">
+<div class="speech-table-scroll sd-table" tabindex="0" role="region" aria-label="语音管道故障排除"><table id="speech-debug-table"><thead><tr><th scope="col">症状</th><th scope="col">檢查下一步</th><th scope="col">有用的证据</th></tr></thead><tbody>
+<tr><th scope="row">准备失败</th><td>设备支持、规范化区域设置、资产状态和预约/下载错误</td><td>操作系统和设备、请求/选定的区域设置、错误域和代码</td></tr>
+<tr><th scope="row">麦克风用户界面处于活动状态，没有缓冲区</th><td>权限、音频会话激活、路由、引擎启动和抽头生命周期</td><td>回调是否到达；输入采样率和通道计数</td></tr>
+<tr><th scope="row">缓冲器到达，没有文本</th><td>兼容格式、非零转换器输出、输出输入和活动结果任务</td><td>输入/输出帧计数和第一个实际管道错误</td></tr>
+<tr><th scope="row">单词重复</th><td>是否附加了可变的修订版而不是替换</td><td>结果音频范围和最终/易失性标志</td></tr>
+<tr><th scope="row">最后的话消失</th><td>最终确定期间的输入完成和消费者寿命</td><td>最后一次输入时间、最终完成和最终结果接收</td></tr>
+<tr><th scope="row">离线启动失败</th><td>该设备和区域设置上的所需机型就绪</td><td>断开连接前的资产状态和表面设置错误</td></tr>
+</tbody></table></div>
+<p>对于诊断，从阶段定时、帧数、区域设置和错误信息开始。 每个日志条目都不需要原始录音和可识别的文本。 如果使用者共享复制品，請要求提供簡短的非敏感测试短语和相关配置，而不是私人对话。</p></div></section>
+<section id="speech-validation" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-07" data-ce-number="07">检查了什么，以及在设备上测量什么</h2></div><div class="ce-chapter__body">
+<p>本文在9月9、2026上根据Apple文档和Xcode 26.6进行了检查。 可下载的助手通过了Swift 6类型检查，并具有iOS 26模拟器目标的完全严格并发性。 它不会录制音频，并且此检查不会显示语音准确性、成功安装资产或端到端麦克风会话。</p>
+<p><a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic/tree/1befcce6c60c0361dbf8cb25ba35fa482f3ec8ba" rel="noopener">修订版1befcce</a>的公共样本在9月9通过了四次PCM转换器测试和iOS模拟器构建。 两次测试在转换后重复使用源缓冲区，并确认单色浮点数和交错立体整数输出保持完好无损；两者都与之前的匹配格式直通实现相比失败。 它的README明确表示，软件包重构尚未在物理iOS设备上重新测试。 此页面之前的历史延迟数字不是当前软件包的基准。</p>
+<p>对于您自己的应用程序，记录设备、操作系统、区域设置、音频路由、模型准备情况和确切的定时边界。 分别测量第一个不稳定文本、第一个最终文本和正常停止完成。 将具有现成资产的会话与需要准备的会话进行比较。 重复一个固定的非敏感短语，并检查缺失或重复的最后单词以及速度。 不要从一个定时结果中推断出神经引擎行为或硬件限制。</p>
+<p>在Apple Watch上，如果适合您的应用程序，请使用单独的系统文本输入流。<a href="https://developer.apple.com/documentation/swiftui/textfieldlink" rel="noopener"><code>TextFieldLink</code></a>打开系统界面；它不会确定听写已经在录制。 SpeechAnalyzer在watchOS上不可用，iOS软件包不是Watch麦克风的实现。</p></div></section>
+<section id="speech-faq" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-08" data-ce-number="08">常见问题</h2></div><div class="ce-chapter__body">
+<details class="speech-faq-item"><summary>SpeechAnalyzer离线工作吗？</summary><p>SpeechTranscriber在设备上处理音频，但其所需的型号必须可用。 资产可能在您的应用程序首次启动之前就已经存在。 在离线会话之前检查并准备它们；不要假设每次首次启动都必须下载，或者之前安装的模型将始终可用。</p></details>
+<details class="speech-faq-item"><summary>我可以添加自定义词汇吗？</summary><p>Apple文档AnalysisContext.contextualStrings for DictationTranscriber，该模块还公开了自定义语言内容提示。 这不是SpeechTranscriber的相同功能的文档。 仔细选择模块，并测试您需要的单词和区域设置。</p></details>
+<details class="speech-faq-item"><summary>为什么应用程序会录制，但没有显示文本？</summary><p>检查设备和区域支持、资产状态、麦克风输入、可选分析仪格式、转换器输出、输入序列和结果消费者。 显示实际错误，而不是将每个空结果视为格式问题。</p></details>
+<details class="speech-faq-item"><summary>停止时如何保留最后一句话？</summary><p>停止产生音频，完成输入延续，让分析器完成输入结束。 让结果消费者保持活力，以接收最终结果。 取消是一个单独的丢弃路径，而不是替代正常完成。</p></details>
+<details class="speech-faq-item"><summary>这个样本在Apple Watch上运行吗？</summary><p>编号。 链接的麦克风会话是iOS 26示例，SpeechAnalyzer在watchOS上不可用。 Watch应用程序可以使用系统文本输入，例如TextFieldLink；它呈现了一个系统输入界面，但并不证明听写录音已经开始。</p></details>
+<details class="speech-faq-item"><summary>样品的验证是什么？</summary><p>链接的存储库在9月9、2026上记录了四个转换器测试和iOS模拟器构建，包括两个重复使用源缓冲存储的回归。 没有要求进行物理设备重新测试。 本指南的准备助手在9月9使用Swift 6完全严格并发模式中的Xcode 26.6进行了类型检查。 这些检查不会确定麦克风的准确性、模型下载行为或延迟。</p></details>
+</div></section><section id="speech-product" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-09" data-ce-number="09">这与Simple Memo有什么关系</h2></div><div class="ce-chapter__body"><p>本指南和免费样品由SimpleMemo开发人员维护。 应用的<a href="/zh/voice-input/">语音输入指南</a>描述了产品工作流程。 样本本身不发送电子邮件，也不向Obsidian保存任何东西。 在Simple Memo中，电子邮件需要收件人设置和验证，<a href="/zh/obsidian/">Obsidian保存需要集成和目标设置</a>。 本地语音识别不会描述您的应用程序执行的任何后期操作的隐私或交付行为。</p><p>相关：<a href="/zh/blog/offline-first-comparison">离线优先备忘录架构</a>。 开发者的下一步是使用测试短语运行完整的样本，并在他们计划支持的设备和区域设置上验证准备工作、结果和停止。</p></div></section>
+
+      </div>
+    </div>
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/zh/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> 阅读下一篇 </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> 将您的笔记放在某个地方进行积累 </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> 在iPhone上设置集成和目标，以在Obsidian中保存您的笔记。</span> </a>
+  </aside>
+
+  </main>
+
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hans" dir="ltr"><a class="site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">记下一点想法，迈出下一步。</p><p class="site-footer-description">从 iPhone 向 Obsidian 和电子邮件发送笔记。</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="页脚导航">
+      <div class="footer__col">
+        <p class="footer__col-title">产品</p>
+        <a href="/zh/download/" class="footer__link">下载</a>
+        <a href="/zh/" class="footer__link">首页</a>
+        <a href="/zh/send-email-to-yourself/" class="footer__link">通过电子邮件发送自己的应用程序</a>
+        <a href="/zh/use-cases/" class="footer__link">使用场景</a>
+        <a href="/zh/guides/" class="footer__link">使用指南</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比较和切换</p>
+        <a href="/zh/captio-alternative/" class="footer__link">Captio替代</a>
+        <a href="/zh/note-to-email/" class="footer__link">将笔记发送到邮箱</a>
+        <a href="/zh/vs/" class="footer__link">对比</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">阅读</p>
+        <a href="/zh/about/" class="footer__link">关于开发者</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">支持</p>
+        <a href="/zh/roadmap/" class="footer__link">公开路线图</a>
+        <a href="/zh/devlog/" class="footer__link">开发日志</a>
+        <a href="/zh/faq" class="footer__link">常见问题</a>
+        <a href="/zh/privacy" class="footer__link">隐私</a>
+        <a href="/zh/contact" class="footer__link">联系我们</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 运营：YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

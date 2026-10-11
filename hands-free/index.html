@@ -6,34 +6,34 @@
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
   <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/hands-free/">
   <script>
-    window.addEventListener('load', function() {
+    (function() {
       if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
-      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
-      ric(function() {
-        var s = document.createElement('script');
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
-        s.async = true;
-        document.head.appendChild(s);
-        s.onload = function() {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
-        };
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
       });
-    });
+    })();
   </script>
-  <title>ハンズフリー音声メモ — 移動中も開くだけで自動録音・圏外でも消えない | Obsidian連携シンプルメモ</title>
-  <meta name="description" content="開くだけで音声入力が自動起動。高精度なオンデバイス音声で話すだけ、下書きは端末内に自動保存、Obsidianにはローカル保存で圏外でも消えません。通勤・サイクリング・ドライブの“手がふさがる移動中”に最適なハンズフリー音声メモ（安全運用の注意つき）。">
+  <title>ハンズフリー音声メモ — 移動中も、設定すれば開くだけで自動録音・圏外でも端末に残る | Obsidian連携シンプルメモ</title>
+  <meta name="description" content="設定すれば、開くだけで音声入力が自動起動（iOS 26以降の対応端末）。オンデバイスの音声認識で話すだけ、下書きは端末内に自動保存、Obsidianにはローカル保存で、圏外でも端末に残ります。通勤・サイクリング・ドライブの“手がふさがる移動中”に最適なハンズフリー音声メモ（安全運用の注意つき）。">
   <meta name="theme-color" content="#070b14">
 
   <!-- OGP -->
-  <meta property="og:title" content="ハンズフリー音声メモ — 移動中も開くだけで自動録音・圏外でも消えない | Obsidian連携シンプルメモ">
-  <meta property="og:description" content="開くだけで自動録音、高精度オンデバイス音声、下書き自動保存、Obsidianローカル保存で圏外でも消えない。手がふさがる移動中のハンズフリー音声メモ。">
+  <meta property="og:title" content="ハンズフリー音声メモ — 移動中も、設定すれば開くだけで自動録音・圏外でも端末に残る | Obsidian連携シンプルメモ">
+  <meta property="og:description" content="設定しておけば、開くだけで自動録音（iOS 26以降の対応端末）、オンデバイスの音声認識、下書き自動保存、Obsidianローカル保存で圏外でも端末に残る。手がふさがる移動中のハンズフリー音声メモ。">
   <meta property="og:type" content="article">
   <meta property="article:published_time" content="2026-06-04T00:00:00+09:00">
   <meta property="og:url" content="https://simplememofast.com/hands-free/">
-  <meta property="og:image" content="https://simplememofast.com/assets/img/og/hands-free.png">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/hands-free.png?v=a17bfcfc7f">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:site_name" content="Obsidian連携シンプルメモ">
@@ -43,14 +43,22 @@
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@simplememofast">
-  <meta name="twitter:title" content="ハンズフリー音声メモ — 開くだけで自動録音・圏外でも消えない | Obsidian連携シンプルメモ">
-  <meta name="twitter:description" content="開くだけで自動録音、高精度オンデバイス音声、下書き自動保存、Obsidianローカル保存で圏外でも消えない。移動中のハンズフリー音声メモ。">
-  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/hands-free.png">
+  <meta name="twitter:title" content="ハンズフリー音声メモ — 設定すれば開くだけで自動録音・圏外でも端末に残る | Obsidian連携シンプルメモ">
+  <meta name="twitter:description" content="設定しておけば、開くだけで自動録音（iOS 26以降の対応端末）、オンデバイスの音声認識、下書き自動保存、Obsidianローカル保存で圏外でも端末に残る。移動中のハンズフリー音声メモ。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/hands-free.png?v=a17bfcfc7f">
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/hands-free/">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/hands-free/">
   <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/hands-free/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/hands-free/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/hands-free/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/hands-free/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/hands-free/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/hands-free/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/hands-free/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/hands-free/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/hands-free/">
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/hands-free/">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -72,14 +80,14 @@
   </script>
 
   <!-- JSON-LD: Article -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/hands-free/#article","inLanguage":"ja","headline":"ハンズフリー音声メモ — 移動中も開くだけで自動録音・圏外でも消えない","description":"開くだけで音声入力が自動起動。高精度なオンデバイス音声で話すだけ、下書きは端末内に自動保存、Obsidianにはローカル保存で圏外でも消えません。通勤・サイクリング・ドライブの移動中に最適なハンズフリー音声メモ。","url":"https://simplememofast.com/hands-free/","datePublished":"2026-06-04","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/hands-free.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/hands-free/"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/hands-free/#article","inLanguage":"ja","headline":"ハンズフリー音声メモ — 移動中も、設定すれば開くだけで自動録音・圏外でも端末に残る","description":"設定すれば、開くだけで音声入力が自動起動（iOS 26以降の対応端末）。オンデバイスの音声認識で話すだけ、下書きは端末内に自動保存、Obsidianにはローカル保存で、圏外でも端末に残ります。通勤・サイクリング・ドライブの移動中に最適なハンズフリー音声メモ。","url":"https://simplememofast.com/hands-free/","datePublished":"2026-06-04","dateModified":"2026-10-04","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/hands-free.png?v=a17bfcfc7f","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/hands-free/"}}</script>
 
   <!-- JSON-LD: FAQPage -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/hands-free/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"運転中や自転車の走行中に使ってもいいですか？","acceptedAnswer":{"@type":"Answer","text":"運転中・走行中にスマホを手に持つ・通話する・画面を注視する行為は日本の道路交通法で禁止されており危険です（自転車も2024年11月から「ながらスマホ」が罰則対象）。本機能は画面を見ず・触らず音声だけで使える設計ですが、安全のため、①安全な場所に停車してから、②またはハンズフリーで音声のみ（画面を見ない・操作しない）、③同乗者が操作、を必ず守ってください。前方への注意が最優先です。"}},{"@type":"Question","name":"電波がない場所（トンネル・山・地下）でも使えますか？","acceptedAnswer":{"@type":"Answer","text":"使えます。圏外でも、話した内容は(1)端末内の下書きとして自動保存、(2)メールはオフラインキュー（Outbox）に暗号化して貯まり復帰時に自動送信、(3)Obsidian連携をフォルダ直書きにしていればその場でローカルのノートに追記されます。音声認識も初回に言語モデルを取得しておけばオフラインで動作します。"}},{"@type":"Question","name":"開くだけで録音が始まるのはどう設定しますか？","acceptedAnswer":{"@type":"Answer","text":"設定の詳細設定にある「起動時に音声入力を自動オン」をオンにします。以降はアプリを開いた瞬間に録音が始まるので、マイクを探したり画面を操作したりする必要がありません（iOS 26以降の対応端末）。"}},{"@type":"Question","name":"音声の精度は？追加料金はかかりますか？","acceptedAnswer":{"@type":"Answer","text":"Appleの最新オンデバイス音声認識（iOS 26）を使うため精度が高く、文字起こしは端末内で完結します。音声もテキストも外部に送らず、従量課金の外部APIも使わないため追加料金はかかりません。"}},{"@type":"Question","name":"言い間違えたり途中で中断しても大丈夫ですか？","acceptedAnswer":{"@type":"Answer","text":"大丈夫です。入力中の内容は話すそばから端末内にAES-GCM暗号化で自動保存されるため、アプリが閉じても・落ちても、次に開けば続きから編集できます。送信すると下書きは破棄されます。"}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/hands-free/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"運転中や自転車の走行中に使ってもいいですか？","acceptedAnswer":{"@type":"Answer","text":"運転中・走行中にスマホを手に持つ・通話する・画面を注視する行為は日本の道路交通法で禁止されており危険です（自転車も2024年11月から「ながらスマホ」が罰則対象）。アプリで録音して送るには、開くときと送るときに画面の操作が要ります。安全のため、①安全な場所に停車してから、②またはハンズフリーでSiriなど声だけの操作に限る（画面を見ない・操作しない。解除や画面操作を求められたら停車してから）、③同乗者が操作、を必ず守ってください。前方への注意が最優先です。"}},{"@type":"Question","name":"電波がない場所（トンネル・山・地下）でも使えますか？","acceptedAnswer":{"@type":"Answer","text":"使えます。圏外でも、話した内容は(1)端末内の下書きとして自動保存されます。送信すると、(2)メールはオフラインキュー（Outbox）に暗号化して貯まり復帰時に自動送信、(3)Obsidian連携をフォルダ直書きにしていればその場でローカルのノートに追記されます。音声認識も初回に言語モデルを取得しておけばオフラインで動作します。"}},{"@type":"Question","name":"開くだけで録音が始まるのはどう設定しますか？","acceptedAnswer":{"@type":"Answer","text":"設定の「音声入力とサウンド」にある「起動時に音声入力を自動オン」をオンにします。以降はアプリを開くと録音が始まるので、マイクを探してタップする必要はありません（iOS 26以降の対応端末。開始の表示を確かめてから話します）。"}},{"@type":"Question","name":"音声の精度は？追加料金はかかりますか？","acceptedAnswer":{"@type":"Answer","text":"Appleのオンデバイス音声認識（iOS 26以降）を使い、文字起こしは端末内で行います。精度は測っておらず、話し方・周りの音・言語で変わるので、送る前に文字を確かめてください。文字起こしのために音声もテキストも外部へ送らず、従量課金の外部APIも使わないため、追加料金はかかりません。"}},{"@type":"Question","name":"言い間違えたり途中で中断しても大丈夫ですか？","acceptedAnswer":{"@type":"Answer","text":"大丈夫です。入力中の内容は、変わってから約0.4秒後に端末内へAES-GCM暗号化で自動保存されるため、アプリが閉じても・落ちても、次に開けば最後に保存したところから編集を続けられます。送信すると下書きは破棄されます。"}}]}</script>
 
   <!-- JSON-LD: WebPage with Speakable -->
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/hands-free/#webpage","inLanguage":"ja","name":"ハンズフリー音声メモ — 移動中も開くだけで自動録音・圏外でも消えない | Obsidian連携シンプルメモ","url":"https://simplememofast.com/hands-free/","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".lp-section__lead"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}
+  {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/hands-free/#webpage","inLanguage":"ja","name":"ハンズフリー音声メモ — 移動中も、設定すれば開くだけで自動録音・圏外でも端末に残る | Obsidian連携シンプルメモ","url":"https://simplememofast.com/hands-free/","isPartOf":{"@id":"https://simplememofast.com/#website"}}
   </script>
   <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
@@ -273,329 +281,305 @@
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- app-schema: managed by scripts/inject_app_schema.py -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","@id":"https://simplememofast.com/#app","name":"Obsidian連携シンプルメモ","alternateName":["Simple Memo - for Obsidian","Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo"],"url":"https://simplememofast.com/","image":"https://simplememofast.com/assets/img/app-icon-256.png","applicationCategory":"UtilitiesApplication","operatingSystem":"iOS 16.0+, watchOS","softwareVersion":"5.8.9","isAccessibleForFree":true,"inLanguage":"ja","downloadUrl":"https://apps.apple.com/jp/app/id6758438948","offers":[{"@type":"Offer","name":"Free","price":"0","priceCurrency":"JPY","description":"1日3通まで（ずっと無料）","availability":"https://schema.org/InStock"},{"@type":"Offer","name":"Premium Monthly","price":"500","priceCurrency":"JPY","description":"月額500円・送信無制限","availability":"https://schema.org/InStock"},{"@type":"Offer","name":"Premium Yearly","price":"5000","priceCurrency":"JPY","description":"年額5,000円・送信無制限","availability":"https://schema.org/InStock"}],"author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"aggregateRating":{"@type":"AggregateRating","ratingValue":"4.2","ratingCount":"25","bestRating":"5","worstRating":"1"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","@id":"https://simplememofast.com/#app","name":"Obsidian連携シンプルメモ","alternateName":["Simple Memo - for Obsidian","Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo"],"url":"https://simplememofast.com/","image":"https://simplememofast.com/assets/img/app-icon-256.png","applicationCategory":"UtilitiesApplication","operatingSystem":"iOS 16.0+, watchOS","softwareVersion":"5.9.12","isAccessibleForFree":true,"inLanguage":"ja","downloadUrl":"https://apps.apple.com/jp/app/id6758438948","offers":[{"@type":"Offer","name":"Free","price":"0","priceCurrency":"JPY","description":"1日3通まで（利用期間の制限なし）","availability":"https://schema.org/InStock"},{"@type":"Offer","name":"Premium Monthly","price":"500","priceCurrency":"JPY","description":"月額500円・送信無制限","availability":"https://schema.org/InStock"},{"@type":"Offer","name":"Premium Yearly","price":"5000","priceCurrency":"JPY","description":"年額5,000円・送信無制限","availability":"https://schema.org/InStock"}],"author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"}}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/capture-next.css?v=4e62584640">
+<link rel="stylesheet" href="/assets/css/capture-third.css?v=ce878a94dc">
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="capture-editorial capture-brand capture-full capture-next capture-third site-designed" data-design-family="refined">
+<a class="ce-skip" href="#main-content">本文へスキップ</a>
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="メインナビゲーション">
-    <div class="global-nav__inner">
-      <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
-      <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
-        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
-        <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
-        <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
-        <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
-        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
-        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="voice" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=45b35116-b5b3-4b97-9256-0c97289681b6&amp;pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
-      </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/hands-free/" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/hands-free/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
-        <a data-cta-variant="v1" data-cta-cluster="voice" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=45b35116-b5b3-4b97-9256-0c97289681b6&amp;pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
-          <span lang="ja">ダウンロード</span>
-        </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
-      </div>
-    </div>
-  </nav>
+  <nav aria-label="メインナビゲーション" class="global-nav" data-site-header="">
+<div class="global-nav__inner">
+<a class="global-nav__logo site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/guides/">使い方</a><a href="/use-cases/">活用事例</a><a href="/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+<li><a href="/guides/">使い方</a></li>
+<li><a href="/use-cases/">活用事例</a></li>
+<li><a href="/vs/">比較</a></li>
+<li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
+<li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
+<li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
+<li><a href="/faq">よくある質問</a></li>
+<li><a href="/about/">開発者について</a></li>
+<li><a href="/devlog/">開発記録</a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="voice" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=45b35116-b5b3-4b97-9256-0c97289681b6&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
+</ul>
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="日本語 · 言語を選択"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>JA</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ja" dir="ltr"><p class="site-language-title">言語を選択</p><div class="site-language-grid"><span class="site-language-current" data-site-locale="ja" aria-current="page"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/en/hands-free/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/hands-free/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/hands-free/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/hands-free/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/hands-free/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/hands-free/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/hands-free/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/hands-free/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/hands-free/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+<a class="global-nav__cta" data-cta-cluster="voice" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=45b35116-b5b3-4b97-9256-0c97289681b6&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8">
+<span lang="ja">ダウンロード</span>
+</a>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="メニュー"><span>メニュー</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+</div>
+</div>
+</nav>
 
   <!-- Meta Templates for JS -->
 
-<main class="page-content">
-    <div class="container">
-
-      <!-- Hero -->
-      <div class="lp-hero">
-        <div class="lp-hero__label">
-          <span lang="ja">移動中のハンズフリー音声メモ</span>
-
-        </div>
-        <h1 class="lp-hero__title">
-          <span lang="ja">移動中も、開くだけで。</span>
-
-        </h1>
-        <p class="lp-hero__sub">
-          <span lang="ja">手がふさがる通勤・サイクリング・ドライブでも、<strong>開いた瞬間に録音が始まり</strong>、高精度なオンデバイス音声で話すだけ。書きかけは<strong>下書きに自動保存</strong>、Obsidianには<strong>ローカル保存</strong>で——<strong>電波がなくても消えません</strong>。画面を見ず・触らず、声だけで思いつきを残せます。</span>
-
-        </p>
-        <div class="hero-cta-row" style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
-          <a data-cta-variant="v1" data-cta-cluster="voice" data-cta-placement="hero" lang="ja" href="https://apps.apple.com/jp/app/id6758438948?ppid=45b35116-b5b3-4b97-9256-0c97289681b6&amp;pt=128498560&amp;ct=jp__hero&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
-            <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="eager">
-          </a>
-
-          <a href="#setup" class="hero-cta-secondary" style="display:inline-flex;align-items:center;min-height:48px;padding:.6rem 1.1rem;border:1px solid rgba(34,211,238,.3);border-radius:24px;color:#22d3ee;text-decoration:none;font-size:.9rem;">
-            <span lang="ja">設定を見る</span>
-          </a>
-        </div>
-        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
-          <span lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a></span>
-
-        </p>
-      </div>
-
-      <!-- Safety note (prominent, early) -->
-      <section class="lp-section" style="padding-top:0;">
-        <div class="safety-box">
-          <div class="safety-box__title"><span lang="ja">⚠ 安全と法律について（必ずお読みください）</span></div>
-          <p lang="ja" style="margin:0;">運転中・走行中に<strong>スマホを手に持つ・通話する・画面を注視する</strong>行為は、日本の道路交通法で禁止されており大変危険です（自転車も2024年11月から「ながらスマホ」が罰則対象）。本機能は<strong>画面を見ず・触らず、音声だけ</strong>で使えるよう設計していますが、安全のため次を必ず守ってください：<strong>①安全な場所に停車してから使う</strong>／<strong>②またはハンズフリー（端末を固定し、画面を見ない・操作しない）で音声のみ</strong>／<strong>③同乗者が操作する</strong>。前方・周囲への注意が最優先です。</p>
-
-        </div>
-      </section>
-
-      <!-- Answer-first -->
-      <section class="lp-section" style="padding-top:0;">
-        <div class="tip-box" style="font-size:.95rem;">
-          <div class="tip-box__title"><span lang="ja">ひとことで言うと</span></div>
-          <p lang="ja">アプリを<strong>開いた瞬間に音声入力が自動で始まる</strong>ので、画面を見ず・触らず、声だけでメモできます。話した内容は<strong>下書きとして端末内に自動保存</strong>され、<strong>Obsidianにはローカルファイルとして保存</strong>。メールはオフラインキューに貯まり、オンライン復帰時に自動送信。だから<strong>電波がない移動中でも、メモは消えません</strong>。</p>
-
-        </div>
-      </section>
-
-      <!-- The 4 pillars -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
-          <span lang="ja">移動中に効く、4つの仕組み</span>
-
-        </h2>
-        <div class="reason-cards">
-          <div class="reason-card">
-            <div class="reason-card__title">🎙️ <span lang="ja">開くだけで自動録音</span></div>
-            <div class="reason-card__desc"><span lang="ja">設定の「<a href="/voice-input/" style="color:var(--accent);">起動時に音声入力を自動オン</a>」で、開いた瞬間に録音開始。マイクを探す手間も画面操作もゼロ。</span></div>
-          </div>
-          <div class="reason-card">
-            <div class="reason-card__title">🎯 <span lang="ja">高精度・オンデバイス音声</span></div>
-            <div class="reason-card__desc"><span lang="ja">Appleの最新オンデバイス音声認識（iOS 26）で精度が高く、外部送信なし・追加料金なし。初回に言語モデルを入れれば<strong>オフラインでも認識</strong>します。</span></div>
-          </div>
-          <div class="reason-card">
-            <div class="reason-card__title">💾 <span lang="ja">下書き自動保存</span></div>
-            <div class="reason-card__desc"><span lang="ja">話したそばから端末内にAES-GCM暗号化で<a href="/guides/draft-autosave/" style="color:var(--accent);">自動保存</a>。アプリが落ちても・中断しても、次に開けば続きから。取りこぼしません。</span></div>
-          </div>
-          <div class="reason-card">
-            <div class="reason-card__title">🟣 <span lang="ja">Obsidianローカル保存（圏外OK）</span></div>
-            <div class="reason-card__desc"><span lang="ja"><a href="/obsidian/" style="color:var(--accent);">Obsidian連携</a>はフォルダ直書き。<strong>ネット接続がなくても</strong>、その場でローカルのノートに追記され、iCloud同期は復帰後に行われます。iPhoneに触れず、AirPodsに話すだけでデイリーノートまで届ける手順は<a href="/obsidian/airpods/" style="color:var(--accent);">AirPods→Obsidianハンズフリー実践</a>にまとめました。</span></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Offline triple-save flow -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
-          <span lang="ja">圏外でも“3重”に残るから、消えない</span>
-
-        </h2>
-        <p class="lp-section__lead">
-          <span lang="ja">トンネル・山道・地下など電波のない場所でも、送信した瞬間にメモは3か所に残ります。後でオンラインに戻れば、メールは自動送信され、Obsidianの内容もiCloudで同期されます。</span>
-
-        </p>
-        <div class="flow-card">
-          <div class="flow-row">
-            <span class="flow-chip">🗣️ <span lang="ja">話す（圏外）</span></span>
-            <span class="flow-arrow">→</span>
-            <span class="flow-chip">💾 <span lang="ja">下書き保存（端末内）</span></span>
-            <span class="flow-arrow">＋</span>
-            <span class="flow-chip">📤 <span lang="ja">Outboxにキュー</span></span>
-            <span class="flow-arrow">＋</span>
-            <span class="flow-chip" style="background:rgba(124,77,255,.12);border-color:rgba(124,77,255,.28);">🟣 <span lang="ja">Obsidianローカル追記</span></span>
-          </div>
-        </div>
-        <div class="tip-box">
-          <div class="tip-box__title"><span lang="ja">プライバシー</span></div>
-          <p lang="ja" style="margin:0;">音声の文字起こしは端末内で完結し、音声もテキストも外部に送りません。下書き・オフラインキュー・送信履歴は端末内でAES-GCM暗号化。メール本文は送信時の通過のみで、当社サーバに恒常保存しません。</p>
-
-        </div>
-      </section>
-
-      <!-- Setup -->
-      <section class="lp-section" id="setup">
-        <h2 class="lp-section__title">
-          <span lang="ja">設定（約2分）</span>
-
-        </h2>
-        <ul lang="ja" class="prereq-list">
-          <li>iPhone（iOS 26以降・音声入力対応機種）</li>
-          <li>Obsidianの保管庫が iCloud Drive 上にある（ローカル保存に使用）</li>
-          <li>初回のみオンライン（言語モデルの取得）</li>
-        </ul>
-
-        <ol lang="ja" class="steps-list">
-          <li><strong>起動時に音声入力を自動オン</strong><br>設定 → 詳細設定 →「起動時に音声入力を自動オン」をオン。以降は開いた瞬間に録音が始まります。</li>
-          <li><strong>Obsidianフォルダを選ぶ</strong><br>詳細設定でObsidian連携をオンにし、iCloud Drive内の保管庫フォルダを選択。ファイル直書きなので圏外でもローカルに保存されます。</li>
-          <li><strong>音声モデルを準備（初回のみ）</strong><br>一度オンラインでマイクをタップして言語モデルを取得。以降は音声認識もオフラインで動きます。</li>
-          <li><strong>ホーム画面/ウィジェットに配置</strong><br>押しやすい位置やウィジェットに置き、最短で起動できるように。</li>
-          <li><strong>開く → 話す → 送信</strong><br>安全な状況で、開いて話すだけ。送信で下書き・Outbox・Obsidianローカルに同時に残ります。</li>
-        </ol>
-
-      </section>
-
-      <!-- Use cases -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
-          <span lang="ja">こんな移動シーンで</span>
-
-        </h2>
-        <div class="reason-cards">
-          <div class="reason-card">
-            <div class="reason-card__title"><span lang="ja">通勤・通学</span></div>
-            <div class="reason-card__desc"><span lang="ja">満員電車やバスで手が使えなくても、声でサッと。<a href="/use-cases/commute/" style="color:var(--accent);">通勤メモ</a>がそのまま受信箱とObsidianに。</span></div>
-          </div>
-          <div class="reason-card">
-            <div class="reason-card__title"><span lang="ja">サイクリング（停車時に）</span></div>
-            <div class="reason-card__desc"><span lang="ja">信号待ちや休憩で安全に止まったとき、開いて一言。走行中の操作は厳禁です。</span></div>
-          </div>
-          <div class="reason-card">
-            <div class="reason-card__title"><span lang="ja">ドライブ（停車・ハンズフリー）</span></div>
-            <div class="reason-card__desc"><span lang="ja">安全に停車してから、または画面を見ない音声のみで。圏外の山道でもローカルに残ります。</span></div>
-          </div>
-          <div class="reason-card">
-            <div class="reason-card__title"><span lang="ja">ランニング・散歩</span></div>
-            <div class="reason-card__desc"><span lang="ja">走りながら浮かんだことを、立ち止まらず声で。あとでObsidianで整理できます。</span></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- FAQ -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
-          <span lang="ja">よくある質問</span>
-
-        </h2>
-        <div lang="ja">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">運転中や自転車の走行中に使ってもいいですか？</summary><div class="faq-answer"><p>運転中・走行中にスマホを手に持つ・通話する・画面を注視する行為は日本の道路交通法で禁止されており危険です（自転車も2024年11月から「ながらスマホ」が罰則対象）。本機能は画面を見ず・触らず音声だけで使える設計ですが、安全のため、①安全な場所に停車してから、②またはハンズフリーで音声のみ（画面を見ない・操作しない）、③同乗者が操作、を必ず守ってください。前方への注意が最優先です。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">電波がない場所（トンネル・山・地下）でも使えますか？</summary><div class="faq-answer"><p>使えます。圏外でも、話した内容は(1)端末内の下書きとして自動保存、(2)メールはオフラインキュー（Outbox）に暗号化して貯まり復帰時に自動送信、(3)Obsidian連携をフォルダ直書きにしていればその場でローカルのノートに追記されます。音声認識も初回に言語モデルを取得しておけばオフラインで動作します。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">開くだけで録音が始まるのはどう設定しますか？</summary><div class="faq-answer"><p>設定の詳細設定にある「起動時に音声入力を自動オン」をオンにします。以降はアプリを開いた瞬間に録音が始まるので、マイクを探したり画面を操作したりする必要がありません（iOS 26以降の対応端末）。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">音声の精度は？追加料金はかかりますか？</summary><div class="faq-answer"><p>Appleの最新オンデバイス音声認識（iOS 26）を使うため精度が高く、文字起こしは端末内で完結します。音声もテキストも外部に送らず、従量課金の外部APIも使わないため追加料金はかかりません。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">言い間違えたり途中で中断しても大丈夫ですか？</summary><div class="faq-answer"><p>大丈夫です。入力中の内容は話すそばから端末内にAES-GCM暗号化で自動保存されるため、アプリが閉じても・落ちても、次に開けば続きから編集できます。送信すると下書きは破棄されます。</p></div></details></div>
-        </div>
-
-      </section>
-
-      <!-- CTA -->
-      <div class="cta-box">
-        <div class="cta-box__title">
-          <span lang="ja">手がふさがっていても、思いつきを逃さない</span>
-
-        </div>
-        <div class="cta-box__desc">
-          <span lang="ja">ダウンロードは無料。音声入力はiOS 26以降の対応端末で。安全運用でお使いください。</span>
-
-        </div>
-        <a data-cta-variant="v1" data-cta-cluster="voice" data-cta-placement="mid" lang="ja" href="https://apps.apple.com/jp/app/id6758438948?ppid=45b35116-b5b3-4b97-9256-0c97289681b6&amp;pt=128498560&amp;ct=jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
-          <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
-        </a>
-
-      </div>
-
-      <!-- Internal Links -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
-          <span lang="ja">関連ページ</span>
-
-        </h2>
-        <div class="internal-links">
-          <a href="/siri/"><span lang="ja">AirPodsから、スマホを触らず送る</span></a>
-          <a href="/fastest-voice-memo/"><span lang="ja">アクションボタンで5秒メモ（おすすめの使い方）</span></a>
-          <a href="/voice-input/"><span lang="ja">音声入力（音声自動入力）</span></a>
-          <a href="/obsidian/"><span lang="ja">Obsidian連携</span></a>
-          <a href="/apple-watch-obsidian/"><span lang="ja">Apple Watch × Obsidian連携</span></a>
-          <a href="/blog/obsidian-voice-input"><span lang="ja">Obsidianに音声入力でメモする方法4選</span></a>
-          <a href="/guides/draft-autosave/"><span lang="ja">下書き自動保存</span></a>
-          <a href="/blog/offline-memo-apps"><span lang="ja">オフライン対応メモアプリ</span></a>
-          <a href="/use-cases/commute/"><span lang="ja">通勤の活用</span></a>
-          <a href="/note-to-email/"><span lang="ja">メモ→メールの仕組み</span></a>
-        </div>
-      </section>
-
-    </div>
-
-<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-  <div class="container">
-  <h2 style="font-size:1.1rem;margin-bottom:1rem;">
-    <span lang="ja">参考文献</span>
-
-  </h2>
-  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
-    <li><a href="https://www.npa.go.jp/bureau/traffic/keitai/info.html" target="_blank" rel="noopener" style="color:var(--accent);">警察庁 — ながら運転の禁止</a> — <span lang="ja">運転中の携帯電話使用等に関する公式情報</span></li>
-    <li><a href="https://developer.apple.com/documentation/speech" target="_blank" rel="noopener" style="color:var(--accent);">Apple — Speech framework</a> — <span lang="ja">オンデバイス音声認識の公式ドキュメント</span></li>
-    <li><a data-cta-variant="v1" data-cta-cluster="voice" data-cta-placement="reference" href="https://apps.apple.com/jp/app/id6758438948" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian連携シンプルメモ — App Store</a> — <span lang="ja">App Storeのダウンロードページ</span></li>
-  </ul>
-  </div>
+<main class="page-content" id="main-content">
+<div class="container">
+<!-- Hero -->
+<div class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy">
+<div class="lp-hero__label">
+<span lang="ja">移動中のハンズフリー音声メモ</span>
+</div>
+<h1 class="lp-hero__title">
+<span lang="ja">移動中も、開くだけで。</span>
+</h1>
+<p class="lp-hero__sub">
+<span lang="ja">手がふさがる通勤・サイクリング・ドライブでも、設定しておけば<strong>開くと録音が始まり</strong>（iOS 26以降の対応端末）、オンデバイスの音声認識で話すだけ。書きかけは<strong>下書きに自動保存</strong>、送信すればObsidianには<strong>ローカル保存</strong>で——<strong>電波がなくても端末に残ります</strong>。アプリを開くときと送るときは画面の操作が要ります。画面に触れずに送りたいときは、Siriの「シンプルメモで残す」を使います（ロック中の設定によっては解除が必要）。</span>
+</p>
+<div class="hero-cta-row" style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+<a aria-label="App Store からダウンロード" class="app-store-badge" data-cta-cluster="voice" data-cta-placement="hero" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=45b35116-b5b3-4b97-9256-0c97289681b6&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8" lang="ja">
+<img alt="App Store からダウンロード" class="badge-img" height="40" loading="eager" src="/assets/img/app-store-badge-ja.svg" width="109"/>
+</a>
+<a class="hero-cta-secondary" href="#setup" style="display:inline-flex;align-items:center;min-height:48px;padding:.6rem 1.1rem;border:1px solid rgba(34,211,238,.3);border-radius:24px;color:#22d3ee;text-decoration:none;font-size:.9rem;">
+<span lang="ja">設定を見る</span>
+</a>
+</div>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
+<span lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a></span>
+</p>
+<a class="ce-read-link" href="#capture-section-1">本文を読む <span aria-hidden="true">↓</span></a></div><nav aria-label="読みたい内容から選ぶ" class="ce-routes"><a class="ce-route" href="#capture-section-1"><span>01</span><b>4つの仕組み</b></a><a class="ce-route" href="#capture-section-2"><span>02</span><b>圏外での保存</b></a><a class="ce-route" href="#capture-section-3"><span>03</span><b>設定を見る</b></a></nav><figure class="ce-stage ce-stage--phone"><p class="ce-stage-label">SIMPLEMEMO / iPHONE</p><div class="ce-device"><img alt="シンプルメモの入力画面。上部に送信、右下に音声入力ボタン。" decoding="async" fetchpriority="high" height="1389" src="/assets/img/obsidian-voice-input/01-compose.webp" width="640"/></div><figcaption class="ce-stage-foot">シンプルメモの実際の入力画面</figcaption></figure></div><div class="ce-article"><details class="ce-index"><summary>このページの目次</summary><nav aria-label="目次"><a href="#capture-section-1">移動中に効く、4つの仕組み</a><a href="#capture-section-2">圏外でも端末に残す</a><a href="#capture-section-3">設定</a><a href="#capture-section-4">こんな移動シーンで</a><a href="#capture-section-5">よくある質問</a><a href="#capture-section-6">関連ページ</a><a href="#capture-section-7">参考文献</a></nav></details>
+<!-- Safety note (prominent, early) -->
+<section class="lp-section" style="padding-top:0;">
+<div class="safety-box">
+<div class="safety-box__title"><span lang="ja">⚠ 安全と法律について（必ずお読みください）</span></div>
+<p lang="ja" style="margin:0;">運転中・走行中に<strong>スマホを手に持つ・通話する・画面を注視する</strong>行為は、日本の道路交通法で禁止されており大変危険です（自転車も2024年11月から「ながらスマホ」が罰則対象）。アプリで録音して送るには、<strong>開くときと送るときに画面の操作が要ります</strong>。安全のため次を必ず守ってください：<strong>①安全な場所に停車してから使う</strong>／<strong>②またはハンズフリー（端末を固定し、画面を見ない・操作しない）で、Siriなど声だけの操作に限る</strong>（解除や画面操作を求められたら停車してから）／<strong>③同乗者が操作する</strong>。前方・周囲への注意が最優先です。</p>
+</div>
 </section>
+<!-- Answer-first -->
+<section class="lp-section" style="padding-top:0;">
+<div class="tip-box" style="font-size:.95rem;">
+<div class="tip-box__title"><span lang="ja">ひとことで言うと</span></div>
+<p lang="ja">設定の「起動時に音声入力を自動オン」をオンにすると、アプリを<strong>開いたときに音声入力が自動で始まる</strong>ので、マイクを探してタップしなくても話し始められます（iOS 26以降の対応端末。開始の表示を確かめてから話します）。話した内容は<strong>下書きとして端末内に自動保存</strong>されます。送信すると<strong>Obsidianにはローカルファイルとして追記</strong>され、メールはオフラインならキューに貯まり、オンライン復帰時に自動送信。だから<strong>電波がない移動中でも、メモは端末に残ります</strong>。</p>
+</div>
+</section>
+<!-- The 4 pillars -->
+<section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="01" id="capture-section-1">
+<span lang="ja">移動中に効く、4つの仕組み</span>
+</h2></div><div class="ce-chapter__body">
+
+<div class="reason-cards">
+<div class="reason-card">
+<div class="reason-card__title">🎙️ <span lang="ja">開くだけで自動録音</span></div>
+<div class="reason-card__desc"><span lang="ja">設定の「<a href="/voice-input/" style="color:var(--accent);">起動時に音声入力を自動オン</a>」で、開くと録音開始。マイクを探してタップする手間がありません。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">🎯 <span lang="ja">オンデバイスの音声認識</span></div>
+<div class="reason-card__desc"><span lang="ja">Appleのオンデバイス音声認識（iOS 26以降）を使い、文字起こしのために音声を外部へ送らず、追加料金もかかりません。初回に言語モデルを入れれば<strong>オフラインでも認識</strong>します。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">💾 <span lang="ja">下書き自動保存</span></div>
+<div class="reason-card__desc"><span lang="ja">話した内容は、変わってから約0.4秒後に端末内へAES-GCM暗号化で<a href="/guides/draft-autosave/" style="color:var(--accent);">自動保存</a>。アプリが落ちても・中断しても、次に開けば最後に保存したところから続けられます。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">🟣 <span lang="ja">Obsidianローカル保存（圏外OK）</span></div>
+<div class="reason-card__desc"><span lang="ja"><a href="/obsidian/" style="color:var(--accent);">Obsidian連携</a>はフォルダ直書き。<strong>ネット接続がなくても</strong>、その場でローカルのノートに追記され、iCloud同期は復帰後に行われます。AirPodsからSiriに話しかけてデイリーノートへ渡す手順（ロック中の条件つき）は<a href="/obsidian/airpods/" style="color:var(--accent);">AirPods→Obsidianハンズフリー実践</a>にまとめました。</span></div>
+</div>
+</div>
+</div></section>
+<!-- Offline triple-save flow -->
+<section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="02" id="capture-section-2">
+<span lang="ja">圏外でも端末に残す</span>
+</h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead">
+<span lang="ja">トンネル・山道・地下など電波のない場所でも、書きかけは下書きとして端末内に残り、送信するとメモはOutboxに入ります（Obsidian連携をフォルダ直書きにしていれば、その場でローカルのノートにも追記）。下書きは送信と同時に消えます。後でオンラインに戻れば、メールは自動送信され、Obsidianの内容もiCloudで同期されます。</span>
+</p>
+<div class="flow-card">
+<div class="flow-row">
+<span class="flow-chip">🗣️ <span lang="ja">話す（圏外）</span></span>
+<span class="flow-arrow">→</span>
+<span class="flow-chip">💾 <span lang="ja">下書き（送信までは端末内）</span></span>
+<span class="flow-arrow">→</span>
+<span class="flow-chip">📤 <span lang="ja">送信でOutboxにキュー</span></span>
+<span class="flow-arrow">＋</span>
+<span class="flow-chip" style="background:rgba(124,77,255,.12);border-color:rgba(124,77,255,.28);">🟣 <span lang="ja">Obsidianローカル追記</span></span>
+</div>
+</div>
+<div class="tip-box">
+<div class="tip-box__title"><span lang="ja">プライバシー</span></div>
+<p lang="ja" style="margin:0;">音声の文字起こしは端末内で完結し、文字起こしのために音声やテキストを外部へ送ることはありません。下書き・オフラインキュー・送信履歴は端末内でAES-GCM暗号化。メール本文は送信時の通過のみで、当社サーバに恒常保存しません。</p>
+</div>
+</div></section>
+<!-- Setup -->
+<section class="lp-section ce-chapter" id="setup"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="03" id="capture-section-3">
+<span lang="ja">設定</span>
+</h2></div><div class="ce-chapter__body">
+
+<ul class="prereq-list" lang="ja">
+<li>iPhone（iOS 26以降・音声入力対応機種）</li>
+<li>Obsidianの保管庫が iCloud Drive か「このiPhone内」にある（ローカル保存に使用）</li>
+<li>初回のみオンライン（言語モデルの取得）</li>
+</ul>
+<ol class="steps-list" lang="ja">
+<li><strong>起動時に音声入力を自動オン</strong><br/>設定 →「音声入力とサウンド」→「起動時に音声入力を自動オン」をオン。以降は開くと録音が始まります。</li>
+<li><strong>Obsidianフォルダを選ぶ</strong><br/>設定の「Obsidian」の欄で「Obsidian 連携」をオンにし、保管庫フォルダ（iCloud Drive か「このiPhone内」）を選択。ファイル直書きなので圏外でもローカルに保存されます。</li>
+<li><strong>音声モデルを準備（初回のみ）</strong><br/>一度オンラインでマイクをタップして言語モデルを取得。以降は音声認識もオフラインで動きます。</li>
+<li><strong>ホーム画面/ウィジェットに配置</strong><br/>押しやすい位置やウィジェットに置き、最短で起動できるように。</li>
+<li><strong>開く → 話す → 送信</strong><br/>安全な状況で、開いて話すだけ。送信するとメモはOutboxに入り（Obsidian連携をオンにしていれば、ローカルのノートにも追記）、下書きは消えます。</li>
+</ol>
+</div></section>
+<!-- Use cases -->
+<section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="04" id="capture-section-4">
+<span lang="ja">こんな移動シーンで</span>
+</h2></div><div class="ce-chapter__body">
+
+<div class="reason-cards">
+<div class="reason-card">
+<div class="reason-card__title"><span lang="ja">通勤・通学</span></div>
+<div class="reason-card__desc"><span lang="ja">満員電車やバスで手が使えなくても、声でサッと。<a href="/use-cases/commute/" style="color:var(--accent);">通勤メモ</a>がそのまま受信箱とObsidianに。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title"><span lang="ja">サイクリング（停車時に）</span></div>
+<div class="reason-card__desc"><span lang="ja">信号待ちや休憩で安全に止まったとき、開いて一言。走行中の操作は厳禁です。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title"><span lang="ja">ドライブ（停車・ハンズフリー）</span></div>
+<div class="reason-card__desc"><span lang="ja">安全に停車してから（または画面を見ずに、Siriの声だけの操作で）。圏外の山道でも、アプリで書いたメモは端末に残ります。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title"><span lang="ja">ランニング・散歩</span></div>
+<div class="reason-card__desc"><span lang="ja">走りながら浮かんだことを、立ち止まらず声で。あとでObsidianで整理できます。</span></div>
+</div>
+</div>
+</div></section>
+<!-- FAQ -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="05" id="capture-section-5">
+<span lang="ja">よくある質問</span>
+</h2></div><div class="ce-chapter__body">
+
+<div lang="ja">
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">運転中や自転車の走行中に使ってもいいですか？</summary><div class="faq-answer"><p>運転中・走行中にスマホを手に持つ・通話する・画面を注視する行為は日本の道路交通法で禁止されており危険です（自転車も2024年11月から「ながらスマホ」が罰則対象）。アプリで録音して送るには、開くときと送るときに画面の操作が要ります。安全のため、①安全な場所に停車してから、②またはハンズフリーでSiriなど声だけの操作に限る（画面を見ない・操作しない。解除や画面操作を求められたら停車してから）、③同乗者が操作、を必ず守ってください。前方への注意が最優先です。</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">電波がない場所（トンネル・山・地下）でも使えますか？</summary><div class="faq-answer"><p>使えます。圏外でも、話した内容は(1)端末内の下書きとして自動保存されます。送信すると、(2)メールはオフラインキュー（Outbox）に暗号化して貯まり復帰時に自動送信、(3)Obsidian連携をフォルダ直書きにしていればその場でローカルのノートに追記されます。音声認識も初回に言語モデルを取得しておけばオフラインで動作します。</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">開くだけで録音が始まるのはどう設定しますか？</summary><div class="faq-answer"><p>設定の「音声入力とサウンド」にある「起動時に音声入力を自動オン」をオンにします。以降はアプリを開くと録音が始まるので、マイクを探してタップする必要はありません（iOS 26以降の対応端末。開始の表示を確かめてから話します）。</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">音声の精度は？追加料金はかかりますか？</summary><div class="faq-answer"><p>Appleのオンデバイス音声認識（iOS 26以降）を使い、文字起こしは端末内で行います。精度は測っておらず、話し方・周りの音・言語で変わるので、送る前に文字を確かめてください。文字起こしのために音声もテキストも外部へ送らず、従量課金の外部APIも使わないため、追加料金はかかりません。</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">言い間違えたり途中で中断しても大丈夫ですか？</summary><div class="faq-answer"><p>大丈夫です。入力中の内容は、変わってから約0.4秒後に端末内へAES-GCM暗号化で自動保存されるため、アプリが閉じても・落ちても、次に開けば最後に保存したところから編集を続けられます。送信すると下書きは破棄されます。</p></div></details></div>
+</div>
+</div></section>
+<!-- CTA -->
+<div class="cta-box">
+<div class="cta-box__title">
+<span lang="ja">手がふさがっていても、思いつきをその場で</span>
+</div>
+<div class="cta-box__desc">
+<span lang="ja">ダウンロードは無料。音声入力はiOS 26以降の対応端末で。安全運用でお使いください。</span>
+</div>
+<a aria-label="App Store からダウンロード" class="app-store-badge" data-cta-cluster="voice" data-cta-placement="mid" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=45b35116-b5b3-4b97-9256-0c97289681b6&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8" lang="ja">
+<img alt="App Store からダウンロード" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-ja.svg" width="109"/>
+</a>
+</div>
+<!-- Internal Links -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="06" id="capture-section-6">
+<span lang="ja">関連ページ</span>
+</h2></div><div class="ce-chapter__body">
+
+<div class="internal-links">
+<a href="/siri/"><span lang="ja">AirPodsから、アプリを開かず送る</span></a>
+<a href="/fastest-voice-memo/"><span lang="ja">アクションボタンで音声メモ（おすすめの使い方）</span></a>
+<a href="/voice-input/"><span lang="ja">音声入力（音声自動入力）</span></a>
+<a href="/obsidian/"><span lang="ja">Obsidian連携</span></a>
+<a href="/apple-watch-obsidian/"><span lang="ja">Apple Watch × Obsidian連携</span></a>
+<a href="/blog/obsidian-voice-input"><span lang="ja">Obsidianに音声入力でメモする方法4選</span></a>
+<a href="/guides/draft-autosave/"><span lang="ja">下書き自動保存</span></a>
+<a href="/blog/offline-memo-apps"><span lang="ja">オフライン対応メモアプリ</span></a>
+<a href="/use-cases/commute/"><span lang="ja">通勤の活用</span></a>
+<a href="/note-to-email/"><span lang="ja">メモ→メールの仕組み</span></a>
+</div>
+</div></section>
+<section class="references ce-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);"><div class="ce-chapter__head"><h2 data-ce-number="07" id="capture-section-7" style="font-size:1.1rem;margin-bottom:1rem;">
+<span lang="ja">参考文献</span>
+</h2></div><div class="ce-chapter__body">
+
+
+<ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+<li><a href="https://www.npa.go.jp/bureau/traffic/keitai/info.html" rel="noopener" style="color:var(--accent);" target="_blank">警察庁 — ながら運転の禁止</a> — <span lang="ja">運転中の携帯電話使用等に関する公式情報</span></li>
+<li><a href="https://developer.apple.com/documentation/speech" rel="noopener" style="color:var(--accent);" target="_blank">Apple — Speech framework</a> — <span lang="ja">オンデバイス音声認識の公式ドキュメント</span></li>
+<li><a data-cta-cluster="voice" data-cta-placement="reference" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948" rel="noopener" style="color:var(--accent);" target="_blank">Obsidian連携シンプルメモ — App Store</a> — <span lang="ja">App Storeのダウンロードページ</span></li>
+</ul>
+
+</div></section><aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="feature" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
+<span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
+<span lang="ja">次に読む</span>
+</span>
+<span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
+<span lang="ja">声で残したメモの、行き先を決める</span>
+</span>
+<span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
+<span lang="ja">iPhoneで連携と保存先を設定すると、音声メモをメールとObsidianに残せます。</span>
+</span>
+</a>
+</aside><section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+
+<h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
+<span lang="ja">関連コンテンツ</span>
+</h3>
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/voice-input/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">音声入力</span></a></li>
+<li><a href="/use-cases/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">活用事例</span></a></li>
+<li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">設定ガイド</span></a></li>
+<li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">FAQ</span></a></li>
+</ul>
+
+</section></div></div>
 
 <!-- SEO: Auto-generated related content links -->
-  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
        Exactly one destination per page. Adding a second defeats the purpose: the page
        already offers dozens of links and none of them gets clicked. -->
-  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
-    <a data-next-step="feature" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
-      <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
-        <span lang="ja">次に読む</span>
-      </span>
-      <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
-        <span lang="ja">声で残したメモの、行き先を決める</span>
-      </span>
-      <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
-        <span lang="ja">iPhoneで連携と保存先を設定すると、音声メモをメールとObsidianに残せます。</span>
-      </span>
-    </a>
-  </aside>
 
-<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
-  <div class="container">
-  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
-    <span lang="ja">関連コンテンツ</span>
 
-  </h3>
-  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
-    <li><a href="/voice-input/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">音声入力</span></a></li>
-    <li><a href="/use-cases/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">活用事例</span></a></li>
-    <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">設定ガイド</span></a></li>
-    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">FAQ</span></a></li>
-  </ul>
-  </div>
-</section>
 </main>
 
-  <footer class="footer">
-    <div class="container">
-      <nav class="footer__nav" aria-label="Footer navigation">
-      <div class="footer__col">
-        <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
-        <a href="/" class="footer__link"><span lang="ja">ホーム</span></a>
-        <a href="/voice-input/" class="footer__link"><span lang="ja">音声入力</span></a>
-        <a href="/obsidian/" class="footer__link"><span lang="ja">Obsidian連携</span></a>
-        <a href="/use-cases/" class="footer__link"><span lang="ja">使い方</span></a>
-        <a href="/guides/" class="footer__link"><span lang="ja">設定ガイド</span></a>
-      </div>
-      <div class="footer__col">
-        <p class="footer__col-title">比較・乗り換え</p>
-        <a href="/note-to-email/" class="footer__link"><span lang="ja">メモ→メール</span></a>
-      </div>
-      <div class="footer__col">
-        <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span lang="ja">公開ロードマップ</span></a>
-        <a href="/devlog/" class="footer__link"><span lang="ja">開発記録</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
-        <a href="/faq" class="footer__link"><span lang="ja">FAQ</span></a>
-        <a href="/privacy" class="footer__link"><span lang="ja">プライバシー</span></a>
-        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span></a>
-      </div>
-      </nav>
-      <p class="footer__copyright">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ja" dir="ltr"><a class="site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a><div><p class="site-footer-title">思いついたことを、次の一歩へ。</p><p class="site-footer-description">Obsidianとメールに、メモを送るiPhoneアプリ。</p></div></div><!-- /site-chrome:intro -->
+<div class="container">
+<nav aria-label="Footer navigation" class="footer__nav">
+<div class="footer__col">
+<p class="footer__col-title">プロダクト</p>
+<a class="footer__link" href="/download/">ダウンロード</a>
+<a class="footer__link" href="/">ホーム</a>
+<a class="footer__link" href="/voice-input/"><span lang="ja">音声入力</span></a>
+<a class="footer__link" href="/obsidian/">Obsidian連携</a>
+<a class="footer__link" href="/use-cases/">活用事例</a>
+<a class="footer__link" href="/guides/">使い方</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">比較・乗り換え</p>
+<a class="footer__link" href="/note-to-email/">メモをメールへ</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">サポート</p>
+<a class="footer__link" href="/roadmap/">公開ロードマップ</a>
+<a class="footer__link" href="/devlog/">開発記録</a>
+<a class="footer__link" href="/about/">開発者について</a>
+<a class="footer__link" href="/faq">よくある質問</a>
+<a class="footer__link" href="/privacy">プライバシー</a>
+<a class="footer__link" href="/contact">お問い合わせ</a>
+</div>
+</nav>
+<p class="footer__copyright">
         © 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ
       </p>
-    </div>
-  </footer>
+</div>
+</footer>
 
-  <script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

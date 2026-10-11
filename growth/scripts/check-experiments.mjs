@@ -33,6 +33,7 @@
 import { run as runScenarios } from '../../scripts/lib/selftest.mjs';
 import fs from 'node:fs';
 import { loadLedger, validate, summarize, daysOverdue, today, DECISIONS } from '../lib/ledger.mjs';
+import { classifyDueOwnership } from '../lib/experiment-coexistence.mjs';
 
 const strict = process.argv.includes('--strict');
 const asOf = today();
@@ -136,6 +137,8 @@ if (problems.length) {
 }
 
 const { total, open, due, overdue } = summarize(ledger, asOf);
+const { blocking, observations } = classifyDueOwnership(due);
+const observationIds = new Set(observations.map((e) => e.id));
 console.log(`Experiment ledger: ${total} total, ${open} open, ${due.length} due, ${overdue.length} overdue (as of ${asOf})`);
 
 if (!due.length) {
@@ -149,12 +152,14 @@ const rows = due
 
 for (const { e, d } of rows) {
   const label = d > 0 ? `${d} day(s) OVERDUE` : 'due today';
-  console.log(`  ${label.padEnd(18)} ${e.id}  ${e.page}  (${e.type}, evaluation_at ${e.evaluation_at})`);
+  const observational = observationIds.has(e.id);
+  console.log(`  ${label.padEnd(18)} ${e.id}  ${e.page}  (${e.type}, ${observational ? 'nonexclusive observation' : 'exclusive'}, evaluation_at ${e.evaluation_at})`);
   // Annotation text is single-line by contract; GitHub renders \n as a literal.
   console.log(
     `::warning file=growth/experiments/experiments.json::${e.id} (${e.page}) is ${label}. ` +
-    `Evaluate with: node growth/scripts/experiments.mjs evaluate ${e.id} --decision <${DECISIONS.join('|')}>. ` +
-    'Select --snapshot and --note for GSC, or --review for other metrics/diagnosis; see growth/EXPERIMENT_EVIDENCE.md.'
+    (observational ? 'Approved nonexclusive observation: review its registered metric and minimum sample; no blanket page freeze or isolated causal claim. '
+      : `Exclusive scope: review before another change; evaluate with --decision <${DECISIONS.join('|')}> only when evidence qualifies. `) +
+    'Use --snapshot and --note only for eligible single-page or exact query-page GSC CTR/position/impressions; use --review for other scopes, metrics and diagnostics. See growth/EXPERIMENT_EVIDENCE.md.'
   );
 }
 
@@ -162,18 +167,18 @@ if (process.env.GITHUB_STEP_SUMMARY) {
   const md = [
     `### ⏰ ${rows.length} experiment(s) awaiting a decision`,
     '',
-    '| Days overdue | Experiment | Page | Evaluation date |',
-    '|---:|---|---|---|',
-    ...rows.map(({ e, d }) => `| ${d} | \`${e.id}\` | \`${e.page}\` | ${e.evaluation_at} |`),
+    '| Days overdue | Experiment | Page | Evaluation date | Ownership |',
+    '|---:|---|---|---|---|',
+    ...rows.map(({ e, d }) => `| ${d} | \`${e.id}\` | \`${e.page}\` | ${e.evaluation_at} | ${observationIds.has(e.id) ? 'nonexclusive observation' : 'exclusive'} |`),
     '',
-    'These pages stay frozen — do not stack a new title change on top of an unevaluated one.',
+    ...(blocking.length ? ['Exclusive scopes stay frozen until an evidence-based decision is recorded.'] : []),
+    ...(observations.length ? ['Approved nonexclusive observations remain due but do not freeze other page work. Check the registered metric and minimum sample before any outcome.'] : []),
     '',
     '```sh',
     'node growth/scripts/experiments.mjs due',
-    'node growth/scripts/experiments.mjs evaluate <id> --decision keep --snapshot <label> --note "comparison and limitations"',
     '```',
     '',
-    'Other metrics and measurement diagnostics use an explicit `--review` file. See [evidence requirements](growth/EXPERIMENT_EVIDENCE.md).',
+    'Only eligible single-page or exact query-page GSC CTR/position/impressions use a comparable explicit `--snapshot`; other scopes, metrics and diagnostics require a source-specific `--review` file. See [evidence requirements](growth/EXPERIMENT_EVIDENCE.md).',
   ].join('\n');
   fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md + '\n');
 }

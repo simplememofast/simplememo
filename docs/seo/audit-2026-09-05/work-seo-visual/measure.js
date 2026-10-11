@@ -1,6 +1,6 @@
-const { chromium } = require('/Users/hajimeataka/simplememo/node_modules/playwright');
+const { chromium } = require('/Users/<user>/simplememo/node_modules/playwright');
 const fs = require('fs');
-const OUT = '/private/tmp/claude-501/-Users-hajimeataka-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad/work-seo-visual';
+const OUT = '/private/tmp/claude-501/-Users-<user>-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad/work-seo-visual';
 const BASE = 'https://simplememofast.com';
 const PAGES = ['/', '/en/', '/autopilot/', '/obsidian/', '/obsidian/plugins/', '/obsidian/getting-started/',
   '/blog/best-memo-apps-2026', '/blog/line-keep-alternative', '/vs/notion/', '/vs/', '/apple-watch/',

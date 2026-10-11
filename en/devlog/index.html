@@ -8,23 +8,23 @@
 <meta content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/" name="apple-itunes-app"/>
 <!-- Google tag (gtag.js) -->
 <script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
     window.addEventListener('load', function() {
-      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
       var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
       ric(function() {
         var s = document.createElement('script');
         s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
         s.async = true;
         document.head.appendChild(s);
-        s.onload = function() {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
-        };
       });
     });
-  </script>
+  })();
+</script>
 <title>Dev Log | Simple Memo - for Obsidian</title>
 <meta content="Development diary of Simple Memo - for Obsidian. Technical decisions behind recreating the Captio experience: UIKit architecture, Outbox pattern…" name="description"/>
 <meta content="#070b14" name="theme-color"/>
@@ -221,33 +221,46 @@
   <link rel="canonical" href="https://simplememofast.com/en/devlog/">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/">
   <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/">
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/">
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
-<nav aria-label="Main navigation" class="global-nav">
+<nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
-<a class="global-nav__logo" href="/en/">
-<img alt="Simple Memo - for Obsidian" height="28" loading="eager" src="/assets/img/app-icon-56.png" width="28"/><span lang="en">Simple Memo - for Obsidian</span></a>
-<ul class="global-nav__links" id="navLinks">
-<li><a href="/en/guides/"><span lang="en">Guides</span></a></li>
-<li><a href="/en/use-cases/"><span lang="en">Use Cases</span></a></li>
-<li><a href="/en/vs/"><span lang="en">Compare</span></a></li>
+<a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/">Guides</a><a href="/en/use-cases/">Use cases</a><a href="/en/vs/">Compare</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+<li><a href="/en/guides/">Guides</a></li>
+<li><a href="/en/use-cases/">Use cases</a></li>
+<li><a href="/en/vs/">Compare</a></li>
 <li><a href="/en/methods/"><span lang="en">Methods</span></a></li>
 <li><a href="/en/blog/"><span lang="en">Blog</span></a></li>
 <li><a href="/en/glossary/"><span lang="en">Glossary</span></a></li>
-<li><a href="/en/faq"><span lang="en">FAQ</span></a></li>
-<li><a href="/en/about/"><span lang="en">About</span></a></li>
-<li><a href="/en/devlog/"><span lang="en">Dev Log</span></a></li>
-<li class="nav-cta-mobile"><a data-cta-cluster="other" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8"><span lang="en">Download</span></a></li>
+<li><a href="/en/faq">FAQ</a></li>
+<li><a href="/en/about/">About the developer</a></li>
+<li><a href="/en/devlog/">Development log</a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="other" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span lang="en">Download</span></a></li>
 </ul>
-<div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn" href="/devlog/" hreflang="ja" aria-label="日本語" style="text-decoration:none">JA</a><a class="lang-switcher__btn active" href="/en/devlog/" hreflang="en" aria-label="Switch to English" aria-current="page" style="text-decoration:none">EN</a></div>
-<a class="global-nav__cta" data-cta-cluster="other" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8">
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="English · Choose a language"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>EN</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="en" dir="ltr"><p class="site-language-title">Choose a language</p><div class="site-language-grid"><a href="/devlog/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="en" aria-current="page"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh/devlog/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/devlog/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/devlog/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/devlog/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/devlog/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/devlog/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/devlog/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/devlog/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+<a class="global-nav__cta" data-cta-cluster="other" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">
 <span lang="en">Download</span>
 </a>
-<button aria-controls="navLinks" aria-expanded="false" aria-label="Menu" class="global-nav__hamburger" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
 </div>
 </div>
 </nav>
@@ -255,7 +268,7 @@
 
 <main class="page-content">
 <div class="container">
-<h1 class="page-content__title">
+<h1 class="page-content__title sd-title">
 
 <span lang="en">Dev Log</span>
 </h1>
@@ -273,7 +286,7 @@
 <a class="article-card" href="/en/devlog/day1">
 <div class="article-card__date">February 13, 2026</div>
 <div class="article-card__title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
-<div class="article-card__excerpt">Launch in ~1s, send with one tap, zero message loss. Dissecting the Captio experience and documenting every technical decision: UIKit, Outbox architecture, Relay API, and privacy-first design.</div>
+<div class="article-card__excerpt">Send with one tap and keep unsent notes for retry. Dissecting the Captio experience and documenting every technical decision: UIKit, Outbox architecture, Relay API, and privacy-first design.</div>
 <div class="article-card__tags">
 <span class="article-card__tag">UIKit</span>
 <span class="article-card__tag">Outbox</span>
@@ -286,7 +299,7 @@
 </div>
 <!-- Topic Deep Dives -->
 <div class="topic-section">
-<h2>
+<h2 id="reading-01" data-ce-number="01">
 
 <span lang="en">Technical Deep Dives</span>
 </h2>
@@ -295,15 +308,15 @@
 <div class="topic-grid">
 <a class="topic-card" href="/en/devlog/uikit-vs-swiftui">
 <div class="topic-card__title">UIKit vs SwiftUI: Choosing for Launch Speed</div>
-<div class="topic-card__desc">Why UIKit in 2026. Architecture design to achieve Time-to-Text under 500ms.</div>
+<div class="topic-card__desc">Why UIKit in 2026. Architecture designed around a Time-to-Text target under 500ms.</div>
 </a>
 <a class="topic-card" href="/en/devlog/outbox-architecture">
-<div class="topic-card__title">Outbox Architecture: Zero Message Loss</div>
-<div class="topic-card__desc">Instant UI clear on send, but messages never lost. The full AES-GCM encrypted Outbox pattern.</div>
+<div class="topic-card__title">Outbox Architecture: Designing Against Message Loss</div>
+<div class="topic-card__desc">Instant UI clear on send, with unsent messages kept and retried. The full AES-GCM encrypted Outbox pattern.</div>
 </a>
 <a class="topic-card" href="/en/devlog/relay-api-design">
 <div class="topic-card__title">Relay API: Email Infrastructure on Cloudflare Workers</div>
-<div class="topic-card__desc">Breaking free from external email API dependency. Edge computing for global email delivery in milliseconds.</div>
+<div class="topic-card__desc">Sending without mailbox OAuth: a relay API on the edge (Cloudflare Workers) that sends through Resend.</div>
 </a>
 <a class="topic-card" href="/en/devlog/privacy-first-design">
 <div class="topic-card__title">Privacy-First Design: Obsessive Attention to Detail</div>
@@ -330,46 +343,41 @@
 </a>
 </aside>
 </main>
-<footer class="footer">
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro -->
 <div class="container">
 <nav aria-label="Footer navigation" class="footer__nav">
 <div class="footer__col">
 <p class="footer__col-title">Product</p>
-<a class="footer__link" href="/en/download/"><span lang="en">Download</span></a>
-<a class="footer__link" href="/en/"> <span lang="en">Home</span></a>
+<a class="footer__link" href="/en/download/">Download</a>
+<a class="footer__link" href="/en/">Home</a>
 <a class="footer__link" href="/en/how-to/"> <span lang="en">How to Use</span></a>
 <a class="footer__link" href="/en/templates/"> <span lang="en">Templates</span></a>
 </div>
 <div class="footer__col">
 <p class="footer__col-title">Compare & Switch</p>
-<a class="footer__link" href="/captio/"> <span lang="en">Captio Method</span></a>
+<a class="footer__link" href="/en/captio/"> <span lang="en">Captio Method</span></a>
 </div>
 <div class="footer__col">
 <p class="footer__col-title">Learn</p>
-<a class="footer__link" href="/en/devlog/"> <span lang="en">Dev Log</span></a>
+<a class="footer__link" href="/en/devlog/">Development log</a>
 <a class="footer__link" href="/en/autopilot/"> <span lang="en">How this app is run</span></a>
 </div>
 <div class="footer__col">
 <p class="footer__col-title">Support</p>
-<a class="footer__link" href="/en/roadmap/"><span lang="en">Public roadmap</span></a>
-<a class="footer__link" href="/en/about/"><span lang="en">About the developer</span></a>
+<a class="footer__link" href="/en/roadmap/">Public roadmap</a>
+<a class="footer__link" href="/en/about/">About the developer</a>
 <a class="footer__link" href="/en/terms"> <span lang="en">Terms</span></a>
-<a class="footer__link" href="/en/privacy"> <span lang="en">Privacy</span></a>
-<a class="footer__link" href="/en/contact"> <span lang="en">Contact</span></a>
+<a class="footer__link" href="/en/privacy">Privacy</a>
+<a class="footer__link" href="/en/contact">Contact</a>
 </div>
 </nav>
 <p class="footer__copyright">
-        © 2026 Simple Memo - for Obsidian / Yurika Inc.
+        © 2026 Simple Memo - for Obsidian / YURIKA, K.K.
       </p>
 </div>
 </footer>
 
-<script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
 <script defer="" src="/js/app-store-tracking.js?v=fd48cabcf6"></script>
 </body>
 </html>

@@ -26,7 +26,7 @@ import { readJSON } from './lib/read-json.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-const pct = (n, digits = 1) => `${(n * 100).toFixed(digits)}`;
+const pct = (n, digits = 1) => Number.isFinite(n) ? `${(n * 100).toFixed(digits)}` : '未観測';
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 // ── 台帳 ───────────────────────────────────────────────
@@ -80,11 +80,11 @@ function panel({ title, lede = '', body, source = '', state = '' }) {
 
 /** 横棒。分母と分子を必ず併記する（率だけ出さない）。 */
 function bar(label, value, detail, state = '') {
-  const w = Math.max(0, Math.min(100, value * 100));
-  return `<div class="bar${state ? ` is-${state}` : ''}">
+  const known = Number.isFinite(value), w = known ? Math.max(0, Math.min(100, value * 100)) : null;
+  return `<div class="bar${known ? state ? ` is-${state}` : '' : ' is-unknown'}">
     <div class="bar__label">${esc(label)}</div>
-    <div class="bar__track"><div class="bar__fill" style="width:${w.toFixed(1)}%"></div></div>
-    <div class="bar__value">${pct(value)}<span class="bar__pct">%</span></div>
+    <div class="bar__track">${known ? `<div class="bar__fill" style="width:${w.toFixed(1)}%"></div>` : ''}</div>
+    <div class="bar__value">${pct(value)}${known ? '<span class="bar__pct">%</span>' : ''}</div>
     <div class="bar__detail">${esc(detail)}</div>
   </div>`;
 }
@@ -123,29 +123,30 @@ const areaPanel = panel({
 });
 
 const autonomy = panel({
-  title: '成果物の自律性',
-  lede: 'ここが<strong>この運営で一番強い数字</strong>で、他の率とは物差しが違う。'
-      + '「何件のタスクを自動化したか」ではなく<strong>「出したものに人が手を入れたか」</strong>。',
+  title: '成果物への介入記録',
+  lede: '出荷した成果物の介入記録を集計する。タスクの自動化率とは別の物差し。',
   body: `<div class="readouts readouts--two">
-    ${readout({ label: '成果物のAI自律率', value: pct(runs.artifact_autonomy_rate), note: `出荷 ${runs.totals.shipped} 件のうち、人が中身に触っていない割合`, state: 'ok' })}
+    ${readout({ label: '成果物の記録上AI自律率', value: pct(runs.artifact_autonomy_rate),
+      unit: Number.isFinite(runs.artifact_autonomy_rate) ? '%' : '',
+      note: `出荷 ${runs.totals.shipped} 件の介入記録に基づく。未観測 ${runs.intervention_observation.shipped.unknown_runs} 件`,
+      state: Number.isFinite(runs.artifact_autonomy_rate) ? 'ok' : 'unknown' })}
     ${readout({ label: '変更行のAI比率', value: '94.2', note: '開発領域のみ。別の物差しなので他領域と足さない（data/code-authorship.json の実測）', state: 'ok' })}
   </div>
-  <p class="panel__foot">人間の介入は <strong>${pct(runs.human_intervention_rate)}%</strong> あるが、
-  内訳を開くと<strong>成果物への介入は0件</strong>。人がやっていたのは基盤の修理と起動で、
-  出したものの中身には一度も触っていない。
-  <strong>${pct(runs.human_intervention_rate)}% を隠して100%だけを出さない</strong>ため、両方を並べる。</p>`,
+  <p class="panel__foot">記録上の人間介入率は <strong>${pct(runs.human_intervention_rate)}${Number.isFinite(runs.human_intervention_rate) ? '%' : ''}</strong>。
+  成果物への介入は記録済み ${runs.intervention_by_kind.artifact.runs} 実行、
+  着手した実行の介入記録は未観測 ${runs.intervention_observation.attempted.unknown_runs} 件。
+  空配列は記録上ゼロであり、すべての人介入を観測したことや実際のzero-touch完遂を証明しない。</p>`,
   source: 'data/autopilot-runs.json · scripts/autopilot-runs.mjs',
 });
 
 const KIND_JA = { artifact: '成果物への介入', infra: '基盤の修理', substitute: '代走', bootstrap: '立ち上げ', request: '起票のみ' };
 const KIND_NOTE = { artifact: 'AIの自律性の中核', infra: '', substitute: '', bootstrap: '一度きり', request: '未実行' };
 const interventions = panel({
-  title: `人間介入の内訳 — 合計 ${pct(runs.human_intervention_rate)}%`,
-  lede: '<strong>合計だけでは何も分からない。</strong>「半分は人がやっている」と読めてしまうが、'
-      + '実際に人が触っていたのは基盤と起動だけである。',
+  title: `人間介入の記録 — 総率 ${pct(runs.human_intervention_rate)}${Number.isFinite(runs.human_intervention_rate) ? '%' : ''}`,
+  lede: '確認できた介入記録を種類ごとに集計する。未観測の実行が混ざる総率は未観測として示す。',
   body: `<div class="bars">${Object.entries(runs.intervention_by_kind).map(([kind, v]) => bar(
     KIND_JA[kind] ?? kind, v.rate,
-    `${v.runs} 実行${KIND_NOTE[kind] ? ` · ${KIND_NOTE[kind]}` : ''}`,
+    `記録済み ${v.runs} 実行 / 未観測 ${v.unknown_runs} 実行${KIND_NOTE[kind] ? ` · ${KIND_NOTE[kind]}` : ''}`,
     kind === 'artifact' ? 'ok' : 'warn'
   )).join('')}</div>`,
   source: 'data/autopilot-runs.json · intervention_by_kind',
@@ -427,5 +428,5 @@ const out = outIdx >= 0 ? argv[outIdx + 1] : path.join(ROOT, 'build/dashboard.ht
 fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, html);
 console.log(`運営ダッシュボードを生成: ${out}`);
-console.log(`  総合自動化率 ${pct(o.overall_automation_rate)}% / 成果物のAI自律率 ${pct(runs.artifact_autonomy_rate)}%`);
+console.log(`  総合自動化率 ${pct(o.overall_automation_rate)}% / 成果物の記録上AI自律率 ${pct(runs.artifact_autonomy_rate)}${Number.isFinite(runs.artifact_autonomy_rate) ? '%' : ''}`);
 console.log(`  測れていないもの ${UNKNOWNS.length} 件を明示`);

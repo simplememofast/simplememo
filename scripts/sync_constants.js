@@ -17,6 +17,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { walkHtmlFiles } = require('./lib/site-files');
 
 const ROOT = path.resolve(__dirname, '..');
 const C = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/site-constants.json'), 'utf8'));
@@ -28,7 +29,7 @@ const C = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/site-constants.json')
 const OWN_VALUE_PAGES = new Set([
   // /download/ shows the rating and the price table and names no competitor,
   // so every number on it is ours and belongs under enforcement.
-  'download/index.html',
+  'download/index.html', 'en/download/index.html',
   // Both show our rating in a hero block (visible text + aria-label) and
   // neither quotes a competitor's rating or price, so free-text enforcement
   // is safe here. Until 2026-08-12 they were outside it, and both still read
@@ -36,20 +37,21 @@ const OWN_VALUE_PAGES = new Set([
   // own JSON-LD.
   'ai-tags/index.html', 'en/ai-tags/index.html',
   'captio-alternative/index.html', 'en/captio-alternative/index.html',
-  'index.html', 'en/index.html', 'voices/index.html',
+  'index.html', 'en/index.html', 'voices/index.html', 'en/voices/index.html',
   'ar/index.html', 'es/index.html', 'id/index.html', 'ko/index.html',
   'pt-BR/index.html', 'tr/index.html', 'zh/index.html', 'zh-Hant/index.html',
 ]);
 
 // [description, regex, canonicalReplacement, needsBrandContext]
 const RULES = [
-  // JSON-LD: our own offers — always authoritative
+  // Legacy price patterns support original isolated RULE tests only.
+  // Actual JSON-LD pricing requires admitted direct own-app offers and currency.
   ['JSON-LD monthly offer price',
     /("name":\s?"Premium Monthly"[^}]{0,400}?"price":\s?")(\d+)(")/gs,
-    (m, a, v, b) => a + C.priceMonthlyJpy + b, false],
+    (m, a, v, b) => a + C.priceMonthlyJpy + b, 'app-price-monthly'],
   ['JSON-LD yearly offer price',
     /("name":\s?"Premium Yearly"[^}]{0,400}?"price":\s?")(\d+)(")/gs,
-    (m, a, v, b) => a + C.priceYearlyJpy.replace(',', '') + b, false],
+    (m, a, v, b) => a + C.priceYearlyJpy.replace(',', '') + b, 'app-price-yearly'],
   // JSON-LD aggregateRating on our own app node.
   //
   // Anchored on the `#app` @id, not on the shape of the aggregateRating,
@@ -77,7 +79,7 @@ const RULES = [
   // two of the blocks ship minified.
   ['JSON-LD aggregateRating on #app',
     /("@id":\s?"https:\/\/simplememofast\.com\/#app"(?:(?!"@type":\s?"SoftwareApplication")[\s\S]){0,4000}?"aggregateRating"[\s\S]{0,120}?"ratingValue":\s?")(\d\.\d)("[\s\S]{0,200}?"ratingCount":\s?")(\d+)(")/g,
-    (m, a, rv, b, rc, c) => a + C.ratingValue + b + C.ratingCount + c, false],
+    (m, a, rv, b, rc, c) => a + C.ratingValue + b + C.ratingCount + c, 'app-rating'],
   // Visible rating pairs (value + count in one phrase), ours only
   // mid part may cross inline tags (<strong>4.4</strong> … 10件の評価)
   ['rating pair JA 「4.4…10件の評価」',
@@ -86,6 +88,9 @@ const RULES = [
   ['rating pair EN "4.4 … 10 ratings"',
     /(\d\.\d)((?:[^{}\d]|<[^>]+>|\d(?! ratings)){0,90}?)(\d+)( ratings\b)/g,
     (m, v, mid, n, tail) => C.ratingValue + mid + C.ratingCount + tail, 'own'],
+  ['rating pair JA compact summary',
+    /(★\s*)(\d\.\d)(\s*[・·]\s*)(\d+)(件)(?=[）)])/g,
+    (m, star, value, middle, count, label) => star + C.ratingValue + middle + C.ratingCount + label, 'own'],
   // Localized hero ratings use the same source as JSON-LD. Keep the star
   // and translated count label intact, and retain the own-page boundary.
   ['rating pair localized hero',
@@ -111,7 +116,7 @@ const RULES = [
   // drift further. It is one field in site-constants.json now.
   ['JSON-LD softwareVersion',
     /("softwareVersion":\s?")([^"]+)(")/g,
-    (m, a, v, b) => a + C.appVersion + b, false],
+    (m, a, v, b) => a + C.appVersion + b, 'app-version'],
   // © line — unified string, unambiguous
   ['© line',
     /((?:©|&copy;)\s?2026[^<\n]{0,200})(?=<\/p>|\n|<\/div>)/g,
@@ -126,37 +131,24 @@ const RULES = [
  * saying nothing. Its own instruction ("Do NOT infer or extrapolate … version
  * numbers beyond these published values") is what gives the wrong number teeth.
  */
-/**
- * 「as of」の日付は、**この行が名乗る事実のうち最も古い確認日**にする。
- *
- * 2026-08-22、5.8.1 の反映でこの穴が実際に出た: version だけを書き換える
- * 規則だったので、リリース当日に llms.txt が
- *   「**Current facts (as of 2026-08-09):** version 5.8.1」
- * になった。**リリースの13日前に 5.8.1 が現行だったと名乗る**形で、
- * この文書の冒頭が警告している「権威ありげな誤情報」そのもの。
- *
- * 今日の日付にはしない。この行はバージョンだけでなく評価・価格も名乗るので、
- * **一番古い事実より新しい鮮度を主張できない。**（評価が10日前なら、
- * バージョンを今日更新しても、この行全体としては10日前が正しい）
- */
-function stampDate(c = C) {
-  const dates = [c.appVersionNote, c.ratingNote, c.priceNote]
-    .map((n) => {
-      const all = [...String(n || '').matchAll(/(\d{4}-\d{2}-\d{2})/g)].map((m) => m[1]).sort();
-      return all.length ? all[all.length - 1] : null;
-    })
-    .filter(Boolean)
-    .sort();
-  return dates.length ? dates[0] : null;
+// Each published fact carries its own verification date. A shared "as of"
+// date can predate a newly released version when the price was checked earlier.
+function latestDate(note) {
+  const dates = [...String(note || '').matchAll(/(\d{4}-\d{2}-\d{2})/g)]
+    .map((m) => m[1]).sort();
+  return dates.at(-1) || null;
 }
 
 const LLMS_RULES = [
-  ['llms.txt Current facts version',
-    /(\*\*Current facts \(as of )(\d{4}-\d{2}-\d{2})(\):\*\* version )([0-9][0-9.]*)/,
-    (m, a, d, b, v) => a + (stampDate() || d) + b + C.appVersion],
-  ['llms.txt rating',
-    /(App Store rating )(\d\.\d)( \()(\d+)( ratings\))/,
-    (m, a, rv, b, rc, c) => a + C.ratingValue + b + C.ratingCount + c],
+  ['llms.txt public version and verification date',
+    /(Japan App Store version )([0-9][0-9.]*)( \(verified )(\d{4}-\d{2}-\d{2})(\))/,
+    (m, a, v, b, date, c) => a + C.appVersion + b + (latestDate(C.appVersionNote) || date) + c],
+  ['llms.txt rating and verification date',
+    /(Japan App Store rating )(\d\.\d)( \()(\d+)( ratings; verified )(\d{4}-\d{2}-\d{2})(\))/,
+    (m, a, rv, b, rc, c, date, d) => a + C.ratingValue + b + C.ratingCount + c + (latestDate(C.ratingNote) || date) + d],
+  ['llms.txt Japan prices and confirmation date',
+    /(Premium ¥)(\d+)(\/mo or ¥)([\d,]+)(\/yr \(owner-confirmed )(\d{4}-\d{2}-\d{2})(\))/,
+    (m, a, monthly, b, yearly, c, date, d) => a + C.priceMonthlyJpy + b + C.priceYearlyJpy + c + (latestDate(C.priceNote) || date) + d],
 ];
 
 const args = new Set(process.argv.slice(2));
@@ -168,12 +160,7 @@ if (!WRITE && !args.has('--check') && !SELFTEST) {
 }
 
 function* htmlFiles(dir) {
-  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (e.name === 'node_modules' || e.name.startsWith('.')) continue;
-    const p = path.join(dir, e.name);
-    if (e.isDirectory()) yield* htmlFiles(p);
-    else if (e.name.endsWith('.html')) yield p;
-  }
+  yield* walkHtmlFiles(dir, { skipDirs: ['node_modules'], tolerateReadErrors: false });
 }
 
 /**
@@ -229,19 +216,19 @@ if (SELFTEST) {
   t('見える評価の対（値と件数）を同時に直す',
     pair.includes(String(C.ratingValue)) && pair.includes(`${C.ratingCount}件の評価`));
 
-  // --- 鮮度の日付。**一番古い事実より新しい鮮度を主張しない。** ---
-  // 実際に起きた形: 版だけ新しい日付にしたら「リリースの13日前に 5.8.1 が現行」と名乗った。
-  t('3つの注記のうち一番古い日付を採る',
-    stampDate({ appVersionNote: '2026-09-01', ratingNote: '2026-08-20', priceNote: '2026-08-25' }) === '2026-08-20');
-  t('1つの注記に複数の日付があれば、その中では新しい方を使う',
-    stampDate({ appVersionNote: '2026-08-01 と 2026-09-01', ratingNote: '2026-09-02', priceNote: '2026-09-03' }) === '2026-09-01');
-  t('日付がどこにも無ければ null（今日の日付を捏造しない）',
-    stampDate({ appVersionNote: 'なし', ratingNote: '', priceNote: null }) === null);
+  // --- Date provenance is per field, including owner-confirmed prices. ---
+  t('複数の日付を含む注記は最新の確認日を使う',
+    latestDate('2026-08-01 と 2026-09-01') === '2026-09-01');
+  t('価格の確認日を公開版の確認日へ流用しない',
+    latestDate('version checked 2026-09-28') !== latestDate('price confirmed 2026-09-22'));
+  t('日付が無ければ null（今日の日付を捏造しない）', latestDate('なし') === null);
 
   // --- 実データが通ること（合成検体だけだと本物が形を変えた日に気づかない） ---
   t('台帳の値が揃っている',
     [C.ratingValue, C.ratingCount, C.priceMonthlyJpy, C.appVersion].every((v) => v !== undefined && v !== null && String(v) !== ''));
-  t('実データの stampDate が日付を返す', /^\d{4}-\d{2}-\d{2}$/.test(String(stampDate())));
+  t('実データの版・評価・価格に個別の確認日がある',
+    [C.appVersionNote, C.ratingNote, C.priceNote]
+      .every((note) => /^\d{4}-\d{2}-\d{2}$/.test(String(latestDate(note)))));
 
   // ── ここから下は「規則を単体で当てる」では届かない門 ──────────────
   //
@@ -255,13 +242,20 @@ if (SELFTEST) {
   t('英語ページの著作権表記を日本語へ戻さない', drift(englishCopyright, 'en/fixture.html').length === 0);
   t('英語ページの古い著作権表記も同期する',
     scanHtml('<p>© 2026 Old Name</p>', 'en/fixture.html', { write: true }).out === englishCopyright);
+  for (const [locale, line] of Object.entries(C.copyrightLines)) {
+    const rel = `${locale === 'zh-Hans' ? 'zh' : locale}/fixture.html`;
+    t(`${locale}: localized copyright stays localized`, drift(`<p>${line}</p>`, rel).length === 0);
+    t(`${locale}: stale publisher is detected and corrected`,
+      drift('<p>© 2026 Old Publisher</p>', rel).length === 1
+        && scanHtml('<p>© 2026 Old Publisher</p>', rel, {write: true}).out === `<p>${line}</p>`);
+  }
 
   // 何も食い違っていない面が黙ることを先に固定する。これが無いと、
   // 以下の「落ちた」が雑音の上で成立している可能性を排除できない。
   const okPage = `<html lang="ja"><head><meta property="og:site_name" content="${C.appNameJa}">`
     + `</head><body><script type="application/ld+json">`
-    + `{"@id":"https://simplememofast.com/#app",`
-    + `"aggregateRating":{"ratingValue":"${C.ratingValue}","ratingCount":"${C.ratingCount}"},`
+    + `{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication",`
+    + `"aggregateRating":{"@type":"AggregateRating","ratingValue":"${C.ratingValue}","ratingCount":"${C.ratingCount}","bestRating":"5","worstRating":"1"},`
     + `"softwareVersion":"${C.appVersion}"}</script></body></html>`;
   t('正準値だけの面は何も言わない', drift(okPage).length === 0);
 
@@ -271,6 +265,23 @@ if (SELFTEST) {
   t('見える評価は比較ページでは見ない（競合の数字を書き換えない）',
     drift(visibleRating, 'vs/captio/index.html').length === 0);
   t('見える評価は自社値の面では見る', drift(visibleRating, 'index.html').length === 1);
+
+  // Review quotations remain historical; only the surrounding aggregate
+  // rating pair follows the ledger. Exercise the formerly omitted pages.
+  const reviewQuote = '<blockquote>Five stars. Input is smooth.</blockquote>';
+  const voiceSummary = '<p>公開レビュー（★1.0・1件）</p>' + reviewQuote;
+  const enVoiceSummary = '<meta content="App Store review (★1.0 from 1 ratings)">' + reviewQuote;
+  const enDownload = '<p>App Store 1.0 (1 ratings)</p>';
+  for (const [rel, html, expected] of [
+    ['voices/index.html', voiceSummary, `<p>公開レビュー（★${C.ratingValue}・${C.ratingCount}件）</p>` + reviewQuote],
+    ['en/voices/index.html', enVoiceSummary, `<meta content="App Store review (★${C.ratingValue} from ${C.ratingCount} ratings)">` + reviewQuote],
+    ['en/download/index.html', enDownload, `<p>App Store ${C.ratingValue} (${C.ratingCount} ratings)</p>`],
+  ]) {
+    t(`${rel}: omitted aggregate form fails`, drift(html, rel).length === 1);
+    t(`${rel}: sync fixes aggregate without rewriting quote`, scanHtml(html, rel, { write: true }).out === expected);
+    t(`${rel}: corrected form passes`, drift(expected, rel).length === 0);
+    t(`${rel}: same form on competitor page is untouched`, scanHtml(html, 'vs/competitor/index.html', { write: true }).out === html);
+  }
 
   const localizedRatings = [
     ["ar", "★ 1.0 (1 تقييمات في App Store)"],
@@ -306,8 +317,9 @@ if (SELFTEST) {
     drift(`<meta property="og:site_name" content="${C.appNameEn}">`).length === 0);
 
   // llms.txt は HTML の走査を通らないので、ここを見ないと丸ごと無検査になる。
-  const llms = `**Current facts (as of ${stampDate()}):** version ${C.appVersion}\n`
-    + `App Store rating ${C.ratingValue} (${C.ratingCount} ratings)\n`;
+  const llms = `Japan App Store version ${C.appVersion} (verified ${latestDate(C.appVersionNote)})\n`
+    + `Japan App Store rating ${C.ratingValue} (${C.ratingCount} ratings; verified ${latestDate(C.ratingNote)})\n`
+    + `Premium ¥${C.priceMonthlyJpy}/mo or ¥${C.priceYearlyJpy}/yr (owner-confirmed ${latestDate(C.priceNote)})\n`;
   t('llms.txt が正準値なら何も言わない', scanLlms(llms).findings.length === 0);
   t('llms.txt の version がずれていれば落ちる',
     scanLlms(llms.replace(`version ${C.appVersion}`, 'version 3.9')).findings.length === 1);
@@ -321,8 +333,270 @@ if (SELFTEST) {
     scanHtml(drifted, 'fixture/x.html', { write: true }).out === okPage);
   t('--check は書き換えない', scanHtml(drifted, 'fixture/x.html').out === drifted);
 
+
+  let versionSelftestCount = 0;
+  const vt = (name, condition) => { versionSelftestCount++; t(name, condition); };
+
+  // Version scope is the direct own entity, never nearby text or an ancestor.
+  const versionTag = (body, quote = '"') => '<script type=' + quote + 'application/ld+json' + quote + '>' + body + '</script>';
+  const ownVersion = '{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","softwareVersion":"0.0"}';
+  const correctVersion = ownVersion.replace('"0.0"', JSON.stringify(C.appVersion));
+  const rivalVersion = '{"@type":"SoftwareApplication","@id":"https://fixture.invalid/rival","name":"Other memo","softwareVersion":"2.3"}';
+  const vscan = (html, write = false) => scanHtml(html, 'vs/fixture/index.html', { write });
+  vt('version: stale own entity is detected', vscan(versionTag(ownVersion)).findings.length === 1);
+  vt('version: writer changes only own token', vscan(versionTag(ownVersion), true).out === versionTag(correctVersion));
+  vt('version: check leaves stale bytes intact', vscan(versionTag(ownVersion)).out === versionTag(ownVersion));
+  vt('version: canonical own entity is quiet', vscan(versionTag(correctVersion)).findings.length === 0);
+  vt('version: competitor entity is quiet', vscan(versionTag(rivalVersion)).findings.length === 0);
+  vt('version: competitor writer is byte-identical', vscan(versionTag(rivalVersion), true).out === versionTag(rivalVersion));
+  vt('version: mixed own-first keeps rival bytes',
+    vscan(versionTag('[' + ownVersion + ',' + rivalVersion + ']'), true).out === versionTag('[' + correctVersion + ',' + rivalVersion + ']'));
+  vt('version: mixed rival-first keeps rival bytes',
+    vscan(versionTag('[' + rivalVersion + ',' + ownVersion + ']'), true).out === versionTag('[' + rivalVersion + ',' + correctVersion + ']'));
+  vt('version: graph nesting retains entity boundary',
+    vscan(versionTag('{"@graph":[' + rivalVersion + ',' + ownVersion + ']}'), true).out === versionTag('{"@graph":[' + rivalVersion + ',' + correctVersion + ']}'));
+  const reverseVersion = '{"softwareVersion":"0.0","name":"Own","@type":"SoftwareApplication","@id":"https://simplememofast.com/#app"}';
+  vt('version: version-before-identity is still own',
+    vscan(versionTag(reverseVersion), true).out === versionTag(reverseVersion.replace('"0.0"', JSON.stringify(C.appVersion))));
+  const spacedVersion = '{ "@type" : "SoftwareApplication", "@id" : "https://simplememofast.com/#app", "softwareVersion":   "0.0" }';
+  vt('version: whitespace stays byte-exact outside value',
+    vscan(versionTag(spacedVersion), true).out === versionTag(spacedVersion.replace('"0.0"', JSON.stringify(C.appVersion))));
+  const nestedRival = '{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","item":' + rivalVersion + '}';
+  vt('version: own parent does not own nested rival', vscan(versionTag(nestedRival), true).out === versionTag(nestedRival));
+  const nonApp = ownVersion.replace('SoftwareApplication', 'WebPage');
+  vt('version: same id with non-app type is untouched', vscan(versionTag(nonApp), true).out === versionTag(nonApp));
+  const noId = '{"@type":"SoftwareApplication","softwareVersion":"0.0"}';
+  vt('version: identity missing is not inferred', vscan(versionTag(noId), true).out === versionTag(noId));
+  vt('version: JSON outside JSON-LD is untouched', vscan(ownVersion, true).out === ownVersion);
+  const malformed = versionTag(ownVersion.slice(0, -1));
+  vt('version: malformed JSON-LD is not rewritten', vscan(malformed, true).out === malformed);
+  const duplicateId = '{"@id":"https://simplememofast.com/#app","@id":"https://fixture.invalid/rival","@type":"SoftwareApplication","softwareVersion":"0.0"}';
+  vt('version: duplicate id is not admitted', vscan(versionTag(duplicateId), true).out === versionTag(duplicateId));
+  const duplicateVersion = ownVersion.slice(0, -1) + ',"softwareVersion":"2.3"}';
+  vt('version: duplicate version is not admitted', vscan(versionTag(duplicateVersion), true).out === versionTag(duplicateVersion));
+  const quoted = '{"description":"quoted \\"{ sibling }\\" text","@type":"SoftwareApplication","softwareVersion":"0.0","@id":"https://simplememofast.com/#app"}';
+  vt('version: quoted braces do not cross object boundaries',
+    vscan(versionTag(quoted), true).out === versionTag(quoted.replace('"0.0"', JSON.stringify(C.appVersion))));
+  const noVersion = '{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication"}';
+  vt('version: absent own version never reaches next rival',
+    vscan(versionTag('[' + noVersion + ',' + rivalVersion + ']'), true).out === versionTag('[' + noVersion + ',' + rivalVersion + ']'));
+  const ordinaryScript = '<script type="application/json">' + ownVersion + '</script>';
+  vt('version: other script type is untouched', vscan(ordinaryScript, true).out === ordinaryScript);
+  const arrayType = ownVersion.replace('"SoftwareApplication"', '["SoftwareApplication"]');
+  vt('version: unqualified array type stays untouched', vscan(versionTag(arrayType), true).out === versionTag(arrayType));
+  const numericVersion = ownVersion.replace('"0.0"', '0');
+  vt('version: numeric version stays untouched', vscan(versionTag(numericVersion), true).out === versionTag(numericVersion));
+  vt('version: single-quoted script type is admitted',
+    vscan(versionTag(ownVersion, "'"), true).out === versionTag(correctVersion, "'"));
+
+
+  const escapedDuplicateId = '{"@id":"https://simplememofast.com/#app","@\\u0069d":"https://fixture.invalid/rival","@type":"SoftwareApplication","softwareVersion":"0.0"}';
+  vt('version: escaped duplicate id is not admitted',
+    vscan(versionTag(escapedDuplicateId), true).out === versionTag(escapedDuplicateId));
+  const escapedDuplicateVersion = ownVersion.slice(0, -1) + ',"software\\u0056ersion":"2.3"}';
+  vt('version: escaped duplicate version is not admitted',
+    vscan(versionTag(escapedDuplicateVersion), true).out === versionTag(escapedDuplicateVersion));
+
+
+  // Independent exact expected strings for the four parser/regex divergence
+  // cases. Only the actual scanHtml writer is called; no parser oracle reuse.
+  const colonSpacedVersion = ownVersion.replace('"softwareVersion":', '"softwareVersion" : ');
+  const colonSpacedExpected = colonSpacedVersion.replace('"0.0"', JSON.stringify(C.appVersion));
+  vt('version span: colon-before whitespace is detected',
+    vscan(versionTag(colonSpacedVersion)).findings.length === 1);
+  vt('version span: colon-before whitespace writer preserves other bytes',
+    vscan(versionTag(colonSpacedVersion), true).out === versionTag(colonSpacedExpected));
+  const escapedKeyVersion = ownVersion.replace('softwareVersion', 'software\\u0056ersion');
+  const escapedKeyExpected = escapedKeyVersion.replace('"0.0"', JSON.stringify(C.appVersion));
+  vt('version span: single escaped key is detected',
+    vscan(versionTag(escapedKeyVersion)).findings.length === 1);
+  vt('version span: single escaped key writer preserves key bytes',
+    vscan(versionTag(escapedKeyVersion), true).out === versionTag(escapedKeyExpected));
+  const emptyVersion = ownVersion.replace('"0.0"', '""');
+  const emptyExpected = ownVersion.replace('"0.0"', JSON.stringify(C.appVersion));
+  vt('version span: empty string is detected',
+    vscan(versionTag(emptyVersion)).findings.length === 1);
+  vt('version span: empty string writer changes only complete token',
+    vscan(versionTag(emptyVersion), true).out === versionTag(emptyExpected));
+  const quotedVersion = ownVersion.replace('"0.0"', '"0.0\\\"beta"');
+  const quotedExpected = ownVersion.replace('"0.0"', JSON.stringify(C.appVersion));
+  vt('version span: escaped quote string is detected',
+    vscan(versionTag(quotedVersion)).findings.length === 1);
+  const quotedWritten = vscan(versionTag(quotedVersion), true).out;
+  vt('version span: escaped quote writer preserves valid JSON and other bytes',
+    quotedWritten === versionTag(quotedExpected) &&
+    JSON.parse(quotedWritten.slice(quotedWritten.indexOf('>') + 1, quotedWritten.indexOf('</script>'))).softwareVersion === C.appVersion);
+
+
+  // Price ownership cases use explicit inputs and expected source-ledger values,
+  // not the parser/ownership implementation as their oracle.
+  let priceSelftestCount = 0;
+  const pt = (name, condition) => { priceSelftestCount++; t(name, condition); };
+  const priceFixtureTag = (body) => '<script type="application/ld+json">' + body + '</script>';
+  const priceFixtureApp = (offers) => '{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","offers":' + offers + '}';
+  const priceFixtureRival = (offers) => '{"@id":"https://fixture.invalid/rival","@type":"SoftwareApplication","offers":' + offers + '}';
+  const priceFixtureOffer = (name, currency, raw) => '{"@type":"Offer","name":' + JSON.stringify(name) + ',"price":' + raw + ',"priceCurrency":' + JSON.stringify(currency) + '}';
+  const pmj = priceFixtureOffer('Premium Monthly', 'JPY', '"1"');
+  const pyj = priceFixtureOffer('Premium Yearly', 'JPY', '"1"');
+  const pmu = priceFixtureOffer('Premium Monthly', 'USD', '"1.25"');
+  const pyu = priceFixtureOffer('Premium Yearly', 'USD', '"1.25"');
+  const pmjOk = priceFixtureOffer('Premium Monthly', 'JPY', JSON.stringify(C.priceMonthlyJpy));
+  const pyjOk = priceFixtureOffer('Premium Yearly', 'JPY', JSON.stringify(C.priceYearlyJpy.replace(',', '')));
+  const pmuOk = priceFixtureOffer('Premium Monthly', 'USD', JSON.stringify(C.priceMonthlyUsd));
+  const pyuOk = priceFixtureOffer('Premium Yearly', 'USD', JSON.stringify(C.priceYearlyUsd));
+
+  const priceCases = [
+    { name: "price: own JPY monthly check detects", input: priceFixtureTag(priceFixtureApp(pmj)), expected: priceFixtureTag(priceFixtureApp(pmj)), drifts: 1, unknown: false, write: false },
+    { name: "price: own JPY monthly writer", input: priceFixtureTag(priceFixtureApp(pmj)), expected: priceFixtureTag(priceFixtureApp(pmjOk)), drifts: 1, unknown: false, write: true },
+    { name: "price: own JPY yearly writer", input: priceFixtureTag(priceFixtureApp(pyj)), expected: priceFixtureTag(priceFixtureApp(pyjOk)), drifts: 1, unknown: false, write: true },
+    { name: "price: own USD monthly decimal writer", input: priceFixtureTag(priceFixtureApp(pmu)), expected: priceFixtureTag(priceFixtureApp(pmuOk)), drifts: 1, unknown: false, write: true },
+    { name: "price: own USD yearly decimal writer", input: priceFixtureTag(priceFixtureApp(pyu)), expected: priceFixtureTag(priceFixtureApp(pyuOk)), drifts: 1, unknown: false, write: true },
+    { name: "price: string token kind preserved", input: priceFixtureTag(priceFixtureApp(pmu)), expected: priceFixtureTag(priceFixtureApp(pmuOk)), drifts: 1, unknown: false, write: true },
+    { name: "price: numeric JPY token kind preserved", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY','1'))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',C.priceMonthlyJpy))), drifts: 1, unknown: false, write: true },
+    { name: "price: numeric USD decimal token kind preserved", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','USD','1.25'))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','USD',C.priceMonthlyUsd))), drifts: 1, unknown: false, write: true },
+    { name: "price: direct offers array owns both plans", input: priceFixtureTag(priceFixtureApp('[' + pmj + ',' + pyj + ']')), expected: priceFixtureTag(priceFixtureApp('[' + pmjOk + ',' + pyjOk + ']')), drifts: 2, unknown: false, write: true },
+    { name: "price: mixed check reports own only", input: priceFixtureTag('{"@graph":[' + priceFixtureApp(pmj) + ',' + priceFixtureRival(pmj) + ']}'), expected: priceFixtureTag('{"@graph":[' + priceFixtureApp(pmj) + ',' + priceFixtureRival(pmj) + ']}'), drifts: 1, unknown: false, write: false },
+    { name: "price: mixed writer preserves rival bytes", input: priceFixtureTag('{"@graph":[' + priceFixtureApp(pmj) + ',' + priceFixtureRival(pmj) + ']}'), expected: priceFixtureTag('{"@graph":[' + priceFixtureApp(pmjOk) + ',' + priceFixtureRival(pmj) + ']}'), drifts: 1, unknown: false, write: true },
+    { name: "price: rival same plan untouched", input: priceFixtureTag(priceFixtureRival(pmj)), expected: priceFixtureTag(priceFixtureRival(pmj)), drifts: 0, unknown: false, write: true },
+    { name: "price: bare descendant cannot inherit ownership", input: priceFixtureTag('{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","extra":' + pmj + '}'), expected: priceFixtureTag('{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","extra":' + pmj + '}'), drifts: 0, unknown: false, write: true },
+    { name: "price: sibling Offer cannot inherit ownership", input: priceFixtureTag('{"@graph":[{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication"},' + pmj + ']}'), expected: priceFixtureTag('{"@graph":[{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication"},' + pmj + ']}'), drifts: 0, unknown: false, write: true },
+    { name: "price: nested genuine own app independent", input: priceFixtureTag('{"@id":"https://fixture.invalid/rival","@type":"SoftwareApplication","offers":' + pmj + ',"nested":' + priceFixtureApp(pyu) + '}'), expected: priceFixtureTag('{"@id":"https://fixture.invalid/rival","@type":"SoftwareApplication","offers":' + pmj + ',"nested":' + priceFixtureApp(pyuOk) + '}'), drifts: 1, unknown: false, write: true },
+    { name: "price: missing app identity untouched", input: priceFixtureTag('{"@type":"SoftwareApplication","offers":' + pmj + '}'), expected: priceFixtureTag('{"@type":"SoftwareApplication","offers":' + pmj + '}'), drifts: 0, unknown: false, write: true },
+    { name: "price: own marker non-app type unknown", input: priceFixtureTag(priceFixtureApp(pmj).replace('"SoftwareApplication"','"WebPage"')), expected: priceFixtureTag(priceFixtureApp(pmj).replace('"SoftwareApplication"','"WebPage"')), drifts: 0, unknown: true, write: true },
+    { name: "price: duplicate app id unknown", input: priceFixtureTag(priceFixtureApp(pmj).replace('"@id":"https://simplememofast.com/#app"', '"@id":"https://simplememofast.com/#app","@id":"https://fixture.invalid/rival"')), expected: priceFixtureTag(priceFixtureApp(pmj).replace('"@id":"https://simplememofast.com/#app"', '"@id":"https://simplememofast.com/#app","@id":"https://fixture.invalid/rival"')), drifts: 0, unknown: true, write: true },
+    { name: "price: duplicate app type unknown", input: priceFixtureTag(priceFixtureApp(pmj).replace('"@type":"SoftwareApplication"', '"@type":"SoftwareApplication","@type":"SoftwareApplication"')), expected: priceFixtureTag(priceFixtureApp(pmj).replace('"@type":"SoftwareApplication"', '"@type":"SoftwareApplication","@type":"SoftwareApplication"')), drifts: 0, unknown: true, write: true },
+    { name: "price: array app type unknown", input: priceFixtureTag(priceFixtureApp(pmj).replace('"SoftwareApplication"','["SoftwareApplication"]')), expected: priceFixtureTag(priceFixtureApp(pmj).replace('"SoftwareApplication"','["SoftwareApplication"]')), drifts: 0, unknown: true, write: true },
+    { name: "price: duplicate offers property unknown", input: priceFixtureTag(priceFixtureApp(pmj).slice(0,-1) + ',"offers":' + pyj + '}'), expected: priceFixtureTag(priceFixtureApp(pmj).slice(0,-1) + ',"offers":' + pyj + '}'), drifts: 0, unknown: true, write: true },
+    { name: "price: malformed direct collection unknown", input: priceFixtureTag(priceFixtureApp('[' + pmj + ',0]')), expected: priceFixtureTag(priceFixtureApp('[' + pmj + ',0]')), drifts: 0, unknown: true, write: true },
+    { name: "price: duplicate plan currency unknown", input: priceFixtureTag(priceFixtureApp('[' + pmj + ',' + pmj + ']')), expected: priceFixtureTag(priceFixtureApp('[' + pmj + ',' + pmj + ']')), drifts: 0, unknown: true, write: true },
+    { name: "price: same plan distinct currencies admitted", input: priceFixtureTag(priceFixtureApp('[' + pmj + ',' + pmu + ']')), expected: priceFixtureTag(priceFixtureApp('[' + pmjOk + ',' + pmuOk + ']')), drifts: 2, unknown: false, write: true },
+    { name: "price: unsupported currency unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','EUR','"1"'))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','EUR','"1"'))), drifts: 0, unknown: true, write: true },
+    { name: "price: missing currency unknown", input: priceFixtureTag(priceFixtureApp(pmj.replace(',"priceCurrency":"JPY"',''))), expected: priceFixtureTag(priceFixtureApp(pmj.replace(',"priceCurrency":"JPY"',''))), drifts: 0, unknown: true, write: true },
+    { name: "price: duplicate currency unknown", input: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"priceCurrency":"USD"}')), expected: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"priceCurrency":"USD"}')), drifts: 0, unknown: true, write: true },
+    { name: "price: missing price unknown", input: priceFixtureTag(priceFixtureApp(pmj.replace(',"price":"1"',''))), expected: priceFixtureTag(priceFixtureApp(pmj.replace(',"price":"1"',''))), drifts: 0, unknown: true, write: true },
+    { name: "price: duplicate price unknown", input: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"price":"2"}')), expected: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"price":"2"}')), drifts: 0, unknown: true, write: true },
+    { name: "price: duplicate name unknown", input: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"name":"Premium Monthly"}')), expected: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"name":"Premium Monthly"}')), drifts: 0, unknown: true, write: true },
+    { name: "price: duplicate Offer type unknown", input: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"@type":"Offer"}')), expected: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"@type":"Offer"}')), drifts: 0, unknown: true, write: true },
+    { name: "price: escaped duplicate price unknown", input: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"pri\\u0063e":"2"}')), expected: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"pri\\u0063e":"2"}')), drifts: 0, unknown: true, write: true },
+    { name: "price: escaped duplicate app id unknown", input: priceFixtureTag(priceFixtureApp(pmj).slice(0,-1) + ',"@\\u0069d":"https://simplememofast.com/#app"}'), expected: priceFixtureTag(priceFixtureApp(pmj).slice(0,-1) + ',"@\\u0069d":"https://simplememofast.com/#app"}'), drifts: 0, unknown: true, write: true },
+    { name: "price: property order independent", input: priceFixtureTag(priceFixtureApp('{"price":"1","priceCurrency":"JPY","name":"Premium Monthly","@type":"Offer"}')), expected: priceFixtureTag(priceFixtureApp('{"price":' + JSON.stringify(C.priceMonthlyJpy) + ',"priceCurrency":"JPY","name":"Premium Monthly","@type":"Offer"}')), drifts: 1, unknown: false, write: true },
+    { name: "price: escaped keys and value token retained", input: priceFixtureTag(priceFixtureApp('{"@type":"Offer","na\\u006de":"Premium Monthly","pri\\u0063e":"\\u0031","price\\u0043urrency":"JPY"}')), expected: priceFixtureTag(priceFixtureApp('{"@type":"Offer","na\\u006de":"Premium Monthly","pri\\u0063e":' + JSON.stringify(C.priceMonthlyJpy) + ',"price\\u0043urrency":"JPY"}')), drifts: 1, unknown: false, write: true },
+    { name: "price: escaped quote price unknown valid JSON", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY','"1\\\"bad"'))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY','"1\\\"bad"'))), drifts: 0, unknown: true, write: true },
+    { name: "price: whitespace outside price token preserved", input: priceFixtureTag(priceFixtureApp('{"@type":"Offer","name":"Premium Monthly","price" :  "1", "priceCurrency":"JPY"}')), expected: priceFixtureTag(priceFixtureApp('{"@type":"Offer","name":"Premium Monthly","price" :  ' + JSON.stringify(C.priceMonthlyJpy) + ', "priceCurrency":"JPY"}')), drifts: 1, unknown: false, write: true },
+    { name: "price: canonical own two currencies quiet", input: priceFixtureTag(priceFixtureApp('[' + pmuOk + ',' + pyjOk + ']')), expected: priceFixtureTag(priceFixtureApp('[' + pmuOk + ',' + pyjOk + ']')), drifts: 0, unknown: false, write: true },
+    { name: "price: unnamed Free own untouched", input: priceFixtureTag(priceFixtureApp('{"@type":"Offer","price":"0","priceCurrency":"USD"}')), expected: priceFixtureTag(priceFixtureApp('{"@type":"Offer","price":"0","priceCurrency":"USD"}')), drifts: 0, unknown: false, write: true },
+    { name: "price: unnamed rival untouched", input: priceFixtureTag(priceFixtureRival('{"@type":"Offer","price":"0","priceCurrency":"USD"}')), expected: priceFixtureTag(priceFixtureRival('{"@type":"Offer","price":"0","priceCurrency":"USD"}')), drifts: 0, unknown: false, write: true },
+    { name: "price: outside JSON-LD untouched", input: priceFixtureApp(pmj), expected: priceFixtureApp(pmj), drifts: 0, unknown: false, write: true },
+    { name: "price: malformed JSON-LD unadmitted", input: priceFixtureTag(priceFixtureApp(pmj).slice(0,-1)), expected: priceFixtureTag(priceFixtureApp(pmj).slice(0,-1)), drifts: 0, unknown: false, write: true },
+    { name: "price: numeric exponent accepts finite value", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY','1e2'))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',C.priceMonthlyJpy))), drifts: 1, unknown: false, write: true },
+    { name: "price: braces in description do not change boundary", input: priceFixtureTag(priceFixtureApp(pmj).slice(0,-1) + ',"description":"quoted braces { rival }"}'), expected: priceFixtureTag(priceFixtureApp(pmjOk).slice(0,-1) + ',"description":"quoted braces { rival }"}'), drifts: 1, unknown: false, write: true },
+    { name: "price: standalone Offer has no app owner", input: priceFixtureTag(pmj), expected: priceFixtureTag(pmj), drifts: 0, unknown: false, write: true },
+    { name: "price: invalid null unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"null"))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"null"))), drifts: 0, unknown: true, write: true },
+    { name: "price: invalid boolean unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"true"))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"true"))), drifts: 0, unknown: true, write: true },
+    { name: "price: invalid negative number unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"-1"))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"-1"))), drifts: 0, unknown: true, write: true },
+    { name: "price: invalid overflow number unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"1e999"))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"1e999"))), drifts: 0, unknown: true, write: true },
+    { name: "price: invalid empty string unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\"\""))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\"\""))), drifts: 0, unknown: true, write: true },
+    { name: "price: invalid nonnumeric string unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\"not-money\""))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\"not-money\""))), drifts: 0, unknown: true, write: true },
+    { name: "price: invalid negative string unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\"-1\""))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\"-1\""))), drifts: 0, unknown: true, write: true },
+    { name: "price: invalid grouped string unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\"1,000\""))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\"1,000\""))), drifts: 0, unknown: true, write: true },
+    { name: "price: invalid padded string unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\" 1 \""))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\" 1 \""))), drifts: 0, unknown: true, write: true },
+  ];
+  for (const priceCase of priceCases) {
+    const priceActual = scanHtml(priceCase.input, 'vs/price-fixture/index.html', { write: priceCase.write });
+    pt(priceCase.name, priceActual.out === priceCase.expected &&
+      priceActual.findings.length === priceCase.drifts &&
+      (priceActual.priceProblems.length > 0) === priceCase.unknown);
+  }
+
+
+  // New independent direct-rating fixtures. The old156 statements/names are
+  // retained; only okPage's missing positive type/scale fields are supplemented.
+  let ratingSelftestCount = 0;
+  const rt = (name, condition) => { ratingSelftestCount++; t(name, condition); };
+  const ratingFixtureTag = (body) => '<script type="application/ld+json">' + body + '</script>';
+  const ratingFixtureApp = (value) => '{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","aggregateRating":' + value + '}';
+  const ratingFixtureRival = (value) => '{"@id":"https://fixture.invalid/rival","@type":"SoftwareApplication","aggregateRating":' + value + '}';
+  const ratingFixtureValueCount = (value, count) => '{"@type":"AggregateRating","ratingValue":' + value + ',"ratingCount":' + count + ',"bestRating":"5","worstRating":"1"}';
+  const ratingStale = ratingFixtureValueCount('"9.9"', '"1"');
+  const ratingFixed = ratingFixtureValueCount(JSON.stringify(C.ratingValue), JSON.stringify(C.ratingCount));
+  const ratingRivalValue = ratingFixtureValueCount('"4.9"', '"206"');
+  const ratingNumeric = ratingFixtureValueCount('9.9', '1');
+  const ratingNumericFixed = ratingFixtureValueCount(C.ratingValue, C.ratingCount);
+  const ratingMixedKind = ratingFixtureValueCount('"9.9"', '1');
+  const ratingMixedKindFixed = ratingFixtureValueCount(JSON.stringify(C.ratingValue), C.ratingCount);
+  const ratingEscapedValue = ratingFixtureValueCount('"9\\u002e9"', '"1"');
+  const ratingEscapedKey = ratingStale.replace('"ratingValue"', '"rating\\u0056alue"');
+  const ratingEscapedKeyFixed = ratingFixed.replace('"ratingValue"', '"rating\\u0056alue"');
+  const ratingReverse = '{"worstRating":"1","ratingCount":"1","bestRating":"5","ratingValue":"9.9","@type":"AggregateRating"}';
+  const ratingReverseFixed = '{"worstRating":"1","ratingCount":' + JSON.stringify(C.ratingCount) + ',"bestRating":"5","ratingValue":' + JSON.stringify(C.ratingValue) + ',"@type":"AggregateRating"}';
+  const ratingNoRating = '{"@type":"SoftwareApplication","@id":"https://simplememofast.com/#app","name":"Own without rating"}';
+  const ratingLateRival = '{"name":"Rival","aggregateRating":' + ratingRivalValue + ',"@type":"SoftwareApplication"}';
+
+  const ratingCases = [
+    { name: "rating: id before type check sees own fields", input: ratingFixtureTag(ratingFixtureApp(ratingStale)), expected: ratingFixtureTag(ratingFixtureApp(ratingStale)), drifts: 2, unknown: false, write: false },
+    { name: "rating: id before type writer fixes own fields", input: ratingFixtureTag(ratingFixtureApp(ratingStale)), expected: ratingFixtureTag(ratingFixtureApp(ratingFixed)), drifts: 2, unknown: false, write: true },
+    { name: "rating: own rating before id still owns fields", input: ratingFixtureTag('{"aggregateRating":' + ratingStale + ',"@type":"SoftwareApplication","@id":"https://simplememofast.com/#app"}'), expected: ratingFixtureTag('{"aggregateRating":' + ratingFixed + ',"@type":"SoftwareApplication","@id":"https://simplememofast.com/#app"}'), drifts: 2, unknown: false, write: true },
+    { name: "rating: current canonical string fields quiet", input: ratingFixtureTag(ratingFixtureApp(ratingFixed)), expected: ratingFixtureTag(ratingFixtureApp(ratingFixed)), drifts: 0, unknown: false, write: true },
+    { name: "rating: numeric field kinds preserved", input: ratingFixtureTag(ratingFixtureApp(ratingNumeric)), expected: ratingFixtureTag(ratingFixtureApp(ratingNumericFixed)), drifts: 2, unknown: false, write: true },
+    { name: "rating: mixed numeric and string field kinds preserved", input: ratingFixtureTag(ratingFixtureApp(ratingMixedKind)), expected: ratingFixtureTag(ratingFixtureApp(ratingMixedKindFixed)), drifts: 2, unknown: false, write: true },
+    { name: "rating: escaped value token wholly replaced", input: ratingFixtureTag(ratingFixtureApp(ratingEscapedValue)), expected: ratingFixtureTag(ratingFixtureApp(ratingFixed)), drifts: 2, unknown: false, write: true },
+    { name: "rating: escaped property key lexical bytes retained", input: ratingFixtureTag(ratingFixtureApp(ratingEscapedKey)), expected: ratingFixtureTag(ratingFixtureApp(ratingEscapedKeyFixed)), drifts: 2, unknown: false, write: true },
+    { name: "rating: property order within rating independent", input: ratingFixtureTag(ratingFixtureApp(ratingReverse)), expected: ratingFixtureTag(ratingFixtureApp(ratingReverseFixed)), drifts: 2, unknown: false, write: true },
+    { name: "rating: absent own rating remains absent", input: ratingFixtureTag(ratingNoRating), expected: ratingFixtureTag(ratingNoRating), drifts: 0, unknown: false, write: true },
+    { name: "rating: late type rival cannot inherit missing own rating", input: ratingFixtureTag('{"@graph":[' + ratingNoRating + ',' + ratingLateRival + ']}'), expected: ratingFixtureTag('{"@graph":[' + ratingNoRating + ',' + ratingLateRival + ']}'), drifts: 0, unknown: false, write: true },
+    { name: "rating: mixed full writer preserves late rival", input: ratingFixtureTag('{"@graph":[' + ratingNoRating + ',' + ratingLateRival + ',' + ratingFixtureApp(ratingStale) + ']}'), expected: ratingFixtureTag('{"@graph":[' + ratingNoRating + ',' + ratingLateRival + ',' + ratingFixtureApp(ratingFixed) + ']}'), drifts: 2, unknown: false, write: true },
+    { name: "rating: standalone AggregateRating has no owner", input: ratingFixtureTag(ratingRivalValue), expected: ratingFixtureTag(ratingRivalValue), drifts: 0, unknown: false, write: true },
+    { name: "rating: bare descendant cannot inherit app ownership", input: ratingFixtureTag('{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","extra":' + ratingRivalValue + '}'), expected: ratingFixtureTag('{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","extra":' + ratingRivalValue + '}'), drifts: 0, unknown: false, write: true },
+    { name: "rating: sibling AggregateRating cannot inherit app ownership", input: ratingFixtureTag('{"@graph":[' + ratingNoRating + ',' + ratingRivalValue + ']}'), expected: ratingFixtureTag('{"@graph":[' + ratingNoRating + ',' + ratingRivalValue + ']}'), drifts: 0, unknown: false, write: true },
+    { name: "rating: own app does not own nested rival rating", input: ratingFixtureTag('{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","aggregateRating":' + ratingStale + ',"extra":' + ratingFixtureRival(ratingRivalValue) + '}'), expected: ratingFixtureTag('{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","aggregateRating":' + ratingFixed + ',"extra":' + ratingFixtureRival(ratingRivalValue) + '}'), drifts: 2, unknown: false, write: true },
+    { name: "rating: nested genuine own app independently owns its rating", input: ratingFixtureTag('{"@id":"https://fixture.invalid/rival","@type":"SoftwareApplication","aggregateRating":' + ratingRivalValue + ',"extra":' + ratingFixtureApp(ratingStale) + '}'), expected: ratingFixtureTag('{"@id":"https://fixture.invalid/rival","@type":"SoftwareApplication","aggregateRating":' + ratingRivalValue + ',"extra":' + ratingFixtureApp(ratingFixed) + '}'), drifts: 2, unknown: false, write: true },
+    { name: "rating: absent app identity is not inferred", input: ratingFixtureTag('{"@type":"SoftwareApplication","aggregateRating":' + ratingRivalValue + '}'), expected: ratingFixtureTag('{"@type":"SoftwareApplication","aggregateRating":' + ratingRivalValue + '}'), drifts: 0, unknown: false, write: true },
+    { name: "rating: duplicate app identity unknown", input: ratingFixtureTag('{"@id":"https://simplememofast.com/#app","@id":"https://fixture.invalid/rival","@type":"SoftwareApplication","aggregateRating":' + ratingStale + '}'), expected: ratingFixtureTag('{"@id":"https://simplememofast.com/#app","@id":"https://fixture.invalid/rival","@type":"SoftwareApplication","aggregateRating":' + ratingStale + '}'), drifts: 0, unknown: true, write: true },
+    { name: "rating: duplicate app type unknown", input: ratingFixtureTag('{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","@type":"Thing","aggregateRating":' + ratingStale + '}'), expected: ratingFixtureTag('{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","@type":"Thing","aggregateRating":' + ratingStale + '}'), drifts: 0, unknown: true, write: true },
+    { name: "rating: array app type unknown", input: ratingFixtureTag('{"@id":"https://simplememofast.com/#app","@type":["SoftwareApplication"],"aggregateRating":' + ratingStale + '}'), expected: ratingFixtureTag('{"@id":"https://simplememofast.com/#app","@type":["SoftwareApplication"],"aggregateRating":' + ratingStale + '}'), drifts: 0, unknown: true, write: true },
+    { name: "rating: duplicate direct rating property unknown", input: ratingFixtureTag('{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","aggregateRating":' + ratingStale + ',"aggregateRating":' + ratingRivalValue + '}'), expected: ratingFixtureTag('{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","aggregateRating":' + ratingStale + ',"aggregateRating":' + ratingRivalValue + '}'), drifts: 0, unknown: true, write: true },
+    { name: "rating: direct rating array unknown", input: ratingFixtureTag(ratingFixtureApp('[' + ratingStale + ']')), expected: ratingFixtureTag(ratingFixtureApp('[' + ratingStale + ']')), drifts: 0, unknown: true, write: true },
+    { name: "rating: direct scalar rating unknown", input: ratingFixtureTag(ratingFixtureApp('null')), expected: ratingFixtureTag(ratingFixtureApp('null')), drifts: 0, unknown: true, write: true },
+    { name: "rating: duplicate rating type unknown", input: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"@type":"AggregateRating"', '"@type":"AggregateRating","@type":"Thing"'))), expected: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"@type":"AggregateRating"', '"@type":"AggregateRating","@type":"Thing"'))), drifts: 0, unknown: true, write: true },
+    { name: "rating: duplicate value unknown", input: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"ratingValue":"9.9"', '"ratingValue":"9.9","ratingValue":"4.9"'))), expected: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"ratingValue":"9.9"', '"ratingValue":"9.9","ratingValue":"4.9"'))), drifts: 0, unknown: true, write: true },
+    { name: "rating: escaped duplicate value unknown", input: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"ratingValue":"9.9"', '"ratingValue":"9.9","rating\\u0056alue":"4.9"'))), expected: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"ratingValue":"9.9"', '"ratingValue":"9.9","rating\\u0056alue":"4.9"'))), drifts: 0, unknown: true, write: true },
+    { name: "rating: duplicate count unknown", input: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"ratingCount":"1"', '"ratingCount":"1","ratingCount":"2"'))), expected: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"ratingCount":"1"', '"ratingCount":"1","ratingCount":"2"'))), drifts: 0, unknown: true, write: true },
+    { name: "rating: unsupported app context unknown", input: ratingFixtureTag('{"@context":{"ratingValue":"https://fixture.invalid/rating"},"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","aggregateRating":' + ratingStale + '}'), expected: ratingFixtureTag('{"@context":{"ratingValue":"https://fixture.invalid/rating"},"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","aggregateRating":' + ratingStale + '}'), drifts: 0, unknown: true, write: true },
+    { name: "rating: inherited unsupported context unknown", input: ratingFixtureTag('{"@context":{"ratingValue":"https://fixture.invalid/rating"},"@graph":[' + ratingFixtureApp(ratingStale) + ']}'), expected: ratingFixtureTag('{"@context":{"ratingValue":"https://fixture.invalid/rating"},"@graph":[' + ratingFixtureApp(ratingStale) + ']}'), drifts: 0, unknown: true, write: true },
+    { name: "rating: duplicate escaped context unknown", input: ratingFixtureTag('{"@context":"https://schema.org","@con\\u0074ext":"https://schema.org","@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","aggregateRating":' + ratingStale + '}'), expected: ratingFixtureTag('{"@context":"https://schema.org","@con\\u0074ext":"https://schema.org","@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","aggregateRating":' + ratingStale + '}'), drifts: 0, unknown: true, write: true },
+    { name: "rating: direct unsupported rating context unknown", input: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"@type":"AggregateRating"', '"@context":"https://fixture.invalid","@type":"AggregateRating"'))), expected: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"@type":"AggregateRating"', '"@context":"https://fixture.invalid","@type":"AggregateRating"'))), drifts: 0, unknown: true, write: true },
+    { name: "rating: duplicate scale bound unknown", input: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"bestRating":"5"', '"bestRating":"5","bestRating":"10"'))), expected: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"bestRating":"5"', '"bestRating":"5","bestRating":"10"'))), drifts: 0, unknown: true, write: true },
+    { name: "rating: unsupported scale unknown", input: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"bestRating":"5"', '"bestRating":"10"'))), expected: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"bestRating":"5"', '"bestRating":"10"'))), drifts: 0, unknown: true, write: true },
+    { name: "rating: reversed scale unknown", input: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"bestRating":"5","worstRating":"1"', '"bestRating":"1","worstRating":"5"'))), expected: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"bestRating":"5","worstRating":"1"', '"bestRating":"1","worstRating":"5"'))), drifts: 0, unknown: true, write: true },
+    { name: "rating: missing scale unknown", input: ratingFixtureTag(ratingFixtureApp(ratingStale.replace(',"bestRating":"5","worstRating":"1"', ''))), expected: ratingFixtureTag(ratingFixtureApp(ratingStale.replace(',"bestRating":"5","worstRating":"1"', ''))), drifts: 0, unknown: true, write: true },
+    { name: "rating: missing value unknown", input: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"ratingValue":"9.9",', ''))), expected: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"ratingValue":"9.9",', ''))), drifts: 0, unknown: true, write: true },
+    { name: "rating: missing count unknown", input: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"ratingCount":"1",', ''))), expected: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"ratingCount":"1",', ''))), drifts: 0, unknown: true, write: true },
+    { name: "rating: missing AggregateRating type unknown", input: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"@type":"AggregateRating",', ''))), expected: ratingFixtureTag(ratingFixtureApp(ratingStale.replace('"@type":"AggregateRating",', ''))), drifts: 0, unknown: true, write: true },
+    { name: "rating: supported explicit schema context preserves bytes", input: ratingFixtureTag('{"@context":"https://schema.org","@graph":[' + ratingFixtureApp(ratingStale) + ']}'), expected: ratingFixtureTag('{"@context":"https://schema.org","@graph":[' + ratingFixtureApp(ratingFixed) + ']}'), drifts: 2, unknown: false, write: true },
+    { name: "rating: invalid JSON remains unadmitted", input: ratingFixtureTag('{"@id":"https://simplememofast.com/#app","aggregateRating":' + ratingStale), expected: ratingFixtureTag('{"@id":"https://simplememofast.com/#app","aggregateRating":' + ratingStale), drifts: 0, unknown: false, write: true },
+    { name: "rating: outside JSON-LD remains unadmitted", input: ratingFixtureApp(ratingStale), expected: ratingFixtureApp(ratingStale), drifts: 0, unknown: false, write: true },
+    { name: "rating: invalid value null unknown", input: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount("null", '"1"'))), expected: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount("null", '"1"'))), drifts: 0, unknown: true, write: true },
+    { name: "rating: invalid value boolean unknown", input: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount("true", '"1"'))), expected: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount("true", '"1"'))), drifts: 0, unknown: true, write: true },
+    { name: "rating: invalid value negative unknown", input: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount("-1", '"1"'))), expected: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount("-1", '"1"'))), drifts: 0, unknown: true, write: true },
+    { name: "rating: invalid value overflow unknown", input: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount("1e999", '"1"'))), expected: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount("1e999", '"1"'))), drifts: 0, unknown: true, write: true },
+    { name: "rating: invalid value empty-string unknown", input: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount("\"\"", '"1"'))), expected: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount("\"\"", '"1"'))), drifts: 0, unknown: true, write: true },
+    { name: "rating: invalid value nonnumeric-string unknown", input: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount("\"unknown\"", '"1"'))), expected: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount("\"unknown\"", '"1"'))), drifts: 0, unknown: true, write: true },
+    { name: "rating: invalid count null unknown", input: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount('"9.9"', "null"))), expected: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount('"9.9"', "null"))), drifts: 0, unknown: true, write: true },
+    { name: "rating: invalid count boolean unknown", input: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount('"9.9"', "false"))), expected: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount('"9.9"', "false"))), drifts: 0, unknown: true, write: true },
+    { name: "rating: invalid count fractional unknown", input: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount('"9.9"', "1.5"))), expected: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount('"9.9"', "1.5"))), drifts: 0, unknown: true, write: true },
+    { name: "rating: invalid count negative unknown", input: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount('"9.9"', "-1"))), expected: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount('"9.9"', "-1"))), drifts: 0, unknown: true, write: true },
+    { name: "rating: invalid count unsafe-integer unknown", input: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount('"9.9"', "9007199254740992"))), expected: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount('"9.9"', "9007199254740992"))), drifts: 0, unknown: true, write: true },
+    { name: "rating: invalid count empty-string unknown", input: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount('"9.9"', "\"\""))), expected: ratingFixtureTag(ratingFixtureApp(ratingFixtureValueCount('"9.9"', "\"\""))), drifts: 0, unknown: true, write: true },
+  ];
+  for (const ratingCase of ratingCases) {
+    const ratingActual = scanHtml(ratingCase.input, 'vs/rating-fixture/index.html', { write: ratingCase.write });
+    rt(ratingCase.name, ratingActual.out === ratingCase.expected &&
+      ratingActual.findings.length === ratingCase.drifts &&
+      (ratingActual.ratingProblems.length > 0) === ratingCase.unknown);
+  }
+
   failures.forEach((f) => console.error(`  ✗ ${f}`));
-  console.log(`自己テスト 56 件中 ${failures.length} 件失敗`);
+  console.log('自己テスト ' + (84 + versionSelftestCount + priceSelftestCount + ratingSelftestCount) + ' 件中 ' + failures.length + ' 件失敗');
   process.exit(failures.length ? 1 : 0);
 }
 
@@ -338,8 +612,320 @@ if (SELFTEST) {
  * 呼び出し側の挙動は切り出し前と同じ（`--check` / `--write` の出力が
  * バイト単位で一致することを確認してある）。
  */
+
+/**
+ * Complete JSON string value spans in valid JSON-LD objects.
+ * Ownership is direct, unique, same-object identity/type/version. The actual
+ * writer admits only owned tokens and preserves all other lexical bytes.
+ * Invalid JSON or ambiguous/missing identity/type/version is outside admission,
+ * not proof of version synchronization.
+ */
+function jsonLdObjectDocuments(src) {
+  const documents = [];
+  const tags = /<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi;
+  for (const tag of src.matchAll(tags)) {
+    if (!/(?:^|\s)type\s*=\s*(['"])application\/ld\+json\1(?:\s|$)/i.test(tag[1])) continue;
+    const text = tag[2];
+    const offset = tag.index + tag[0].indexOf('>') + 1;
+    try {
+      JSON.parse(text);
+      let i = 0;
+      const objects = [];
+      const whitespace = () => { while (i < text.length && /\s/.test(text[i])) i++; };
+      const string = () => {
+        const start = i++;
+        while (i < text.length) {
+          if (text[i] === '\\') { i += 2; continue; }
+          if (text[i++] === '"') return { kind: 'string', value: JSON.parse(text.slice(start, i)), start, end: i };
+        }
+        throw new Error('invalid JSON string span');
+      };
+      const value = () => {
+        whitespace();
+        if (text[i] === '"') return string();
+        if (text[i] === '{') {
+          i++;
+          const fields = [];
+          whitespace();
+          if (text[i] !== '}') {
+            while (true) {
+              whitespace();
+              const key = string();
+              whitespace();
+              if (text[i++] !== ':') throw new Error('invalid JSON object separator');
+              fields.push({ key: key.value, keyStart: key.start, node: value() });
+              whitespace();
+              if (text[i] !== ',') break;
+              i++;
+            }
+          }
+          if (text[i++] !== '}') throw new Error('invalid JSON object end');
+          const object = { kind: 'object', fields };
+          objects.push(object);
+          return object;
+        }
+        if (text[i] === '[') {
+          i++;
+          const entries = [];
+          whitespace();
+          if (text[i] !== ']') {
+            while (true) {
+              entries.push(value());
+              whitespace();
+              if (text[i] !== ',') break;
+              i++;
+            }
+          }
+          if (text[i++] !== ']') throw new Error('invalid JSON array end');
+          return { kind: 'array', entries };
+        }
+        const token = text.slice(i).match(/^(?:-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?|true|false|null)/);
+        if (!token) throw new Error('invalid JSON scalar');
+        const start = i;
+        i += token[0].length;
+        const scalar = JSON.parse(token[0]);
+        return typeof scalar === 'number'
+          ? { kind: 'number', value: scalar, start, end: i } : { kind: 'scalar' };
+      };
+      value();
+      whitespace();
+      if (i !== text.length) throw new Error('unconsumed JSON payload');
+      documents.push({ offset, objects });
+    } catch {
+      // Unknown/invalid nodes remain untouched, without a synchronization claim.
+    }
+  }
+  return documents;
+}
+
+function softwareVersionTokens(src) {
+  const tokens = [];
+  for (const { offset, objects } of jsonLdObjectDocuments(src)) {
+      for (const object of objects) {
+        const fields = (key) => object.fields.filter((field) => field.key === key);
+        const ids = fields('@id'); const types = fields('@type'); const versions = fields('softwareVersion');
+        const owned = ids.length === 1 && types.length === 1 && versions.length === 1 &&
+          ids[0].node.kind === 'string' && ids[0].node.value === 'https://simplememofast.com/#app' &&
+          types[0].node.kind === 'string' && types[0].node.value === 'SoftwareApplication';
+        for (const version of versions) {
+          if (version.node.kind !== 'string') continue;
+          tokens.push({ owned, value: version.node.value,
+            fieldStart: offset + version.keyStart,
+            start: offset + version.node.start, end: offset + version.node.end });
+        }
+      }
+  }
+  return tokens.sort((a, b) => a.start - b.start);
+}
+
+/** Own named offer prices only; never inherit ownership through arbitrary
+ * descendants. JPY/USD come from the original owner-confirmed constants.
+ * Unknown positively own named offers are refused, not counted synchronized. */
+function softwareOfferPriceTokens(src) {
+  const docs = jsonLdObjectDocuments(src);
+  const fields = (object, key) => object.fields.filter((field) => field.key === key);
+  const names = ['Premium Monthly', 'Premium Yearly'];
+  const recognized = (object) => fields(object, 'name').some((field) =>
+    field.node.kind === 'string' && names.includes(field.node.value));
+  const tokens = []; const problems = [];
+  const claimed = new Set(); const owned = new Set();
+  const problem = (code) => { if (!problems.includes(code)) problems.push(code); };
+  for (const { objects } of docs) {
+    for (const object of objects) {
+      const ids = fields(object, '@id'); const types = fields(object, '@type');
+      if (!ids.some((field) => field.node.kind === 'string' &&
+        field.node.value === 'https://simplememofast.com/#app')) continue;
+      const offerFields = fields(object, 'offers');
+      if (offerFields.length === 0) continue;
+      const entries = []; let shapeValid = offerFields.length === 1;
+      for (const field of offerFields) {
+        if (field.node.kind === 'object') entries.push(field.node);
+        else if (field.node.kind === 'array') {
+          for (const item of field.node.entries) {
+            if (item.kind === 'object') entries.push(item);
+            else shapeValid = false;
+          }
+        } else shapeValid = false;
+      }
+      for (const entry of entries) claimed.add(entry);
+      if (!shapeValid) problem('own_offer_collection_unknown');
+      const appValid = ids.length === 1 && types.length === 1 &&
+        ids[0].node.kind === 'string' && ids[0].node.value === 'https://simplememofast.com/#app' &&
+        types[0].node.kind === 'string' && types[0].node.value === 'SoftwareApplication';
+      if (!appValid && entries.some(recognized)) problem('own_app_identity_or_type_unknown');
+      if (!shapeValid || !appValid) continue;
+      const pairs = new Map();
+      for (const entry of entries) {
+        const ns = fields(entry, 'name'); const cs = fields(entry, 'priceCurrency');
+        if (ns.length === 1 && ns[0].node.kind === 'string' && names.includes(ns[0].node.value) &&
+            cs.length === 1 && cs[0].node.kind === 'string') {
+          const pair = ns[0].node.value + '\n' + cs[0].node.value;
+          pairs.set(pair, (pairs.get(pair) || 0) + 1);
+        }
+      }
+      for (const entry of entries) {
+        const ns = fields(entry, 'name'); const cs = fields(entry, 'priceCurrency');
+        const pair = ns.length === 1 && ns[0].node.kind === 'string' &&
+          cs.length === 1 && cs[0].node.kind === 'string'
+          ? ns[0].node.value + '\n' + cs[0].node.value : null;
+        if (pair !== null && pairs.get(pair) > 1 && recognized(entry)) {
+          problem('own_offer_plan_currency_ambiguous');
+        } else owned.add(entry);
+      }
+    }
+  }
+  for (const { offset, objects } of docs) {
+    for (const object of objects) {
+      if (!recognized(object)) continue;
+      const ns = fields(object, 'name'); const ts = fields(object, '@type');
+      const cs = fields(object, 'priceCurrency'); const ps = fields(object, 'price');
+      const directClaim = claimed.has(object);
+      const nameValid = ns.length === 1 && ns[0].node.kind === 'string' && names.includes(ns[0].node.value);
+      const typeValid = ts.length === 1 && ts[0].node.kind === 'string' && ts[0].node.value === 'Offer';
+      const currencyValid = cs.length === 1 && cs[0].node.kind === 'string' && ['JPY', 'USD'].includes(cs[0].node.value);
+      const priceValid = ps.length === 1 &&
+        ((ps[0].node.kind === 'string' && /^\d+(?:\.\d+)?$/.test(ps[0].node.value) &&
+          Number.isFinite(Number(ps[0].node.value))) ||
+         (ps[0].node.kind === 'number' && Number.isFinite(ps[0].node.value) && ps[0].node.value >= 0));
+      if (directClaim) {
+        if (!nameValid) problem('own_offer_name_unknown');
+        if (!typeValid) problem('own_offer_type_unknown');
+        if (!currencyValid) problem('own_offer_currency_unknown');
+        if (!priceValid) problem('own_offer_price_unknown');
+      }
+      if (!nameValid || !typeValid || !currencyValid || !priceValid) continue;
+      const currency = cs[0].node.value;
+      const monthly = ns[0].node.value === 'Premium Monthly';
+      const canonical = currency === 'JPY'
+        ? (monthly ? C.priceMonthlyJpy : C.priceYearlyJpy.replace(',', ''))
+        : (monthly ? C.priceMonthlyUsd : C.priceYearlyUsd);
+      if (typeof canonical !== 'string' || !/^\d+(?:\.\d+)?$/.test(canonical) ||
+          !Number.isFinite(Number(canonical))) {
+        problem('canonical_offer_price_unknown'); continue;
+      }
+      const price = ps[0].node;
+      tokens.push({ owned: owned.has(object), period: monthly ? 'monthly' : 'yearly',
+        value: price.value, kind: price.kind, canonical,
+        start: offset + price.start, end: offset + price.end,
+        fieldStart: offset + ps[0].keyStart });
+    }
+  }
+  return { tokens: tokens.sort((a, b) => a.start - b.start), problems };
+}
+
+
+/** Literal JSON-LD own direct AggregateRating contract only. Ratings absent
+ * remain absent. Ambiguous positive own fields are refused; a sibling/nested
+ * rating does not acquire ownership from an earlier app marker. */
+function softwareRatingTokens(src) {
+  const docs = jsonLdObjectDocuments(src);
+  const fields = (object, key) => object.fields.filter((field) => field.key === key);
+  const tokens = []; const problems = [];
+  const claimed = new Set(); const owned = new Set();
+  const problem = (code) => { if (!problems.includes(code)) problems.push(code); };
+  const parents = new Map();
+  const descendants = (node, parent) => {
+    if (node.kind === 'object') {
+      parents.set(node, parent);
+    } else if (node.kind === 'array') {
+      for (const entry of node.entries) descendants(entry, parent);
+    }
+  };
+  for (const { objects } of docs) {
+    for (const object of objects) {
+      for (const field of object.fields) descendants(field.node, object);
+    }
+  }
+  const contextKnown = (object) => {
+    const seen = new Set();
+    for (let node = object; node; node = parents.get(node)) {
+      if (seen.has(node)) return false;
+      seen.add(node);
+      const contexts = fields(node, '@context');
+      if (contexts.length && (contexts.length !== 1 ||
+          contexts[0].node.kind !== 'string' ||
+          !['https://schema.org', 'https://schema.org/', 'http://schema.org', 'http://schema.org/'].includes(contexts[0].node.value))) return false;
+    }
+    // Absent context retains the original literal-key contract. This is not
+    // JSON-LD namespace expansion; explicit unsupported mappings are unknown.
+    return true;
+  };
+  const decimal = (node) => node &&
+    ((node.kind === 'string' && /^\d+(?:\.\d+)?$/.test(node.value) &&
+      Number.isFinite(Number(node.value))) ||
+     (node.kind === 'number' && Number.isFinite(node.value) && node.value >= 0));
+  const count = (node) => node &&
+    ((node.kind === 'string' && /^\d+$/.test(node.value) &&
+      Number.isSafeInteger(Number(node.value))) ||
+     (node.kind === 'number' && Number.isSafeInteger(node.value) && node.value >= 0));
+  for (const { objects } of docs) {
+    for (const object of objects) {
+      const ids = fields(object, '@id'); const types = fields(object, '@type');
+      if (!ids.some((field) => field.node.kind === 'string' &&
+        field.node.value === 'https://simplememofast.com/#app')) continue;
+      const ratings = fields(object, 'aggregateRating');
+      if (ratings.length === 0) continue; // A supported current page has no rating.
+      const appValid = ids.length === 1 && types.length === 1 &&
+        ids[0].node.kind === 'string' && ids[0].node.value === 'https://simplememofast.com/#app' &&
+        types[0].node.kind === 'string' && types[0].node.value === 'SoftwareApplication';
+      if (!appValid) problem('own_rating_app_identity_or_type_unknown');
+      if (!contextKnown(object)) problem('own_rating_context_unknown');
+      const directValid = ratings.length === 1 && ratings[0].node.kind === 'object';
+      if (!directValid) problem('own_rating_direct_object_unknown');
+      for (const field of ratings) {
+        if (field.node.kind !== 'object') continue;
+        claimed.add(field.node);
+        if (appValid && directValid && contextKnown(object)) owned.add(field.node);
+      }
+    }
+  }
+  for (const { offset, objects } of docs) {
+    for (const object of objects) {
+      const ts = fields(object, '@type');
+      const vs = fields(object, 'ratingValue'); const cs = fields(object, 'ratingCount');
+      const bs = fields(object, 'bestRating'); const ws = fields(object, 'worstRating');
+      const directClaim = claimed.has(object);
+      const typeValid = ts.length === 1 && ts[0].node.kind === 'string' &&
+        ts[0].node.value === 'AggregateRating';
+      const valueValid = vs.length === 1 && decimal(vs[0].node);
+      const countValid = cs.length === 1 && count(cs[0].node);
+      const scaleValid = bs.length === 1 && ws.length === 1 &&
+        decimal(bs[0].node) && decimal(ws[0].node) &&
+        Number(bs[0].node.value) === 5 && Number(ws[0].node.value) === 1;
+      const knownContext = contextKnown(object);
+      if (directClaim) {
+        if (!typeValid) problem('own_rating_type_unknown');
+        if (!valueValid) problem('own_rating_value_unknown');
+        if (!countValid) problem('own_rating_count_unknown');
+        if (!scaleValid) problem('own_rating_scale_unknown');
+        if (!knownContext) problem('own_rating_context_unknown');
+      }
+      if (!typeValid || !valueValid || !countValid || !scaleValid || !knownContext) continue;
+      const canonicalValue = C.ratingValue; const canonicalCount = C.ratingCount;
+      if (typeof canonicalValue !== 'string' || !/^\d+(?:\.\d+)?$/.test(canonicalValue) ||
+          !Number.isFinite(Number(canonicalValue)) ||
+          Number(canonicalValue) < 1 || Number(canonicalValue) > 5 ||
+          typeof canonicalCount !== 'string' || !/^\d+$/.test(canonicalCount) ||
+          !Number.isSafeInteger(Number(canonicalCount))) {
+        if (directClaim) problem('canonical_rating_unknown');
+        continue;
+      }
+      for (const [field, canonical] of [[vs[0], canonicalValue], [cs[0], canonicalCount]]) {
+        const value = field.node;
+        tokens.push({ owned: owned.has(object), field: field.key,
+          kind: value.kind, value: value.value, canonical,
+          fieldStart: offset + field.keyStart,
+          start: offset + value.start, end: offset + value.end });
+      }
+    }
+  }
+  return { tokens: tokens.sort((a, b) => a.start - b.start), problems };
+}
+
 function scanHtml(src, rel, { write = false } = {}) {
   const findings = [];
+  const priceProblems = [];
+  const ratingProblems = [];
   // byte ranges of pricing sections / plan cards on this page
   const priceZones = [];
   for (const zm of src.matchAll(/<(?:section|div)[^>]*class="[^"]*(?:pricing|plan-summary)[^"]*"[^>]*>/g)) {
@@ -348,12 +934,84 @@ function scanHtml(src, rel, { write = false } = {}) {
   const inPriceZone = (i) => priceZones.some(([a, b]) => i >= a && i < b);
   for (const [desc, re, build, scope] of RULES) {
     if (scope === 'own' && !OWN_VALUE_PAGES.has(rel)) continue;
+    // Legacy regex/build remain unchanged for original isolated RULE tests.
+    // The real offer writer changes only complete, admitted value tokens.
+    if (scope === 'app-price-monthly' || scope === 'app-price-yearly') {
+      const packet = softwareOfferPriceTokens(src);
+      for (const code of packet.problems) {
+        if (!priceProblems.includes(code)) priceProblems.push(code);
+      }
+      // Refuse all price writes in this HTML when an own offer is ambiguous.
+      if (packet.problems.length) continue;
+      const period = scope === 'app-price-monthly' ? 'monthly' : 'yearly';
+      const edits = [];
+      for (const token of packet.tokens) {
+        if (token.period !== period) continue;
+        if (!token.owned) continue;
+        const correct = token.kind === 'string' ? token.value === token.canonical
+          : token.value === Number(token.canonical);
+        if (correct) continue;
+        const replacement = token.kind === 'string' ? JSON.stringify(token.canonical) : token.canonical;
+        const m = src.slice(token.fieldStart, token.end);
+        const canonical = src.slice(token.fieldStart, token.start) + replacement;
+        findings.push(`${write ? 'fix' : 'DRIFT'}: ${rel}: ${desc}: ${JSON.stringify(m.slice(0, 60))} -> ${JSON.stringify(canonical.slice(0, 60))}`);
+        if (write) edits.push({ start: token.start, end: token.end, value: replacement });
+      }
+      for (const edit of edits.sort((a, b) => b.start - a.start)) {
+        src = src.slice(0, edit.start) + edit.value + src.slice(edit.end);
+      }
+      continue;
+    }
+    // The legacy regex remains only for its original isolated RULE tests.
+    // Real rating edits require same-object ownership and complete value spans.
+    if (scope === 'app-rating') {
+      const packet = softwareRatingTokens(src);
+      for (const code of packet.problems) {
+        if (!ratingProblems.includes(code)) ratingProblems.push(code);
+      }
+      if (packet.problems.length) continue;
+      const edits = [];
+      for (const token of packet.tokens) {
+        if (!token.owned) continue;
+        const correct = token.kind === 'string' ? token.value === token.canonical
+          : token.value === Number(token.canonical);
+        if (correct) continue;
+        const replacement = token.kind === 'string' ? JSON.stringify(token.canonical) : token.canonical;
+        const m = src.slice(token.fieldStart, token.end);
+        const canonical = src.slice(token.fieldStart, token.start) + replacement;
+        findings.push(`${write ? 'fix' : 'DRIFT'}: ${rel}: ${desc} ${token.field}: ${JSON.stringify(m.slice(0, 60))} -> ${JSON.stringify(canonical.slice(0, 60))}`);
+        if (write) edits.push({ start: token.start, end: token.end, value: replacement });
+      }
+      for (const edit of edits.sort((a, b) => b.start - a.start)) {
+        src = src.slice(0, edit.start) + edit.value + src.slice(edit.end);
+      }
+      continue;
+    }
+    // Keep the legacy RULE for its original isolated selftests. The real
+    // version consumer uses complete JSON string value spans, never that regex.
+    if (scope === 'app-version') {
+      const edits = [];
+      for (const token of softwareVersionTokens(src)) {
+        if (!token.owned) continue;
+        if (token.value === C.appVersion) continue;
+        const m = src.slice(token.fieldStart, token.end);
+        const canonical = src.slice(token.fieldStart, token.start) + JSON.stringify(C.appVersion);
+        findings.push(`${write ? 'fix' : 'DRIFT'}: ${rel}: ${desc}: ${JSON.stringify(m.slice(0, 60))} -> ${JSON.stringify(canonical.slice(0, 60))}`);
+        if (write) edits.push({ start: token.start, end: token.end, value: JSON.stringify(C.appVersion) });
+      }
+      for (const edit of edits.sort((a, b) => b.start - a.start)) {
+        src = src.slice(0, edit.start) + edit.value + src.slice(edit.end);
+      }
+      continue;
+    }
     src = src.replace(re, (...args2) => {
       const m = args2[0];
       const index = args2[args2.length - 2];
       if (scope === 'pricing' && !inPriceZone(index)) return m;
-      const canonical = desc === '© line' && rel.startsWith('en/')
-        ? C.copyrightLineEn : build(...args2);
+      const locale = rel.split('/')[0] === 'zh' ? 'zh-Hans' : rel.split('/')[0];
+      const canonical = desc === '© line'
+        ? (C.copyrightLines?.[locale] || (locale === 'en' ? C.copyrightLineEn : C.copyrightLine))
+        : build(...args2);
       if (m === canonical) return m;
       findings.push(`${write ? 'fix' : 'DRIFT'}: ${rel}: ${desc}: ${JSON.stringify(m.slice(0, 60))} -> ${JSON.stringify(canonical.slice(0, 60))}`);
       return write ? canonical : m;
@@ -369,7 +1027,7 @@ function scanHtml(src, rel, { write = false } = {}) {
       }
     }
   }
-  return { out: src, findings };
+  return { out: src, findings, priceProblems, ratingProblems };
 }
 
 /**
@@ -401,13 +1059,23 @@ function scanLlms(src, { write = false } = {}) {
 let driftCount = 0;
 let filesChanged = 0;
 const report = [];
+const priceAdmissionProblems = [];
+const ratingAdmissionProblems = [];
 
 for (const file of htmlFiles(ROOT)) {
   const orig = fs.readFileSync(file, 'utf8');
   const rel = path.relative(ROOT, file);
-  const { out, findings } = scanHtml(orig, rel, { write: WRITE });
+  const { out, findings, priceProblems, ratingProblems } = scanHtml(orig, rel, { write: WRITE });
   driftCount += findings.length;
   report.push(...findings);
+  for (const code of priceProblems) {
+    const issue = 'UNKNOWN: ' + rel + ': own named offer price: ' + code;
+    report.push(issue); priceAdmissionProblems.push(issue);
+  }
+  for (const code of ratingProblems) {
+    const issue = 'UNKNOWN: ' + rel + ': own aggregateRating: ' + code;
+    report.push(issue); ratingAdmissionProblems.push(issue);
+  }
   if (WRITE && out !== orig) {
     fs.writeFileSync(file, out);
     filesChanged++;
@@ -426,11 +1094,19 @@ for (const file of htmlFiles(ROOT)) {
 }
 
 report.forEach((l) => console.log(l));
+if (priceAdmissionProblems.length) {
+  console.error('FAIL: ' + priceAdmissionProblems.length + ' own named offer price admission issue(s)');
+  process.exit(1);
+}
+if (ratingAdmissionProblems.length) {
+  console.error('FAIL: ' + ratingAdmissionProblems.length + ' own aggregateRating admission issue(s)');
+  process.exit(1);
+}
 if (WRITE) {
   console.log(`done: ${driftCount} value(s) updated in ${filesChanged} file(s)`);
 } else if (driftCount) {
   console.error(`FAIL: ${driftCount} value(s) drift from data/site-constants.json`);
   process.exit(1);
 } else {
-  console.log('OK: rating/price/©/og:site_name all match data/site-constants.json');
+  console.log('OK: admitted rating/price/©/og:site_name rules match data/site-constants.json; unknown or unadmitted price/rating nodes not certified');
 }

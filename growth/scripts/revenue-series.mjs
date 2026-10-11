@@ -30,6 +30,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { selftestTally } from '../../scripts/lib/tally.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 export const SRC_DIR = path.join(ROOT, 'growth/data/appstore');
@@ -300,9 +301,7 @@ export function policyDrift(policy, series) {
 }
 
 function selftest() {
-  let total = 0; const failures = [];
-  const t = (name, cond) => { total += 1; if (!cond) failures.push(name);
-    console.log(`  ${cond ? 'ok  ' : 'FAIL'} ${name}`); };
+  const { t, finish } = selftestTally();
 
   const mk = (date, from, to, days, proceeds) => ({
     date, reports: [{ report: 'App Store Purchases Standard',
@@ -430,9 +429,7 @@ function selftest() {
   t('写しと方針が揃っていれば黙る',
     policyDrift({ cash_scenarios: { revenue_history_days: 3 } }, { covered_days: 3 }).length === 0);
 
-  if (failures.length) { console.log(`\nselftest: ${total}件中 ${failures.length}件 失敗 — ${failures.join(' / ')}`); return 1; }
-  console.log(`\nselftest: 全${total}件 通過`);
-  return 0;
+  return finish();
 }
 
 /** 隣の実測を読む。**無ければ null**（0 ではない）。 */

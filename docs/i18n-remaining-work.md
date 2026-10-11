@@ -519,7 +519,7 @@ python3 scripts/inject_faq_schema.py
 <footer>
   <div class="disclaimer">
     <small>
-      SimpleMemo is an independent iOS app developed by Yurika Inc. (Japan).
+      SimpleMemo is an independent iOS app developed by YURIKA, K.K. (Japan).
       Not affiliated with the original Captio app by Ben Lenarts (which shut down October 1, 2024)
       nor with Emburse Captio (the expense management SaaS by Captio Tech SL).
     </small>

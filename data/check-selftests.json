@@ -208,6 +208,12 @@
       "broke": "壊し1通りで4件落ちることを観測。**`asc_state !== 'APPROVED'` の判定を殺す**と、未提出の CPP を配線しても素通りする。これは実際に踏んだ罠で、Apple は未承認 CPP へのリンクを既定商品ページへ倒すのに、台帳と --check だけが「配線済み」と言う（free-memo-generic が同じ状態で審査待ちのまま止まっていた）。自己テストは8件で、UUID の形・ppid が null の行を黙らせること・実データが通ることも見る。"
     },
     {
+      "script": "scripts/assess-release-health-evidence.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-29",
+      "broke": "独立した一時変異で、未受領の同週App Crashesをevidence_readyへ誤分類すると自己テスト2件がexit 1、低母数判定を無効化すると自己テスト1件がexit 1。元ファイルへ復元後8件成功。クラッシュ欠測と実ゼロ、低母数と元100件を混同しない。"
+    },
+    {
       "script": "scripts/automation-rate.mjs",
       "state": "demonstrated",
       "at": "2026-08-27",
@@ -268,6 +274,12 @@
       "broke": "実際のワークフローからGCP資格情報の接続を外す変異で --check が非0終了。欠損日・重複日・古い/未来の観測・別プロパティ・取得失敗・タイムアウト・秘密情報混入を自己テストで拒否。取得失敗時は0件や取得成功にしない。"
     },
     {
+      "script": "scripts/autopilot-diagnostics.mjs",
+      "state": "demonstrated",
+      "at": "2026-10-06",
+      "broke": "限定診断の34項目を実測。コピーした実装からtool_nameの許可リストを外すと自己テストが失敗することを確認。両モデル結果を対象にする条件、固定GITHUB_SHA、限定uploadディレクトリ、savedガード、非致命的uploadの5配線変異を拒否する。実際のinterpretRunでupload失敗がverifiedをno_artifactへ誤分類する負例と、非致命的step結論ならshippedを保持する回帰を確認。実CLIとworkflow内の実費抽出Pythonをfixtureで実行し、raw denial配列と旧count形式、欠損、秘密除外、symlink・過大入力・既存出力ディレクトリ拒否を確認。自己テストは課金実行やremote workflowを起動しない。"
+    },
+    {
       "script": "scripts/autopilot-drill.mjs",
       "state": "demonstrated",
       "at": "2026-09-05",
@@ -290,6 +302,12 @@
       "state": "demonstrated",
       "at": "2026-09-05",
       "broke": "repair_of が存在しない故障を指す 1通りで落ちることを観測\n2026-09-05: 原因未確定の失敗を証拠付きの調査待ちとして許す経路を追加。旧来の一律拒否へ戻す・検知証拠を要求しない・未分類を未修理一覧から隠す3変異で自己検査が失敗。隔離した実Gitのappend CLIで記録した同一検体は修正前check=1、修正後check=0。元の失敗・調査待ち・unknown修理上限3回を保持。検体を本番台帳へ書いていない。"
+    },
+    {
+      "script": "scripts/build_site_translations.py",
+      "state": "demonstrated",
+      "at": "2026-10-07",
+      "broke": "24件の自己テストが正常版で成功。値保護を無効化すると2件、翻訳先URLへの書換えを無効化すると1件、公開ページの登録漏れ検知を無効化すると1件が失敗することを個別の作業コピーで確認した。翻訳の意味や自然さは別途レビューが必要。"
     },
     {
       "script": "scripts/build-citation-assets.py",
@@ -502,6 +520,12 @@
       "broke": "DRAFT リボンが draft フラグから切れる／文字列 DRAFT で判定してしまう罠／寸法ずれ／見出しの「」が長すぎる を落とすことを観測"
     },
     {
+      "script": "scripts/check-pr-release-ledger.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-24",
+      "broke": "壊し3通りで落ちることを観測し、あわせて**実データでも確かめた。****(1) 突き合わせを殺す**（experiments の status 判定を外して planned も「出た」と数える）と「planned は『出た』と数えない」が落ちる —— これが効かなくなると、**出す予定の日付が入っているだけで『配信済み』と見なされ、本当に出た配信の欠落が隠れる。****(2) park を無期限の棚上げにする**（resolve_by の比較を外す）と2件が落ちる —— 未記録を `known_unrecorded` に入れた時点で永久に黙り、**把握していることが放置の道具になる。****(3) 設定が読めないときに通す**と「設定が消えたら落ちる」が落ちる —— `data/pr-release-ledger.json` を消すだけで黙る検査になる（check-guard-shapes が言う『地面を失うと消える見張り』）。**実データ:** `known_unrecorded` から PR⑦ の行を外すと、実際の annotations/experiments に対して「2026-09-24 の配信が annotations にあるのに experiments に無い」が出る。これは仕込んだ検体ではなく、**2026-09-24 時点で実際に起きている食い違い**である（`due(ledger,'2026-10-08')` が [] を返すことを別途実測）。**自分の書いたコードの欠陥も1件これで見つかった** —— 当初 `age !== null && age > limit` と書いており、`ISO_DATE` が形しか見ないため `2026-13-01` が通って `Date.parse` が NaN になり、**上限超過の判定ごと素通りしていた。**null を独立した problem に変え、自己テストで固定した。"
+    },
+    {
       "script": "scripts/check-prd.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",
@@ -524,6 +548,12 @@
       "state": "demonstrated",
       "at": "2026-08-26",
       "broke": "新しい data/check-selftests.json を分類せずに置いて「分類するまで通さない」で落ちた"
+    },
+    {
+      "script": "scripts/check-query-definitions.mjs",
+      "state": "demonstrated",
+      "at": "2026-10-01",
+      "broke": "scripts/check-query-definitions.test.mjs の7ケースを実行。全8SQLの原本変異、CTR分母逆転、同16桁prefixの偽fullSHA、欠落・重複・path逸脱・kind・履歴・日付・依存欄の不正、読取失敗・空理由・不一致IOを拒否。実CLIでSQL-only変異を --check が拒否し、空理由では更新せず、理由付き --bump 後に原KPI・他定義・元履歴を保持して通ることを確認。新KPI値や本番クエリは生成しない"
     },
     {
       "script": "scripts/check-release-gate-pin.mjs",
@@ -718,6 +748,12 @@
       "broke": "2026-09-19: 隔離した写しでlang-content除去を無効化すると本文表示の回帰検査が失敗。未処理のJA/EN検体は両方が差分として検出され、apply後は差分0。後から生成される英語リンク・言語切替保持・非空FAQ再生成・祖先別パンくず名・他ItemListのラベル保持を8件で検証する。 同日補完: 計17件に拡張。英語aria/alt、表示ラベル、構造化データ名の変換を個別に無効化すると各1件失敗（例外0）。実際の旧head整形処理へ差し替えるとscript/comment保持の検査が1件失敗（例外0）。inline head、RSS、Smart App Banner、本文、コメント内html例、商品schemaのロケール別定数価格・ID・US導線、抽出後の英語offers復元と生成位置の保持・再実行一致も確認した。"
     },
     {
+      "script": "scripts/generate_dev_feed.py",
+      "state": "demonstrated",
+      "at": "2026-09-24",
+      "broke": "**[2026-09-24] CI に配線した日に、壊し6通りと実データ1通りを実測した。**(1) `--check` がずれを報告しない（`if have != want` を潰す）→ 自己テスト2件（無い／古いフィード）／(2) 読めないページを `--check` が飛ばす（FeedError で 0 を返す）→ 1件／(3) `EXTRA_PAGES` を読まない → 1件／(4) 古い順に並べる → 3件／(5) lastBuildDate を最古の dateModified にする → 1件／(6) 正規 URL の重複を通す → **最初は素通りした**（重複の検体が無かった）。検体（同じ canonical の2ページ）を足して 1件で落ちることを確かめた。**実データ**：記事の meta description だけを変えてフィードを作り直さないと `--check` が exit 1（stale）。これは同じ日に #1563 が relay-api-design の説明文を変えたまま main に入り、フィードだけ古い説明文で配られていた形そのもの。"
+    },
+    {
       "script": "scripts/generate_sitemap.py",
       "state": "demonstrated",
       "at": "2026-09-06",
@@ -758,6 +794,12 @@
       "state": "demonstrated",
       "at": "2026-09-03",
       "broke": "**壊れても赤くならない側の道具。**黙って間違えると、英語の読者が dual-DOM の面で日本語を見続けるか（種が入らない）、日本語の読者が切替器で選んだ値を毎回上書きされるか（`if(!getItem)` が消える）で、**どちらも CI では何も起きない。**\n\n自己テスト15件。壊し5通りで落ちるのを観測（2026-09-03）: **(1) 冪等の判定を殺す**と1件（再実行で種が2つ入り、読者の localStorage を二重に触る）。**(2) `</head>` が無い面も通す**と1件。**(3) 既存の値の確認（`if(!localStorage.getItem(k))`）を外す**と1件 —— 英語の面を開くたびに読者の選択を `en` へ書き戻す。**(4) キーを lang.js と違うものにする**と1件（種を撒いても誰も読まない）。**(5) head の外へ置く**と2件。\n\n**[2026-09-03 追記] 残していた観測を直した。**挿入位置は `rpartition(\"</head>\")` で**最後の** `</head>` を選んでいた。/en/ の48面はすべて `</head>` が1つなので出力は変わらないが、本文中のコメントに `</head>` が現れた面では種が head の外へ出る。`inject_faq_schema.py` が同じ日に**向きが逆の同じ穴**を踏んでいる —— あちらは素の `re.search` で**最初の** `</head>` を拾い、/captio-alternative/ のコメントの**中へ**ブロックを差し込んだ。HTML のコメントは入れ子にならないので残りが生きた markup になり、**本番ページの最初の可視行が `by scripts/inject_faq_schema.py -->` になった。**\n\n同じ直し方を当てた —— コメントを**同じ長さの空白**で覆ってから最初の `</head>` を探す（`first_live_head_close`）。検体を6件足して 15 → 21 件。壊し4通りで落ちるのを観測: **(1) コメントを覆わない**と4件（先例が踏んだ向き）。**(2) `rpartition` へ戻す**と3件。**(3) 覆いを空文字にする**と3件 —— 長さが変わると位置がずれて差し込み先が動く。**(4) `</head>` が無いとき 0 を返す**と2件（本文の先頭へ差し込む）。\n\n**出力が変わらないことを実測した** —— 出荷済みの48面から種を剥がして新実装を当て直すと、**48面すべてがバイト単位で出荷済みと一致**し、旧実装（rpartition）とも48面すべてで同じ位置になった。\n\n残る限界: `<script>` の文字列中の `</head>` はまだ本物と区別できない（先例も同じ範囲）。`</head>` を挿入位置に使うスクリプトはこの2本だけで、どちらもコメントを覆うようになった。"
+    },
+    {
+      "script": "scripts/merge-identity-check.js",
+      "state": "demonstrated",
+      "at": "2026-09-24",
+      "broke": "隔離した写しで3通り壊し、--selftest がいずれも非0終了することを実測。(1) 承認済み名義の後ろに任意の括弧名を許すと、名義の前方一致を拒否する検体が落ちる。(2) PRコミット上限を250から999に緩めると、251件を拒否する検体が落ちる。(3) PR作成者プロフィールの完全一致を前方一致に緩めると、著者名の偽装を拒否する検体が落ちる。元実装は成功。GitHub APIのコミット件数突き合わせと対象SHA一致の統合模擬も別途成功。"
     },
     {
       "script": "scripts/pr-evaluation-due.mjs",
@@ -850,6 +892,18 @@
       "broke": "壊し2通りで落ちることを観測。**(1) `(?!\"@type\":\"SoftwareApplication\")` のガードを外す**と2件 —— 自社ノードに評価が無いページで、隣の他社ノードへ回り込んで **競合の 4.9/206 を自社の値へ書き換える。**これは実際に起きかけた事故（/en/send-email-to-yourself/ の Boomerang）で、**検出器が他人の構造化データを編集するのは、検出器が無いより悪い。****(2) stampDate を『一番新しい日付』に変える**と2件 —— llms.txt が 「リリースの13日前に 5.8.1 が現行」と名乗った、権威ありげな誤情報そのもの。自己テストは12件。**検体を1桁で書いて規則（\\d{3}）を空振りさせた誤りを自己テスト自身が捕まえた**ので、検体が台帳の値と別物であることを固定する行を足してある。\n\n**[2026-09-03 追記] 規則を単体で当てるだけでは、ループ側の門を1つも通っていなかった。**上の観測は `apply(ruleName, html)` で RULES を1本ずつ当てたもので、**自社ページ限定（`scope === 'own'`）・料金ゾーン限定（`scope === 'pricing'`）・og:site_name・llms.txt の4つの門をどれも通らない。**隔離した写しで潰して確かめたら、4つとも **12件中0件失敗**（緑のまま）だった。判定を `scanHtml` / `scanLlms` へ切り出し、面ごと通す検体を12件足して 24 件に。壊し6通りで落ちるのを観測: **(1) 自社ページ限定を外す**と1件 —— 外すと比較ページに載っている**競合の評価を自社の値へ書き換えにいく**。**(2) 料金ゾーン限定を外す**と1件（本文中の編集上の価格まで直す）。**(3) og:site_name の判定を殺す**と1件。**(4) llms.txt の「当たらない規則」を合格にする**と1件 ——文面が変わればこの値は誰にも管理されなくなる。**(5) 食い違いの報告を丸ごと殺す**と2件。**(6) --write が書き換えないようにする**と1件。切り出しが挙動を変えていないことは、`--check` と `--write` の出力がバイト単位で一致することで確認（食い違いのある木で 348 行のログ / 3,884 行の書き換え、両モードとも一致）。"
     },
     {
+      "script": "scripts/sync_page_design.py",
+      "state": "demonstrated",
+      "at": "2026-10-07",
+      "broke": "2026-10-07: seven self-tests pass. In an isolated fixture repository, --check exits 1 for an unmigrated page and for an outdated stylesheet hash; after --write it exits 0. Reversing document-language detection makes --selftest exit 1. Tests preserve copy, scripts and campaign attributes, exclude private pages, avoid nested chapter grids and duplicate authored numbering, and verify idempotence."
+    },
+    {
+      "script": "scripts/sync_shared_chrome.py",
+      "state": "demonstrated",
+      "at": "2026-10-07",
+      "broke": "2026-10-07: seven self-tests pass. In isolated copies, accepting an unknown mixed navigation handler and using the first textual head-close instead of the parsed closing tag each make --selftest exit 1. The tests also preserve main content, JSON-LD, CTA URLs and attributes, locale handling, exclusions and idempotence. Language navigation: 12 self-tests pass. Isolated mutations that omit an existing translation pair or make the current language reload its URL both make --selftest exit 1. Utility input, metadata, CTA attributes and native-language destinations are preserved."
+    },
+    {
       "script": "scripts/tag-cta-placements.js",
       "state": "demonstrated",
       "at": "2026-09-03",
@@ -882,8 +936,8 @@
     {
       "script": "scripts/vendor-terms.mjs",
       "state": "demonstrated",
-      "at": "2026-08-28",
-      "broke": "壊し6通り目を追加。**改定で判定を戻すときに `reviewed_by` を落とさない**と「改定後も reviewed_by が残っている」が落ちる（`draft_note` / `risk_note` も同じ）。判定だけ戻して読み手の記録を残すと、**中身の無い『AIの下書きどまり』の印が付いたまま**になり、check-corporate の集計にも出続ける。`reviewed_at` を null にするのと同じ理由なので、同じ場所で落とすようにした。\n\n以下は 2026-08-26 の記録。壊し5通りを実測。**script/style を落とさない**と「script の中身を本文に数えている」で落ちる（殻を弾く仕掛けを自分で無効にする形）／**取得失敗で指紋を null にする**と「取得失敗で台帳の指紋を消している」／**改定で判定を戻さない**と4件／**not_applicable まで戻す**と2件。**1つは最初、落ちなかった** —— 長さの下限を 0 にしても、殻の検体に規約らしい語が無く語の判定が代わりに弾いていた（テストが正しい理由で通っていた）。現実の殻は <title>Terms of Service</title> を持つので looksLikeTerms(\"Terms of Service\") を検体に足し、下限を 0 にすると落ちることを確認した"
+      "at": "2026-09-24",
+      "broke": "**[2026-09-24] 指紋を本文だけに取る（`body_scope` / `fingerprint_scope`）ので、壊し13通りを実測し、13通りとも落ちた。**(1) `<main>` が2つあっても最初を選ぶ → 1件／(2) script を落とさずに `<main>` を数える → 5件（検体の script に `<main>` の文字を入れてある）／(3) **範囲が取れない回を unknown にする** → 6件 —— 作りが変わった日から嘘の ok が永久に残る形／(4) **切り出した範囲の本文らしさを見ない** → 2件／(5) ページが1文字も同じでも範囲が取れなければ戻す → 1件（目印の打ち間違いで人の判定を消す形）／(6) 範囲を移す回にページ全体を比べない → 1件／(7) **範囲名が違っても指紋を比べる** → 1件／(8) 目印を範囲名に焼き込まない → 1件／(9) 終わりの目印を先頭から探す → 1件／(10) 範囲名を台帳に書かない → 1件／(11) 台帳の設定の検査を素通しにする → 1件／(12) **範囲を無視してページ全体の指紋を使う** → 1件（メニューが動いただけで判定が消える、今回直した形そのもの）／(13) 読めない設定で判定を動かす → 1件。\n\n**(4) と (7) は最初、落ちなかった。**(4) は殻の検体の指紋が前回の指紋と違ったので、本文らしさを見なくても changed になって通っていた。(7) も前回の指紋がたまたま違う値だった。**どちらもテストが正しい理由で通っていなかった**（08-26 と同じ形）。(4) は「殻のまま記録された行が、翌週も殻」の検体（前回の指紋＝殻の指紋）を足し、(7) は前回の指紋をわざと今の範囲の値にした検体に直して、落ちることを確かめた。\n\n**実データでも確かめた。**Web アーカイブの写し（ページ全体の指紋が台帳の値と一致するもの）で、anthropic の4回・appsflyer の3回・search_console の1回のページ全体の変化が本文の指紋では消え、google_cloud（09-02〜09-07 の支払い条項の改定）と firebase（09-02 の改定）の変化は本文の指紋でも残ることを見た。\n\n壊し6通り目を追加。**改定で判定を戻すときに `reviewed_by` を落とさない**と「改定後も reviewed_by が残っている」が落ちる（`draft_note` / `risk_note` も同じ）。判定だけ戻して読み手の記録を残すと、**中身の無い『AIの下書きどまり』の印が付いたまま**になり、check-corporate の集計にも出続ける。`reviewed_at` を null にするのと同じ理由なので、同じ場所で落とすようにした。\n\n以下は 2026-08-26 の記録。壊し5通りを実測。**script/style を落とさない**と「script の中身を本文に数えている」で落ちる（殻を弾く仕掛けを自分で無効にする形）／**取得失敗で指紋を null にする**と「取得失敗で台帳の指紋を消している」／**改定で判定を戻さない**と4件／**not_applicable まで戻す**と2件。**1つは最初、落ちなかった** —— 長さの下限を 0 にしても、殻の検体に規約らしい語が無く語の判定が代わりに弾いていた（テストが正しい理由で通っていた）。現実の殻は <title>Terms of Service</title> を持つので looksLikeTerms(\"Terms of Service\") を検体に足し、下限を 0 にすると落ちることを確認した"
     }
   ],
   "$baseline": "2026-08-26 の実測。**通すために上げた値ではない。**以後この数は下げる方向にしか動かさない —— 上げた瞬間に、この台帳は現状を追認する表になり、止める力を失う。余裕（slack）も持たせない。初回 none=41 → 同日に none=0、続けて selftest_only=0 まで下げた。**両方 0 は「CI 配線 58 本すべてについて、壊して落ちるのを実際に見た」という意味であって、「検査が正しい」ではない。**見たのは『壊れたら気づく』ことだけで、『見るべきものを見ている』かは別問題。次に測るならそこ。",

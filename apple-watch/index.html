@@ -6,22 +6,22 @@
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
   <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/apple-watch/">
   <script>
-    window.addEventListener('load', function() {
+    (function() {
       if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
-      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
-      ric(function() {
-        var s = document.createElement('script');
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
-        s.async = true;
-        document.head.appendChild(s);
-        s.onload = function() {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
-        };
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
       });
-    });
+    })();
   </script>
   <title>Apple Watchで音声入力メモを取る方法｜入力・送信・到着確認</title>
   <meta name="description" content="Apple Watchで音声入力したメモをメールへ残す手順。iPhoneでの宛先設定、入力方法の切替、スマートスタック、待機・失敗時の確認を解説します。入力画面が自動で開くことと録音開始は別で、メール送信はペアのiPhoneを経由します。">
@@ -33,7 +33,7 @@
   <meta property="og:type" content="article">
   <meta property="article:published_time" content="2026-06-11T00:00:00+09:00">
   <meta property="og:url" content="https://simplememofast.com/apple-watch/">
-  <meta property="og:image" content="https://simplememofast.com/assets/img/og/index.png">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/index-20261001.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:site_name" content="Obsidian連携シンプルメモ">
@@ -45,12 +45,20 @@
   <meta name="twitter:site" content="@simplememofast">
   <meta name="twitter:title" content="Apple Watchで音声入力メモを取る方法｜入力・送信・到着確認">
   <meta name="twitter:description" content="Apple Watchで音声入力したメモをメールへ残す手順。iPhoneでの宛先設定、入力方法の切替、スマートスタック、待機・失敗時の確認を解説します。入力画面が自動で開くことと録音開始は別で、メール送信はペアのiPhoneを経由します。">
-  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/index.png">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/index-20261001.jpg">
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/apple-watch/">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/apple-watch/">
   <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/apple-watch/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/apple-watch/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/apple-watch/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/apple-watch/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/apple-watch/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/apple-watch/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/apple-watch/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/apple-watch/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/apple-watch/">
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/apple-watch/">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -63,11 +71,9 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"Apple Watch対応","item":"https://simplememofast.com/apple-watch/"}]}</script>
 
   <!-- JSON-LD: WebPage with Speakable -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/apple-watch/#webpage","inLanguage":"ja","name":"Apple Watchで音声入力メモを取る方法｜入力・送信・到着確認","description":"Apple Watchで音声入力したメモをメールへ残す手順。iPhoneでの宛先設定、入力方法の切替、スマートスタック、待機・失敗時の確認を解説します。入力画面が自動で開くことと録音開始は別で、メール送信はペアのiPhoneを経由します。","url":"https://simplememofast.com/apple-watch/","datePublished":"2026-06-11","dateModified":"2026-09-09","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub"]},"about":{"@type":"SoftwareApplication","@id":"https://simplememofast.com/#app","name":"Obsidian連携シンプルメモ","operatingSystem":"iOS, watchOS","applicationCategory":"ProductivityApplication","url":"https://apps.apple.com/jp/app/id6758438948","alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/apple-watch/#webpage","inLanguage":"ja","name":"Apple Watchで音声入力メモを取る方法｜入力・送信・到着確認","description":"Apple Watchで音声入力したメモをメールへ残す手順。iPhoneでの宛先設定、入力方法の切替、スマートスタック、待機・失敗時の確認を解説します。入力画面が自動で開くことと録音開始は別で、メール送信はペアのiPhoneを経由します。","url":"https://simplememofast.com/apple-watch/","datePublished":"2026-06-11","dateModified":"2026-10-01","about":{"@type":"SoftwareApplication","@id":"https://simplememofast.com/#app","name":"Obsidian連携シンプルメモ","operatingSystem":"iOS, watchOS","applicationCategory":"ProductivityApplication","url":"https://apps.apple.com/jp/app/id6758438948","alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
 
   <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
-  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
   <style>
     .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
     .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
@@ -259,55 +265,77 @@
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/apple-watch/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Watchでアプリを開くと音声入力が自動で始まりますか？","acceptedAnswer":{"@type":"Answer","text":"設定が完了して入力できる状態なら、シンプルメモはwatchOS標準の入力画面を自動で開く構成です。ただし、表示される入力方法はモデル・言語・画面の状態で変わります。キーボードが出たら音声入力へ切り替え、画面が開かない場合はアプリ中央のマイクから始めてください。"}},{"@type":"Question","name":"本当に2タップで送れますか？","acceptedAnswer":{"@type":"Answer","text":"起動後に音声入力が使える状態で、追加の選択や確認が不要な場合は「アプリを開く」「完了」の2回で送信操作に進めます。初回設定、ロック解除、入力方法の切替などは別です。操作回数やメールの到着時間をすべての環境で保証するものではありません。"}},{"@type":"Question","name":"iPhoneが近くになくても、Watchの通信だけでメールを送れますか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモのWatchアプリは、送信依頼をペアのiPhoneへ渡します。Watch単体のWi-Fiやセルラー接続だけでメール送信が完結する仕組みではありません。待機や失敗が表示された場合は、iPhoneとの接続とアプリの状態を確認し、受信箱で到着を確かめてください。"}},{"@type":"Question","name":"WatchからのメモはObsidianにも入りますか？","acceptedAnswer":{"@type":"Answer","text":"iPhone側でObsidian連携、保管庫へのアクセス、保存先を設定している場合に追加保存できます。メールが届いたことだけでノートへの追記完了を判断せず、初回は設定したノートでも同じ文章を確認してください。"}},{"@type":"Question","name":"Obsidian公式のApple Watchアプリですか？","acceptedAnswer":{"@type":"Answer","text":"いいえ。シンプルメモは株式会社ユリカが開発する独立したアプリです。Obsidianの公式アプリではなく、自分宛メールだけでも使えます。無料は1日3通までで、追加送信などのプランはアプリ内の購入画面で確認できます。"}},{"@type":"Question","name":"スマートスタックにはどうアクセスしますか？","acceptedAnswer":{"@type":"Answer","text":"文字盤でDigital Crownを上方向へ回すか、画面下端から上へスワイプします。追加したシンプルメモのウィジェットをタップするとアプリが開きます。編集画面や追加方法の表示はwatchOSのバージョンによって変わります。"}}]}</script>
+  <link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+  <link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+  <noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="capture-editorial capture-brand capture-full site-designed" data-design-family="refined">
+  <a class="ce-skip" href="#main-content">本文へスキップ</a>
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="メインナビゲーション">
+  <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span>Obsidian連携シンプルメモ</span></a>
-      <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span>使い方</span></a></li>
-        <li><a href="/use-cases/"><span>活用事例</span></a></li>
-        <li><a href="/vs/"><span>比較</span></a></li>
+      <a class="global-nav__logo site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/guides/">使い方</a><a href="/use-cases/">活用事例</a><a href="/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/">使い方</a></li>
+        <li><a href="/use-cases/">活用事例</a></li>
+        <li><a href="/vs/">比較</a></li>
         <li><a href="/methods/"><span>メソッド</span></a></li>
         <li><a href="/blog/"><span>ブログ</span></a></li>
         <li><a href="/glossary/"><span>用語集</span></a></li>
-        <li><a href="/faq"><span>FAQ</span></a></li>
-        <li><a href="/about/"><span>開発者</span></a></li>
-        <li><a href="/devlog/"><span>開発記録</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="watch" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=4b75e642-3dd9-425c-8ff7-9db0cc859eb6&amp;pt=128498560&amp;ct=jp__nav&amp;mt=8"><span>ダウンロード</span></a></li>
+        <li><a href="/faq">よくある質問</a></li>
+        <li><a href="/about/">開発者について</a></li>
+        <li><a href="/devlog/">開発記録</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="watch" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=4b75e642-3dd9-425c-8ff7-9db0cc859eb6&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/apple-watch/" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/apple-watch/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
-        <a data-cta-variant="v1" data-cta-cluster="watch" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=4b75e642-3dd9-425c-8ff7-9db0cc859eb6&amp;pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="日本語 · 言語を選択"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>JA</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ja" dir="ltr"><p class="site-language-title">言語を選択</p><div class="site-language-grid"><span class="site-language-current" data-site-locale="ja" aria-current="page"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/en/apple-watch/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/apple-watch/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/apple-watch/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/apple-watch/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/apple-watch/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/apple-watch/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/apple-watch/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/apple-watch/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/apple-watch/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="watch" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=4b75e642-3dd9-425c-8ff7-9db0cc859eb6&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
           <span>ダウンロード</span>
         </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="メニュー"><span>メニュー</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
   </nav>
 
-<main class="page-content">
+<main class="page-content" id="main-content">
     <div class="container">
 
       <!-- Hero -->
       <div class="lp-hero">
+<div class="ce-hero-copy">
         <div class="lp-hero__label">
           <span>Apple Watch対応</span>
         </div>
         <h1 class="lp-hero__title">
-          <span>Apple Watchから、音声メモをメールへ。</span>
+          <span>Apple Watchから、<span class="ce-title-accent">音声メモ</span>をメールへ。</span>
         </h1>
         <p class="lp-hero__sub">手首で短い文章を入力し、ペアのiPhoneを経由して設定したメール宛先へ送ります。まずiPhoneで宛先を認証し、Watchで入力方法を選んで、受信箱への到着を確認してください。Obsidianへの追加保存にはiPhone側の連携設定も必要です。</p>
         <div class="hero-cta-row" style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
-          <a data-cta-variant="v1" data-cta-cluster="watch" data-cta-placement="hero" href="https://apps.apple.com/jp/app/id6758438948?ppid=4b75e642-3dd9-425c-8ff7-9db0cc859eb6&amp;pt=128498560&amp;ct=jp__hero&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード" data-cta-position="hero">
+          <a data-cta-variant="v1" data-cta-cluster="watch" data-cta-placement="hero" href="https://apps.apple.com/jp/app/id6758438948?ppid=4b75e642-3dd9-425c-8ff7-9db0cc859eb6&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード" data-cta-position="hero">
             <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="eager">
           </a>
           <a href="#limitation" class="hero-cta-secondary" style="display:inline-flex;align-items:center;min-height:48px;padding:.6rem 1.1rem;border:1px solid rgba(100,180,255,.25);border-radius:24px;color:var(--accent);text-decoration:none;font-size:.9rem;">入力画面と音声入力の違いを読む</a>
         </div>
       </div>
+<div class="ce-stage ce-stage--watch" aria-hidden="true"><p class="ce-stage-label">CAPTURE FROM YOUR WRIST</p><div class="ce-watch"><div class="ce-wave"><i style="--bar:10px"></i><i style="--bar:20px"></i><i style="--bar:35px"></i><i style="--bar:23px"></i><i style="--bar:47px"></i><i style="--bar:55px"></i><i style="--bar:31px"></i><i style="--bar:42px"></i><i style="--bar:22px"></i><i style="--bar:49px"></i><i style="--bar:33px"></i><i style="--bar:17px"></i><i style="--bar:26px"></i><i style="--bar:10px"></i></div><p>手首で入力</p></div><div class="ce-connector">↓</div><div class="ce-chip-grid"><div class="ce-chip">ペアのiPhone</div><div class="ce-chip">メール宛先</div></div><p>入力した文章は、ペアのiPhoneを経由。<br>Obsidianへの追加保存は連携設定が必要です。</p><p class="ce-stage-foot">構成イメージ</p></div>
+</div>
+<div class="ce-routes" aria-label="読みたい内容から選ぶ"><a class="ce-route" href="#guide-section-2"><span>01</span><b>iPhoneで準備する</b></a><a class="ce-route" href="#guide-section-3"><span>02</span><b>Watchから送る</b></a><a class="ce-route" href="#guide-section-5"><span>03</span><b>入力で困ったら</b></a></div>
+<div class="ce-article"><details class="ce-index"><summary>このページの目次</summary><nav aria-label="ページ内の目次"><a href="#guide-section-1">01　Apple Watchでメモを音声入力するには？</a><a href="#guide-section-2">02　最初にiPhoneで宛先を設定する</a><a href="#guide-section-3">03　Watchで入力し、送信結果を確認する</a><a href="#guide-section-4">04　自動で開くのは入力画面。入力方法は環境で変わります</a><a href="#guide-section-5">05　キーボードが出る・言語が違う・音声入力が見つからないとき</a><a href="#guide-section-6">06　待機・失敗の表示や、メールが届かないとき</a><a href="#guide-section-7">07　スマートスタックから開く</a><a href="#guide-section-8">08　よくある質問</a><a href="#guide-section-9">09　関連ページ</a></nav></details>
 
-      <section class="lp-section watch-guide-copy" id="watch-voice-input" data-answer-block="apple-watch-voice-input-how"><h2 class="lp-section__title">Apple Watchでメモを音声入力するには？</h2><p>Apple Watchでは、対応する入力画面で音声を文字に変換できます。<a href="https://support.apple.com/en-in/guide/watch/apdc6fb0a03f/26/watchos/26">watchOS 26の純正メモ</a>に残す方法もあります。自分のメール受信箱へ集めたい場合は、以下のシンプルメモの設定から試せます。送るのは確定した文章で、録音ファイルの添付ではありません。</p><p>最終確認: <time datetime="2026-09-09">2026年9月9日</time>。著者はシンプルメモの開発者です。Appleの操作ガイドとアプリの入力・送信経路を確認して説明しています。操作回数や配送時間の全機種での実測を示すものではありません。</p></section><section class="lp-section watch-guide-copy" id="watch-setup" ><h2 class="lp-section__title">最初にiPhoneで宛先を設定する</h2><ol><li>ペアのiPhoneでシンプルメモを開き、受信するメールアドレスを設定・認証します。<a href="/note-to-email/#first-send">初回設定ガイド</a>に沿って、まずiPhoneから短いテストメールを送ります。</li><li>iPhoneのWatchアプリでシンプルメモがインストールされていることを確認します。見つからなければ「マイウォッチ」の「利用可能なApp」から追加します。<a href="https://support.apple.com/en-gb/109023">Appleのインストール手順</a>。</li><li>Watchでシンプルメモを開き、設定の同期が終わるのを待ちます。未設定や同期待ちが表示される場合は、先にiPhone側のアプリと宛先設定を確認してください。</li></ol><p>無料は1日3通までです。<a href="/faq#pricing-ja">料金FAQ</a>も確認できます。初回テストはiPhoneとWatchを近くに置いて行うと、設定と通信の状態を確認しやすくなります。</p></section><section class="lp-section watch-guide-copy" id="watch-send" ><h2 class="lp-section__title">Watchで入力し、送信結果を確認する</h2><ol><li><strong>アプリを開く。</strong>アプリ一覧、追加したスマートスタックのウィジェット、対応するコンプリケーションから開きます。</li><li><strong>入力方法を選んで話す。</strong>標準の入力画面が開きます。キーボードなどが出た場合は、画面の入力方法から音声入力を選びます。画面自体が開かないときは、アプリ中央のマイクをタップします。</li><li><strong>文章を確認して「完了」を押す。</strong>この確定操作で、空でない文章の送信依頼に進みます。固有名詞や数字を確認し、送りたくない場合は確定せず閉じます。</li><li><strong>受信箱で到着を確認する。</strong>Watchの待機・送信・失敗の表示を確認し、iPhoneと受信側でも同じ文が届いたか確認します。Obsidianを使う場合は設定したノートも開きます。</li></ol></section><figure class="lp-video" style="margin:2rem 0;">
+
+      <section class="lp-section ce-chapter watch-guide-copy" id="watch-voice-input" data-answer-block="apple-watch-voice-input-how"><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-1" data-ce-number="01">Apple Watchでメモを音声入力するには？</h2></header><div class="ce-chapter__body"><p>Apple Watchでは、対応する入力画面で音声を文字に変換できます。<a href="https://support.apple.com/en-in/guide/watch/apdc6fb0a03f/26/watchos/26">watchOS 26の純正メモ</a>に残す方法もあります。自分のメール受信箱へ集めたい場合は、以下のシンプルメモの設定から試せます。送るのは確定した文章で、録音ファイルの添付ではありません。</p><p>最終確認: <time datetime="2026-09-09">2026年9月9日</time>。著者はシンプルメモの開発者です。Appleの操作ガイドとアプリの入力・送信経路を確認して説明しています。操作回数や配送時間の全機種での実測を示すものではありません。</p></div></section><section class="lp-section ce-chapter watch-guide-copy" id="watch-setup" ><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-2" data-ce-number="02">最初にiPhoneで宛先を設定する</h2></header><div class="ce-chapter__body"><ol><li>ペアのiPhoneでシンプルメモを開き、受信するメールアドレスを設定・認証します。<a href="/note-to-email/#first-send">初回設定ガイド</a>に沿って、まずiPhoneから短いテストメールを送ります。</li><li>iPhoneのWatchアプリでシンプルメモがインストールされていることを確認します。見つからなければ「マイウォッチ」の「利用可能なApp」から追加します。<a href="https://support.apple.com/en-gb/109023">Appleのインストール手順</a>。</li><li>Watchでシンプルメモを開き、設定の同期が終わるのを待ちます。未設定や同期待ちが表示される場合は、先にiPhone側のアプリと宛先設定を確認してください。</li></ol><p>無料は1日3通までです。<a href="/faq#pricing-ja">料金FAQ</a>も確認できます。初回テストはiPhoneとWatchを近くに置いて行うと、設定と通信の状態を確認しやすくなります。</p></div></section><section class="lp-section ce-chapter watch-guide-copy" id="watch-send" ><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-3" data-ce-number="03">Watchで入力し、送信結果を確認する</h2></header><div class="ce-chapter__body"><ol><li><strong>アプリを開く。</strong>アプリ一覧、追加したスマートスタックのウィジェット、対応するコンプリケーションから開きます。</li><li><strong>入力方法を選んで話す。</strong>標準の入力画面が開きます。キーボードなどが出た場合は、画面の入力方法から音声入力を選びます。画面自体が開かないときは、アプリ中央のマイクをタップします。</li><li><strong>文章を確認して「完了」を押す。</strong>この確定操作で、空でない文章の送信依頼に進みます。固有名詞や数字を確認し、送りたくない場合は確定せず閉じます。</li><li><strong>受信箱で到着を確認する。</strong>Watchの待機・送信・失敗の表示を確認し、iPhoneと受信側でも同じ文が届いたか確認します。Obsidianを使う場合は設定したノートも開きます。</li></ol></div></section><figure class="lp-video" style="margin:2rem 0;">
         <video controls preload="none" playsinline muted width="1280" height="720"
                poster="/assets/video/apple-watch-voice-poster.jpg?v=90738b6f25"
                style="width:100%;height:auto;border-radius:var(--radius-sm);display:block;background:#0b1020;">
@@ -315,14 +343,14 @@
           お使いのブラウザは動画の再生に対応していません。
         </video>
         <figcaption style="font-size:.875rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem;">Apple Watchの入力・送信を示す図解動画（2026年9月9日更新）。実機画面の録画ではありません。入力方法を選び、文章を確定し、受信箱で到着を確認します。メール送信はペアのiPhoneを経由し、Obsidianへの保存は連携・保存先の設定が必要です。</figcaption>
-      </figure><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoObject","@id":"https://simplememofast.com/apple-watch/#video","name":"Apple Watchで入力してiPhone経由で送る","description":"Apple Watchの入力・送信を示す図解動画（2026年9月9日更新）。実機画面の録画ではありません。入力方法を選び、文章を確定し、受信箱で到着を確認します。メール送信はペアのiPhoneを経由し、Obsidianへの保存は連携・保存先の設定が必要です。","thumbnailUrl":["https://simplememofast.com/assets/video/apple-watch-voice-poster.jpg?v=90738b6f25"],"uploadDate":"2026-09-09T01:49:57+09:00","duration":"PT14S","contentUrl":"https://simplememofast.com/assets/video/apple-watch-voice.mp4?v=34c2765c14","encodingFormat":"video/mp4","inLanguage":"ja","isFamilyFriendly":true,"publisher":{"@id":"https://simplememofast.com/#organization"},"mainEntityOfPage":{"@id":"https://simplememofast.com/apple-watch/#webpage"}}</script><section class="lp-section watch-guide-copy" id="limitation" ><h2 class="lp-section__title">自動で開くのは入力画面。入力方法は環境で変わります</h2><p>以前、このページでは自動で音声入力を開けないと説明し、その後「常に音声入力へ直行する」と案内しました。現在は<strong>入力画面の自動表示と、音声入力の開始を分けて説明します</strong>。設定済みで入力できる状態なら自動表示する構成ですが、未設定・送信中などでは同じ動作になりません。</p><p><a href="https://developer.apple.com/documentation/watchkit/wkinterfacecontroller/presenttextinputcontroller(withsuggestions:allowedinputmode:completion:)">WatchKitの公開API</a>は標準のテキスト入力画面を表示できます。表示後の入力方法はモデル・言語・画面の状態にも左右されます。「開く」「完了」の2タップは、音声入力をそのまま使え、追加操作がない場合の最短例です。</p></section><section class="lp-section watch-guide-copy" id="watchos-dictation" ><h2 class="lp-section__title">キーボードが出る・言語が違う・音声入力が見つからないとき</h2><p>まず文字を入力する画面を開き、現在の入力方法を確認します。<a href="https://support.apple.com/en-ie/guide/watch/apdaf7837856/watchos">Appleのテキスト入力ガイド</a>では、入力方法のボタンから音声入力・キーボード・スクリブルを切り替えます。使える選択肢はモデルと言語によって異なります。話した言語と違う文字になる場合も、入力言語を先に確認してください。</p><p>シンプルメモだけで始まらない場合は、メッセージなど別の入力欄でも音声入力を選べるか確認します。ペアのiPhoneが近くにあれば、iPhoneに出るApple Watchのキーボード入力通知から文章を入力する方法もあります。長い文章はiPhoneで入力する方が扱いやすい場合があります。</p></section><section class="lp-section watch-guide-copy" id="watch-delivery" ><h2 class="lp-section__title">待機・失敗の表示や、メールが届かないとき</h2><p>Watchのシンプルメモは、送信依頼をペアのiPhoneへ渡します。WatchのWi-Fiやセルラー接続だけでメール送信が完結する機能ではありません。iPhoneとの連携が進まない場合は、iPhone側でアプリを開き、宛先設定・通信・保留中の状態を確認してください。</p><p>「待機」や「キューに追加」は受信済みという意味ではありません。再送する前に受信箱や迷惑メールを確認し、アプリに再試行が表示される場合はその状態に沿って操作します。初回は短いテスト文を使い、確認できていない文章を消したりアプリを入れ直したりする前に内容を控えてください。<a href="/note-to-email/#delivery-check">到着確認の手順</a>も参照できます。</p><p>Obsidianへの追加保存は、iPhone側で保管庫へのアクセスと保存先を設定する必要があります。<a href="/obsidian/">連携設定ガイド</a>で設定したノートに、同じ文章が残ることを確かめます。</p></section><section class="lp-section watch-guide-copy" id="smart-stack" ><h2 class="lp-section__title">スマートスタックから開く</h2><p>文字盤でDigital Crownを上へ回すか、<strong>画面下端から上へスワイプ</strong>してスマートスタックを開きます。シンプルメモのウィジェットを追加し、タップして起動できます。追加・並べ替えは<a href="https://support.apple.com/en-is/guide/watch/apdecf142fb9/watchos">Appleのスマートスタックガイド</a>で、お使いのwatchOSの操作を確認してください。</p></section><section class="lp-section watch-guide-copy" id="faq" ><h2 class="lp-section__title">よくある質問</h2><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Watchでアプリを開くと音声入力が自動で始まりますか？</summary><div class="faq-answer"><p>設定が完了して入力できる状態なら、シンプルメモはwatchOS標準の入力画面を自動で開く構成です。ただし、表示される入力方法はモデル・言語・画面の状態で変わります。キーボードが出たら音声入力へ切り替え、画面が開かない場合はアプリ中央のマイクから始めてください。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">本当に2タップで送れますか？</summary><div class="faq-answer"><p>起動後に音声入力が使える状態で、追加の選択や確認が不要な場合は「アプリを開く」「完了」の2回で送信操作に進めます。初回設定、ロック解除、入力方法の切替などは別です。操作回数やメールの到着時間をすべての環境で保証するものではありません。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">iPhoneが近くになくても、Watchの通信だけでメールを送れますか？</summary><div class="faq-answer"><p>シンプルメモのWatchアプリは、送信依頼をペアのiPhoneへ渡します。Watch単体のWi-Fiやセルラー接続だけでメール送信が完結する仕組みではありません。待機や失敗が表示された場合は、iPhoneとの接続とアプリの状態を確認し、受信箱で到着を確かめてください。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">WatchからのメモはObsidianにも入りますか？</summary><div class="faq-answer"><p>iPhone側でObsidian連携、保管庫へのアクセス、保存先を設定している場合に追加保存できます。メールが届いたことだけでノートへの追記完了を判断せず、初回は設定したノートでも同じ文章を確認してください。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Obsidian公式のApple Watchアプリですか？</summary><div class="faq-answer"><p>いいえ。シンプルメモは株式会社ユリカが開発する独立したアプリです。Obsidianの公式アプリではなく、自分宛メールだけでも使えます。無料は1日3通までで、追加送信などのプランはアプリ内の購入画面で確認できます。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">スマートスタックにはどうアクセスしますか？</summary><div class="faq-answer"><p>文字盤でDigital Crownを上方向へ回すか、画面下端から上へスワイプします。追加したシンプルメモのウィジェットをタップするとアプリが開きます。編集画面や追加方法の表示はwatchOSのバージョンによって変わります。</p></div></details></div></section>
+      </figure><script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoObject","@id":"https://simplememofast.com/apple-watch/#video","name":"Apple Watchで入力してiPhone経由で送る","description":"Apple Watchの入力・送信を示す図解動画（2026年9月9日更新）。実機画面の録画ではありません。入力方法を選び、文章を確定し、受信箱で到着を確認します。メール送信はペアのiPhoneを経由し、Obsidianへの保存は連携・保存先の設定が必要です。","thumbnailUrl":["https://simplememofast.com/assets/video/apple-watch-voice-poster.jpg?v=90738b6f25"],"uploadDate":"2026-09-09T01:49:57+09:00","duration":"PT14S","contentUrl":"https://simplememofast.com/assets/video/apple-watch-voice.mp4?v=34c2765c14","encodingFormat":"video/mp4","inLanguage":"ja","isFamilyFriendly":true,"publisher":{"@id":"https://simplememofast.com/#organization"},"mainEntityOfPage":{"@id":"https://simplememofast.com/apple-watch/#webpage"}}</script><section class="lp-section ce-chapter watch-guide-copy" id="limitation" ><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-4" data-ce-number="04">自動で開くのは入力画面。入力方法は環境で変わります</h2></header><div class="ce-chapter__body"><p>以前、このページでは自動で音声入力を開けないと説明し、その後「常に音声入力へ直行する」と案内しました。現在は<strong>入力画面の自動表示と、音声入力の開始を分けて説明します</strong>。設定済みで入力できる状態なら自動表示する構成ですが、未設定・送信中などでは同じ動作になりません。</p><p><a href="https://developer.apple.com/documentation/watchkit/wkinterfacecontroller/presenttextinputcontroller(withsuggestions:allowedinputmode:completion:)">WatchKitの公開API</a>は標準のテキスト入力画面を表示できます。表示後の入力方法はモデル・言語・画面の状態にも左右されます。「開く」「完了」の2タップは、音声入力をそのまま使え、追加操作がない場合の最短例です。</p></div></section><section class="lp-section ce-chapter watch-guide-copy" id="watchos-dictation" ><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-5" data-ce-number="05">キーボードが出る・言語が違う・音声入力が見つからないとき</h2></header><div class="ce-chapter__body"><p>まず文字を入力する画面を開き、現在の入力方法を確認します。<a href="https://support.apple.com/en-ie/guide/watch/apdaf7837856/watchos">Appleのテキスト入力ガイド</a>では、入力方法のボタンから音声入力・キーボード・スクリブルを切り替えます。使える選択肢はモデルと言語によって異なります。話した言語と違う文字になる場合も、入力言語を先に確認してください。</p><p>シンプルメモだけで始まらない場合は、メッセージなど別の入力欄でも音声入力を選べるか確認します。ペアのiPhoneが近くにあれば、iPhoneに出るApple Watchのキーボード入力通知から文章を入力する方法もあります。長い文章はiPhoneで入力する方が扱いやすい場合があります。</p></div></section><section class="lp-section ce-chapter watch-guide-copy" id="watch-delivery" ><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-6" data-ce-number="06">待機・失敗の表示や、メールが届かないとき</h2></header><div class="ce-chapter__body"><p>Watchのシンプルメモは、送信依頼をペアのiPhoneへ渡します。WatchのWi-Fiやセルラー接続だけでメール送信が完結する機能ではありません。iPhoneとの連携が進まない場合は、iPhone側でアプリを開き、宛先設定・通信・保留中の状態を確認してください。</p><p>「待機」や「キューに追加」は受信済みという意味ではありません。再送する前に受信箱や迷惑メールを確認し、アプリに再試行が表示される場合はその状態に沿って操作します。初回は短いテスト文を使い、確認できていない文章を消したりアプリを入れ直したりする前に内容を控えてください。<a href="/note-to-email/#delivery-check">到着確認の手順</a>も参照できます。</p><p>Obsidianへの追加保存は、iPhone側で保管庫へのアクセスと保存先を設定する必要があります。<a href="/obsidian/">連携設定ガイド</a>で設定したノートに、同じ文章が残ることを確かめます。</p></div></section><section class="lp-section ce-chapter watch-guide-copy" id="smart-stack" ><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-7" data-ce-number="07">スマートスタックから開く</h2></header><div class="ce-chapter__body"><p>文字盤でDigital Crownを上へ回すか、<strong>画面下端から上へスワイプ</strong>してスマートスタックを開きます。シンプルメモのウィジェットを追加し、タップして起動できます。追加・並べ替えは<a href="https://support.apple.com/en-is/guide/watch/apdecf142fb9/watchos">Appleのスマートスタックガイド</a>で、お使いのwatchOSの操作を確認してください。</p></div></section><section class="lp-section ce-chapter watch-guide-copy" id="faq" ><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-8" data-ce-number="08">よくある質問</h2></header><div class="ce-chapter__body"><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Watchでアプリを開くと音声入力が自動で始まりますか？</summary><div class="faq-answer"><p>設定が完了して入力できる状態なら、シンプルメモはwatchOS標準の入力画面を自動で開く構成です。ただし、表示される入力方法はモデル・言語・画面の状態で変わります。キーボードが出たら音声入力へ切り替え、画面が開かない場合はアプリ中央のマイクから始めてください。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">本当に2タップで送れますか？</summary><div class="faq-answer"><p>起動後に音声入力が使える状態で、追加の選択や確認が不要な場合は「アプリを開く」「完了」の2回で送信操作に進めます。初回設定、ロック解除、入力方法の切替などは別です。操作回数やメールの到着時間をすべての環境で保証するものではありません。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">iPhoneが近くになくても、Watchの通信だけでメールを送れますか？</summary><div class="faq-answer"><p>シンプルメモのWatchアプリは、送信依頼をペアのiPhoneへ渡します。Watch単体のWi-Fiやセルラー接続だけでメール送信が完結する仕組みではありません。待機や失敗が表示された場合は、iPhoneとの接続とアプリの状態を確認し、受信箱で到着を確かめてください。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">WatchからのメモはObsidianにも入りますか？</summary><div class="faq-answer"><p>iPhone側でObsidian連携、保管庫へのアクセス、保存先を設定している場合に追加保存できます。メールが届いたことだけでノートへの追記完了を判断せず、初回は設定したノートでも同じ文章を確認してください。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Obsidian公式のApple Watchアプリですか？</summary><div class="faq-answer"><p>いいえ。シンプルメモは株式会社ユリカが開発する独立したアプリです。Obsidianの公式アプリではなく、自分宛メールだけでも使えます。無料は1日3通までで、追加送信などのプランはアプリ内の購入画面で確認できます。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">スマートスタックにはどうアクセスしますか？</summary><div class="faq-answer"><p>文字盤でDigital Crownを上方向へ回すか、画面下端から上へスワイプします。追加したシンプルメモのウィジェットをタップするとアプリが開きます。編集画面や追加方法の表示はwatchOSのバージョンによって変わります。</p></div></details></div></div></section>
 <!-- CTA -->
       <div class="cta-box">
         <div class="cta-box__title">
-          <span>手首の上の思いつきを、逃さない</span>
+          <span>手首の上の思いつきを、その場で</span>
         </div>
         <div class="cta-box__desc">iPhoneで宛先を設定・認証してからWatchで試せます。無料は1日3通まで。</div>
-        <a data-cta-position="bottom" data-cta-variant="v1" data-cta-cluster="watch" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?ppid=4b75e642-3dd9-425c-8ff7-9db0cc859eb6&amp;pt=128498560&amp;ct=jp__bottom&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+        <a data-cta-position="bottom" data-cta-variant="v1" data-cta-cluster="watch" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?ppid=4b75e642-3dd9-425c-8ff7-9db0cc859eb6&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
         </a>
         <div class="cta-qr">
@@ -332,10 +360,10 @@
       </div>
 
       <!-- Internal Links -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-9" data-ce-number="09">
           <span>関連ページ</span>
-        </h2>
+        </h2></header><div class="ce-chapter__body">
         <div class="internal-links">
           <a href="/apple-watch-obsidian/"><span>Apple Watch × Obsidian連携</span></a>
           <a href="/obsidian/"><span>Obsidian連携</span></a>
@@ -345,12 +373,13 @@
           <a href="/methods/second-brain/"><span>セカンドブレイン</span></a>
           <a href="/faq"><span>FAQ</span></a>
           <a href="/voice-input/">音声入力でメモを取る</a>
-          <a href="/obsidian/airpods/"><span>AirPodsに話すだけでObsidianへ</span></a>
+          <a href="/obsidian/airpods/"><span>AirPodsからSiriでObsidianへ</span></a>
           <a href="/blog/instant-capture-workflow"><span>即キャプチャワークフロー</span></a>
         </div>
-      </section>
+      </div></section>
 
     </div>
+</div>
 
 <section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
   <div class="container">
@@ -400,30 +429,31 @@
 </section>
 </main>
 
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ja" dir="ltr"><a class="site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a><div><p class="site-footer-title">思いついたことを、次の一歩へ。</p><p class="site-footer-description">Obsidianとメールに、メモを送るiPhoneアプリ。</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
+
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span>ダウンロード</span> </a>
-        <a href="/" class="footer__link"><span>ホーム</span></a>
-        <a href="/obsidian/" class="footer__link"><span>Obsidian連携</span></a>
-        <a href="/use-cases/" class="footer__link"><span>使い方</span></a>
-        <a href="/guides/" class="footer__link"><span>設定ガイド</span></a>
+        <a href="/download/" class="footer__link">ダウンロード</a>
+        <a href="/" class="footer__link">ホーム</a>
+        <a href="/obsidian/" class="footer__link">Obsidian連携</a>
+        <a href="/use-cases/" class="footer__link">活用事例</a>
+        <a href="/guides/" class="footer__link">使い方</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
-        <a href="/note-to-email/" class="footer__link"><span>メモ→メール</span></a>
-        <a href="/vs/" class="footer__link"><span>比較</span></a>
+        <a href="/note-to-email/" class="footer__link">メモをメールへ</a>
+        <a href="/vs/" class="footer__link">比較</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span>公開ロードマップ</span> </a>
-        <a href="/devlog/" class="footer__link"><span>開発記録</span> </a>
-        <a href="/about/" class="footer__link"><span>開発者について</span> </a>
-        <a href="/faq" class="footer__link"><span>FAQ</span></a>
-        <a href="/privacy" class="footer__link"><span>プライバシー</span></a>
-        <a href="/contact" class="footer__link"><span>お問い合わせ</span></a>
+        <a href="/roadmap/" class="footer__link">公開ロードマップ</a>
+        <a href="/devlog/" class="footer__link">開発記録</a>
+        <a href="/about/" class="footer__link">開発者について</a>
+        <a href="/faq" class="footer__link">よくある質問</a>
+        <a href="/privacy" class="footer__link">プライバシー</a>
+        <a href="/contact" class="footer__link">お問い合わせ</a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -432,12 +462,7 @@
     </div>
   </footer>
 
-  <script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

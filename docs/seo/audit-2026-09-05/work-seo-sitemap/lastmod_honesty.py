@@ -3,7 +3,7 @@
 import json, re, os, subprocess
 from pathlib import Path
 from collections import Counter, defaultdict
-S = Path('/private/tmp/claude-501/-Users-hajimeataka-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad')
+S = Path('/private/tmp/claude-501/-Users-<user>-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad')
 WT = S/'wt'; SITE='https://simplememofast.com'
 THRESH = 40
 sm = json.load(open(S/'work-seo-sitemap/sitemap_urls.json'))

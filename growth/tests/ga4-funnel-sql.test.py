@@ -344,5 +344,59 @@ class FunnelTests(unittest.TestCase):
         self.assertEqual(rows[0]["sessions_with_own_app_click_24h"], 1)
 
 
+class LandingDiagnosticTests(unittest.TestCase):
+    SQL = SQL.with_name("ga4-landing-diagnostic.sql")
+
+    def test_missing_view_is_a_candidate_and_does_not_change_the_funnel_denominator(self):
+        events = [event("missing", "session_start", page_location=
+                        "https://simplememofast.com/resources/obsidian-inbox/?private=discard#secret"),
+                  event("missing", "seo_cta_impression", 2, measurement_version="2026-09-05"),
+                  event("match", "session_start"), event("match", "page_view", 1),
+                  event("different", "session_start"),
+                  event("different", "page_view", 1, page_location="https://simplememofast.com/en/")]
+        rows = run(events, self.SQL)
+        missing = next(r for r in rows if r["page_view_status"] == "missing_page_view_24h")
+        observed = next(r for r in rows if r["page_view_status"] == "observed_page_view_24h")
+        self.assertEqual(missing["candidate_start_group"], "obsidian_path")
+        self.assertEqual(missing["sessions_with_cta_impression"], 1)
+        self.assertEqual(observed["observed_started_sessions"], 2)
+        self.assertEqual(observed["start_path_matches_page_view"], 1)
+        self.assertEqual(observed["start_path_differs_from_page_view"], 1)
+        self.assertNotIn("discard", str(rows))
+        self.assertNotIn("secret", str(rows))
+        self.assertNotIn("/resources/obsidian-inbox/", str(rows))
+        funnel = run(events)
+        self.assertEqual(sum(r["observed_started_sessions"] for r in funnel), 3)
+        self.assertEqual(sum(r["observed_started_sessions"] for r in funnel
+                             if r["landing_scope"] == "missing_landing_page"), 1)
+
+    def test_unsafe_or_nonproduction_start_urls_never_become_candidates(self):
+        urls = ["https://preview.example.test/obsidian/", "custom://simplememofast.com/obsidian/",
+                "https://simplememofast.com/private%40example.test/", None]
+        rows = run([event(str(i), "session_start", page_location=url)
+                    for i, url in enumerate(urls)], self.SQL)
+        self.assertEqual(sum(r["observed_started_sessions"] for r in rows), 4)
+        self.assertTrue(all(r["candidate_start_group"] is None for r in rows))
+        self.assertTrue(all(r["page_view_status"] == "missing_page_view_24h" for r in rows))
+
+    def test_site_shaped_private_paths_are_bucketed_without_exporting_the_path(self):
+        rows = run([event("private", "session_start", page_location=
+                    "https://simplememofast.com/private-user-123/")], self.SQL)
+        self.assertEqual(rows[0]["candidate_start_group"], "other_production_path")
+        self.assertNotIn("private-user-123", str(rows))
+
+    def test_first_page_view_obeys_session_stream_and_24_hour_boundaries(self):
+        events = [event("a", "session_start"),
+                  event("a", "page_view", -1),
+                  event("a", "page_view", 86_400_000_000),
+                  event("a", "page_view", 1, session_id=2),
+                  event("a", "page_view", 2, stream_id="other-stream"),
+                  event("b", "session_start"), event("b", "page_view", 86_399_999_999)]
+        rows = run(events, self.SQL)
+        by_status = {r["page_view_status"]: r for r in rows}
+        self.assertEqual(by_status["missing_page_view_24h"]["observed_started_sessions"], 1)
+        self.assertEqual(by_status["observed_page_view_24h"]["observed_started_sessions"], 1)
+
+
 if __name__ == "__main__":
     unittest.main()

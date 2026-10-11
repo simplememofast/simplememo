@@ -64,6 +64,48 @@
   "method": "scripts/check-guard-shapes.mjs（コメント・文字列・正規表現を潰し、台帳由来の束縛を伝播させて存在確認の && を拾う）",
   "known": [
     {
+      "file": "scripts/gsc-crawled-indexing.mjs",
+      "expr": "target.search",
+      "disposition": "前提",
+      "note": "2026-09-30: 公開HTMLの内部リンクを数える際、同一origin・queryなし・別ページへの直接リンクだけをcanonical URLのinboundへ加える選別条件。new URLのsearchが空文字なら!target.searchは真で、照合元の欠落を理由に違反判定を消す向きではない。query付き・外部・自己リンクはこの直接リンクの証拠に数えず、適格リンクが0件なら後段のsources.size > 0のassertが必ず拒否する。HTTPのPR baseline除外とは別のsource auditで、C13/C14の適格inbound各2件を確認。実際の選別行と必須assertを読み出した単発検査でもquery付き・外部・自己リンクだけの3ケースは拒否し、queryなしの直接リンクは採用した。専用自己テストは追加していない。述語・走査規則・既存85件の範囲を変更して通す登録ではない。"
+    },
+    {
+      "file": "scripts/gsc-crawled-indexing.mjs",
+      "expr": "report.error",
+      "disposition": "前提",
+      "note": "2026-09-30: catchで記録した実行エラーが無いことを要求する全体の成功条件。エラーがあればreport.okは偽になり、finallyで証拠を保存した後のassertが拒否する。エラー欄が無い正常時も、既存85件のfailed=0・skipped=0と、strictでは公開6件のfailed=0・skipped=0を独立して要求するため、欄の欠落で未検証や失敗を成功にしない。既存のsynthetic selftestで伝播未完了404、公開元ファイル欠落、robots.txt 503の拒否とreport保存、正常strict全件完了、PR baselineで候補元ファイルを読まず新URLを取得しないことを確認。baselineの公開候補6件のskipは明示したmerge前の範囲で、strictの未完了には適用しない。判定・scannerの弱化ではない。"
+    },
+    {
+      "file": "scripts/execution-priorities.mjs",
+      "expr": "unmet",
+      "disposition": "前提",
+      "note": "2026-09-30: 検査済みblocked_onのうち未充足の条件が存在する場合だけ、到達可能で延期中ではない候補をwaitへ戻す前提。条件が全て揃っている通常業務にはこの待ちを要求しない。非配列blocked_onは直前で例外として拒否し、材料だけの条件は別のscope判定がactをinspectへ戻す。execution-priorities.test.mjsの29件で非配列拒否、条件不足wait、完全条件act、28日材料だけのinspect、期限切れwait・deferと人の境界保持を確認。述語や走査規則を削除して通す変更ではない。"
+    },
+    {
+      "file": "scripts/check-expert-escalation.mjs",
+      "expr": "fieldSentRecords",
+      "disposition": "前提",
+      "note": "2026-09-30: 当該分野の検証済み送信履歴が存在する場合だけ、直前送信日時の記録を必須にする。履歴が無い初回送信に直前日時を要求しないのが正しい。sent非配列・null行・不正または未来の送信/返信日時は先行ガードがholdし、履歴ありの直前日時欠落・不正・未来・実履歴より古い値もholdする。これらの欠測保護と有効な過去履歴・7日境界を専門家ゲートの51件の自己検査で確認。存在条件を消して検査を通す変更ではない。"
+    },
+    {
+      "file": "scripts/autopilot-selfheal.mjs",
+      "expr": "problems",
+      "disposition": "前提",
+      "note": "2026-09-30: 自己修復の検査が問題なしで、actionsの上限到達対象が1件だけの場合に限り、所有者承認の私的な1回限り復旧許可を照合する成功条件。問題があれば許可の照合へ進まず従来のcontainへ落ちる。許可欠落・不正・別タスク・Run now・期限切れもPython側が拒否し、明示停止は解除しない。規則の欠測で違反を消す条件ではない。実タスクと初回turnの照合、期限、停止と予算の拒否と原ログ整理後の同一実行の再照合を9件の検査で確認。"
+    },
+    {
+      "file": "scripts/decision-ci.mjs",
+      "expr": "declared.id",
+      "disposition": "別に検出",
+      "note": "2026-09-20: assert 内で事前宣言の選択候補 ID と候補の ID の一致を要求する成功条件。両方欠落した undefined 同士の一致を防ぐため、直前で選択 ID の文字列型と既存の契約 ID 形式を必須にした。両 ID 欠落・両 ID 空文字の事前宣言を実 Git 履歴に置く回帰検査で拒否を確認する。"
+    },
+    {
+      "file": "scripts/decision-ci.mjs",
+      "expr": "m.company_run_id",
+      "disposition": "別に検出",
+      "note": "2026-09-20: assert 内で事前宣言と計測登録の Company run ID および決定ハッシュの一致を要求する成功条件。run ID の欠落・不正形式は先行する schema_version/UUID/ハッシュ検査で拒否し、一致しない場合もこの assert が拒否する。照合元の欠落で規則が消える向きではない。"
+    },
+    {
       "file": "scripts/autopilot-act.mjs",
       "expr": "observed?.task_kind_unavailable",
       "disposition": "前提",
@@ -729,6 +771,78 @@
       "expr": "sum.pending_pr?.length",
       "disposition": "報告のみ",
       "note": "2026-09-13: 未処理なしの表示は、要対応・PR待ち・期日待ちがすべて空の場合に限る。任意の旧PR欄の欠落は空扱いだが、期日待ちを消したり行を閉じたりしない。未来行は別枠で表示し、期日当日に担当へ戻る自己検査を確認。"
+    },
+    {
+      "file": "scripts/devlog-syndication.mjs",
+      "expr": "age",
+      "disposition": "別に検出",
+      "note": "2026-09-29: assertFresh の `age !== null && Number.isFinite(age) && age > maxAge`。**Age ヘッダが無い応答は古さを判定しない（通す）。**これは3段の2段目で、1段目は読み方そのもの（dev.to は Origin を毎回変え、はてなはクエリを毎回変えて、キャッシュに当たらない要求にする。実測で age 0）。3段目は投稿の直前の publishGuard で、キャッシュの無い認証済みの一覧（dev.to の me/all・はてなの AtomPub）で24時間の上限と間隔を確かめ直す。**Age の無い古い一覧を門が通しても、二重投稿は投稿の段で止まる**（その run は赤くなる）。2026-09-29 の実測では Fastly（dev.to）も CloudFront（はてな）も MISS に `age: 0` を付けていた。自己テストで age 92695・6206 を落とし、age の無い応答を通すことを固定した"
+    },
+    {
+      "file": "scripts/devlog-syndication.mjs",
+      "expr": "hours",
+      "disposition": "対象が無いときは判定しない",
+      "note": "2026-09-29: publishGuard の `hours !== null && hours < minIntervalHours && !force`。hours が null になるのは**公開済みの記事が1本も無い**ときだけで、門の first_post と同じ意味（間隔の規則は相手が無いので判定しない）。24時間の上限はこの前に独立に判定する。**一覧が空・読めないときはここに来ない** —— publishDevto は me/all が空か配列でなければ、publishHatena は AtomPub の entry が0件なら、投稿せずに投げる（空を「投稿が無い」と読まない）。自己テストで空の一覧・30時間前（間隔不足）・force・2時間前（上限）を固定した"
+    },
+    {
+      "file": "scripts/devlog-syndication.mjs",
+      "expr": "p.id",
+      "disposition": "重複しても害が無い",
+      "note": "2026-09-29: mergeJustPublished の `(p.id != null && q.id === p.id) || q.url === p.url`。id が無いときは URL で照合する。両方で外れると、一覧にある記事をこの run の結果からもう1本足す —— 見張りの経過時間が数秒ずれるだけで、投稿も門も変えない（見張りは読むだけ）。はてなの結果には id が無く（null）、URL で照合する"
+    },
+    {
+      "file": "scripts/devlog-syndication.mjs",
+      "expr": "p.fromRun",
+      "disposition": "別に検出",
+      "note": "2026-09-30: watchPlatform の本文欠測保護2か所（dev.to の `!p.fromRun && (typeof a.body_markdown !== 'string' || !a.body_markdown.trim())` と、はてなの `!p.fromRun && !String(p.content || '').trim()`）。通常の公開一覧には fromRun 欄が無いので、この条件は真となり、本文が欠測なら別経路と決めず unreadable にする。確認済み候補より新しい記事の経路が不明なときは、自経路の間隔も理由付き unknown・pipeline_age_hours=null とし、古い記事だけで停滞を断定しない。例外の fromRun=true は mergeJustPublished が同runの公開結果（試験実行・他媒体・URL欠測・解釈不能の日時を除外）にだけ付け、経路の出力証拠として使う。公開一覧に合流した記事も dev.to は公開API、両媒体は公開URLで別に読み直し品質を検査する。公開結果や本文の印から自然scheduleや人介入ゼロを推定しない。devlog-syndication --selftest 全32件を確認し、新しいDEV/はてな回帰ではアカウント最新20h＋自経路14日をalert、新しい本文の欠測をunknown、80/96h境界・停止免除・走査上限を固定。既存回帰で投稿直後の公開結果による合流・作成直後404の再読取りも保持。"
+    },
+    {
+      "file": "scripts/devlog-syndication.mjs",
+      "expr": "a.origin",
+      "disposition": "向きが逆",
+      "note": "2026-09-29: 自己テストの assert。Origin が無いと assert が落ちる側（**規則を消す向きではなく、発火させる向き**）"
+    },
+    {
+      "file": "scripts/autonomy-score.mjs",
+      "expr": "w.from",
+      "disposition": "前提",
+      "note": "2026-09-30: inWindow の窓下限比較。score は直前に windowOf(all, policy.window_days, today) を呼んで生成した窓だけを渡す。windowOf は日付行なしでも from=to=today を返し、日付行がある場合も from/to を両方返す。介入観測helperによる汚染伝播で既存式が新たに走査対象になった。欠落下限を無介入ゼロや短い窓へ補完する分岐ではなく、式・元の日数/台帳/配点は変更していない。今回の窓内欠測・窓外carry欠測の回帰は元の全行を残したまま率null/未知分を無加点とする。"
+    },
+    {
+      "file": "scripts/autonomy-score.mjs",
+      "expr": "c.n",
+      "disposition": "前提",
+      "note": "2026-09-30: check の partialRa 例外は Number.isInteger(c.n) と c.n>0 を両方必要とする。欠落・null・文字列・0は例外に入れず、measurable=falseの加点拒否を維持する。復旧率null/復旧点0/復旧介入unknown>0だけでなく、既知検知のhit整数と0<=hit<=n、hit/n=rate、policy半配点=max、points=max*rate、RA点=検知点を全て一致させる。未知復旧への偽加点と検知分子/率/点の不一致を負例で検証。配点と政策は変えない。"
+    },
+    {
+      "file": "scripts/autonomy-score.mjs",
+      "expr": "c.detect.rate",
+      "disposition": "前提",
+      "note": "2026-09-30: check の partialRa 例外中2条件。Number.isFinite(c.detect?.rate) が欠落/null/不正型を先に拒否し、0<=rate<=1を求める。さらに検知hit/nとの厳密一致、policy既存半配点とmaxの一致、points=max*rate、RA点=検知点を必要とする。率が欠落すると例外は成立せずmeasurable=falseの加点を拒否する。復旧率はnull/復旧点0のまま、検知の証拠だけを保持する限定例外。hit=0/rate=0なのに検知10点を残す偽装と未知復旧の偽加点が自己検査で拒否される。"
+    },
+    {
+      "file": "scripts/check-definitions.mjs",
+      "expr": "d.history",
+      "disposition": "前提",
+      "note": "2026-09-30: bump の既存履歴型検査。history が明示された場合は配列以外を拒否し、version/checksum/history を変える前に停止する。省略は従来の新しい履歴を開始するだけで、過去の変更がゼロだったという証明には使わない。source_file と明示した source_dependencies の正本読取り・checksum照合は currentSources が別に必須とし、履歴の省略・空配列・既存配列のどれでも依存欠落/読取失敗を拒否する。独立15ケースで不正履歴6型のNOWRITE、許容3型のv+1/旧prefix保持、各許容型と欠落/読取失敗の組合せを確認。既存19定義・原履歴・期間/配点/分母を削除して検査を通す例外ではない。"
+    },
+    {
+      "file": "growth/scripts/check-data-quality.mjs",
+      "expr": "byDate",
+      "disposition": "別に検出",
+      "note": "クリック欠測・不正値と合計オーバーフローは、比較より前の clicksOf が組別に明示fatalへ入れ、合計をNULLで保持する。byDate/byQuery がNULLなら大小比較をしないので、未知を0として比較しない。この比較guardを外しても先行fatalは消えず、欠測を0へ補うこともない。全3組の不正値・0・小数・オーバーフローを実ファイルの自己テスト36検体で検査する（通常CIの実行結果は別証拠）。"
+    },
+    {
+      "file": "scripts/check-routine-runs.mjs",
+      "expr": "r.id",
+      "disposition": "別に検出",
+      "note": "参照不可の登録IDと observation_unavailable の未解消行を同時に照合する。該当行がない場合は accounted=false となり、その直後の不整合判定と後段の未追跡異常検査が失敗する。routine-observer の自己テストで未解消行を削除した変異が失敗することを確認。"
+    },
+    {
+      "file": "scripts/routine-observer.mjs",
+      "expr": "last.routine.observation_state",
+      "disposition": "前提",
+      "note": "最後の実測に参照不可の写しを入れ子で保存しないための否定条件。直前のID照合・enabledのboolean検査と観測時刻の検査をすべて満たすことをassertで要求する。観測状態がない通常の実測だけを履歴として保持し、現在の参照不可には別途個別GETの404証跡を必須とする。繰り返し観測でも元の履歴時刻を更新しない自己テストあり。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
@@ -740,6 +854,7 @@
     "growth/scripts/ingest-bigquery.mjs",
     "growth/scripts/seal-daily-gsc.mjs",
     "growth/scripts/search-intent.mjs",
+    "scripts/autopilot-diagnostics.mjs",
     "scripts/autopilot-drill.mjs",
     "scripts/autopilot-gate.mjs",
     "scripts/bing-capture.mjs",
@@ -747,10 +862,12 @@
     "scripts/ci-health.mjs",
     "scripts/ci-health.test.mjs",
     "scripts/execution-priorities.test.mjs",
-    "scripts/press-release-next.test.mjs",
     "scripts/property-tests.mjs",
     "scripts/qr-routing.test.mjs",
-    "scripts/should-snapshot.mjs"
+    "scripts/should-snapshot.mjs",
+    "scripts/sync-shared-chrome.mjs",
+    "scripts/viewport-pool.test.mjs",
+    "scripts/viewport-pool-browser.test.mjs"
   ],
   "$no_ledger_binding": [
     {
@@ -762,6 +879,8 @@
       "scripts/autopilot-gate.mjs": "同上。decide(s) は引数の状態だけを見る",
       "scripts/check-asc-landed.mjs": "**他モジュール経由**（ingest-asc.mjs の readSource）。上と同じ限界",
       "scripts/ci-health.mjs": "ghからGitHub Actionsの履歴を読む。ローカルJSON台帳は読まない。読み取り失敗は中断し、成功再実行はflaky確定ではなく候補としてのみ出力する。",
+      "scripts/viewport-pool-browser.test.mjs": "CI-only browser integration uses a fixed four-job route/width fixture and the exported viewport measurement API; it does not read ledger JSON. Asserts measurable Chromium results, no failed jobs and complete requested coverage. Local runs explicitly skip because browsers are operated through the app UI.",
+      "scripts/viewport-pool.test.mjs": "Uses synthetic browser contexts and job fixtures only; no ledger JSON is read. Tests all requested page/width pairs, bounded renderer reuse, state isolation and explicit failure reporting. The required CI browser integration separately checks the real Chromium API.",
       "scripts/ci-health.test.mjs": "合成runと注入したgh応答で監査の境界を検査する。実台帳・ネットワークを読まない。",
       "scripts/property-tests.mjs": "他の検査から純粋関数を import して性質を回す（readFileSync 0箇所）",
       "growth/scripts/search-intent.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot / listSnapshots）。この走査は1ファイル単位なので追えない —— 見えていないことを承知で置く（analyze.mjs / check-asc-landed.mjs と同じ限界）",
@@ -771,9 +890,153 @@
       "scripts/press-release-next.test.mjs": "Pure fixtures passed to the exported dispatch gate. Does not read live ledger JSON or access PR TIMES. The production module reads the actual ledger separately.",
       "scripts/execution-priorities.test.mjs": "合成の業務棚卸し・評価を prioritize に渡す回帰テスト。実台帳JSONを直接読まない。別モジュールの証拠ファイル存在確認と未達blocked_on判定を通し、期限切れ・物理境界・分母維持・無効参照を検査する。実台帳のCLI検査は execution-priorities.mjs --check で別途行う。",
       "growth/scripts/collect-bing.mjs": "Official Bing API reader through lib/bing-webmaster.mjs; no local ledger reads. Validates runtime and encryption before refresh; tests cover missing credentials, source/date/schema failures, bounded retries and redaction.",
-      "scripts/bing-capture.mjs": "Private capture state is read and validated in lib/company-bing.mjs. This thin CLI has no local ledger binding; module tests reject missing, stale, tampered, concurrent and mismatched attempt evidence."
+      "scripts/bing-capture.mjs": "Private capture state is read and validated in lib/company-bing.mjs. This thin CLI has no local ledger binding; module tests reject missing, stale, tampered, concurrent and mismatched attempt evidence.",
+      "scripts/autopilot-diagnostics.mjs": "2026-10-06: 公開判定の正となる台帳を読まない診断投影器。読むのは固定名の一時SDK execution JSONと検査時のworkflowで、readExecutionはJSON.parseをオブジェクト内の式で返すため現走査の束縛追跡には現れない。実行データの未取得・不正・容量超過はnullと固定unknown理由に残し、verdictや権限の判定に使わない。入力本文・任意文字列を除外し、34自己テストで欠損、壊れたJSON、symlink、容量超過、限定出力を確認。scannerや母数上限は変更しない。"
     },
-    "scripts/preflight.mjs … **台帳を読まない。**読むのは `.github/workflows/seo-check.yml` で、そこから実行する検査の一覧を導出する（一覧を手で持つと、CI に検査を足した日に古くなる）。判定を持たない実行器なので、台帳由来の束縛が無いのは設計どおり"
+    "scripts/preflight.mjs … **台帳を読まない。**読むのは `.github/workflows/seo-check.yml` で、そこから実行する検査の一覧を導出する（一覧を手で持つと、CI に検査を足した日に古くなる）。判定を持たない実行器なので、台帳由来の束縛が無いのは設計どおり",
+    "\n",
+    "2",
+    "0",
+    "2",
+    "6",
+    "-",
+    "1",
+    "0",
+    "-",
+    "0",
+    "7",
+    ":",
+    " ",
+    "s",
+    "c",
+    "r",
+    "i",
+    "p",
+    "t",
+    "s",
+    "/",
+    "s",
+    "y",
+    "n",
+    "c",
+    "-",
+    "s",
+    "h",
+    "a",
+    "r",
+    "e",
+    "d",
+    "-",
+    "c",
+    "h",
+    "r",
+    "o",
+    "m",
+    "e",
+    ".",
+    "m",
+    "j",
+    "s",
+    " ",
+    "o",
+    "n",
+    "l",
+    "y",
+    " ",
+    "d",
+    "i",
+    "s",
+    "p",
+    "a",
+    "t",
+    "c",
+    "h",
+    "e",
+    "s",
+    " ",
+    "t",
+    "h",
+    "e",
+    " ",
+    "l",
+    "o",
+    "c",
+    "a",
+    "l",
+    " ",
+    "H",
+    "T",
+    "M",
+    "L",
+    " ",
+    "t",
+    "r",
+    "a",
+    "n",
+    "s",
+    "f",
+    "o",
+    "r",
+    "m",
+    "e",
+    "r",
+    " ",
+    "w",
+    "i",
+    "t",
+    "h",
+    " ",
+    "-",
+    "-",
+    "w",
+    "r",
+    "i",
+    "t",
+    "e",
+    ";",
+    " ",
+    "i",
+    "t",
+    " ",
+    "r",
+    "e",
+    "a",
+    "d",
+    "s",
+    " ",
+    "n",
+    "o",
+    " ",
+    "o",
+    "p",
+    "e",
+    "r",
+    "a",
+    "t",
+    "i",
+    "o",
+    "n",
+    "a",
+    "l",
+    " ",
+    "l",
+    "e",
+    "d",
+    "g",
+    "e",
+    "r",
+    " ",
+    "o",
+    "r",
+    " ",
+    "m",
+    "e",
+    "t",
+    "r",
+    "i",
+    "c",
+    "s",
+    "."
   ],
   "param_guards_measured_at": "2026-09-05",
   "$param_guards_note": [
@@ -1055,6 +1318,60 @@
       "expr": "current",
       "disposition": "検体の生成",
       "note": "2026-09-05: リモートブランチrefが404で消えている検体を生成する。マージ済みPRの照合はhead SHAで続行し、open PRのref欠落はunknownにする。"
+    },
+    {
+      "file": "scripts/vendor-terms.mjs",
+      "expr": "bodyScope",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-09-24: scopeKey の `bodyScope === undefined || bodyScope === null` → 'page'。**設定が無い行はページ全体を見る**（いちばん広い範囲・これまでどおりの動き）ので、範囲の設定が欠けても見張りは外れない。読めない設定（空文字・from だけ等）は null を返し、scopeProblems が PR の時点で落とす（CI の `vendor-terms.mjs --selftest` が台帳も見る）"
+    },
+    {
+      "file": "scripts/vendor-terms.mjs",
+      "expr": "body",
+      "disposition": "向きが逆",
+      "note": "2026-09-24: reconcile の `body === null` / `!bodyShape.ok`。**範囲が取れない・本文らしくないときに発火する側**で、戻す（changed）へ倒す判定。消える方向ではない —— 取れなかった範囲を unknown や unchanged にしない（ページ全体が前回と1文字も同じときだけ戻さない）。自己テスト「<main> が消えたのに戻していない」「殻の <main> の指紋を『前回と同じ本文』と読んでいる」で固定し、unknown に変える壊しで6件落ちることを確認した"
+    },
+    {
+      "file": "scripts/devlog-syndication.mjs",
+      "expr": "hours",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-09-25: 見張り（watch）の経過時間の区分 classifyAge。hours が null・undefined・NaN のときは 'unreadable' を返し、'ok'（異常なし）には倒さない。見張り全体の判定で unreadable は注意と同じ重さに数える。最新投稿そのものが無いときは呼び出し側が classifyAge を呼ばずに 'alert' とする。自己テストで null・NaN が unreadable になることを固定した。"
+    },
+    {
+      "file": "scripts/devlog-syndication.mjs",
+      "expr": "age",
+      "disposition": "別に検出",
+      "note": "2026-09-29: 2か所。(1) assertFresh の `age !== null && …`（仮引数ではなくローカルだが、同じファイルの自己テストに仮引数 age があるので当たる）。読みは known 側の age と同じ —— Age の無い応答は通し、キャッシュに当たらない読み方と、投稿の直前の認証済みの一覧での確かめ直しが別に止める。(2) 自己テストの応答を作る補助 `reply(age, body)` の `age !== null` は検体の生成（Age ヘッダを付けない応答を作るため）"
+    },
+    {
+      "file": "scripts/full-public-assets-readback.mjs",
+      "expr": "d",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-01: plain(d) は null・非object・配列をfalseにし、parseManifestが最上位/collection/rawentry/secondaryHTMLで無条件assertする。値が無い場合に検査を消す規則ではなくHTTP前に拒否する型ゲート。実root readonlyで正しい205raw+1HTMLを許容し、canonical JSON null/array/bool/number/stringの最上位5型とcollection/entry/secondary各5型、計20負例を拒否（HTTP0/source変更0）。原17suiteのhash/timeout/budget失敗証拠と206loopback別範囲を保持。既存guardrows・no_ledger_binding・計測metadataや検査コードは変更しない。"
+    },
+    {
+      "file": "scripts/full-public-assets-readback.mjs",
+      "expr": "value",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-01: boundedRetryAfter(value, now) の value === null は任意Retry-Afterヘッダの欠測を state:absent と明示する。null以外も文字列型/128文字上限、整数秒またはHTTP-date/24時間上限を満たす値だけ記録し、型不正・範囲外は invalid_or_out_of_bounds。HTTP429時のqueue停止・peer中断・FAILED本文保持はヒントの有無に依存せず無条件で行い、この値で待機・再試行・PASS判定をしない。HTTP-dateはDate.nowの壁時計で解釈し、単調時計deadlineへ流用しない。private統合14回帰の bounded Retry-After（null/正常秒/date/負数/小数/過大/任意文字）と429停止/body保全で確認、production復旧は未認定。既存budget/上限/原台帳条件は変更しない。"
+    },
+    {
+      "file": "scripts/full-public-assets-readback.mjs",
+      "expr": "testTiming",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-01: runChecks の testTiming === null（2site）は既定の実performance.now/実delayを選ぶabsence分岐と、通常productionでrequest/observer/requestMs/overallMsを固定値へ拘束する分岐。testTiming自体はnullまたはplain objectをHTTP前に無条件assertし、明示testTimingはnow/delayのexact keys・function型・private requestとの組合せ・mode productionを必須にする。明示seamのreport.modeはprivate-production-pacing-test、pacingClockScopeもpublic証明を否定し、60秒cooldown/global1秒pacer/10秒600秒上限は維持。仮引数欠測によって検証を消す分岐ではなく、通常productionの上書きを拒否する型/実行境界。private統合14回帰で通常productionのrequest/clock/observer/間隔/並列/予算上書き・unpaired testTiming拒否、explicit fakeproduction pacing/初期cooldown/spacing中deadline/429停止を確認。原budget・既存台帳metadata・no_ledger_binding・既存guard行は変更しない。"
+    },
+    {
+      "file": "growth/scripts/check-stoploss.mjs",
+      "expr": "rows",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-02: selectCurrent(pagePath, rows) の rows == null は欠測snapshot（null/undefined）を status:hold・current:null・reason_code:snapshot_unavailable・matching_rows:null と明示する。currentFor は counts/null 互換を保ち、実CLIの evaluateCurrent は current_selection の欠測理由を保持した hold を返す。欠測をゼロcounts、continue、検査の空集合、自律revertへ補完しない。私有原CLIの33自己検査（旧16＋新17）のうち欠測snapshot両型・currentFor null・実consumer hold/reasonのnamed caseは通過済み。通常PR初回はこの未登録keyで前段Guard51が失敗しMarketing110はskippedであり、通常CI実行済みとは扱わない。元threshold/targets/権限・scanner・既存guard50行・known/no_ledger_binding・計測metadata/予算を変更せず、この既存安全側分岐の読みを登録するだけ。"
+    },
+    {
+      "file": "scripts/autopilot-diagnostics.mjs",
+      "expr": "value",
+      "disposition": "報告のみ",
+      "note": "2026-10-06: receiptのObject.entries(result).filter(([, value]) => value === null)は、既にnullとして保持した未観測項目名をobservations_unknownへ列挙する表示処理。値を0や成功に補完せず、元の出力verdict・exit code・公開判定を変更しない。34自己テストの欠測・不正型・壊れたJSON・モデル検証skip・checkpoint失敗でnullと固定理由の保持を確認。"
     }
   ]
 }

@@ -6,7 +6,8 @@ import {digest,ROOT} from './company-metrics.mjs';
 import {privateState,atomicJson,acquireLock,observe,opportunities} from './company-loop.mjs';
 import {safePath,intentPath} from '../../scripts/value-contracts.mjs';
 import {boundRun,verifyDecision} from '../../scripts/decision-ci.mjs';
-import {verifyMeasurementInput,verifyMeasurementOwnership,EXPERIMENTS} from './company-measurement.mjs';
+import {verifyMeasurementInput,verifyMeasurementOwnership,verifyMeasurementMergeScope,EXPERIMENTS} from './company-measurement.mjs';
+import {prepareExperimentEvaluation,evaluationDecisionCommitment,evaluationDecisionTrace,EVALUATION_STATUS} from './company-evaluation.mjs';
 
 const read=f=>JSON.parse(fs.readFileSync(f,'utf8'));
 const uuid=s=>/^[a-f0-9-]{36}$/.test(s??'');
@@ -36,6 +37,7 @@ function validateScope(candidate,scope) {
   }
 }
 export function decisionCommitment(receipt) {
+  if(receipt.decision?.kind==='experiment_evaluation')return evaluationDecisionCommitment(receipt);
   const d=receipt.decision;
   assert(d?.schema_version===1 && d.company_run_id===receipt.id,'prospective Company decision required');
   assert(/^[a-f0-9]{40}$/.test(d.source_commit??'') && /^[a-f0-9]{64}$/.test(d.observation_fingerprint??''),'retained observation identity required');
@@ -49,7 +51,12 @@ export function decisionCommitment(receipt) {
 }
 export function prepareCompanyDecision({stateRoot,id,evidenceFile,now=new Date(),currentCandidates,root=ROOT}) {
   assert(uuid(id),'invalid Company run ID');
-  const dir=privateState(stateRoot),release=acquireLock(dir);if(!release)return{status:'busy'};
+  const dir=privateState(stateRoot),source=fs.realpathSync(evidenceFile),stat=fs.statSync(source);
+  assert(source.startsWith(fs.realpathSync(dir)+path.sep) && stat.isFile() && !(stat.mode&0o077) && stat.uid===process.getuid(),'private decision input required');
+  const earlyInput=read(source),earlyReceipt=read(path.join(dir,'runs',id+'.json'));
+  if(earlyReceipt.candidates?.find(c=>c.id===earlyInput.candidate_id)?.kind==='evaluate_existing_experiment')
+    return prepareExperimentEvaluation({stateRoot:dir,id,evidenceFile,now,currentCandidates,root});
+  const release=acquireLock(dir);if(!release)return{status:'busy'};
   try {
     const file=path.join(dir,'runs',id+'.json'),receipt=read(file);
     assert([2,3].includes(receipt.schema_version) && receipt.status==='observed_decision_requires_execution','start a new prospective observation; legacy receipts cannot be upgraded');
@@ -123,19 +130,21 @@ export async function verifyDecisionContract(receipt,contract,call,{head,cwd,del
   }
   return history;
 }
-export async function verifyDecisionDelivery(receipt,contract,row,before,after,merge,call,cwd) {
+export async function verifyDecisionDelivery(receipt,contract,row,before,after,merge,call,cwd,{stateRoot}={}) {
   assert.equal(row.run_id,receipt.decision?.input.run_id,'run differs from selected decision');
   assert.equal(row.artifact,receipt.decision.input.scope.artifact,'delivered artifact differs from selected decision');
   assert(Number.isFinite(Date.parse(receipt.bound_at)) && Date.parse(receipt.bound_at)>=Date.parse(contract.created_at)
     && Date.parse(merge.merged_at)>=Date.parse(receipt.bound_at),'action must follow prospective binding');
   assert.deepEqual(boundRun(contract,before,after),row,'canonical task binding failed');
   const history=await verifyDecisionContract(receipt,contract,call,{head:merge.head_sha,cwd,delivered:true});
-  call('git',['diff','--quiet',merge.head_sha,merge.merge_sha,'--',...receipt.decision.input.scope.paths]);
+  const mergeScope=verifyMeasurementMergeScope(receipt,{stateRoot,head:merge.head_sha,mergeSha:merge.merge_sha,mergedAt:merge.merged_at,call});
   return {state:'verified',decision_sha256:receipt.decision.sha256,candidate_id:receipt.decision.input.candidate_id,
     contract_id:contract.id,contract_path:intentPath(contract.id),declaration_sha:history.declaration_sha,
+    ...(mergeScope?{merge_scope_verification:mergeScope}:{}),
     limitation:'The frozen decision, canonical contract/run and affected output match. Relevance is an explicit agent judgment; measured effect awaits the original evaluation gate.'};
 }
 export function decisionTrace(receipt) {
+  if(receipt.status===EVALUATION_STATUS)return evaluationDecisionTrace(receipt);
   if(!['verified_existing_autopilot','verified_integration'].includes(receipt.status))return{state:'pending',candidate_id:receipt.decision?.input.candidate_id??null};
   if(!receipt.decision)return{state:'unproven_legacy_trace',delivery_status:receipt.status,
     initial_recommendation:receipt.selected?.id??null,artifact:receipt.evidence_of_completion?.artifact??null,
@@ -151,7 +160,7 @@ export function decisionTrace(receipt) {
 export function decisionTraceStatus({stateRoot}) {
   const dir=path.join(stateRoot,'runs'),runs=[],failures=[];
   if(fs.existsSync(dir))for(const file of fs.readdirSync(dir).filter(f=>/^[a-f0-9-]{36}\.json$/.test(f))) {
-    try {const r=read(path.join(dir,file));if(['verified_existing_autopilot','verified_integration'].includes(r.status))runs.push({id:r.id,...decisionTrace(r)});}
+    try {const r=read(path.join(dir,file));if(['verified_existing_autopilot','verified_integration',EVALUATION_STATUS].includes(r.status))runs.push({id:r.id,...decisionTrace(r)});}
     catch {failures.push({source:'company_decision_trace',artifact:file,reason:'unreadable_run'});}
   }
   return{scope:'Supplemental decision continuity audit; no change to formal metrics, original run outcomes or experiment results.',runs,failures};

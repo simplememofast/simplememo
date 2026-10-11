@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/en/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: 'en'});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>iOS 26 SpeechAnalyzer Özel Kelime Dağarcığı: Doğru Transkripsiyonu Kullanın</title>
+  <meta name="description" content="iOS 26 contextualStrings, DictationTranscriber için belgelenmiştir. Sınırlarını, setContext davranışını ve doğru konuşma modülünü nasıl seçeceğinizi öğrenin.">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="iOS 26 SpeechAnalyzer Özel Kelime Dağarcığı: Doğru Transkripsiyonu Kullanın">
+  <meta property="og:description" content="Apple, AnalysisContext.contextualStrings for DictationTranscriber&#x27;ı belgeler. İşte bunun SpeechAnalyzer modülü seçimi, sınırları ve geçiş için anlamı.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-18T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/tr/blog/ios26-speechanalyzer-custom-vocabulary">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog.png">
+  <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Simple Memo - for Obsidian"><meta property="og:locale" content="tr_TR">
+  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="iOS 26 SpeechAnalyzer Özel Kelime Dağarcığı: Doğru Transkripsiyonu Kullanın">
+  <meta name="twitter:description" content="contextualStrings iOS 26&#x27;de bulunur - ancak modül seçimi önemlidir.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog.png">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/tr/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/ios26-speechanalyzer-custom-vocabulary">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/ios26-speechanalyzer-custom-vocabulary">
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "inLanguage": "tr",
+  "headline": "iOS 26 özel kelime dağarcığını öldürmedi - yanlış modüle ekliyorsunuz",
+  "description": "AnalysisContext.contextualStrings, DictationTranscriber, limitleri, setContext değiştirme anlambilimleri ve iOS 26 konuşma modülleri arasında nasıl seçim yapılır ile nasıl çalışır.",
+  "image": "https://simplememofast.com/assets/img/og/blog.png",
+  "url": "https://simplememofast.com/tr/blog/ios26-speechanalyzer-custom-vocabulary",
+  "datePublished": "2026-09-18",
+  "dateModified": "2026-09-18",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Simple Memo - Obsidian için",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "Konuşma Analizörü"
+    },
+    {
+      "@type": "Thing",
+      "name": "DikteTranskripsiyoncu"
+    },
+    {
+      "@type": "Thing",
+      "name": "AnalysisContext contextualStrings"
+    }
+  ],
+  "keywords": "iOS 26, SpeechAnalyzer, DictationTranscriber, SpeechTranscriber, contextualStrings, özel kelime, Swift"
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Ana Sayfa",
+      "item": "https://simplememofast.com/tr/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://simplememofast.com/tr/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "iOS 26 özel kelime dağarcığını öldürmedi - yanlış modüle ekliyorsunuz",
+      "item": "https://simplememofast.com/tr/blog/ios26-speechanalyzer-custom-vocabulary"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/tr/blog/ios26-speechanalyzer-custom-vocabulary#webpage",
+  "inLanguage": "tr",
+  "name": "iOS 26 SpeechAnalyzer Özel Kelime Dağarcığı: Doğru Transkripsiyonu Kullanın",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/tr/#website"
+  },
+  "url": "https://simplememofast.com/tr/blog/ios26-speechanalyzer-custom-vocabulary"
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700;font-size:.95rem}.global-nav__logo img{border-radius:8px}
+    .global-nav__links{display:flex;align-items:center;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;padding:.4rem .7rem;min-height:48px;display:inline-flex;align-items:center}
+    .global-nav__actions{display:flex;align-items:center;gap:.5rem}.global-nav__cta{background:linear-gradient(135deg,#007AFF,#5856D6);color:#fff!important;text-decoration:none;font-size:.875rem;font-weight:700;padding:.45rem 1rem;border-radius:20px;min-height:48px;display:inline-flex;align-items:center}
+    .nav-cta-mobile,.global-nav__hamburger{display:none}.global-nav__hamburger{background:none;border:0;color:#fff;font-size:1.5rem;min-width:48px;min-height:48px}
+    @media(max-width:768px){.global-nav__links,.global-nav__cta{display:none}.global-nav__hamburger{display:block}.global-nav__links.open{display:flex;flex-direction:column;position:absolute;top:56px;left:0;right:0;background:rgba(10,12,18,.97);padding:.5rem 1rem 1rem}.global-nav__links.open .nav-cta-mobile{display:block}}
+    .article-meta{font-size:.875rem;color:var(--text-muted);margin-bottom:2rem}.article-body h2{font-size:1.4rem;margin:2.5rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}.article-body h3{font-size:1.1rem;margin:2rem 0 .75rem}
+    .article-body p,.article-body li{font-size:.95rem;line-height:1.85;color:var(--text-secondary)}.article-body a{color:var(--accent)}.article-body code{background:rgba(100,180,255,.08);padding:.15rem .4rem;border-radius:4px}.article-body pre{background:#0d1424;border:1px solid rgba(148,178,230,.18);border-radius:12px;padding:16px 18px;overflow-x:auto}.article-body pre code{background:none;padding:0;color:#dbe6ff}
+    .callout{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:10px;padding:1rem 1.25rem;margin:1.5rem 0}.article-body table{display:block;overflow-x:auto;width:100%;border-collapse:collapse;margin:1.25rem 0}.article-body th,.article-body td{border:1px solid var(--border);padding:.55rem .7rem;text-align:left;vertical-align:top}
+  </style>
+  <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
+  <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="Ana navigasyon" data-site-header=""><div class="global-nav__inner">
+<a class="global-nav__logo site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/tr/guides/">Kılavuzlar</a><a href="/tr/use-cases/">Kullanım örnekleri</a><a href="/tr/vs/">Karşılaştır</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks"><li><a href="/tr/guides/">Kılavuzlar</a></li><li><a href="/tr/use-cases/">Kullanım örnekleri</a></li><li><a href="/tr/vs/">Karşılaştır</a></li><li><a href="/tr/methods/">Yöntemler</a></li><li><a href="/tr/blog/">Blog</a></li><li><a href="/tr/glossary/">Sözlük</a></li><li><a href="/tr/faq">Sık sorulan sorular</a></li><li><a href="/tr/about/">Geliştirici hakkında</a></li><li><a href="/tr/devlog/">Geliştirme günlüğü</a></li><li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">İndir</a></li></ul>
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="Türkçe · Dil seçin"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>TR</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="tr" dir="ltr"><p class="site-language-title">Dil seçin</p><div class="site-language-grid"><a href="/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/ios26-speechanalyzer-custom-vocabulary" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="tr" aria-current="page"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true">✓</span></span></div></div></details><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">İndir</a><button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menü"><span>Menü</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button></div>
+</div></nav>
+<main class="page-content"><div class="container">
+<h1 class="page-content__title sd-title">iOS 26 özel kelime dağarcığını öldürmedi - yanlış modüle ekliyorsunuz</h1>
+<p class="article-meta">Yazan <a href="/tr/about/">AI ATAKA</a> · Yayınlanma: Eylül 18, 2026</p>
+<div class="page-content__body article-body">
+<p><strong>Apple'in yeni SpeechAnalyzer yığınından özel kelime dağarcığı kaybolmadı.</strong> Önemli detay modül seçimidir. Apple, <code>AnalysisContext.contextualStrings</code>'yi özellikle <code>DictationTranscriber</code> ile birlikte belgeler. <code>SpeechTranscriber</code> etrafında inşa ediyorsanız, aynı bağlamı eklemenin size aynı kelime davranışını verdiğini varsaymayın.</p>
+<div class="callout"><p><strong>Kısa versiyon:</strong> Bağlamsal ifadeler tanıma tasarımınızın bir parçası olduğunda <code>DictationTranscriber</code>'i seçin. Listeyi kısa tutun, cümleleri kısa tutun ve bunları garantili değiştirmeler yerine önyargılı ipuçları olarak ele alın.</p></div>
+
+<h2 id="reading-01" data-ce-number="01">İki transkripsiyon modülü vardır - ve bunlar değiştirilebilir değildir</h2>
+<p>iOS 26'in Konuşma çerçevesi transkripsiyonu modüler hale getirir. <code>SpeechTranscriber</code>, Apple'ün normal konuşma için genel amaçlı transkripsiyonudur. <code>DictationTranscriber</code> sistem diktesine daha yakındır ve ek doğruluk kontrollerini açığa çıkarır.</p>
+<div class="sd-table" tabindex="0" role="region" aria-label="Kaydırılabilir tablo"><table><thead><tr><th>İhtiyaç</th><th>Önce değerlendirilecek modül</th><th>Neden</th></tr></thead><tbody>
+<tr><td>Genel konuşma / uzun biçimli transkripsiyon</td><td><code>SpeechTranscriber</code></td><td>Apple bunu genel amaçlı konuşmadan metne modül olarak tanımlar.</td></tr>
+<tr><td>Uygulamaya özgü isimler veya terimlerle kısa dikte</td><td><code>DictationTranscriber</code></td><td>Apple, <code>AnalysisContext.contextualStrings</code>'i bu modülle açıkça belgelemektedir.</td></tr>
+<tr><td>Özel telaffuz / dil modeli</td><td><code>DictationTranscriber</code></td><td>Ayrıca <code>SFSpeechLanguageModel</code> tarafından desteklenen özelleştirilmiş bir dil içeriği ipucunu da ortaya çıkarır.</td></tr>
+</tbody></table></div>
+
+<h2 id="reading-02" data-ce-number="02">BağlamsalStrings gerçekte nasıl çalışır</h2>
+<p><code>AnalysisContext.contextualStrings</code>, bağlamsal dize etiketlerine göre gruplandırılmış bir sözlüktür. Apple, bu kelimelerin veya ifadelerin, uygulamaya özgü adların, ürünlerin, yerlerin, etki alanı terminolojisinin veya olağandışı kelimelerin tanınma olasılığını artırmak için <code>DictationTranscriber</code> ile kullanılabileceğini söylüyor.</p>
+<pre tabindex="0"><code>let context = AnalysisContext()
+context.contextualStrings[.general] = [
+    "Simple Memo",
+    "Obsidian",
+    "SpeechAnalyzer"
+]
+
+try await analyzer.setContext(context)</code></pre>
+<p>Uygulamada üç sınır önemlidir:</p>
+<ul>
+<li><strong>İfadeleri kısa tutun.</strong> Apple mümkün olduğunda bir veya iki kelime önerir.</li>
+<li><strong>Tüm etiketlerde toplamı 100 veya daha az ifade olarak tutun.</strong></li>
+<li><strong>Bunlar garanti değil, ipuçlarıdır.</strong> API tanımayı önyargılı hale getirir; kesin bir transkripsiyon vaat etmez.</li>
+</ul>
+
+<h2 id="reading-03" data-ce-number="03">setContext bağlamın yerini alır - eklenmez</h2>
+<p><code>SpeechAnalyzer.setContext(_:)</code>, analizörün geçerli bağlam nesnesinin yerini alır. Yeni bir grup eklerken önceki ifadeleri korumak istiyorsanız, kullanmak istediğiniz tamamen yeni bağlamı oluşturun ve bunu ayarlayın.</p>
+<pre tabindex="0"><code>let next = AnalysisContext()
+next.contextualStrings[.general] = baseTerms + currentScreenTerms
+try await analyzer.setContext(next)</code></pre>
+<p>Bu aynı zamanda etiketleri kullanışlı hale getirir: kategorileri kendi durumunuzda tutabilir ve tekrarlanan <code>setContext</code> aramalarını artımlı eklemeler olarak ele almak yerine bağlamı kasıtlı olarak yeniden oluşturabilirsiniz.</p>
+
+<h2 id="reading-04" data-ce-number="04">Peki ya SpeechTranscriber?</h2>
+<p>Apple'in <code>SpeechTranscriber</code> için mevcut belgeleri, <code>contextualStrings</code>'yi bu modülün doğruluk kontrollerinden biri olarak belgelemiyor. Buna karşılık, <code>DictationTranscriber</code> belgeleri açıkça geliştiricilere bir <code>AnalysisContext</code> oluşturmalarını ve <code>contextualStrings</code>'e kelimeler eklemelerini söyler.</p>
+<p>Bu ayrım güvenli uygulama sınırıdır: <strong>hedef işletim sisteminizde, yerel ayarınızda ve cihazınızda tam olarak ihtiyacınız olan davranışı bağımsız olarak doğrulamadığınız sürece bağlamsal kelime dağarcığı etrafında bir <code>SpeechTranscriber</code> boru hattı tasarlamayın.</strong></p>
+
+<h2 id="reading-05" data-ce-number="05">Bugün uzun biçimli konuşmada kelime dağarcığına ihtiyacınız varsa</h2>
+<p>Evrensel bir göç kuralı yoktur. Mevcut <code>SFSpeechRecognizer</code> yolunuz zaten <code>contextualStrings</code>'e bağlıysa, iOS 26'e geçmek, mekanik bir API yeniden adlandırma yerine bir modül seçimi ve regresyon testi alıştırması olarak ele alınmalıdır.</p>
+<ol>
+<li><code>DictationTranscriber</code>'in ihtiyacınız olan süreye, gecikmeye, yerel ayara ve aygıt aralığına uygun olup olmadığını test edin.</li>
+<li>Daha zengin bir kelime hazinesine ihtiyacınız varsa, özelleştirilmiş dil modeli seçeneğini değerlendirin.</li>
+<li>Yeni modül yolu, ürününüzün bağlı olduğu davranışı korumazsa, diğer yolları ayrı ayrı geçirirken bu kullanım durumu için kanıtlanmış <code>SFSpeechRecognizer</code> yolunu saklayın.</li>
+</ol>
+
+<h2 id="reading-06" data-ce-number="06">Minimal karar kuralı</h2>
+<div class="callout"><p><strong>Önce konuşma:</strong> <code>SpeechTranscriber</code> ile başlayın. <strong>Önce kelime hazinesi:</strong> <code>DictationTranscriber</code>'i değerlendirerek başlayın. Kelime hazinesi kritikse, modüller arasındaki eşitlik varsaymak yerine, gönderdiğiniz gerçek kelimeleri ve yerel ayarları ölçün.</p></div>
+
+<h2 id="reading-07" data-ce-number="07">İlgili uygulama kılavuzu</h2>
+<p>Canlı mikrofon boru hattı için - model varlıkları, PCM dönüşümü, uçucu ve nihai sonuçlar, durdurma/sonlandırma davranışı ve Swift 6 eşzamanlılığı - <a href="/tr/blog/ios26-speechanalyzer-live-mic">iOS 26 SpeechAnalyzer canlı mikrofon kılavuzunun tamamına</a> bakın. Çalıştırılabilir örnek <a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic" rel="noopener">GitHub (MIT)</a>'dedir.</p>
+
+<h2 id="reading-08" data-ce-number="08">Birincil kaynaklar</h2>
+<ul>
+<li><a href="https://developer.apple.com/documentation/speech/analysiscontext/contextualstrings" rel="noopener noreferrer">Apple: AnalysisContext.contextualStrings</a></li>
+<li><a href="https://developer.apple.com/documentation/speech/dictationtranscriber" rel="noopener noreferrer">Apple: DikteTranskripsiyon</a></li>
+<li><a href="https://developer.apple.com/documentation/speech/speechtranscriber" rel="noopener noreferrer">Apple: KonuşmaTranskripsiyoncu</a></li>
+<li><a href="https://developer.apple.com/documentation/speech/speechanalyzer/setcontext(_:)" rel="noopener noreferrer">Apple: SpeechAnalyzer.setContext(_:)</a></li>
+</ul>
+</div></div></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="tr" dir="ltr"><a class="site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Küçük bir not. Bir sonraki adım.</p><p class="site-footer-description">iPhone'unuzdan Obsidian'a ve e-postaya not gönderin.</p></div></div><!-- /site-chrome:intro --><div class="container">
+<nav class="footer__nav" aria-label="Alt bilgi gezinmesi">
+<div class="footer__col"><p class="footer__col-title">Ürün</p><a href="/tr/download/" class="footer__link">İndir</a><a href="/tr/use-cases/" class="footer__link">Kullanım örnekleri</a><a href="/tr/guides/" class="footer__link">Kılavuzlar</a></div>
+<div class="footer__col"><p class="footer__col-title">Karşılaştır ve Değiştir</p><a href="/tr/captio-alternative/" class="footer__link">Captio Alternatif</a><a href="/tr/vs/" class="footer__link">Karşılaştır</a></div>
+<div class="footer__col"><p class="footer__col-title">Oku</p><a href="/tr/about/" class="footer__link">Geliştirici hakkında</a><a href="/tr/devlog/" class="footer__link">Geliştirme günlüğü</a><a href="/tr/blog/" class="footer__link">Blog</a></div>
+<div class="footer__col"><p class="footer__col-title">Destek</p><a href="/tr/terms" class="footer__link">Şartlar</a><a href="/tr/privacy" class="footer__link">Gizlilik</a><a href="/tr/faq" class="footer__link">Sık sorulan sorular</a><a href="/tr/contact" class="footer__link">İletişim</a></div>
+</nav>
+<nav class="footer__social" aria-label="Sosyal bağlantılar"><a href="https://x.com/simplememofast" rel="me noopener" target="_blank" class="footer__link">X/Twitter</a><a href="https://github.com/simplememofast" rel="me noopener" target="_blank" class="footer__link">GitHub</a></nav>
+<p class="footer__copyright">© 2026 Simple Memo - for Obsidian / İşleten: YURIKA, K.K.</p>
+</div></footer>
+
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body></html>

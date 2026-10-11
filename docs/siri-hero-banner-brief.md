@@ -89,3 +89,12 @@ light arc across the middle, left half kept dark and clean for overlay text.
 `og/siri.png` の参照には `?v=20260805c` を付けてある（`/assets/*` は7日
 immutable キャッシュのため、中身を変えたらバンプが要る）。
 `siri-banner-ja.*` は新規ファイルなのでバージョン不要。
+
+## ✅ 文言の差し替え（2026-10-01）
+
+台帳（`docs/seo/directory-registration-2026-09.md`）§7 の #53 の残り。オーナーの判断（10/1）で、画像の中の「スマホを触らず、声で残す」を **「アプリを開かず、声で残す」** に変え、トップの代替テキストも画像に合わせた（「話すだけで…届く」の言い切りを外した）。
+
+- 入稿の元データ（1691×930）はリポジトリに無いので、`siri-banner-ja@2x.webp`（1691×888）のその1行だけを描き直した。周りは一様な暗い色なので、その色で消してから書いた。見出し・図・チップ・人物・端末は元のまま。
+- そこから `siri-banner-ja.webp`・`siri-banner-ja.jpg`（どちらも 1200×630）を作り、`python scripts/perf/build_home.py --write` でトップの AVIF（5サイズ）・`manifest.json`・日本語フォントの部分集合を作り直した。
+- **同じ URL のまま中身を変えたので、トップの参照に `?v=`（ファイルの SHA-256 の先頭10桁）を付けた。**`/assets/*` は7日 immutable で、CDN が差し替え前の画像を返し続けた前例がある（`scripts/check-css-version.mjs` の onboarding 画像の注記）。`check-css-version.mjs` は srcset の中の `?v=` を扱えない（`?v=` の後ろを引用符まで1つの値として読む）ので対象には入れず、手で付けた。**次に中身を変えるときは `?v=` も変える。**
+- `assets/img/og/siri.png`・`assets/img/og/siri-20260928.jpg`（プレス素材・前の OGP）は古い文言のまま。どちらも 9/30 の #1727 からはどのページにも使われていない。プレス素材として使うなら作り直しが要る。

@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/guides/inbox-memo-organization/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>给自己的备忘录堆积后的整理术 — Gmail × AI 活用指南 | SimpleMemo</title>
+  <meta name="description" content="用SimpleMemo发给自己的备忘录堆积之后的整理术。 包含Gmail过滤器和自动星级、搜索运算符的提取、Gemini / Apple Intelligence的总结、每周评论的模板的完整指南。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="给自己的备忘录堆积后的整理术 — Gmail × AI 活用指南 | SimpleMemo">
+  <meta property="og:description" content="高速发送备忘录后，如何整理积累的100通、300通。 Gmail 过滤器 + AI 合作的运用设计。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-05-20T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh/guides/inbox-memo-organization/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/guides-inbox-memo-organization.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="给自己的备忘录堆积后的整理术 — Gmail × AI 活用指南 | SimpleMemo">
+  <meta name="twitter:description" content="通过Gmail×AI合作解说备忘录堆积后的整理方法的指南。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/guides-inbox-memo-organization.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh/guides/inbox-memo-organization/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/guides/inbox-memo-organization/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/guides/inbox-memo-organization/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/guides/inbox-memo-organization/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/guides/inbox-memo-organization/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/guides/inbox-memo-organization/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/guides/inbox-memo-organization/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/guides/inbox-memo-organization/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/guides/inbox-memo-organization/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/guides/inbox-memo-organization/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/guides/inbox-memo-organization/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/guides/inbox-memo-organization/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主页",
+      "item": "https://simplememofast.com/zh/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "设置指南",
+      "item": "https://simplememofast.com/zh/guides/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "发给自己的笔记积累之后，如何整理",
+      "item": "https://simplememofast.com/zh/guides/inbox-memo-organization/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh/guides/inbox-memo-organization/#article",
+  "inLanguage": "zh-Hans",
+  "headline": "给自己的备忘录堆积后的整理术 — Gmail × AI 活用指南 | SimpleMemo",
+  "description": "用SimpleMemo发送给自己的备忘录积累后，用Gmail过滤器、自动加星、搜索运算符、Gemini / Apple Intelligence高效整理、提取的完全指南。",
+  "url": "https://simplememofast.com/zh/guides/inbox-memo-organization/",
+  "datePublished": "2026-05-20",
+  "dateModified": "2026-10-03",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/guides-inbox-memo-organization.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh/guides/inbox-memo-organization/"
+  }
+}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh/guides/inbox-memo-organization/#webpage",
+  "inLanguage": "zh-Hans",
+  "name": "给自己的备忘录堆积后的整理术 — Gmail × AI 活用指南 | SimpleMemo",
+  "url": "https://simplememofast.com/zh/guides/inbox-memo-organization/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh/#website"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem}
+    .steps-list li{counter-increment:step;position:relative;padding:1rem 1rem 1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .reason-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .tip-box{background:rgba(100,180,255,.06);border:1px solid rgba(100,180,255,.18);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.875rem;line-height:1.8}
+    .tip-box__title{font-weight:700;color:var(--accent);margin-bottom:.4rem;font-size:.875rem;text-transform:uppercase;letter-spacing:.04em}
+
+    .trouble-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:.75rem 0}
+    .trouble-item__q{font-weight:700;font-size:.92rem;margin-bottom:.5rem}
+    .trouble-item__a{font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    .prereq-list{margin:1rem 0 1.5rem;padding-left:0;list-style:none}
+    .prereq-list li{font-size:.9rem;color:var(--text-secondary);padding:.4rem 0 .4rem 1.5rem;position:relative;line-height:1.6}
+    .prereq-list li::before{content:'✓';position:absolute;left:0;color:#3fb950;font-weight:700}
+
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="主导航" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh/guides/">使用指南</a><a href="/zh/use-cases/">使用场景</a><a href="/zh/vs/">对比</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/zh/guides/">使用指南</a></li>
+        <li><a href="/zh/use-cases/">使用场景</a></li>
+        <li><a href="/zh/vs/">对比</a></li>
+        <li><a href="/zh/methods/"><span>方法</span></a></li>
+        <li><a href="/zh/blog/"><span>博客</span></a></li>
+        <li><a href="/zh/glossary/"><span>术语集</span></a></li>
+        <li><a href="/zh/faq">常见问题</a></li>
+        <li><a href="/zh/about/">关于开发者</a></li>
+        <li><a href="/zh/devlog/">开发日志</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>下载</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="简体中文 · 选择语言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>简中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hans" dir="ltr"><p class="site-language-title">选择语言</p><div class="site-language-grid"><a href="/guides/inbox-memo-organization/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/guides/inbox-memo-organization/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hans" aria-current="page"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh-Hant/guides/inbox-memo-organization/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/guides/inbox-memo-organization/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/guides/inbox-memo-organization/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/guides/inbox-memo-organization/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/guides/inbox-memo-organization/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/guides/inbox-memo-organization/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/guides/inbox-memo-organization/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">下载</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="菜单"><span>菜单</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
+        <div class="lp-hero__label">
+          <span>运用指南</span>
+
+        </div>
+        <h1 class="lp-hero__title"> <span>给自己的备忘录堆积后的整理术</span> </h1>
+        <p class="lp-hero__sub"> <span>即使从点击0.4秒（iPhone 16e・warm启动的实测）开始书写，如何处理积聚的100通是另一个技能。 结合了Gmail过滤器、搜索运算符、Gemini / Apple Intelligence，现实的整理工作流程。 </span> </p>
+      </div><nav class="sd-hero-index" aria-label="本页内容"><p>本页内容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>为什么需要这个指南</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>1。 Gmail 过滤器 + 自动加星</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>2。 用搜索运算符提取</span><span aria-hidden="true">↗</span></a></nav></div>
+
+      <!-- Atomic answer block -->
+      <aside class="answer-block" aria-label="本页的要点" style="background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-left:3px solid var(--accent,#6ab4ff);border-radius:8px;padding:1.25rem 1.5rem;margin:0 auto 2rem;max-width:760px;font-size:.95rem;line-height:1.85;color:rgba(255,255,255,.75);">
+        <span style="font-weight:700;color:var(--accent,#6ab4ff);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;display:block;">要点</span>
+
+        <p style="margin:0;">按3步骤整理：（1）Gmail过滤器将<code>from:noreply@mail.simplememofast.com</code>分为自动星+专用标签，（2）搜索操作符在需要时一次性提取，委托（3）Gemini / Apple Intelligence进行总结、分类。 <strong style="color:#fff;">不把“整理”放在应用程序方面，交给邮件基础</strong>是这个设计的核心。 月300通也容易持续的运用。</p>
+
+      </aside>
+
+      <!-- Why-this-guide section -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"> <span>为什么需要这个指南</span> </h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>如果继续用邮件发送备忘录的话，1日10通也是1个月300通。 那时如何整理是这个指南的主题。 SimpleMemo的设计是为了加快“投掷侧”的速度，所以没有分文件夹等整理功能。 取而代之的是，通过使用已经适合整理的Gmail・邮件基础的功能，推荐“速度×整理”兼顾的运用。 本指南将总结具体步骤。 </span> </p>
+      </div></section>
+
+      <!-- Section 1: Gmail filter -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02"> <span>1。 Gmail 过滤器 + 自动加星</span> </h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>最有效的是，通过这个应用程序收到的邮件在<strong>Gmail侧自动加星+专用标签</strong>的设置。 与普通的收件箱不混为一谈，作为“给自己的备忘录”积聚在独立的空间里。 设置只有1次。 </span> </p>
+
+        <h3 style="font-size:1.1rem;margin:1.5rem 0 .75rem"> <span>步骤（PC版 Gmail）</span> </h3>
+        <ol class="steps-list">
+          <li>在Gmail的搜索框中输入<code>from:noreply@mail.simplememofast.com</code>→点击搜索栏右端的“筛选选项”图标。</li>
+          <li>确认“From”栏有<code>noreply@mail.simplememofast.com</code>，点击“创建过滤器”。</li>
+          <li>选择“加星”“加标签（例：新建📝Self Memo）”“不加重要标记”。</li>
+          <li>勾选“对现有邮件◯件也应用过滤器”并“创建过滤器”。</li>
+          <li>包括过去写给自己的备忘录在内，全部变成自动星号+标签状态。</li>
+        </ol>
+
+        <div class="tip-box">
+          <div class="tip-box__title">
+            <span>💡进一步分类的话</span>
+
+          </div>
+          <p style="margin:0;">想法、任务、参考资料等，按用途制作子标签（例：📝 Self Memo/Idea、📝 Self Memo/Task）后，只需在备忘录的1行（进入邮件标题）输入关键词即可自动分配。 在Gmail的过滤条件中，像<code>subject:アイデア</code>一样指定标题的单词，如果是正文的单词，在“包含”栏指定。</p>
+
+        </div>
+      </div></section>
+
+      <!-- Section 2: Search operators -->
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03"> <span>2。 用搜索运算符取出</span> </h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>通过过滤器提取积聚的备忘录时，使用Gmail的搜索运算符即可。 应该记住的只有6。 </span> </p>
+
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title"><code>from:noreply@mail.simplememofast.com</code></div>
+            <div class="reason-card__desc">
+              <span>缩小范围到从SimpleMemo收到的邮件（发件人的地址）。 最基本的。</span>
+
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title"><code>label:self-memo</code></div>
+            <div class="reason-card__desc">
+              <span>用制作的标签缩小范围。 如果只是加了星号的备忘录的话 <code>is:starred</code> 。</span>
+
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title"><code>after:2026/05/01 before:2026/05/31</code></div>
+            <div class="reason-card__desc">
+              <span>期间缩小范围。 月度评论和每周评论必备。</span>
+
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title"><code>subject:アイデア</code> / <code>"keyword"</code></div>
+            <div class="reason-card__desc">
+              <span>根据标题关键词或正文完全一致的短语进行筛选。 用引号圈起来的话完全一致。</span>
+
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title"><code>-in:trash -in:spam</code></div>
+            <div class="reason-card__desc">
+              <span>垃圾桶、垃圾邮件除外。 搜索结果被弄脏时使用。</span>
+
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title"><code>newer_than:7d</code></div>
+            <div class="reason-card__desc">
+              <span>只显示最近7日收到的备忘录。 在每周评论中使用。</span>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-box__title">
+            <span>💡 组合例子</span>
+
+          </div>
+          <p style="margin:0 0 .6rem;"><code>from:noreply@mail.simplememofast.com label:self-memo after:2026/05/01 subject:アイデア</code><br>→ 5月以后的“想法”只显示标题的备忘录。</p>
+          <p style="margin:0;"><code>from:noreply@mail.simplememofast.com -label:processed</code><br>→只显示尚未处理的备忘录（与手动赋予“processed”标签的运用相结合）。</p>
+
+        </div>
+      </div></section>
+
+      <!-- Section 3: AI -->
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04"> <span>3。 让AI整理（2026年现在）</span> </h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>“乱扔，之后让AI整理”的运用终于变得现实了。 2026年时实用水平的3的选择。 </span> </p>
+
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span>🤖Gmail中的Gemini</span>
+
+            </div>
+            <div class="reason-card__desc">
+              <span>从Gmail的侧板调用Gemini，可以用自然语言指示“📝 Self Memo标签中只提取本周的任务”“从上周的备忘录中只汇总阅读感想”等。 可以使用的是Google的对象方案，对象请在Google的指南中确认。<a href="https://gemini.google.com/" rel="noopener" target="_blank" style="color:var(--accent)">Gemini</a> 。</span>
+
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span>🍎 Apple Intelligence</span>
+
+            </div>
+            <div class="reason-card__desc">
+              <span>对应Apple Intelligence的iPhone（iPhone 15 Pro以后等）可以使用邮件应用程序中的邮件摘要和优先级高的邮件在上面显示功能等（日语从iOS 18.4开始）。 因为处理以终端内为中心，所以适合不想将内容发送到外部的运用。</span>
+
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span>💬手动传递给ChatGPT等</span>
+
+            </div>
+            <div class="reason-card__desc">
+              <span>从Gmail复制多个对应标签的备忘录→与提示一起粘贴到ChatGPT / Claude等。“ 分类”“按重要性顺序排列”“只提取动作项目”等。 虽然手数很多，但是AI模型的选择很广。</span>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-box__title">
+            <span>💡 设计思想</span>
+
+          </div>
+          <p style="margin:0;">在投入的瞬间判断“这是想法、任务、参考资料”的工作，不让写笔记的一方承担的设计。 判断交给AI，人类集中于“想到的瞬间写”的事情。 Captio抛弃的摩擦，即使到了AI时代也不会再现的设计判断。</p>
+
+        </div>
+      </div></section>
+
+      <!-- Section 4: Weekly review template -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05"> <span>4。 每周评论的模板</span> </h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>为了防止积攒，只要确保每周1次30分钟的评论名额就足够了。 将GTD（Getting Things Done）和Inbox Zero的想法融入到邮件基础的运用。 </span> </p>
+
+        <ol class="steps-list">
+          <li><strong>缩小范围</strong>：用Gmail用<code>label:self-memo after:今週月曜日</code>显示本周的备忘录。</li>
+          <li><strong>分类</strong>：打开1个，分配到3的目的地之一：<br> ・<strong>Action</strong>（本周内做）→ 转写到任务管理应用程序 or 固定标记<br> ・<strong>Reference</strong>（稍后回顾）→ 贴上“processed”标签存档<br> ・<strong>Trash</strong>（不需要）→删除</li>
+          <li><strong>AI 总结（任意）</strong>：委托Gemini等“总结本周的备忘录”，制作回顾用的总结。</li>
+          <li><strong>结转到下周</strong>：本周内处理不完的备忘录，留下星星后发送到下周的评论。</li>
+        </ol>
+
+        <div class="tip-box">
+          <div class="tip-box__title">
+            <span>💡如果觉得30分钟很长</span>
+
+          </div>
+          <p style="margin:0;">一开始光是“把本周的笔记大致总结成Gemini”就足够有价值了。 分类从下周开始OK。 比起以完美的GTD为目标，“先了解一下这周记下了什么”的习惯更容易继续下去。</p>
+
+        </div>
+      </div></section>
+
+      <!-- Section 5: Troubleshooting / FAQ -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06"> <span>5。 常见问题</span> </h2></div><div class="ce-chapter__body">
+
+        <div class="trouble-item">
+          <div class="trouble-item__q">
+            <span>过去给自己的备忘录在Gmail搜索中找不到</span>
+
+          </div>
+          <div class="trouble-item__a">
+            <span>Gmail的搜索是标准，排除“垃圾桶、垃圾邮件”。<code>-in:trash -in:spam</code> 删掉了 <code>from:noreply@mail.simplememofast.com</code> 单独搜索也找不到的话，请在“所有邮件”文件夹中确认备忘录，或者<code>in:anywhere from:noreply@mail.simplememofast.com</code> 请尝试一下。</span>
+
+          </div>
+        </div>
+
+        <div class="trouble-item">
+          <div class="trouble-item__q">
+            <span>iPhone的Mail.app也可以做同样的整理吗？</span>
+
+          </div>
+          <div class="trouble-item__a">
+            <span>如果收件人是Gmail的话，在Gmail（Web版）中设置一次过滤器，分配就会在Gmail那边进行，在iPhone的邮件应用程序中也可以看到标签作为文件夹。 用iPhone的邮件应用程序可以制定的规则是iCloud邮件用的，所以如果收件人是iCloud邮件的话，可以用那个规则进行分配。 如果将发件人设置为“VIP”，在VIP的邮箱中只能看到备忘录。 Apple Intelligence对应的iPhone的话，也可以使用摘要和优先度高的邮件显示。</span>
+
+          </div>
+        </div>
+
+        <div class="trouble-item">
+          <div class="trouble-item__q">
+            <span>应该存档到什么程度，从哪里删除？</span>
+
+          </div>
+          <div class="trouble-item__a">
+            <span>如果犹豫不决的话，推荐存档。 Gmail的存储容量是Google账户的15GB与Google驱动器、Google照片共享，但只有文本的备忘录因为1通很小，所以很难压缩容量。 在搜索中保持可以全部提取的状态的人，在以后变成“那个备忘录是什么”的时候是压倒性的强。 显然不需要（错误发送、重复、测试备忘录）只要删除就足够了。</span>
+
+          </div>
+        </div>
+
+        <div class="trouble-item">
+          <div class="trouble-item__q">
+            <span>想把备忘录导入Obsidian和Notion</span>
+
+          </div>
+          <div class="trouble-item__a">
+            <span>接下来要发送的备忘录，在应用程序的设置中 <a href="/zh/obsidian/" style="color:var(--accent)">Obsidian合作</a> 呀 <a href="/zh/notion/" style="color:var(--accent)">Notion合作</a> 后，除了邮件之外，还可以留在保管库和Notion中。 已经积聚在Gmail的备忘录，可以通过Google数据导出（Google Takeout）选择标签以.mbox格式导出，但Obsidian官方的Importer和Notion的导入都不支持.mbox，所以使用转换工具或只粘贴必要的备忘录。 如果想将收到的邮件自动发送到Notion等，也可以使用Zapier和Make等合作服务。</span>
+
+          </div>
+        </div>
+
+        <div class="trouble-item">
+          <div class="trouble-item__q">
+            <span>为了隐私，不想给AI看备忘录内容</span>
+
+          </div>
+          <div class="trouble-item__a">
+            <span>Apple Intelligence以终端内的处理为主，使用Private Cloud Compute时也不会将数据保存在Apple的服务器上，Apple解释说。 Gmail + Gemini将数据传递到Google，如果包含机密内容的话，请分开使用，或者只用手动+搜索操作符完成整理。 SimpleMemo本身不会将备忘录正文永久保存在服务器上（只是发送时通过中继服务器）。 详情请见 <a href="/zh/privacy" style="color:var(--accent)">隐私政策</a> 请确认。</span>
+
+          </div>
+        </div>
+      </div></section>
+
+      <!-- CTA -->
+      <div class="cta-box">
+        <div class="cta-box__title">
+          <span>首先尝试发送方</span>
+
+        </div>
+        <div class="cta-box__desc">
+          <span>整理要积攒起来才来得及。 首先请体验一下“投进的速度”。 下载是免费的。</span>
+
+        </div>
+        <a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="从App Store下载"> <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="从App Store下载" loading="lazy"> </a>
+
+      </div>
+
+      <!-- Internal Links -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07"> <span>相关页面</span> </h2></div><div class="ce-chapter__body">
+        <div class="internal-links">
+          <a href="/zh/guides/"> <span>设置指南一览</span> </a>
+          <a href="/zh/guides/gmail/"> <span>Gmail 设置指南</span> </a>
+          <a href="/zh/blog/email-management-tips"> <span>博客：邮件管理的诀窍</span> </a>
+          <a href="/zh/glossary/inbox-zero/"> <span>用语：Inbox Zero</span> </a>
+          <a href="/zh/use-cases/"> <span>活用事例集</span> </a>
+          <a href="/zh/voices/"> <span>用户的声音</span> </a>
+          <a href="/zh/vs/obsidian/"> <span>vs Obsidian 比较</span> </a>
+          <a href="/zh/faq"> <span>常见问题</span> </a>
+        </div>
+      </div></section>
+
+    </div>
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="method" href="/zh/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>接着阅读</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>把写下的笔记存入 Obsidian</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>在 iPhone 中设置笔记库访问权限和追加位置，就能把写下的笔记也保存到 Obsidian。</span> </span> </a>
+  </aside>
+
+  </main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hans" dir="ltr"><a class="site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">记下一点想法，迈出下一步。</p><p class="site-footer-description">从 iPhone 向 Obsidian 和电子邮件发送笔记。</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="页脚导航">
+      <div class="footer__col">
+        <p class="footer__col-title">产品</p>
+        <a href="/zh/download/" class="footer__link">下载</a>
+        <a href="/zh/" class="footer__link">首页</a>
+        <a href="/zh/use-cases/" class="footer__link">使用场景</a>
+        <a href="/zh/guides/" class="footer__link">使用指南</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比较与迁移</p>
+        <a href="/zh/captio-alternative/" class="footer__link"><span>Captio替代</span> </a>
+        <a href="/zh/note-to-email/" class="footer__link">将笔记发送到邮箱</a>
+        <a href="/zh/vs/" class="footer__link">对比</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">支持</p>
+        <a href="/zh/roadmap/" class="footer__link">公开路线图</a>
+        <a href="/zh/devlog/" class="footer__link">开发日志</a>
+        <a href="/zh/about/" class="footer__link">关于开发者</a>
+        <a href="/zh/faq" class="footer__link">常见问题</a>
+        <a href="/zh/privacy" class="footer__link">隐私</a>
+        <a href="/zh/contact" class="footer__link">联系我们</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 运营：YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

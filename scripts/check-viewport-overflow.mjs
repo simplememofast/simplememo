@@ -48,13 +48,14 @@
  */
 
 import fs from 'node:fs';
+import { collectHtmlFiles } from './lib/site-files.js';
 import path from 'node:path';
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
-import { run } from './lib/selftest.mjs';
 import { measureWebKit, findWebKitDriver } from './lib/webkit-driver.mjs';
 import { MARKER, measurementGroup } from './lib/viewport-health.mjs';
 import { hasCurrentInlineSharedCss } from './perf/inline_styles.mjs';
+import { measureViewportJobs } from './lib/viewport-pool.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -158,21 +159,12 @@ export function unboundedKeepAll(html) {
  * 面のほうも同じだった。
  */
 export function allPages(root = ROOT) {
-  const out = [];
-  const walk = (d) => {
-    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
-      // `fixtures/` は**検査のための見本**で、公開する面ではない。
-      // 中身はわざと壊してあるので、走査に混ぜると検査が自分の見本で落ちる。
-      if (e.name === 'node_modules' || e.name === '.git' || e.name === 'fixtures') continue;
-      const abs = path.join(d, e.name);
-      if (e.isDirectory()) walk(abs);
-      else if (e.name.endsWith('.html')) {
-        out.push('/' + path.relative(root, abs).split(path.sep).join('/').replace(/index\.html$/, ''));
-      }
-    }
-  };
-  walk(root);
-  return out.sort();
+  // `fixtures/` contains deliberately broken rendering samples, not public pages.
+  return collectHtmlFiles(root, {
+    skipDirs: ['node_modules', '.git', 'fixtures'],
+    skipHidden: false,
+    tolerateReadErrors: false,
+  }).map((abs) => '/' + path.relative(root, abs).split(path.sep).join('/').replace(/index\.html$/, '')).sort();
 }
 
 /**
@@ -392,7 +384,7 @@ export const PROBE = () => {
  */
 export const CONCURRENCY = 6;
 
-export async function measure({ pages = PAGES, widths = WIDTHS, concurrency = CONCURRENCY } = {}) {
+export async function measure({ pages = PAGES, widths = WIDTHS, concurrency = CONCURRENCY, progress = false } = {}) {
   const chromium = await loadChromium();
   const exe = findChromium();
   if (!chromium || !exe) {
@@ -404,25 +396,15 @@ export async function measure({ pages = PAGES, widths = WIDTHS, concurrency = CO
   const browser = await chromium.launch({ executablePath: exe, args: ['--no-sandbox'] });
   const jobs = [];
   for (const page of pages) for (const width of widths) jobs.push({ page, width });
-  const results = [];
-  const failures = [];
-  let next = 0;
-  const worker = async () => {
-    for (let i = next++; i < jobs.length; i = next++) {
-      const { page, width } = jobs[i];
-      const p = await browser.newPage({ viewport: { width, height: 800 } });
-      try {
-        await p.goto(`http://127.0.0.1:${port}${page}`, { waitUntil: 'domcontentloaded' });
-        await p.waitForTimeout(250);
-        results.push({ page, width, ...(await p.evaluate(PROBE)) });
-      } catch (e) {
-        // **測れなかったことを、漏れが無かったことにしない。**
-        failures.push({ page, width, why: String(e.message || e).split('\n')[0].slice(0, 120) });
-      } finally { await p.close().catch(() => {}); }
-    }
-  };
+  let results, failures;
   try {
-    await Promise.all(Array.from({ length: Math.min(concurrency, jobs.length) }, worker));
+    ({ results, failures } = await measureViewportJobs({ browser, jobs,
+      origin: `http://127.0.0.1:${port}`, probe: PROBE, concurrency,
+      onProgress: ({ completed, total, failed }) => {
+        if (progress && (completed % 100 === 0 || completed === total)) {
+          console.log(`Chromium viewport progress: ${completed}/${total}; failed=${failed}`);
+        }
+      } }));
   } finally {
     await browser.close();
     srv.close();
@@ -677,11 +659,12 @@ if (isMain) {
   // 面を絞る側（3面）と幅を絞る側（全面）を両方持つ。片方だけだと、
   // 2026-09-03 に実際そうなったように「見ていない面」か「見ていない幅」が残る。
   const sweep = argv.includes('--no-sweep') ? null
-    : await measure({ pages: allPages(), widths: SWEEP_WIDTHS });
-  const m = await measure();
+    : await measure({ pages: allPages(), widths: SWEEP_WIDTHS, progress: true });
+  const m = await measure({ progress: true });
   // **もう一方のエンジン。**Blink とは行分割の判断が違い、実機（iOS）はこちら側。
   //   深い3面 × 14幅（約16秒）＋ 全269面 × 320px（約1.7分）。
   //   全面 × 4幅まで広げると 6.8 分で、CIに載らない＝結局また測らなくなる。
+  if (!argv.includes('--no-webkit')) console.log(`WebKit viewport sweep: ${allPages().length} pages plus deep landing checks`);
   const wk = argv.includes('--no-webkit') ? null
     : await measureWk({
         pages: [...new Set([...PAGES, ...allPages()])],
@@ -775,7 +758,8 @@ if (isMain) {
       + '\n   2026-09-03 の校正で 実機41px に対しここは31px。**余裕は多めに見ること。**）');
     if (!wkN) {
       console.log('  （**WebKit を測っていない。**`apt-get install -y --no-install-recommends '
-        + 'webkit2gtk-driver xvfb` を入れると、Blink では出ない壊れ方も見る）');
+        + 'webkit2gtk-driver xvfb`（Ubuntu 26.04 では `webkitgtk-webdriver`）を入れると、'
+        + 'Blink では出ない壊れ方も見る）');
     }
   } else {
     console.log(`\n  **横スクロールが出る組み合わせが ${m.problems.length} 件。**`);

@@ -1,5 +1,5 @@
 import json,sys
-d=json.load(open('/private/tmp/claude-501/-Users-hajimeataka-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad/work-seo-visual/results.json'))
+d=json.load(open('/private/tmp/claude-501/-Users-<user>-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad/work-seo-visual/results.json'))
 print('reqTotal',d['reqTotal'],'bad',d['bad'][:10])
 def delta(a,b):
     if not a or not b: return None

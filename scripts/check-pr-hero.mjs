@@ -11,7 +11,6 @@
  * 出来上がりではない。**
  */
 import { run as runScenarios } from './lib/selftest.mjs';
-import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { LEAD_MAX_GLYPHS, splitHeadline, heroLines, buildHTML, WIDTH, HEIGHT } from './pr-hero-layout.mjs';

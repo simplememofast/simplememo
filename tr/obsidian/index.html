@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<script src="/js/i18n/tr/messages.dfd6df89eae7.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>iPhone üzerinden Obsidian uygulamasına not gönderme — Eklentisiz otomatik ekleme</title>
+  <meta name="description" content="SimpleMemo ile iPhone notlarını günlük nota veya Inbox notuna otomatik ekleyin. Eklenti gerektirmeyen klasör entegrasyonu için kayıt konumunun seçilmesinden yazma testine ve ilk notun kontrolüne kadar tüm adımları açıklıyoruz. Yanlış kayıt konumu ve yazma hataları için çözümler de yer alıyor.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="iPhone üzerinden Obsidian uygulamasına not gönderme — Eklentisiz otomatik ekleme">
+  <meta property="og:description" content="Seçtiğiniz Obsidian kasasındaki nota metin ekleyin. Klasöre doğrudan yazma başarılı olursa Obsidian uygulamasını açmadan kayıt yapabilirsiniz.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-05-30T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/tr/obsidian/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-banner.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="iPhone üzerinden Obsidian uygulamasına not gönderme — Eklentisiz otomatik ekleme">
+  <meta name="twitter:description" content="Gönderdiğiniz metni seçili Obsidian notuna ekleyin. Doğrudan yazma yönteminde eklenti veya Obsidian uygulamasını açmak gerekmez.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-banner.jpg">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/tr/obsidian/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Ana sayfa",
+      "item": "https://simplememofast.com/tr/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian entegrasyonu",
+      "item": "https://simplememofast.com/tr/obsidian/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/tr/obsidian/#article",
+  "inLanguage": "tr",
+  "headline": "iPhone üzerinden Obsidian uygulamasına not gönderme — Eklentisiz otomatik ekleme",
+  "description": "SimpleMemo ile Obsidian entegrasyonu. Gönderilen metin seçili kasa klasöründeki nota eklenir. Doğrudan yazma başarılı olursa topluluk eklentisi veya Obsidian uygulamasının açılması gerekmez; metin, zaman damgasıyla günlük nota ya da Inbox notuna kaydedilir.",
+  "url": "https://simplememofast.com/tr/obsidian/",
+  "datePublished": "2026-05-30",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-banner.jpg",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/tr/obsidian/"
+  }
+}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/tr/obsidian/#faq",
+  "inLanguage": "tr",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Obsidian eklentisi gerekiyor mu?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Klasöre doğrudan yazmak için topluluk eklentisi gerekmez. Notlar, iCloud Drive veya “iPhone üzerinde” konumunda seçtiğiniz klasöre yazılır. Bu yöntemde Daily Notes özelliğini etkinleştirmek de gerekmez. Önce ayarlardaki “Obsidian yazma testi” ile kayıt konumunu doğrulayın."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Her not gönderdiğimde Obsidian açılır mı?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Seçilen klasöre doğrudan yazma başarılı olursa Obsidian açılmadan not eklenebilir. Normal modda klasör seçilmemişse veya doğrudan yazma başarısız olursa uygulama, URL şemasıyla Obsidian uygulamasını açıp not eklemeyi deneyebilir. Ayarlardaki yazma testi yalnızca klasöre doğrudan yazmayı kontrol eder."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Hangi nota, nasıl eklenir?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "“Günlük not”, seçilen klasörde o güne ait yyyy-MM-dd.md dosyasına ekler. “Belirli not”, ayarladığınız dosya adına ekler; varsayılan ad Inbox.md olur. Varsayılan biçim - HH:mm not şeklindedir. “Ekleme biçimi” ayarından zaman damgasını ve metin başı ile sonu şablonlarını değiştirebilir, iPhone ve Apple Watch için ayrı ayrı ayarlayabilirsiniz. Ekleme sırasında notun mevcut içeriği silinmez."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Yalnızca Obsidian Sync ile eşitleme yapıyorsam kullanabilir miyim?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Hedef klasörün iCloud Drive veya “iPhone üzerinde” konumunda bulunması ve Dosyalar uygulamasından erişilebilir olması gerekir. Yalnızca Obsidian Sync kullanan kasalar klasör seçicisinde görünmeyebilir. Bu durumda uygulama, URL şeması yöntemine geri döner."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Android veya bilgisayarda kullanabilir miyim?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Entegrasyonu gerçekleştiren SimpleMemo, şu anda iOS 16 veya üstünü kullanan iPhone için sunulan bir uygulamadır. Hedef Obsidian kasasını iCloud Drive veya Obsidian Sync ile eşitlerseniz aynı notları Mac, iPad ve diğer cihazlardaki Obsidian üzerinden açabilirsiniz."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Notlar sunucuda saklanır mı?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Obsidian içine not ekleme, tamamen cihazda gerçekleşen yerel bir işlemdir. Mevcut gönderim ve şifreleme yollarında değişiklik yapılmamıştır. E-posta gövdesi yalnızca gönderim sırasında sunucumuzdan geçer; kalıcı olarak saklanmaz."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Mevcut e-posta gönderimine ne olur?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Normal modda not hem e-postada hem Obsidian içinde kalır. Kapsama alanı dışındayken e-posta Outbox içinde tutulur; seçilmiş klasöre ekleme işlemi cihazda yapılır. Premium ile ayarlardan kasa klasörünü seçip yazma testini tamamladıktan sonra “Yalnızca Obsidian içine kaydet (e-posta gönderme)” seçeneğini açabilirsiniz. Etkin olduğu sürece notlar e-postayla gönderilmez, yalnızca kasaya kaydedilir. Premium süresi dolsa bile bu mod, ücretsiz kullanımın her 1 günde 3 not sınırıyla devam eder."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Çevrimdışıyken, kapsama alanı dışında da Obsidian içine eklenir mi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Hedef klasör iPhone cihazına indirilmişse ve uygulama klasöre yazabiliyorsa internet bağlantısı olmadan yerel dosyaya not eklenebilir. Önce yazma testiyle doğrulayın. Normal moddaki e-postalar Outbox içinde bekler; iCloud ile diğer cihazlara eşitleme için bağlantının geri gelmesi gerekir."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Notları Obsidian içindeki Inbox notunda toplayabilir miyim?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Evet. “Hedef” bölümünde “Belirli not” seçeneğini seçin ve “Not adı” alanını ayarlayın. Boş bırakırsanız Inbox.md kullanılır. Notlar seçilen klasördeki aynı dosyaya ekleneceğinden önce yazma testiyle dosya adını ve içeriğini kontrol edin. Günlük not seçeneğine ayarlardan geçebilirsiniz."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Gmail, Outlook veya iCloud e-postasıyla da Obsidian içinde saklayabilir miyim?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Obsidian içine ekleme, e-posta alıcısından bağımsız çalışır; Gmail, Outlook, iCloud veya başka bir hizmet olabilir. Çünkü Obsidian içine ekleme, cihazdaki yerel bir işlemdir ve e-posta gönderiminden ayrıdır. Normal modda e-posta her zamanki gelen kutunuza ulaşır, aynı not Obsidian içinde de kalır. “Yalnızca Obsidian içine kaydet” etkin olduğu sürece notlar e-postayla gönderilmez."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apple Watch üzerinden Obsidian uygulamasına gönderebilir miyim?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Apple Watch üzerinden kendinize not gönderdiğinizde, iPhone tarafındaki entegrasyon işlemi aynı notu Obsidian içine ekler. Ekleme işlemini iPhone yapar; Watch doğrudan kasaya yazmaz. Ayrıntılar için Apple Watch destek sayfasına bakın."
+      }
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/tr/obsidian/#webpage",
+  "inLanguage": "tr",
+  "name": "iPhone üzerinden Obsidian uygulamasına not gönderme — Eklentisiz otomatik ekleme",
+  "url": "https://simplememofast.com/tr/obsidian/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/tr/#website"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" as="image" type="image/webp" href="/assets/img/obsidian-banner-ja.webp" imagesrcset="/assets/img/obsidian-banner-ja.webp 1200w, /assets/img/obsidian-banner-ja@2x.webp 1448w" imagesizes="(max-width: 760px) 100vw, 760px">
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn,.lang-switcher__link{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em;text-decoration:none;display:inline-block}
+    .lang-switcher__btn:hover,.lang-switcher__link:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible,.lang-switcher__link:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active,.lang-switcher__link.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem}
+    .steps-list li{counter-increment:step;position:relative;padding:1rem 1rem 1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .reason-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .tip-box{background:rgba(100,180,255,.06);border:1px solid rgba(100,180,255,.18);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.875rem;line-height:1.8}
+    .tip-box__title{font-weight:700;color:var(--accent);margin-bottom:.4rem;font-size:.875rem;text-transform:uppercase;letter-spacing:.04em}
+
+    .trouble-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:.75rem 0}
+    .trouble-item__q{font-weight:700;font-size:.92rem;margin-bottom:.5rem}
+    .trouble-item__a{font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    .prereq-list{margin:1rem 0 1.5rem;padding-left:0;list-style:none}
+    .prereq-list li{font-size:.9rem;color:var(--text-secondary);padding:.4rem 0 .4rem 1.5rem;position:relative;line-height:1.6}
+    .prereq-list li::before{content:'✓';position:absolute;left:0;color:#3fb950;font-weight:700}
+
+    /* Obsidian feature page extras */
+    .flow-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem;margin:1.5rem 0}
+    .flow-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;font-size:.95rem;font-weight:700}
+    .flow-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem .9rem;border-radius:10px;background:rgba(100,180,255,.10);border:1px solid rgba(100,180,255,.2);color:var(--text)}
+    .flow-arrow{color:var(--accent);font-weight:700}
+    .note-preview{margin-top:1.25rem;background:#0d1117;border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.25rem;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.82rem;line-height:1.9;color:#c9d1d9;overflow-x:auto}
+    .note-preview .nt-h{color:#79c0ff;font-weight:700}
+    .note-preview .nt-time{color:#6ab4ff}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn,.lang-switcher__link{transition:none}}
+
+    /* Header and footer share the landing page's palette and control states.
+       Scoped !important rules override the shared legacy navigation theme. */
+    body.lpr-page{--chrome-bg:#07070b;--chrome-surface:#0d0e14;--chrome-ink:#e9e9f1;--chrome-muted:#b5b5c7;--chrome-accent:#c4b5fd;--chrome-line:rgba(167,139,250,.22)}
+    .lpr-page .global-nav,.lpr-page .footer{font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Meiryo UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
+    .lpr-page .global-nav{position:sticky;top:0;z-index:1000;background:rgba(7,7,11,.94)!important;border-bottom:1px solid var(--chrome-line)!important;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+    .lpr-page .global-nav__inner{max-width:1120px;margin:0 auto;padding:0 24px!important;min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .lpr-page .global-nav__logo,.lpr-page .lpr-footer-brand{display:inline-flex;align-items:center;gap:12px;min-height:48px;color:#fff!important;text-decoration:none;flex-shrink:0}
+    .lpr-page .global-nav__logo img{width:36px;height:36px;border-radius:11px;box-shadow:0 0 0 1px var(--chrome-line),0 4px 20px rgba(139,92,246,.18)!important}
+    .lpr-page .lpr-brand-name{display:flex!important;flex-direction:column;gap:3px;overflow:visible;line-height:1.25}
+    .lpr-page .lpr-brand-name small{font-size:10px;font-weight:500;letter-spacing:.1em;color:var(--chrome-accent)}
+    .lpr-page .lpr-brand-name strong{font-size:16px;font-weight:750;letter-spacing:.02em;color:#fff}
+    .lpr-page .global-nav__links{display:flex;align-items:center;gap:0;list-style:none;margin:0;padding:0}
+    .lpr-page .global-nav__links a{display:flex;align-items:center;min-height:44px;padding:8px;color:var(--chrome-muted)!important;font-size:12px;font-weight:500;text-decoration:none;border-radius:10px;transition:background .18s,color .18s}
+    .lpr-page .global-nav__links a:hover{background:rgba(139,92,246,.12)!important;color:#fff!important}
+    .lpr-page .global-nav__links a::after{display:none}
+    .lpr-page .global-nav__actions{display:flex;align-items:center;gap:12px;flex-shrink:0}
+    .lpr-page .global-nav__cta{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 16px;border:1px solid #fff;border-radius:12px;background:#fff!important;color:#07070b!important;box-shadow:none!important;font-size:12px;font-weight:700;text-decoration:none;transition:background .18s,border-color .18s}
+    .lpr-page .global-nav__cta:hover{background:#ede9fe!important;border-color:#ede9fe;box-shadow:none!important}
+    .lpr-page .lang-switcher--nav{background:var(--chrome-surface)!important;border-color:var(--chrome-line)!important;border-radius:12px!important;margin-right:0!important}
+    .lpr-page .lang-switcher--nav .lang-switcher__btn{min-width:40px;min-height:40px!important;padding:4px 8px!important;border-radius:9px!important;color:var(--chrome-muted)!important}
+    .lpr-page .lang-switcher--nav .lang-switcher__btn.active{background:rgba(139,92,246,.2)!important;border-color:rgba(167,139,250,.32);color:#fff!important;box-shadow:none!important}
+    .lpr-page .lang-switcher--nav .lang-switcher__btn:hover{color:#fff!important;background:rgba(139,92,246,.12)!important}
+    .lpr-page .global-nav__hamburger{display:none;width:44px;height:44px;padding:11px;border:1px solid var(--chrome-line);border-radius:12px;background:var(--chrome-surface);color:var(--chrome-ink)!important;cursor:pointer}
+    .lpr-page .global-nav__hamburger svg{display:block;width:20px;height:20px;overflow:visible}
+    .lpr-page .global-nav__hamburger path{transform-box:fill-box;transform-origin:center;transition:transform .18s}
+    .lpr-page .global-nav__hamburger[aria-expanded="true"] path:first-child{transform:translateY(4px) rotate(45deg)}
+    .lpr-page .global-nav__hamburger[aria-expanded="true"] path:last-child{transform:translateY(-4px) rotate(-45deg)}
+    .lpr-page .global-nav :is(a,button):focus-visible,.lpr-page .footer a:focus-visible{outline:2px solid var(--chrome-accent)!important;outline-offset:4px}
+    .lpr-page .nav-cta-mobile{display:none}
+
+    .lpr-page .footer{position:relative;margin-top:48px;padding:64px 24px 140px;border-top:1px solid var(--chrome-line);background:radial-gradient(ellipse at 10% 0,rgba(139,92,246,.14),transparent 55%),var(--chrome-bg);color:var(--chrome-ink)}
+    .lpr-page .footer > .container{display:grid;grid-template-columns:minmax(180px,.85fr) minmax(0,2fr);align-items:start;gap:40px 64px;max-width:1120px;padding:0}
+    .lpr-page .lpr-footer-brand{align-self:start;justify-self:start;padding-top:4px}
+    .lpr-page .lpr-footer-brand img{width:48px;height:48px;border:1px solid var(--chrome-line);border-radius:14px;box-shadow:0 8px 32px rgba(139,92,246,.15)}
+    .lpr-page .lpr-footer-brand .lpr-brand-name strong{font-size:20px}
+    .lpr-page .footer__nav{grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;width:100%;max-width:none;margin:0}
+    .lpr-page .footer__col-title{margin:0 0 14px;color:var(--chrome-accent);font-size:12px;font-weight:600;letter-spacing:.08em}
+    .lpr-page .footer__col .footer__link{min-height:44px;padding:10px 0;color:var(--chrome-muted);font-size:13px;border-radius:6px;line-height:1.6}
+    .lpr-page .footer__link:hover{color:#fff;background:rgba(139,92,246,.1)}
+    .lpr-page .footer__copyright{grid-column:1/-1;margin:0;padding-top:24px;border-top:1px solid var(--chrome-line);text-align:left;font-size:11px;line-height:1.8;color:var(--chrome-muted)}
+    @media(max-width:1199px){
+      .lpr-page .global-nav__links:not(.open){display:none!important}
+      .lpr-page .global-nav__hamburger{display:block!important}
+      .lpr-page .global-nav__links.open{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));position:absolute!important;top:100%;left:24px;right:24px;max-width:640px;margin:8px auto 0;padding:16px!important;gap:8px!important;max-height:calc(100dvh - 100px);overflow-y:auto;border:1px solid var(--chrome-line)!important;border-radius:20px;background:#0d0e14!important;box-shadow:0 24px 64px rgba(0,0,0,.45);backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+      .lpr-page .global-nav__links.open a{padding:12px 16px;font-size:13px;color:var(--chrome-ink)!important;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06)}
+      .lpr-page .global-nav__links.open .nav-cta-mobile{display:block!important;grid-column:1/-1;margin:4px 0 0;padding:0;border-radius:12px;background:#fff!important}
+      .lpr-page .global-nav__links.open .nav-cta-mobile a{justify-content:center;background:#fff!important;color:#07070b!important;border-radius:12px;font-weight:700}
+      .lpr-page .global-nav__links.open .nav-cta-mobile a:hover{background:#ede9fe!important}
+    }
+    @media(max-width:767px){
+      .lpr-page .global-nav__inner{min-height:72px;padding:0 16px!important;gap:12px}
+      .lpr-page .global-nav__logo{gap:8px}
+      .lpr-page .global-nav__logo img{width:32px;height:32px;border-radius:10px}
+      .lpr-page .global-nav__actions{gap:8px}
+      .lpr-page .global-nav__cta{display:none!important}
+      .lpr-page .global-nav__links.open{left:12px;right:12px;padding:12px!important;max-height:calc(100dvh - 96px)}
+      .lpr-page .footer{margin-top:32px;padding:40px 24px 140px}
+      .lpr-page .footer > .container{grid-template-columns:minmax(0,1fr);gap:32px}
+      .lpr-page .footer__nav{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 24px}
+      .lpr-page .footer__col:last-child{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px}
+      .lpr-page .footer__col:last-child .footer__col-title{grid-column:1/-1}
+    }
+    @media(prefers-reduced-motion:reduce){.lpr-page .global-nav *,.lpr-page .footer *{transition:none!important}}
+
+    /* =========================================================
+       LP Redesign (obsidian) — scoped under .lpr
+       Install CVR focused, mobile-first scroll narrative.
+       Added 2026-10-05. Removable in one block.
+       ========================================================= */
+    .lpr{--lpr-accent:#8b5cf6;--lpr-accent-2:#a78bfa;--lpr-accent-3:#c4b5fd;--lpr-good:#34d399;--lpr-ink-0:#fff;--lpr-ink-1:#e9e9f1;--lpr-ink-2:#9c9db0;--lpr-ink-3:#a3a3b7;--lpr-line:rgba(255,255,255,.08);--lpr-line-2:rgba(255,255,255,.14);--lpr-bg-0:#07070b;--lpr-bg-1:#0d0e14;max-width:430px;margin:0 auto;position:relative;color:var(--lpr-ink-1);font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Meiryo UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif;line-height:1.6}
+    .lpr *,.lpr *::before,.lpr *::after{box-sizing:border-box}
+    .lpr a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent}
+    .lpr section{padding:72px 20px;position:relative;overflow:hidden;background:var(--lpr-bg-0)}
+    .lpr-prog{position:fixed;top:0;left:0;right:0;z-index:70;height:2px;pointer-events:none}
+    .lpr-prog-bar{height:100%;width:0;background:linear-gradient(90deg,var(--lpr-accent),#60a5fa,var(--lpr-good));transition:width .1s linear;box-shadow:0 0 8px rgba(139,92,246,.5)}
+    .lpr-chapter{padding:16px 20px 0}
+    .lpr-chap-num{font-size:11px;letter-spacing:.3em;color:var(--lpr-ink-3);text-transform:uppercase;margin-bottom:4px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .lpr-chap-title{font-size:12px;color:var(--lpr-accent-3);font-weight:700;margin-bottom:12px;letter-spacing:.04em}
+    .lpr-section-h{font-size:34px;line-height:1.15;letter-spacing:-.02em;font-weight:900;color:var(--lpr-ink-0);margin-bottom:16px}
+    .lpr-section-h .q{font-family:"Didot","Hoefler Text",Georgia,serif;font-style:italic;color:var(--lpr-accent-3)}
+    .lpr-section-sub{color:var(--lpr-ink-2);font-size:15px;line-height:1.75;margin-bottom:28px}
+
+    .lpr-hero{padding:40px 20px 48px;min-height:92vh;display:flex;flex-direction:column;justify-content:space-between;background:radial-gradient(ellipse 90% 60% at 50% 0%, rgba(139,92,246,.3) 0%, transparent 55%),radial-gradient(ellipse 60% 40% at 80% 30%, rgba(96,165,250,.18) 0%, transparent 50%),var(--lpr-bg-0)}
+    .lpr-hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.06) 1px,transparent 0);background-size:20px 20px;mask-image:linear-gradient(180deg,transparent,#000 20%,#000 80%,transparent);pointer-events:none}
+    .lpr-eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--lpr-accent-3);padding:6px 10px;border:1px solid rgba(139,92,246,.35);border-radius:999px;background:rgba(139,92,246,.08);margin-bottom:20px;width:fit-content;position:relative;z-index:2}
+    .lpr-eyebrow .dot{width:6px;height:6px;background:var(--lpr-accent);border-radius:50%;animation:lprPulse 2s infinite}
+    @keyframes lprPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(1.25)}}
+    .lpr-hero-h{font-size:52px;line-height:.98;letter-spacing:-.035em;font-weight:900;color:var(--lpr-ink-0);margin-bottom:18px;position:relative;z-index:2;text-shadow:0 2px 24px rgba(139,92,246,.15)}
+    .lpr-hero-h .accent{color:transparent;background:linear-gradient(135deg,#c4b5fd 0%,#8b5cf6 50%,#60a5fa 100%);-webkit-background-clip:text;background-clip:text}
+    .lpr-hero-h .em{font-family:"Didot","Hoefler Text",Georgia,serif;font-style:italic;font-weight:700;color:var(--lpr-accent-3)}
+    .lpr-hero-sub{font-size:16px;line-height:1.7;color:var(--lpr-ink-2);margin-bottom:28px;position:relative;z-index:2;max-width:360px}
+    .lpr-hero-sub strong{color:var(--lpr-ink-0)}
+
+    .lpr-phone-stage{position:relative;margin:0 auto 32px;width:260px;aspect-ratio:1/2;perspective:1200px;z-index:1}
+    .lpr-phone{position:relative;width:100%;height:100%;border-radius:34px;background:linear-gradient(145deg,#1a1b26,#0b0c13);border:1.5px solid rgba(255,255,255,.07);box-shadow:0 40px 80px -20px rgba(139,92,246,.35),0 20px 40px -15px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08);padding:14px;transform:rotateX(8deg) rotateY(-8deg) rotateZ(2deg);transition:transform .6s cubic-bezier(.2,.9,.3,1.1)}
+    .lpr-phone-screen{width:100%;height:100%;border-radius:22px;background:#fff;color:#111;display:flex;flex-direction:column;position:relative;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif}
+    .lpr-phone-status{height:32px;flex-shrink:0;padding:10px 16px 0;background:#000;color:#fff;display:flex;justify-content:space-between;font-size:9px;font-weight:600;line-height:1}
+    .lpr-phone-status svg{width:36px;height:10px}
+    .lpr-app-nav{display:grid;grid-template-columns:36px 1fr 40px;align-items:center;gap:6px;background:#000;color:#fff;padding:8px 10px 10px;flex-shrink:0}
+    .lpr-app-settings{width:28px;height:28px;border:1px solid #333;border-radius:50%;display:grid;place-items:center;background:#151515}
+    .lpr-app-settings svg{width:17px;height:17px}
+    .lpr-app-title{font-size:12px;font-weight:600;text-align:center;white-space:nowrap}
+    .lpr-app-send{background:#006cf1;color:#fff;border-radius:999px;padding:7px 0;font-size:11px;font-weight:600;text-align:center;line-height:1.2}
+    .lpr-phone-content{padding:12px 10px 10px;flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+    .lpr-memo-input{font-size:12px;line-height:1.65;color:#111;min-height:4em;overflow-wrap:anywhere}
+    .lpr-caret{display:inline-block;width:2px;height:1em;background:#0070fb;margin-left:1px;vertical-align:text-bottom;animation:lprCaret 1s infinite}
+    @keyframes lprCaret{0%,49%{opacity:1}50%,100%{opacity:0}}
+    .lpr-app-mic{margin-top:auto;align-self:flex-end;width:38px;height:38px;border-radius:50%;background:#0070fb;color:#fff;display:grid;place-items:center;box-shadow:0 3px 10px rgba(0,0,0,.18);flex-shrink:0}
+    .lpr-app-mic svg{width:23px;height:23px}
+    .lpr-keyboard{background:#e2e3e8;padding:8px 5px 6px;flex-shrink:0;border-radius:14px 14px 0 0;color:#111}
+    .lpr-keyboard-suggestions{display:flex;justify-content:space-around;font-size:11px;padding:0 0 8px}
+    .lpr-keyboard-keys{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(4,29px);gap:4px}
+    .lpr-keyboard-keys span{display:grid;place-items:center;background:#fff;border-radius:6px;font-size:16px;line-height:1}
+    .lpr-keyboard-keys .small{font-size:10px}
+    .lpr-keyboard-keys .return{grid-column:5;grid-row:3/5;font-size:24px}
+    .lpr-keyboard-foot{display:flex;justify-content:space-between;padding:8px 9px 5px}
+    .lpr-keyboard-foot svg{width:17px;height:17px}
+    .lpr-home-indicator{height:3px;width:36%;margin:2px auto 0;border-radius:3px;background:#111}
+    .lpr-obs-badge{position:absolute;right:-10px;bottom:-14px;background:#15131f;border:1px solid rgba(139,92,246,.35);padding:10px 12px;border-radius:12px;font-size:11px;color:var(--lpr-accent-3);display:flex;align-items:center;gap:6px;box-shadow:0 10px 24px rgba(0,0,0,.5);animation:lprFloat 2.2s ease-out .6s both}
+    .lpr-obs-mark{width:18px;height:18px;border-radius:4px;background:linear-gradient(135deg,#a78bfa,#5b21b6);display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff}
+    @keyframes lprFloat{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+    .lpr-ctas{display:flex;flex-direction:column;gap:10px;position:relative;z-index:2}
+    a.lpr-btn-primary{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:#07070b;padding:16px 20px;border-radius:14px;font-weight:700;font-size:16px;box-shadow:0 10px 30px -8px rgba(255,255,255,.25);transition:transform .15s ease;position:relative;overflow:hidden}
+    .lpr :is(a,button,summary,[tabindex]):focus-visible{outline:3px solid #c4b5fd;outline-offset:4px}
+    .lpr .lpr-faq-q:focus-visible{outline-offset:-4px}
+    .lpr-btn-primary:active{transform:scale(.98)}
+    .lpr-btn-primary .apple{width:22px;height:22px}
+    .lpr-btn-secondary{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--lpr-ink-1);font-size:14px;font-weight:600;padding:12px 16px;border-radius:12px;border:1px solid var(--lpr-line-2);background:rgba(255,255,255,.02)}
+    .lpr-note{font-size:12px;color:var(--lpr-ink-3);margin-top:12px;text-align:center;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;position:relative;z-index:2}
+    .lpr-note .dot{width:3px;height:3px;background:var(--lpr-ink-3);border-radius:50%;display:inline-block}
+    .lpr-stars{color:#fcd34d;font-size:12px;letter-spacing:.1em}
+    .lpr-trust-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:12px;position:relative;z-index:2}
+    .lpr-trust-pill{font-size:10px;padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--lpr-line);color:var(--lpr-ink-2);font-weight:500;letter-spacing:.02em;display:inline-flex;align-items:center;gap:4px}
+    .lpr-trust-fine{font-size:12px;color:var(--lpr-ink-3);text-align:center;margin-top:8px;position:relative;z-index:2;letter-spacing:.02em}
+    .lpr-trust-fine a{color:var(--lpr-ink-2);text-decoration:underline}
+
+    .lpr-friction{display:flex;flex-direction:column;gap:12px;margin-top:24px}
+    .lpr-friction-item{display:flex;align-items:flex-start;gap:14px;padding:16px;border-radius:16px;background:rgba(255,255,255,.025);border:1px solid var(--lpr-line)}
+    .lpr-friction-item .ic{flex-shrink:0;width:36px;height:36px;border-radius:10px;background:rgba(239,68,68,.1);color:#f87171;display:flex;align-items:center;justify-content:center;font-size:17px}
+    .lpr-friction-item .t{font-size:14px;color:var(--lpr-ink-1);line-height:1.6;font-weight:500}
+    .lpr-friction-item .s{font-size:12px;color:var(--lpr-ink-3);margin-top:3px;line-height:1.55}
+
+    .lpr-flow-visual{display:flex;flex-direction:column;gap:16px;margin:28px 0 8px}
+    .lpr-flow-card{background:rgba(255,255,255,.03);border:1px solid var(--lpr-line);border-radius:18px;padding:18px;display:flex;align-items:center;gap:14px;position:relative;transition:border-color .4s ease}
+    .lpr-flow-ic{width:46px;height:46px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(139,92,246,.05));border:1px solid rgba(139,92,246,.2)}
+    .lpr-flow-step{font-size:10px;letter-spacing:.3em;color:var(--lpr-ink-3);text-transform:uppercase;margin-bottom:3px;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+    .lpr-flow-t{font-size:15px;font-weight:700;color:var(--lpr-ink-0);line-height:1.3}
+    .lpr-flow-s{font-size:12px;color:var(--lpr-ink-2);margin-top:4px;line-height:1.5}
+    .lpr-flow-arrow-v{width:1px;height:14px;background:linear-gradient(180deg,var(--lpr-line-2),transparent);margin:-10px auto;position:relative;z-index:0}
+
+    .lpr-demo-stage{background:#0a0a13;border-radius:24px;padding:20px;margin:24px 0;border:1px solid var(--lpr-line);box-shadow:0 20px 60px -20px rgba(139,92,246,.25);position:relative;overflow:hidden}
+    .lpr-demo-row{display:flex;gap:12px;margin-bottom:12px;align-items:center}
+    .lpr-demo-tab{all:unset;min-height:44px;flex:1;padding:10px 8px;text-align:center;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;background:rgba(255,255,255,.03);color:var(--lpr-ink-2);border:1px solid var(--lpr-line);transition:all .25s ease;box-sizing:border-box}
+    .lpr-demo-tab.on{background:var(--lpr-accent);color:#fff;border-color:transparent;box-shadow:0 6px 18px -4px rgba(139,92,246,.5)}
+    .lpr-demo-content{background:#06060a;border-radius:14px;padding:14px;min-height:200px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--lpr-ink-2);line-height:1.7}
+    .lpr-demo-content .md-h{color:var(--lpr-accent-3);font-weight:700;font-size:13px;margin-bottom:8px}
+    .lpr-demo-content .md-line{display:flex;gap:6px;padding:2px 0;align-items:flex-start}
+    .lpr-demo-content .md-line .t{color:var(--lpr-accent-2);font-weight:600;flex-shrink:0}
+    .lpr-demo-content .md-line .c{color:var(--lpr-ink-1)}
+    .lpr-demo-content .md-dash{color:var(--lpr-ink-3);margin-right:4px}
+    .lpr-demo-content .new{animation:lprSlideIn .5s ease-out both;background:rgba(139,92,246,.08);border-radius:4px;padding:2px 4px;margin-left:-4px}
+    @keyframes lprSlideIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
+    .lpr-demo-foot{margin-top:12px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--lpr-ink-3)}
+    .lpr-demo-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;background:rgba(52,211,153,.1);color:var(--lpr-good);font-weight:600;font-size:10px}
+
+    .lpr-dialog{display:flex;flex-direction:column;gap:10px;margin-top:20px;max-width:360px;margin-left:auto;margin-right:auto}
+    .lpr-bubble{padding:14px 16px;border-radius:18px;position:relative;max-width:85%;animation:lprBubbleIn .5s ease-out both}
+    .lpr-bubble .label{display:block;font-size:9px;letter-spacing:.2em;text-transform:uppercase;opacity:.6;margin-bottom:2px;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+    .lpr-bubble.you{background:linear-gradient(135deg,var(--lpr-accent),#5b21b6);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+    .lpr-bubble.siri{background:rgba(255,255,255,.05);color:var(--lpr-ink-1);align-self:flex-start;border-bottom-left-radius:4px;border:1px solid var(--lpr-line)}
+    .lpr-bubble.siri.done{border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.06)}
+    .lpr-bubble p{font-size:14px;line-height:1.4}
+    @keyframes lprBubbleIn{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+    .lpr-dialog .lpr-bubble:nth-child(1){animation-delay:.05s}
+    .lpr-dialog .lpr-bubble:nth-child(2){animation-delay:.6s}
+    .lpr-dialog .lpr-bubble:nth-child(3){animation-delay:1.15s}
+    .lpr-dialog .lpr-bubble:nth-child(4){animation-delay:1.75s}
+
+    .lpr-compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+    .lpr-compare-col{background:rgba(255,255,255,.03);border:1px solid var(--lpr-line);border-radius:16px;padding:16px}
+    .lpr-compare-col.hero{background:linear-gradient(180deg,rgba(139,92,246,.1),rgba(139,92,246,.02));border-color:rgba(139,92,246,.35)}
+    .lpr-compare-h{font-size:13px;font-weight:700;color:var(--lpr-ink-0);margin-bottom:10px}
+    .lpr-compare-h.hero{color:var(--lpr-accent-3)}
+    .lpr-compare-list{font-size:12px;color:var(--lpr-ink-2);display:flex;flex-direction:column;gap:8px;line-height:1.5}
+    .lpr-compare-list .ok{color:var(--lpr-good);margin-right:4px}
+    .lpr-compare-list .no{color:#f87171;margin-right:4px}
+
+    .lpr-proof-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}
+    .lpr-proof-stat{text-align:center;padding:16px 8px;background:rgba(255,255,255,.025);border:1px solid var(--lpr-line);border-radius:14px}
+    .lpr-proof-stat .n{font-size:22px;font-weight:800;color:var(--lpr-ink-0);letter-spacing:-.02em;line-height:1;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+    .lpr-proof-stat .l{font-size:10px;color:var(--lpr-ink-3);margin-top:4px;letter-spacing:.05em}
+    .lpr-reviews{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+    .lpr-review{background:rgba(255,255,255,.03);border:1px solid var(--lpr-line);border-radius:16px;padding:16px}
+    .lpr-review-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .lpr-review-stars{color:#fcd34d;font-size:12px;letter-spacing:.1em}
+    .lpr-review-src{font-size:10px;color:var(--lpr-ink-3);letter-spacing:.05em}
+    .lpr-review-t{font-weight:700;color:var(--lpr-ink-0);font-size:14px;margin-bottom:6px}
+    .lpr-review-q{font-size:13px;color:var(--lpr-ink-2);line-height:1.7;font-style:italic}
+
+    .lpr-setup-anchor{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:rgba(52,211,153,.1);color:var(--lpr-good);font-size:12px;font-weight:700;margin-bottom:16px}
+    .lpr-setup-steps{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+    .lpr-setup-step{display:flex;gap:14px;padding:16px;background:rgba(255,255,255,.025);border:1px solid var(--lpr-line);border-radius:16px}
+    .lpr-step-num{flex-shrink:0;width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--lpr-accent),#5b21b6);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 4px 12px rgba(139,92,246,.4);font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+    .lpr-step-t{font-size:14px;font-weight:700;color:var(--lpr-ink-0);margin-bottom:4px}
+    .lpr-step-s{font-size:12px;color:var(--lpr-ink-2);line-height:1.6}
+
+    .lpr-price-cards{display:flex;flex-direction:column;gap:12px;margin-top:20px}
+    .lpr-price-card{background:rgba(255,255,255,.03);border:1px solid var(--lpr-line);border-radius:20px;padding:20px;position:relative}
+    .lpr-price-card.highlight{background:linear-gradient(180deg,rgba(139,92,246,.08),rgba(139,92,246,.02));border-color:rgba(139,92,246,.4)}
+    .lpr-price-tag{position:absolute;top:14px;right:14px;padding:4px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.08em;background:var(--lpr-accent);color:#fff}
+    .lpr-price-name{font-size:12px;letter-spacing:.1em;color:var(--lpr-ink-3);text-transform:uppercase;margin-bottom:6px}
+    .lpr-price-v{display:flex;align-items:baseline;gap:4px;margin-bottom:10px}
+    .lpr-price-v .n{font-size:30px;font-weight:800;color:var(--lpr-ink-0);letter-spacing:-.02em;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+    .lpr-price-v .u{font-size:13px;color:var(--lpr-ink-2)}
+    .lpr-price-l{font-size:12px;color:var(--lpr-ink-2);line-height:1.6;margin-bottom:12px}
+    .lpr-price-f{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--lpr-ink-2)}
+    .lpr-price-f .k{color:var(--lpr-good);margin-right:4px}
+
+    .lpr-faq-list{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+    .lpr-faq-item{background:rgba(255,255,255,.025);border:1px solid var(--lpr-line);border-radius:14px;overflow:hidden}
+    .lpr-faq-q{padding:16px;font-size:14px;font-weight:600;color:var(--lpr-ink-0);display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;list-style:none}
+    .lpr-faq-q::-webkit-details-marker{display:none}
+    .lpr-faq-q .ic{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:14px;transition:transform .3s ease;flex-shrink:0}
+    .lpr-faq-item[open] .lpr-faq-q .ic{transform:rotate(45deg)}
+    .lpr-faq-a{padding:0 16px 16px;font-size:13px;color:var(--lpr-ink-2);line-height:1.7}
+
+    .lpr-final{background:radial-gradient(circle at 50% 0%,rgba(139,92,246,.4) 0%,transparent 50%),var(--lpr-bg-0);padding:80px 20px 120px;text-align:center}
+    .lpr-final-h{font-size:36px;line-height:1.15;letter-spacing:-.02em;font-weight:900;color:var(--lpr-ink-0);margin-bottom:14px}
+    .lpr-final-h .em{font-family:"Didot","Hoefler Text",Georgia,serif;font-style:italic;color:var(--lpr-accent-3)}
+    .lpr-final-sub{color:var(--lpr-ink-2);font-size:14px;margin-bottom:28px;line-height:1.7}
+    .lpr-final .lpr-btn-primary{margin:0 auto 16px;max-width:320px}
+    .lpr-risk-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;font-size:12px;color:var(--lpr-ink-2);margin-top:12px}
+    .lpr-risk-item{display:inline-flex;align-items:center;gap:4px}
+    .lpr-risk-item .k{color:var(--lpr-good);font-weight:800}
+
+    /* Sticky bottom CTA */
+    .lpr-sticky-cta{position:fixed;left:0;right:0;bottom:0;z-index:50;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(7,7,11,.85);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border-top:1px solid var(--lpr-line);transform:translateY(100%);transition:transform .4s cubic-bezier(.2,.9,.3,1);max-width:430px;margin:0 auto}
+    .lpr-sticky-cta.show{transform:translateY(0)}
+    .lpr-sticky-cta .lpr-btn-primary{padding:14px;font-size:15px;max-width:none}
+    .lpr-sticky-cta .meta{font-size:10px;color:var(--lpr-ink-3);text-align:center;margin-top:6px;letter-spacing:.03em}
+
+    /* Film grain overlay (scoped to body when LPR is present) */
+    body.lpr-page::before{content:"";position:fixed;inset:0;z-index:100;pointer-events:none;opacity:.04;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.9'/></svg>")}
+
+    .lpr-reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.9,.3,1.1)}
+    .lpr-reveal.in{opacity:1;transform:translateY(0)}
+
+    @media (prefers-reduced-motion:reduce){.lpr *,.lpr *::before,.lpr *::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+    @media (min-width:430px){.lpr-hero-h{font-size:56px}.lpr-section-h{font-size:36px}}
+
+    /* Ensure page content takes over container styles cleanly */
+    body.lpr-page main.page-content{padding:0}
+    body.lpr-page main.page-content > .container{max-width:430px;padding:0}
+    body.lpr-page .references, body.lpr-page .related-links{max-width:430px;margin-left:auto;margin-right:auto}
+
+    /* Wider screens use the available space while keeping mobile styles intact. */
+    @media (min-width:768px){
+      body.lpr-page main.page-content > .container{width:calc(100% - 48px);max-width:1120px}
+      .lpr{max-width:none}
+      .lpr section{padding:80px 40px}
+      .lpr-chapter{padding:0;margin-bottom:20px}
+      .lpr-section-h{font-size:clamp(36px,4vw,48px)}
+      .lpr-section-sub{max-width:42em;font-size:17px}
+
+      .lpr .lpr-hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);grid-template-areas:"eyebrow phone" "title phone" "copy phone" "ctas ctas";column-gap:40px;min-height:0;padding:64px 40px}
+      .lpr-eyebrow{grid-area:eyebrow;align-self:start}
+      .lpr-hero-h{grid-area:title;font-size:clamp(52px,5.5vw,72px);line-height:1.08;margin-bottom:24px}
+      .lpr-hero-sub{grid-area:copy;max-width:none;font-size:18px;margin-bottom:0}
+      .lpr-phone-stage{grid-area:phone;width:100%;max-width:280px;margin:0;align-self:center;justify-self:center}
+      .lpr-ctas{grid-area:ctas;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:12px;width:100%;max-width:760px;margin:40px auto 0}
+      .lpr-ctas > :not(.lpr-btn-primary):not(.lpr-btn-secondary){grid-column:1/-1}
+      .lpr-ctas .lpr-note,.lpr-ctas .lpr-trust-row{margin-top:4px}
+
+      .lpr-friction,.lpr-setup-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+      .lpr-friction-item,.lpr-setup-step{flex-direction:column;padding:24px}
+      .lpr-friction-item .t,.lpr-step-t,.lpr-flow-t{font-size:16px}
+      .lpr-friction-item .s,.lpr-step-s,.lpr-flow-s{font-size:14px}
+      .lpr-flow-visual{display:grid;grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr) 20px minmax(0,1fr);gap:12px}
+      .lpr-flow-card{flex-direction:column;align-items:flex-start;padding:24px}
+      .lpr-flow-arrow-v{width:20px;height:1px;margin:auto 0;background:linear-gradient(90deg,var(--lpr-line-2),var(--lpr-accent-2))}
+      .lpr-demo-stage{max-width:840px;margin:32px auto;padding:28px}
+      .lpr-demo-tab{font-size:14px}
+      .lpr-demo-content{font-size:14px;min-height:240px;padding:24px}
+      .lpr-dialog{max-width:560px;margin-top:32px}
+      .lpr-bubble p{font-size:16px}
+      .lpr-compare-grid,.lpr-price-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+      .lpr-compare-col,.lpr-price-card{padding:28px}
+      .lpr-compare-h,.lpr-review-t{font-size:17px}
+      .lpr-compare-list,.lpr-review-q,.lpr-price-l,.lpr-price-f{font-size:15px}
+      .lpr-proof-stat{padding:24px}
+      .lpr-proof-stat .n{font-size:32px}
+      .lpr-proof-stat .l{font-size:12px}
+      .lpr-reviews{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+      .lpr-review{padding:24px}
+      .lpr-price-v .n{font-size:40px}
+      .lpr-faq-list{max-width:860px;margin:32px auto 0}
+      .lpr-faq-q{padding:20px 24px;font-size:16px}
+      .lpr-faq-a{padding:0 24px 24px;font-size:15px}
+      .lpr-final-h{font-size:56px}
+      .lpr-final-sub{font-size:17px}
+      .lpr-final .lpr-btn-primary{max-width:360px}
+
+      body.lpr-page .lp-video{width:calc(100% - 80px);max-width:840px!important}
+      body.lpr-page .lp-section{padding-left:40px;padding-right:40px}
+      .lpr-sticky-cta{display:flex;align-items:center;justify-content:space-between;gap:24px;width:calc(100% - 48px);max-width:1120px;padding:14px 24px calc(14px + env(safe-area-inset-bottom))}
+      .lpr-sticky-cta .lpr-btn-primary{width:320px;flex-shrink:0}
+      .lpr-sticky-cta .meta{margin-top:0;font-size:12px;color:#9c9db0}
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- app-schema: managed by scripts/inject_app_schema.py -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "@id": "https://simplememofast.com/#app",
+  "name": "SimpleMemo",
+  "alternateName": [
+    "Simple Memo - for Obsidian",
+    "Captio式シンプルメモ",
+    "シンプルメモ",
+    "SimpleMemoFast",
+    "Simple Memo"
+  ],
+  "url": "https://simplememofast.com/",
+  "image": "https://simplememofast.com/assets/img/app-icon-256.png",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "iOS 16.0+, watchOS",
+  "softwareVersion": "5.9.12",
+  "isAccessibleForFree": true,
+  "inLanguage": "tr",
+  "downloadUrl": "https://apps.apple.com/jp/app/id6758438948",
+  "offers": [
+    {
+      "@type": "Offer",
+      "name": "Free",
+      "price": "0",
+      "priceCurrency": "JPY",
+      "description": "günde en fazla 3 mesaj (kullanım süresi sınırı yok)",
+      "availability": "https://schema.org/InStock"
+    },
+    {
+      "@type": "Offer",
+      "name": "Premium Monthly",
+      "price": "500",
+      "priceCurrency": "JPY",
+      "description": "Aylık 500 yen · Sınırsız gönderim",
+      "availability": "https://schema.org/InStock"
+    },
+    {
+      "@type": "Offer",
+      "name": "Premium Yearly",
+      "price": "5000",
+      "priceCurrency": "JPY",
+      "description": "Yıllık 5,000 yen · Sınırsız gönderim",
+      "availability": "https://schema.org/InStock"
+    }
+  ],
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="lpr-page capture-full site-designed" data-design-family="refined">
+  <!-- Scroll progress (LP redesign) -->
+  <div class="lpr-prog" aria-hidden="true"><div class="lpr-prog-bar" id="lprProgBar"></div></div>
+
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Ana gezinme" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/tr/guides/">Kılavuzlar</a><a href="/tr/use-cases/">Kullanım örnekleri</a><a href="/tr/vs/">Karşılaştır</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/tr/guides/">Kılavuzlar</a></li>
+        <li><a href="/tr/use-cases/">Kullanım örnekleri</a></li>
+        <li><a href="/tr/vs/">Karşılaştır</a></li>
+        <li><a href="/tr/methods/"><span>Yöntemler</span></a></li>
+        <li><a href="/tr/blog/"><span>Blog</span></a></li>
+        <li><a href="/tr/glossary/"><span>Sözlük</span></a></li>
+        <li><a href="/tr/faq">Sık sorulan sorular</a></li>
+        <li><a href="/tr/about/">Geliştirici hakkında</a></li>
+        <li><a href="/tr/devlog/">Geliştirme günlüğü</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>İndir</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Türkçe · Dil seçin"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>TR</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="tr" dir="ltr"><p class="site-language-title">Dil seçin</p><div class="site-language-grid"><a href="/obsidian/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="tr" aria-current="page"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true">✓</span></span></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="global-nav__cta">İndir</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menü"><span>Menü</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- =================================================================
+           LP Redesign (obsidian) — mobile-first scroll narrative
+           Added 2026-10-05 (PR: feature/obsidian-page-redesign)
+           CTA campaign tokens: ct=web_obsidian_v1 (preserved for existing analytics)
+             + sub-variants hero / sticky / final via data-cta-placement
+           ================================================================= -->
+      <div class="lpr">
+        <!-- Hero (redesigned) -->
+        <section class="lpr-hero">
+          <span class="lpr-eyebrow" aria-hidden="true"><span class="dot"></span>Obsidian × iPhone</span>
+          <h1 class="lpr-hero-h"> <span class="em">Söyleyin</span>.<br>Notunuz<br><span class="accent">kasaya</span> ulaşsın. </h1>
+          <p class="lpr-hero-sub"> iPhone üzerinde söylediğiniz notlar<br>Obsidian kasasına <strong>otomatik eklenir</strong>.<br>Eklenti gerekmez. Tek dokunuşla gönderin. </p>
+
+          <!-- Decorative illustration of the compose screen; not interactive app controls. -->
+          <div class="lpr-phone-stage" aria-hidden="true">
+            <div class="lpr-phone" id="lprPhone">
+              <div class="lpr-phone-screen">
+                <div class="lpr-phone-status">
+                  <span>9:41</span>
+                  <svg viewBox="0 0 36 10" fill="currentColor"><path d="M0 7h2v3H0zm4-2h2v5H4zm4-2h2v7H8zm4-3h2v10h-2z"/><rect x="20" y="1" width="13" height="8" rx="2" fill="none" stroke="currentColor"/><rect x="22" y="3" width="9" height="4" rx="1"/><path d="M34 3h2v4h-2z"/></svg>
+                </div>
+                <div class="lpr-app-nav">
+                  <span class="lpr-app-settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="m9 3 1-2h4l1 2 2 1 2-1 3 3-1 2 1 2 2 1v4l-2 1-1 2 1 2-3 3-2-1-2 1-1 2h-4l-1-2-2-1-2 1-3-3 1-2-1-2-2-1v-4l2-1 1-2-1-2 3-3 2 1z" transform="translate(2 1) scale(.8)"/><circle cx="12" cy="12" r="3.5"/></svg></span>
+                  <span class="lpr-app-title">新しいメモ</span>
+                  <span class="lpr-app-send">送信</span>
+                </div>
+                <div class="lpr-phone-content">
+                  <div class="lpr-memo-input">
+                    <span class="lpr-typed" id="lprTyped">買い物: コーヒー豆、牛乳</span><span class="lpr-caret"></span>
+                  </div>
+                  <span class="lpr-app-mic"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M6 10v3a6 6 0 0 0 12 0v-3M12 19v3m-4 0h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+                </div>
+                <div class="lpr-keyboard">
+                  <div class="lpr-keyboard-suggestions"><span>こと</span><span>から</span><span>けど</span><span>かも</span><span>⌄</span></div>
+                  <div class="lpr-keyboard-keys">
+                    <span>→</span><span>あ</span><span>か</span><span>さ</span><span>⌫</span>
+                    <span>↶</span><span>た</span><span>な</span><span>は</span><span class="small">空白</span>
+                    <span class="small">ABC</span><span>ま</span><span>や</span><span>ら</span><span class="return">↵</span>
+                    <span>☺</span><span>^</span><span>わ</span><span class="small">、。?!</span>
+                  </div>
+                  <div class="lpr-keyboard-foot">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><ellipse cx="12" cy="12" rx="4" ry="10"/><path d="M2 12h20M4 6h16M4 18h16"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M6 10v3a6 6 0 0 0 12 0v-3M12 19v3m-4 0h8"/></svg>
+                  </div>
+                  <div class="lpr-home-indicator"></div>
+                </div>
+              </div>
+            </div>
+            <div class="lpr-obs-badge" aria-hidden="true">
+              <span class="lpr-obs-mark">◆</span>
+              <span>追記完了</span>
+            </div>
+          </div>
+
+          <div class="lpr-ctas">
+            <a class="lpr-btn-primary" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="hero" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" aria-label="App Store üzerinden ücretsiz indirin">
+              <svg class="apple" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg> App Store üzerinden ücretsiz indirin </a>
+            <a class="lpr-btn-secondary" href="#lpr-demo">30 saniyelik demoyu izleyin ↓</a>
+            <div class="lpr-note">
+              <span class="lpr-stars" aria-label="5 üzerinden 4.1 yıldız">★★★★☆</span>
+              <span class="dot" aria-hidden="true"></span>
+              <span>App Store 4.1 · 27 değerlendirme</span>
+              <span class="dot" aria-hidden="true"></span>
+              <span>Kredi kartı gerekmez</span>
+              <span class="dot" aria-hidden="true"></span>
+              <span>İstediğiniz zaman iptal edin</span>
+            </div>
+            <div class="lpr-trust-row">
+              <span class="lpr-trust-pill">🔒 Cihazda AES-GCM şifreleme</span>
+              <span class="lpr-trust-pill">📵 Çevrimdışı kullanım desteği</span>
+              <span class="lpr-trust-pill">⚡ 0.4 saniyede açılır<sup>※</sup></span>
+            </div>
+            <p class="lpr-trust-fine">※ iPhone 16e üzerinde sıcak başlatma ölçümlerinin medyanı (<a href="/tr/blog/benchmark-methodology">ölçüm yöntemi</a>)</p>
+            <p style="font-size:10px;color:var(--lpr-ink-3);text-align:center;margin-top:12px;line-height:1.6">Bu uygulama, Obsidian tarafından sunulan resmi bir uygulama veya eklenti değildir; YURIKA, K.K. tarafından geliştirilen bağımsız bir uygulamadır. Obsidian, Dynalist Inc. şirketinin ticari markasıdır.</p>
+            <p class="article-meta" style="font-size:11px;color:var(--lpr-ink-3);margin-top:12px;text-align:center;"> Yazar: <a href="/tr/about/" style="color:var(--lpr-accent-3);text-decoration:underline">AI ATAKA</a> · Güncelleme: <time datetime="2026-09-30">30/9/2026</time> </p>
+          </div>
+        </section>
+
+        <!-- 01 FRICTION -->
+        <section>
+          <div class="lpr-chapter">
+            <div class="lpr-chap-num">01 / ZORLUKLAR</div>
+            <div class="lpr-chap-title">Fikirler çabuk uçar</div>
+          </div>
+          <h2 class="lpr-section-h lpr-reveal"> <span class="q">“Yazmakla</span><br>uğraşamam.”<br>Bunu düşündüğünüz anda<br>fikir kaybolur. </h2>
+          <p class="lpr-section-sub lpr-reveal"> Obsidian kullanıcılarının her gün karşılaştığı 3 zorluk. Bunlardan en az 1 tanesini yaşıyorsanız farkı hissedebilirsiniz. </p>
+          <div class="lpr-friction">
+            <div class="lpr-friction-item lpr-reveal">
+              <div class="ic">⛔</div>
+              <div>
+                <div class="t">Obsidian uygulamasının iPhone üzerinde açılması zaman alır</div>
+                <div class="s">Kasanın yüklenmesini beklerken aklınızdaki fikir uçup gider.</div>
+              </div>
+            </div>
+            <div class="lpr-friction-item lpr-reveal">
+              <div class="ic">🎙️</div>
+              <div>
+                <div class="t">Sesli notlar kullanışlı. Ama nereye kaydettiğinizi bulmak zor</div>
+                <div class="s">Kayıt uygulaması → Yazıya çevirme → Yapıştırma. Gereğinden fazla adım.</div>
+              </div>
+            </div>
+            <div class="lpr-friction-item lpr-reveal">
+              <div class="ic">📵</div>
+              <div>
+                <div class="t">Metroda, dağ yolunda, sabah yatakta — çevrimdışı kalmak endişelendirir</div>
+                <div class="s">Eşitlemeyi beklemek, yeniden denemek, kaybolan notlar. Güvenemediğiniz bir not uygulamasını kullanmayı sürdürmek zordur.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 02 RESOLUTION -->
+        <section>
+          <div class="lpr-chapter">
+            <div class="lpr-chap-num">02 / ÇÖZÜM</div>
+            <div class="lpr-chap-title">Söyleyin → Ulaşsın. Hepsi bu.</div>
+          </div>
+          <h2 class="lpr-section-h lpr-reveal"> Kasaya giden<br><span class="q">en kısa yol,</span><br>sesinizdi. </h2>
+          <p class="lpr-section-sub lpr-reveal"> SimpleMemo ile 3 adım yeter: açın → yazın veya söyleyin → tek dokunuşla gönderin. Gönderdiğiniz not aynı anda hem e-postada hem de Obsidian içinde kalır. </p>
+          <div class="lpr-flow-visual">
+            <div class="lpr-flow-card lpr-reveal">
+              <div class="lpr-flow-ic">🎙️</div>
+              <div>
+                <div class="lpr-flow-step">Adım 01</div>
+                <div class="lpr-flow-t">Söyleyin veya yazın</div>
+                <div class="lpr-flow-s">Uygulama açılır açılmaz yazmaya başlayın. Yazıya çevirme işlemi tamamen cihazda gerçekleşir.</div>
+              </div>
+            </div>
+            <div class="lpr-flow-arrow-v" aria-hidden="true"></div>
+            <div class="lpr-flow-card lpr-reveal">
+              <div class="lpr-flow-ic">⚡</div>
+              <div>
+                <div class="lpr-flow-step">Adım 02</div>
+                <div class="lpr-flow-t">Tek dokunuşla gönderin</div>
+                <div class="lpr-flow-s">Gönderimden sonra giriş alanı otomatik temizlenir. Hemen sonraki nota geçebilirsiniz.</div>
+              </div>
+            </div>
+            <div class="lpr-flow-arrow-v" aria-hidden="true"></div>
+            <div class="lpr-flow-card lpr-reveal">
+              <div class="lpr-flow-ic">📥</div>
+              <div>
+                <div class="lpr-flow-step">Adım 03</div>
+                <div class="lpr-flow-t">E-postaya ve Obsidian uygulamasına eklenir</div>
+                <div class="lpr-flow-s">HH:mm biçiminde günlük nota veya Inbox notuna otomatik eklenir.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 03 DEMO (interactive tabs) -->
+        <section id="lpr-demo">
+          <div class="lpr-chapter">
+            <div class="lpr-chap-num">03 / DEMO</div>
+            <div class="lpr-chap-title">Gönderdiğiniz anda notunuz büyür</div>
+          </div>
+          <h2 class="lpr-section-h lpr-reveal">30 saniyede<br><span class="q">deneyin.</span></h2>
+          <p class="lpr-section-sub lpr-reveal">Sekmeler arasında geçiş yaparak gönderdiğiniz notun kasadaki bir nota nasıl eklendiğini deneyin.</p>
+          <div class="lpr-demo-stage lpr-reveal">
+            <div class="lpr-demo-row" role="tablist">
+              <button class="lpr-demo-tab on" data-tab="daily" id="lpr-tab-daily" role="tab" aria-controls="lprDemoContent" tabindex="0" aria-selected="true">Günlük not</button>
+              <button class="lpr-demo-tab" data-tab="inbox" id="lpr-tab-inbox" role="tab" aria-controls="lprDemoContent" tabindex="-1" aria-selected="false">Gelen kutusu</button>
+              <button class="lpr-demo-tab" data-tab="mail" id="lpr-tab-mail" role="tab" aria-controls="lprDemoContent" tabindex="-1" aria-selected="false">E-posta</button>
+            </div>
+            <div class="lpr-demo-content" id="lprDemoContent" role="tabpanel" aria-labelledby="lpr-tab-daily" tabindex="0" aria-live="polite">
+              <div class="md-h"># 2026-10-05</div>
+              <div class="md-line"><span class="t">- 07:12</span><span class="c"><span class="md-dash">—</span>Sabah yürüyüşünde aklıma gelen yazı başlığı fikri</span></div>
+              <div class="md-line"><span class="t">- 09:34</span><span class="c"><span class="md-dash">—</span>Alışveriş: kahve çekirdeği, süt</span></div>
+              <div class="md-line"><span class="t">- 12:48</span><span class="c"><span class="md-dash">—</span>Öğle yemeğinde duyduğum rakibin yeni özelliğini daha sonra araştır</span></div>
+              <div class="md-line new"><span class="t">- 14:21</span><span class="c"><span class="md-dash">—</span>Az önce sesle gönderdiğim not buraya eklenir</span></div>
+            </div>
+            <div class="lpr-demo-foot">
+              <span class="lpr-demo-badge">● Yerel yazma</span>
+              <span>iCloud Drive · yyyy-MM-dd.md</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- EXTRA: Siri hands-free -->
+        <section>
+          <div class="lpr-chapter">
+            <div class="lpr-chap-num">EKSTRA</div>
+            <div class="lpr-chap-title">AirPods ile telefona dokunmadan</div>
+          </div>
+          
+<p class="lpr-section-sub" data-translation-example-note="">Aşağıdaki sesli komutlar Japonca örneklerdir. Siri dilini ve cihazınızda kayıtlı kestirmeleri kontrol edin.</p>
+<h2 class="lpr-section-h lpr-reveal"><span class="q">“Hey Siri,</span><br>シンプルメモで残す”</h2>
+          <p class="lpr-section-sub lpr-reveal">iPhone cebinizde kalsın. 2 turluk konuşmayla notunuz kasaya ulaşır. Gerçek cihazda doğrulanmış komutu kullanın.</p>
+          <div class="lpr-dialog lpr-reveal">
+            <div class="lpr-bubble you"><span class="label">SİZ</span><p>Hey Siri、シンプルメモで残す</p></div>
+            <div class="lpr-bubble siri"><span class="label">SIRI</span><p>Ne not almak istersiniz?</p></div>
+            <div class="lpr-bubble you"><span class="label">SİZ</span><p>İşe giderken aklıma gelen yazı başlığı fikri</p></div>
+            <div class="lpr-bubble siri done"><span class="label">SIRI</span><p>Not gönderildi ✓</p></div>
+          </div>
+          <p style="text-align:center;font-size:12px;color:var(--lpr-ink-3);margin-top:16px"><a href="/tr/siri/" style="color:var(--lpr-accent-3);text-decoration:underline">Kullanılabilir komutları ve ayarları görün →</a></p>
+        </section>
+
+        <!-- 04 COMPARISON -->
+        <section>
+          <div class="lpr-chapter">
+            <div class="lpr-chap-num">04 / FARKLAR</div>
+            <div class="lpr-chap-title">Obsidian resmi mobil uygulaması ve SimpleMemo</div>
+          </div>
+          <h2 class="lpr-section-h lpr-reveal"><span class="q">Aynı amaç,</span><br>farklı hız.</h2>
+          <p class="lpr-section-sub lpr-reveal">Obsidian mobil uygulaması kapalıyken yalnızca not yakalamayı üstlenir. Obsidian ile düzenleyin, SimpleMemo ile toplayın.</p>
+          <div class="lpr-compare-grid">
+            <div class="lpr-compare-col lpr-reveal">
+              <div class="lpr-compare-h">Yalnızca Obsidian mobil uygulaması</div>
+              <div class="lpr-compare-list">
+                <div><span class="no">×</span>Kasanın yüklenmesini bekler</div>
+                <div><span class="no">×</span>Sesli notlar için eklenti gerekir</div>
+                <div><span class="no">×</span>Apple Watch uygulaması yok</div>
+                <div><span class="no">×</span>Siri ile not eklenemez</div>
+              </div>
+            </div>
+            <div class="lpr-compare-col hero lpr-reveal">
+              <div class="lpr-compare-h hero">SimpleMemo</div>
+              <div class="lpr-compare-list">
+                <div><span class="ok">✓</span>Açılır açılmaz yazın</div>
+                <div><span class="ok">✓</span>Cihazda sesle giriş</div>
+                <div><span class="ok">✓</span>Apple Watch desteği</div>
+                <div><span class="ok">✓</span>「Hey Siri、シンプルメモで残す」</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 05 VOICES -->
+        <section>
+          <div class="lpr-chapter">
+            <div class="lpr-chap-num">05 / YORUMLAR</div>
+            <div class="lpr-chap-title">Kullananlar ne diyor?</div>
+          </div>
+          <h2 class="lpr-section-h lpr-reveal"><span class="q">“Artık vazgeçemiyorum”</span></h2>
+          <div class="lpr-proof-stats lpr-reveal">
+            <div class="lpr-proof-stat"><div class="n">4.1<span style="font-size:14px">★</span></div><div class="l">App Store puanı</div></div>
+            <div class="lpr-proof-stat"><div class="n">27</div><div class="l">değerlendirme</div></div>
+            <div class="lpr-proof-stat"><div class="n">AES-GCM</div><div class="l">Cihazda şifreleme</div></div>
+          </div>
+          <div class="lpr-reviews">
+            <div class="lpr-review lpr-reveal">
+              <div class="lpr-review-head"><span class="lpr-review-stars">★★★★★</span><span class="lpr-review-src">App Store · 2026/06</span></div>
+              <div class="lpr-review-t">Yazmak inanılmaz akıcı!</div>
+              <div class="lpr-review-q">“Gönder düğmesine bastığım anda yeni bir ekran açılıyor. Düşünce akışımı kesmeden bu kadar rahat yazmaya devam edebildiğim uygulama pek yok.”</div>
+            </div>
+            <div class="lpr-review lpr-reveal">
+              <div class="lpr-review-head"><span class="lpr-review-stars">★★★★★</span><span class="lpr-review-src">App Store · 2026/06</span></div>
+              <div class="lpr-review-t">Obsidian entegrasyonu!</div>
+              <div class="lpr-review-q">“Obsidian entegrasyonu sayesinde sesli notlarım birikiyor! Yeni özellikleri heyecanla bekliyorum!”</div>
+            </div>
+            <div class="lpr-review lpr-reveal">
+              <div class="lpr-review-head"><span class="lpr-review-stars">★★★★★</span><span class="lpr-review-src">App Store · 2026/07</span></div>
+              <div class="lpr-review-t">Silme düğmesi istiyorum</div>
+              <div class="lpr-review-q">“Her gün o kadar çok kullanıyorum ki artık vazgeçemiyorum!”</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 06 START -->
+        <section id="setup">
+          <div class="lpr-chapter">
+            <div class="lpr-chap-num">06 / BAŞLANGIÇ</div>
+            <div class="lpr-chap-title">Kurulumdan sonra yaklaşık 3 dakika</div>
+          </div>
+          <span class="lpr-setup-anchor">⏱ Ortalama ayarlama süresi: 3 dakika</span>
+          <h2 class="lpr-section-h lpr-reveal">İlk notunuz<br>kasaya ulaşana kadar.</h2>
+          <div class="lpr-setup-steps">
+            <div class="lpr-setup-step lpr-reveal">
+              <div class="lpr-step-num">1</div>
+              <div>
+                <div class="lpr-step-t">App Store üzerinden ücretsiz indirin</div>
+                <div class="lpr-step-s">Hesap açmak gerekmez. Alıcı e-posta adresini ayarlamanız yeterlidir.</div>
+              </div>
+            </div>
+            <div class="lpr-setup-step lpr-reveal">
+              <div class="lpr-step-num">2</div>
+              <div>
+                <div class="lpr-step-t">Ayarlardaki “Obsidian” bölümünden kasa klasörünü seçin</div>
+                <div class="lpr-step-s">Dosyalar uygulamasından iCloud Drive veya “iPhone üzerinde” konumundaki kasayı seçin.</div>
+              </div>
+            </div>
+            <div class="lpr-setup-step lpr-reveal">
+              <div class="lpr-step-num">3</div>
+              <div>
+                <div class="lpr-step-t">Yazma testi → İlk notu gönderin</div>
+                <div class="lpr-step-s">Test başarılıysa bundan sonra göndermeniz yeterli; metin nota eklenir.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 07 PRICING -->
+        <section>
+          <div class="lpr-chapter">
+            <div class="lpr-chap-num">07 / FİYATLAR</div>
+            <div class="lpr-chap-title">Ücretsiz başlayın. İhtiyaç duyarsanız aylık 500 yen</div>
+          </div>
+          <h2 class="lpr-section-h lpr-reveal"><span class="q">Kredi kartı gerekmez.</span><br>İstediğiniz zaman iptal edin.</h2>
+          <div class="lpr-price-cards">
+            <div class="lpr-price-card lpr-reveal">
+              <div class="lpr-price-name">Free</div>
+              <div class="lpr-price-v"><span class="n">¥0</span><span class="u">/ süre sınırı yok</span></div>
+              <div class="lpr-price-l">günde en fazla 3 mesaj (kullanım süresi sınırı yok)</div>
+              <div class="lpr-price-f">
+                <div><span class="k">✓</span>Tüm Obsidian entegrasyon özellikleri</div>
+                <div><span class="k">✓</span>Sesle giriş ve yapay zekâyla etiketleme</div>
+                <div><span class="k">✓</span>Çevrimdışı Outbox</div>
+              </div>
+            </div>
+            <div class="lpr-price-card highlight lpr-reveal">
+              <span class="lpr-price-tag">Sınırsız gönderim</span>
+              <div class="lpr-price-name">Premium</div>
+              <div class="lpr-price-v"><span class="n">¥500</span><span class="u">/ ay, vergiler dahil</span></div>
+              <div class="lpr-price-l">Yıllık ¥5,000, vergiler dahil. App Store üzerinden istediğiniz zaman iptal edin.</div>
+              <div class="lpr-price-f">
+                <div><span class="k">✓</span>Sınırsız sayıda gönderim</div>
+                <div><span class="k">✓</span>“Yalnızca Obsidian içine kaydet” modu</div>
+                <div><span class="k">✓</span>Geliştirmeyi doğrudan destekleyin</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 08 FAQ -->
+        <section>
+          <div class="lpr-chapter">
+            <div class="lpr-chap-num">08 / SIK SORULAN SORULAR</div>
+            <div class="lpr-chap-title">En çok sorulanlardan başlayın</div>
+          </div>
+          <h2 class="lpr-section-h lpr-reveal"><span class="q">Aklınıza takılan</span><br>her şey.</h2>
+          <div class="lpr-faq-list">
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Obsidian eklentisi gerekiyor mu?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Klasöre doğrudan yazmak için topluluk eklentisi gerekmez. Notlar, iCloud Drive veya “iPhone üzerinde” konumunda seçtiğiniz klasöre yazılır. Bu yöntemde Daily Notes özelliğini etkinleştirmek de gerekmez. Önce ayarlardaki “Obsidian yazma testi” ile kayıt konumunu doğrulayın.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Her not gönderdiğimde Obsidian açılır mı?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Seçilen klasöre doğrudan yazma başarılı olursa Obsidian açılmadan not eklenebilir. Normal modda klasör seçilmemişse veya doğrudan yazma başarısız olursa uygulama, URL şemasıyla Obsidian uygulamasını açıp not eklemeyi deneyebilir. Ayarlardaki yazma testi yalnızca klasöre doğrudan yazmayı kontrol eder.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Hangi nota, nasıl eklenir?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">“Günlük not”, seçilen klasörde o güne ait yyyy-MM-dd.md dosyasına ekler. “Belirli not”, ayarladığınız dosya adına ekler; varsayılan ad Inbox.md olur. Varsayılan biçim - HH:mm not şeklindedir. “Ekleme biçimi” ayarından zaman damgasını ve metin başı ile sonu şablonlarını değiştirebilir, iPhone ve Apple Watch için ayrı ayrı ayarlayabilirsiniz. Ekleme sırasında notun mevcut içeriği silinmez.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Yalnızca Obsidian Sync ile eşitleme yapıyorsam kullanabilir miyim?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Hedef klasörün iCloud Drive veya “iPhone üzerinde” konumunda bulunması ve Dosyalar uygulamasından erişilebilir olması gerekir. Yalnızca Obsidian Sync kullanan kasalar klasör seçicisinde görünmeyebilir. Bu durumda uygulama, URL şeması yöntemine geri döner.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Android veya bilgisayarda kullanabilir miyim?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Entegrasyonu gerçekleştiren SimpleMemo, şu anda iOS 16 veya üstünü kullanan iPhone için sunulan bir uygulamadır. Hedef Obsidian kasasını iCloud Drive veya Obsidian Sync ile eşitlerseniz aynı notları Mac, iPad ve diğer cihazlardaki Obsidian üzerinden açabilirsiniz.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Notlar sunucuda saklanır mı?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Obsidian içine not ekleme, tamamen cihazda gerçekleşen yerel bir işlemdir. Mevcut gönderim ve şifreleme yollarında değişiklik yapılmamıştır. E-posta gövdesi yalnızca gönderim sırasında sunucumuzdan geçer; kalıcı olarak saklanmaz.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Mevcut e-posta gönderimine ne olur?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Normal modda not hem e-postada hem Obsidian içinde kalır. Kapsama alanı dışındayken e-posta Outbox içinde tutulur; seçilmiş klasöre ekleme işlemi cihazda yapılır. Premium ile ayarlardan kasa klasörünü seçip yazma testini tamamladıktan sonra “Yalnızca Obsidian içine kaydet (e-posta gönderme)” seçeneğini açabilirsiniz. Etkin olduğu sürece notlar e-postayla gönderilmez, yalnızca kasaya kaydedilir. Premium süresi dolsa bile bu mod, ücretsiz kullanımın her 1 günde 3 not sınırıyla devam eder.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Çevrimdışıyken, kapsama alanı dışında da Obsidian içine eklenir mi?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Hedef klasör iPhone cihazına indirilmişse ve uygulama klasöre yazabiliyorsa internet bağlantısı olmadan yerel dosyaya not eklenebilir. Önce yazma testiyle doğrulayın. Normal moddaki e-postalar Outbox içinde bekler; iCloud ile diğer cihazlara eşitleme için bağlantının geri gelmesi gerekir.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Notları Obsidian içindeki Inbox notunda toplayabilir miyim?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Evet. “Hedef” bölümünde “Belirli not” seçeneğini seçin ve “Not adı” alanını ayarlayın. Boş bırakırsanız Inbox.md kullanılır. Notlar seçilen klasördeki aynı dosyaya ekleneceğinden önce yazma testiyle dosya adını ve içeriğini kontrol edin. Günlük not seçeneğine ayarlardan geçebilirsiniz.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Gmail, Outlook veya iCloud e-postasıyla da Obsidian içinde saklayabilir miyim?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Obsidian içine ekleme, e-posta alıcısından bağımsız çalışır; Gmail, Outlook, iCloud veya başka bir hizmet olabilir. Çünkü Obsidian içine ekleme, cihazdaki yerel bir işlemdir ve e-posta gönderiminden ayrıdır. Normal modda e-posta her zamanki gelen kutunuza ulaşır, aynı not Obsidian içinde de kalır. “Yalnızca Obsidian içine kaydet” etkin olduğu sürece notlar e-postayla gönderilmez.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Apple Watch üzerinden Obsidian uygulamasına gönderebilir miyim?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Apple Watch üzerinden kendinize not gönderdiğinizde, iPhone tarafındaki entegrasyon işlemi aynı notu Obsidian içine ekler. Ekleme işlemini iPhone yapar; Watch doğrudan kasaya yazmaz. Ayrıntılar için Apple Watch destek sayfasına bakın.</div>
+            </details>
+          </div>
+          <p style="text-align:center;font-size:12px;color:var(--lpr-ink-3);margin-top:16px"><a href="/tr/faq" style="color:var(--lpr-accent-3);text-decoration:underline">Tüm sık sorulan soruları görün →</a></p>
+        </section>
+
+        <!-- Final CTA -->
+        <section class="lpr-final">
+          <h2 class="lpr-final-h">Fikirlerinizi<br><span class="em">kasaya</span> taşıyın.</h2>
+          <p class="lpr-final-sub">İndirmek ücretsiz.<br>İlk notunuz 3 dakika içinde hazır olabilir.</p>
+          <a class="lpr-btn-primary" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" aria-label="App Store üzerinden ücretsiz indirin">
+            <svg class="apple" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg> App Store üzerinden ücretsiz indirin </a>
+          <div class="lpr-risk-row">
+            <span class="lpr-risk-item"><span class="k">✓</span>Kredi kartı gerekmez</span>
+            <span class="lpr-risk-item"><span class="k">✓</span>Kayıt gerekmez</span>
+            <span class="lpr-risk-item"><span class="k">✓</span>İstediğiniz zaman iptal edin</span>
+          </div>
+          <p style="margin-top:20px"><img src="/assets/img/qr-obsidian-ja.svg?v=d3f9ab0299" width="92" height="92" alt="App Store üzerinden indirme QR kodu" loading="lazy" style="background:#fff;padding:6px;border-radius:10px"></p>
+          <small style="color:var(--lpr-ink-3);font-size:11px">Telefonunuzla tarayın</small>
+        </section>
+      </div>
+      <!-- /.lpr -->
+
+      <!-- Explainer video — preserved for SEO (VideoObject schema) -->
+      <figure class="lp-video" style="margin:2rem auto;max-width:430px;">
+        <video controls preload="none" playsinline muted width="1280" height="720"
+               poster="/assets/video/obsidian-append-poster.jpg?v=3da21cf677"
+               style="width:100%;height:auto;border-radius:12px;display:block;background:#0b1020;">
+          <source src="/assets/video/obsidian-append.mp4?v=d0b8612871" type="video/mp4"> Tarayıcınız video oynatmayı desteklemiyor. </video>
+        <figcaption style="font-size:.875rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem;"> Normal modda notun e-postayla gönderilmesini ve ayrıca Obsidian kasasına eklenmesini gösteren akış. E-posta gövdesi standart SMTP ile iletilir; uçtan uca şifreleme kullanılmaz. Klasöre doğrudan yazmak için kayıt konumunun seçilmesi ve yazma işleminin başarılı olması gerekir. </figcaption>
+      </figure>
+      <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  "@id": "https://simplememofast.com/tr/obsidian/#video",
+  "name": "Metin Obsidian notuna eklenene kadar",
+  "description": "Normal modda notun e-postayla gönderilmesini ve ayrıca Obsidian kasasına eklenmesini açıklayan video. E-posta üzerinden kasaya yönlendirme yapan bir sistem değildir. E-posta gövdesi standart SMTP ile iletilir; uçtan uca şifreleme kullanılmaz.",
+  "thumbnailUrl": [
+    "https://simplememofast.com/assets/video/obsidian-append-poster.jpg?v=3da21cf677"
+  ],
+  "uploadDate": "2026-08-11T13:42:48+09:00",
+  "duration": "PT14S",
+  "contentUrl": "https://simplememofast.com/assets/video/obsidian-append.mp4?v=d0b8612871",
+  "encodingFormat": "video/mp4",
+  "inLanguage": "tr",
+  "isFamilyFriendly": true,
+  "publisher": {
+    "@id": "https://simplememofast.com/#organization"
+  },
+  "mainEntityOfPage": {
+    "@id": "https://simplememofast.com/tr/obsidian/#webpage"
+  }
+}</script>
+
+      <!-- Legacy content below is replaced by the LP redesign above.
+           Removed: tip-box summary, "この連携で変わること", "どう動くのか",
+           "設定手順", "活用アイデア", "動作条件と注意点",
+           "うまくいかないとき", 旧FAQ, 旧CTA box.
+           Internal Links section preserved for SEO. -->
+
+      <!-- What you get: removed (redundant with LP hero + flow) -->
+      <!-- Internal Links -->
+      <section class="lp-section">
+        <h2 class="lp-section__title"> <span>İlgili sayfalar</span> </h2>
+        <div class="internal-links">
+          <a href="/tr/obsidian/what-is-vault/"><span>Kasa (Vault) nedir? Aslında sıradan bir klasördür</span></a>
+          <a href="/tr/obsidian/sync/"><span>Eşitleme yöntemleri — iCloud, resmi Sync, Git ve Syncthing karşılaştırması</span></a>
+          <a href="/tr/obsidian/pricing/"><span>Obsidian fiyatları — Ücretsiz neler yapılabilir?</span></a>
+          <a href="/tr/obsidian/plugins/"><span>Eklentilere giriş — 6,812 eklenti arasından ölçülen en iyi 10</span></a>
+          <a href="/tr/obsidian/compare/"><span>Obsidian karşılaştırma merkezi — Neyle karşılaştırmalı?</span></a>
+          <a href="/tr/apple-watch-obsidian/"><span>Apple Watch × Obsidian entegrasyonu</span></a>
+          <a href="/tr/guides/"><span>Kurulum kılavuzları</span></a>
+          <a href="/tr/guides/draft-autosave/"><span>Otomatik taslak kaydetme nasıl kullanılır?</span></a>
+          <a href="/tr/guides/gmail-star-todo/"><span>Gmail yıldızlarıyla gelen kutunuzu görev listesine dönüştürün</span></a>
+          <a href="/tr/methods/second-brain/"><span>İkinci beyin</span></a>
+          <a href="/tr/methods/zettelkasten/"><span>Zettelkasten</span></a>
+          <a href="/tr/obsidian/getting-started/"><span>Obsidian ile başlangıç: gerçek ekranlarla kılavuz</span></a>
+          <a href="/tr/obsidian/compare/logseq/"><span>Obsidian ve Logseq karşılaştırma testi</span></a>
+          <a href="/tr/obsidian/compare/capacities/"><span>Obsidian ve Capacities — Tür ile dosya arasındaki fark</span></a>
+          <a href="/tr/obsidian/second-brain/"><span>Obsidian ile ikinci beyin — PARA yönteminin 4 klasörü ve gerçek ekranlar</span></a>
+          <a href="/tr/obsidian/journaling/"><span>Obsidian ile günlük tutma — Tarihli notlar ve elle uygulanan şablonlar</span></a>
+          <a href="/tr/obsidian/compare/memos/"><span>Obsidian ve memos — Dosyalar ile kendi sunucunuzda barındırma arasındaki fark</span></a>
+          <a href="/tr/vs/obsidian/"><span>Obsidian ile karşılaştırma</span></a>
+          <a href="/tr/vs/obsidian-share-sheet/"><span>Resmi paylaşım sayfasıyla dürüst karşılaştırma</span></a>
+          <a href="/tr/privacy-architecture/"><span>Gizlilik tasarımı: verilerin izlediği yol</span></a>
+          <a href="/tr/note-to-email/"><span>Nottan e-postaya: nasıl çalışır?</span></a>
+        </div>
+      </section>
+
+    </div>
+
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="container">
+  <h2 style="font-size:1.1rem;margin-bottom:1rem;"> <span>Kaynaklar</span> </h2>
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://obsidian.md/help/" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Help</a> — <span>Obsidian resmi yardımı: kasalar, günlük notlar ve eşitleme özellikleri için başvuru kaynağı</span></li>
+    <li><a href="https://obsidian.md/help/Extending+Obsidian/Obsidian+URI" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian URI</a> — <span>Yedek yöntem olarak kullanılan standart obsidian:// URI için resmi belgeler</span></li>
+    <li><a href="https://support.apple.com/icloud" target="_blank" rel="noopener" style="color:var(--accent);">Apple — iCloud</a> — <span>iCloud Drive ile dosya eşitleme hakkında resmi destek</span></li>
+    <li><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="reference" href="https://apps.apple.com/jp/app/id6758438948" target="_blank" rel="noopener" style="color:var(--accent);">SimpleMemo — App Store</a> — <span>App Store indirme sayfası</span></li>
+  </ul>
+  </div>
+</section>
+
+<!-- SEO: Auto-generated related content links -->
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <div class="container">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>İlgili içerikler</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/tr/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Tüm yöntemler</span></a></li>
+    <li><a href="/tr/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Tüm blog yazıları</span></a></li>
+    <li><a href="/tr/use-cases/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Kullanım örnekleri</span></a></li>
+    <li><a href="/tr/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Sık sorulan sorular</span></a></li>
+    <li><a href="/tr/blog/email-to-obsidian" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>E-postayla Obsidian uygulamasına gönderme (Gmail/Outlook/iCloud)</span></a></li>
+  </ul>
+  </div>
+</section>
+<aside style="max-width:900px;margin:2rem auto;padding:1.25rem;border:1px solid var(--border,#31445f);border-radius:12px"><p><a href="/tr/resources/obsidian-inbox/">Inbox için Markdown deneyin</a> · <a href="/tr/press/">Tanıtım ve basın materyalleri</a></p></aside>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="tr" dir="ltr"><a class="site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Küçük bir not. Bir sonraki adım.</p><p class="site-footer-description">iPhone'unuzdan Obsidian'a ve e-postaya not gönderin.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+
+      <nav class="footer__nav" aria-label="Alt bilgi gezinmesi">
+      <div class="footer__col">
+        <p class="footer__col-title">Ürün</p>
+        <a href="/tr/download/" class="footer__link">İndir</a>
+        <a href="/tr/" class="footer__link">Ana sayfa</a>
+        <a href="/tr/obsidian/" class="footer__link">Obsidian entegrasyonu</a>
+        <a href="/tr/use-cases/" class="footer__link">Kullanım örnekleri</a>
+        <a href="/tr/guides/" class="footer__link">Kılavuzlar</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Karşılaştırmalar ve geçiş</p>
+        <a href="/tr/note-to-email/" class="footer__link">E-postaya not gönderme</a>
+        <a href="/tr/vs/" class="footer__link">Karşılaştır</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Destek</p>
+        <a href="/tr/roadmap/" class="footer__link">Açık yol haritası</a>
+        <a href="/tr/devlog/" class="footer__link">Geliştirme günlüğü</a>
+        <a href="/tr/about/" class="footer__link">Geliştirici hakkında</a>
+        <a href="/tr/faq" class="footer__link">Sık sorulan sorular</a>
+        <a href="/tr/privacy" class="footer__link">Gizlilik</a>
+        <a href="/tr/contact" class="footer__link">İletişim</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / İşleten: YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <!-- Sticky bottom CTA (LP redesign) -->
+  <div class="lpr-sticky-cta" id="lprStickyCta" role="complementary" aria-label="Sabit işlem alanı">
+    <a class="lpr-btn-primary" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" aria-label="App Store üzerinden ücretsiz indirin">
+      <svg class="apple" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg> Ücretsiz başlayın </a>
+    <div class="meta">★ 4.1 · Ücretsiz günde 3 mesaj · Kredi kartı gerekmez</div>
+  </div>
+
+  <!-- LP redesign scripts (inline, no external deps) -->
+  <script>
+  (function(){
+    // Typed hero text
+    var el = document.getElementById('lprTyped');
+    if(el && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      var phrases = ["朝の散歩で思いついた記事タイトル","買い物: コーヒー豆、牛乳","打ち合わせでSarahが言ってた案","読んだ本の一節"];
+      var i=0,j=0,forward=true;
+      function tick(){
+        var p = phrases[i];
+        if(forward){ j++; el.textContent = p.slice(0,j); if(j>=p.length){forward=false;setTimeout(tick,1400);return;} setTimeout(tick, 48 + Math.random()*40); }
+        else { j--; el.textContent = p.slice(0,j); if(j<=0){forward=true; i=(i+1)%phrases.length; setTimeout(tick,400);return;} setTimeout(tick, 22); }
+      }
+      tick();
+    }
+    // Scroll reveal
+    if('IntersectionObserver' in window){
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, {threshold:.12, rootMargin:'0px 0px -40px 0px'});
+      document.querySelectorAll('.lpr-reveal').forEach(function(x){ io.observe(x); });
+    } else {
+      document.querySelectorAll('.lpr-reveal').forEach(function(x){ x.classList.add('in'); });
+    }
+    // Sticky CTA show after hero
+    var sticky = document.getElementById('lprStickyCta');
+    var hero = document.querySelector('.lpr-hero');
+    if(sticky && hero && 'IntersectionObserver' in window){
+      var io2 = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ if(e.isIntersecting){ sticky.classList.remove('show'); } else { sticky.classList.add('show'); } });
+      }, {threshold:0.1});
+      io2.observe(hero);
+    }
+    // Demo tab switch
+    var tabs = document.querySelectorAll('.lpr-demo-tab');
+    var content = document.getElementById('lprDemoContent');
+    if(tabs.length && content){
+      var data = {
+        daily: globalThis.SimpleMemoI18n.text("<div class=\"md-h\"># 2026-10-05</div><div class=\"md-line\"><span class=\"t\">- 07:12</span><span class=\"c\"><span class=\"md-dash\">—</span>朝の散歩で浮かんだ記事見出し案</span></div><div class=\"md-line\"><span class=\"t\">- 09:34</span><span class=\"c\"><span class=\"md-dash\">—</span>買い物: コーヒー豆、牛乳</span></div><div class=\"md-line\"><span class=\"t\">- 12:48</span><span class=\"c\"><span class=\"md-dash\">—</span>ランチで聞いた競合の新機能をあとで調べる</span></div><div class=\"md-line new\"><span class=\"t\">- 14:21</span><span class=\"c\"><span class=\"md-dash\">—</span>いま声で送ったメモがここに追記される</span></div>"),
+        inbox: globalThis.SimpleMemoI18n.text("<div class=\"md-h\"># Inbox.md</div><div class=\"md-line\"><span class=\"t\">- 10/03 09:12</span><span class=\"c\"><span class=\"md-dash\">—</span>FY26計画のドラフト書き出し</span></div><div class=\"md-line\"><span class=\"t\">- 10/04 20:48</span><span class=\"c\"><span class=\"md-dash\">—</span>ジムで思いついた新機能のUI</span></div><div class=\"md-line new\"><span class=\"t\">- 10/05 14:21</span><span class=\"c\"><span class=\"md-dash\">—</span>固定ノートに全部まとめる派ならInboxが楽</span></div>"),
+        mail:  globalThis.SimpleMemoI18n.text("<div class=\"md-h\">📬 受信箱</div><div class=\"md-line\"><span class=\"t\">14:21</span><span class=\"c\"><span class=\"md-dash\">—</span>件名: AI生成タイトル「散歩メモ」</span></div><div class=\"md-line\"><span class=\"c\" style=\"padding-left:10px\">本文: いま声で送ったメモがここに追記される #walk #idea</span></div><div class=\"md-line new\"><span class=\"t\">👤</span><span class=\"c\"><span class=\"md-dash\">—</span>From: noreply@mail.simplememofast.com</span></div>")
+      };
+      tabs.forEach(function(tab, index){
+        tab.addEventListener('keydown', function(e){
+          var next;
+          if(e.key === 'ArrowRight') next = (index + 1) % tabs.length;
+          else if(e.key === 'ArrowLeft') next = (index + tabs.length - 1) % tabs.length;
+          else if(e.key === 'Home') next = 0;
+          else if(e.key === 'End') next = tabs.length - 1;
+          else return;
+          e.preventDefault();
+          tabs[next].focus();
+          tabs[next].click();
+        });
+        tab.addEventListener('click', function(){
+          tabs.forEach(function(t){ t.classList.remove('on'); t.setAttribute('aria-selected','false'); t.tabIndex = -1; });
+          tab.classList.add('on');
+          tab.setAttribute('aria-selected','true');
+          tab.tabIndex = 0;
+          content.setAttribute('aria-labelledby', tab.id);
+          var k = tab.getAttribute('data-tab');
+          content.innerHTML = data[k] || '';
+          if('vibrate' in navigator){ try{ navigator.vibrate(8); }catch(e){} }
+        });
+      });
+    }
+    // Phone parallax tilt
+    var phone = document.getElementById('lprPhone');
+    if(phone){
+      var raf = null;
+      function updatePhone(){
+        var y = Math.min(window.scrollY, 400);
+        var t = y / 400;
+        phone.style.transform = 'rotateX(' + (8 - t*6) + 'deg) rotateY(' + (-8 + t*8) + 'deg) rotateZ(' + (2 - t*4) + 'deg) scale(' + (1 - t*0.08) + ')';
+        raf = null;
+      }
+      window.addEventListener('scroll', function(){ if(!raf) raf = requestAnimationFrame(updatePhone); }, {passive:true});
+    }
+    // Scroll progress bar
+    var bar = document.getElementById('lprProgBar');
+    if(bar){
+      var raf2 = null;
+      function updateBar(){
+        var h = document.documentElement.scrollHeight - window.innerHeight;
+        var p = h > 0 ? (window.scrollY / h) * 100 : 0;
+        bar.style.width = Math.min(100, p) + '%';
+        raf2 = null;
+      }
+      window.addEventListener('scroll', function(){ if(!raf2) raf2 = requestAnimationFrame(updateBar); }, {passive:true});
+      updateBar();
+    }
+  })();
+  </script>
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

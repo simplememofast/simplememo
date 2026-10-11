@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/glossary/e2e-encryption/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>E2E加密（端到端加密）是什麼？ 解說結構、與TLS的差異、極限 | 術語集</title>
+  <meta name="description" content="E2E加密（端到端加密）是指只有傳送者和接收者的終端才能解密資料的方式。 解說金鑰交換的構造、與通訊路加密（TLS）、儲存時加密的差異、主要服務的對應情況、E2EE也無法保護的東西、不同威脅模型的選擇方法。 SimpleMemo不是E2EE的理由也明確說明。">
+  <meta name="theme-color" content="#070b14">
+
+  <meta property="og:title" content="E2E加密（端到端加密）是什麼？ 解說結構、與TLS的差異、極限 | 術語集">
+  <meta property="og:description" content="E2E加密的機制、TLS、與儲存時加密的區別、主要服務的對應、E2EE也無法保護的東西、按威脅模型的不同選擇方法進行解說。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-06T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh-Hant/glossary/e2e-encryption/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/glossary-e2e-encryption.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_TW">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="E2E加密（端到端加密）是什麼？ 解說結構、與TLS的差異、極限 | 術語集">
+  <meta name="twitter:description" content="E2E加密的機制、TLS・與儲存時加密的區別、主要服務的對應、限制和選擇方法。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/glossary-e2e-encryption.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh-Hant/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/glossary/e2e-encryption/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh-Hant/glossary/e2e-encryption/#article",
+  "inLanguage": "zh-Hant",
+  "image": "https://simplememofast.com/assets/img/og/glossary-e2e-encryption.png",
+  "headline": "E2E加密（端到端加密）是什麼？ 解說結構、與TLS的差異、極限 | 術語集",
+  "description": "E2E加密（端到端加密）是隻有傳送者和接收者的終端才能解密資料的方式。 金鑰交換的機制、TLS、與儲存時加密的區別、主要服務的對應情況、極限、不同威脅模型的選擇方法。",
+  "url": "https://simplememofast.com/zh-Hant/glossary/e2e-encryption/",
+  "datePublished": "2026-03-06",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh-Hant/glossary/e2e-encryption/"
+  }
+}</script>
+
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主頁",
+      "item": "https://simplememofast.com/zh-Hant/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "術語集",
+      "item": "https://simplememofast.com/zh-Hant/glossary/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "E2E加密",
+      "item": "https://simplememofast.com/zh-Hant/glossary/e2e-encryption/"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "DefinedTerm",
+  "name": "E2E加密",
+  "description": "E2E加密（端到端加密）是指只有傳送者和接收者的終端才能解密資料的方式。 解說與通訊路加密（TLS）和儲存時加密的區別、極限、威脅模型的選擇方法。",
+  "inDefinedTermSet": {
+    "@type": "DefinedTermSet",
+    "name": "備忘錄應用程式術語集",
+    "url": "https://simplememofast.com/zh-Hant/glossary/"
+  },
+  "url": "https://simplememofast.com/zh-Hant/glossary/e2e-encryption/"
+}</script>
+
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh-Hant/glossary/e2e-encryption/#webpage",
+  "inLanguage": "zh-Hant",
+  "name": "E2E加密是指",
+  "url": "https://simplememofast.com/zh-Hant/glossary/e2e-encryption/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh-Hant/#website"
+  }
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+    .definition-block{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.5rem;margin:1.5rem 0 2rem;font-size:.9rem;line-height:1.8}
+    .definition-block__label{font-weight:700;margin-bottom:.5rem;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em}
+    .definition-block p{color:var(--text-secondary);margin-bottom:.5rem}
+    .definition-block p:last-child{margin-bottom:0}
+    .reason-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .reason-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/zh-Hant/glossary/e2e-encryption/#faq","inLanguage":"zh-Hant","mainEntity":[{"@type":"Question","name":"E2E加密是什麼？","acceptedAnswer":{"@type":"Answer","text":"資料在傳送者的裝置上加密，只有在接收者的裝置上才能解密的方式。 中間伺服器和網路運營商無法讀取資料。"}},{"@type":"Question","name":"SimpleMemo是E2E加密嗎？","acceptedAnswer":{"@type":"Answer","text":"不。 為了讓作為收件人的使用者自己在平時的郵件應用程式上閱讀正文，郵件傳送使用的是標準SMTP協議。 取而代之的是，Outbox和傳送歷史的終端內AES-GCM-256加密，郵件正文沒有永久儲存，透過資料最小化模型來保護隱私。 需要E2EE的用途請考慮Standard Notes、Signal、ProtonMail等。"}},{"@type":"Question","name":"E2E加密和AES-GCM的區別是什麼？","acceptedAnswer":{"@type":"Answer","text":"E2E加密是架構的概念（誰可以解密）。 AES-GCM是加密演算法（如何加密）。 E2E加密的內部安裝也可以使用AES-GCM。"}},{"@type":"Question","name":"E2E加密和TLS（HTTPS）的區別是什麼？","acceptedAnswer":{"@type":"Answer","text":"TLS只保護終端和伺服器之間的通訊路，到達伺服器時企業可以讀取內容。 E2E加密在到達接收者的終端之前，路徑上的任何人（包括企業）都無法讀取內容。"}},{"@type":"Question","name":"E2E加密絕對安全嗎？","acceptedAnswer":{"@type":"Answer","text":"不。 可以保護的是通訊路徑和企業洩露。 無法防止終端的侵犯、未加密的雲備份、後設資料、收件人的傳輸和截圖。"}},{"@type":"Question","name":"郵件（Gmail等）是E2E加密的嗎？","acceptedAnswer":{"@type":"Answer","text":"普通郵件用TLS保護通訊路，儲存時由企業進行加密，但不是E2EE。 要使用E2EE，需要像PGP和S/MIME，或者Proton Mail一樣，傳送和接收的兩端對應結構。"}},{"@type":"Question","name":"LINE是E2E加密嗎？","acceptedAnswer":{"@type":"Answer","text":"1對1對話的文字預設為“Letter Sealing”的E2E加密有效。 但是也有不在物件範圍內的內容，詳情請在LINE的官方資訊中確認。"}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="主導航" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh-Hant/guides/">使用指南</a><a href="/zh-Hant/use-cases/">使用情境</a><a href="/zh-Hant/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/zh-Hant/guides/">使用指南</a></li>
+        <li><a href="/zh-Hant/use-cases/">使用情境</a></li>
+        <li><a href="/zh-Hant/vs/">比較</a></li>
+        <li><a href="/zh-Hant/methods/"><span>方法</span></a></li>
+        <li><a href="/zh-Hant/blog/"><span>部落格</span></a></li>
+        <li><a href="/zh-Hant/glossary/"><span>術語集</span></a></li>
+        <li><a href="/zh-Hant/faq">常見問題</a></li>
+        <li><a href="/zh-Hant/about/">關於開發者</a></li>
+        <li><a href="/zh-Hant/devlog/">開發日誌</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="glossary" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>下載</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="繁體中文 · 選擇語言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>繁中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hant" dir="ltr"><p class="site-language-title">選擇語言</p><div class="site-language-grid"><a href="/glossary/e2e-encryption/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/glossary/e2e-encryption/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/glossary/e2e-encryption/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hant" aria-current="page"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ko/glossary/e2e-encryption/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/glossary/e2e-encryption/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/glossary/e2e-encryption/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/glossary/e2e-encryption/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/glossary/e2e-encryption/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/glossary/e2e-encryption/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="glossary" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">下載</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="選單"><span>選單</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+
+<main class="page-content">
+    <div class="container">
+
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
+        <div class="lp-hero__label"><span>術語集 — 安全</span></div>
+        <h1 class="lp-hero__title"><span>E2E加密<br>（端到端加密）是指</span></h1>
+        <p class="lp-hero__sub"> <span>E2E加密（端到端加密）是在傳送者的裝置上對資料進行加密，只有在接收者的裝置上才能解密的方式。 中間伺服器無法讀取資料內容。 SimpleMemo以“不將備忘錄正文持續儲存在伺服器上”的不同方法來保護隱私。 </span> </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>作者: <a href="/zh-Hant/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a></span> <span> · 最後更新: <time datetime="2026-09-30">2026年09月30日</time></span></p>
+      </div><nav class="sd-hero-index" aria-label="本頁內容"><p>本頁內容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>E2E加密的機制 — 透過4個步驟理解概念</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>通訊路加密、儲存時加密、E2E加密的差異</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>主要服務的E2E加密對應</span><span aria-hidden="true">↗</span></a></nav></div>
+
+      <div class="definition-block">
+        <div class="definition-block__label">定義</div>
+        <p><strong>E2E加密（End-to-End Encryption）</strong>是只能在通訊的兩端（端點）解密資料的加密方式。 在傳送者的裝置上對資料進行加密，用通訊物件的終端擁有的鑰匙進行解密。 轉播資訊的伺服器、網路運營商，甚至服務提供商本身也無法讀取資料內容。 WhatsApp、Signal、Proton Mail等都採用了這種方式。</p>
+      </div>
+
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"><span>E2E加密的構造 — 透過4的步驟理解概念</span></h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>E2E加密的要點是“中繼服務沒有解密所需的金鑰”。 以下是理解公開金鑰加密和資訊加密作用的概念圖。 實際的Signal Protocol有本人確認、金鑰協議、金鑰更新，不能僅透過4階段實現。 </span> </p>
+        <div class="reason-cards">
+          <div class="reason-card"><div class="reason-card__title"><span>1。 終端製作鑰匙對</span></div><div class="reason-card__desc"><span>各終端生成公開金鑰和秘密金鑰的配對。 公開鑰匙是可以分發的鑰匙，秘金鑰匙是隻放在終端裡的鑰匙。 服務業者只承擔保管公開鑰匙並交給對方的“電話簿”的角色。</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>2。 與對方達成共同金鑰協議</span></div><div class="reason-card__desc"><span>從對方的公開金鑰和自己的秘密金鑰中，推匯出只有雙方才能計算的共同會話金鑰（Diffie-Hellman金鑰協議）。 因為鑰匙本身不會流過網路，所以即使記錄了所有的通訊也無法找出鑰匙。</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>3。 用傳送終端加密後傳送</span></div><div class="reason-card__desc"><span>本文使用會話金鑰，<a href="/zh-Hant/glossary/aes-gcm/">AES-GCM</a>和ChaCha20-Poly1305這樣的認證通用金鑰加密進行加密。 伺服器接收的只是密碼文，接收方驗證認證標籤並檢測篡改。</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>4。 只有接收終端被解碼</span></div><div class="reason-card__desc"><span>處理解密所需的金鑰的是通訊兩端的終端，而不是中繼伺服器。 在Signal的Double Ratchet中，每個資訊都會更新金鑰，使已經刪除的過去金鑰很難在以後獲得（前方隱匿性）。 侵權後更換新的金鑰材料，再次保護未來通訊的特性被區分為侵權後的恢復。 在終端持續被侵犯之前不能保證安全。</span></div></div>
+        </div>
+      </div></section>
+
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02"><span>通訊路加密、儲存時加密、E2E加密的差異</span></h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>“正在加密”的說明中有3種，可以保護的範圍完全不同。 HTTPS（TLS）只在終端和伺服器之間，儲存時加密只保護在伺服器的磁碟上，無論哪個服務企業都可以讀取內容。 只有E2E加密才能實現“企業也無法讀取”。 </span> </p>
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格">
+        <table class="compare-table">
+          <thead><tr><th scope="col">觀點</th><th scope="col">通訊路加密（TLS / HTTPS）</th><th scope="col">儲存時加密（at rest）</th><th scope="col">E2E加密</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">守衛的區間</th><td>終端和伺服器之間的通訊</td><td>伺服器和磁碟上的資料</td><td>從傳送終端到接收終端的全部區間</td></tr>
+            <tr><th scope="row">持有鑰匙的人</th><td>終端和伺服器都</td><td>服務企業</td><td>只有兩端使用者的終端</td></tr>
+            <tr><th scope="row">經營者能讀懂裡面的內容嗎</th><td>可以閱讀（到達伺服器後是平文）</td><td>可讀（管理鑰匙的是企業主）</td><td>看不懂</td></tr>
+            <tr><th scope="row">竊聽通訊</th><td>可以防止</td><td>物件外</td><td>可以防止</td></tr>
+            <tr><th scope="row">伺服器侵犯、內部不正當</th><td>無法阻止</td><td>鑰匙在同一個地方的話無法阻止</td><td>可以防止（洩露的只有密碼文）</td></tr>
+            <tr><th scope="row">伺服器方面的搜尋、共同編輯、AI處理</th><td>可能</td><td>可能</td><td>原則上不能（因為看不懂內容）</td></tr>
+            <tr><th scope="row">代表例</th><td>幾乎所有的Web服務</td><td>雲端儲存整體</td><td>訊號・WhatsApp・iMessage・Standard Notes</td></tr>
+          </tbody>
+        </table>
+
+        </div>
+      </div></section>
+
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"><span>主要服務的E2E加密對應</span></h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>即使是同樣的“加密”，也是預設的E2EE，還是隻在設定生效時，或者設計上本來就不是E2EE。 這是基於各公司的公開檔案的2026年9月時的整理。 因為規格會發生變化，所以在做出重要判斷之前，請在官方資訊中再次確認。 </span> </p>
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格">
+        <table class="compare-table">
+          <thead><tr><th scope="col">服務</th><th scope="col">E2E加密</th><th scope="col">補充</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">訊號</th><td class="yes">預設E2EE</td><td>訊號協議。 資訊、通話、附件全部為物件</td></tr>
+            <tr><th scope="row">WhatsApp</th><td class="yes">預設E2EE</td><td>採用Signal Protocol。 雲備份的加密是任意設定</td></tr>
+            <tr><th scope="row">iMessage</th><td class="yes">Apple終端之間是E2EE</td><td>iCloud備份在啟用“高階資料保護”之前由Apple保留金鑰</td></tr>
+            <tr><th scope="row">LINE</th><td class="yes">1對1談話的文字是E2EE</td><td>Letter Sealing（預設有效）。 也有物件之外的內容</td></tr>
+            <tr><th scope="row">Gmail等一般郵件</th><td class="no">不是E2EE</td><td>通訊路是TLS，儲存時由企業進行加密。 商家可以讀懂內容的設計</td></tr>
+            <tr><th scope="row">Proton Mail</th><td class="yes">Proton之間是E2EE</td><td>外部地址可以透過密碼保護郵件E2EE化</td></tr>
+            <tr><th scope="row">Standard Notes</th><td class="yes">預設E2EE</td><td>所有的筆記本都是E2EE。 丟失密碼的話無法恢復</td></tr>
+            <tr><th scope="row">Apple 筆記</th><td>取決於設定</td><td>通常的備忘錄由Apple保留鑰匙（“高階資料保護”E2EE化）。 帶鎖的備忘錄用密碼來源的鑰匙進行加密</td></tr>
+            <tr><th scope="row">Notion</th><td class="no">不是E2EE</td><td>只有通訊時、儲存時的加密。 在伺服器端進行共同編輯、搜尋的設計</td></tr>
+            <tr><th scope="row">Obsidian Sync</th><td class="yes">E2EE（自己設定加密密碼時）</td><td>Obsidian公司也無法解密。 本地的保管庫本身沒有加密</td></tr>
+            <tr><th scope="row">SimpleMemo</th><td class="no">不是E2EE</td><td>終端內的Outbox和傳送記錄用AES-GCM-256加密。 正文以標準SMTP傳送到自己的收件箱，不常常儲存在伺服器上</td></tr>
+          </tbody>
+        </table>
+
+        </div>
+      </div></section>
+
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04"><span>E2E加密也保護不了的東西</span></h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>E2E加密是保護“途中”的技術，不保護“端”及其周圍。 即使使用E2EE的應用程式，資訊洩露的路徑實際上集中在這個4上。 </span> </p>
+        <div class="reason-cards">
+          <div class="reason-card"><div class="reason-card__title"><span>終端本身</span></div><div class="reason-card__desc"><span>解密的平文存在於終端上。 如果終端感染了惡意軟體，或者在解鎖的狀態下落入他人手中，與加密無關。 前提是終端的鎖、OS的更新、終端內加密。</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>後設資料</span></div><div class="reason-card__desc"><span>“給誰、給誰、什麼時候、多少量”，本文在E2EE中也會留在很多服務中。 雖然也有像Signal那樣最小化後設資料的設計，但不會變成零。</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>備份</span></div><div class="reason-card__desc"><span>對話是E2EE，如果雲備份用企業金鑰儲存的話，可以從那裡讀取。 WhatsApp的備份加密是任意設定的，iMessage的備份只要不啟用“高階資料保護”就可以解密Apple。</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>接收者的行動</span></div><div class="reason-card__desc"><span>如果接收的對方轉發、截圖、複製的話，加密不會成為任何限制。 E2EE是以“信任對方”為前提的技術。</span></div></div>
+        </div>
+      </div></section>
+
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05"><span>需要什麼級別的加密 — 透過威脅模型決定</span></h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>既不是“不是E2EE就危險”也不是“有TLS就放心”。 如果先決定要從誰那裡保護什麼，所需的等級幾乎分為3。 </span> </p>
+        <div class="reason-cards">
+          <div class="reason-card"><div class="reason-card__title"><span>想防止偷看通訊</span></div><div class="reason-card__desc"><span>正確驗證的HTTPS（TLS）保護終端和連線伺服器之間的通訊。 在郵件配送中，每個路徑的TLS對應和政策都不同，所以僅僅透過HTTPS連線API，無法判斷從傳送到接收的所有路徑都會受到保護。</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>想保護企業、伺服器免受侵犯</span></div><div class="reason-card__desc"><span>如醫療記錄、法律諮詢、內部告發、高度機密的私信等，如果是服務業者也不能閱讀的內容，選擇預設提供E2EE的服務（Signal・Proton Mail・Standard Notes等）。</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>傳送到自己的收件箱即可的日常備忘錄</span></div><div class="reason-card__desc"><span>像想法、ToDo、購物清單一樣“送到自己的Gmail，之後可以搜尋”的用途的話，終端內加密和資料最小化（不在本公司伺服器上留下正文）在實用上就足夠了。 SimpleMemo位於這裡。</span></div></div>
+        </div>
+      </div></section>
+
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06"><span>SimpleMemo是E2E加密嗎？ </span></h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span><strong>不。 Simple Memo不提供End-to-End加密（E2EE）。 </strong>郵件正文，為了能夠透過接收使用者自己的普通郵件客戶端（Gmail / Apple Mail / Outlook等）閱讀，使用標準的SMTP協議傳送。 取而代之的是“終端內加密+資料最小化”的模式來保護隱私。 對於需要E2EE的用途，請考慮Standard Notes、Signal、ProtonMail等專用服務。 </span> </p>
+        <div class="reason-cards">
+          <div class="reason-card"><div class="reason-card__title"><span>E2E 加密模型</span></div><div class="reason-card__desc"><span>Standard Notes和ProtonMail等服務，將資料以加密的狀態儲存在伺服器上。 即使是伺服器運營者也無法解密內容。 雖然可以同步、備份，但是密碼文會永久地存在於伺服器上。 接收者用專用客戶端解密後讀取。</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>Simple Memo的模型</span></div><div class="reason-card__desc"><span>等待離線傳送的Outbox和傳送記錄在終端內AES-GCM-256加密。 鑰匙是Apple Keychain。 通訊是TLS。<strong>郵件正文以標準SMTP傳送，所以有可能從通訊路的中間伺服器和接收郵件伺服器看到</strong>。 本公司伺服器不會持續儲存本文。 收件人可以透過平時的郵件應用程式直接閱讀。</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>應該選擇哪一個</span></div><div class="reason-card__desc"><span>取決於威脅模型。 像醫療記錄、法律諮詢、內部告發一樣，如果是不想被接收郵件伺服器運營者看到的內容的話，E2EE專用服務（Standard Notes / Signal / ProtonMail等）。 像日常的想法備忘錄、ToDo、購物清單一樣，如果送到自己的Gmail就可以的話，Simple Memo的模型很實用。</span></div></div>
+        </div>
+      </div></section>
+
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07"><span>常見問題（E2E加密）</span></h2></div><div class="ce-chapter__body">
+        <div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">E2E加密是什麼？</summary><div class="faq-answer"><p>資料在傳送者的裝置上加密，只有在接收者的裝置上才能解密的方式。 中間伺服器和網路運營商無法讀取資料。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">SimpleMemo是E2E加密嗎？</summary><div class="faq-answer"><p><strong>不。 </strong>為了讓作為收件人的使用者自己在平時的郵件應用程式上閱讀正文，郵件傳送使用的是標準SMTP協議。 取而代之的是，Outbox和傳送歷史的終端內AES-GCM-256加密，郵件正文沒有永久儲存，透過資料最小化模型來保護隱私。 需要E2EE的用途請考慮Standard Notes、Signal、ProtonMail等。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">E2E加密和AES-GCM的區別是什麼？</summary><div class="faq-answer"><p>E2E加密是架構的概念（誰可以解密）。 AES-GCM是加密演算法（如何加密）。 E2E加密的內部安裝也可以使用AES-GCM。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">E2E加密和TLS（HTTPS）的區別是什麼？</summary><div class="faq-answer"><p>TLS只保護終端和伺服器之間的通訊路，到達伺服器時企業可以讀取內容。 E2E加密在到達接收者的終端之前，路徑上的任何人（包括企業）都無法讀取內容。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">E2E加密絕對安全嗎？</summary><div class="faq-answer"><p>不。 可以保護的是通訊路徑和企業洩露。 無法防止終端的侵犯、未加密的雲備份、後設資料、收件人的傳輸和截圖。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">郵件（Gmail等）是E2E加密的嗎？</summary><div class="faq-answer"><p>普通郵件用TLS保護通訊路，儲存時由企業進行加密，但不是E2EE。 要使用E2EE，需要像PGP和S/MIME，或者Proton Mail一樣，傳送和接收的兩端對應結構。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">LINE是E2E加密嗎？</summary><div class="faq-answer"><p>1對1對話的文字預設為“Letter Sealing”的E2E加密有效。 但是也有不在物件範圍內的內容，詳情請在LINE的官方資訊中確認。</p></div></details></div>
+        </div>
+
+      </div></section>
+
+      <section class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+        <h3 style="font-size:1rem;margin-bottom:0.75rem">參考文獻・外部連結</h3>
+        <ul style="font-size:0.85rem;line-height:1.6;list-style:none;padding:0">
+        <li><a href="https://en.wikipedia.org/wiki/End-to-end_encryption" target="_blank" rel="noopener">端到端加密 — 維基百科</a></li>
+        <li><a href="https://signal.org/docs/" target="_blank" rel="noopener">Signal Protocol 文件</a></li>
+        <li><a href="https://signal.org/docs/specifications/doubleratchet/" target="_blank" rel="noopener">雙棘輪演算法—訊號規格書</a></li>
+        <li><a href="https://ssd.eff.org/module/what-should-i-know-about-encryption" target="_blank" rel="noopener">關於加密，我應該知道什麼？—EFF監控自衛</a></li>
+        <li><a href="https://support.apple.com/102651" target="_blank" rel="noopener">iCloud 資料安全概要（高階資料保護） — Apple 支援</a></li>
+        </ul>
+      </section>
+
+      <div class="cta-box">
+        <div class="cta-box__title"><span>終端內加密+資料最小化的簡單方法</span></div>
+        <div class="cta-box__desc"><span>SimpleMemo將離線Outbox和傳送歷史記錄在終端內AES-GCM-256加密，郵件正文不會常設在伺服器上。 E2E 雖然不是加密，但是是將日常備忘錄傳送到自己的郵件收件箱的實用隱私模型。 下載免費。</span></div>
+        <a data-cta-variant="v1" data-cta-cluster="glossary" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="從App Store下載"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="從App Store下載" loading="lazy"></a>
+
+      </div>
+
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08"><span>相關頁面</span></h2></div><div class="ce-chapter__body">
+        <div class="internal-links">
+          <a href="/zh-Hant/glossary/"><span>術語集首頁</span></a>
+          <a href="/zh-Hant/glossary/aes-gcm/"><span>AES-GCM加密是指</span></a>
+          <a href="/zh-Hant/blog/memo-app-security-comparison"><span>備忘錄應用程式的安全比較</span></a>
+          <a href="/zh-Hant/blog/memo-app-encryption-comparison"><span>比較備忘錄應用程式的加密</span></a>
+          <a href="/zh-Hant/glossary/outbox-architecture/"><span>Outbox架構是指</span></a>
+          <a href="/zh-Hant/vs/standard-notes/"><span>Standard Notes比較</span></a>
+          <a href="/zh-Hant/guides/proton-mail/"><span>Proton Mail設定指南</span></a>
+          <a href="/zh-Hant/privacy-architecture/"><span>隱私設計（不儲存什麼）</span></a>
+          <a href="/zh-Hant/glossary/smtp/"><span>SMTP/IMAP是指</span></a>
+        </div>
+      </div></section>
+
+    </div>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="method" href="/zh-Hant/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>接著閱讀</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>把寫下的筆記存入 Obsidian</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>在 iPhone 中設定筆記庫訪問許可權和追加位置，就能把寫下的筆記也儲存到 Obsidian。</span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>相關內容</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/zh-Hant/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>方法一覽</span></a></li>
+    <li><a href="/zh-Hant/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>部落格文章一覽</span></a></li>
+    <li><a href="/zh-Hant/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>常見問題</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hant" dir="ltr"><a class="site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">記下一點想法，邁出下一步。</p><p class="site-footer-description">從 iPhone 將筆記傳送至 Obsidian 和電子郵件。</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="頁尾導航">
+      <div class="footer__col">
+        <p class="footer__col-title">產品</p>
+        <a href="/zh-Hant/download/" class="footer__link">下載</a>
+        <a href="/zh-Hant/" class="footer__link">首頁</a>
+        <a href="/zh-Hant/use-cases/" class="footer__link">使用情境</a>
+        <a href="/zh-Hant/guides/" class="footer__link">使用指南</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較與遷移</p>
+        <a href="/zh-Hant/captio-alternative/" class="footer__link"><span>Captio替代</span></a>
+        <a href="/zh-Hant/note-to-email/" class="footer__link">將筆記傳送至信箱</a>
+        <a href="/zh-Hant/vs/" class="footer__link">比較</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">讀物</p>
+        <a href="/zh-Hant/glossary/" class="footer__link"><span>術語集</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">支援</p>
+        <a href="/zh-Hant/roadmap/" class="footer__link">公開路線圖</a>
+        <a href="/zh-Hant/devlog/" class="footer__link">開發日誌</a>
+        <a href="/zh-Hant/about/" class="footer__link">關於開發者</a>
+        <a href="/zh-Hant/faq" class="footer__link">常見問題</a>
+        <a href="/zh-Hant/privacy" class="footer__link">隱私</a>
+        <a href="/zh-Hant/contact" class="footer__link">聯絡我們</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 營運：YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 import os,re,json,sys,unicodedata
 from bs4 import BeautifulSoup, Comment
-S='/private/tmp/claude-501/-Users-hajimeataka-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad'
+S='/private/tmp/claude-501/-Users-<user>-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad'
 files=[l.strip() for l in open(S+'/work-seo-content/html_files.txt')]
 def fw(s):
     return sum(1 if unicodedata.east_asian_width(c) in 'FWA' else 0.5 for c in s)

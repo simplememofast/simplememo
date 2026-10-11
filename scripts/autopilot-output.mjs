@@ -13,8 +13,8 @@ import { validate as validateRuns, deriveStage } from './autopilot-runs.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const sha = value => typeof value === 'string' && /^[a-f0-9]{40}$/.test(value);
-const unknown = why => ({ verdict: 'unknown', why });
-const missing = why => ({ verdict: 'missing', why });
+const unknown = (why, reason_code = 'unknown_evidence', evidence) => ({ verdict: 'unknown', reason_code, why, ...(evidence && { evidence }) });
+const missing = (why, reason_code, evidence) => ({ verdict: 'missing', reason_code, why, evidence });
 
 export function runIdentity(env) {
   assert.match(env.GITHUB_REPOSITORY ?? '', /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/);
@@ -51,7 +51,7 @@ async function branchHead(get, branch) {
 export async function capture(identity, get, now = new Date()) {
   try {
     return { ...identity, version: 1, verdict: 'ready', branch_sha: await branchHead(get, identity.branch), captured_at: now.toISOString() };
-  } catch { return { ...identity, version: 1, ...unknown('開始前のリモート状態を取得できなかった') }; }
+  } catch { return { ...identity, version: 1, ...unknown('開始前のリモート状態を取得できなかった', 'unknown_remote_read') }; }
 }
 
 async function runsAt(get, head) {
@@ -66,21 +66,29 @@ async function runsAt(get, head) {
 }
 
 export async function verify(snapshot, identity, get) {
+  // Bounded observations only; these never participate in the verdict.
+  const evidence = { matching_pr_count: null, current_run_record_count: null, remote_head_sha: null };
+  let phase = 'snapshot', readFailed = false;
+  const read = async endpoint => {
+    try { return await get(endpoint); }
+    catch { readFailed = true; throw Error('remote read unavailable'); }
+  };
   try {
     assert.equal(snapshot?.version, 1, 'snapshot version');
     assert.equal(snapshot.verdict, 'ready', 'baseline unavailable');
     for (const key of ['repo', 'run_id', 'attempt', 'day', 'branch', 'base_sha']) assert.equal(snapshot[key], identity[key], `snapshot ${key} mismatch`);
     assert(snapshot.branch_sha === null || sha(snapshot.branch_sha), 'baseline branch SHA missing');
     assert(Number.isFinite(Date.parse(snapshot.captured_at)), 'snapshot time missing');
+    phase = 'remote';
     const baseline = snapshot.branch_sha ?? identity.base_sha;
-    const before = await runsAt(get, baseline);
+    const before = await runsAt(read, baseline);
     assert(before !== null, 'baseline ledger unavailable');
     const previous = before.filter(row => String(row.external_ref) === identity.run_id);
     assert(previous.length <= 1, 'ambiguous previous run identity');
     const prs = [];
     let complete = false;
     for (let page = 1; page <= 5; page++) {
-      const rows = await get('/pulls?state=all&base=main&head='
+      const rows = await read('/pulls?state=all&base=main&head='
         + encodeURIComponent(`${identity.repo.split('/')[0]}:${identity.branch}`)
         + `&sort=updated&direction=desc&per_page=100&page=${page}`);
       assert(Array.isArray(rows), 'PR inventory unavailable');
@@ -88,38 +96,47 @@ export async function verify(snapshot, identity, get) {
       if (rows.length < 100) { complete = true; break; }
     }
     assert(complete, 'PR inventory truncated');
-    let unreadable = false;
+    evidence.matching_pr_count = prs.length;
+    let unreadable = false, invalidOrStale = false;
     for (const listed of prs) {
       assert(Number.isInteger(listed?.number) && listed.number > 0, 'invalid PR inventory');
-      const pr = await get(`/pulls/${listed.number}`);
+      const pr = await read(`/pulls/${listed.number}`);
       assert(pr?.number === listed.number, 'PR disappeared during verification');
       if (pr.head?.ref !== identity.branch || pr.head.repo?.full_name !== identity.repo
         || pr.base?.ref !== 'main' || pr.base.repo?.full_name !== identity.repo
-        || (pr.state !== 'open' && !(pr.state === 'closed' && pr.merged === true))) continue;
+        || (pr.state !== 'open' && !(pr.state === 'closed' && pr.merged === true))) { invalidOrStale = true; continue; }
       assert(sha(pr.head.sha), 'PR head missing');
-      if (pr.head.sha === baseline) continue;
-      const after = await runsAt(get, pr.head.sha);
-      if (after === null) continue;
+      if (pr.head.sha === baseline) { invalidOrStale = true; continue; }
+      const after = await runsAt(read, pr.head.sha);
+      if (after === null) { invalidOrStale = true; continue; }
       const own = after.filter(row => String(row.external_ref) === identity.run_id);
+      // Count observations across inspected PR heads, not unique executions.
+      evidence.current_run_record_count = (evidence.current_run_record_count ?? 0) + own.length;
       if (own.length === 0) continue;
       assert.equal(own.length, 1, 'ambiguous current run identity');
       const row = own[0];
       if (row.route !== 'actions' || row.date_jst !== identity.day || validateRuns({ runs: [row] }).length
-        || (row.outcome === 'shipped' && row.pr !== pr.number)) continue;
+        || (row.outcome === 'shipped' && row.pr !== pr.number)) { invalidOrStale = true; continue; }
       // Merely opening an old branch, merging main, or reusing an old attempt's
       // identical record cannot turn previous work into this execution's output.
-      if (isDeepStrictEqual(previous[0], row)) continue;
-      if (pr.state === 'open' && await branchHead(get, identity.branch) !== pr.head.sha) {
-        unreadable = true; continue; // a concurrent update is not proof of absence
+      if (isDeepStrictEqual(previous[0], row)) { invalidOrStale = true; continue; }
+      if (pr.state === 'open') {
+        evidence.remote_head_sha = await branchHead(read, identity.branch);
+        if (evidence.remote_head_sha !== pr.head.sha) {
+          unreadable = true; continue; // a concurrent update is not proof of absence
+        }
       }
-      return { verdict: 'verified', disposition: pr.merged === true ? 'merged_pr' : 'pending_pr',
+      return { verdict: 'verified', reason_code: 'verified_current_run_record', evidence,
+        disposition: pr.merged === true ? 'merged_pr' : 'pending_pr',
         pr: pr.number, head_sha: pr.head.sha, run_id: row.run_id, external_ref: identity.run_id,
         run_outcome: row.outcome, production_verified: false,
         why: '開始前から変化したPR上の記録を今回の実行IDと照合した。本番反映・価値達成の証明ではない。' };
     }
-    return unreadable ? unknown('PRとブランチが照合中に更新された')
-      : missing('今回の実行IDに結びつく新しい結果記録を持つPRがない（宣言ブランチ・当日statusだけでは完了としない）');
-  } catch { return unknown('リモートの取得または実行証跡の照合を完了できなかった。成果物ゼロとは断定しない。'); }
+    return unreadable ? unknown('PRとブランチが照合中に更新された', 'unknown_concurrent_update', evidence)
+      : missing('今回の実行IDに結びつく新しい結果記録を持つPRがない（宣言ブランチ・当日statusだけでは完了としない）',
+        !prs.length ? 'no_matching_pr' : invalidOrStale ? 'invalid_or_stale_record' : 'no_current_run_record', evidence);
+  } catch { return unknown('リモートの取得または実行証跡の照合を完了できなかった。成果物ゼロとは断定しない。',
+    phase === 'snapshot' ? 'unknown_snapshot' : readFailed ? 'unknown_remote_read' : 'unknown_evidence', evidence); }
 }
 
 export function checkWiring(source) {
@@ -199,6 +216,31 @@ async function selftest() {
     const result = await check({ after: [normalized] });
     assert.equal(result.verdict, 'verified'); assert.equal(result.run_outcome, 'no_artifact');
   });
+  for (const [options, code] of [
+    [{ prs: [] }, 'no_matching_pr'],
+    [{ after: [] }, 'no_current_run_record'],
+    [{ after: [{ ...row, external_ref: '122' }] }, 'no_current_run_record'],
+    [{ after: [{ ...row, pr: 939 }] }, 'invalid_or_stale_record'],
+    [{ before: [row] }, 'invalid_or_stale_record'],
+    [{ after: null }, 'invalid_or_stale_record'],
+    [{ broken: '/pulls?' }, 'unknown_remote_read'],
+    [{ broken: '/contents' }, 'unknown_remote_read'],
+    [{ current: old }, 'unknown_concurrent_update'],
+    [{ after: [row, row] }, 'unknown_evidence'],
+  ]) await t('reason describes the actual failure without changing the verdict', async () => {
+    const result = await check(options);
+    assert.equal(result.reason_code, code);
+    assert.equal(result.verdict, code.startsWith('unknown_') ? 'unknown' : 'missing');
+  });
+  await t('no PR does not manufacture a zero record count or a remote head observation', async () => {
+    assert.deepEqual((await check({ prs: [] })).evidence,
+      { matching_pr_count: 0, current_run_record_count: null, remote_head_sha: null });
+  });
+  await t('actual inspected record and remote branch observations remain typed', async () => {
+    assert.deepEqual((await check()).evidence,
+      { matching_pr_count: 1, current_run_record_count: 1, remote_head_sha: head });
+    assert.equal((await verify({ ...snapshot, attempt: 2 }, identity, fixture())).reason_code, 'unknown_snapshot');
+  });
   const directory = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'output-receipt-test-')));
   try {
     const preload = path.join(directory, 'github-fixture.mjs'), snapshotFile = path.join(directory, 'before.json');
@@ -224,9 +266,11 @@ async function selftest() {
       const result = cli('--verify', 'verified'); assert.equal(result.status, 0, result.stderr);
       assert.equal(JSON.parse(result.stdout).production_verified, false);
       assert.match(fs.readFileSync(path.join(directory, 'step-output'), 'utf8'), /verdict=verified/);
+      assert.match(fs.readFileSync(path.join(directory, 'step-output'), 'utf8'), /reason_code=verified_current_run_record/);
     });
     for (const verdict of ['missing', 'unknown']) await t('real verifier CLI fails with its specific verdict', async () => {
       const result = cli('--verify', verdict); assert.equal(result.status, 1); assert.equal(JSON.parse(result.stdout).verdict, verdict);
+      assert.equal(JSON.parse(result.stdout).reason_code, verdict === 'missing' ? 'no_current_run_record' : 'unknown_remote_read');
     });
     await t('captured baseline is not silently overwritten', async () => assert.equal(cli('--capture', 'capture').status, 1));
   } finally { fs.rmSync(directory, { recursive: true, force: true }); }
@@ -246,10 +290,13 @@ async function main() {
     const get = githubReader(identity.repo, process.env.GH_TOKEN || process.env.GITHUB_TOKEN);
     result = mode === '--capture' ? await capture(identity, get)
       : await verify(JSON.parse(fs.readFileSync(filename, 'utf8')), identity, get);
-  } catch { result = unknown('開始前の証跡または今回の実行IDを確認できなかった'); }
+  } catch { result = unknown('開始前の証跡または今回の実行IDを確認できなかった', 'unknown_snapshot'); }
   if (mode === '--capture') fs.writeFileSync(filename, JSON.stringify(result, null, 2) + '\n', { mode: 0o600, flag: 'wx' });
   console.log(JSON.stringify(result, null, 2));
-  if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, `verdict=${result.verdict}\n`);
+  if (process.env.GITHUB_OUTPUT) {
+    const outputs = { verdict: result.verdict, reason_code: result.reason_code ?? '', ...result.evidence };
+    fs.appendFileSync(process.env.GITHUB_OUTPUT, Object.entries(outputs).map(([key, value]) => `${key}=${value ?? ''}\n`).join(''));
+  }
   if (mode === '--verify' && result.verdict !== 'verified') process.exitCode = 1;
 }
 if (import.meta.url === `file://${process.argv[1]}`) main().catch(error => { console.error(process.argv.includes('--selftest') ? error.stack : 'Output verification could not complete'); process.exitCode = 1; });

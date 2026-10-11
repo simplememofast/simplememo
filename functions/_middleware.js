@@ -111,7 +111,9 @@ const UNSERVED_DATA = new Set([
   "model-routing.json",
   "monitoring-coverage.json",
   "obsidian-feature-observation-20260911.json",
+  "one-release-local-quality.schema.json",
   "pr-claims.json",
+  "pr-release-ledger.json",
   "press-release-next.json",
   "prior-art.json",
   "publication-policy.json",
@@ -128,6 +130,7 @@ const UNSERVED_DATA = new Set([
   "signal-ledger.json",
   "site-constants.json",
   "spend-approvals.json",
+  "sql-query-definitions.json",
   "stop-drill-auto-merge-observation-20260909.json",
   "stop-drills.json",
   "vendor-operating-review.json",
@@ -164,7 +167,9 @@ function isBlockedDataPath(pathname) {
 // **Pages はリポジトリをそのまま配信するので、置いただけで公開される** ——
 // 追加した当日、`https://simplememofast.com/fixtures/engine-divergence.html` が 200 を返していた。
 // `noindex,nofollow` は索引だけを止める。配信を止めるのはここ。
-const INTERNAL_PREFIXES = ["/docs", "/scripts", "/tools", "/growth", "/fixtures"];
+// Translation catalogs are build inputs; browsers use generated HTML and
+// localized JS. They remain readable in the public repository.
+const INTERNAL_PREFIXES = ["/docs", "/scripts", "/tools", "/growth", "/fixtures", "/data/i18n"];
 
 // Referral/attribution params that carry no content meaning (step 1b).
 // Each one mints a distinct crawlable URL for the same page — GSC has
@@ -196,6 +201,7 @@ const RETIRED = {
   "/blog/memo-app-free-guide": "/blog/free-memo-apps-ranking",
   "/blog/memo-shuukan-tips": "/blog/memo-habit",
   "/devlog/captio-alternative": "/captio-alternative/",
+  "/en/blog/revenue-report-2025": "/en/blog/",
   "/en/blog/why-captio-died": "/en/captio-alternative/",
   "/privacy-policy": "/privacy",
   "/privacy-policy/": "/privacy",
@@ -354,6 +360,22 @@ export const onRequest = async (context) => {
 
   if (needsRedirect) {
     return Response.redirect(url.toString(), 301);
+  }
+
+  // Public raw JSON and CSV remain available to the site's readers and data
+  // consumers. Set noindex on the final response as well as in _headers:
+  // an unchanged CSV can retain a cached asset response with old headers.
+  if (
+    (pathname.startsWith("/data/") && pathname.endsWith(".json")) ||
+    (pathname.startsWith("/assets/downloads/") && pathname.endsWith(".csv"))
+  ) {
+    const asset = await context.next();
+    // A conditional request can return 304 with no body. It still needs the
+    // new directive so an older cached 200 does not hide the indexing policy.
+    if (!asset.ok && asset.status !== 304) return asset;
+    const response = new Response(asset.body, asset);
+    response.headers.set("X-Robots-Tag", "noindex");
+    return response;
   }
 
   return context.next();

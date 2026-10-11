@@ -22,7 +22,6 @@ import { bingView } from './company-bing.mjs';
 export const DEFAULT_STATE = path.join(os.homedir(), '.config/simplememo/company-os');
 const read = f => JSON.parse(fs.readFileSync(f, 'utf8'));
 const repoRead = f => read(path.join(ROOT, f));
-const ratio = (n, d) => d > 0 ? n / d : null;
 const jst = date => new Date(date.getTime() + 9 * 3600000).toISOString().slice(0, 10);
 
 export function privateState(directory = DEFAULT_STATE) {

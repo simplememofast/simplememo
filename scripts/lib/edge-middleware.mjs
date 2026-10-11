@@ -12,7 +12,10 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
-export const PASSTHROUGH = Symbol("passthrough");
+// A real Response lets source audits exercise middleware that adjusts headers
+// after context.next(), while this marker still identifies the synthetic asset.
+const PASSTHROUGH_HEADER = "X-Edge-Test-Passthrough";
+export const PASSTHROUGH = new Response(null, { headers: { [PASSTHROUGH_HEADER]: "1" } });
 
 export async function loadEdgeMiddleware(root = ROOT) {
   const src = readFileSync(path.join(root, "functions/_middleware.js"), "utf8");
@@ -33,7 +36,7 @@ export async function edgeResult(onRequest, absoluteUrl, origin) {
     request: new Request(absoluteUrl),
     next: async () => PASSTHROUGH,
   });
-  if (res === PASSTHROUGH) return { kind: "pass" };
+  if (res === PASSTHROUGH || res.headers.get(PASSTHROUGH_HEADER) === "1") return { kind: "pass" };
   if (res.status >= 300 && res.status < 400) {
     const loc = res.headers.get("location");
     return {

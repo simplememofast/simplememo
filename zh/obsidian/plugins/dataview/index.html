@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/plugins/dataview/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Dataview插件的使用方法 — 通过查询搜索保管库的入门【2026】 | SimpleMemo</title>
+  <meta name="description" content="Dataview的DQL・内联式・DataviewJS从官方规格开始解说。 整理LIST・TABLE・TASK・CALENDAR的输出格式和写法的差异。 下载数量以2026年8月的获取值表示，与现在的开发情况和实机动作分开说明。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Dataview插件的使用方法 — 通过查询搜索保管库的入门【2026】 | SimpleMemo">
+  <meta property="og:description" content="Dataview的DQL・内联式・DataviewJS从官方规格开始解说。 整理LIST・TABLE・TASK・CALENDAR的输出格式和写法的差异。 下载数量以2026年8月的获取值表示，与现在的开发情况和实机动作分开说明。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-22T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh/obsidian/plugins/dataview/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-plugins-dataview.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_CN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Dataview插件的使用方法 — 通过查询搜索保管库的入门【2026】">
+  <meta name="twitter:description" content="Dataview的DQL・内联式・DataviewJS从官方规格开始解说。 整理LIST・TABLE・TASK・CALENDAR的输出格式和写法的差异。 下载数量以2026年8月的获取值表示，与现在的开发情况和实机动作分开说明。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-plugins-dataview.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/plugins/dataview/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主页",
+      "item": "https://simplememofast.com/zh/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian合作",
+      "item": "https://simplememofast.com/zh/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "插件入门",
+      "item": "https://simplememofast.com/zh/obsidian/plugins/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "数据视图",
+      "item": "https://simplememofast.com/zh/obsidian/plugins/dataview/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh/obsidian/plugins/dataview/#article",
+  "inLanguage": "zh-Hans",
+  "headline": "Dataview插件的使用方法 — 通过查询搜索保管库的入门",
+  "description": "Dataview的DQL・内联式・DataviewJS从官方规格开始解说。 整理LIST・TABLE・TASK・CALENDAR的输出格式和写法的差异。 下载数量以2026年8月的获取值表示，与现在的开发情况和实机动作分开说明。",
+  "url": "https://simplememofast.com/zh/obsidian/plugins/dataview/",
+  "datePublished": "2026-08-22",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-plugins-dataview.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh/obsidian/plugins/dataview/"
+  }
+}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/zh/obsidian/plugins/dataview/#faq",
+  "inLanguage": "zh-Hans",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Dataview是做什么的插件？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "是能够像数据库一样搜索保管库（Vault）的插件。 笔记的frontmatter和内联字段中写的元数据，可以用DQL、内联式、DataviewJS、内联JS式4的写法来处理。 DQL的输出格式是LIST・TABLE・TASK・CALENDAR，与DataviewJS不相同的分类。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Dataview用了多久？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Obsidian官方下载数数据在2026年8月22日直接获取，4805635件，其中数据中3位（1位Excalidraw・2位Templater）。 另外，“注册插件6,840个”是注册表一览的件数，与计算排名的下载数数据是分开的文件。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Dataview现在还在开发吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "仅凭本页2026年8月22日的统计・版的获取记录，无法判断目前的开发情况。 统计的更新日期和时间与代码的更新日期不同。 请确认官方发布和变更记录，使用Obsidian的版本进行尝试。 在这次的更正中，没有安装现行版来确认动作。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Dataview的基本写法是什么？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "在笔记的frontmatter（YAML）或正文中以“字段名::值”的形式书写的内联字段添加元数据。 在那上面dataview在代码块上写显示形式和条件。 例如，LIST・TABLE可以显示笔记，TASK可以显示笔记内的任务。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "DataviewJS可以安全使用吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "根据官方README，DataviewJS与其他Obsidian插件的权限相同，因此可以改写、删除文件和进行网络通信。 建议只使用自己编写的代码或可靠的分发来源的脚本。 普通的DQL查询是沙盒化的，不能写入保管库。"
+      }
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh/obsidian/plugins/dataview/#webpage",
+  "inLanguage": "zh-Hans",
+  "name": "Dataview插件的使用方法 — 通过查询搜索保管库的入门【2026】 | SimpleMemo",
+  "url": "https://simplememofast.com/zh/obsidian/plugins/dataview/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh/#website"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;min-width:0}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em;word-break:normal;white-space:pre}
+
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:26%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/capture-next.css?v=4e62584640">
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full capture-next site-designed" data-design-family="refined">
+<a class="ce-skip" href="#main-content">跳到正文</a>
+  <!-- Global Navigation -->
+  <nav aria-label="主导航" class="global-nav" data-site-header="">
+<div class="global-nav__inner">
+<a class="global-nav__logo site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh/guides/">使用指南</a><a href="/zh/use-cases/">使用场景</a><a href="/zh/vs/">对比</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+<li><a href="/zh/guides/">使用指南</a></li>
+<li><a href="/zh/use-cases/">使用场景</a></li>
+<li><a href="/zh/vs/">对比</a></li>
+<li><a href="/zh/methods/"><span>方法</span></a></li>
+<li><a href="/zh/blog/"><span>博客</span></a></li>
+<li><a href="/zh/glossary/"><span>术语集</span></a></li>
+<li><a href="/zh/faq">常见问题</a></li>
+<li><a href="/zh/about/">关于开发者</a></li>
+<li><a href="/zh/devlog/">开发日志</a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="obsidian" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>下载</span></a></li>
+</ul>
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="简体中文 · 选择语言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>简中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hans" dir="ltr"><p class="site-language-title">选择语言</p><div class="site-language-grid"><a href="/obsidian/plugins/dataview/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/plugins/dataview/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hans" aria-current="page"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh-Hant/obsidian/plugins/dataview/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/plugins/dataview/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/plugins/dataview/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/plugins/dataview/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/plugins/dataview/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/plugins/dataview/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/plugins/dataview/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+<a class="global-nav__cta" data-cta-cluster="obsidian" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">下载</a>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="菜单"><span>菜单</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+</div>
+</div>
+</nav>
+
+<main class="page-content" id="main-content">
+<div class="container">
+<!-- Hero -->
+<div class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy">
+<div class="lp-hero__label">
+<span>Obsidian插件解说 — Dataview</span>
+</div>
+<h1 class="lp-hero__title"> <span>Dataview的使用方法 — 像数据库一样搜索保管库</span> </h1>
+<p class="lp-hero__sub"> <span>2026年8月22日的获取数据，Dataview是<a href="/zh/obsidian/plugins/">下载数3位</a>。 本页<strong>官方GitHub存储库的README和清单，直接获取官方下载数数据</strong>，只总结了能做什么、使用多少、4个查询的写法，在可以验证的范围内。 </span> </p>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;"> <span>作者: <a href="/zh/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> ・ 公开: <time datetime="2026-08-22">2026年8月22日</time> ・ 说明更正: <time datetime="2026-09-30">2026年9月30日</time>（统计值是8月22日的获取记录）</span> </p>
+<a class="ce-read-link" href="#capture-section-1">阅读正文 <span aria-hidden="true">↓</span></a></div><nav aria-label="从想读的内容中选择" class="ce-routes"><a class="ce-route" href="#capture-section-1"><span>01</span><b>能做的事情</b></a><a class="ce-route" href="#capture-section-3"><span>02</span><b>4个查询</b></a><a class="ce-route" href="#capture-section-4"><span>03</span><b>为了安全使用</b></a></nav><figure aria-hidden="true" class="ce-stage cn-concept"><p class="ce-stage-label">数据视图/四种模式</p><div class="cn-concept-list"><div class="cn-concept-row"><span>01</span><strong>列表</strong></div><div class="cn-concept-row"><span>02</span><strong>表格</strong></div><div class="cn-concept-row"><span>03</span><strong>任务</strong></div><div class="cn-concept-row"><span>04</span><strong>日历</strong></div></div><figcaption class="ce-stage-foot">比较观点的形象</figcaption></figure></div><div class="ce-article"><details class="ce-index"><summary>本页目录</summary><nav aria-label="目录"><a href="#capture-section-1">Dataview是做什么的插件？</a><a href="#capture-section-2">2026年8月22日的获取记录 — 下载数和发布</a><a href="#capture-section-3">4个查询模式 — 来自官方README的样本</a><a href="#capture-section-4">关于DataviewJS安全的注意事项</a><a href="#capture-section-5">在写查询之前，首先决定留下1行的地方</a><a href="#capture-section-6">常见问题</a><a href="#capture-section-7">相关页面</a></nav></details>
+<!-- Answer block (AIO) -->
+<section class="lp-section ce-chapter" data-answer-block="obsidian-dataview-what-is-it" style="padding-top:1rem;"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="01" id="capture-section-1"><span>Dataview是做什么的插件？ </span></h2></div><div class="ce-chapter__body">
+
+<div>
+<p><strong>是能够像数据库一样搜索保管库（Vault）的插件。 </strong>写在笔记的frontmatter和内联字段的元数据，可以用DQL・内联式・DataviewJS・内联JS式的4种书写方法处理。 DQL的输出格式是LIST・TABLE・TASK・CALENDAR，与DataviewJS不相同的分类。 官方下载数数据（2026年8月22日获取）中4805635件，3位居第（注册表的注册总数是6,840个，但排名是与此不同的文件下载数数据中的排名）。</p>
+<p>仅凭下载统计的更新日期，无法判断开发的继续、停止和当前动作。 下面的数值和版本是2026年8月22日的获取记录，不是当前值。</p>
+</div>
+</div></section>
+<!-- Measured: downloads, rank, release status -->
+<section class="lp-section ce-chapter ce-chapter--wide" id="measured"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="02" id="capture-section-2"> <span>2026年8月22日的获取记录 — 下载数和发布</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span>Obsidian官方的分发源（GitHub: <code>obsidianmd/obsidian-releases</code>）公开的<code>community-plugin-stats.json</code>和Dataview自己的存储库（GitHub: <code>blacksmithgu/obsidian-dataview</code>）的<code>manifest.json</code>，通过<code>raw.githubusercontent.com</code>直接从这个环境中获取。 </span> </p>
+<div aria-labelledby="capture-section-2" class="ce-table-scroll" role="region" tabindex="0">
+<table class="rt-table">
+<thead>
+<tr>
+<th scope="col"><span>项目</span></th>
+<th scope="col"><span>实际测量值</span></th>
+<th scope="col"><span>出处</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row"><span>下载数・排名</span></th>
+<td data-label="价值">4,805,635<span>（下载数数据中<strong>3位</strong>。 1位Excalidraw・2位Templater）</span></td>
+<td data-label="来源"><code>community-plugin-stats.json</code></td>
+</tr>
+<tr>
+<th scope="row"><span>注册表的插件总数</span></th>
+<td data-label="价值"><span>6,840件。 <strong>与排名母数不同的文件</strong>，下载数数据中的件数比这个略少（因为有统计中没有出现的插件）。 </span></td>
+<td data-label="来源"><code>community-plugins.json</code></td>
+</tr>
+<tr>
+<th scope="row"><span>与上次测量（2026-08-21）的差异</span></th>
+<td data-label="价值"><span>±0件。 但是，这在“24小时内1件也没有增加”的意思<strong>没有</strong>。 发送的JSON本身在2次获取期间没有重新生成，<a href="/zh/obsidian/plugins/">读取了与上一页</a>相同的快照，这是准确的阅读方法。 </span></td>
+<td data-label="来源"><code>community-plugin-stats.json</code></td>
+</tr>
+<tr>
+<th scope="row"><span>下载数数据的更新时间</span></th>
+<td data-label="价值">2025-04-07 19:17 UTC<span>（测量时约16个月前）</span></td>
+<td data-label="来源"><code>community-plugin-stats.json</code> <span>的</span><code>updated</code><span>字段</span></td>
+</tr>
+<tr>
+<th scope="row"><span>master分支的版本</span></th>
+<td data-label="价值">0.5.68<span>（minAppVersion 0.13.11・isDesktopOnly：false）</span></td>
+<td data-label="来源"><code>manifest.json</code></td>
+</tr>
+<tr>
+<th scope="row"><span>获取时的GitHub Releases最新标签</span></th>
+<td data-label="价值">0.5.70<span>（贝塔标注）</span></td>
+<td data-label="来源">github.com/blacksmithgu/obsidian-dataview/releases</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p> <span>当时获得的master版本是0.5.68，Releases的标签是0.5.70（测试版）。 仅凭统计文件的更新日期和时间和2个号码的差异，无法得出开发停止、稳定性、现在的兼容性。 现在的版本和变更内容请在<a href="https://github.com/blacksmithgu/obsidian-dataview/releases" rel="noopener" target="_blank">官方发布</a>中确认。 </span> </p>
+</div></section>
+<!-- Four query modes -->
+<section class="lp-section ce-chapter ce-chapter--wide" id="query-modes"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="03" id="capture-section-3"> <span>4个查询模式 — 来自官方README的样本</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span>官方README区分了DQL、内联式、DataviewJS、内联JS式4的写法。 DQL内的<a href="https://blacksmithgu.github.io/obsidian-dataview/queries/query-types/" rel="noopener" target="_blank">输出格式</a>是LIST（列表）、TABLE（表）、TASK（任务）、CALENDAR（日期日历）。 下面的README例子这次也没有在实机上执行。 </span> </p>
+<div class="reason-cards" style="grid-template-columns:1fr;">
+<div class="reason-card">
+<div class="reason-card__title">1. <span>DQL（数据视图查询语言）</span></div>
+<p class="reason-card__desc"><span>类似于SQL的专用记法。 适合基本用途。 </span></p>
+<pre class="note-sample" tabindex="0" aria-label="代码示例（可以横向滚动）"><code>```dataview
+TABLE file.name AS "File", rating AS "Rating" FROM #book
+```</code></pre>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">2. <span>内联式</span></div>
+<p class="reason-card__desc"><span>嵌入正文中，通过预览进行评价。 </span></p>
+<pre class="note-sample" tabindex="0" aria-label="代码示例（可以横向滚动）"><code>We are on page `= this.file.name`.</code></pre>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">3。 数据视图JS</div>
+<p class="reason-card__desc"><span>可以充分利用JavaScript API，最强大的模式。 </span></p>
+<pre class="note-sample" tabindex="0" aria-label="代码示例（可以横向滚动）"><code>```dataviewjs
+dv.taskList(dv.pages().file.tasks.where(t =&gt; !t.completed));
+```</code></pre>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">4. <span>内联JS式</span></div>
+<p class="reason-card__desc"><span>内联式JavaScript版。 可以当场执行任意的JS。 </span></p>
+<pre class="note-sample" tabindex="0" aria-label="代码示例（可以横向滚动）"><code>This page was last modified at `$= dv.current().file.mtime`.</code></pre>
+</div>
+</div>
+<p class="lp-section__lead" style="margin-top:1rem;"> <span>数据的输入方是2种。 笔记开头的YAML frontmatter（用<code>---</code>包围）或正文中写<code>フィールド名:: 値</code>的内联字段，两者都是Dataview读取并作为查询的对象。 从输入UI和保存YAML连接实际查询的例子，可以通过<a href="/zh/obsidian/properties/">属性变更，Dataview列表变更的实例</a>进行确认。 </span> </p>
+<pre class="note-sample" tabindex="0" aria-label="代码示例（可以横向滚动）"><code>---
+alias: "document"
+last-reviewed: 2021-08-17
+thoughts:
+  rating: 8
+  reviewable: false
+---</code></pre>
+<pre class="note-sample" tabindex="0" aria-label="代码示例（可以横向滚动）"><code>Basic Field:: Value
+**Bold Field**:: Nice!
+You can also write [field:: inline fields]; multiple [field2:: on the same line].</code></pre>
+</div></section>
+<!-- Security note -->
+<section class="lp-section ce-chapter" id="security"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="04" id="capture-section-4"> <span>关于DataviewJS安全的注意事项</span> </h2></div><div class="ce-chapter__body">
+
+<div class="tip-box">
+<div class="tip-box__title"><span>来自官方README</span></div>
+<p style="margin:0;"><span>DataviewJS功能强大，与其他Obsidian插件具有相同的权限。 也就是说，也可以改写、制作、删除文件，也可以进行网络通信。 <strong>官方推荐使用自己编写的代码或理解内容、可靠的分发来源的脚本</strong>。 另一方面，普通的Dataview查询（DQL）是沙盒化的，不能对存储库进行更改（因此能做的事情有限）。 </span></p>
+</div>
+</div></section>
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="05" id="capture-section-5"> <span>在写查询之前，首先决定留下1行的地方</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span>Dataview搜索、统计保管库中的笔记和元数据。 从SimpleMemo留下输入的备忘录时，打开连接，设置可以访问的文件夹和保存地址，确认写入测试。 可以选择日期笔记或固定的Inbox。 请分别确认邮件的到达和笔记的保存，与自动生成Dataview用的字段的功能区分开来。 </span> </p>
+<div class="cta-box">
+<div class="cta-box__title"><span>首先制作成为查询对象的1行</span></div>
+<p class="cta-box__desc"><span>确认输入的备忘录的保存地址和配合条件后才能使用。 下载是免费的。 </span></p>
+<a aria-label="从App Store下载" class="app-store-badge" data-cta-cluster="obsidian" data-cta-placement="mid" data-cta-position="mid" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"> <img alt="从App Store下载" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="109"/> </a>
+<div class="cta-qr">
+<img alt="App Store下载二维码" height="132" loading="lazy" src="/assets/img/qr-obsidian-plugins-dataview-ja.svg?v=3b79301257" width="132"/>
+<small><span>PC用户用智能手机读取</span></small>
+</div>
+</div>
+</div></section>
+<!-- FAQ -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="06" id="capture-section-6"> <span>常见问题</span> </h2></div><div class="ce-chapter__body">
+
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span>Dataview是做什么的插件？ </span></summary>
+<div class="faq-answer"><span>是能够像数据库一样搜索保管库（Vault）的插件。 笔记的frontmatter和内联字段中写的元数据，可以用DQL、内联式、DataviewJS、内联JS式4的写法来处理。 DQL的输出格式是LIST・TABLE・TASK・CALENDAR，与DataviewJS不相同的分类。</span></div>
+</details>
+</div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span>Dataview用了多久？ </span></summary>
+<div class="faq-answer"><span>Obsidian官方下载数数据在2026年8月22日直接获取，4805635件，其中数据中<strong>3位</strong>（1位Excalidraw・2位Templater）。 另外，“注册插件6,840个”是注册表一览的件数，与计算排名的下载数数据是分开的文件。</span></div>
+</details>
+</div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span>Dataview现在还在开发吗？ </span></summary>
+<div class="faq-answer"><span>仅凭本页2026年8月22日的统计・版的获取记录，无法判断目前的开发情况。 统计的更新日期和时间与代码的更新日期不同。 请确认官方发布和变更记录，使用Obsidian的版本进行尝试。 在这次的更正中，没有安装现行版来确认动作。</span></div>
+</details>
+</div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span>Dataview的基本写法是什么？ </span></summary>
+<div class="faq-answer"><span>在笔记的frontmatter（YAML）或正文中以“字段名::值”的形式书写的内联字段添加元数据。 在那上面<code>dataview</code>在代码块上写显示形式和条件。 例如，LIST・TABLE可以显示笔记，TASK可以显示笔记内的任务。</span></div>
+</details>
+</div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span>DataviewJS可以安全使用吗？ </span></summary>
+<div class="faq-answer"><span>根据官方README，DataviewJS与其他Obsidian插件的权限相同，因此可以改写、删除文件和进行网络通信。 建议只使用自己编写的代码或可靠的分发来源的脚本。 普通的DQL查询是沙盒化的，不能写入保管库。</span></div>
+</details>
+</div>
+</div></section>
+<!-- Verification environment (§28) -->
+<section class="lp-section" style="padding-top:1rem;">
+<div class="tip-box" style="background:rgba(100,180,255,.05);border-color:rgba(100,180,255,.18);">
+<div class="tip-box__title"><span>验证环境和验证范围</span></div>
+<p style="margin:0;"><span>2026年9月30日重新阅读了官方README和Query Types的说明，更正了写法和输出格式的分类。 下载数、注册数、当时的版本保留了2026年8月22日的获取记录，这次没有重新获取。 Dataview的安装、查询执行、现行版的兼容性、SimpleMemo的输入和其他终端同步不包含在本次的实机验证中。 </span></p>
+</div>
+</section>
+<!-- Internal Links -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="07" id="capture-section-7"> <span>相关页面</span> </h2></div><div class="ce-chapter__body">
+
+<div class="internal-links">
+<a href="/zh/obsidian/plugins/"><span>插件入门（从6,812个开始实测顶部10）</span></a>
+<a href="/zh/obsidian/what-is-vault/"><span>保管库（Vault）是指（实测）</span></a>
+<a href="/zh/obsidian/getting-started/"><span>Obsidian的开始方法（实际画面指南）</span></a>
+<a href="/zh/obsidian/"><span>Obsidian合作详情</span></a>
+<a href="/zh/glossary/"><span>术语集</span></a>
+<a href="/zh/faq"><span>常见问题</span></a>
+</div>
+</div></section>
+</div></div>
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+<div class="container">
+<h2 style="font-size:1.1rem;margin-bottom:1rem;"> <span>参考文献・数据的来源</span> </h2>
+<ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+<li><a href="https://github.com/blacksmithgu/obsidian-dataview" rel="noopener" style="color:var(--accent);" target="_blank">blacksmithgu/obsidian-dataview（GitHub）</a> — <span>Dataview官方存储库。 README.md・manifest.json通过<code>raw.githubusercontent.com</code>直接获取2026-08-22</span></li>
+<li><a href="https://github.com/obsidianmd/obsidian-releases" rel="noopener" style="color:var(--accent);" target="_blank">obsidianmd/obsidian-releases（GitHub）</a> — <span>Obsidian官方的发行来源。 <code>community-plugin-stats.json</code>（下载数）・<code>community-plugins.json</code>（注册一览・6,840件）直接获取2026-08-22</span></li>
+<li><a href="/zh/obsidian/plugins/" style="color:var(--accent);">Obsidian插件入门（本网站）</a> — <span>插件总数6,812个（2026-08-21实测）・首页10排名的原页</span></li>
+<li><a data-cta-cluster="obsidian" data-cta-placement="bottom" data-cta-position="bottom" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" rel="noopener" style="color:var(--accent);" target="_blank">SimpleMemo — App Store</a> — <span>App Store的下载页面</span></li>
+</ul>
+<p style="font-size:.8rem;color:var(--text-muted);margin-top:1rem;line-height:1.7;"><span>Obsidian是Dynalist Inc. 的商标。 本网站是与Obsidian项目没有合作关系的独立媒体，SimpleMemo是YURIKA, K.K.开发的独立应用程序。 Dataview是blacksmithgu先生（Michael Brenan）开发的第三方插件，本网站不保证、推荐该开发者、权利人。 </span></p>
+</div>
+</section>
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1. -->
+<aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="explore" href="/zh/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>接下来阅读</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>通过Obsidian合作，创建保存备忘录的地方</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>在iPhone中设置合作和保存地址，发送的备忘录也可以留在Obsidian中。 </span> </span> </a>
+</aside>
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+<div class="container">
+<h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>相关内容</span> </h3>
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/zh/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>备忘录应用程序比较一览</span></a></li>
+<li><a href="/zh/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>方法一览</span></a></li>
+<li><a href="/zh/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>博客文章一览</span></a></li>
+<li><a href="/zh/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>常见问题</span></a></li>
+</ul>
+</div>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hans" dir="ltr"><a class="site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">记下一点想法，迈出下一步。</p><p class="site-footer-description">从 iPhone 向 Obsidian 和电子邮件发送笔记。</p></div></div><!-- /site-chrome:intro -->
+<div class="container">
+<nav aria-label="页脚导航" class="footer__nav">
+<div class="footer__col">
+<p class="footer__col-title">产品</p>
+<a class="footer__link" href="/zh/download/">下载</a>
+<a class="footer__link" href="/zh/">首页</a>
+<a class="footer__link" href="/zh/apple-watch/">Apple Watch</a>
+<a class="footer__link" href="/zh/obsidian/">Obsidian 集成</a>
+<a class="footer__link" href="/zh/use-cases/">使用场景</a>
+<a class="footer__link" href="/zh/guides/">使用指南</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">比较与迁移</p>
+<a class="footer__link" href="/zh/note-to-email/">将笔记发送到邮箱</a>
+<a class="footer__link" href="/zh/vs/">对比</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">支持</p>
+<a class="footer__link" href="/zh/roadmap/">公开路线图</a>
+<a class="footer__link" href="/zh/devlog/">开发日志</a>
+<a class="footer__link" href="/zh/about/">关于开发者</a>
+<a class="footer__link" href="/zh/faq">常见问题</a>
+<a class="footer__link" href="/zh/privacy">隐私</a>
+<a class="footer__link" href="/zh/contact">联系我们</a>
+</div>
+</nav>
+<p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 运营：YURIKA, K.K.</p>
+</div>
+</footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

@@ -363,6 +363,9 @@ jobs:
           label="$(date -u +%Y-%m-%d)"
           echo "label=$label" >> "$GITHUB_OUTPUT"
           node growth/scripts/ingest-bigquery.mjs --days 28 --label "$label"
+          # Remove only existing intent exceptions whose observed impressions
+          # fell below the unchanged threshold. New/missing pages still need review.
+          node growth/scripts/intent-axes.mjs --write
           # The new snapshot also changes the existing refresh queue. Retain
           # that derived output in the same PR so generator parity can pass.
           node growth/scripts/build-queues.mjs --write
@@ -387,9 +390,9 @@ jobs:
             // data/corporate-obligations.json は上の RDAP ステップが --write で書く。
             // **書く動作を誰も動かしていない状態を作らない**（data/generators.json の規律）。
             // 期限は年1回しか動かないので、週次のこの回で拾えば足りる。
-            sh('git add growth/data growth/reports growth/content/refresh-queue.json data/corporate-obligations.json');
+            sh('git add growth/data growth/reports growth/content/refresh-queue.json data/corporate-obligations.json data/relevance-undecided.json');
 
-            if (!sh('git status --porcelain -- growth/data growth/reports growth/content/refresh-queue.json data/corporate-obligations.json')) {
+            if (!sh('git status --porcelain -- growth/data growth/reports growth/content/refresh-queue.json data/corporate-obligations.json data/relevance-undecided.json')) {
               core.notice('スナップショットに差分が無いため何もしない');
               return;
             }

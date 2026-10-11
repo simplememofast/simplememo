@@ -8,22 +8,22 @@
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- Google tag (gtag.js) - deferred for LCP -->
   <script>
-    window.addEventListener('load', function() {
+    (function() {
       if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
-      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
-      ric(function() {
-        var sc = document.createElement('script');
-        sc.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
-        sc.async = true;
-        document.head.appendChild(sc);
-        sc.onload = function() {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-EPZVZKCVQG', {page_language: 'en'});
-        };
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: 'en'});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
       });
-    });
+    })();
   </script>
   <title>Fleeting Notes: How to Write and Process Them (Zettelkasten)</title>
   <meta name="description" content="Fleeting notes explained: their role in Zettelkasten, how to write them, the 3 rules that make them work, and a flow to process them within 24-48 hours.">
@@ -60,11 +60,19 @@
   <link rel="canonical" href="https://simplememofast.com/en/blog/fleeting-notes">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/fleeting-notes">
   <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/fleeting-notes">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/fleeting-notes">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/fleeting-notes">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/fleeting-notes">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/fleeting-notes">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/fleeting-notes">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/fleeting-notes">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/fleeting-notes">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/fleeting-notes">
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/fleeting-notes">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","inLanguage":"en","headline":"Fleeting Notes: How to Write and Process Them (Zettelkasten)","description":"Fleeting notes explained: their role in Zettelkasten, how to write them, the 3 rules that make them work, and a flow to process them within 24-48 hours.","image":"https://simplememofast.com/assets/img/og/en-blog-fleeting-notes.png","url":"https://simplememofast.com/en/blog/fleeting-notes","datePublished":"2026-07-10","dateModified":"2026-07-10","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Simple Memo - for Obsidian","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"keywords":"fleeting notes, Zettelkasten, permanent notes, literature notes, note-taking, capture, inbox, How to Take Smart Notes"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","inLanguage":"en","headline":"Fleeting Notes: How to Write and Process Them (Zettelkasten)","description":"Fleeting notes explained: their role in Zettelkasten, how to write them, the 3 rules that make them work, and a flow to process them within 24-48 hours.","image":"https://simplememofast.com/assets/img/og/en-blog-fleeting-notes.png","url":"https://simplememofast.com/en/blog/fleeting-notes","datePublished":"2026-07-10","dateModified":"2026-10-03","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Simple Memo - for Obsidian","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"keywords":"fleeting notes, Zettelkasten, permanent notes, literature notes, note-taking, capture, inbox, How to Take Smart Notes"}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/en/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://simplememofast.com/en/blog/"},{"@type":"ListItem","position":3,"name":"Fleeting Notes: How to Write and Process Them","item":"https://simplememofast.com/en/blog/fleeting-notes"}]}</script>
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/blog/fleeting-notes#webpage","inLanguage":"en","name":"Fleeting Notes: How to Write and Process Them (Zettelkasten)","isPartOf":{"@id":"https://simplememofast.com/en/#website"},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".page-content__title",".page-content__body p:first-of-type"]},"url":"https://simplememofast.com/en/blog/fleeting-notes"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/blog/fleeting-notes#webpage","inLanguage":"en","name":"Fleeting Notes: How to Write and Process Them (Zettelkasten)","isPartOf":{"@id":"https://simplememofast.com/en/#website"},"url":"https://simplememofast.com/en/blog/fleeting-notes"}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Are fleeting notes meant to be deleted?","acceptedAnswer":{"@type":"Answer","text":"Yes. Once a note has been processed — turned into a permanent note or judged unneeded — you throw it away. Being disposable is exactly what makes them effortless to write."}},{"@type":"Question","name":"How are fleeting notes different from a daily note?","acceptedAnswer":{"@type":"Answer","text":"A daily note is a place for the day’s record; a fleeting note is a thought waiting to be processed. They combine well: many people use the daily note as the inbox where fleeting notes collect."}},{"@type":"Question","name":"What should I write fleeting notes in?","acceptedAnswer":{"@type":"Answer","text":"Anything that lets you start writing within about three seconds and collects everything in one place. Paper, the stock notes app, or an email-based capture app are the usual picks. The one real mistake is scattering them across tools."}},{"@type":"Question","name":"What is the difference from literature notes?","acceptedAnswer":{"@type":"Answer","text":"Literature notes summarize something you read, in your own words, kept long-term with the source. Fleeting notes are quick scribbles of your own passing thoughts, discarded after processing."}}]}</script>
 
   <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
@@ -235,41 +243,44 @@
 </style>
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
-<nav class="global-nav" aria-label="Main navigation">
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="Main navigation" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/en/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager">
-        Simple Memo - for Obsidian
-      </a>
-      <ul class="global-nav__links" id="navLinks">
+      <a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/">Guides</a><a href="/en/use-cases/">Use cases</a><a href="/en/vs/">Compare</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
         <li><a href="/en/guides/">Guides</a></li>
-        <li><a href="/en/use-cases/">Use Cases</a></li>
+        <li><a href="/en/use-cases/">Use cases</a></li>
         <li><a href="/en/vs/">Compare</a></li>
         <li><a href="/en/methods/">Methods</a></li>
         <li><a href="/en/blog/">Blog</a></li>
         <li><a href="/en/glossary/">Glossary</a></li>
         <li><a href="/en/faq">FAQ</a></li>
-        <li><a href="/en/about/">About</a></li>
-        <li><a href="/en/devlog/">Dev Log</a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8">Download</a></li>
+        <li><a href="/en/about/">About the developer</a></li>
+        <li><a href="/en/devlog/">Development log</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">Download</a></li>
       </ul>
-      <div class="global-nav__actions">
-        <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8" class="global-nav__cta">
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="English · Choose a language"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>EN</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="en" dir="ltr"><p class="site-language-title">Choose a language</p><div class="site-language-grid"><a href="/blog/fleeting-notes" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="en" aria-current="page"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh/blog/fleeting-notes" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/blog/fleeting-notes" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/fleeting-notes" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/blog/fleeting-notes" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/fleeting-notes" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/fleeting-notes" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/fleeting-notes" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/fleeting-notes" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
           Download
         </a>
-        <button class="global-nav__hamburger" aria-label="Menu" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">&#9776;</button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
   </nav>
 <main class="page-content">
     <div class="container">
 
-      <h1 class="page-content__title">Fleeting Notes: How to Write and Process Them</h1>
+      <h1 class="page-content__title sd-title">Fleeting Notes: How to Write and Process Them</h1>
 
       <p class="article-meta">
-        By <a href="/en/about/">AI ATAKA</a> &middot; Updated: July 10, 2026 &middot; Reading time: ~7 minutes
+        By <a href="/en/about/">AI ATAKA</a> &middot; Updated: October 3, 2026 &middot; Reading time: ~7 minutes
       </p>
 
       <div class="page-content__body article-body">
@@ -278,11 +289,11 @@
           <strong>Short answer.</strong> Fleeting notes are the Zettelkasten term for <strong>quick scribbles you fully intend to process later</strong>. Three rules make them work: <strong>(1) capture the moment you think it — zero friction, (2) collect everything in one inbox, (3) process within 24-48 hours, then throw the note away</strong>. They do not need to be well written. They need to exist before the thought evaporates.
         </div>
 
-        <h2>What fleeting notes are (and where they sit in Zettelkasten)</h2>
+        <h2 id="reading-01" data-ce-number="01">What fleeting notes are (and where they sit in Zettelkasten)</h2>
         <p>In <em>How to Take Smart Notes</em>, S&ouml;nke Ahrens describes the note-taking system of sociologist Niklas Luhmann — the <a href="/en/methods/zettelkasten/">Zettelkasten</a> — and splits notes into three kinds: <strong>fleeting notes, literature notes, and permanent notes</strong>. Fleeting notes are not where knowledge lives; they are <strong>a temporary net so a passing thought doesn’t get away</strong> (the <a href="https://zettelkasten.de/introduction/" target="_blank" rel="noopener">zettelkasten.de introduction</a> is a good primer).</p>
 
-        <h2>The three note types, side by side</h2>
-        <div style="overflow-x:auto">
+        <h2 id="reading-02" data-ce-number="02">The three note types, side by side</h2>
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Scrollable table">
           <table>
           <tr><th scope="col">Type</th><th scope="col">Job</th><th scope="col">Lifespan</th><th scope="col">Writing bar</th></tr>
           <tr><th scope="row">Fleeting notes</th><td>Catch passing thoughts</td><td>Until processed (1-2 days)</td><td>A scribble is fine</td></tr>
@@ -291,14 +302,14 @@
         </table>
         </div>
 
-        <h2>How to write one (real examples, no perfectionism)</h2>
+        <h2 id="reading-03" data-ce-number="03">How to write one (real examples, no perfectionism)</h2>
         <p>There is no correct format. The bar is "future me can reconstruct this." Examples:</p>
-        <pre><code>- Pricing page FAQ: reordering might cut drop-off?
+        <pre tabindex="0"><code>- Pricing page FAQ: reordering might cut drop-off?
 - "Habits are environment design" - walk-home thought, find source
 - Weakness of plan A: first-launch explainer too long</code></pre>
         <p>Three habits help: <strong>add one word of context</strong> ("plan A," "pricing page"), <strong>use your own phrasing</strong> rather than quoting, and keep to <strong>one thought per note</strong> so sorting stays easy.</p>
 
-        <h2>The 3 rules that make fleeting notes work</h2>
+        <h2 id="reading-04" data-ce-number="04">The 3 rules that make fleeting notes work</h2>
         <h3>Rule 1: Zero-friction capture</h3>
         <p>A slow-launching tool kills the thought all by itself. Aim to be writing <strong>within about three seconds</strong> — a card in your pocket or an app you can reach instantly both qualify.</p>
         <h3>Rule 2: One inbox only</h3>
@@ -306,7 +317,7 @@
         <h3>Rule 3: Process within 24-48 hours</h3>
         <p>Ahrens recommends processing within a day or two. Wait longer and "what did I mean by this?" piles up until the inbox is just a junk drawer. Processing means <strong>deciding</strong>: develop it into a permanent note, convert it to a task, or delete it.</p>
 
-        <h2>The processing flow: inbox &rarr; evaluate &rarr; promote or discard</h2>
+        <h2 id="reading-05" data-ce-number="05">The processing flow: inbox &rarr; evaluate &rarr; promote or discard</h2>
         <ol>
           <li>Open your inbox once a day.</li>
           <li>For each note ask: "Is this raw material for my own thinking?"</li>
@@ -316,15 +327,15 @@
         </ol>
         <p>Most fleeting notes should die here — and that is the system working, not failing. Permission to discard is what keeps capture effortless.</p>
 
-        <h2>Choosing a capture tool: paper, stock notes, or email-based</h2>
+        <h2 id="reading-06" data-ce-number="06">Choosing a capture tool: paper, stock notes, or email-based</h2>
         <ul>
           <li><strong>Paper / index cards</strong> — fastest pen-to-idea, but everything must be re-typed into your digital notes later</li>
           <li><strong>Stock notes app</strong> — easy, but unprocessed scraps sink between other notes with no pressure to deal with them</li>
           <li><strong>Email-based capture</strong> — every note lands in your inbox, which doubles as a processing queue you cannot ignore</li>
         </ul>
-        <p>An example of the email-based route is <a href="/en/obsidian/">Simple Memo - for Obsidian</a>: it launches in 0.4 seconds, takes typed or <a href="/en/blog/obsidian-voice-input">dictated</a> input, and one tap sends the note to your inbox while auto-appending it to an Inbox note in your iCloud Drive vault — feeding <strong>the exact Obsidian workflow where permanent notes get written</strong>. For the full menu of capture routes, see <a href="/en/blog/obsidian-iphone-memo">6 ways to capture notes in Obsidian from iPhone</a>.</p>
+        <p>An example of the email-based route is <a href="/en/obsidian/">Simple Memo - for Obsidian</a>: it launches in 0.4 seconds (warm launch, iPhone 16e), takes typed or <a href="/en/blog/obsidian-voice-input">dictated</a> input, and one tap sends the note to your inbox and, with the Obsidian integration set up, also appends it to an Inbox note in your vault — feeding <strong>the exact Obsidian workflow where permanent notes get written</strong>. For the full menu of capture routes, see <a href="/en/blog/obsidian-iphone-memo">6 ways to capture notes in Obsidian from iPhone</a>.</p>
 
-        <h2>FAQ</h2>
+        <h2 id="reading-07" data-ce-number="07">FAQ</h2>
         <p><strong>Are fleeting notes meant to be deleted?</strong><br>Yes. Once a note has been processed — turned into a permanent note or judged unneeded — you throw it away. Being disposable is exactly what makes them effortless to write.</p>
         <p><strong>How are fleeting notes different from a daily note?</strong><br>A daily note is a place for the day’s record; a fleeting note is a thought waiting to be processed. They combine well: many people use the daily note as the inbox where fleeting notes collect.</p>
         <p><strong>What should I write fleeting notes in?</strong><br>Anything that lets you start writing within about three seconds and collects everything in one place. Paper, the stock notes app, or an email-based capture app are the usual picks. The one real mistake is scattering them across tools.</p>
@@ -354,7 +365,7 @@
   </main>
 
 
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
@@ -362,39 +373,35 @@
         <a href="/en/download/" class="footer__link">Download</a>
         <a href="/en/" class="footer__link">Home</a>
         <a href="/en/send-email-to-yourself/" class="footer__link">Email Yourself Apps</a>
-        <a href="/en/use-cases/" class="footer__link">Use Cases</a>
+        <a href="/en/use-cases/" class="footer__link">Use cases</a>
         <a href="/en/guides/" class="footer__link">Guides</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">Compare & Switch</p>
         <a href="/en/captio-alternative/" class="footer__link">Captio Alternative</a>
-        <a href="/en/note-to-email/" class="footer__link">Note to Email</a>
-        <a href="/en/vs/" class="footer__link">Comparisons</a>
+        <a href="/en/note-to-email/" class="footer__link">Notes to email</a>
+        <a href="/en/vs/" class="footer__link">Compare</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">Read</p>
-        <a href="/en/about/" class="footer__link">About</a>
+        <a href="/en/about/" class="footer__link">About the developer</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">Support</p>
         <a href="/en/roadmap/" class="footer__link">Public roadmap</a>
-        <a href="/en/devlog/" class="footer__link">Dev log</a>
+        <a href="/en/devlog/" class="footer__link">Development log</a>
         <a href="/en/faq" class="footer__link">FAQ</a>
         <a href="/en/privacy" class="footer__link">Privacy</a>
         <a href="/en/contact" class="footer__link">Contact</a>
       </div>
       </nav>
       <p class="footer__copyright">
-        © 2026 Simple Memo - for Obsidian / Yurika Inc.
+        © 2026 Simple Memo - for Obsidian / YURIKA, K.K.
       </p>
     </div>
   </footer>
 
-  <script>
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

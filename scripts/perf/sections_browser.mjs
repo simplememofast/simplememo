@@ -103,7 +103,11 @@ async function measurePage(url,label,c){
   await page.goto(url+'/en/',{waitUntil:'networkidle'});await wait(300);
   for(const section of await page.locator('main > section').all()){await section.scrollIntoViewIfNeeded();await wait(150);}
   stage('english-fonts');await waitForFonts(page);
-  await page.reload({waitUntil:'networkidle'});await wait(500);
+  // font-display:optional can keep the first navigation on fallback metrics in
+  // Firefox even after the font request finishes. Compare both checkouts after
+  // two warmed navigations, while retaining the same geometry assertions.
+  await page.reload({waitUntil:'networkidle'});await waitForFonts(page);
+  await page.reload({waitUntil:'networkidle'});await waitForFonts(page);await wait(500);
   const enHeights=[];
   for(const section of await page.locator('main > section').all()){
    await section.scrollIntoViewIfNeeded();await wait(200);

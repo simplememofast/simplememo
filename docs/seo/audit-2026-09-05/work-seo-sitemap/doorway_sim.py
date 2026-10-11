@@ -3,7 +3,7 @@
 import re, itertools
 from pathlib import Path
 from html.parser import HTMLParser
-S = Path('/private/tmp/claude-501/-Users-hajimeataka-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad')
+S = Path('/private/tmp/claude-501/-Users-<user>-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad')
 P = S/'crawl/pages'
 class Vis(HTMLParser):
     def __init__(s): super().__init__(); s.out=[]; s.skip=0; s.stack=[]

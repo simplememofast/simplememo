@@ -6,30 +6,30 @@
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
   <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/vs/moca/">
   <script>
-    window.addEventListener('load', function() {
+    (function() {
       if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
-      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
-      ric(function() {
-        var s = document.createElement('script');
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
-        s.async = true;
-        document.head.appendChild(s);
-        s.onload = function() {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
-        };
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
       });
-    });
+    })();
   </script>
   <title>Mocaとの比較 — Obsidian連携シンプルメモ | 自分にメール メモ帳アプリ比較</title>
-  <meta name="description" content="Moca（自分にメールを送るメモ帳）とObsidian連携シンプルメモの違いを徹底比較。暗号化・オフライン対応・送信速度・セキュリティの観点で解説。Mocaが向く人・シンプルメモが向く人の結論と、併用パターンも比較表つきで紹介します。">
+  <meta name="description" content="Moca（自分にメールを送るメモ帳）とObsidian連携シンプルメモの違いを徹底比較。暗号化・オフライン対応・セキュリティの観点で解説（起動の速さはシンプルメモだけを計測）。Mocaが向く人・シンプルメモが向く人の結論と、併用パターンも比較表つきで紹介します。">
   <meta name="theme-color" content="#070b14">
 
   <!-- OGP -->
   <meta property="og:title" content="シンプルメモ vs Moca — 自分にメールするメモアプリ徹底比較">
-  <meta property="og:description" content="Moca（自分にメールを送るメモ帳）とObsidian連携シンプルメモの違いを徹底比較。暗号化・オフライン対応・送信速度の観点で解説。">
+  <meta property="og:description" content="Moca（自分にメールを送るメモ帳）とObsidian連携シンプルメモの違いを徹底比較。暗号化・オフライン対応の観点で解説（起動の速さはシンプルメモだけを計測）。">
   <meta property="og:type" content="article">
   <meta property="article:published_time" content="2026-03-06T00:00:00+09:00">
   <meta property="og:url" content="https://simplememofast.com/vs/moca/">
@@ -44,13 +44,21 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@simplememofast">
   <meta name="twitter:title" content="シンプルメモ vs Moca — 自分にメールするメモアプリ徹底比較">
-  <meta name="twitter:description" content="Moca（自分にメールを送るメモ帳）とObsidian連携シンプルメモの違いを徹底比較。暗号化・オフライン対応・送信速度の観点で解説。">
+  <meta name="twitter:description" content="Moca（自分にメールを送るメモ帳）とObsidian連携シンプルメモの違いを徹底比較。暗号化・オフライン対応の観点で解説（起動の速さはシンプルメモだけを計測）。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/vs-moca.png">
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/vs/moca/">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/vs/moca/">
   <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/vs/moca/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/vs/moca/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/vs/moca/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/vs/moca/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/vs/moca/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/vs/moca/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/vs/moca/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/vs/moca/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/vs/moca/">
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/vs/moca/">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -60,13 +68,13 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- JSON-LD: Article -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/vs/moca/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/vs-moca.png","headline":"シンプルメモ vs Moca — 自分にメールするメモアプリ徹底比較","description":"Moca（自分にメールを送るメモ帳）とObsidian連携シンプルメモの違いを徹底比較。暗号化・オフライン対応・送信速度の観点で解説。","url":"https://simplememofast.com/vs/moca/","datePublished":"2026-03-06","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/vs/moca/"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/vs/moca/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/vs-moca.png","headline":"シンプルメモ vs Moca — 自分にメールするメモアプリ徹底比較","description":"Moca（自分にメールを送るメモ帳）とObsidian連携シンプルメモの違いを徹底比較。暗号化・オフライン対応の観点で解説（起動の速さはシンプルメモだけを計測）。","url":"https://simplememofast.com/vs/moca/","datePublished":"2026-03-06","dateModified":"2026-10-04","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/vs/moca/"}}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"メモアプリ比較","item":"https://simplememofast.com/vs/"},{"@type":"ListItem","position":3,"name":"vs Moca","item":"https://simplememofast.com/vs/moca/"}]}</script>
 
   <!-- JSON-LD: Speakable -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/vs/moca/#webpage","inLanguage":"ja","name":"シンプルメモ vs Moca 比較","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub"]},"url":"https://simplememofast.com/vs/moca/","isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/vs/moca/#webpage","inLanguage":"ja","name":"シンプルメモ vs Moca 比較","url":"https://simplememofast.com/vs/moca/","isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
 
   <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
@@ -256,31 +264,36 @@
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/moca/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Mocaのメモはメール受信箱に届きますか？","acceptedAnswer":{"@type":"Answer","text":"Mocaは「自分にメールを送る」コンセプトですが、メモの保存先はアプリ内が中心です。シンプルメモはメール受信箱に直接届くため、メールの検索やクロスデバイスアクセスが可能です。"}},{"@type":"Question","name":"Mocaの端末を変更したらメモは引き継げますか？","acceptedAnswer":{"@type":"Answer","text":"Mocaはアプリ内保存のため、機種変更時にデータが引き継げない場合があります。シンプルメモで送ったメモはメール受信箱に残っているため、端末を変えても過去のメモに常にアクセスできます。"}},{"@type":"Question","name":"Mocaの編集・削除がないという設計思想はシンプルメモにもありますか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモも送信に特化していますが、Outbox内の未送信メモは確認・管理が可能です。Mocaの「書いたら送る、余計な機能はいらない」という思想を共有しつつ、AES-GCM暗号化とオフライン対応を追加しています。"}},{"@type":"Question","name":"Mocaからシンプルメモに移行する手順は？","acceptedAnswer":{"@type":"Answer","text":"App Storeからシンプルメモをダウンロードし、メールアドレスを設定するだけです。1分以内に使い始められます。Mocaと同じメールアドレスを設定すれば、受信箱でメモが統一されます。"}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/moca/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Mocaのメモはメール受信箱に届きますか？","acceptedAnswer":{"@type":"Answer","text":"はい。App Storeの説明によると、Mocaはメモをアプリ内に保存せず、設定したアドレスへメールで送ります。シンプルメモも送ったメモはメールの受信箱に届き、連携を設定すればObsidianのノートにも追記されます。"}},{"@type":"Question","name":"Mocaの端末を変更したらメモは引き継げますか？","acceptedAnswer":{"@type":"Answer","text":"Mocaはメモをアプリ内に保存せずメールで送るため（App Storeの説明）、送ったメモはメールの受信箱に残ります。シンプルメモで送ったメモも受信箱に残るので、端末を変えても受信箱から見返せます。"}},{"@type":"Question","name":"Mocaの編集・削除がないという設計思想はシンプルメモにもありますか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモも送信に特化していますが、Outbox内の未送信メモは確認・管理が可能です。Mocaの「書いたら送る、余計な機能はいらない」という思想を共有しつつ、AES-GCM暗号化とオフライン対応を追加しています。"}},{"@type":"Question","name":"Mocaからシンプルメモに移行する手順は？","acceptedAnswer":{"@type":"Answer","text":"App Storeからシンプルメモをダウンロードし、メールアドレスを設定するだけで、すぐに使い始められます。Mocaと同じメールアドレスを設定すれば、受信箱でメモが統一されます。"}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="メインナビゲーション">
+  <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
-      <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
-        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
+      <a class="global-nav__logo site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/guides/">使い方</a><a href="/use-cases/">活用事例</a><a href="/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/">使い方</a></li>
+        <li><a href="/use-cases/">活用事例</a></li>
+        <li><a href="/vs/">比較</a></li>
         <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
         <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
         <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
-        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
-        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
+        <li><a href="/faq">よくある質問</a></li>
+        <li><a href="/about/">開発者について</a></li>
+        <li><a href="/devlog/">開発記録</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/vs/moca/" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/vs/moca/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
-        <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="日本語 · 言語を選択"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>JA</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ja" dir="ltr"><p class="site-language-title">言語を選択</p><div class="site-language-grid"><span class="site-language-current" data-site-locale="ja" aria-current="page"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/en/vs/moca/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/vs/moca/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/vs/moca/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/vs/moca/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/vs/moca/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/vs/moca/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/vs/moca/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/vs/moca/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/vs/moca/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
           <span lang="ja">ダウンロード</span>
         </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="メニュー"><span>メニュー</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
   </nav>
@@ -291,7 +304,7 @@
     <div class="container">
 
       <!-- Hero -->
-      <div class="lp-hero">
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
         <div class="lp-hero__label">
           <span lang="ja">メモアプリ比較</span>
 
@@ -301,112 +314,110 @@
 
         </h1>
         <p class="lp-hero__sub">
-          <span lang="ja">Mocaも「自分にメールを送るメモ帳」という同じコンセプトのアプリです。どちらも素晴らしいですが、シンプルメモはAES-GCM暗号化・Outboxオフライン自動送信・Cloudflare Workers経由のワンタップ高速配信という、エンタープライズグレードのセキュリティと信頼性を追加しています。</span>
+          <span lang="ja">Mocaも「自分にメールを送るメモ帳」という同じコンセプトのアプリです。どちらも素早いメモに向いています。シンプルメモは、送信待ちと送信履歴の端末内AES-GCM暗号化、オフラインで送信したメモをつながったら再送するOutbox、Cloudflare Workers経由のワンタップ送信を備えています。</span>
 
         </p>
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
           <span lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · 公開日: <time datetime="2026-03-06">2026年03月06日</time></span>
 
         </p>
-      </div>
+      </div><nav class="sd-hero-index" aria-label="このページの内容"><p>このページの内容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Mocaとは</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>比較表：シンプルメモ vs Moca</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>4つのMocaとの違い</span><span aria-hidden="true">↗</span></a></nav></div>
 
       <!-- Entity Definition -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
           <span lang="ja">Mocaとは</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
-          <span lang="ja">Mocaは、開発者Hiroki Ogata氏が作ったiOSアプリ「自分にメールを送るメモ帳」です。2023年にリリースされ、意図的にメモの編集・削除機能を持たないという独自の思想で設計されています。書いたらすぐ送る、余計な機能はいらないというミニマリスト的なアプローチが特徴です。Obsidian連携シンプルメモと同様に「自分にメールを送る」というコンセプトを共有しており、iOSのメモ→メール送信カテゴリにおける数少ないアプリの一つです。</span>
+          <span lang="ja">Mocaは、開発者Hiroki Ogata氏が作ったiOSアプリ「自分にメールを送るメモ帳」です。2023年にリリースされ、意図的にメモの編集・削除機能を持たないという独自の思想で設計されています。書いたらすぐ送る、余計な機能はいらないというミニマリスト的なアプローチが特徴です。App Storeの説明では、メモをアプリ内に保存せず、設定したアドレスへメールで送る設計です。Obsidian連携シンプルメモと同じ「自分にメールを送る」というコンセプトのアプリです。</span>
 
         </p>
-      </section>
+      </div></section>
 
       <!-- Comparison Table -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
           <span lang="ja">比較表：シンプルメモ vs Moca</span>
 
-        </h2>
-        <div style="overflow-x:auto">
+        </h2></div><div class="ce-chapter__body">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table lang="ja" class="compare-table">
             <thead><tr><th scope="col">項目</th><th scope="col">Obsidian連携シンプルメモ</th><th scope="col">Moca</th></tr></thead>
             <tbody>
-              <tr><th scope="row">起動速度</th><td class="yes">0.4秒（即入力可）</td><td>速い</td></tr>
+              <tr><th scope="row">起動速度</th><td class="yes">0.4秒（即入力可）</td><td>当サイトでは未計測</td></tr>
               <tr><th scope="row">ワンタップ送信</th><td class="yes">あり（メール直送）</td><td class="yes">あり</td></tr>
-              <tr><th scope="row">送信速度</th><td class="yes">ワンタップ（Cloudflare Workers）</td><td>標準</td></tr>
               <tr><th scope="row">アカウント不要</th><td class="yes">既存メールのみ</td><td class="yes">既存メールのみ</td></tr>
-              <tr><th scope="row">オフライン対応</th><td class="yes">Outbox自動再送</td><td class="no">なし</td></tr>
-              <tr><th scope="row">暗号化</th><td class="yes">AES-GCM（端末内）</td><td class="no">なし</td></tr>
+              <tr><th scope="row">オフライン対応</th><td class="yes">Outbox自動再送</td><td>公開情報では確認できず</td></tr>
+              <tr><th scope="row">暗号化</th><td class="yes">AES-GCM（端末内）</td><td>公開情報では確認できず</td></tr>
               <tr><th scope="row">編集・削除</th><td>Outbox内で管理可</td><td class="no">意図的になし</td></tr>
-              <tr><th scope="row">無料プラン</th><td class="yes">1日3通・機能制限なし</td><td class="yes">あり</td></tr>
-              <tr><th scope="row">多言語対応</th><td class="yes">日本語・英語</td><td>日本語</td></tr>
-              <tr><th scope="row">リレーインフラ</th><td class="yes">Cloudflare Workers + Resend</td><td>標準メール送信</td></tr>
+              <tr><th scope="row">無料プラン</th><td class="yes">1日3通まで（「Obsidianのみに保存」はPremium）</td><td class="yes">無料</td></tr>
+              <tr><th scope="row">多言語対応</th><td class="yes">10言語（日本語・英語ほか）</td><td>日本語</td></tr>
+              <tr><th scope="row">リレーインフラ</th><td class="yes">Cloudflare Workers + Resend</td><td>公開情報では確認できず</td></tr>
             </tbody>
           </table>
 
         </div>
-      </section>
+      </div></section>
 
       <!-- 5 Key Differences -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
           <span lang="ja">4つのMocaとの違い</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <ul lang="ja" class="diff-list">
           <li>
             <span class="diff-num">1</span>
-            <strong>メール送信 vs アプリ内保存</strong><br>
-            Mocaは「自分にメールを送るメモ帳」というコンセプトですが、メモの保存先はアプリ内にとどまる設計です。シンプルメモはメール送信に完全特化しており、メモは即座にメール受信箱に届きます。メールの検索性・永続性・クロスデバイスアクセスを活用したい方にはシンプルメモが有利です。
+            <strong>送り先：メールだけか、Obsidianにも残せるか</strong><br>
+            Mocaは、書いたメモをアプリ内に保存せず、設定したアドレスへメールで送ります（App Storeの説明）。シンプルメモも送ったメモはメールの受信箱に届き、連携を設定すればObsidianのノートにも追記できます。メールに加えてObsidianにも残したい方にはシンプルメモが合います。
           </li>
           <li>
             <span class="diff-num">2</span>
             <strong>起動速度の実測</strong><br>
-            シンプルメモは0.4秒でキーボードが表示され、即座に入力を開始できます。Mocaも軽快な起動を実現していますが、シンプルメモのインスタントキーボード設計は起動→入力開始のラグを最小限に抑える専用最適化が施されています。
+            シンプルメモはタップから約0.4秒で入力できる状態になります（開発者の計測・iPhone 16e・ウォーム起動の中央値）。Mocaは当サイトでは計測していないため、速さの比較はしていません。
           </li>
           <li>
             <span class="diff-num">3</span>
-            <strong>バックアップの仕組み</strong><br>
-            シンプルメモはメモをメール受信箱に送るため、メールサービスのバックアップ機構がそのまま適用されます。Mocaはアプリ内保存のため、端末の故障や機種変更時にデータが失われるリスクがあります。メール送信=自動バックアップという設計上の安心感があります。
+            <strong>送る前のメモの扱い</strong><br>
+            どちらも送ったメモはメールの受信箱に残るため、メールサービスの保存がそのまま使えます。シンプルメモは、送信したのに送れていないメモを端末内の送信待ち（Outbox）にAES-GCMで暗号化して残し、つながったら再送します。Mocaのオフライン時の動きは、公開情報では確認できませんでした。
           </li>
           <li>
             <span class="diff-num">4</span>
             <strong>開発アクティビティ</strong><br>
-            シンプルメモは2026年も継続的にアップデートされ、新機能やセキュリティ改善が行われています。Mocaの最終更新時期はApp Storeで確認できますが、長期的なサポートやアクティブな開発継続が見込めるアプリを選ぶことも大切な判断基準です。
+            シンプルメモは2026年も継続的にアップデートされています。App Storeによると、Mocaの最新版は2023年9月のv1.0.1です（2026年10月1日確認）。更新が続いているかどうかも、選ぶときの判断材料になります。
           </li>
         </ul>
 
-      </section>
+      </div></section>
 
       <!-- How to Switch from Moca -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
           <span lang="ja">Mocaからの乗り換え手順</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
-          <span lang="ja">MocaからObsidian連携シンプルメモへの乗り換えは非常にシンプルです。どちらも「自分にメールを送る」アプリなので、データ移行の必要がありません。手順は以下の通りです。まず、App StoreからObsidian連携シンプルメモをダウンロードします（1分以内に完了）。次に、Mocaで使っているのと同じメールアドレスを送信先に設定します。これで設定完了です。以降、Obsidian連携シンプルメモで送ったメモはMocaで送ったメモと同じメール受信箱に届きます。Mocaで過去に送ったメモはメール受信箱にそのまま残っているため、何も失われません。しばらく両方を併用して違いを体感するのもおすすめです。Obsidian連携シンプルメモのAES-GCM暗号化、Outboxオフライン自動送信、0.4秒起動を体験すると、多くのユーザーがObsidian連携シンプルメモに統一しています。</span>
+          <span lang="ja">MocaからObsidian連携シンプルメモへの乗り換えは非常にシンプルです。どちらも「自分にメールを送る」アプリなので、データ移行の必要がありません。手順は以下の通りです。まず、App StoreからObsidian連携シンプルメモをダウンロードします。次に、Mocaで使っているのと同じメールアドレスを送信先に設定します。これで設定完了です。以降、Obsidian連携シンプルメモで送ったメモはMocaで送ったメモと同じメール受信箱に届きます。Mocaで過去に送ったメモはメール受信箱にそのまま残っているため、何も失われません。しばらく両方を併用して違いを体感するのもおすすめです。</span>
 
         </p>
-      </section>
+      </div></section>
 
       <!-- Who Should Choose Which -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
           <span lang="ja">どちらを選ぶべきか</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div lang="ja" class="choose-grid">
           <div class="choose-card">
             <div class="choose-card__title">Obsidian連携シンプルメモ向き</div>
             <ul>
-              <li>オフラインでもメモを確実に送りたい</li>
+              <li>オフラインで書いたメモも、つながったら送りたい</li>
               <li>端末内データの暗号化が重要</li>
-              <li>最速のワンタップ送信を求める</li>
+              <li>ワンタップ送信を求める</li>
               <li>英語環境でも使いたい</li>
-              <li>Freeプランで毎日3通、ずっと無料で使いたい</li>
-              <li>業務メモのセキュリティを重視する</li>
+              <li>Freeプランで毎日3通まで、期間を気にせず無料で使いたい</li>
             </ul>
           </div>
           <div class="choose-card">
@@ -414,30 +425,29 @@
             <ul>
               <li>とにかくシンプルなアプリが好き</li>
               <li>編集・削除機能は不要（書いたら送る）</li>
-              <li>常にオンラインで使う前提</li>
-              <li>暗号化は特に気にしない</li>
+              <li>無料のアプリで十分</li>
               <li>日本語だけで十分</li>
               <li>Mocaの設計思想に共感する</li>
             </ul>
           </div>
         </div>
 
-      </section>
+      </div></section>
 
       <!-- FAQ -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
           <span lang="ja">よくある質問</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div lang="ja">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mocaのメモはメール受信箱に届きますか？</summary><div class="faq-answer"><p>Mocaは「自分にメールを送る」コンセプトですが、メモの保存先はアプリ内が中心です。シンプルメモはメール受信箱に直接届くため、メールの検索やクロスデバイスアクセスが可能です。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mocaの端末を変更したらメモは引き継げますか？</summary><div class="faq-answer"><p>Mocaはアプリ内保存のため、機種変更時にデータが引き継げない場合があります。シンプルメモで送ったメモはメール受信箱に残っているため、端末を変えても過去のメモに常にアクセスできます。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mocaのメモはメール受信箱に届きますか？</summary><div class="faq-answer"><p>はい。App Storeの説明によると、Mocaはメモをアプリ内に保存せず、設定したアドレスへメールで送ります。シンプルメモも送ったメモはメールの受信箱に届き、連携を設定すればObsidianのノートにも追記されます。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mocaの端末を変更したらメモは引き継げますか？</summary><div class="faq-answer"><p>Mocaはメモをアプリ内に保存せずメールで送るため（App Storeの説明）、送ったメモはメールの受信箱に残ります。シンプルメモで送ったメモも受信箱に残るので、端末を変えても受信箱から見返せます。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mocaの編集・削除がないという設計思想はシンプルメモにもありますか？</summary><div class="faq-answer"><p>シンプルメモも送信に特化していますが、Outbox内の未送信メモは確認・管理が可能です。Mocaの「書いたら送る、余計な機能はいらない」という思想を共有しつつ、AES-GCM暗号化とオフライン対応を追加しています。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mocaからシンプルメモに移行する手順は？</summary><div class="faq-answer"><p>App Storeからシンプルメモをダウンロードし、メールアドレスを設定するだけです。1分以内に使い始められます。Mocaと同じメールアドレスを設定すれば、受信箱でメモが統一されます。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mocaからシンプルメモに移行する手順は？</summary><div class="faq-answer"><p>App Storeからシンプルメモをダウンロードし、メールアドレスを設定するだけで、すぐに使い始められます。Mocaと同じメールアドレスを設定すれば、受信箱でメモが統一されます。</p></div></details></div>
         </div>
 
-      </section>
+      </div></section>
 
       <!-- CTA -->
       <div class="cta-box">
@@ -449,18 +459,18 @@
           <span lang="ja">Mocaの次のステップ。暗号化・オフライン対応。ダウンロードは無料。</span>
 
         </div>
-        <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="mid" lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+        <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="mid" lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
         </a>
 
       </div>
 
       <!-- Internal Links -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">
           <span lang="ja">関連ページ</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="internal-links">
           <a href="/vs/">
             <span lang="ja">メモアプリ比較一覧</span>
@@ -491,7 +501,7 @@
 
           </a>
         </div>
-      </section>
+      </div></section>
 
     </div>
 
@@ -529,7 +539,6 @@
   <h3 style="font-size:1rem;margin-bottom:0.75rem">参考文献</h3>
   <ul style="font-size:.875rem;line-height:3.5;list-style:none;padding:0">
     <li>MOCA（App Store）</li>
-    <li>Wirecutter ベストメモアプリレビュー</li>
     <li>G2 メモアプリカテゴリ</li>
     <li><a href="https://hbr.org/topic/subject/personal-productivity" target="_blank" rel="noopener">Harvard Business Review — 生産性と情報整理</a></li>
   </ul>
@@ -537,30 +546,30 @@
 
 </main>
 
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ja" dir="ltr"><a class="site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a><div><p class="site-footer-title">思いついたことを、次の一歩へ。</p><p class="site-footer-description">Obsidianとメールに、メモを送るiPhoneアプリ。</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
-        <a href="/" class="footer__link"><span lang="ja">ホーム</span> </a>
-        <a href="/use-cases/" class="footer__link"><span lang="ja">使い方</span> </a>
-        <a href="/guides/" class="footer__link"><span lang="ja">ガイド</span> </a>
+        <a href="/download/" class="footer__link">ダウンロード</a>
+        <a href="/" class="footer__link">ホーム</a>
+        <a href="/use-cases/" class="footer__link">活用事例</a>
+        <a href="/guides/" class="footer__link">使い方</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
         <a href="/captio-alternative/" class="footer__link"><span lang="ja">Captio代替</span> </a>
-        <a href="/note-to-email/" class="footer__link"><span lang="ja">メモ→メール</span> </a>
-        <a href="/vs/" class="footer__link"><span lang="ja">アプリ比較</span> </a>
+        <a href="/note-to-email/" class="footer__link">メモをメールへ</a>
+        <a href="/vs/" class="footer__link">比較</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span lang="ja">公開ロードマップ</span></a>
-        <a href="/devlog/" class="footer__link"><span lang="ja">開発記録</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
-        <a href="/faq" class="footer__link"><span lang="ja">FAQ</span> </a>
-        <a href="/privacy" class="footer__link"><span lang="ja">プライバシー</span> </a>
-        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span> </a>
+        <a href="/roadmap/" class="footer__link">公開ロードマップ</a>
+        <a href="/devlog/" class="footer__link">開発記録</a>
+        <a href="/about/" class="footer__link">開発者について</a>
+        <a href="/faq" class="footer__link">よくある質問</a>
+        <a href="/privacy" class="footer__link">プライバシー</a>
+        <a href="/contact" class="footer__link">お問い合わせ</a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -569,12 +578,7 @@
     </div>
   </footer>
 
-  <script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

@@ -1,0 +1,556 @@
+<!DOCTYPE html><html lang="zh-Hans"><head>
+<script src="/js/i18n/zh-Hans/messages.4b2d76ae8f58.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/daily-note-plugins/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>强化每日笔记的插件 — Calendar/Periodic Notes | SimpleMemo</title>
+  <meta name="description" content="根据Calendar的日期和周号，制作Periodic Notes设置的日志、周刊的方法。 在Linux版Obsidian中确认每日和每周的制作、模板反映、保存、重新打开。 刊登设定值、原始画面、输入Markdown和实际保存的例子。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="强化每日笔记的插件 — Calendar/Periodic Notes | SimpleMemo">
+  <meta property="og:description" content="根据Calendar的日期和周号，制作Periodic Notes设置的日志、周刊的方法。 在Linux版Obsidian中确认每日和每周的制作、模板反映、保存、重新打开。 刊登设定值、原始画面、输入Markdown和实际保存的例子。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-01">
+  <meta property="og:url" content="https://simplememofast.com/zh/obsidian/daily-note-plugins/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-daily-note-plugins.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_CN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="强化每日笔记的插件 — Calendar/Periodic Notes | SimpleMemo">
+  <meta name="twitter:description" content="根据Calendar的日期和周号，制作Periodic Notes设置的日志、周刊的方法。 在Linux版Obsidian中确认每日和每周的制作、模板反映、保存、重新打开。 刊登设定值、原始画面、输入Markdown和实际保存的例子。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-daily-note-plugins.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/daily-note-plugins/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  
+
+  <!-- JSON-LD: Article -->
+  
+
+  <!-- JSON-LD: FAQPage -->
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    /* 中央揃えの和文は行頭が毎行ずれて読みにくい。狭い画面では左揃えにし、
+       行が2〜3行に収まる広い画面だけ中央のままにする。 */
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    /* ── 「開かず」の段階 ──────────────────────────────
+       この記事の骨子。読者が言う「開かず」と記事が指す「開かず」は
+       ずれていることが多いので、先に3段階へ分解して合意を取る。 */
+    .lv{display:grid;grid-template-columns:auto 1fr;gap:0 1.1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.3rem 1.3rem;margin:.85rem 0}
+    .lv__n{grid-row:1/3;width:2.6rem;height:2.6rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;align-self:start}
+    .lv__t{font-size:1.05rem;font-weight:700;line-height:1.55;margin:0 0 .4rem}
+    .lv__d{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0}
+    @media(max-width:520px){
+      .lv{grid-template-columns:1fr;gap:.6rem}
+      .lv__n{grid-row:auto}
+    }
+
+    /* 原因ブロック */
+    .cz{background:var(--surface);border:1px solid var(--border);border-left:3px solid rgba(255,183,52,.55);border-radius:var(--radius-sm);padding:1.35rem 1.3rem;margin:1rem 0}
+    .cz__n{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#ffc76b;margin-bottom:.4rem}
+    .cz__t{font-size:1.05rem;font-weight:700;line-height:1.6;margin:0 0 .55rem}
+    .cz p{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0 0 .7rem}
+    .cz p:last-child{margin-bottom:0}
+    .cz ol,.cz ul{margin:.2rem 0 .7rem;padding-left:1.35rem;font-size:.95rem;line-height:1.9;color:var(--text-secondary)}
+    .cz li{margin-bottom:.3rem}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em}
+
+    /* ── 比較表 ────────────────────────────────────────
+       狭い画面で列を縦に割ると見出し列が語中で折り返して読めなくなる
+       ので、行ごとのカードに組み替えて全幅を使わせる（/siri/ と同じ流儀）。 */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:26%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  
+<style>.plugin-answer{font-size:1.06rem;line-height:1.9;border-left:3px solid #65d6e8;padding-left:1.1rem}.hero-graphic{width:100%;height:auto;display:block;border-radius:14px;margin:1.7rem auto 0;max-width:54rem}.shot{margin:1.5rem 0;border:1px solid var(--border);background:var(--surface);border-radius:12px;overflow:hidden}.shot img{display:block;width:100%;height:auto}.shot figcaption{padding:.9rem 1rem;color:var(--text-secondary);font-size:.9rem;line-height:1.8}.shot figcaption a{display:inline-flex;min-height:44px;align-items:center;color:var(--accent-bright)}.plugin-table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.95rem}.plugin-table th,.plugin-table td{border:1px solid var(--border);padding:.8rem;text-align:left;vertical-align:top;line-height:1.8;overflow-wrap:anywhere}.plugin-table th{background:var(--surface)}.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;background:#0d1525;border:1px solid var(--border);border-radius:10px;padding:1.1rem;line-height:1.8;font-size:.92rem;box-sizing:border-box;max-width:100%}.capture-code code{background:none;border:0;padding:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:1em}.code-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-top:1.2rem}.copy-button{min-height:44px;border-radius:8px;padding:.55rem .9rem;border:1px solid #4589d6;color:#fff;background:#165bac;font:inherit;cursor:pointer}.download-row{display:flex;gap:.65rem;flex-wrap:wrap;margin:1rem 0}.download-row a{min-height:44px;display:inline-flex;align-items:center;padding:.45rem .8rem;color:var(--accent-bright);border:1px solid var(--border);border-radius:8px;font-size:.9rem;overflow-wrap:anywhere}.scope-note{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem;line-height:1.85}.proof-details{margin:1rem 0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px}.proof-details summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:700}.proof-details p{line-height:1.85}.faq-item summary{min-height:44px}.source-list li{line-height:1.85;margin:.65rem 0}.receipt-line{overflow-wrap:anywhere;color:var(--text-secondary);font-size:.88rem}.toc-links{display:flex;flex-wrap:wrap;gap:.8rem;margin:1.2rem 0}.toc-links a{min-height:44px;display:inline-flex;align-items:center;color:var(--accent-bright)}@media(max-width:600px){.plugin-table,.plugin-table tbody,.plugin-table tr,.plugin-table th,.plugin-table td{display:block;width:auto}.plugin-table thead{display:none}.plugin-table tr{margin-bottom:1rem}.plugin-table td:before{content:attr(data-label);display:block;font-size:.82rem;color:var(--text-secondary);font-weight:700}.capture-code{font-size:.85rem;padding:.8rem}.lp-hero{padding-top:2.3rem}.lp-hero__title{font-size:1.85rem}}.lp-section{scroll-margin-top:72px}</style><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh/obsidian/daily-note-plugins/#article",
+  "headline": "强化每日笔记的插件 — Calendar/Periodic Notes",
+  "description": "根据Calendar的日期和周号，制作Periodic Notes设置的日志、周刊的方法。 在Linux版Obsidian中确认每日和每周的制作、模板反映、保存、重新打开。 刊登设定值、原始画面、输入Markdown和实际保存的例子。",
+  "url": "https://simplememofast.com/zh/obsidian/daily-note-plugins/",
+  "mainEntityOfPage": "https://simplememofast.com/zh/obsidian/daily-note-plugins/",
+  "image": "https://simplememofast.com/assets/img/og/obsidian-daily-note-plugins.png",
+  "inLanguage": "zh-Hans",
+  "datePublished": "2026-10-01",
+  "dateModified": "2026-10-01",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://simplememofast.com/#organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    }
+  }
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主页",
+      "item": "https://simplememofast.com/zh/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "每日笔记",
+      "item": "https://simplememofast.com/zh/obsidian/daily-note/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "日历/月报",
+      "item": "https://simplememofast.com/zh/obsidian/daily-note-plugins/"
+    }
+  ]
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Calendar和Periodic Notes，两者都需要吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "想要结合选择日期的入口和每日、每周笔记的设置时，使用这两个例子。 Calendar是日历的入口，Periodic Notes是设置Daily/Weekly的文件夹、格式、模板的一方。 如果想知道每日的标准设置，可以从父母报道的每日笔记解说开始。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "周号不显示的时候呢？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "在这次的Calendar1.5.10中，打开Settings的Calendar中的Show week number后，左端会显示周号列。 仅打开右侧侧边栏可能会选择Backlinks等其他标签，请选择Calendar标签。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "点击日期也无法进入正文时？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "这次，New Daily Note和New Weekly Note的制作确认，不是显示在主画面上，而是显示在打开的Settings的另一个窗口中。 看着两个画面，确认目标文件名，选择确认画面的Create。 确认前多次按同一日期的结果没有验证。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "每周的格式是YYYY还是gggg？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "这个固定例子中使用的值是gggg-[W]ww，在2026-09-30的环境下制作了2026-W40。 表示周年份的格式和日期的年份在边界上可能不一致，所以不要混合格式，也要确认应用程序的周开始日期和地点。 所有年界、区域、时区的结果都未经验证。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "模板变量和Templater也在使用吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "每日输入使用Obsidian的原生{{date:YYYY-MM-DD}}，在实际制作中确认了2026-09-30的替换。 每周是作者的静态正文。 Templater、JavaScript、任意变量和所有格式令牌的执行，不包括在这个例子中。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "iPhone、SimpleMemo，同步也能同样运行吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "确认实际操作的是Linux版Obsidian1.13.7的作者Vault。 与iOS、Android、其他OS、Obsidian Sync、SimpleMemo的配合、终端间同步、速度、生产力、流入的效果，在这个记录中没有验证。 从iPhone到日志的补充路线，请参考其他每日笔记报道。"
+      }
+    }
+  ],
+  "inLanguage": "zh-Hans",
+  "@id": "https://simplememofast.com/zh/obsidian/daily-note-plugins/#faq"
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh/obsidian/daily-note-plugins/#webpage",
+  "name": "强化每日笔记的插件 — Calendar/Periodic Notes",
+  "url": "https://simplememofast.com/zh/obsidian/daily-note-plugins/",
+  "inLanguage": "zh-Hans",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh/#website"
+  }
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="主导航" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh/guides/">使用指南</a><a href="/zh/use-cases/">使用场景</a><a href="/zh/vs/">对比</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/zh/guides/">使用指南</a></li>
+        <li><a href="/zh/use-cases/">使用场景</a></li>
+        <li><a href="/zh/vs/">对比</a></li>
+        <li><a href="/zh/methods/"><span>方法</span></a></li>
+        <li><a href="/zh/blog/"><span>博客</span></a></li>
+        <li><a href="/zh/glossary/"><span>术语集</span></a></li>
+        <li><a href="/zh/faq">常见问题</a></li>
+        <li><a href="/zh/about/">关于开发者</a></li>
+        <li><a href="/zh/devlog/">开发日志</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>下载</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="简体中文 · 选择语言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>简中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hans" dir="ltr"><p class="site-language-title">选择语言</p><div class="site-language-grid"><a href="/obsidian/daily-note-plugins/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/daily-note-plugins/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hans" aria-current="page"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh-Hant/obsidian/daily-note-plugins/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/daily-note-plugins/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/daily-note-plugins/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/daily-note-plugins/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/daily-note-plugins/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/daily-note-plugins/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/daily-note-plugins/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="global-nav__cta">下载</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="菜单"><span>菜单</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content"><article class="container"><header class="lp-hero sd-hero sd-hero--media"><p class="lp-hero__label">Obsidian · 日次和周次的笔记</p><h1 class="lp-hero__title">强化每日笔记的插件 — Calendar/Periodic Notes</h1><p class="lp-hero__sub">根据日期和周号，准备打开想回顾的笔记本的入口。 Calendar和Periodic Notes组合，创建、保存日志和周刊，在同一应用程序内再次打开的实例。</p><p>验证日期：2026年9月30日（UTC） · Linux版 Obsidian 1.13.7</p><img class="hero-graphic sd-hero-media" src="/assets/img/og/obsidian-daily-note-plugins.png" width="1200" height="630" fetchpriority="high" decoding="async" alt="从Calendar的日期到日记，从周号到周刊的指南图。 原始GUI画面刊登在各个步骤"></header>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="choose"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">把两个角色分开的话，容易设置</h2></div><div class="ce-chapter__body"><p class="plugin-answer"><strong>Calendar是“什么时候打开笔记本”的入口，Periodic Notes是“去哪里，用什么名字和正文制作”的设定。 </strong>这次制作了日次的2026-09-30和周次的2026-W40，在模板的正文中添加了作者的确认文并保存了。</p><p>Obsidian标准的Daily notes和从iPhone到日志的备忘录的路线在<a href="/zh/obsidian/daily-note/">每日笔记的父报道</a>中处理。 这篇报道将缩小到桌面的日历操作和每日、每周的设置。</p>
+<div class="sd-table" tabindex="0" role="region" aria-label="可以横向滚动的表格"><table class="plugin-table"><thead><tr><th>功能</th><th>角色</th><th>通过这个例子确认的范围</th></tr></thead><tbody>
+<tr><th scope="row">核心每日笔记</th><td data-label="角色">Obsidian标准的每日笔记功能。</td><td data-label="确认的范围">用实际GUI激活。 与只使用标准功能的每日制作分开，结合了以下两个。</td></tr>
+<tr><th scope="row">日历1.5.10</th><td data-label="角色">从日期和周号进入笔记本的侧边栏。</td><td data-label="确认的范围">日期30，周号40，制作确认，上月和当月的移动。</td></tr>
+<tr><th scope="row">期票0.0.17</th><td data-label="角色">Daily/Weekly的保存地址、格式、模板。</td><td data-label="确认的范围">日志和周刊的设置，实际的制作正文，保存，在同一应用程序内重新打开。</td></tr></tbody></table></div>
+<p class="scope-note">这里使用的版本是从官方的非beta标签中选择的Calendar 1.5.10和Periodic Notes 0.0.17。 不是保证最新、现在的推荐版或其他版本会有相同结果的记录。 操作的UI版本也在下面的原画面上确认。</p>
+<nav class="toc-links" aria-label="这篇报道的目录"><a href="#setup">版本和激活</a><a href="#settings">设定值</a><a href="#daily">制作日记</a><a href="#weekly">制作周刊</a><a href="#faq">绊倒和FAQ</a><a href="#next">下一步</a></nav></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="setup"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">准备验证版，并生效</h2></div><div class="ce-chapter__body"><p>在这个实例中，将官方发布的文件手动放置在隔离的作者Vault中，之后的激活和操作从GUI进行。 不是点击Community plugins的Browse → Install导入的验证。</p><ol class="steps-list"><li>在练习用的Vault上，准备空的<strong translate="no">日誌</strong>、<strong translate="no">週誌</strong>、<strong translate="no">テンプレート</strong>文件夹。 这个例子的输入使用的是下面的Markdown。</li><li><a href="https://github.com/liamcain/obsidian-calendar-plugin/releases/tag/1.5.10" target="_blank" rel="noopener">Calendar 1.5.10的官方发布</a>和<a href="https://github.com/liamcain/obsidian-periodic-notes/releases/tag/0.0.17" target="_blank" rel="noopener">Periodic Notes 0.0.17的官方发布</a>，可以确认这个例子中使用的文件。 手动配置的构成如下所示。</li><li>Settings → Core plugins打开Daily notes。 在这次的操作中，Command palette也确认了ON，Quick switcher也确认了ON的状态。</li><li>确认自己准备的Vault的Trust后，在Settings → Community plugins中打开Periodic Notes和Calendar。 下面的原始画面是这两个实际生效后的显示。</li><li>打开右侧侧边栏，选择<strong>Calendar的标签</strong>。 保留Backlinks等其他标签的话，看不到日期的画面。</li></ol>
+<pre class="capture-code" tabindex="0"><code>.obsidian/plugins/calendar/
+  manifest.json
+  main.js
+.obsidian/plugins/periodic-notes/
+  manifest.json
+  main.js
+  styles.css</code></pre><p>在Calendar的这次发布中，样式包含在main.js中，没有获取其他styles.css。 上面是实际放置的文件的构成。 插件本体不包含在本页面的分发ZIP中。</p><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/plugins.png" target="_blank" rel="noopener" aria-label="以原来的大小打开Calendar和Periodic Notes的实际版本显示和ON的设置画面"><img src="/assets/img/obsidian-daily-note-plugins/plugins.png" width="900" height="700" loading="lazy" decoding="async" alt="Calendar和Periodic Notes的实际版本显示和ON的设置画面"></a><figcaption>用新作者Vault激活的实画面。 观测了Calendar v1.5.10、Periodic Notes v0.0.17的显示和ON。 <a href="/assets/img/obsidian-daily-note-plugins/plugins.png" target="_blank" rel="noopener">打开原始图像</a></figcaption></figure></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="settings"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">先整理日志和周刊的保存地址</h2></div><div class="ce-chapter__body"><p>Settings → Periodic Notes打开Daily Notes和Weekly Notes，输入以下值。 文件夹和模板，提前准备Vault内。 这次的设置输入是核对实际GUI的显示和保存JSON。</p>
+<div class="sd-table" tabindex="0" role="region" aria-label="可以横向滚动的表格"><table class="plugin-table"><thead><tr><th>设置</th><th>每日笔记</th><th>每周笔记</th></tr></thead><tbody>
+<tr><th scope="row">格式</th><td data-label="每日笔记"><code>YYYY-MM-DD</code></td><td data-label="每周笔记"><code>gggg-[W]ww</code></td></tr>
+<tr><th scope="row">备注文件夹</th><td data-label="每日笔记"><code>日誌</code></td><td data-label="每周笔记"><code>週誌</code></td></tr>
+<tr><th scope="row">备注模板</th><td data-label="每日笔记"><code>テンプレート/日</code></td><td data-label="每周笔记"><code>テンプレート/週</code></td></tr></tbody></table></div>
+<p>Settings → Calendar中打开了<strong>Show week number</strong>和<strong>Confirm before creating new note</strong>。 这次一周的开始日期是Locale default（Sunday），应用程序的区域是en，环境的时区是UTC。 不是验证所有周边界和地点组合的结果。</p><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/settings.png" target="_blank" rel="noopener" aria-label="Periodic Notes的实际GUI设置，以原来的大小打开Daily和Weekly的文件夹格式模板"><img src="/assets/img/obsidian-daily-note-plugins/settings.png" width="900" height="700" loading="lazy" decoding="async" alt="Periodic Notes的实际GUI设置，Daily和Weekly的文件夹格式模板"></a><figcaption>打开日次、周次，从实际GUI输入固定值之前的独立尝试的原始画面。 将这个保存JSON作为相同的bytes移交给新的制作验证。 <a href="/assets/img/obsidian-daily-note-plugins/settings.png" target="_blank" rel="noopener">打开原始图像</a></figcaption></figure><details class="proof-details"><summary>Calendar的周号设置的原始画面</summary><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/week-number.png" target="_blank" rel="noopener" aria-label="打开Calendar的Show week number的实GUI以原来的大小打开"><img src="/assets/img/obsidian-daily-note-plugins/week-number.png" width="900" height="700" loading="lazy" decoding="async" alt="打开Calendar的Show week number的实GUI"></a><figcaption>用实GUI打开Show week number的原画面。 在制作尝试中也继承了同样的保存设置。 <a href="/assets/img/obsidian-daily-note-plugins/week-number.png" target="_blank" rel="noopener">打开原始图像</a></figcaption></figure></details></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="daily"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">从日期30开始，制作日志重新打开</h2></div><div class="ce-chapter__body"><p>将每日输入保存到<strong>テンプレート/日.md</strong>。 这里使用的日期变量是Obsidian的原生格式。</p><div class="code-heading"><strong>每日模板的输入全文</strong><button type="button" class="copy-button" data-copy="daily-template">复制正文</button></div><pre class="capture-code" tabindex="0"><code data-code="daily-template"># {{date:YYYY-MM-DD}}
+
+これは著者作成のデイリーノート用テンプレートです。
+
+## 確認
+
+- [ ] 保存した本文をもう一度開く
+- [[索引]]
+</code></pre><div class="download-row"><a class="md-download" data-file="daily-template" href="/assets/downloads/obsidian-daily-note-plugins/daily-template.md" download="daily-template.md">获取Markdown（170 bytes）</a></div><ol class="steps-list"><li>选择Calendar的2026年9月30日。 这次，确认画面出现在打开的Settings的另一个窗口。</li><li><strong>New Daily Note</strong>中确认目标的2026-09-30，选择该画面的<strong>Create</strong>。 在主画面的编辑器中打开了日誌/2026-09-30.md。</li><li>标题被替换为2026-09-30的正文中添加一行确认文，用Ctrl+S保存。</li><li>选择索引转到其他正文，从左边的文件列表中重新选择了日誌/2026-09-30.md。 保存的235 bytes的正文，重新打开后也一致。</li></ol><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/daily.png" target="_blank" rel="noopener" aria-label="从Calendar的日期开始创建的日志重新打开后的实际画面以原来的大小打开"><img src="/assets/img/obsidian-daily-note-plugins/daily.png" width="1720" height="1000" loading="lazy" decoding="async" alt="从Calendar的日期开始创建的日志重新打开后的实际画面"></a><figcaption>从点击日期开始创建，保存作者的确认文后，从文件一览表中再次打开相同的笔记的原画面。 日期标题和正文与保存文件进行了核对。 <a href="/assets/img/obsidian-daily-note-plugins/daily.png" target="_blank" rel="noopener">打开原始图像</a></figcaption></figure><details class="proof-details"><summary>日志的实际保存全文和制作确认画面</summary><div class="code-heading"><strong>在GUI中保存，再次打开的每日正文全文</strong><button type="button" class="copy-button" data-copy="daily-saved">复制正文</button></div><pre class="capture-code" tabindex="0"><code data-code="daily-saved"># 2026-09-30
+
+これは著者作成のデイリーノート用テンプレートです。
+
+## 確認
+
+- [ ] 保存した本文をもう一度開く
+- [[索引]]
+
+著者確認: Calendarの日付クリックで開いた本文を保存。</code></pre><div class="download-row"><a class="md-download" data-file="daily-saved" href="/assets/downloads/obsidian-daily-note-plugins/daily-saved.md" download="daily-saved.md">获取Markdown（235 bytes）</a></div><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/daily-confirm.png" target="_blank" rel="noopener" aria-label="在New Daily Note中以原来的大小打开Create2026-09-30的实际确认画面"><img src="/assets/img/obsidian-daily-note-plugins/daily-confirm.png" width="900" height="700" loading="lazy" decoding="async" alt="用New Daily Note创建2026-09-30的实际确认画面"></a><figcaption>与主窗口不同的Settings窗口显示的实际制作确认。 选择了那个Create，制作了日志。 <a href="/assets/img/obsidian-daily-note-plugins/daily-confirm.png" target="_blank" rel="noopener">打开原始图像</a></figcaption></figure></details></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="weekly"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">从周号40开始，制作周刊重新打开</h2></div><div class="ce-chapter__body"><p>每周输入保存到<strong>テンプレート/週.md</strong>。 每周的正文是静态的作者模板。 不作为任意周变量被替换的例子来处理。</p><div class="code-heading"><strong>每周模板的输入全文</strong><button type="button" class="copy-button" data-copy="weekly-template">复制正文</button></div><pre class="capture-code" tabindex="0"><code data-code="weekly-template"># 週の確認
+
+これは著者作成の週間ノート用テンプレートです。
+
+## 確認
+
+- [ ] 一週間の対象を記録する
+- [[索引]]
+</code></pre><div class="download-row"><a class="md-download" data-file="weekly-template" href="/assets/downloads/obsidian-daily-note-plugins/weekly-template.md" download="weekly-template.md">获取Markdown（151 bytes）</a></div><ol class="steps-list"><li>在显示周号列的Calendar中选择<strong>40</strong>。 在这个环境中，对象的名字是2026-W40。</li><li>Settings的另一个窗口出现的<strong>New Weekly Note</strong>的2026-W40，选择实际的<strong>Create</strong>。</li><li>在週誌/2026-W40.md打开的正文中添加了一行确认文，用Ctrl+S保存了。 这是在原来的静态每周模板上，添加这一行的结果。</li><li>索引，从左边的文件一览表中重新选择了週誌/2026-W40.md。 保存的219 bytes的正文，再次打开后也一致。</li></ol><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/weekly.png" target="_blank" rel="noopener" aria-label="从Calendar的周号40创建的周刊重新打开后的实际画面以原来的大小打开"><img src="/assets/img/obsidian-daily-note-plugins/weekly.png" width="1720" height="1000" loading="lazy" decoding="async" alt="从Calendar的周号40制作的周刊重新打开后的实际画面"></a><figcaption>从周号开始制作，保存作者的确认文后，从文件一览表中再次打开的原画面。 观测了周号40和静态的正文、追加的确认文。 <a href="/assets/img/obsidian-daily-note-plugins/weekly.png" target="_blank" rel="noopener">打开原始图像</a></figcaption></figure><details class="proof-details"><summary>周刊的实际保存全文和制作确认画面</summary><div class="code-heading"><strong>在GUI中保存，再次打开的每周正文全文</strong><button type="button" class="copy-button" data-copy="weekly-saved">复制正文</button></div><pre class="capture-code" tabindex="0"><code data-code="weekly-saved"># 週の確認
+
+これは著者作成の週間ノート用テンプレートです。
+
+## 確認
+
+- [ ] 一週間の対象を記録する
+- [[索引]]
+
+著者確認: Calendarの週番号から開いた本文を保存。</code></pre><div class="download-row"><a class="md-download" data-file="weekly-saved" href="/assets/downloads/obsidian-daily-note-plugins/weekly-saved.md" download="weekly-saved.md">获取Markdown（219 bytes）</a></div><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/weekly-confirm.png" target="_blank" rel="noopener" aria-label="在New Weekly Note中以原来的大小打开创建2026-W40的实际确认画面"><img src="/assets/img/obsidian-daily-note-plugins/weekly-confirm.png" width="900" height="700" loading="lazy" decoding="async" alt="用New Weekly Note创建2026-W40的实际确认画面"></a><figcaption>确认与日次不同的一次实际点击出现的周次制作。 对象是2026-W40。 <a href="/assets/img/obsidian-daily-note-plugins/weekly-confirm.png" target="_blank" rel="noopener">打开原始图像</a></figcaption></figure></details>
+<details class="proof-details"><summary>移动到上个月，回到当月的原画面</summary><p>在另一个固定试验中，选择了Calendar的Previous Month从Sep 2026转移到Aug 2026，选择了Next Month回到了Sep 2026。 不是确认所有月、年边界操作的结果。</p><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/august.png" target="_blank" rel="noopener" aria-label="在Calendar上显示上个月的2026年8月的原始画面以原来的大小打开"><img src="/assets/img/obsidian-daily-note-plugins/august.png" width="1720" height="1000" loading="lazy" decoding="async" alt="在Calendar上显示上月2026年8月的原始画面"></a><figcaption>上个月移动一次的实际画面标题是Aug 2026。 <a href="/assets/img/obsidian-daily-note-plugins/august.png" target="_blank" rel="noopener">打开原始图像</a></figcaption></figure><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/september.png" target="_blank" rel="noopener" aria-label="在Calendar中以原来的大小打开当月的2026年9月的原画面"><img src="/assets/img/obsidian-daily-note-plugins/september.png" width="1720" height="1000" loading="lazy" decoding="async" alt="在Calendar中回到当月2026年9月的原始画面"></a><figcaption>移动到下个月返回的实画面标题是Sep 2026。 <a href="/assets/img/obsidian-daily-note-plugins/september.png" target="_blank" rel="noopener">打开原始图像</a></figcaption></figure></details></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="downloads"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">获取练习用的输入和实际保存的例子</h2></div><div class="ce-chapter__body"><p>输入的索引和模板3件，用GUI制作的保存例2件分开。 不包括插件本体和设置JSON。 为了不覆盖现有的笔记，将输入放在自己的练习用Vault上。 读者对Vault的导入操作尚未验证。</p><div class="download-row"><a class="md-download" data-file="index" href="/assets/downloads/obsidian-daily-note-plugins/index.md" download="index.md">输入索引Markdown（214 bytes）</a><a class="zip-download" href="/assets/downloads/obsidian-daily-note-plugins/author-inputs-and-saved-examples.zip" download="author-inputs-and-saved-examples.zip">输入3件+实际保存例2件ZIP</a></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">绊倒时的确认和FAQ</h2></div><div class="ce-chapter__body"><details class="faq-item"><summary class="faq-summary">Calendar和Periodic Notes，两者都需要吗？</summary><div class="faq-answer">想要结合选择日期的入口和每日、每周笔记的设置时，使用这两个例子。 Calendar是日历的入口，Periodic Notes是设置Daily/Weekly的文件夹、格式、模板的一方。 如果想知道每日的标准设置，可以从父母报道的每日笔记解说开始。</div></details><details class="faq-item"><summary class="faq-summary">周号不显示的时候呢？</summary><div class="faq-answer">在这次的Calendar1.5.10中，打开Settings的Calendar中的Show week number后，左端会显示周号列。 仅打开右侧侧边栏可能会选择Backlinks等其他标签，请选择Calendar标签。</div></details><details class="faq-item"><summary class="faq-summary">点击日期也无法进入正文时？</summary><div class="faq-answer">这次，New Daily Note和New Weekly Note的制作确认，不是显示在主画面上，而是显示在打开的Settings的另一个窗口中。 看着两个画面，确认目标文件名，选择确认画面的Create。 确认前多次按同一日期的结果没有验证。</div></details><details class="faq-item"><summary class="faq-summary">每周的格式是YYYY还是gggg？</summary><div class="faq-answer">这个固定例子中使用的值是gggg-[W]ww，在2026-09-30的环境下制作了2026-W40。 表示周年份的格式和日期的年份在边界上可能不一致，所以不要混合格式，也要确认应用程序的周开始日期和地点。 所有年界、区域、时区的结果都未经验证。</div></details><details class="faq-item"><summary class="faq-summary">模板变量和Templater也在使用吗？</summary><div class="faq-answer">每日输入使用Obsidian的原生{{date:YYYY-MM-DD}}，在实际制作中确认了2026-09-30的替换。 每周是作者的静态正文。 Templater、JavaScript、任意变量和所有格式令牌的执行，不包括在这个例子中。</div></details><details class="faq-item"><summary class="faq-summary">iPhone、SimpleMemo，同步也能同样运行吗？</summary><div class="faq-answer">确认实际操作的是Linux版Obsidian1.13.7的作者Vault。 与iOS、Android、其他OS、Obsidian Sync、SimpleMemo的配合、终端间同步、速度、生产力、流入的效果，在这个记录中没有验证。 从iPhone到日志的补充路线，请参考其他每日笔记报道。</div></details></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">实际确认的范围和官方资料</h2></div><div class="ce-chapter__body"><ul><li>官方Linux版Obsidian 1.13.7/Installer 1.13.7，英语UI。 Calendar 1.5.10/Periodic Notes 0.0.17的实际版本显示。</li><li>作者Vault的实GUI设置，日次和周次各一个的制作确认・正文・保存・在同一应用程序内重新打开。 月移动通过另外的固定试验确认了。</li><li>插件的官方release assets是手动配置。 辅助代码用于初始环境的准备和状态、保存文件的读取、原件复制。 笔记本的制作、编辑、保存、重新打开没有用API代替。</li><li>公开的PNG和Markdown保留了原始文件的bytes。 iOS、其他OS、SimpleMemo、Sync、所有日期、周、月、时间、时区、生产力、流入的效果尚未验证。</li></ul>
+<p>准备阶段的启动停止、beta版的画面和保存设置不一致、点击隐藏标签、忽略其他窗口的确认画面的失败，都保留为原来的失败。 这篇报道的制作、保存例子是基于其他固定的尝试。 Ctrl+O无法观测Quick switcher画面，从同一保存地址的文件列表中实际点击后第一次重新打开。 详细和原始文件的对应汇总到<a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/daily-note-plugins-20260930.md" target="_blank" rel="noopener">验证记录</a>。</p>
+<details class="proof-details"><summary>实际的General版本画面</summary><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/version.png" target="_blank" rel="noopener" aria-label="在General上显示的实Obsidian版1.13.7和Installer版1.13.7以原来的大小打开"><img src="/assets/img/obsidian-daily-note-plugins/version.png" width="900" height="700" loading="lazy" decoding="async" alt="General上显示的实Obsidian版1.13.7和Installer版1.13.7"></a><figcaption>处理了留在另一个窗口的制作确认后，从实际GUI中选择了一次General，观测了app和installer的1.13.7。 <a href="/assets/img/obsidian-daily-note-plugins/version.png" target="_blank" rel="noopener">打开原始图像</a></figcaption></figure></details>
+<ul class="source-list"><li><a href="https://github.com/liamcain/obsidian-calendar-plugin/blob/7d2aebda7f4a280bedc6da6d25f4da611d1625ef/README.md" target="_blank" rel="noopener">Calendar 1.5.10的固定commit・官方README</a></li><li><a href="https://github.com/liamcain/obsidian-calendar-plugin/blob/7d2aebda7f4a280bedc6da6d25f4da611d1625ef/src/settings.ts" target="_blank" rel="noopener">日历的固定设置source</a></li><li><a href="https://github.com/liamcain/obsidian-periodic-notes/blob/5b96e4f14130b0c024edb5ddb7871d01d61d9522/README.md" target="_blank" rel="noopener">Periodic Notes 0.0.17的固定commit・官方README</a></li><li><a href="https://github.com/liamcain/obsidian-periodic-notes/blob/5b96e4f14130b0c024edb5ddb7871d01d61d9522/src/settings/SettingsTab.svelte" target="_blank" rel="noopener">Periodic Notes的固定设置UI source</a></li></ul>
+<p class="receipt-line">原件、设置和实际操作的记录是分开核对的。 官方release的文件和source的同一构建再现都没有验证。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="next"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">接下来，决定在日记中留下备忘录的入口</h2></div><div class="ce-chapter__body"><p>从日期、周号开始准备打开的形状后，可以选择从哪里添加每天的简短备忘录。 从iPhone到Obsidian的日志追加的路线、标准的每日笔记和日期格式的确认，在家长报道中处理。</p><div class="internal-links"><a data-next-step="daily-note" href="/zh/obsidian/daily-note/">每日笔记的家长报道</a><a href="/zh/obsidian/plugins/templater/">Templater的使用方法</a></div></div></section></article></main><script>document.querySelectorAll('[data-copy]').forEach(function(b){b.addEventListener('click',async function(){var k=b.getAttribute('data-copy'),e=document.querySelector('[data-code="'+k+'"]');try{await navigator.clipboard.writeText(e.textContent);b.textContent=globalThis.SimpleMemoI18n.text("コピーしました");setTimeout(function(){b.textContent=globalThis.SimpleMemoI18n.text("本文をコピー")},1600)}catch(err){b.textContent=globalThis.SimpleMemoI18n.text("コピーできませんでした")}})});</script><footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hans" dir="ltr"><a class="site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">记下一点想法，迈出下一步。</p><p class="site-footer-description">从 iPhone 向 Obsidian 和电子邮件发送笔记。</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="页脚导航">
+      <div class="footer__col">
+        <p class="footer__col-title">产品</p>
+        <a href="/zh/download/" class="footer__link">下载</a>
+        <a href="/zh/" class="footer__link">首页</a>
+        <a href="/zh/apple-watch/" class="footer__link">Apple Watch</a>
+        <a href="/zh/obsidian/" class="footer__link">Obsidian 集成</a>
+        <a href="/zh/use-cases/" class="footer__link">使用场景</a>
+        <a href="/zh/guides/" class="footer__link">使用指南</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比较与迁移</p>
+        <a href="/zh/note-to-email/" class="footer__link">将笔记发送到邮箱</a>
+        <a href="/zh/vs/" class="footer__link">对比</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">支持</p>
+        <a href="/zh/roadmap/" class="footer__link">公开路线图</a>
+        <a href="/zh/devlog/" class="footer__link">开发日志</a>
+        <a href="/zh/about/" class="footer__link">关于开发者</a>
+        <a href="/zh/faq" class="footer__link">常见问题</a>
+        <a href="/zh/privacy" class="footer__link">隐私</a>
+        <a href="/zh/contact" class="footer__link">联系我们</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 运营：YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

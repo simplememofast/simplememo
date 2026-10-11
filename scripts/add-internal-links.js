@@ -14,7 +14,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { toUrlPath } = require('./lib/site-files');
+const { collectHtmlFiles, toUrlPath } = require('./lib/site-files');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 
@@ -132,20 +132,13 @@ function processFile(filePath) {
 }
 
 function findOrphanPages() {
-  const allFiles = [];
+  const allFiles = collectHtmlFiles(ROOT_DIR, {
+    skipDirs: ['node_modules', '.git', 'scripts', 'docs', 'screenshots', 'admin', 'tiktok'],
+    skipFiles: ['404.html'],
+    skipHidden: false,
+    tolerateReadErrors: false,
+  });
   const allLinks = new Set();
-
-  function scanDir(dir) {
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
-    for (const entry of entries) {
-      if (['node_modules', '.git', 'scripts', 'docs', 'screenshots', 'admin', 'tiktok'].includes(entry.name)) continue;
-      const fullPath = path.join(dir, entry.name);
-      if (entry.isDirectory()) scanDir(fullPath);
-      else if (entry.name.endsWith('.html') && entry.name !== '404.html') allFiles.push(fullPath);
-    }
-  }
-
-  scanDir(ROOT_DIR);
 
   // Collect all internal links
   for (const file of allFiles) {
@@ -179,16 +172,7 @@ function main() {
     const dir = path.join(ROOT_DIR, pageType);
     if (!fs.existsSync(dir)) continue;
 
-    const files = [];
-    function scanDir(d) {
-      const entries = fs.readdirSync(d, { withFileTypes: true });
-      for (const entry of entries) {
-        const fp = path.join(d, entry.name);
-        if (entry.isDirectory()) scanDir(fp);
-        else if (entry.name.endsWith('.html')) files.push(fp);
-      }
-    }
-    scanDir(dir);
+    const files = collectHtmlFiles(dir, { skipHidden: false, tolerateReadErrors: false });
 
     for (const file of files) {
       if (processFile(file)) {

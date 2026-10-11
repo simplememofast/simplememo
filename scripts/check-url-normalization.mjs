@@ -242,6 +242,8 @@ await redirects("/blog/memo-shuukan-tips", "/blog/memo-habit");
 await redirects("/blog/memo-shuukan-tips.html", "/blog/memo-habit");
 await redirects("/en/blog/why-captio-died", "/en/captio-alternative/");
 await redirects("/en/blog/why-captio-died.html", "/en/captio-alternative/");
+await redirects("/en/blog/revenue-report-2025", "/en/blog/");
+await redirects("/en/blog/revenue-report-2025.html", "/en/blog/");
 await redirects("/blog/memo-app-free-guide", "/blog/free-memo-apps-ranking");
 await redirects("/blog/memo-app-free-guide.html", "/blog/free-memo-apps-ranking");
 await redirects("/blog/memo-app-free-guide?lang=ja", "/blog/free-memo-apps-ranking");
@@ -301,6 +303,8 @@ for (const slug of [
 await notFound("/docs/seo/FULL-AUDIT-REPORT-2026-07-07.md");
 await notFound("//docs//seo/FULL-AUDIT-REPORT-2026-07-07.md");
 await notFound("/scripts/seo-check.js");
+await notFound("/data/i18n/pages.json");
+await notFound("/data/i18n/translations/en.json");
 await notFound("/tools/");
 await notFound("/CLAUDE.md");
 // growth/ carries committed GSC snapshots and App Store exports. Pages deploys

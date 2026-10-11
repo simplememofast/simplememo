@@ -1,7 +1,7 @@
 import json, re, os, unicodedata
 from collections import Counter, defaultdict
 from bs4 import BeautifulSoup, Comment
-S='/private/tmp/claude-501/-Users-hajimeataka-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad'
+S='/private/tmp/claude-501/-Users-<user>-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad'
 WT=S+'/wt'; P=S+'/crawl/pages'; W=S+'/work-seo-schema'
 D=json.load(open(W+'/census.json')); R=D['results']
 sitemap=dict(l.rstrip('\n').split('\t') for l in open(W+'/sitemap_lastmod.tsv'))

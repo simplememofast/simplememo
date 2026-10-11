@@ -34,6 +34,11 @@ class SignatureTests(unittest.TestCase):
         self.assertNotEqual(content_signature(PAGE + old), content_signature(PAGE + old.replace('"price":3', '"price":5')))
         self.assertNotEqual(content_signature(PAGE + old), content_signature(PAGE + old.replace('3}', '3')))
 
+    def test_speakable_markup_does_not_refresh_content(self):
+        base = '<script type="application/ld+json">{"@type":"Article","headline":"Notes"}</script>'
+        with_speakable = '<script type="application/ld+json">{"@type":"Article","headline":"Notes","speakable":{"@type":"SpeakableSpecification","cssSelector":["h1"]}}</script>'
+        self.assertEqual(content_signature(PAGE + base), content_signature(PAGE + with_speakable))
+
     def test_tracking_normalization_preserves_functional_queries(self):
         self.assertEqual(link_destination('/search?q=notes&utm_source=x'), '/search?q=notes')
         self.assertNotEqual(link_destination('/search?q=notes'), link_destination('/search?q=tasks'))

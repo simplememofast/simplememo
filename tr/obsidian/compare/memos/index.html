@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/compare/memos/">
+  <title>Obsidian ve notların karşılaştırılması - Kendi kendine barındırma yolundaki çatal [2026] | SimpleMemo</title>
+  <meta name="description" content="Obsidian ve notları Markdown dosyası ile self-host SQLite&#x27;in ana kitabı arasındaki farktan karşılaştırın. Apple Silicon Mac&#x27;te Memos 0.30.0&#x27;yi başlattım ve gerçek Japonca notları, etiketleri, görevleri ve zaman çizelgesi kaydetmeyi kontrol ettim.">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Obsidian ve notların karşılaştırılması - Kendi kendine ev sahiplerinin yolundaki çatal">
+  <meta property="og:description" content="dosyasına ve sunucuyu kendiniz çalıştıran notlara sahip olan Obsidian. Memos 0.30.0&#x27;in gerçek ekranına dayanarak, yönetilecek nesnelerdeki farklılıkları düzenleyeceğiz.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-08T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/tr/obsidian/compare/memos/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-memos.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="tr_TR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian ve notların karşılaştırılması - Kendi kendine ev sahiplerinin yolundaki çatal">
+  <meta name="twitter:description" content="dosyasına ve sunucuyu kendiniz çalıştıran notlara sahip olan Obsidian. Gerçek makinedeki depolamayı kontrol ettim.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-memos.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/tr/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/compare/memos/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/tr/obsidian/compare/memos/#article",
+  "inLanguage": "tr",
+  "headline": "Obsidian ve notların karşılaştırılması - Kendi kendine ev sahiplerinin yolundaki çatal",
+  "description": "Obsidian ve notların depolama yöntemi ve operasyonel sorumluluk açısından karşılaştırılması. Notlar 0.30.0 gerçek makine onayını içerir.",
+  "url": "https://simplememofast.com/tr/obsidian/compare/memos/",
+  "datePublished": "2026-09-08",
+  "dateModified": "2026-10-03",
+  "author": {
+    "@type": "Person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-memos.png"
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Ana sayfa",
+      "item": "https://simplememofast.com/tr/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian karşılaştırması",
+      "item": "https://simplememofast.com/tr/obsidian/compare/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Obsidian ve notlar",
+      "item": "https://simplememofast.com/tr/obsidian/compare/memos/"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Hangisini seçmeliyim, Obsidian veya notlar?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Markdown dosyasını doğrudan yönetmek istiyorsanız, Obsidian bir adaydır ve kendiniz çalıştırdığınız bir web uygulamasına kısaca kaydetmek ve zaman çizelgesine geri bakmak istiyorsanız, memlar bir adaydır."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "memos, Obsidian kasasını doğrudan kullanabilir mi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Kullanamıyorum. SQLite bu standart girişimde başlatıldı. Obsidian'in Markdown klasörünü doğrudan düzenlemek için bir mekanizma değildir."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Notlar ücretsiz mi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ana gövde açık kaynaktır. Bununla birlikte, halka açık olarak işletilen sunucuların ve alan adlarının maliyeti ve güncellemeleri, yedeklemeleri ve güvenliği ayrı ayrı yönetmek için gereken süre gereklidir."
+      }
+    }
+  ],
+  "inLanguage": "tr",
+  "@id": "https://simplememofast.com/tr/obsidian/compare/memos/#faq"
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="Genel gezinme" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/tr/guides/">Kılavuzlar</a></li><li><a href="/tr/use-cases/">Kullanım örnekleri</a></li><li><a href="/tr/vs/">Karşılaştır</a></li><li><a href="/tr/blog/">Blog</a></li><li><a href="/tr/about/">Geliştirici hakkında</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">İndir</a><details class="site-languages"><summary aria-label="Türkçe · Dil seçin"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>TR</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="tr" dir="ltr"><p class="site-language-title">Dil seçin</p><div class="site-language-grid"><a href="/obsidian/compare/memos/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/compare/memos/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/compare/memos/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/compare/memos/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/compare/memos/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/compare/memos/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/compare/memos/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/compare/memos/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/compare/memos/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="tr" aria-current="page"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true">✓</span></span></div></div></details></div></nav>
+<main class="page-content"><div class="container" style="max-width:880px">
+  <header class="lp-hero sd-hero"><div class="sd-hero-copy"><div class="lp-hero__label">Obsidian × not</div><h1 class="lp-hero__title">Obsidian ve notların karşılaştırılması <br> Kendi kendine ev sahibi fraksiyonunun çatalı</h1><p class="lp-hero__sub">Her ikisi de "kendi" defterleridir, ancak tuttuğunuz defterler farklıdır. Obsidian, Markdown dosyalarını yönetir ve notlar web uygulamalarını ve veritabanlarını kendi başına yönetir. Aslında Mac'imde Memos 0.30.0'yi başlattım ve farkı görmek için kısa notlar kaydettim.</p><p class="article-meta">Yazar: <a href="/tr/about/">AI ATAKA</a> ・ Yayın ve onay tarihi: <time datetime="2026-09-08">2026 yıl 9 ay 8 gün</time></p></div><nav class="sd-hero-index" aria-label="Bu sayfanın içeriği"><p>Bu sayfanın içeriği</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Sonuç: Bir dosyanız var mı veya hizmeti çalıştırıyor musunuz</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Karşılaştırma tablosu: Benzerlik sahiplenme duygusudur, fark orijinaldir</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Memos 0.30.0'i yerel olarak başlatmayı ve kaydetmeyi denedim</span><span aria-hidden="true">↗</span></a></nav></header>
+  <aside class="tip-box">Bu sayfa<strong>Obsidian ve notların depolama ve çalışmasının karşılaştırılması</strong>. " "Kendi kendine barındırma ise aynıdır" olarak özetlenmez ve gerçekten yönetilecek nesneleri bölerek yargılayacağız.</aside>
+  <section class="lp-section ce-chapter sd-chapter" style="padding-top:1rem"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">Sonuç: Bir dosyaya sahip olun veya hizmeti çalıştırın</h2></div><div class="ce-chapter__body"><p class="lp-section__lead"><strong>Notun asıl kopyasını sıradan bir dosya olarak doğrudan yönetmek istiyorsanız Obsidian uygundur. Tarayıcıdan kısa notlar yazıp zaman çizelgesi, etiketler ve görünürlüğü tek web uygulamasında yönetmek istiyorsanız memos bir seçenektir.</strong></p><p>Notları kendi kendinize barındırsanız bile, ana kitap Obsidian ile aynı Markdown klasörü olmayacaktır. Bu başlangıçta, Memos tarafından belirtilen veri dizininde SQLite başlatıldı. Özgürlük yerine, yedekleme ve güncellemeler de dahil olmak üzere hizmet işlemlerini üstleniyoruz.</p></div></section>
+  <section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="comparison"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">Karşılaştırma tablosu: Benzer olan sahiplenme duygusudur, farklı olan ana kitaptır</h2></div><div class="ce-chapter__body"><div class="sd-table" tabindex="0" role="region" aria-label="Yatay olarak kaydırılabilen tablo"><table class="rt-table"><thead><tr><th>Yargı ekseni</th><th>Obsidian</th><th>notlar</th></tr></thead><tbody>
+    <tr><th>Şobon</th><td data-label="Obsidian">Kasa içindeki Markdown dosyası</td><td data-label="notlar">Bir web uygulaması tarafından işlenen bir veritabanı. Bu standart başlangıç SQLite'dir</td></tr>
+    <tr><th>Ana giriş</th><td data-label="Obsidian">Masaüstü/mobil uygulamada açık notlar</td><td data-label="notlar">Tarayıcı bestecisinden zaman çizelgesine gönder</td></tr>
+    <tr><th>Düzenle</th><td data-label="Obsidian">Klasörler, bağlantılar, özellikler, eklentiler</td><td data-label="notlar">Etiket, Arama, Takvim, Pin, İlişkiler, Kaydedilen Görünümler</td></tr>
+    <tr><th>Paylaş</th><td data-label="Obsidian">Ayrı olarak yayınla'yı seçin</td><td data-label="notlar">Her not için herkese açık bir aralığa sahip olma</td></tr>
+    <tr><th>Kendin yönettiğin şey</th><td data-label="Obsidian">Dosya yerleştirme ve senkronizasyon yöntemi</td><td data-label="notlar">Sunucu, veri, güncelleme, yedekleme ve yayın sırasında HTTPS</td></tr>
+    <tr><th>Bu seferki onay</th><td data-label="Obsidian">Resmi depolama özellikleri</td><td data-label="notlar">0.30.0 yerel başlatma, yönetici oluşturma, Japonca not kaydetme</td></tr>
+  </tbody></table></div><p>Notların kompozisyon ve işlem sorumlulukları <a href="https://usememos.com/docs/deploy/binary" target="_blank" rel="noopener">resmi İkili kılavuzda</a> ve düzenleme, etiketler, ilişkiler ve açıklama kapsamı <a href="https://usememos.com/docs/usage/memos" target="_blank" rel="noopener">resmi kullanım kılavuzunda</a> onaylanır.</p></div></section>
+  <section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="hands-on"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">Memos 0.30.0'i yerel olarak başlatmaya ve kaydetmeye çalıştım</h2></div><div class="ce-chapter__body"><p class="lp-section__lead">Apple Silicon için resmi GitHub Sürümleri arşivini elde etti, genel sağlama toplamlarının ve SHA-256'nin eşleştiğini doğruladı ve ardından halka açık olmayan bir yerel ortamda başlattı.</p><ol class="steps-list">
+    <li><strong>Yeni bir veri alanında başlayın. </strong><br> Göreve adanmış geçici bir dizin belirttiğinizde, SQLite başlatıldı ve özel erişimle başlatıldı.</li>
+    <li><strong>İlk yöneticiyi oluşturun. </strong><br> İlk ekranda yerel doğrulama için bir yönetici oluşturdum. Arama, takvim, etiket, genel aralık ve giriş alanları ana sayfada sıralanır.</li>
+    <li><strong>Japonca kısa bir not kaydedin. </strong><br> etiketleri, tamamlanmamış kontrol öğeleri, madde işaretleri ve gövde tek bir nota girildi.</li>
+    <li><strong> zaman çizelgesindeki yansımayı kontrol edin. </strong><br> kaydedildikten hemen sonra bir not görüntülendi, sola bir etiket eklendi ve günün takviminde 1 görüntülendi.</li>
+  </ol>
+  <figure class="shot"><a href="/assets/img/obsidian/memos-home.png"><img src="/assets/img/obsidian/memos-home.png" alt="Memos 0.30.0&#x27;i yerel olarak başlatın ve yönetici oluşturduktan sonra boş zaman çizelgesini görüntüleyin" width="1200" height="649" loading="lazy"></a><figcaption>Gerçek çekim: Yöneticinin oluşturulmasından hemen sonra evde. Yerel boş bir örnektir ve kişisel verileri içermez.</figcaption></figure>
+  <figure class="shot"><a href="/assets/img/obsidian/memos-note.png"><img src="/assets/img/obsidian/memos-note.png" alt="0.30.0 Notlar&#x27;da Japonca etiketleri, kontrol öğeleri ve madde işaretlerini kaydeden zaman çizelgesi" width="1200" height="649" loading="lazy"></a><figcaption>Gerçek çekim: Karşılaştırma notunu kaydettikten sonra. Etiket, görev ve tarih sayısını kontrol ettim.</figcaption></figure>
+  </div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="storage"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">Kendi kendine barındırma bile mutlaka "Markdown doğrudan"</h2></div><div class="ce-chapter__body"><p>Obsidian kasasını dosya yöneticisinde açarak notların gerçek dosyalarını görebilirsiniz. Aynı Markdown dosyasını başka bir düzenleyicide okuyabilmek, araç değiştirmek istediğinizde size çıkış yolu sağlar.</p><p>memos’ta sunucu veritabanını okuyup yazar ve arayüzü sunar. Resmî belgelere göre varsayılan SQLite’dir; MySQL veya PostgreSQL de seçilebilir. Bu, veriyi kendi kontrolünüzde tutmak açısından güçlüdür; ancak Obsidian kasasını doğrudan açıp birlikte kullanma yöntemi değildir. Taşınmayı düşünüyorsanız üretimde kullanmadan önce küçük bir veri grubuyla yedekleme, geri yükleme ve gereken biçimde dışa aktarmayı deneyin. Bu testte bunlar doğrulanmadı.</p></div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="operations"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">Notlar seçtiğinizde artan şey, not işlevinden ziyade operasyonel sorumluluktur</h2></div><div class="ce-chapter__body"><p>Yalnızca evde veya şirket içinde kullansanız bile güncellemeler ve yedeklemeler gereklidir. İnternette yayınlarsanız, arıza durumunda etki alanları, ters proxy, HTTPS, erişim kontrolü ve kurtarma ile de ilgilenecektir. Resmi kılavuz ayrıca ikili kullanıcıların yükseltmeleri, geri almaları, süreç izlemeyi, veri izinlerini ve HTTPS'i yönettiğini açıklar.</p><p><strong>Sunucunun kendisinin çalışmasının keyfini çıkarabiliyorsanız veya zaten bir işletim altyapınız varsa, memos'un kendi kendine barındırması doğal bir seçimdir. </strong> Yalnızca notlara odaklanmak istiyorsanız, yerel dosyaları işleyen Obsidian, sorumluluk kapsamını daraltmayı kolaylaştırır.</p></div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="capture"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">Hangisini seçerseniz seçin, hareket halindeki giriş ayrı olarak değerlendirilecektir</h2></div><div class="ce-chapter__body"><p>Obsidian, bilgiyi depolayan ve birbirine bağlayan bir araçtır ve notlar, kısa kayıtları zaman çizelgesine aktarmak için bir araç olarak tasarlanmıştır. Ancak, Apple Watch ve Siri'den bir kelime bırakma hızı başka bir konudur. SimpleMemo'te Obsidian bağlantısı açıksa, e-posta tutulurken Obsidian vb. günlük notuna eklenecektir. <strong>Doğrudan notlara göndermek için bir işlev yoktur. </strong>Varış noktası Obsidian ise, yardımcı giriş olarak kullanılabilir.</p><aside class="tip-box"><strong>Rolleri karıştırmayın:</strong> Kendi sunucunuzda çalışan memos ile SimpleMemo arasında doğrudan entegrasyon yoktur. Entegrasyon varmış izlenimi veren ifadelerden kaçının ve önce gerçek kayıt hedefini belirleyin.</aside></div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">Sık sorulan sorular</h2></div><div class="ce-chapter__body">
+    <div class="faq-item"><details><summary class="faq-summary">Hangisini seçmeliyim, Obsidian veya notlar?</summary><div class="faq-answer">Markdown dosyasını doğrudan yönetmek istiyorsanız, Obsidian bir adaydır ve kendiniz çalıştırdığınız bir web uygulamasına kısaca kaydetmek ve zaman çizelgesine geri bakmak istiyorsanız, memlar bir adaydır.</div></details></div>
+    <div class="faq-item"><details><summary class="faq-summary">memos, Obsidian kasasını doğrudan kullanabilir mi?</summary><div class="faq-answer">Kullanamıyorum. SQLite bu standart girişimde başlatıldı. Obsidian'in Markdown klasörünü doğrudan düzenlemek için bir mekanizma değildir.</div></details></div>
+    <div class="faq-item"><details><summary class="faq-summary">Notlar ücretsiz mi?</summary><div class="faq-answer">Ana gövde açık kaynaktır. Bununla birlikte, halka açık olarak işletilen sunucuların ve alan adlarının maliyeti ve güncellemeleri, yedeklemeleri ve güvenliği ayrı ayrı yönetmek için gereken süre gereklidir.</div></details></div>
+  </div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="verification"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">Doğrulama ortamı ve kapsamı</h2></div><div class="ce-chapter__body"><div class="tip-box"><p><strong>Gerçek makine onayı:</strong> 2026 yıl 9 ay 8, Apple Silikon Mac/macOS 26.4.1/Memos 0.30.0. Resmi darwin arm64 arşivi yayınlandı. SHA-256 ile eşleştirildi ve yalnızca yerel olarak etkinleştirildi. SQLite başlatma, özel erişim, yönetici oluşturma ve Japonca notların, etiketlerin ve görevlerin kaydedilmesi onaylandı.</p><p><strong>Doğrulanmamış:</strong> Harici sürüm, HTTPS, birden fazla kullanıcı, Alanlar, SSO, başka bir terminalle kullanım, yedekleme kurtarma, yükseltme, içe/dışa aktarma, mobil, Obsidian geçişi, SimpleMemo ile doğrudan işbirliği. Doğrulanmamış çalışma garanti edilmez.</p></div><p>Bu, karşılaştırma hedefiyle ortaklaşa bir makale değildir. Bu site YURIKA, K.K. tarafından işletilmektedir ve bağımsız "SimpleMemo" uygulaması hakkında bilgiler de yayınlanmıştır.</p></div></section>
+  <aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/tr/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">Sonra okuyun</span><strong>Obsidian'i nota nasıl gönderirsiniz</strong><span style="display:block;margin-top:.5rem"> Nerede saklayacağınıza karar verdikten sonra, yürürken girişi hazırlayın. </span></a></aside>
+  <nav class="internal-links" aria-label="İlgili sayfalar"><a href="/tr/obsidian/compare/">Obsidian Karşılaştırma Merkezi</a><a href="/tr/obsidian/compare/logseq/">Logseq ile karşılaştırma</a><a href="/tr/obsidian/compare/capacities/">Capacities ile karşılaştırma</a><a href="/tr/obsidian/getting-started/">Obsidian nasıl başlatılır</a></nav>
+</div></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="tr" dir="ltr"><a class="site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Küçük bir not. Bir sonraki adım.</p><p class="site-footer-description">iPhone'unuzdan Obsidian'a ve e-postaya not gönderin.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="Alt bilgi gezinmesi"><div class="footer__col"><p class="footer__col-title">Ürün</p><a href="/tr/download/" class="footer__link">İndir</a><a href="/tr/" class="footer__link">Ana sayfa</a><a href="/tr/obsidian/" class="footer__link">Obsidian entegrasyonu</a></div><div class="footer__col"><p class="footer__col-title">Karşılaştırmalar ve geçiş</p><a href="/tr/vs/" class="footer__link">Karşılaştır</a><a href="/tr/obsidian/compare/" class="footer__link">Obsidian karşılaştırması</a></div><div class="footer__col"><p class="footer__col-title">Destek</p><a href="/tr/about/" class="footer__link">Geliştirici hakkında</a><a href="/tr/faq" class="footer__link">Sık sorulan sorular</a><a href="/tr/privacy" class="footer__link">Gizlilik</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / İşleten: YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

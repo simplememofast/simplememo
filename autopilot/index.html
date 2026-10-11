@@ -7,22 +7,22 @@
   <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/autopilot/">
     <!-- Google tag (gtag.js) -->
   <script>
-    window.addEventListener('load', function() {
+    (function() {
       if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
-      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
-      ric(function() {
-        var s = document.createElement('script');
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
-        s.async = true;
-        document.head.appendChild(s);
-        s.onload = function() {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
-        };
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
       });
-    });
+    })();
   </script>
   <title>自律型アプリ運営の実測値 | Obsidian連携シンプルメモ</title>
   <meta name="description" content="Obsidian連携シンプルメモの運営を、AIがどこまで実行し、どこから人間が判断しているか。運転台帳から出した実測値、可逆／不可逆で分けた権限表、まだできていないことの一覧を、集計スクリプトと生きた台帳ごと公開しています。">
@@ -51,6 +51,14 @@
   <link rel="canonical" href="https://simplememofast.com/autopilot/">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/autopilot/">
   <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/autopilot/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/autopilot/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/autopilot/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/autopilot/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/autopilot/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/autopilot/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/autopilot/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/autopilot/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/autopilot/">
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/autopilot/">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -275,30 +283,35 @@
 
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="メインナビゲーション">
+  <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
-      <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
-        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
+      <a class="global-nav__logo site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/guides/">使い方</a><a href="/use-cases/">活用事例</a><a href="/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/">使い方</a></li>
+        <li><a href="/use-cases/">活用事例</a></li>
+        <li><a href="/vs/">比較</a></li>
         <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
         <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
         <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
-        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
-        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=3d126d78-2267-4a6c-a860-c69707ab90a5&amp;pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
+        <li><a href="/faq">よくある質問</a></li>
+        <li><a href="/about/">開発者について</a></li>
+        <li><a href="/devlog/">開発記録</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=3d126d78-2267-4a6c-a860-c69707ab90a5&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/autopilot/" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/autopilot/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
-        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=3d126d78-2267-4a6c-a860-c69707ab90a5&amp;pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="日本語 · 言語を選択"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>JA</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ja" dir="ltr"><p class="site-language-title">言語を選択</p><div class="site-language-grid"><span class="site-language-current" data-site-locale="ja" aria-current="page"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/en/autopilot/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/autopilot/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/autopilot/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/autopilot/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/autopilot/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/autopilot/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/autopilot/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/autopilot/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/autopilot/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=3d126d78-2267-4a6c-a860-c69707ab90a5&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
           <span lang="ja">ダウンロード</span>
         </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="メニュー"><span>メニュー</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
   </nav>
@@ -308,7 +321,7 @@
 
 <main class="page-content">
     <div class="container">
-      <h1 class="page-content__title">自律型アプリ運営 — どこまでAIが実行し、どこから人間が決めているか</h1>
+      <h1 class="page-content__title sd-title">自律型アプリ運営 — どこまでAIが実行し、どこから人間が決めているか</h1>
 
       <p class="ap-lead">
         このアプリの日々の運営は、その大半をAIが実行しています。ただし「全部を自動でやっている」わけではありません。
@@ -319,7 +332,7 @@
         載せている数字はすべて台帳から出しています。<b>推定値と、まだ測れていないものは、そうと書いてあります。</b>
       </p>
       <section id="citation-summary" aria-labelledby="citation-title" class="ap-note">
-        <h2 id="citation-title">紹介・引用用：23日間の結果を読む</h2>
+        <h2 id="citation-title" data-ce-number="01">紹介・引用用：23日間の結果を読む</h2>
         <p>以下は<strong>2026年8月11日〜9月2日（日本時間）</strong>の固定集計です。日々更新される下の稼働状況とは区別しています。</p>
         <blockquote>シンプルメモのAI運営台帳では、23日間の全41件のうち実際に着手した28回で19回が出荷に至り、28回中7回に人の介入が記録された。</blockquote>
         <p>出荷率の分母は41件ではなく着手28回。残る13件は、この観測期間の条件によるスキップ11件と無運転2件です。人の介入には基盤修理などを含み、成果物の編集が0件でも「人の作業がゼロ」とは言えません。</p>
@@ -327,12 +340,12 @@
         <p><a href="/assets/downloads/autopilot-runs-2026-09-02.csv" download>全41件のCSVを保存</a> ／ <a href="/assets/img/research/autopilot-outcomes-2026-09-02-ja.svg" download>日本語の結果図（SVG）を保存</a> ／ <a href="/data/autopilot-research-2026-09-02.json">集計元の固定データ</a> ／ <a href="/en/autopilot/">集計方法と失敗事例（英語）</a></p>
         <p>紹介時は期間・分母とともに<a href="https://simplememofast.com/autopilot/#citation-summary">この集計へのリンク</a>を添えると、読者が原本を確認できます。単一アプリの運営者による記録で、一部は履歴から再構成しています。対照群や人の作業時間の比較はなく、時間削減・売上増加・他社での再現性は示していません。</p>
       </section>
-      <p class="ap-stamp">最終更新 2026-09-04 ／ <b>節ごとに計測時点が違います。</b>§3 の率は 2026-08-11 〜 2026-09-02（23日・41実行）時点、§5 の自律スコアは<span data-decision-date>2026-09-20</span>時点の台帳から計算しています ／ 台帳（§10）は生きているので、日々動きます</p>
+      <p class="ap-stamp">最終更新 2026-09-04 ／ <b>節ごとに計測時点が違います。</b>§3 の率は 2026-08-11 〜 2026-09-02（23日・41実行）時点、§5 の自律スコアは<span data-decision-date>2026-10-10</span>時点の台帳から計算しています ／ 台帳（§10）は生きているので、日々動きます</p>
       <p class="ap-note"><a href="/en/autopilot/" lang="en">English report: results, methodology and failure cases</a> ／ <a href="/assets/downloads/autopilot-runs-2026-09-02.csv">2026年9月2日までの41実行（CSV）</a> ／ <a href="/press/">紹介用の図表・資料</a>。CSVは期間を固定した記録です。最新値は下の台帳を参照してください。</p>
 
       <!-- 1. 1サイクル -->
       <section class="ap-sec">
-        <h2>1. 1日のサイクル</h2>
+        <h2 id="reading-02">1. 1日のサイクル</h2>
         <p class="ap-note">定時に起動し、次の順で回ります。人が毎回指示を出す起点はありません。</p>
         <ol class="ap-cycle">
           <li><b>観測</b><span>検索クエリの動き・サイトの実描画・実行台帳・費用・資格情報の期限を読む。前日までに解決していない不具合があれば、そこから拾う。</span></li>
@@ -347,12 +360,12 @@
 
       <!-- 2. 担当分担 -->
       <section class="ap-sec">
-        <h2>2. 担当分担 — 即時に出せるものと、審査を通るもの</h2>
+        <h2 id="reading-03">2. 担当分担 — 即時に出せるものと、審査を通るもの</h2>
         <p class="ap-note">
           この2つを1つの「自動デプロイ」として説明すると、実態より強く聞こえます。分けて書きます。
         </p>
         <div class="ap-tablewrap">
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="ap-table">
           <thead><tr><th>経路</th><th>対象</th><th>AIが即時に本番へ出せるか</th></tr></thead>
           <tbody>
@@ -363,12 +376,12 @@
         </div>
         </div>
         <p class="ap-note" id="lane-b">
-          <b>Lane B の実測（2026-08-11〜09-08・<a href="/data/app-releases.json">アプリ本体の台帳</a>）。</b>
-          タグを切った版は<b>52</b>、うちApp Storeに並んだ版は<b>10</b>（5.7.8 / 5.7.11 / 5.8.0 / 5.8.1 / 5.8.2 / 5.8.4 / 5.8.5 / 5.8.9 / 5.8.17 / 5.8.26）。
-          実機確認の記録がある版は<b>3</b>（記録の台帳が2026-08-28に始まったためで、それ以前の版は「無い」としか言えません。記録は人の申告で、機械の検証ではありません）。
-          台帳に保存した状態の観測から、公開時刻を幅として持てた版が<b>3</b>。
-          各版のコード差分は、コミットで<b>40.3%</b>、変更行で<b>21.1%</b>がAI著者です（数え方は§3のコード著者率と同じ。署名・トレーラー・Claude Code の足跡のいずれも持たないコミットは人側に数えるので、手元の環境から所有者の署名で入れた変更はここに出ません）。
-          <b>公開状態の観測だけでは、実機確認・審査提出・公開をAIが実行した証拠にはなりません。</b>上の§1の「出荷」にこの10版は含めていません。
+          <b>Lane B の実測（2026-08-11〜10-09・<a href="/data/app-releases.json">アプリ本体の台帳</a>）。</b>
+          タグを切った版は<b>85</b>、うちApp Storeに並んだ版は<b>17</b>（5.7.6 / 5.7.8 / 5.7.11 / 5.8.0 / 5.8.1 / 5.8.2 / 5.8.4 / 5.8.5 / 5.8.9 / 5.8.17 / 5.8.26 / 5.8.46 / 5.8.54 / 5.8.57 / 5.8.66 / 5.9.9 / 5.9.11）。
+          実機確認の記録がある版は<b>5</b>（記録の台帳が2026-08-28に始まったためで、それ以前の版は「無い」としか言えません。確認方法は各版の記録に記載しています。記録の存在だけでは、自律した実機検証の証拠にはなりません）。
+          台帳に保存した状態の観測から、公開時刻を幅として持てた版が<b>6</b>。
+          各版のコード差分は、コミットで<b>20.2%</b>、変更行で<b>8.2%</b>がAI著者です（数え方は§3のコード著者率と同じ。署名・トレーラー・Claude Code の足跡のいずれも持たないコミットは人側に数えるので、手元の環境から所有者の署名で入れた変更はここに出ません）。
+          <b>公開状態の観測だけでは、実機確認・審査提出・公開をAIが実行した証拠にはなりません。</b>上の§1の「出荷」にこの17版は含めていません。
         </p>
         <p class="ap-note">
           権限表は19領域あり、<b>そのうち15が稼働中・10が承認制</b>です。
@@ -377,7 +390,7 @@
           実際に人が承認したかどうかは機械では見られません。そこは表の側に書いてあります。
         </p>
         <div class="ap-tablewrap">
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="ap-table">
           <thead><tr><th>操作</th><th>可逆性</th><th>誰が決めるか</th></tr></thead>
           <tbody>
@@ -404,7 +417,7 @@
 
       <!-- 3. 実測 -->
       <section class="ap-sec">
-        <h2>3. 実測 — 何回動き、何回人が入ったか</h2>
+        <h2 id="reading-04">3. 実測 — 何回動き、何回人が入ったか</h2>
         <div class="ap-kpis">
           <div class="ap-kpi"><div class="ap-kpi__v">67.9%</div><div class="ap-kpi__l">AI完走率<br>（着手28回のうち出荷19回）</div></div>
           <div class="ap-kpi"><div class="ap-kpi__v">25.0%</div><div class="ap-kpi__l">人間介入率<br>（人が1回でも触った実行）</div></div>
@@ -417,7 +430,7 @@
           そこで介入を種類で分けています。
         </p>
         <div class="ap-tablewrap">
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="ap-table">
           <thead><tr><th>介入の種類</th><th class="num">実行数</th><th class="num">割合</th></tr></thead>
           <tbody>
@@ -440,11 +453,12 @@
           無運転日は2日（8月16日・17日）です。
           <b>「連続稼働」は実行結果の記録が続いた日数です。</b>事前判定によるスキップや失敗も含みます。無運転（no_run）と台帳に記録のない日は連続を切り、出荷の有無は「連続出荷」で別に数えます。
           <!-- run-streaks:start -->
-          この定義での連続稼働は現在<b>33</b>日（2026年8月18日〜2026年9月19日）で、最長も<b>33</b>日（2026年8月18日〜2026年9月19日）です。
-          「現在」は台帳の最終記入日（2026年9月19日）時点です。
+          この定義での連続稼働は現在<b>54</b>日（2026年8月18日〜2026年10月10日）で、最長も<b>54</b>日（2026年8月18日〜2026年10月10日）です。
+          「現在」は台帳の最終記入日（2026年10月10日）時点です。
           稼働の定義では、失敗して行が立った日も「記録がある日」なので連続が切れません。
-          <b>連続出荷は現在4日</b>（2026年9月16日〜2026年9月19日）で、<b>連続出荷の最長は8日</b>（2026年9月1日〜2026年9月8日）です。
+          <b>連続出荷は現在0日</b>で、<b>連続出荷の最長は8日</b>（2026年9月1日〜2026年9月8日）です。
           <!-- run-streaks:end -->
+          10月1日の復旧記帳はオーナー依頼の保守です。9月20日と10月1日の成果物なしの結果を残し、既存の原因修正を検証して修理記録を結びました。定期運転の公開成功や無介入出荷には数えません。
           9月16日・17日の回収記録はオーナー依頼の保守で、定期運転・無介入出荷・記事公開ではありません。9月17日はページ内移動修正1件が検証済み、ポスター試行とロールバックは1つの速度基準未達サイクルです。未取得タスク結果は不明、断続的な描画遅延は未解決のままです。
           9月9日は事前判定で重複実行を回避した記録だけがあり、実装には着手せず、出荷もしていません。この日も上記の連続稼働日数には含まれます。
           9月10日は占有後に検証環境の不足で中断した1件と、別の実行が重複防止で終了した1件を記録しています。どちらも出荷には数えていません。
@@ -462,7 +476,7 @@
 
       <!-- 4. 領域別 -->
       <section class="ap-sec">
-        <h2>4. 自動化率 — 月ごとの推移と、領域別の内訳</h2>
+        <h2 id="reading-05">4. 自動化率 — 月ごとの推移と、領域別の内訳</h2>
         <p class="ap-note">
           <b>自律度は12.5%→85.4%。</b>2026年6月から9月までの4か月ぶんです。同じ192タスクを分母に固定して数えています。
           コード変更のAI著者率は業務の実行率とは別の指標です。月ごとに変動し、9月は途中集計です。月次の値は<a href="/data/autonomy-timeline.json">自律度の推移</a>の code_ai_commit_rate / code_ai_line_rate に記録しています。
@@ -474,7 +488,7 @@
                width="880" height="352" loading="lazy" style="max-width:100%;height:auto;">
         </figure>
         <div class="ap-tablewrap">
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="ap-table">
           <thead><tr><th>月</th><th class="num">総合自動化率</th><th class="num">その月に実行側へ移った数</th><th>測り方</th></tr></thead>
           <tbody>
@@ -511,7 +525,7 @@
           タスクの粒度は領域間で揃っておらず、全タスクを等価に数えている点は限界として付記します。
         </p>
         <div class="ap-tablewrap">
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="ap-table">
           <thead><tr><th>領域</th><th class="num">総合</th><th class="num">AI関与</th></tr></thead>
           <tbody>
@@ -543,7 +557,7 @@
 
       <!-- 5. 自律スコア -->
       <section class="ap-sec">
-        <h2>5. 自律スコア — 「自動化できた量」ではなく「検証された決定の量」</h2>
+        <h2 id="reading-06">5. 自律スコア — 「自動化できた量」ではなく「検証された決定の量」</h2>
         <p class="ap-note">
           §4 の自動化率は<b>タスク被覆率</b>です。「何を自動化できたか」は言いますが、
           <b>「その決定が正しかったかを確かめる仕組みがあるか」は一言も言いません。</b>
@@ -556,7 +570,7 @@
           運営の決定を5層に分け、実装の検証に加えて、適格性の判定・価値契約の決済・成熟後の探索を接続しました。<b>実装の完了と、運用実績による実証を区別して表示します。</b>
         </p>
         <div class="ap-tablewrap">
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="ap-table">
           <thead><tr><th>層</th><th>何を決める層か</th><th>反証器</th><th>状態</th></tr></thead>
           <tbody>
@@ -570,20 +584,20 @@
         </div>
         </div>
         <p class="ap-note">
-          <b>自律スコアは<span data-score-total>47.9</span>点（100点満点、<span data-decision-date>2026-09-20</span>時点）です。</b>
+          <b>自律スコアは<span data-score-total>42.3</span>点（100点満点、<span data-decision-date>2026-10-10</span>時点）です。</b>
           検証済み決定被覆率は、事前に固定した契約が公開後の実測で決済されて初めて加点されます。
           <b>90点超えは目標であり、実測で到達するまで達成とは表示しません。</b>
         </p>
         <div class="ap-tablewrap">
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="ap-table">
           <thead><tr><th>成分</th><th class="num">得点</th><th class="num">配点</th><th>いま何が起きているか</th></tr></thead>
           <tbody>
-            <tr data-score="vdc"><td>検証済み決定被覆率</td><td class="num"><b>7.5</b></td><td class="num">30</td><td>期間内の出荷24件のうち、事前宣言と公開後の実測決済を確認できたのは6件。</td></tr>
-            <tr data-score="umr"><td>無検査マージ率</td><td class="num"><b>18.4</b></td><td class="num">25</td><td>人の介入なく本番へ届いた変更の割合を可逆性で重み付け。R0には寄与の上限があります。</td></tr>
-            <tr data-score="ra"><td>復旧自律性</td><td class="num"><b>6.0</b></td><td class="num">20</td><td>故障15件のうち機械が検知したのは3件、無介入の修理は6件。本番の自動revert成功は0回。</td></tr>
-            <tr data-score="ep"><td>エスカレーション精度</td><td class="num"><b>7.4</b></td><td class="num">15</td><td>エスカレーションの必要性を判定済みなのは23件。うち18件はオーナー委任によるAI評価で、独立した人間評価ではありません。</td></tr>
-            <tr data-score="tuc"><td>制約下スループット</td><td class="num"><b>8.6</b></td><td class="num">10</td><td>検査を維持して週6.0回出荷。週7回が配点上の基準です。</td></tr>
+            <tr data-score="vdc"><td>検証済み決定被覆率</td><td class="num"><b>12.0</b></td><td class="num">30</td><td>期間内の出荷15件のうち、事前宣言と公開後の実測決済を確認できたのは6件。</td></tr>
+            <tr data-score="umr"><td>無検査マージ率</td><td class="num"><b>10.3</b></td><td class="num">25</td><td>人の介入なく本番へ届いた変更の割合を可逆性で重み付け。R0には寄与の上限があります。</td></tr>
+            <tr data-score="ra"><td>復旧自律性</td><td class="num"><b>5.7</b></td><td class="num">20</td><td>故障7件のうち機械が検知したのは4件、無介入の修理は0件。本番の自動revert成功は0回。</td></tr>
+            <tr data-score="ep"><td>エスカレーション精度</td><td class="num"><b>8.9</b></td><td class="num">15</td><td>エスカレーションの必要性を判定済みなのは23件。うち18件はオーナー委任によるAI評価で、独立した人間評価ではありません。</td></tr>
+            <tr data-score="tuc"><td>制約下スループット</td><td class="num"><b>5.4</b></td><td class="num">10</td><td>検査を維持して週3.8回出荷。週7回が配点上の基準です。</td></tr>
           </tbody>
         </table>
         </div>
@@ -600,13 +614,13 @@
           答えられなかったのは調べ方の問題ではなく、記録が同じ列に入っていたからです。台帳に記録された出荷以外の結果を、以下の層で分けています。
         </p>
         <div class="ap-tablewrap">
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="ap-table">
           <thead><tr><th>層</th><th class="num">件数</th><th>意味</th><th>いちばん近い例</th></tr></thead>
           <tbody>
-            <tr data-stage="eligibility"><td>適格性（実行前に止まった）</td><td class="num"><b>21</b></td><td>判定して、着手しなかった</td><td>秘密鍵が無い日に静かに寝た（8回）／<b>構造化された判定記録が無い（6回）</b></td></tr>
-            <tr data-stage="execution"><td>実行（着手して落ちた）</td><td class="num"><b>11</b></td><td>作りに行って、途中で死んだ</td><td>権限拒否・認証失敗・時間切れ</td></tr>
-            <tr data-stage="cost"><td>コスト（枠で止まった）</td><td class="num"><b>7</b></td><td>使用量の上限に当たった</td><td>主系と副系が同じ枠を食って同日に落ちた</td></tr>
+            <tr data-stage="eligibility"><td>適格性（実行前に止まった）</td><td class="num"><b>50</b></td><td>判定して、着手しなかった</td><td>秘密鍵が無い日に静かに寝た（8回）／<b>構造化された判定記録が無い（6回）</b></td></tr>
+            <tr data-stage="execution"><td>実行（着手して落ちた）</td><td class="num"><b>13</b></td><td>作りに行って、途中で死んだ</td><td>権限拒否・認証失敗・時間切れ</td></tr>
+            <tr data-stage="cost"><td>コスト（枠で止まった）</td><td class="num"><b>8</b></td><td>使用量の上限に当たった</td><td>主系と副系が同じ枠を食って同日に落ちた</td></tr>
             <tr data-stage="absent"><td>経路不在（機械が居なかった）</td><td class="num"><b>2</b></td><td>判定も実行も行われていない</td><td>副系がまだ存在していなかった日</td></tr>
           </tbody>
         </table>
@@ -656,7 +670,7 @@
 
       <!-- 6. AIに与えていない権限 -->
       <section class="ap-sec">
-        <h2>6. AIに与えていない権限を、理由つきで書いてある</h2>
+        <h2 id="reading-07">6. AIに与えていない権限を、理由つきで書いてある</h2>
         <p>
           公開したいのはできることの一覧ではなく、境界のほうです。
           アプリのリリース経路そのものは自動化されていますが、<b>その連鎖を起動する権限を、開発用のAIワークフローには与えていません。</b>
@@ -676,11 +690,11 @@
 
       <!-- 7. 実行ログ -->
       <section class="ap-sec">
-        <h2>7. 実行ログの抜粋 — うまくいかなかった回も同じ形式で残す</h2>
+        <h2 id="reading-08">7. 実行ログの抜粋 — うまくいかなかった回も同じ形式で残す</h2>
         <p class="ap-note">
           台帳は1実行1行です。出荷した回と失敗した回を、同じ列で書きます。以下は実物からの抜粋です。
         </p>
-        <pre class="ap-log">run_id      : ap-20260823-actions
+        <pre class="ap-log" tabindex="0">run_id      : ap-20260823-actions
 date_jst    : 2026-08-23
 route       : actions          outcome : shipped
 pr          : 538              artifact: /obsidian/pricing/
@@ -709,10 +723,10 @@ note        : 台帳に記録が無かった。成果物ゼロで落ちた回は
 
       <!-- 8. できていないこと -->
       <section class="ap-sec">
-        <h2>8. できていないこと</h2>
+        <h2 id="reading-09">8. できていないこと</h2>
         <p class="ap-note">この基盤は「全領域が自動で完結する」状態ではありません。手順書とレポートに書いてあるものをそのまま並べます。</p>
         <div class="ap-tablewrap">
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="ap-table">
           <thead><tr><th>領域</th><th>現状</th></tr></thead>
           <tbody>
@@ -738,12 +752,12 @@ note        : 台帳に記録が無かった。成果物ゼロで落ちた回は
 
       <!-- 9. 広報自身の採点 -->
       <section class="ap-sec">
-        <h2>9. 広報の原稿も、同じ物差しで採点している</h2>
+        <h2 id="reading-10">9. 広報の原稿も、同じ物差しで採点している</h2>
         <p class="ap-note">
           過去5本のプレスリリースの実績で採点式を較正しています。<b>n=5の較正であり、外挿の根拠にはなりません。</b>
         </p>
         <div class="ap-tablewrap">
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="ap-table">
           <thead><tr><th class="num">スコア</th><th class="num">PV</th><th class="num">転載</th><th>件名</th></tr></thead>
           <tbody>
@@ -764,7 +778,7 @@ note        : 台帳に記録が無かった。成果物ゼロで落ちた回は
 
       <!-- 10. 台帳 -->
       <section class="ap-sec">
-        <h2>10. 生きている台帳</h2>
+        <h2 id="reading-11">10. 生きている台帳</h2>
         <p class="ap-note">このページの数字の出どころです。<b>更新されているかどうかも含めて、そのまま見られます。</b></p>
         <div class="ap-links">
           <a href="/data/autopilot-runs.json"><b>運転台帳</b><span>1実行1行。着手・結果・PR・介入・費用・未解消の不具合</span></a>
@@ -819,14 +833,14 @@ note        : 台帳に記録が無かった。成果物ゼロで落ちた回は
 
       <!-- 11. 実物 -->
       <section class="ap-sec ap-cta">
-        <h2>11. このページの数字は、動いているアプリのものです</h2>
+        <h2 id="reading-12">11. このページの数字は、動いているアプリのものです</h2>
         <p class="ap-note">
           「Obsidian連携シンプルメモ」は、思いついた瞬間に話すか書くだけで、自分のメールと
           Obsidian へメモを残す iPhone／Apple Watch 向けアプリです。
           <b>1日3通まで期限なく無料</b>で、クレジットカードの登録は要りません（メールアドレスの認証だけ）。
         </p>
         <div class="ap-cta__row">
-          <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?ppid=3d126d78-2267-4a6c-a860-c69707ab90a5&amp;pt=128498560&amp;ct=jp__bottom&amp;mt=8" class="ap-cta__store">App Store で無料ダウンロード</a>
+          <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?ppid=3d126d78-2267-4a6c-a860-c69707ab90a5&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="ap-cta__store">App Store で無料ダウンロード</a>
           <a href="/" class="ap-cta__ghost">トップページ →</a>
         </div>
         <p class="ap-note">
@@ -842,13 +856,13 @@ note        : 台帳に記録が無かった。成果物ゼロで落ちた回は
 
     </div>
   </main>
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ja" dir="ltr"><a class="site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a><div><p class="site-footer-title">思いついたことを、次の一歩へ。</p><p class="site-footer-description">Obsidianとメールに、メモを送るiPhoneアプリ。</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
-        <a href="/" class="footer__link"><span lang="ja">ホーム</span> </a>
+        <a href="/download/" class="footer__link">ダウンロード</a>
+        <a href="/" class="footer__link">ホーム</a>
         <a href="/how-to/" class="footer__link"><span lang="ja">使い方</span> </a>
         <a href="/templates/" class="footer__link"><span lang="ja">テンプレ</span> </a>
       </div>
@@ -858,16 +872,16 @@ note        : 台帳に記録が無かった。成果物ゼロで落ちた回は
       </div>
       <div class="footer__col">
         <p class="footer__col-title">読みもの</p>
-        <a href="/devlog/" class="footer__link"><span lang="ja">開発日誌</span> </a>
+        <a href="/devlog/" class="footer__link">開発記録</a>
         <a href="/autopilot/" class="footer__link"><span lang="ja">自律型アプリ運営</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span lang="ja">公開ロードマップ</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
+        <a href="/roadmap/" class="footer__link">公開ロードマップ</a>
+        <a href="/about/" class="footer__link">開発者について</a>
         <a href="/terms" class="footer__link"><span lang="ja">利用規約</span> </a>
-        <a href="/privacy" class="footer__link"><span lang="ja">プライバシーポリシー</span> </a>
-        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span> </a>
+        <a href="/privacy" class="footer__link">プライバシー</a>
+        <a href="/contact" class="footer__link">お問い合わせ</a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -876,12 +890,7 @@ note        : 台帳に記録が無かった。成果物ゼロで落ちた回は
     </div>
   </footer>
 
-  <script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

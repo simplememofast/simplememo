@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/zettelkasten/">
+  <title>Obsidian和Zettelkasten — 製作筆記和連結的實踐指南 | SimpleMemo</title>
+  <meta name="description" content="用Obsidian開始Zetstel卡斯滕的實踐指南。 在作者製作的小筆記上加上帶有理由的內部連結，解說從索引開始追蹤的步驟。 Linux版Obsidian 1.13.7的實際操作畫面和儲存Markdown，刊登連結新增前後的圖表。 介紹編號的方法、反向連結、沒有線時的確認、驗證範圍。">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Obsidian和Zettelkasten — 製作筆記和連結的實踐指南">
+  <meta property="og:description" content="用Obsidian開始Zetstel卡斯滕的實踐指南。 在作者製作的小筆記上加上帶有理由的內部連結，解說從索引開始追蹤的步驟。 Linux版Obsidian 1.13.7的實際操作畫面和儲存Markdown，刊登連結新增前後的圖表。 介紹編號的方法、反向連結、沒有線時的確認、驗證範圍。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-30T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh-Hant/obsidian/zettelkasten/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-zettelkasten.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_TW">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian和Zettelkasten — 製作筆記和連結的實踐指南">
+  <meta name="twitter:description" content="用Obsidian開始Zetstel卡斯滕的實踐指南。 在作者製作的小筆記上加上帶有理由的內部連結，解說從索引開始追蹤的步驟。 Linux版Obsidian 1.13.7的實際操作畫面和儲存Markdown，刊登連結新增前後的圖表。 介紹編號的方法、反向連結、沒有線時的確認、驗證範圍。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-zettelkasten.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh-Hant/obsidian/zettelkasten/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/zettelkasten/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/zettelkasten/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/zettelkasten/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/zettelkasten/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/zettelkasten/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/zettelkasten/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/zettelkasten/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/zettelkasten/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/zettelkasten/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/zettelkasten/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/zettelkasten/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.capture-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.capture-note{color:var(--text-secondary);font-size:.9rem}</style>
+<style>.lp-section code,.tip-box code,.faq-answer{overflow-wrap:anywhere}.capture-code{max-width:100%;min-width:0;font-size:.9rem}.capture-toc a{min-height:44px;display:inline-flex;align-items:center}.capture-results{display:grid;gap:1rem}.capture-results>div{min-width:0}.source-list a{overflow-wrap:anywhere}@media(min-width:701px){.capture-results{grid-template-columns:1fr 1fr}}</style>
+<style>
+.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem}.capture-toc a{padding:.4rem .2rem;min-height:44px}.article-meta{font-size:.9rem;line-height:1.8;color:var(--text-secondary)}.shot a{display:block}.shot figcaption a{display:inline}.lp-section code,.tip-box code{overflow-wrap:anywhere}.settings-table tbody th{width:32%}.role-map{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}.role-route{min-width:0;padding:1.25rem;border:1px solid var(--border);border-radius:12px;background:var(--surface)}.role-route h3{font-size:1.1rem;line-height:1.6;margin:0 0 1rem}.role-route ol{list-style:none!important;margin:0;padding:0!important}.role-route li{margin:0;padding:.75rem 1rem;line-height:1.75;background:rgba(100,180,255,.06);border-radius:8px}.role-route li+li{margin-top:1.35rem;position:relative}.role-route li+li:before{content:"↓";position:absolute;top:-1.5rem;left:calc(50% - .4rem);color:var(--accent-bright)}.role-caption{font-size:.875rem;color:var(--text-secondary);line-height:1.8}.capture-checks{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.capture-checks>div{min-width:0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px}.capture-checks h3{font-size:1rem;margin:0 0 .5rem}.capture-checks p{margin:.5rem 0}.source-list a{overflow-wrap:anywhere}.quickadd-crumb{font-size:.875rem;line-height:1.8;margin-bottom:1rem}.quickadd-crumb a{color:var(--accent-bright)}
+@media(max-width:700px){.role-map,.capture-checks{grid-template-columns:1fr}.role-route{padding:1rem}.settings-table tbody th{width:auto}.global-nav__inner{padding:0 1rem}.global-nav__logo{min-width:0;font-size:.82rem}.global-nav__logo img{flex-shrink:0}.lp-hero{padding-top:2.25rem}.lp-section{padding:2rem 0}.capture-toc{gap:.4rem .9rem}.shot{margin:1.25rem 0}.role-caption{text-align:left}}
+</style>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh-Hant/obsidian/zettelkasten/#article",
+  "inLanguage": "zh-Hant",
+  "headline": "Obsidian和Zettelkasten — 製作筆記和連結的實踐指南",
+  "description": "用Obsidian開始Zetstel卡斯滕的實踐指南。 在作者製作的小筆記上加上帶有理由的內部連結，解說從索引開始追蹤的步驟。 Linux版Obsidian 1.13.7的實際操作畫面和儲存Markdown，刊登連結新增前後的圖表。 介紹編號的方法、反向連結、沒有線時的確認、驗證範圍。",
+  "url": "https://simplememofast.com/zh-Hant/obsidian/zettelkasten/",
+  "datePublished": "2026-09-30",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "name": "SimpleMemo Developer",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-zettelkasten.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh-Hant/obsidian/zettelkasten/"
+  }
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主頁",
+      "item": "https://simplememofast.com/zh-Hant/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Zettelkasten",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/zettelkasten/"
+    }
+  ]
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/zh-Hant/obsidian/zettelkasten/#faq",
+  "inLanguage": "zh-Hant",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Zettelkasten需要專用的外掛嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "在這次的小例子中，使用了Obsidian 1.13.7的內部連結、圖表檢視、反向連結等核心功能。 沒有新增社群外掛。 請確認在自己的環境中必要的核心功能是否有效。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "需要像20260930-01那樣附加筆記本ID嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "這個編號是作者為了區分驗證用的筆記而選擇的例子。 Obsidian不是自動新增的ID。 這篇報道沒有比較號碼的取號方法。 首先，選擇連結，加上不會出錯的名字，作為留下與正文相關的理由的例子使用。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "圖表上沒有線的話筆記就不會儲存嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "這次的第一個畫面上有儲存好的3筆記，連結的線是0。 筆記本的存在和連線筆記本之間的連結是不同的。 確認儲存時，請開啟實際的筆記，並確認Markdown的正文。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "圖表上的線代表什麼？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "在這次的顯示設定中，透過內部連結連線的筆記之間顯示了線條。 僅憑線，不知道為什麼相關，說明是否有依據。 例子中，在連結之前寫下理由，以便能夠閱讀從圖表中找到的筆記的正文。"
+      }
+    }
+  ]
+}</script>
+
+<style>.zettel-guide .sample-code{max-width:100%;padding:1rem 1.15rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem;line-height:1.9}.zettel-guide :not(pre)>code{white-space:normal;overflow-wrap:anywhere}.zettel-guide .note-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;margin:1.5rem 0}.zettel-guide .note-flow>div{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;line-height:1.8}.zettel-guide .note-flow strong{display:block;color:var(--accent-bright);margin-bottom:.5rem}.zettel-guide .source-note{font-size:.85rem;color:var(--text-muted);line-height:1.8}.zettel-guide .raw-link{display:inline-block;padding:.5rem 0;min-height:44px}.zettel-guide h2,.zettel-guide h3{scroll-margin-top:76px}@media(max-width:720px){.zettel-guide .note-flow{grid-template-columns:1fr}.zettel-guide .sample-code{padding:.85rem;font-size:.85rem}}</style>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="zettel-guide site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="全球導航" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/zh-Hant/guides/">使用指南</a></li><li><a href="/zh-Hant/use-cases/">使用情境</a></li><li><a href="/zh-Hant/vs/">比較</a></li><li><a href="/zh-Hant/blog/">部落格</a></li><li><a href="/zh-Hant/about/">關於開發者</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">下載</a><details class="site-languages"><summary aria-label="繁體中文 · 選擇語言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>繁中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hant" dir="ltr"><p class="site-language-title">選擇語言</p><div class="site-language-grid"><a href="/obsidian/zettelkasten/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/zettelkasten/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/zettelkasten/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hant" aria-current="page"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ko/obsidian/zettelkasten/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/zettelkasten/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/zettelkasten/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/zettelkasten/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/zettelkasten/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/zettelkasten/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content"><article class="container" style="max-width:880px">
+<nav aria-label="麵包屑" style="padding-top:1.25rem;font-size:.85rem;color:var(--text-muted)"><a href="/zh-Hant/">主頁</a> › <a href="/zh-Hant/obsidian/">Obsidian</a> › Zettelkasten</nav>
+<header class="lp-hero sd-hero"><div class="sd-hero-copy"><div class="lp-hero__label">Obsidian · 連線筆記的實施指南</div><h1 class="lp-hero__title">用Obsidian製作Zettelkasten<br>筆記和連結的實踐例子</h1><p class="lp-hero__sub">想到的備忘錄，作為檔案零散地留下。 如果在相關想法的正文中加上鍊接和理由，就可以建立進入另一個筆記的入口。 在作者寫的小練習筆記中，確認新增連結前後的圖表和實際儲存的Markdown。</p><p class="source-note">作者：<a href="/zh-Hant/about/">SimpleMemo Developer</a> · 公開・驗證：<time datetime="2026-09-30">2026年9月30日</time> · Linux版Obsidian 1.13.7</p></div><nav class="sd-hero-index" aria-label="本頁內容"><p>本頁內容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>如何用Obsidian啟動Zettelkasten？ </span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>1。 在小小的保管庫裡，準備正文</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>2。 在連結之前，寫相關的理由</span><span aria-hidden="true">↗</span></a></nav></header>
+<section class="lp-section ce-chapter sd-chapter" id="answer"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">如何用Obsidian啟動Zettelkasten？</h2></div><div class="ce-chapter__body"><p class="lp-section__lead"><strong>把一個想法寫在筆記的正文中，從留下相關的理由和內部連結開始。 </strong>在這個例子中，準備臨時備忘錄和兩個想法的筆記，並新增一個帶有理由的連結。 最後製作索引，確認從中進入兩個筆記。</p><p>這裡將Zettelkasten作為以筆記為單位重寫想法，用文章和連結留下相關內容的小練習來處理。 關於收集想法的入口，請到<a href="/zh-Hant/methods/zettelkasten/">Zetterkasten和郵件備忘錄的指南</a>。 這篇報道是在Obsidian內連線筆記的操作的例子。</p><div class="note-flow" aria-label="這個例子中進行的三個操作"><div><strong>1。 準備正文</strong>臨時備忘錄和總結想法的兩個筆記本</div><div><strong>2。 留下相關</strong>理由的一句話和其他筆記的內部連結</div><div><strong>3。 追蹤確認</strong>索引、連結、反向連結、圖表</div></div><p class="source-note">筆記名、編號、文章是作者為了說明這個步驟而製作的例子。 不是從實際研究、閱讀資料、使用者的運用記錄中取出來的。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="prepare"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02">1。 在小小的保管庫裡，準備正文</h2></div><div class="ce-chapter__body"><p>嘗試時，使用不包含個人資訊的練習用保管庫。 沒有必要移動現有的筆記本。 如果是第一次保管庫的話，<a href="/zh-Hant/obsidian/what-is-vault/">可以先確認保管庫的儲存地址和實際檔案</a>。</p><p>在這個例子中，最先準備的是以下三個。 稍後新增一個索引。 標題的<code>20260930-01</code>和<code>20260930-02</code>是作者為了區分而新增的編號。</p><div class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格"><table class="rt-table"><thead><tr><th scope="col">儲存的檔名</th><th scope="col">這個例子中的作用</th></tr></thead><tbody><tr><th scope="row">仮メモ.md</th><td data-label="角色">關於記下階段和考慮相關階段的兩個簡短的備忘錄</td></tr><tr><th scope="row">20260930-01 入力と整理を分ける.md</th><td data-label="角色">用自己的話重新寫一個想法的例子</td></tr><tr><th scope="row">20260930-02 関係に理由を添える.md</th><td data-label="角色">附加參考其他筆記的理由的例子</td></tr></tbody></table></div><p>第一個畫面中三個都存在，圖表上顯示<strong>3節點、線0</strong>。 有正文和有連結到其他筆記是不同的。</p><figure class="shot"><a href="/assets/img/obsidian-zettelkasten/graph-start.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-zettelkasten/graph-start.png" width="1024" height="800" loading="lazy" decoding="async" alt="顯示沒有內部連結的三個練習筆記的Obsidian的圖表檢視"></a><figcaption>第一個實畫面：3節點，線0根。 存在三個Markdown。 <a href="/assets/img/obsidian-zettelkasten/graph-start.png" target="_blank" rel="noopener">開啟原始影象</a></figcaption></figure><p class="source-note">最初的三個筆記，在啟動前作者作為Markdown檔案準備了。 之後的連結理由和索引正文，輸入到實際的Obsidian編輯器中儲存了。 設定視窗和右側側邊欄的顯示調整，使用輔助API讀取儲存狀態的範圍，記載在末尾的驗證記錄中。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="link"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03">2。 在連結之前，寫下相關的理由</h2></div><div class="ce-chapter__body"><p>開啟<code>20260930-01 入力と整理を分ける</code>，在末尾寫下<code>## 関連</code>的標題和02的筆記的理由。 連結以<code>[[ノート名]]</code>的形式，與實際儲存的名字相匹配。</p><p>下面是新增連結後的01儲存的Markdown。 包括空行在內，原封不動地刊登了原樣的內容。</p><pre class="sample-code" tabindex="0"><code data-evidence="atomic-note-1"># 入力と整理を分ける
+
+この例では、思いつきを仮メモに置き、あとで一つの考えを一つのノートに書き直す。
+
+書き留める段階と、整理する段階を分ける運用案として扱う。
+## 関連
+
+整理の段階で関連の理由も書く例として、[[20260930-02 関係に理由を添える]]を参照する。
+</code></pre><figure class="shot"><a href="/assets/img/obsidian-zettelkasten/reason-link.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-zettelkasten/reason-link.png" width="1024" height="800" loading="lazy" decoding="async" alt="01的相關理由和02的內部連結輸入後的實際Obsidian畫面"></a><figcaption>輸入理由文和內部連結後的01。 本文是作者製作的練習用的例子。 <a href="/assets/img/obsidian-zettelkasten/reason-link.png" target="_blank" rel="noopener">開啟原始影象</a></figcaption></figure><p>與其簡單地排列連結，不如把“為了確認什麼而開啟”寫成一句話，可以在正文中留下審查時的入口。 在這個例子中，作為“在整理階段寫相關理由的例子”參考了02。</p><p>如果想把短文和參考筆記作為卡片排列的話，也可以參考<a href="/zh-Hant/obsidian/canvas/">在Canvas上留下連線標籤的例項</a>。</p><p>新增後的圖表是<strong>3節點，線1本</strong>。 01和02之間有線，臨時備忘錄是孤立的。 在<code>Ctrl＋E</code>中切換到讀取檢視，點選連結移動到02也確認了。</p><figure class="shot"><a href="/assets/img/obsidian-zettelkasten/graph-linked.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-zettelkasten/graph-linked.png" width="1024" height="800" loading="lazy" decoding="async" alt="顯示從01到02的內部連結和孤立的臨時備忘錄的圖表檢視"></a><figcaption>新增有理由的連結後：3節點，線1根。 臨時備忘錄是孤立的。 <a href="/assets/img/obsidian-zettelkasten/graph-linked.png" target="_blank" rel="noopener">開啟原尺寸影象</a></figcaption></figure></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="index"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04">3。 從索引中追蹤筆記</h2></div><div class="ce-chapter__body"><p>接下來用<code>Ctrl＋N</code>製作新的筆記本，命名為<code>索引</code>儲存。 填寫這組小主題和進入兩個筆記本的入口。 這次的儲存內容如下。</p><pre class="sample-code" tabindex="0"><code data-evidence="index-note"># 索引
+
+この例で扱うテーマは、メモを書く段階と、関連を残す段階を分けること。
+
+- [[20260930-01 入力と整理を分ける]] — 書き留める内容と整理する内容を分ける例。
+- [[20260930-02 関係に理由を添える]] — 関連ノートへ進む理由を添える例。
+</code></pre><figure class="shot"><a href="/assets/img/obsidian-zettelkasten/index-reading.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-zettelkasten/index-reading.png" width="1024" height="800" loading="lazy" decoding="async" alt="索引的讀取檢視中顯示兩個想法筆記的連結的實Obsidian畫面"></a><figcaption>實際儲存的索引的讀取檢視。 從兩個連結移動到了目標筆記本。 <a href="/assets/img/obsidian-zettelkasten/index-reading.png" target="_blank" rel="noopener">開啟原尺寸影象</a></figcaption></figure><p>重新開啟索引確認正文沒有變化，在讀取檢視中按照<strong>索引→01→02</strong>的順序點選了連結。 02的反向連結顯示了01和索引這兩個參考源，點選參考源的上下文可以返回01。</p><figure class="shot"><a href="/assets/img/obsidian-zettelkasten/backlink-result.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-zettelkasten/backlink-result.png" width="1024" height="800" loading="lazy" decoding="async" alt="02的正文和01以及從索引中顯示兩個參考來源的Obsidian的反向連結畫面"></a><figcaption>新增索引後的02。 在Linked mentions中顯示了01和索引的兩個參考來源。 <a href="/assets/img/obsidian-zettelkasten/backlink-result.png" target="_blank" rel="noopener">開啟原尺寸影象</a></figcaption></figure><p>索引是作者作為返回這個主題的入口而製作的例子。 沒有嘗試過將保管庫的所有筆記收集到這裡的規則和自動生成的機制。 如果想與專案單位的資料夾或工作筆記結合的話，也可以參考<a href="/zh-Hant/obsidian/second-brain/">PARA的小實現例子</a>。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="graph"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">在三個階段確認圖表的變化</h2></div><div class="ce-chapter__body"><p>在這次的英語UI中，用<code>Ctrl＋P</code>開啟命令調色盤，選擇了<code>Graph view: Open graph view</code>。 各階段的實畫面，與已儲存的筆記對應進行確認。</p><p>最後的圖表是<strong>4節點，線3本</strong>。 增加的節點是索引，增加的線是從索引到01、02填寫的兩個連結。 臨時備忘錄直到最後都沒有其他筆記的連結，被孤立地保留著。</p><figure class="shot"><a href="/assets/img/obsidian-zettelkasten/graph-final.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-zettelkasten/graph-final.png" width="1024" height="800" loading="lazy" decoding="async" alt="索引和兩個想法的筆記用三條線連線，臨時備忘錄孤立的最終圖表"></a><figcaption>最終階段的實畫面：4節點，線3本。 點的位置是根據自動佈局。 <a href="/assets/img/obsidian-zettelkasten/graph-final.png" target="_blank" rel="noopener">開啟原尺寸影象</a></figcaption></figure><div class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格"><table class="rt-table"><thead><tr><th scope="col">階段</th><th scope="col">節點</th><th scope="col">線</th><th scope="col">變更的內容</th></tr></thead><tbody><tr><th scope="row">最初</th><td data-label="節點">3</td><td data-label="線">0</td><td data-label="內容">準備了三個正文。 沒有內部連結</td></tr><tr><th scope="row">有理由的連結</th><td data-label="節點">3</td><td data-label="線">1</td><td data-label="內容">從01到02增加一個內部連結</td></tr><tr><th scope="row">新增索引</th><td data-label="節點">4</td><td data-label="線">3</td><td data-label="內容">從索引到01・02增加了兩個內部連結</td></tr></tbody></table></div><p>三張是同一天一次驗證進行操作的順序。 因為點的位置會隨著圖表的自動佈局而變化，所以沒有作為比較位置和寬度大小的指標。 確認了真實檔案、內部連結的解決結果、顯示節點和線的對應。</p><p>顯示條件固定為Search空白、Tags OFF、Attachments OFF、Existing files only OFF、Orphans ON。 這個保管庫裡沒有未解決的內部連結。 圖表顯示的是這次連結的結構，沒有衡量文章的正確性、學習的深度、知識和生產力的提高。</p><p>搜尋、孤立筆記、顏色區分、改變本地圖表深度的操作，可以透過<a href="/zh-Hant/obsidian/graph-view/">縮小顯示範圍的圖表檢視例項</a>進行確認。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="checks"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">找不到線路或連結時確認</h2></div><div class="ce-chapter__body"><ol class="steps-list"><li><strong>檢視現在的保管庫和實際檔案。 </strong>確認是否開啟了同名的別的保管庫，是否有想要的Markdown。</li><li><strong>開啟本文的連結。 </strong>看看<code>[[...]]</code>裡面是否與目標筆記的名稱和路徑一致。 如果有同名筆記本的話，請連開啟的正文都確認。</li><li><strong>看圖表的顯示條件。 </strong>確認Search等縮小範圍和顯示孤立筆記的Orphans的設定。 不一定和這次的顯示條件一樣。</li><li><strong>連結的理由在正文中重讀。 </strong>不只是以增加線為目的，而是把想透過那個連結推進到哪個想法變成一句話。</li></ol><p>這個檢查清單是在自己的保管庫裡確認的步驟。 未解決的連結、同名筆記、過濾器切換後的各種組合，這次不是全部嘗試的結果。 操作和顯示設定請參考<a href="https://help.obsidian.md/links" target="_blank" rel="noopener">內部連結</a>和<a href="https://help.obsidian.md/plugins/graph" target="_blank" rel="noopener">圖表檢視的官方說明</a>。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="raw"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">確認已儲存的Markdown的原件</h2></div><div class="ce-chapter__body"><p>可以下載最後階段的四個Markdown。 點選連結後，指定以下一個<strong>原來的日語檔名</strong>儲存。 如果根據瀏覽器或儲存方法儲存為英文字母的分發名，請修改為表格的名稱，或者將正文的內部連結與自己的筆記本名稱對齊。</p><div class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格"><table class="rt-table"><thead><tr><th scope="col">原來的儲存名</th><th scope="col">原件</th></tr></thead><tbody><tr><th scope="row"><code>仮メモ.md</code></th><td data-label="原件"><a class="raw-link" href="/assets/downloads/obsidian-zettelkasten/fleeting-note.md" download="仮メモ.md">儲存Markdown</a></td></tr><tr><th scope="row"><code>20260930-01 入力と整理を分ける.md</code></th><td data-label="原件"><a class="raw-link" href="/assets/downloads/obsidian-zettelkasten/atomic-note-1.md" download="20260930-01 入力と整理を分ける.md">儲存Markdown</a></td></tr><tr><th scope="row"><code>20260930-02 関係に理由を添える.md</code></th><td data-label="原件"><a class="raw-link" href="/assets/downloads/obsidian-zettelkasten/atomic-note-2.md" download="20260930-02 関係に理由を添える.md">儲存Markdown</a></td></tr><tr><th scope="row"><code>索引.md</code></th><td data-label="原件"><a class="raw-link" href="/assets/downloads/obsidian-zettelkasten/final-note.md" download="索引.md">儲存Markdown</a></td></tr></tbody></table></div><p class="source-note">英文字母的分發名是公開原件的別名。 因為裡面的wikilink是日語的筆記本名，所以如果把英文名字原封不動地放在保管庫裡的話，和這個例子的連結地址不一致。 在匯入實際筆記之前，請在練習用的地方確認姓名和連結。 將這個分發檔案匯入讀者的保管庫的操作，不包括在這次的驗證範圍內。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="capture"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">想到的備忘錄，作為稍後重新檢視連結的入口</h2></div><div class="ce-chapter__body"><p>這次的臨時備忘錄是作者在重寫正文之前放置備忘錄的例子。 準備連結和索引，作為之後重新審視想法時的操作而分開的。 如果想查詢移動中的輸入或從iPhone到保管庫的方法，可以確認<a href="/zh-Hant/methods/zettelkasten/">輸入和重新審視的想法</a>和<a href="/zh-Hant/obsidian/">SimpleMemo的配合、儲存地址指南</a>。</p><p>在這篇文章中沒有嘗試從SimpleMemo輸入、郵件傳送、配送到保管庫和同步。 不是僅僅輸入就自動建立永久筆記、連結、索引的圖表或驗證。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">常見問題</h2></div><div class="ce-chapter__body"><details class="faq-item"><summary class="faq-summary">Zettelkasten需要專用的外掛嗎？</summary><div class="faq-answer">在這次的小例子中，使用了Obsidian 1.13.7的內部連結、圖表檢視、反向連結等核心功能。 沒有新增社群外掛。 請確認在自己的環境中必要的核心功能是否有效。</div></details>
+<details class="faq-item"><summary class="faq-summary">需要像20260930-01那樣附加筆記本ID嗎？</summary><div class="faq-answer">這個編號是作者為了區分驗證用的筆記而選擇的例子。 Obsidian不是自動新增的ID。 這篇報道沒有比較號碼的取號方法。 首先，選擇連結，加上不會出錯的名字，作為留下與正文相關的理由的例子使用。</div></details>
+<details class="faq-item"><summary class="faq-summary">圖表上沒有線的話筆記就不會儲存嗎？</summary><div class="faq-answer">這次的第一個畫面上有儲存好的3筆記，連結的線是0。 筆記本的存在和連線筆記本之間的連結是不同的。 確認儲存時，請開啟實際的筆記，並確認Markdown的正文。</div></details>
+<details class="faq-item"><summary class="faq-summary">圖表上的線代表什麼？</summary><div class="faq-answer">在這次的顯示設定中，透過內部連結連線的筆記之間顯示了線條。 僅憑線，不知道為什麼相關，說明是否有依據。 例子中，在連結之前寫下理由，以便能夠閱讀從圖表中找到的筆記的正文。</div></details></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-10" data-ce-number="10">驗證環境和確認的範圍</h2></div><div class="ce-chapter__body"><ul><li><strong>實際應用程式：</strong>2026年9月30日，Linux版Obsidian 1.13.7。 在另一個保管庫裡只放了作者製作的合成筆記，沒有新增社群外掛進行了確認。</li><li><strong>實際操作：</strong>01的理由和連結的輸入、儲存、索引正文的輸入、儲存、讀取檢視中的索引→01→02的移動、反向連結的參考來源點選、索引的重新顯示。</li><li><strong>儲存和圖表：</strong>每個操作階段的Markdown，內部連結的解決處，核對實際畫面和圖表的節點・線。 早期的3/0、連結後的3/1、索引後的4/3，透過這個小的保管庫和固定顯示條件進行了確認。</li><li><strong>程式的輔助：</strong>前三個筆記在啟動前作為Markdown準備。 開啟設定視窗的操作、右側側邊欄的顯示調整、儲存狀態的讀取使用了輔助API。 刊登的PNG是實際Obsidian的畫面，Markdown是實際的儲存檔案，沒有繪製圖表影象和儲存結果來代替。</li><li><strong>未驗證：</strong>iPhone・Android・Mac的實際操作、SimpleMemo聯動、郵件・同步、CLI/URI、大量筆記、長期使用、知識・學習・生產力的變化。</li></ul><p>確認Linux桌面上的限定操作。 不是用iOS Simulator和iPhone實機確認的結果。 <a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/zettelkasten-20260930.md" target="_blank" rel="noopener">驗證記錄、原件和確認範圍</a>中記載了三個階段和公開檔案的對應。</p><h3>官方資料和相關指南</h3><ul class="source-list"><li><a href="https://github.com/obsidianmd/obsidian-releases/releases/tag/v1.13.7" target="_blank" rel="noopener">Obsidian 1.13.7的官方釋出</a> — 這次的桌面版</li><li><a href="https://help.obsidian.md/links" target="_blank" rel="noopener">Obsidian的內部連結</a> — 確認自己的筆記本名、路徑的入口</li><li><a href="https://help.obsidian.md/plugins/graph" target="_blank" rel="noopener">Obsidian的圖表檢視</a> — 顯示條件的官方指南</li><li><a href="https://help.obsidian.md/plugins/backlinks" target="_blank" rel="noopener">Obsidian的反向連結</a> — 追溯參考來源的官方指南</li></ul><div class="internal-links"><a href="/zh-Hant/methods/zettelkasten/">收集筆記，稍後回顧</a><a href="/zh-Hant/obsidian/second-brain/">PARA的實施例</a><a href="/zh-Hant/obsidian/journaling/">日報的實施例</a></div><p class="source-note">本網站由YURIKA, K.K.運營，介紹獨立應用程式“SimpleMemo”。 不是Obsidian官方的報道。</p></div></section>
+<aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/zh-Hant/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">接下來閱讀</span><strong>確認Obsidian連線和儲存位置的設定</strong></a></aside>
+</article></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hant" dir="ltr"><a class="site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">記下一點想法，邁出下一步。</p><p class="site-footer-description">從 iPhone 將筆記傳送至 Obsidian 和電子郵件。</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="頁尾導航"><div class="footer__col"><p class="footer__col-title">產品</p><a href="/zh-Hant/download/" class="footer__link">下載</a><a href="/zh-Hant/" class="footer__link">首頁</a><a href="/zh-Hant/obsidian/" class="footer__link">Obsidian 整合</a></div><div class="footer__col"><p class="footer__col-title">比較與遷移</p><a href="/zh-Hant/vs/" class="footer__link">比較</a><a href="/zh-Hant/obsidian/compare/" class="footer__link">Obsidian比較</a></div><div class="footer__col"><p class="footer__col-title">支援</p><a href="/zh-Hant/about/" class="footer__link">關於開發者</a><a href="/zh-Hant/faq" class="footer__link">常見問題</a><a href="/zh-Hant/privacy" class="footer__link">隱私</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / 營運：YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

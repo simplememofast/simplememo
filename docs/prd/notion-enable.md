@@ -4,7 +4,7 @@
 状態: 設計案
 対象リポジトリ: `simplememo-api` / `simplememo-ios` / `simplememo`
 
-2026-09-19再照合。実装・有効化・実OAuth・実保存・一般提供を分けて判定する。
+2026-09-20再照合。実装・有効化・実OAuth・実保存・一般提供を分けて判定する。
 
 ## 0. 一行定義
 
@@ -15,13 +15,17 @@
 API main `c6ed249` に `src/notion.ts`、iOS main `17dcad9` に `NotionManager.swift` と
 `docs/notion-v1.md` がある。Notionの宛先カードは `notion_destination_row` が既定false。
 設定画面の連携と宛先カードは別条件である。
-現在の公開API読取はこの確認環境でHTTP403だったため、availableの現在値は不明。9/4のfalseを現在値へ転記しない。
+9/20 05:18 JST（9/19 20:18 UTC）の通常の公開HTTPS GETでは、
+[`/v1/notion/config`](https://api.simplememofast.com/v1/notion/config) がHTTP200・`available=true`、
+[`/v1/config`](https://api.simplememofast.com/v1/config) がHTTP200・`flags.notion_destination_row=false`だった。
+9/19のHTTP403による現在値不明は、この観測で解消した。API設定の利用可否と宛先カードの表示を分けて記録する。
+これは設定応答の確認であり、現在のOAuth・実保存・実機受入れの成功ではない。秘密情報・フラグ・接続設定は変更していない。
 9/4 13:21 UTCの既存記録では、公開OAuthの開始・同意・交換、Private Inbox作成、
 1件の実保存、本文・タイトルの一致、同じCapture IDの再送で同じページになることを確認済み。
 関連するAPI [#240](https://github.com/simplememofast/simplememo-api/pull/240)・
 [#241](https://github.com/simplememofast/simplememo-api/pull/241)・
 [#242](https://github.com/simplememofast/simplememo-api/pull/242) はmainへ統合済み。
-これは過去のサーバー経路の証拠であり、現在の健康度や1686の実機合格ではない。
+これは過去のサーバー経路の証拠であり、現在の健康度や今回の配布版の実機合格ではない。
 原記録は非公開で保管し、接続先・ページID・資格・本文は公開しない。
 
 ## 2. VISION §13 のチェック
@@ -42,7 +46,7 @@ API main `c6ed249` に `src/notion.ts`、iOS main `17dcad9` に `NotionManager.s
 - [ ] iPhone・Siri・Watch、再試行、重複防止、認可取消・回復を同じ版で検証する。
 - [ ] 受付時の保存先を保持し、認証失敗で以前のメールへ勝手に転送しない。
 - [ ] 本文、トークン、個人名を公開証拠や分析へ出さない。保存データの既存保護・削除を維持する。
-- [ ] APIの利用可否と宛先カードのフラグを別々に確認する。
+- [x] APIの利用可否と宛先カードのフラグを別々に確認する。9/20 05:18 JSTの公開GETでそれぞれ`true`・`false`を確認。設定観測だけで実OAuth・保存・提供開始を合格にしない。
 - [ ] 現行コードの料金条件を確認して告知する。無料のコピー保存とPremium条件のNotionのみ保存を混同しない。
 - [ ] 実配布・提供開始・効果測定の証拠を別々に残す。
 

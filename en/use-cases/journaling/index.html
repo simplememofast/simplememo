@@ -7,23 +7,23 @@
 <meta content="index,follow,max-image-preview:large,max-snippet:-1" name="robots"/>
 <meta content="app-id=6758438948, app-argument=https://simplememofast.com/use-cases/journaling/" name="apple-itunes-app"/>
 <script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
     window.addEventListener('load', function() {
-      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
       var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
       ric(function() {
         var s = document.createElement('script');
         s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
         s.async = true;
         document.head.appendChild(s);
-        s.onload = function() {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
-        };
       });
     });
-  </script>
+  })();
+</script>
 <title>Email Journaling for People Who Can't Keep a Diary</title>
 <meta content="Send 1-3 lines to your email each day. A searchable journal builds up automatically. The easiest way to start a journaling habit." name="description"/>
 <meta content="#070b14" name="theme-color"/>
@@ -54,7 +54,7 @@
 <link href="/assets/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
 <link href="/assets/favicon/site.webmanifest" rel="manifest"/>
 <!-- JSON-LD: Article -->
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/en/use-cases/journaling/#article","inLanguage":"en","image":"https://simplememofast.com/assets/img/og/use-cases-journaling.png","headline":"Email Journaling — The One-Line Diary for People Who Can't Keep a Journal | Simple Memo","description":"Send 1-3 lines to your email each day. A searchable journal builds up automatically. The easiest way to start a journaling habit.","url":"https://simplememofast.com/en/use-cases/journaling/","datePublished":"2026-03-06","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Simple Memo - for Obsidian","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/use-cases/journaling/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/en/use-cases/journaling/#article","inLanguage":"en","image":"https://simplememofast.com/assets/img/og/use-cases-journaling.png","headline":"Email Journaling — The One-Line Diary for People Who Can't Keep a Journal | Simple Memo","description":"Send 1-3 lines to your email each day. A searchable journal builds up automatically. The easiest way to start a journaling habit.","url":"https://simplememofast.com/en/use-cases/journaling/","datePublished":"2026-03-06","dateModified":"2026-10-03","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Simple Memo - for Obsidian","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/use-cases/journaling/"}}</script>
 <!-- JSON-LD: BreadcrumbList -->
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/en/"},{"@type":"ListItem","position":2,"name":"Use Cases How to Use Simple Memo","item":"https://simplememofast.com/en/use-cases/"},{"@type":"ListItem","position":3,"name":"Email Journaling for People Who Can't Keep a Diary","item":"https://simplememofast.com/en/use-cases/journaling/"}]}</script>
 <link href="/assets/css/style.min.css?v=aa4747a0f6" rel="stylesheet"/>
@@ -238,41 +238,54 @@
 
   </style>
 <!-- JSON-LD: Speakable -->
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/use-cases/journaling/#webpage","inLanguage":"en","name":"Email Journaling — The One-Line Diary for People Who Can't Keep a Journal | Simple Memo","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".scenario-block__title"]},"url":"https://simplememofast.com/en/use-cases/journaling/","isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/use-cases/journaling/#webpage","inLanguage":"en","name":"Email Journaling — The One-Line Diary for People Who Can't Keep a Journal | Simple Memo","url":"https://simplememofast.com/en/use-cases/journaling/","isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
 <script async="" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" src="https://analytics.ahrefs.com/analytics.js"></script>
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/en/use-cases/journaling/">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/use-cases/journaling/">
   <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/use-cases/journaling/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/use-cases/journaling/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/use-cases/journaling/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/use-cases/journaling/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/use-cases/journaling/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/use-cases/journaling/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/use-cases/journaling/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/use-cases/journaling/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/use-cases/journaling/">
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/use-cases/journaling/">
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/use-cases/journaling/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"What is email journaling?","acceptedAnswer":{"@type":"Answer","text":"Email journaling is a practice of sending short daily reflections to your own email. Instead of using a dedicated journaling app, your inbox becomes your journal — searchable, timestamped, and always accessible."}},{"@type":"Question","name":"Can people who can't keep a journal stick with this?","acceptedAnswer":{"@type":"Answer","text":"Yes. The key is ultra-low friction. One line is enough, perfect prose isn't needed, and the whole process takes under 10 seconds with a 0.4s launch and one-tap send. No journal to find, no pen to pick up. This low barrier is what makes the habit stick."}},{"@type":"Question","name":"Can I search past journal entries?","acceptedAnswer":{"@type":"Answer","text":"Yes. Since entries accumulate in your email, you can use Gmail or Outlook search to find entries by keyword. Search \"vacation\" or \"grateful\" and see all related entries at a glance — a major advantage over paper journals."}},{"@type":"Question","name":"Should I journal in the morning or at night?","acceptedAnswer":{"@type":"Answer","text":"Both work well. Morning is great for setting intentions and goals. Evening is ideal for reflection and gratitude. Start with one, and add the other when the habit feels natural."}},{"@type":"Question","name":"Is my journal private?","acceptedAnswer":{"@type":"Answer","text":"Yes. Memos are sent only to your own email address. No account creation, no cloud storage of your data. Offline entries are saved with AES-GCM encryption on your device. Your journal content exists only on your email server."}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/use-cases/journaling/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"What is email journaling?","acceptedAnswer":{"@type":"Answer","text":"Email journaling is a practice of sending short daily reflections to your own email. Instead of using a dedicated journaling app, your inbox becomes your journal — searchable, timestamped, and always accessible."}},{"@type":"Question","name":"Can people who can't keep a journal stick with this?","acceptedAnswer":{"@type":"Answer","text":"Yes. The key is ultra-low friction. One line is enough, perfect prose isn't needed, and the whole process takes only seconds with a 0.4s launch (warm, iPhone 16e) and one-tap send. No journal to find, no pen to pick up. This low barrier is what makes the habit stick."}},{"@type":"Question","name":"Can I search past journal entries?","acceptedAnswer":{"@type":"Answer","text":"Yes. Since entries accumulate in your email, you can use Gmail or Outlook search to find entries by keyword. Search \"vacation\" or \"grateful\" and see all related entries at a glance — a major advantage over paper journals."}},{"@type":"Question","name":"Should I journal in the morning or at night?","acceptedAnswer":{"@type":"Answer","text":"Both work well. Morning is great for setting intentions and goals. Evening is ideal for reflection and gratitude. Start with one, and add the other when the habit feels natural."}},{"@type":"Question","name":"Is my journal private?","acceptedAnswer":{"@type":"Answer","text":"Memos are sent only to the address you set, and no account is needed. Entries waiting to send and your send history are saved with AES-GCM encryption on your device. Memo bodies pass through Cloudflare and Resend at send time and are not persistently stored on our servers. Delivered entries stay in your own mailbox (and in your vault if you use the Obsidian integration)."}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
-<nav aria-label="Main navigation" class="global-nav">
+<nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
-<a class="global-nav__logo" href="/en/">
-<img alt="Simple Memo - for Obsidian" height="28" loading="eager" src="/assets/img/app-icon-56.png" width="28"/><span lang="en">Simple Memo - for Obsidian</span></a>
-<ul class="global-nav__links" id="navLinks">
-<li><a href="/en/guides/"><span lang="en">Guides</span></a></li>
-<li><a href="/en/use-cases/"><span lang="en">Use Cases</span></a></li>
-<li><a href="/en/vs/"><span lang="en">Compare</span></a></li>
+<a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/">Guides</a><a href="/en/use-cases/">Use cases</a><a href="/en/vs/">Compare</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+<li><a href="/en/guides/">Guides</a></li>
+<li><a href="/en/use-cases/">Use cases</a></li>
+<li><a href="/en/vs/">Compare</a></li>
 <li><a href="/en/methods/"><span lang="en">Methods</span></a></li>
 <li><a href="/en/blog/"><span lang="en">Blog</span></a></li>
 <li><a href="/en/glossary/"><span lang="en">Glossary</span></a></li>
-<li><a href="/en/faq"><span lang="en">FAQ</span></a></li>
-<li><a href="/en/about/"><span lang="en">About</span></a></li>
-<li><a href="/en/devlog/"><span lang="en">Dev Log</span></a></li>
-<li class="nav-cta-mobile"><a data-cta-cluster="use-case" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8"><span lang="en">Download</span></a></li>
+<li><a href="/en/faq">FAQ</a></li>
+<li><a href="/en/about/">About the developer</a></li>
+<li><a href="/en/devlog/">Development log</a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="use-case" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span lang="en">Download</span></a></li>
 </ul>
-<div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn" href="/use-cases/journaling/" hreflang="ja" aria-label="日本語" style="text-decoration:none">JA</a><a class="lang-switcher__btn active" href="/en/use-cases/journaling/" hreflang="en" aria-label="Switch to English" aria-current="page" style="text-decoration:none">EN</a></div>
-<a class="global-nav__cta" data-cta-cluster="use-case" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8">
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="English · Choose a language"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>EN</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="en" dir="ltr"><p class="site-language-title">Choose a language</p><div class="site-language-grid"><a href="/use-cases/journaling/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="en" aria-current="page"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh/use-cases/journaling/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/use-cases/journaling/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/use-cases/journaling/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/use-cases/journaling/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/use-cases/journaling/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/use-cases/journaling/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/use-cases/journaling/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/use-cases/journaling/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+<a class="global-nav__cta" data-cta-cluster="use-case" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">
 <span lang="en">Download</span>
 </a>
-<button aria-controls="navLinks" aria-expanded="false" aria-label="Menu" class="global-nav__hamburger" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
 </div>
 </div>
 </nav>
@@ -281,7 +294,7 @@
 <main class="page-content">
 <div class="container">
 <!-- Hero -->
-<div class="lp-hero">
+<div class="lp-hero sd-hero"><div class="sd-hero-copy">
 <div class="lp-hero__label">
 
 <span lang="en">Use Case / Email Journaling</span>
@@ -292,19 +305,19 @@
 </h1>
 <p class="lp-hero__sub">
 
-<span lang="en">Started a journal and quit after three days? Downloaded a journaling app only to forget about it? The problem isn't willpower — it's friction. With Simple Memo, just send 1-3 lines to your email. In 10 seconds, you're done. A searchable journal builds up automatically in your inbox with zero effort.</span>
+<span lang="en">Started a journal and quit after three days? Downloaded a journaling app only to forget about it? The problem isn't willpower — it's friction. With Simple Memo, just send 1-3 lines to your email. In a few seconds, you're done. A searchable journal builds up in your inbox automatically, with little effort.</span>
 </p>
 <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
 
 <span lang="en">By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a></span>
 </p>
-</div>
+</div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Why Journals Don&#x27;t Stick</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>The Solution: One-Line Diary Sent to Email</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>How to Use It (5 Steps)</span><span aria-hidden="true">↗</span></a></nav></div>
 <!-- Problem Statement -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
 
 <span lang="en">Why Journals Don't Stick</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 
 <span lang="en">The reason journals don't stick isn't laziness. Most journaling methods set the bar too high. Sit down for 30 minutes, write beautiful prose, fill a full page — this can't survive once the initial enthusiasm fades.</span>
@@ -317,7 +330,7 @@
 </div>
 <div class="reason-card__desc">
 
-<span lang="en">The word "journal" creates pressure to write long entries. If you don't fill a page, it doesn't feel like you "did it properly." This pressure is the #1 cause of giving up.</span>
+<span lang="en">The word "journal" creates pressure to write long entries. If you don't fill a page, it doesn't feel like you "did it properly." This pressure is a common reason people give up.</span>
 </div>
 </div>
 <div class="reason-card">
@@ -341,39 +354,39 @@
 </div>
 </div>
 </div>
-</section>
+</div></section>
 <!-- Solution -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
 
 <span lang="en">The Solution: One-Line Diary Sent to Email</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 
-<span lang="en">Email journaling has one rule: "Send at least one line to yourself every day." Simple Memo makes this a 10-second habit with its 0.4s launch and one-tap send. One line is enough. Entries accumulate in your email with timestamps, so you can search past entries instantly with Gmail or Outlook. Your daily email app becomes your journal.</span>
+<span lang="en">Email journaling has one rule: "Send at least one line to yourself every day." Simple Memo makes this a few-second habit with its 0.4s launch (warm, iPhone 16e) and one-tap send. One line is enough. Entries accumulate in your email with timestamps, so you can search past entries instantly with Gmail or Outlook. Your daily email app becomes your journal.</span>
 </p>
-</section>
+</div></section>
 <!-- How To Steps -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
 
 <span lang="en">How to Use It (5 Steps)</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <ol class="steps-list" lang="en">
 <li><strong>Set a daily reminder</strong> — Use your iPhone's reminder or alarm app to set a notification at a fixed time, morning or evening. This becomes your journaling trigger.</li>
-<li><strong>Launch the app</strong> — When the reminder fires, open Simple Memo. Cursor is ready in 0.4 seconds.</li>
+<li><strong>Launch the app</strong> — When the reminder fires, open Simple Memo. Cursor is ready in 0.4 seconds (warm launch, iPhone 16e).</li>
 <li><strong>Write 1-3 lines about your day</strong> — "Highlight: got a compliment from a coworker" or "Grateful for: beautiful weather." One line is fine. No need for perfect prose.</li>
-<li><strong>Send with one tap</strong> — Tap send once. Set subject prefix [JOURNAL] so you can filter and review just your journal entries later.</li>
+<li><strong>Send with one tap</strong> — Tap send once. Start the first line with [JOURNAL]; the first line becomes the subject, so you can filter and review just your journal entries later.</li>
 <li><strong>Search and reflect via email</strong> — On weekends or month-end, search "[JOURNAL]" in your email. Past entries appear chronologically. Easily look back at "this time last year."</li>
 </ol>
-</section>
+</div></section>
 <!-- Real Scenarios -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
 
 <span lang="en">Real-World Scenario Examples</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <div lang="en">
 <div class="scenario-block">
@@ -385,7 +398,7 @@
 <div class="scenario-block">
 <div class="scenario-block__label">Scenario 2</div>
 <div class="scenario-block__title">Evening Gratitude Journal</div>
-<div class="scenario-block__body">Before bed, write "3 things I'm grateful for today." In bed, launch the app: "1. Coworker helped me 2. Great lunch 3. Kid's smile." Send. Done in 10 seconds. Daily practice strengthens positive thinking over time.</div>
+<div class="scenario-block__body">Before bed, write "3 things I'm grateful for today." In bed, launch the app: "1. Coworker helped me 2. Great lunch 3. Kid's smile." Send. Done in seconds. Daily practice strengthens positive thinking over time.</div>
 <div class="scenario-block__memo">[JOURNAL] Grateful: coworker's help / great lunch / kid's smile</div>
 </div>
 <div class="scenario-block">
@@ -401,22 +414,22 @@
 <div class="scenario-block__memo">[JOURNAL] A fulfilling day. New project kicked off.</div>
 </div>
 </div>
-</section>
+</div></section>
 <!-- FAQ -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
 
 <span lang="en">FAQ</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <div lang="en">
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is email journaling?</summary><div class="faq-answer"><p>Email journaling is a practice of sending short daily reflections to your own email. Instead of using a dedicated journaling app, your inbox becomes your journal — searchable, timestamped, and always accessible.</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can people who can't keep a journal stick with this?</summary><div class="faq-answer"><p>Yes. The key is ultra-low friction. One line is enough, perfect prose isn't needed, and the whole process takes under 10 seconds with a 0.4s launch and one-tap send. No journal to find, no pen to pick up. This low barrier is what makes the habit stick.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can people who can't keep a journal stick with this?</summary><div class="faq-answer"><p>Yes. The key is ultra-low friction. One line is enough, perfect prose isn't needed, and the whole process takes only seconds with a 0.4s launch (warm, iPhone 16e) and one-tap send. No journal to find, no pen to pick up. This low barrier is what makes the habit stick.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I search past journal entries?</summary><div class="faq-answer"><p>Yes. Since entries accumulate in your email, you can use Gmail or Outlook search to find entries by keyword. Search "vacation" or "grateful" and see all related entries at a glance — a major advantage over paper journals.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Should I journal in the morning or at night?</summary><div class="faq-answer"><p>Both work well. Morning is great for setting intentions and goals. Evening is ideal for reflection and gratitude. Start with one, and add the other when the habit feels natural.</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is my journal private?</summary><div class="faq-answer"><p>Yes. Memos are sent only to your own email address. No account creation, no cloud storage of your data. Offline entries are saved with AES-GCM encryption on your device. Your journal content exists only on your email server.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is my journal private?</summary><div class="faq-answer"><p>Memos are sent only to the address you set, and no account is needed. Entries waiting to send and your send history are saved with AES-GCM encryption on your device. Memo bodies pass through Cloudflare and Resend at send time and are not persistently stored on our servers. Delivered entries stay in your own mailbox (and in your vault if you use the Obsidian integration).</p></div></details></div>
 </div>
-</section>
+</div></section>
 <!-- CTA -->
 <div class="cta-box">
 <div class="cta-box__title">
@@ -425,19 +438,19 @@
 </div>
 <div class="cta-box__desc">
 
-<span lang="en">Free to download. Setup takes 3 minutes.</span>
+<span lang="en">Free to download. Quick to set up.</span>
 </div>
 
-<a aria-label="Download on the App Store" class="app-store-badge" data-cta-cluster="use-case" data-cta-placement="mid" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__mid&amp;mt=8" lang="en">
+<a aria-label="Download on the App Store" class="app-store-badge" data-cta-cluster="use-case" data-cta-placement="mid" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" lang="en">
 <img alt="Download on the App Store" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="120"/>
 </a>
 </div>
 <!-- Internal Links -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
 
 <span lang="en">Related Pages</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="internal-links">
 <a href="/en/use-cases/">
 
@@ -460,19 +473,19 @@
 <span lang="en">FAQ</span>
 </a>
 </div>
-</section>
+</div></section>
 </div>
 <!-- References -->
-<section class="lp-section references">
+<section class="lp-section references ce-chapter sd-chapter">
 
-<h2 class="lp-section__title" lang="en">References</h2>
+<div class="ce-chapter__head"><h2 class="lp-section__title" lang="en" id="reading-07" data-ce-number="07">References</h2></div><div class="ce-chapter__body">
 <ul style="font-size:.875rem;color:var(--text-secondary);line-height:1.8;list-style:disc;padding-left:1.5rem;">
 
-<li lang="en"><a href="https://pubmed.ncbi.nlm.nih.gov/29946959/" rel="noopener" target="_blank">Smyth &amp; Pennebaker (2008) — Expressive Writing and Health</a> — Research on the mental and physical health benefits of journaling</li>
+<li lang="en"><a href="https://doi.org/10.1348/135910707X260117" rel="noopener" target="_blank">Smyth &amp; Pennebaker (2008) — Exploring the boundary conditions of expressive writing: In search of the right recipe</a> — British Journal of Health Psychology 13(1), 1-7; on when expressive writing helps health and when it does not</li>
 
 <li lang="en"><a href="https://positivepsychology.com/benefits-of-journaling/" rel="noopener" target="_blank">Positive Psychology — Benefits of Journaling</a> — Evidence-based overview of how journaling improves well-being and self-reflection</li>
 </ul>
-</section>
+</div></section>
 <!-- SEO: Auto-generated related content links -->
 <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
        Exactly one destination per page. Adding a second defeats the purpose: the page
@@ -503,44 +516,39 @@
 </ul>
 </section>
 </main>
-<footer class="footer">
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro -->
 <div class="container">
 <nav aria-label="Footer navigation" class="footer__nav">
 <div class="footer__col">
 <p class="footer__col-title">Product</p>
-<a class="footer__link" href="/en/download/"><span lang="en">Download</span></a>
-<a class="footer__link" href="/en/"> <span lang="en">Home</span></a>
-<a class="footer__link" href="/en/use-cases/"> <span lang="en">Use Cases</span></a>
-<a class="footer__link" href="/en/guides/"> <span lang="en">Guides</span></a>
+<a class="footer__link" href="/en/download/">Download</a>
+<a class="footer__link" href="/en/">Home</a>
+<a class="footer__link" href="/en/use-cases/">Use cases</a>
+<a class="footer__link" href="/en/guides/">Guides</a>
 </div>
 <div class="footer__col">
 <p class="footer__col-title">Compare & Switch</p>
 <a class="footer__link" href="/en/captio-alternative/"> <span lang="en">Captio Alternative</span></a>
-<a class="footer__link" href="/en/note-to-email/"> <span lang="en">Note to Email</span></a>
-<a class="footer__link" href="/en/vs/"> <span lang="en">vs</span></a>
+<a class="footer__link" href="/en/note-to-email/">Notes to email</a>
+<a class="footer__link" href="/en/vs/">Compare</a>
 </div>
 <div class="footer__col">
 <p class="footer__col-title">Support</p>
-<a class="footer__link" href="/en/roadmap/"><span lang="en">Public roadmap</span></a>
-<a class="footer__link" href="/en/devlog/"><span lang="en">Dev log</span></a>
-<a class="footer__link" href="/en/about/"><span lang="en">About the developer</span></a>
-<a class="footer__link" href="/en/faq"> <span lang="en">FAQ</span></a>
-<a class="footer__link" href="/en/privacy"> <span lang="en">Privacy</span></a>
-<a class="footer__link" href="/en/contact"> <span lang="en">Contact</span></a>
+<a class="footer__link" href="/en/roadmap/">Public roadmap</a>
+<a class="footer__link" href="/en/devlog/">Development log</a>
+<a class="footer__link" href="/en/about/">About the developer</a>
+<a class="footer__link" href="/en/faq">FAQ</a>
+<a class="footer__link" href="/en/privacy">Privacy</a>
+<a class="footer__link" href="/en/contact">Contact</a>
 </div>
 </nav>
 <p class="footer__copyright">
-        © 2026 Simple Memo - for Obsidian / Yurika Inc.
+        © 2026 Simple Memo - for Obsidian / YURIKA, K.K.
       </p>
 </div>
 </footer>
 
-<script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
 <script defer="" src="/js/app-store-tracking.js?v=fd48cabcf6"></script>
 </body>
 </html>

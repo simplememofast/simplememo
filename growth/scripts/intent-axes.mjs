@@ -6,6 +6,7 @@
  *   node growth/scripts/intent-axes.mjs --json
  *   node growth/scripts/intent-axes.mjs --check   # 矛盾があれば非0
  *   node growth/scripts/intent-axes.mjs --selftest
+ *   node growth/scripts/intent-axes.mjs --write  # 実測で閾値未満になった既存行だけ除く
  *
  * 【なぜ要るか】
  * businessRelevance は「インストールにどれだけ近いか」の1次元しか無く、
@@ -33,8 +34,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 import {
-  ROOT, listSnapshots, loadSnapshot, toPath,
+  ROOT, GSC_DIR, listSnapshots, loadSnapshot, toPath,
   BUSINESS_RELEVANCE, MONETIZATION_RELEVANCE,
   businessRelevance, monetizationRelevance, freeSeekingShare,
 } from '../lib/gsc.mjs';
@@ -90,6 +92,45 @@ export function coverage(snapshot, ledger, { threshold = ledger?.threshold_impre
 export const readUndecided = () => {
   try { return JSON.parse(fs.readFileSync(UNDECIDED_PATH, 'utf8')); } catch { return null; }
 };
+
+/** Reconcile observed declines only. Missing pages and new intent decisions still need review. */
+export function pruneObservedBelowThreshold(snapshot, ledger) {
+  const meta = snapshot?.meta;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(snapshot?.label ?? '') || meta?.label !== snapshot.label
+    || meta.source !== 'bigquery' || meta.complete_window !== true
+    || meta.bigquery?.site_url !== 'sc-domain:simplememofast.com' || meta.bigquery.search_type !== 'WEB'
+    || !Array.isArray(snapshot.pages) || !snapshot.pages.length
+    || meta.row_counts?.pages !== snapshot.pages.length) {
+    throw new Error('A complete weekly BigQuery snapshot with matching page count is required');
+  }
+  if (!ledger || !Number.isFinite(ledger.threshold_impressions) || ledger.threshold_impressions <= 0
+    || !Array.isArray(ledger.pages) || ledger.pages.some(p => typeof p?.page !== 'string'
+      || !p.page.startsWith('/') || typeof p.reason !== 'string' || !p.reason.trim())
+    || new Set(ledger.pages.map(p => p.page)).size !== ledger.pages.length) {
+    throw new Error('The existing intent ledger must be valid before reconciliation');
+  }
+  const observed = new Map();
+  for (const row of snapshot.pages) {
+    if (typeof row?.page !== 'string' || !row.page.trim()
+      || !Number.isFinite(row.impressions) || row.impressions < 0
+      || !Number.isFinite(row.clicks) || row.clicks < 0) {
+      throw new Error('Invalid observed page row; the intent ledger was not changed');
+    }
+    const page = toPath(row.page);
+    if (observed.has(page)) throw new Error('Duplicate observed page; the intent ledger was not changed');
+    observed.set(page, row);
+  }
+  const stale = new Set(coverage(snapshot, ledger).stale);
+  const removed = ledger.pages.filter(p => stale.has(p.page) && observed.has(p.page)
+    && observed.get(p.page).impressions < ledger.threshold_impressions).map(p => p.page);
+  const removedSet = new Set(removed);
+  return {
+    removed,
+    ledger: removed.length ? { ...ledger, measured_at: snapshot.label,
+      snapshot: `growth/data/gsc/${snapshot.label}`,
+      pages: ledger.pages.filter(p => !removedSet.has(p.page)) } : ledger,
+  };
+}
 
 /** 宣言が実測に殴られたと呼ぶ線。可視スライスの3割が無料狙いなら、高い宣言は保てない。 */
 export const CONTRADICTION_FREE_SHARE = 0.3;
@@ -231,6 +272,46 @@ function selftest() {
   const failures = []; let total = 0;
   const t = (name, ok) => { total += 1; if (!ok) failures.push(name); console.log(`${ok ? '  ok ' : '  NG '} ${name}`); };
 
+  const ledger = { measured_at: '2026-09-15', snapshot: 'growth/data/gsc/2026-09-15',
+    threshold_impressions: 100, pages: [
+      { page: '/blog/unknown-low', reason: 'Keep original reason until enough evidence.' },
+      { page: '/blog/unknown-edge', reason: 'Still needs an intent decision.' },
+      { page: '/blog/unknown-absent', reason: 'Absence is not a measured zero.' },
+    ] };
+  const observed = { label: '2026-09-21', meta: { label: '2026-09-21', source: 'bigquery',
+    complete_window: true, row_counts: { pages: 3 },
+    bigquery: { site_url: 'sc-domain:simplememofast.com', search_type: 'WEB' } }, pages: [
+    { page: '/blog/unknown-low', impressions: 82, clicks: 2 },
+    { page: '/blog/unknown-edge', impressions: 100, clicks: 1 },
+    { page: '/blog/new-undecided', impressions: 200, clicks: 3 },
+  ] };
+  const reconciled = pruneObservedBelowThreshold(observed, ledger);
+  t('週次更新は実測で閾値未満の既存行だけ除き、100表示と未観測の行を残す',
+    JSON.stringify(reconciled.removed) === JSON.stringify(['/blog/unknown-low'])
+    && reconciled.ledger.pages[0] === ledger.pages[1] && reconciled.ledger.pages[1] === ledger.pages[2]);
+  t('週次更新は入力・理由・閾値を変更せず、新しい未宣言行を免除しない',
+    ledger.pages.length === 3 && reconciled.ledger.threshold_impressions === 100
+    && coverage(observed, reconciled.ledger).unlisted.some(p => p.page === '/blog/new-undecided'));
+  t('週次更新は元の観測ラベルへ結び付け、変更が無ければ書き直さない',
+    reconciled.ledger.measured_at === '2026-09-21'
+    && reconciled.ledger.snapshot === 'growth/data/gsc/2026-09-21'
+    && pruneObservedBelowThreshold(observed, reconciled.ledger).ledger === reconciled.ledger);
+  for (const [name, s, l] of [
+    ['不完全な観測', { ...observed, meta: { ...observed.meta, complete_window: false } }, ledger],
+    ['別の検索プロパティ', { ...observed, meta: { ...observed.meta, bigquery: { ...observed.meta.bigquery, site_url: 'sc-domain:example.com' } } }, ledger],
+    ['別の検索面', { ...observed, meta: { ...observed.meta, bigquery: { ...observed.meta.bigquery, search_type: 'IMAGE' } } }, ledger],
+    ['観測件数の不一致', { ...observed, meta: { ...observed.meta, row_counts: { pages: 4 } } }, ledger],
+    ['空の観測', { ...observed, pages: [], meta: { ...observed.meta, row_counts: { pages: 0 } } }, ledger],
+    ['重複した観測', { ...observed, pages: [observed.pages[0], observed.pages[0], observed.pages[1]] }, ledger],
+    ['不正な観測値', { ...observed, pages: [{ ...observed.pages[0], impressions: null }, ...observed.pages.slice(1)] }, ledger],
+    ['台帳の読み取り失敗', observed, null],
+    ['台帳の不正な閾値', observed, { ...ledger, threshold_impressions: null }],
+  ]) {
+    let refused = false;
+    try { pruneObservedBelowThreshold(s, l); } catch { refused = true; }
+    t(`${name}で未判定行を消さない`, refused);
+  }
+
   const P = (page, clicks, impressions) => ({ page, clicks, impressions, position: 5, ctr: 0 });
   const QP = (query, page, impressions) => ({ query, page, impressions, clicks: 0, position: 5, ctr: 0 });
   const snap = (pages, queryPages = []) => ({ label: 'T', meta: {}, pages, queryPages });
@@ -326,6 +407,15 @@ function selftest() {
     const c = coverage(sn, readUndecided());
     t('**実データで台帳が門を通る**（未宣言はすべて理由つき）', c.unlisted.length === 0);
     t('実データで台帳に古い行が無い', c.stale.length === 0);
+    const child = spawnSync(process.execPath, [fileURLToPath(import.meta.url), '--json'],
+      { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 });
+    let complete = false;
+    try {
+      const decoded = JSON.parse(child.stdout);
+      complete = child.status === 0 && decoded.label === sn.label
+        && decoded.rows.length === a.rows.length;
+    } catch { /* A truncated JSON stream is a failed check. */ }
+    t('実CLIのJSONはパイプでも全行を読み戻せる', complete);
   } else {
     t('**スナップショットが無い**', false);
   }
@@ -341,14 +431,28 @@ if (isMain) {
   const labels = listSnapshots();
   if (!labels.length) { console.error('スナップショットが無い'); process.exit(1); }
   const snap = loadSnapshot(labels[labels.length - 1]);
+  if (process.argv.includes('--write')) {
+    if (GSC_DIR !== path.join(ROOT, 'growth/data/gsc')) {
+      console.error('Only the committed weekly snapshot store may update the intent ledger');
+      process.exit(1);
+    }
+    const current = readUndecided();
+    const result = pruneObservedBelowThreshold(snap, current);
+    if (result.removed.length) fs.writeFileSync(UNDECIDED_PATH, `${JSON.stringify(result.ledger, null, 2)}\n`);
+    console.error(`Observed below threshold: removed ${result.removed.length} existing intent rows`);
+  }
   const a = axes(snap);
   const cov = coverage(snap, readUndecided());
-  if (process.argv.includes('--json')) { console.log(JSON.stringify({ ...a, coverage: cov }, null, 2)); process.exit(0); }
-  console.log(render(a, cov));
-  const problems = validate(a, cov);
-  if (problems.length) {
-    console.error('\n宣言まわりの問題:');
-    for (const p of problems) console.error(`  - ${p}`);
-    if (process.argv.includes('--check')) process.exit(1);
+  if (process.argv.includes('--json')) {
+    // Let Node drain stdout; explicit exit truncates large snapshots when piped.
+    console.log(JSON.stringify({ ...a, coverage: cov }, null, 2));
+  } else {
+    console.log(render(a, cov));
+    const problems = validate(a, cov);
+    if (problems.length) {
+      console.error('\n宣言まわりの問題:');
+      for (const p of problems) console.error(`  - ${p}`);
+      if (process.argv.includes('--check')) process.exit(1);
+    }
   }
 }

@@ -576,7 +576,10 @@ jobs:
               d = next((x for x in reversed(d) if isinstance(x, dict) and 'total_cost_usd' in x), {})
           cost = d.get('total_cost_usd')
           turns = d.get('num_turns')
-          denials = d.get('permission_denials_count')
+          raw_denials = d.get('permission_denials')
+          denials = len(raw_denials) if isinstance(raw_denials, list) else d.get('permission_denials_count')
+          if type(denials) is not int or denials < 0:
+              denials = None  # unknown is not zero
           run_id = os.environ.get('GITHUB_RUN_ID', '')
           if cost is None:
               print("* AI実費: 取得できなかった（total_cost_usd がログに無い）")
@@ -607,9 +610,12 @@ jobs:
           print("```")
           PY
 
-      - name: Preserve declared page work after model failure
+      - name: Preserve declared page work after model or output failure
         id: checkpoint
-        if: failure() && steps.claude.outcome == 'failure'
+        if: >-
+          !cancelled() &&
+          (steps.claude.outcome == 'failure' ||
+           (steps.claude.outcome == 'success' && steps.output.outcome == 'failure'))
         continue-on-error: true
         run: |
           git worktree add --detach "$RUNNER_TEMP/checkpoint-tools" "$GITHUB_SHA"
@@ -621,6 +627,41 @@ jobs:
         with:
           name: autopilot-work-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/autopilot-checkpoint
+          retention-days: 7
+          if-no-files-found: error
+
+      # Only typed counts/states/hashes leave the runner; never upload SDK messages.
+      # Independent of checkpoint success and the verifier's exit code.
+      - name: Preserve bounded execution diagnostics
+        id: diagnostics
+        if: >-
+          !cancelled() &&
+          (steps.claude.outcome == 'success' || steps.claude.outcome == 'failure')
+        continue-on-error: true
+        env:
+          EXEC_FILE: ${{ steps.claude.outputs.execution_file }}
+          TODAY_DASH: ${{ steps.gate.outputs.today_dash }}
+          MODEL_OUTCOME: ${{ steps.claude.outcome }}
+          OUTPUT_VERDICT: ${{ steps.output.outputs.verdict }}
+          OUTPUT_REASON_CODE: ${{ steps.output.outputs.reason_code }}
+          MATCHING_PR_COUNT: ${{ steps.output.outputs.matching_pr_count }}
+          CURRENT_RUN_RECORD_COUNT: ${{ steps.output.outputs.current_run_record_count }}
+          REMOTE_HEAD_SHA: ${{ steps.output.outputs.remote_head_sha }}
+          CHECKPOINT_OUTCOME: ${{ steps.checkpoint.outcome }}
+          CHECKPOINT_SAVED: ${{ steps.checkpoint.outputs.saved }}
+          CHECKPOINT_REASON: ${{ steps.checkpoint.outputs.reason }}
+          DECLARED_PAGE_CHANGE_COUNT: ${{ steps.checkpoint.outputs.declared_page_change_count }}
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/diagnostic-tools" "$GITHUB_SHA"
+          node "$RUNNER_TEMP/diagnostic-tools/scripts/autopilot-diagnostics.mjs" --save "$RUNNER_TEMP/autopilot-diagnostic"
+
+      - name: Upload bounded execution diagnostics
+        if: always() && steps.diagnostics.outputs.saved == 'true'
+        continue-on-error: true
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: autopilot-diagnostic-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/autopilot-diagnostic
           retention-days: 7
           if-no-files-found: error
 

@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/uikit-vs-swiftui">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>UIKit vs SwiftUI: Razões para escolher o UIKit para velocidade de inicialização | Diário de Desenvolvimento SimpleMemo</title>
+  <meta name="description" content="Eu me atrevi a escolher o UIKit no 2026. Com o objetivo de Time-to-Text 500ms ou menos, a decisão de design que escolheu se tornouFirstResponder com o uso de Storyboard, geração direta de VC e viewDidAppear.">
+  <meta name="theme-color" content="#070b14">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- OGP -->
+  <meta property="og:title" content="UIKit vs SwiftUI: Por que escolhi o UIKit para a velocidade de inicialização">
+  <meta property="og:description" content="Eu me atrevi a escolher o UIKit no 2026. Com o objetivo de Time-to-Text 500ms ou menos, a decisão de design que escolheu se tornouFirstResponder com o uso de Storyboard, geração direta de VC e viewDidAppear.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/pt-BR/devlog/uikit-vs-swiftui">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-uikit-vs-swiftui.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="UIKit vs SwiftUI: Por que escolhi o UIKit para a velocidade de inicialização">
+  <meta name="twitter:description" content="Eu me atrevi a escolher o UIKit no 2026. Com o objetivo de Time-to-Text 500ms ou menos, a decisão de design que escolheu se tornouFirstResponder com o uso de Storyboard, geração direta de VC e viewDidAppear.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-uikit-vs-swiftui.png">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/pt-BR/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/uikit-vs-swiftui">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: Speakable (AIO / Voice Search) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/pt-BR/devlog/uikit-vs-swiftui#webpage",
+  "inLanguage": "pt-BR",
+  "name": "UIKit vs SwiftUI: Seleção para velocidade de inicialização",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/pt-BR/#website"
+  },
+  "url": "https://simplememofast.com/pt-BR/devlog/uikit-vs-swiftui"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    /* Language Switcher Styles - 2026 Dark Sleek Premium */
+    .lang-switcher-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 1.25rem 0;
+    }
+    .lang-switcher {
+      display: inline-flex;
+      background: rgba(18, 26, 46, 0.95);
+      border: 1px solid rgba(82, 160, 255, 0.12);
+      border-radius: 22px;
+      padding: 3px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .lang-switcher__btn {
+      background: transparent;
+      border: none;
+      color: #c9d4ec;
+      padding: 0.75rem 1.1rem;
+      min-height: 48px;
+      border-radius: 19px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 400;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.02em;
+    }
+    .lang-switcher__btn:hover {
+      color: #f2f6ff;
+    }
+    .lang-switcher__btn:focus-visible {
+      outline: 2px solid #4da3ff;
+      outline-offset: 2px;
+    }
+    .lang-switcher__btn.active {
+      background: rgba(82, 160, 255, 0.25);
+      border: 1px solid rgba(82, 160, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(82, 160, 255, 0.1);
+    }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lang-switcher__btn {
+        transition: none;
+      }
+    }
+
+    /* Code Block Styles */
+    pre {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+    code {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.85rem;
+      color: #e0e0e0;
+    }
+
+    /* Related Card Styles */
+    .related-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .related-section__title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+    .related-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    @media (min-width: 600px) {
+      .related-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .related-card {
+      background: rgba(18, 26, 46, 0.85);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.25s;
+      display: block;
+    }
+    .related-card:hover {
+      border-color: rgba(82, 160, 255, 0.3);
+    }
+    .related-card__title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .related-card__desc {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Article Styles */
+    .article-meta {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+    .article-body h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-top: 40px;
+      margin-bottom: 16px;
+      color: var(--text);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-top: 28px;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .article-body p {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      font-size: 0.92rem;
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      padding-left: 1.5em;
+      font-size: 0.92rem;
+    }
+    .article-body li {
+      margin-bottom: 6px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+    .metric-highlight {
+      background: rgba(82, 160, 255, 0.08);
+      border: 1px solid rgba(82, 160, 255, 0.15);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .metric-highlight strong {
+      color: var(--accent);
+    }
+    .faq-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .faq-item {
+      margin-bottom: 24px;
+    }
+    .faq-item__question {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .faq-item__answer {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+
+  <!-- JSON-LD: TechArticle -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": [
+    "BlogPosting",
+    "TechArticle"
+  ],
+  "@id": "https://simplememofast.com/pt-BR/devlog/uikit-vs-swiftui#article",
+  "headline": "UIKit vs SwiftUI: Por que escolhi o UIKit para a velocidade de inicialização",
+  "description": "Eu me atrevi a escolher o UIKit no 2026. Com o objetivo de Time-to-Text 500ms ou menos, a decisão de design que escolheu se tornouFirstResponder com o uso de Storyboard, geração direta de VC e viewDidAppear.",
+  "url": "https://simplememofast.com/pt-BR/devlog/uikit-vs-swiftui",
+  "datePublished": "2026-02-13",
+  "dateModified": "2026-10-04",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/devlog-uikit-vs-swiftui.png",
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/pt-BR/devlog/uikit-vs-swiftui"
+  },
+  "inLanguage": "pt-BR",
+  "keywords": "Desempenho do UIKit SwiftUI, velocidade de inicialização do SwiftUI, desempenho de lançamento do aplicativo iOS, UIKit vs SwiftUI 2026",
+  "proficiencyLevel": "Expert",
+  "dependencies": "UIKit, Xcode Instruments (os_signpost)"
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Início",
+      "item": "https://simplememofast.com/pt-BR/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Diário de Desenvolvimento",
+      "item": "https://simplememofast.com/pt-BR/devlog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "UIKit vs SwiftUI",
+      "item": "https://simplememofast.com/pt-BR/devlog/uikit-vs-swiftui"
+    }
+  ]
+}</script>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Navegação principal" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/pt-BR/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/pt-BR/guides/">Guias</a><a href="/pt-BR/use-cases/">Casos de uso</a><a href="/pt-BR/vs/">Comparar</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/pt-BR/guides/">Guias</a></li>
+        <li><a href="/pt-BR/use-cases/">Casos de uso</a></li>
+        <li><a href="/pt-BR/vs/">Comparar</a></li>
+        <li><a href="/pt-BR/methods/"><span>Métodos</span></a></li>
+        <li><a href="/pt-BR/blog/"><span>Blog</span></a></li>
+        <li><a href="/pt-BR/glossary/"><span>Glossário</span></a></li>
+        <li><a href="/pt-BR/faq">Perguntas frequentes</a></li>
+        <li><a href="/pt-BR/about/">Sobre o desenvolvedor</a></li>
+        <li><a href="/pt-BR/devlog/">Registro de desenvolvimento</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>Baixar</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Português · Escolher idioma"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>PT</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="pt-BR" dir="ltr"><p class="site-language-title">Escolher idioma</p><div class="site-language-grid"><a href="/devlog/uikit-vs-swiftui" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/devlog/uikit-vs-swiftui" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/devlog/uikit-vs-swiftui" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/devlog/uikit-vs-swiftui" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/devlog/uikit-vs-swiftui" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/devlog/uikit-vs-swiftui" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="pt-BR" aria-current="page"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/id/devlog/uikit-vs-swiftui" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/devlog/uikit-vs-swiftui" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/devlog/uikit-vs-swiftui" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">Baixar</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menu"><span>Menu</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title sd-title"> <span>UIKit vs SwiftUI: Por que escolhi o UIKit para velocidade de inicialização</span> </h1>
+
+      <div class="article-meta">
+        <span>2026 anos 2 mês 13 dias ・ Tópico de tecnologia escavação profunda</span>
+
+      </div>
+
+      <!-- Japanese Content -->
+      <div class="">
+        <div class="article-body">
+
+          <h2 id="reading-01">1. Por que é UIKit em 2026</h2>
+          <p>Apple enfatiza a evolução do SwiftUI em sua WWDC anual, e a conveniência da UI declarativa não é mais duvidosa.</p>
+          <p>No entanto, este aplicativo tem <strong>requisitos de inflexão</strong>. É para fazer <strong>Time-to-Text (tempo desde a inicialização até a entrada de texto) para 500ms ou menos</strong>.</p>
+          <p>No SwiftUI, existem sobrecargas declarativas específicas da estrutura da interface do usuário, como inicialização do <code>@StateObject</code>, reavaliação do <code>body</code> e controle de tempo do <code>.onAppear</code>. Estes podem ser ignorados em aplicativos gerais, mas não podem ser ignorados em situações em que a otimização é realizada em milissegundos.</p>
+          <p>Por outro lado, o caminho que chama <code>becomeFirstResponder()</code> de <code>viewDidAppear</code> no UIKit é <strong>determinísticamente rápido</strong>. O ciclo de vida do ViewController é claro e você pode controlar com precisão quando o teclado é exibido.</p>
+          <div class="metric-highlight">
+            <strong>Ajulgamento do projeto:</strong>O UIKit é usado para atender aos requisitos não funcionais do Time-to-Text 500ms ou menos. </div>
+
+          <h2 id="reading-02">2. A razão para eliminar completamente o Storyboard</h2>
+          <p>Não é suficiente escolher o UIKit. O storyboard também tem sobrecarga que afeta o desempenho da inicialização.</p>
+          <ul>
+            <li><strong>Custo da análise XML:</strong>O Storyboard é um arquivo XML interno e precisa ser analisado na inicialização</li>
+            <li><strong>Custo de resolução de Segue:</strong>Leva tempo para resolver as configurações do Segue para transições de tela</li>
+            <li><strong>Complicidade desnecessária:</strong>As ferramentas de design visual do Storyboard são excessivas para aplicativos simples de memorandos</li>
+          </ul>
+          <p>, o método de gerar ViewController diretamente com <code>SceneDelegate</code> foi adotado.</p>
+          <pre tabindex="0"><code>func scene(_ scene: UIScene, willConnectTo session: UISceneSession,
+           options connectionOptions: UIScene.ConnectionOptions) {
+    PerformanceLogger.shared.signpostBegin(name: "SceneConnect")
+    guard let windowScene = (scene as? UIWindowScene) else { return }
+    let window = UIWindow(windowScene: windowScene)
+    let composeVC = ComposeViewController()
+    let navController = UINavigationController(rootViewController: composeVC)
+    window.rootViewController = navController
+    window.makeKeyAndVisible()
+    PerformanceLogger.shared.signpostEnd(name: "SceneConnect")
+}</code></pre>
+          <p>Esta abordagem atinge <strong>Zero Persing time para Storyboard e zero tempo de resolução Segui</strong>. Ao gerar o ComposeViewController diretamente do SceneDelegate, o processamento desnecessário foi completamente eliminado do caminho de inicialização.</p>
+
+          <h2 id="reading-03">3. A linha de visão 1DidAppear completa tudo</h2>
+          <p>A maior força do UIKit é que o Ciclo de Vida do ViewController é claramente definido. Quando <code>viewDidAppear(_:)</code> é chamado, a visualização é totalmente exibida na tela. Ao ligar para <code>becomeFirstResponder()</code> neste determinado horário, você pode minimizar o atraso até que o teclado seja exibido.</p>
+          <pre tabindex="0"><code>override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    activateTextInput()
+}
+
+private func activateTextInput() {
+    textView.becomeFirstResponder()
+    PerformanceLogger.shared.endTimeToText()
+}</code></pre>
+          <p>A medição por <code>os_signpost</code> é realizada com precisão de nanossegundos. O <code>PerformanceLogger.shared.endTimeToText()</code> registra o evento de término do Sinal e permite uma análise detalhada nos Instrumentos.</p>
+          <div class="metric-highlight">
+            <strong>Resultados da medição:</strong>A meta é no máximo 500 ms. Nas medições por gravação de tela a partir do toque no ícone, realizadas no dia 11 do mês 8 de 2026 no iPhone 16e, com inicialização a quente, o campo recebeu foco em 0.17 segundos e o teclado ficou totalmente visível em 0.4 segundos. </div>
+
+          <h2 id="reading-04">4. Mecanismo de medição de desempenho</h2>
+          <p>Os julgamentos de design são feitos com base em dados quantitativos, não no julgamento sensorial de "rápido".</p>
+          <ul>
+            <li><strong>PerformanceLogger:</strong>Loger personalizado embrulhado com <code>os_signpost</code>. Meça cada fase de inicialização, transmissão e atualização da interface do usuário</li>
+            <li><strong>Colaboração de instrumentos:</strong>O rastreamento de precisão de nanossegundos é possível com o instrumento os_signpost do Xcode</li>
+            <li><strong>Principais métricas:</strong>Time-to-Text (início → entrada), Enviar-to-Reset (botão enviar → inicialização da interface do usuário)</li>
+            <li><strong>Monitoramento contínuo:</strong>Medição de desempenho em todas as construções em desenvolvimento e detecção instantânea de regressão</li>
+          </ul>
+          <p>Desempenho é uma função. Mesmo que os usuários não exijam explicitamente "velocidade", aplicativos lentos não serão usados inconscientemente. É por isso que é importante continuar a gerenciar o desempenho numericamente.</p>
+
+          <h2 id="reading-05">5. Há alguma situação em que o SwiftUI é usado</h2>
+          <p>UIKit não é a única opção. Existem algumas situações no aplicativo em que o SwiftUI é adequado.</p>
+          <ul>
+            <li><strong>Tela de configuração: </strong>A interface do usuário declarativa do SwiftUI aumenta a produtividade em telas não críticas que não afetam a velocidade de inicialização</li>
+            <li><strong>Definição de caminho crítico:</strong>Início → Digite uma nota → Mantenha o fluxo principal de envio com UIKit</li>
+            <li><strong> Complexidade híbrida:</strong>A mistura de UIKit e SwiftUI requer atenção à consistência do gerenciamento e do fluxo de dados do UIHostingController</li>
+            <li><strong>Julgamento no momento: </strong>A interface do usuário do aplicativo de memorando é simples, e é melhor unificá-la com um UIKit em tela cheia para manter a consistência baseada em código</li>
+          </ul>
+          <p>Se o desempenho do SwiftUI melhorar ainda mais no futuro, há espaço para reavaliação, mas o caminho crítico UIKit será mantido por enquanto.</p>
+
+          <!-- FAQ Section -->
+          <div class="faq-section">
+            <h2 id="reading-06" data-ce-number="06">Perguntas frequentes</h2>
+
+            <div class="faq-item">
+              <div class="faq-item__question">P. É impossível iniciar 500ms ou menos no SwiftUI?</div>
+              <div class="faq-item__answer">Não é impossível. No entanto, no SwiftUI<code>@StateObject</code>e<code>body</code>. Neste desenvolvimento, que visa o mais rápido, escolhemos o UIKit, que pode controlar o ciclo de vida em detalhes (não o resultado de medir e comparar os dois nas mesmas condições).</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">P. Quais são as desvantagens de não usar o Storyboard?</div>
+              <div class="faq-item__answer">A visualização da interface do usuário se torna uma base de código. Você não poderá arrastar e soltar o design no Interface Builder. No entanto, a interface do usuário do aplicativo memo é simples, então não é um problema criar uma interface do usuário baseada em código.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">P. Quais são os resultados da medição na máquina real?</div>
+              <div class="faq-item__answer">A meta é no máximo 500 ms. A medição preservada foi feita por gravação de tela a partir do toque no ícone, em 11/8/2026, no iPhone 16e com inicialização a quente. O campo recebeu foco em 0.17 segundos e o teclado ficou totalmente visível em 0.4 segundos. Durante o desenvolvimento, <code>os_signpost</code>e analisada com Instrumentos.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">P. Você planeja migrar para o SwiftUI no futuro?</div>
+              <div class="faq-item__answer">O caminho crítico (início → entrada → envio) mantém o UIKit. Para telas não críticas, como a tela de configuração, há espaço para considerar a adoção do SwiftUI.</div>
+            </div>
+          </div>
+
+          <!-- Related Articles -->
+          <div class="related-section">
+            <h2 class="related-section__title" id="reading-07" data-ce-number="07">Artigos relacionados</h2>
+            <div class="related-grid">
+              <a href="/pt-BR/devlog/day1" class="related-card">
+                <div class="related-card__title">[Day1] Eu amo tanto Captio que quero fazer "essa experiência" novamente</div>
+                <div class="related-card__desc">Transmissão e design de um toque para evitar derramamentos. O registro de desenvolvimento inicial que registra todos os julgamentos técnicos.</div>
+              </a>
+              <a href="/pt-BR/devlog/" class="related-card">
+                <div class="related-card__title">Lista de Diários de Desenvolvimento</div>
+                <div class="related-card__desc">SimpleMemo registro de decisão técnica.</div>
+              </a>
+              <a href="/pt-BR/devlog/outbox-architecture" class="related-card">
+                <div class="related-card__title">Outbox Arquitetura: Design para evitar derramamentos</div>
+                <div class="related-card__desc">A interface do usuário é limpa assim que é enviada, mas a mensagem não enviada permanece no terminal e é reenviada. A imagem completa do padrão de criptografia AES-GCM Outbox.</div>
+              </a>
+              <a href="/pt-BR/devlog/relay-api-design" class="related-card">
+                <div class="related-card__title">Relay API: Construa uma plataforma de transmissão de e-mail com trabalhadores Cloudflare</div>
+                <div class="related-card__desc">Envie sem depender da integração OAuth da caixa de correio. Envie com Resend do relé API (Cloudflare Trabalhadores) que se move na borda.</div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- English Content -->
+
+    </div>
+
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-08" data-ce-number="08"> <span>Referências</span> </h2></div><div class="ce-chapter__body">
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developer.apple.com/documentation/uikit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Desenvolvedor — Documentação UIKit</a> — <span>Referência oficial à estrutura adotada para a construção da interface do usuário do SimpleMemo</span></li>
+    <li><a href="https://developer.apple.com/documentation/swiftui" target="_blank" rel="noopener" style="color:var(--accent);">Apple Desenvolvedor — Documentação SwiftUI</a> — <span>Uma estrutura declarativa de interface do usuário que foi comparada. Assunto de medição de desempenho</span></li>
+    <li><a href="https://developer.apple.com/documentation/os/ossignposter" target="_blank" rel="noopener" style="color:var(--accent);">Apple Desenvolvedor — os_signpost / OSSignposter</a> — <span>Medição de desempenho de colaboração de instrumentos usado para medição de Tempo para Texto API</span></li>
+    <li><a href="https://developer.apple.com/videos/play/wwdc2023/10160/" target="_blank" rel="noopener" style="color:var(--accent);">WWDC 2023 - Análise pendura com Instrumentos</a> — <span>Sessão WWDC como referência para otimização de resposta da interface do usuário</span></li>
+  </ul>
+</div></section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/pt-BR/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>Leia a seguir</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Crie um lugar para suas notas com a integração Obsidian</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>Configure a integração e o destino no iPhone para guardar as notas enviadas também no Obsidian.</span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>Conteúdo relacionado</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/pt-BR/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio Comparação de Aplicativos Alternativos</span></a></li>
+    <li><a href="/pt-BR/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Artigos do blog</span></a></li>
+    <li><a href="/pt-BR/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Comparações de aplicativos de notas</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="pt-BR" dir="ltr"><a class="site-brand" href="/pt-BR/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Uma pequena nota. Um próximo passo.</p><p class="site-footer-description">Envie notas do seu iPhone para o Obsidian e por e-mail.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="Navegação do rodapé">
+      <div class="footer__col">
+        <p class="footer__col-title">Produto</p>
+        <a href="/pt-BR/download/" class="footer__link">Baixar</a>
+        <a href="/pt-BR/" class="footer__link">Início</a>
+        <a href="/pt-BR/how-to/" class="footer__link"><span>Como usar</span> </a>
+        <a href="/pt-BR/templates/" class="footer__link"><span>Modelos</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Comparações e migração</p>
+        <a href="/pt-BR/captio/" class="footer__link"><span>Método Captio</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Artigos</p>
+        <a href="/pt-BR/devlog/" class="footer__link">Registro de desenvolvimento</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Suporte</p>
+        <a href="/pt-BR/roadmap/" class="footer__link">Roteiro público</a>
+        <a href="/pt-BR/about/" class="footer__link">Sobre o desenvolvedor</a>
+        <a href="/pt-BR/terms" class="footer__link"><span>Termos de Uso</span> </a>
+        <a href="/pt-BR/privacy" class="footer__link">Privacidade</a>
+        <a href="/pt-BR/contact" class="footer__link">Contato</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Operado por YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

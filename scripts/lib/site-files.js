@@ -32,34 +32,39 @@ const path = require('path');
  *        When true an unreadable directory is skipped silently; when false the
  *        underlying fs error propagates. Defaults to true — pass false to keep
  *        the fail-loud behaviour of the callers that never had a try/catch.
- * @returns {string[]} absolute paths, in readdir order, parents before children
+ * @param {boolean} [options.skipHidden]   skip dot-prefixed entries (default true)
+ * @returns {string[]} paths, in the existing depth-first readdir order
  */
 function collectHtmlFiles(dir, options) {
+  return [...walkHtmlFiles(dir, options)];
+}
+
+/** The same traversal, consumed lazily by tools that edit pages while walking. */
+function* walkHtmlFiles(dir, options) {
   const opts = options || {};
   const skipDirs = opts.skipDirs || [];
   const skipFiles = opts.skipFiles || [];
   const tolerateReadErrors = opts.tolerateReadErrors !== false;
+  const skipHidden = opts.skipHidden !== false;
 
-  const results = [];
   let entries;
   try {
     entries = fs.readdirSync(dir, { withFileTypes: true });
   } catch (e) {
-    if (tolerateReadErrors) return results;
+    if (tolerateReadErrors) return;
     throw e;
   }
 
   for (const entry of entries) {
-    if (skipDirs.includes(entry.name) || entry.name.startsWith('.')) continue;
+    if (skipDirs.includes(entry.name) || (skipHidden && entry.name.startsWith('.'))) continue;
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      results.push(...collectHtmlFiles(fullPath, opts));
+      yield* walkHtmlFiles(fullPath, opts);
     } else if (entry.name.endsWith('.html') && !skipFiles.includes(entry.name)) {
-      results.push(fullPath);
+      yield fullPath;
     }
   }
 
-  return results;
 }
 
 /**
@@ -81,4 +86,4 @@ function toUrlPath(rootDir, filePath) {
   return url;
 }
 
-module.exports = { collectHtmlFiles, toUrlPath };
+module.exports = { collectHtmlFiles, walkHtmlFiles, toUrlPath };

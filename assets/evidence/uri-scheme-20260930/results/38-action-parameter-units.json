@@ -1,0 +1,903 @@
+{
+  "source_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+  "source_sha256": "d401a97319322d3d3abf993dc18ab859c127060a54927b01a901781addecd5c1",
+  "unit_definition": "one officially enumerated action.parameter; daily explicit inheritance expands new11; six format-list actions plus separate Hook section =7; choose-vault no listed parameters",
+  "unit_count": 38,
+  "input_attempted_unit_count": 38,
+  "valid_documented_effect_witness_unit_count": 24,
+  "observations_count": 58,
+  "units": [
+    {
+      "unit": "open.vault",
+      "action": "open",
+      "parameter": "vault",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        54
+      ],
+      "documented_meaning": "Vault名または16文字ID。",
+      "input_attempted": true,
+      "observation_refs": [
+        "I:O1",
+        "I:O2",
+        "I:O3",
+        "I:O4",
+        "I:O5",
+        "I:O6",
+        "S:M01",
+        "S:M02",
+        "S:O01",
+        "S:P01",
+        "S:P02",
+        "S:P03",
+        "T:B1"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "I:O1はVault名、I:O3は16文字IDで指定Vaultを表示。IDはこのopen入力で確認し、他アクションの全ID組合せへ広げない。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "open.file",
+      "action": "open",
+      "parameter": "file",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        55
+      ],
+      "documented_meaning": "Vault内の名前またはルートからの相対パス。.mdは省略可能。",
+      "input_attempted": true,
+      "observation_refs": [
+        "I:O2",
+        "I:O3",
+        "I:O4",
+        "I:O5",
+        "I:O6",
+        "S:M01",
+        "S:M02",
+        "S:O01",
+        "S:P01",
+        "S:P02",
+        "S:P03",
+        "T:B1"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "I:O2は日本語・空白の相対パス、I:O3は.md付きで表示。I:O5は見出し、T:B1は有効ブロックへ移動。I:O6の不存在fileは通知・作成なし。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "open.path",
+      "action": "open",
+      "parameter": "path",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        56,
+        57,
+        58,
+        59
+      ],
+      "documented_meaning": "ファイルシステムの絶対パス。指定するとvault/fileより優先し、含むVaultを探すと記載。",
+      "input_attempted": true,
+      "observation_refs": [
+        "I:O4"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "I:O4は登録済み著者Vault内の絶対パスで既存ノートを表示。同時に指定した無効vault/fileより実pathが使われた。新規作成のpathとは結果を分ける。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "open.prepend",
+      "action": "open",
+      "parameter": "prepend",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        60
+      ],
+      "documented_meaning": "先頭へ追加しプロパティ併合を試みると記載。open節に本文運搬のcontentは列挙されていない。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:M02"
+      ],
+      "effect_status": "exploratory_input_only_no_documented_content_carrier",
+      "valid_documented_effect_witness": false,
+      "observed_result_and_gap": "探索的S:M02では対象を表示、bytes不変。正しい本文運搬を検証できておらず、公式効果を成功とも不具合とも認定しない。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "open.append",
+      "action": "open",
+      "parameter": "append",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        61
+      ],
+      "documented_meaning": "ファイル末尾へ追加しプロパティ併合も試みると記載。本文運搬のcontentはopen節に列挙されていない。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:M01"
+      ],
+      "effect_status": "exploratory_input_only_no_documented_content_carrier",
+      "valid_documented_effect_witness": false,
+      "observed_result_and_gap": "探索的S:M01では対象を表示、bytes不変。公式効果の有効な追加本文の証拠なし。本文追記の実例はnew+appendを使用。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "open.paneType",
+      "action": "open",
+      "parameter": "paneType",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        62,
+        63,
+        64,
+        65,
+        66
+      ],
+      "documented_meaning": "tab=新タブ、split=新グループ、window=ポップアウト（Desktopのみ）。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:P01",
+        "S:P02",
+        "S:P03"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "S:P01/P02/P03は各tab/split/windowで新タブ・新グループ・別画面を実表示。windowはLinuxデスクトップだけの記録。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "new.vault",
+      "action": "new",
+      "parameter": "vault",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        81
+      ],
+      "documented_meaning": "Vault名または16文字ID。",
+      "input_attempted": true,
+      "observation_refs": [
+        "I:N1",
+        "I:N2",
+        "I:N3",
+        "I:N4",
+        "I:N5",
+        "I:W1",
+        "S:C01",
+        "S:C04",
+        "S:M03",
+        "S:N01",
+        "S:N02",
+        "S:N03",
+        "S:P04",
+        "S:P05",
+        "S:P06",
+        "S:X01"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "著者Vault名を含むI:N1〜N5とSの新規入力で保存を観測。競合pathのS:N02は別の未達入力。newでの16文字ID全組合せは試していない。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "new.name",
+      "action": "new",
+      "parameter": "name",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        82
+      ],
+      "documented_meaning": "新規ノート名。保存先はDefault location for new notes設定。",
+      "input_attempted": true,
+      "observation_refs": [
+        "I:N1",
+        "I:N2",
+        "S:N01",
+        "S:N02"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "I:N1はnameのみで作成、I:N2は同時file指定先を使用。S:N01は事前設定したDefault location for new notesの著者フォルダへ保存。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "new.file",
+      "action": "new",
+      "parameter": "file",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        83
+      ],
+      "documented_meaning": "Vaultルートからの保存先と名前。指定するとnameより優先。",
+      "input_attempted": true,
+      "observation_refs": [
+        "I:N2",
+        "I:N3",
+        "I:N4",
+        "I:N5",
+        "I:W1",
+        "S:C01",
+        "S:C04",
+        "S:M03",
+        "S:N02",
+        "S:N03",
+        "S:P04",
+        "S:P05",
+        "S:P06",
+        "S:X01"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "I:N2はVaultルートからの作成先に保存し同時nameを使わなかった。I:N3/N5は既存fileの追記/置換。不存在の親フォルダ全形式は試していない。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "new.path",
+      "action": "new",
+      "parameter": "path",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        84
+      ],
+      "documented_meaning": "ファイルシステムの絶対パス。指定するとvault/fileより優先し、含むVaultを探すと記載。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:N02",
+        "T:P1"
+      ],
+      "effect_status": "valid_owned_target_bounded_no_creation",
+      "valid_documented_effect_witness": false,
+      "observed_result_and_gap": "S:N02は競合入力で未達。別T:P1は登録済み著者Vault内の未作成ファイルへpath+contentだけを入力し、6秒後も作成なし。成功例なし。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "new.paneType",
+      "action": "new",
+      "parameter": "paneType",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        85
+      ],
+      "documented_meaning": "tab=新タブ、split=新グループ、window=ポップアウト（Desktopのみ）。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:P04",
+        "S:P05",
+        "S:P06"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "S:P04/P05/P06はnewの保存先Markdownとtab/split/windowの表示をそれぞれ観測。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "new.content",
+      "action": "new",
+      "parameter": "content",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        86
+      ],
+      "documented_meaning": "保存する本文。値の記号・改行もエンコード。",
+      "input_attempted": true,
+      "observation_refs": [
+        "I:N1",
+        "I:N2",
+        "I:N3",
+        "I:N4",
+        "I:N5",
+        "I:W1",
+        "S:C04",
+        "S:M03",
+        "S:N01",
+        "S:N02",
+        "S:N03",
+        "S:P04",
+        "S:P05",
+        "S:P06",
+        "S:X01",
+        "T:P1"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "I:N1の日本語・記号・改行は保存本文と一致。I:W1の生#は後半を失った。T:P1はcontentを入力してもpath先ファイルができなかった別記録。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "new.clipboard",
+      "action": "new",
+      "parameter": "clipboard",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        87
+      ],
+      "documented_meaning": "contentの代わりにクリップボード本文を使う。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:C01",
+        "S:C04"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "S:C01は専用DISPLAYの著者clipboardを保存。S:C04はcontentとの同時指定でclipboard本文を保存。この一組の優先結果で全形式を保証しない。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "new.silent",
+      "action": "new",
+      "parameter": "silent",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        88
+      ],
+      "documented_meaning": "作成したノートを開かない。",
+      "input_attempted": true,
+      "observation_refs": [
+        "I:N4"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "I:N4は新Markdownを保存しながら表示中ノートを維持した。保存有無と画面が開くことを別々に確認。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "new.append",
+      "action": "new",
+      "parameter": "append",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        89
+      ],
+      "documented_meaning": "既存ファイルがある場合に末尾追記する指定。",
+      "input_attempted": true,
+      "observation_refs": [
+        "I:N3",
+        "S:M03",
+        "S:N03"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "I:N3は既存本文保持+末尾追記。S:N03のappend+overwriteも追記。S:M03は著者YAML一組と本文を併合。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "new.overwrite",
+      "action": "new",
+      "parameter": "overwrite",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        90
+      ],
+      "documented_meaning": "appendを設定していない場合に既存本文を置換。",
+      "input_attempted": true,
+      "observation_refs": [
+        "I:N5",
+        "S:N03"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "I:N5のoverwrite単独は既存本文を置換。S:N03はappend同時指定で既存本文を保持して追記し、overwriteを使わなかった。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "new.x-success",
+      "action": "new",
+      "parameter": "x-success",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        91
+      ],
+      "documented_meaning": "呼び出し元の返送URI。name/url/file出力を受信側で確認する必要がある。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:X01"
+      ],
+      "effect_status": "caller_handoff_unmet",
+      "valid_documented_effect_witness": false,
+      "observed_result_and_gap": "入力・URI受領を記録したが、所有するHTTP受信先への返送なし。準備したBROWSERアダプターも実行なし。OS/呼び出し元ハンドオフが未確認で、callbackの普遍的失敗は断定しない。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "daily.vault",
+      "action": "daily",
+      "parameter": "vault",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        104,
+        81
+      ],
+      "documented_meaning": "Vault名または16文字ID。",
+      "input_attempted": true,
+      "observation_refs": [
+        "I:D1",
+        "I:D2",
+        "S:C02",
+        "S:D01",
+        "S:D02",
+        "S:D03",
+        "S:D04",
+        "S:D05",
+        "S:P07",
+        "S:P08",
+        "S:P09",
+        "S:X02"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "I:D1の初回はMarkdownなし。保存フォルダと索引基準を準備した別計画I:D2は登録済み著者Vaultの日次に保存。原因を前提変更だけに断定しない。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "daily.name",
+      "action": "daily",
+      "parameter": "name",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        104,
+        82
+      ],
+      "documented_meaning": "新規ノート名。保存先はDefault location for new notes設定。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:D01"
+      ],
+      "effect_status": "bounded_different_target_observed",
+      "valid_documented_effect_witness": false,
+      "observed_result_and_gap": "S:D01は指定nameではなく設定済みの日付ノートへ追記。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "daily.file",
+      "action": "daily",
+      "parameter": "file",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        104,
+        83
+      ],
+      "documented_meaning": "Vaultルートからの保存先と名前。指定するとnameより優先。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:D02"
+      ],
+      "effect_status": "bounded_different_target_observed",
+      "valid_documented_effect_witness": false,
+      "observed_result_and_gap": "S:D02は指定fileではなく設定済みの日付ノートへ追記。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "daily.path",
+      "action": "daily",
+      "parameter": "path",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        104,
+        84
+      ],
+      "documented_meaning": "ファイルシステムの絶対パス。指定するとvault/fileより優先し、含むVaultを探すと記載。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:D03"
+      ],
+      "effect_status": "bounded_different_target_observed",
+      "valid_documented_effect_witness": false,
+      "observed_result_and_gap": "S:D03は指定pathではなく設定済みの日付ノートへ追記。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "daily.paneType",
+      "action": "daily",
+      "parameter": "paneType",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        104,
+        85
+      ],
+      "documented_meaning": "tab=新タブ、split=新グループ、window=ポップアウト（Desktopのみ）。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:P07",
+        "S:P08",
+        "S:P09"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "S:P07/P08/P09は設定済みの日次へ本文を保存し、それぞれtab/split/windowを実表示。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "daily.content",
+      "action": "daily",
+      "parameter": "content",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        104,
+        86
+      ],
+      "documented_meaning": "保存する本文。値の記号・改行もエンコード。",
+      "input_attempted": true,
+      "observation_refs": [
+        "I:D1",
+        "I:D2",
+        "S:D01",
+        "S:D02",
+        "S:D03",
+        "S:D04",
+        "S:D05",
+        "S:P07",
+        "S:P08",
+        "S:P09",
+        "S:X02"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "I:D2とSの複数入力で設定された日付ファイルへ本文を保存。I:D1の初回失敗、S:D01〜D03の指定先相違は別記録で残す。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "daily.clipboard",
+      "action": "daily",
+      "parameter": "clipboard",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        104,
+        87
+      ],
+      "documented_meaning": "contentの代わりにクリップボード本文を使う。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:C02"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "S:C02は専用DISPLAYの著者clipboard本文を既存の日次ファイルに追加。物理iPhoneやOS間clipboardは未検証。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "daily.silent",
+      "action": "daily",
+      "parameter": "silent",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        104,
+        88
+      ],
+      "documented_meaning": "作成したノートを開かない。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:D04"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "S:D04は日次ファイルへ保存し、実表示は索引を維持。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "daily.append",
+      "action": "daily",
+      "parameter": "append",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        104,
+        89
+      ],
+      "documented_meaning": "既存ファイルがある場合に末尾追記する指定。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:D05"
+      ],
+      "effect_status": "joint_flags_observed_not_isolated",
+      "valid_documented_effect_witness": false,
+      "observed_result_and_gap": "S:D05はappend+overwriteで元本文保持+追記。フラグなしdailyも追記しているためappendだけの因果は分離していない。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "daily.overwrite",
+      "action": "daily",
+      "parameter": "overwrite",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        104,
+        90
+      ],
+      "documented_meaning": "appendを設定していない場合に既存本文を置換。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:D05"
+      ],
+      "effect_status": "joint_flags_observed_not_isolated",
+      "valid_documented_effect_witness": false,
+      "observed_result_and_gap": "S:D05はappend+overwriteの同時入力。元本文保持を観測したがoverwrite単独は未試験。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "daily.x-success",
+      "action": "daily",
+      "parameter": "x-success",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        104,
+        91
+      ],
+      "documented_meaning": "呼び出し元の返送URI。name/url/file出力を受信側で確認する必要がある。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:X02"
+      ],
+      "effect_status": "caller_handoff_unmet",
+      "valid_documented_effect_witness": false,
+      "observed_result_and_gap": "入力・URI受領を記録したが、所有するHTTP受信先への返送なし。準備したBROWSERアダプターも実行なし。OS/呼び出し元ハンドオフが未確認で、callbackの普遍的失敗は断定しない。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "unique.vault",
+      "action": "unique",
+      "parameter": "vault",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        119
+      ],
+      "documented_meaning": "Vault名または16文字ID。",
+      "input_attempted": true,
+      "observation_refs": [
+        "I:U1",
+        "I:U2",
+        "S:C03",
+        "S:P10",
+        "S:P11",
+        "S:P12",
+        "S:X03"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "I:U1の初回はMarkdownなし。保存フォルダを用意した別計画I:U2とSでは著者Vaultに固有名Markdown作成。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "unique.paneType",
+      "action": "unique",
+      "parameter": "paneType",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        120
+      ],
+      "documented_meaning": "tab=新タブ、split=新グループ、window=ポップアウト（Desktopのみ）。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:P10",
+        "S:P11",
+        "S:P12"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "S:P10/P11/P12は固有名Markdownの保存とtab/split/windowの各表示を観測。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "unique.content",
+      "action": "unique",
+      "parameter": "content",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        121
+      ],
+      "documented_meaning": "保存する本文。値の記号・改行もエンコード。",
+      "input_attempted": true,
+      "observation_refs": [
+        "I:U1",
+        "I:U2",
+        "S:P10",
+        "S:P11",
+        "S:P12",
+        "S:X03"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "I:U2とSの固有名ファイルに著者本文を保存。初回I:U1は作成なしの別記録として保持。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "unique.clipboard",
+      "action": "unique",
+      "parameter": "clipboard",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        122
+      ],
+      "documented_meaning": "contentの代わりにクリップボード本文を使う。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:C03"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "S:C03は専用DISPLAYの著者clipboardを固有名Markdownへ保存。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "unique.x-success",
+      "action": "unique",
+      "parameter": "x-success",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        123
+      ],
+      "documented_meaning": "呼び出し元の返送URI。name/url/file出力を受信側で確認する必要がある。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:X03"
+      ],
+      "effect_status": "caller_handoff_unmet",
+      "valid_documented_effect_witness": false,
+      "observed_result_and_gap": "入力・URI受領を記録したが、所有するHTTP受信先への返送なし。準備したBROWSERアダプターも実行なし。OS/呼び出し元ハンドオフが未確認で、callbackの普遍的失敗は断定しない。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "search.vault",
+      "action": "search",
+      "parameter": "vault",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        138
+      ],
+      "documented_meaning": "Vault名または16文字ID。",
+      "input_attempted": true,
+      "observation_refs": [
+        "I:S1",
+        "I:S2",
+        "S:S01"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "I:S1/S2は指定Vaultの検索を表示し、S:S01はqueryなしで検索サイドバーを開いた。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "search.query",
+      "action": "search",
+      "parameter": "query",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        139
+      ],
+      "documented_meaning": "検索語。省略時は検索を開く。",
+      "input_attempted": true,
+      "observation_refs": [
+        "I:S1",
+        "I:S2"
+      ],
+      "effect_status": "bounded_effect_witnessed",
+      "valid_documented_effect_witness": true,
+      "observed_result_and_gap": "I:S1は著者本文に一致する引用符付き語を表示。I:S2は不存在語を表示して一致なし。全検索構文や全ての特殊文字の組合せは未検証。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "hook-get-address.vault",
+      "action": "hook-get-address",
+      "parameter": "vault",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        159
+      ],
+      "documented_meaning": "Vault名または16文字ID。省略時は現在/最後にフォーカスしたVault。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:K01",
+        "S:X04",
+        "S:X05"
+      ],
+      "effect_status": "valid_vault_output_unmet_invalid_vault_dialog_observed",
+      "valid_documented_effect_witness": false,
+      "observed_result_and_gap": "S:K01/S:X04は著者Vaultを入力したがHook出力なし。S:X05の不存在Vaultは実エラーダイアログ。名前解決とHook連携成功を区別。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "hook-get-address.x-success",
+      "action": "hook-get-address",
+      "parameter": "x-success",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        160
+      ],
+      "documented_meaning": "呼び出し元の返送URI。name/url/file出力を受信側で確認する必要がある。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:X04"
+      ],
+      "effect_status": "caller_handoff_unmet",
+      "valid_documented_effect_witness": false,
+      "observed_result_and_gap": "入力・URI受領を記録したが、所有するHTTP受信先への返送なし。準備したBROWSERアダプターも実行なし。OS/呼び出し元ハンドオフが未確認で、callbackの普遍的失敗は断定しない。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    },
+    {
+      "unit": "hook-get-address.x-error",
+      "action": "hook-get-address",
+      "parameter": "x-error",
+      "official_source": "source/Obsidian-URI-pinned.md",
+      "official_commit": "9cf8c2913e56830e75c13f33ba198d7e70b6d9ef",
+      "official_lines": [
+        161
+      ],
+      "documented_meaning": "Hook節のエラー返送URI。正確なエラー発火条件はこの本文で規定されていない。",
+      "input_attempted": true,
+      "observation_refs": [
+        "S:X05"
+      ],
+      "effect_status": "caller_handoff_unmet",
+      "valid_documented_effect_witness": false,
+      "observed_result_and_gap": "入力・URI受領を記録したが、所有するHTTP受信先への返送なし。準備したBROWSERアダプターも実行なし。OS/呼び出し元ハンドオフが未確認で、callbackの普遍的失敗は断定しない。",
+      "limits": "Parameter-use unit; not all Cartesian combinations, values, platform behavior or caller handoff coverage."
+    }
+  ],
+  "unmet_states_are_preserved": true,
+  "public_admission": "pending parent assessment; original queue/title/unique value unchanged",
+  "extra_formats": {
+    "choose-vault": [
+      "I:M1"
+    ],
+    "heading": [
+      "I:O5"
+    ],
+    "valid_block": [
+      "T:B1"
+    ],
+    "invalid_author_block_gap": [
+      "S:O01"
+    ],
+    "shorthand_vault": [
+      "S:H01"
+    ],
+    "shorthand_absolute": [
+      "S:H02"
+    ],
+    "encoding_reserved_symbols": [
+      "I:N1",
+      "I:N3",
+      "I:W1"
+    ],
+    "clipboard_content_precedence": [
+      "S:C04"
+    ],
+    "new_append_properties": [
+      "S:M03"
+    ]
+  }
+}

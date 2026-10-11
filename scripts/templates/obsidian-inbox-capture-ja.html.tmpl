@@ -1,0 +1,77 @@
+<head>
+<link rel="stylesheet" href="{{asset:assets/css/capture-editorial.css}}"/>
+<link rel="stylesheet" href="{{asset:assets/css/capture-content.css}}"/>
+<link rel="stylesheet" href="{{asset:assets/css/capture-next.css}}"/>
+<link rel="stylesheet" href="{{asset:assets/css/capture-third.css}}"/>
+<link rel="stylesheet" href="{{asset:assets/css/capture-fourth.css}}"/>
+<link rel="stylesheet" href="{{asset:assets/css/capture-sixth.css}}"/>
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<noscript><style>.capture-sixth .cs-workspace .tool-panel button{display:none!important}</style></noscript>
+</head>
+<body class="capture-editorial capture-brand capture-full capture-next capture-third capture-fourth capture-sixth">
+<a class="skip-link" href="#main">本文へ移動</a>
+<nav aria-label="メインナビゲーション" class="global-nav">
+<div class="global-nav__inner">
+<a class="global-nav__logo" href="/"><img alt="" height="36" loading="eager" src="/assets/img/app-icon-56.png" width="36"/><span class="capture-brand-name"><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+<ul class="global-nav__links" id="navLinks"><li><a href="/obsidian/">Obsidian</a></li><li><a href="/press/">紹介用資料</a></li><li><a href="/resources/obsidian-inbox/">Markdownツール</a></li></ul>
+<div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a aria-current="page" class="lang-switcher__btn active" href="/resources/obsidian-inbox/" lang="ja">JA</a><a class="lang-switcher__btn" href="/en/resources/obsidian-inbox/" lang="en">EN</a></div>
+
+<button aria-controls="navLinks" aria-expanded="false" aria-label="メニュー" class="global-nav__hamburger" type="button">☰</button>
+</div>
+</div>
+</nav>
+{{main}}
+<footer class="footer cs-resource-footer"><div class="container"><a class="capture-footer-brand" href="/"><img alt="" height="48" loading="lazy" src="/assets/img/app-icon-256.png" width="48"/><span class="capture-brand-name"><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a><nav aria-label="フッターナビゲーション" class="cs-footer-links">
+<a href="/about/">開発者について</a>
+<a href="/privacy">プライバシー</a>
+<a href="/contact">お問い合わせ</a>
+<a href="/autopilot/">運営の実測値</a>
+</nav><p class="footer__copyright">{{copyright}}</p></div></footer>
+<script>
+  // Disclosure navigation: keep the visual state and accessible state together.
+  (function(){
+    var nav = document.querySelector('.global-nav');
+    var menu = document.getElementById('navLinks');
+    var toggle = nav.querySelector('.global-nav__hamburger');
+    function setOpen(open){
+      menu.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'メニューを閉じる' : 'メニュー');
+    }
+    toggle.addEventListener('click', function(){
+      var open = !menu.classList.contains('open');
+      setOpen(open);
+      if(open) menu.querySelector('a').focus();
+    });
+    menu.querySelectorAll('a').forEach(function(a){
+      a.addEventListener('click', function(){ setOpen(false); });
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && menu.classList.contains('open')){
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+    document.addEventListener('click', function(e){
+      if(!nav.contains(e.target)) setOpen(false);
+    });
+    nav.addEventListener('focusout', function(){
+      setTimeout(function(){ if(!nav.contains(document.activeElement)) setOpen(false); }, 0);
+    });
+    window.matchMedia('(min-width: 1200px)').addEventListener('change', function(e){
+      var menuHadFocus = menu.contains(document.activeElement);
+      setOpen(false);
+      if(!e.matches && menuHadFocus) toggle.focus();
+    });
+  })();
+  </script>
+</body></html>

@@ -1,0 +1,556 @@
+<!DOCTYPE html><html lang="ko"><head>
+<script src="/js/i18n/ko/messages.c10b3b710ae9.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/daily-note-plugins/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>데일리 노트를 강화하는 플러그인 — Calendar/Periodic Notes | SimpleMemo</title>
+  <meta name="description" content="Calendar의 날짜와 주 번호를 기준으로, Periodic Notes에서 설정한 일지·주지를 만드는 방법. Linux 버전 Obsidian에서 일일 및 주간 생성·템플릿 반영·저장·재오픈을 확인합니다. 설정값, 원본 화면, 입력 Markdown 및 실제 저장 예시를 게시합니다.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="데일리 노트를 강화하는 플러그인 — Calendar/Periodic Notes | SimpleMemo">
+  <meta property="og:description" content="Calendar의 날짜와 주 번호를 기준으로, Periodic Notes에서 설정한 일지·주지를 만드는 방법. Linux 버전 Obsidian에서 일일 및 주간 생성·템플릿 반영·저장·재오픈을 확인합니다. 설정값, 원본 화면, 입력 Markdown 및 실제 저장 예시를 게시합니다.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-01">
+  <meta property="og:url" content="https://simplememofast.com/ko/obsidian/daily-note-plugins/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-daily-note-plugins.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ko_KR">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="데일리 노트를 강화하는 플러그인 — Calendar/Periodic Notes | SimpleMemo">
+  <meta name="twitter:description" content="Calendar의 날짜와 주 번호를 기준으로, Periodic Notes에서 설정한 일지·주지를 만드는 방법. Linux 버전 Obsidian에서 일일 및 주간 생성·템플릿 반영·저장·재오픈을 확인합니다. 설정값, 원본 화면, 입력 Markdown 및 실제 저장 예시를 게시합니다.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-daily-note-plugins.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ko/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/daily-note-plugins/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  
+
+  <!-- JSON-LD: Article -->
+  
+
+  <!-- JSON-LD: FAQPage -->
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    /* 中央揃えの和文は行頭が毎行ずれて読みにくい。狭い画面では左揃えにし、
+       行が2〜3行に収まる広い画面だけ中央のままにする。 */
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    /* ── 「開かず」の段階 ──────────────────────────────
+       この記事の骨子。読者が言う「開かず」と記事が指す「開かず」は
+       ずれていることが多いので、先に3段階へ分解して合意を取る。 */
+    .lv{display:grid;grid-template-columns:auto 1fr;gap:0 1.1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.3rem 1.3rem;margin:.85rem 0}
+    .lv__n{grid-row:1/3;width:2.6rem;height:2.6rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;align-self:start}
+    .lv__t{font-size:1.05rem;font-weight:700;line-height:1.55;margin:0 0 .4rem}
+    .lv__d{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0}
+    @media(max-width:520px){
+      .lv{grid-template-columns:1fr;gap:.6rem}
+      .lv__n{grid-row:auto}
+    }
+
+    /* 原因ブロック */
+    .cz{background:var(--surface);border:1px solid var(--border);border-left:3px solid rgba(255,183,52,.55);border-radius:var(--radius-sm);padding:1.35rem 1.3rem;margin:1rem 0}
+    .cz__n{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#ffc76b;margin-bottom:.4rem}
+    .cz__t{font-size:1.05rem;font-weight:700;line-height:1.6;margin:0 0 .55rem}
+    .cz p{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0 0 .7rem}
+    .cz p:last-child{margin-bottom:0}
+    .cz ol,.cz ul{margin:.2rem 0 .7rem;padding-left:1.35rem;font-size:.95rem;line-height:1.9;color:var(--text-secondary)}
+    .cz li{margin-bottom:.3rem}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em}
+
+    /* ── 比較表 ────────────────────────────────────────
+       狭い画面で列を縦に割ると見出し列が語中で折り返して読めなくなる
+       ので、行ごとのカードに組み替えて全幅を使わせる（/siri/ と同じ流儀）。 */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:26%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  
+<style>.plugin-answer{font-size:1.06rem;line-height:1.9;border-left:3px solid #65d6e8;padding-left:1.1rem}.hero-graphic{width:100%;height:auto;display:block;border-radius:14px;margin:1.7rem auto 0;max-width:54rem}.shot{margin:1.5rem 0;border:1px solid var(--border);background:var(--surface);border-radius:12px;overflow:hidden}.shot img{display:block;width:100%;height:auto}.shot figcaption{padding:.9rem 1rem;color:var(--text-secondary);font-size:.9rem;line-height:1.8}.shot figcaption a{display:inline-flex;min-height:44px;align-items:center;color:var(--accent-bright)}.plugin-table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.95rem}.plugin-table th,.plugin-table td{border:1px solid var(--border);padding:.8rem;text-align:left;vertical-align:top;line-height:1.8;overflow-wrap:anywhere}.plugin-table th{background:var(--surface)}.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;background:#0d1525;border:1px solid var(--border);border-radius:10px;padding:1.1rem;line-height:1.8;font-size:.92rem;box-sizing:border-box;max-width:100%}.capture-code code{background:none;border:0;padding:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:1em}.code-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-top:1.2rem}.copy-button{min-height:44px;border-radius:8px;padding:.55rem .9rem;border:1px solid #4589d6;color:#fff;background:#165bac;font:inherit;cursor:pointer}.download-row{display:flex;gap:.65rem;flex-wrap:wrap;margin:1rem 0}.download-row a{min-height:44px;display:inline-flex;align-items:center;padding:.45rem .8rem;color:var(--accent-bright);border:1px solid var(--border);border-radius:8px;font-size:.9rem;overflow-wrap:anywhere}.scope-note{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem;line-height:1.85}.proof-details{margin:1rem 0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px}.proof-details summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:700}.proof-details p{line-height:1.85}.faq-item summary{min-height:44px}.source-list li{line-height:1.85;margin:.65rem 0}.receipt-line{overflow-wrap:anywhere;color:var(--text-secondary);font-size:.88rem}.toc-links{display:flex;flex-wrap:wrap;gap:.8rem;margin:1.2rem 0}.toc-links a{min-height:44px;display:inline-flex;align-items:center;color:var(--accent-bright)}@media(max-width:600px){.plugin-table,.plugin-table tbody,.plugin-table tr,.plugin-table th,.plugin-table td{display:block;width:auto}.plugin-table thead{display:none}.plugin-table tr{margin-bottom:1rem}.plugin-table td:before{content:attr(data-label);display:block;font-size:.82rem;color:var(--text-secondary);font-weight:700}.capture-code{font-size:.85rem;padding:.8rem}.lp-hero{padding-top:2.3rem}.lp-hero__title{font-size:1.85rem}}.lp-section{scroll-margin-top:72px}</style><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/ko/obsidian/daily-note-plugins/#article",
+  "headline": "데일리 노트를 강화하는 플러그인 — Calendar/Periodic Notes",
+  "description": "Calendar의 날짜와 주 번호를 기준으로, Periodic Notes에서 설정한 일지·주지를 만드는 방법. Linux 버전 Obsidian에서 일일 및 주간 생성·템플릿 반영·저장·재오픈을 확인합니다. 설정값, 원본 화면, 입력 Markdown 및 실제 저장 예시를 게시합니다.",
+  "url": "https://simplememofast.com/ko/obsidian/daily-note-plugins/",
+  "mainEntityOfPage": "https://simplememofast.com/ko/obsidian/daily-note-plugins/",
+  "image": "https://simplememofast.com/assets/img/og/obsidian-daily-note-plugins.png",
+  "inLanguage": "ko",
+  "datePublished": "2026-10-01",
+  "dateModified": "2026-10-01",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://simplememofast.com/#organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    }
+  }
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "홈",
+      "item": "https://simplememofast.com/ko/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "데일리 노트",
+      "item": "https://simplememofast.com/ko/obsidian/daily-note/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "캘리더/주기 노트",
+      "item": "https://simplememofast.com/ko/obsidian/daily-note-plugins/"
+    }
+  ]
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Calendar와 Periodic Notes는 둘 다 필요합니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "날짜를 선택하는 입력과 일일·주간 노트 설정을 결합하고 싶을 때, 이 예시의 두 가지를 사용합니다. Calendar는 캘린더의 입구이며, Periodic Notes는 Daily/Weekly의 폴더·서식·템플릿을 설정하는 측입니다. 일일 기본 설정을 알고 싶으시면, 부모 기사의 데일리 노트 해설부터 시작하실 수 있습니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "주 번호가 표시되지 않을 때는?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "이번 Calendar1.5.10에서는 Settings의 Calendar에 있는 Show week number를 ON으로 설정하면 왼쪽 끝에 주 번호 열이 표시되었습니다. 오른쪽 사이드바를 여는 것만으로는 Backlinks와 같은 별도의 탭이 선택되어 있을 수 있으므로, Calendar 탭을 선택하십시오."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "날짜를 클릭해도 본문으로 이동할 수 없을 때는?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "이번에는 New Daily Note와 New Weekly Note의 생성 확인이 메인 화면이 아니라 열려 있던 Settings의 별도 창에 표시되었습니다. 양쪽 화면을 확인하고, 대상 파일명을 확인한 뒤, 해당 확인 화면의 Create를 선택합니다. 확인 전에 같은 날짜를 여러 번 눌렀을 때의 결과는 검증되지 않았습니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "주차의 형식은 YYYY와 gggg 중 어느 것인가요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "이 고정 예제에서 사용한 값은 gggg-[W]ww이며, 2026-09-30 환경에서는 2026-W40를 생성했습니다. 주의 연도를 나타내는 서식과 날짜의 연도는 경계에서 일치하지 않을 수 있으므로, 형식을 섞지 않고, 앱의 주 시작일과 로케일도 확인합니다. 모든 연경계·로케일·타임존 결과는 아직 검증되지 않았습니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "템플릿 변수와 Templater도 사용하고 계십니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "일일 입력에는 Obsidian의 네이티브 {{date:YYYY-MM-DD}}를 사용했으며, 실제 작성에서 2026-09-30로의 교체를 확인했습니다. 주차는 저자의 정적인 본문입니다. Templater, JavaScript, 임의의 변수 및 모든 형식 토큰의 실행은 이 예에 포함되지 않습니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "iPhone, SimpleMemo, 동기화에서도 동일하게 동작합니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "실제 조작을 확인한 사람은 Linux 버전 Obsidian1.13.7의 저자 Vault입니다. iOS, Android, 기타 OS, Obsidian Sync, SimpleMemo와의 연동, 기기 간 동기화, 속도·생산성·유입 효과는 이 기록에서 검증하지 않았습니다. iPhone에서 일지에 추가할 루트는 다른 데일리 노트 기사를 참조하십시오."
+      }
+    }
+  ],
+  "inLanguage": "ko",
+  "@id": "https://simplememofast.com/ko/obsidian/daily-note-plugins/#faq"
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/ko/obsidian/daily-note-plugins/#webpage",
+  "name": "데일리 노트를 강화하는 플러그인 — Calendar/Periodic Notes",
+  "url": "https://simplememofast.com/ko/obsidian/daily-note-plugins/",
+  "inLanguage": "ko",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/ko/#website"
+  }
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="메인 내비게이션" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/ko/guides/">사용 가이드</a><a href="/ko/use-cases/">활용 사례</a><a href="/ko/vs/">비교</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/ko/guides/">사용 가이드</a></li>
+        <li><a href="/ko/use-cases/">활용 사례</a></li>
+        <li><a href="/ko/vs/">비교</a></li>
+        <li><a href="/ko/methods/"><span>메소드</span></a></li>
+        <li><a href="/ko/blog/"><span>블로그</span></a></li>
+        <li><a href="/ko/glossary/"><span>용어집</span></a></li>
+        <li><a href="/ko/faq">자주 묻는 질문</a></li>
+        <li><a href="/ko/about/">개발자 소개</a></li>
+        <li><a href="/ko/devlog/">개발 기록</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>다운로드</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="한국어 · 언어 선택"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>KO</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ko" dir="ltr"><p class="site-language-title">언어 선택</p><div class="site-language-grid"><a href="/obsidian/daily-note-plugins/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/daily-note-plugins/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/daily-note-plugins/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/daily-note-plugins/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ko" aria-current="page"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/es/obsidian/daily-note-plugins/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/daily-note-plugins/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/daily-note-plugins/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/daily-note-plugins/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/daily-note-plugins/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="global-nav__cta">다운로드</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="메뉴"><span>메뉴</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content"><article class="container"><header class="lp-hero sd-hero sd-hero--media"><p class="lp-hero__label">Obsidian · 일일 및 주간 노트</p><h1 class="lp-hero__title">데일리 노트를 강화하는 플러그인 — Calendar/Periodic Notes</h1><p class="lp-hero__sub">날짜와 주 번호를 기준으로, 되돌아보고 싶은 노트를 여는 입구를 준비합니다. Calendar와 Periodic Notes를 결합하여 일지와 주간지를 생성·저장하고, 동일한 앱 내에서 다시 열 수 있는 사례입니다.</p><p>검증일: 2026년 9월 30일 (UTC) · Linux 버전 Obsidian 1.13.7</p><img class="hero-graphic sd-hero-media" src="/assets/img/og/obsidian-daily-note-plugins.png" width="1200" height="630" fetchpriority="high" decoding="async" alt="Calendar의 날짜에서 일지, 주 번호에서 주간지로 이동하는 안내도. 원본 GUI 화면은 각 절차에 게재됩니다"></header>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="choose"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">두 역할을 나누면 설정하기 쉽습니다</h2></div><div class="ce-chapter__body"><p class="plugin-answer"><strong>Calendar는 “언제 노트를 열지”의 입구이며, Periodic Notes는 “어디로, 어떤 이름과 본문으로 만들지” 설정입니다. </strong> 이번에는 일일 2026-09-30과 주간 2026-W40를 만들고, 템플릿 본문에 저자 확인문을 추가하여 저장했습니다.</p><p>Obsidian 표준의 Daily notes와 iPhone에서 일지에 메모를 추가하는 루트는 <a href="/ko/obsidian/daily-note/">데일리 노트의 부모 기사</a>에서 다루고 있습니다. 이 문서는 데스크톱의 캘린더 조작 및 일일·주간 설정으로 좁힙니다.</p>
+<div class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표"><table class="plugin-table"><thead><tr><th>기능</th><th>역할</th><th>이 예에서 확인한 범위</th></tr></thead><tbody>
+<tr><th scope="row">코어 일일 노트</th><td data-label="역할">Obsidian 표준 일일 노트 기능.</td><td data-label="확인한 범위">실제 GUI로 활성화합니다. 표준 기능만을 사용한 일일 생성과는 별도로, 아래 두 가지를 결합했습니다.</td></tr>
+<tr><th scope="row">캘리더 1.5.10</th><td data-label="역할">날짜와 주 번호를 기준으로 노트로 이동하는 사이드바.</td><td data-label="확인한 범위">날짜 30, 주 번호 40, 작성 확인, 전월과 당월 이동.</td></tr>
+<tr><th scope="row">주기 노트 0.0.17</th><td data-label="역할">Daily/Weekly의 저장 대상, 서식, 템플릿.</td><td data-label="확인한 범위">일지와 주간지 설정, 실제 작성 본문, 저장, 동일한 앱 내에서 다시 열기.</td></tr></tbody></table></div>
+<p class="scope-note">여기서 사용한 버전은 공식 비베타 태그에서 선택한 Calendar 1.5.10과 Periodic Notes 0.0.17입니다. 최신·현재의 권장 버전이나 다른 버전에서 동일한 결과가 된다는 것을 보장하는 기록이 아닙니다. 조작한 UI 버전도 아래 원본 화면에서 확인하고 있습니다.</p>
+<nav class="toc-links" aria-label="이 기사 목차"><a href="#setup">버전 및 활성화</a><a href="#settings">설정값</a><a href="#daily">일지를 만들다</a><a href="#weekly">주간지를 만들다</a><a href="#faq">우회와 FAQ</a><a href="#next">다음 절차</a></nav></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="setup"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">검증한 버전을 준비하고, 활성화합니다</h2></div><div class="ce-chapter__body"><p>이 예제에서는 공식 릴리스 파일을 격리한 저자 Vault에 수동으로 배치하고, 이후의 활성화 및 작업을 GUI에서 수행했습니다. Community plugins의 Browse → Install을 클릭하여 도입한 검증이 아닙니다.</p><ol class="steps-list"><li>연습용 Vault에 빈 <strong translate="no">日誌</strong>, <strong translate="no">週誌</strong>, <strong translate="no">テンプレート</strong> 폴더를 준비합니다. 이 예시의 입력은 아래의 Markdown을 사용하고 있습니다.</li><li><a href="https://github.com/liamcain/obsidian-calendar-plugin/releases/tag/1.5.10" target="_blank" rel="noopener">Calendar 1.5.10의 공식 릴리스</a>와, <a href="https://github.com/liamcain/obsidian-periodic-notes/releases/tag/0.0.17" target="_blank" rel="noopener">Periodic Notes 0.0.17의 공식 릴리스</a>에서 이 예에서 사용한 파일을 확인할 수 있습니다. 수동 배치의 구성은 아래에 표시됩니다.</li><li>Settings → Core plugins에서 Daily notes를 켭니다. 이번 작업에서는 Command palette도 ON이며, Quick switcher는 ON 상태를 확인했습니다.</li><li>제가 직접 준비한 Vault의 Trust를 확인한 후, Settings → Community plugins에서 Period Notes와 Calendar를 켭니다. 아래 원본 화면은 이 두 개를 실제로 활성화한 후의 표시입니다.</li><li>오른쪽 사이드바를 열고, <strong>Calendar 탭</strong>을 선택합니다. Backlinks와 같은 별도의 탭을 그대로 두면 날짜 화면이 보이지 않습니다.</li></ol>
+<pre class="capture-code" tabindex="0"><code>.obsidian/plugins/calendar/
+  manifest.json
+  main.js
+.obsidian/plugins/periodic-notes/
+  manifest.json
+  main.js
+  styles.css</code></pre><p>Calendar의 이번 릴리스에서는 스타일이 main.js에 포함되어 있으며, 다른 styles.css를 가져오지 않습니다. 위는 실제로 배치한 파일의 구성입니다. 플러그인 본체는 이 페이지의 배포 ZIP에 포함되어 있지 않습니다.</p><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/plugins.png" target="_blank" rel="noopener" aria-label="Calendar와 Periodic Notes의 실제 버전 표시 및 ON 설정 화면을 원래 크기로 엽니다"><img src="/assets/img/obsidian-daily-note-plugins/plugins.png" width="900" height="700" loading="lazy" decoding="async" alt="Calendar와 Periodic Notes의 실제 버전 표시 및 ON 설정 화면"></a><figcaption>새로운 저자 Vault으로 활성화한 실제 화면. Calendar v1.5.10, Periodic Notes v0.0.17의 표시와 ON을 관측했습니다. <a href="/assets/img/obsidian-daily-note-plugins/plugins.png" target="_blank" rel="noopener">원 이미지를 엽니다</a></figcaption></figure></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="settings"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">일지와 주간지의 저장처를 미리 정렬합니다</h2></div><div class="ce-chapter__body"><p>Settings → Periodic Notes에서 Daily Notes와 Weekly Notes를 켜고, 다음 값을 입력합니다. 폴더와 템플릿은 미리 Vault 내에 준비합니다. 이번 설정 입력은 실제 GUI의 표시와 저장 JSON을 대조했습니다.</p>
+<div class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표"><table class="plugin-table"><thead><tr><th>설정</th><th>일일 노트</th><th>주간 노트</th></tr></thead><tbody>
+<tr><th scope="row">형성</th><td data-label="일일 노트"><code>YYYY-MM-DD</code></td><td data-label="주간 노트"><code>gggg-[W]ww</code></td></tr>
+<tr><th scope="row">노트 폴더</th><td data-label="일일 노트"><code>日誌</code></td><td data-label="주간 노트"><code>週誌</code></td></tr>
+<tr><th scope="row">메모 템플릿</th><td data-label="일일 노트"><code>テンプレート/日</code></td><td data-label="주간 노트"><code>テンプレート/週</code></td></tr></tbody></table></div>
+<p>Settings → Calendar에서는 <strong>Show week number</strong>와 <strong>Confirm before creating new note</strong>를 ON으로 설정했습니다. 이번 주 시작일은 Locale default(Sunday)이며, 앱의 로케일은 en, 환경의 시간대는 UTC입니다. 모든 주 경계와 로케일 조합을 검증한 결과가 아닙니다.</p><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/settings.png" target="_blank" rel="noopener" aria-label="Periodic Notes의 실제 GUI 설정, Daily와 Weekly 폴더 서식 템플릿을 원래 크기로 엽니다"><img src="/assets/img/obsidian-daily-note-plugins/settings.png" width="900" height="700" loading="lazy" decoding="async" alt="Periodic Notes의 실제 GUI 설정, Daily와 Weekly 폴더 서식 템플릿"></a><figcaption>일일·주간을 켜고 고정값을 실제 GUI에서 입력한 전의 독립 시도 원본 화면. 이 저장 JSON을 새로운 생성 검증에 동일한 바이트 수 그대로 인계했습니다. <a href="/assets/img/obsidian-daily-note-plugins/settings.png" target="_blank" rel="noopener">원상 이미지 열기</a></figcaption></figure><details class="proof-details"><summary>Calendar의 주 번호 설정 원본 화면</summary><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/week-number.png" target="_blank" rel="noopener" aria-label="Calendar의 Show week number를 ON으로 설정한 실제 GUI를 원래 크기로 엽니다"><img src="/assets/img/obsidian-daily-note-plugins/week-number.png" width="900" height="700" loading="lazy" decoding="async" alt="Calendar의 Show week number를 ON으로 설정한 실제 GUI"></a><figcaption>Show week number를 실제 GUI로 ON한 원본 화면. 생성 시도에서도 동일한 저장 설정을 이어받았습니다. <a href="/assets/img/obsidian-daily-note-plugins/week-number.png" target="_blank" rel="noopener">원상 이미지 열기</a></figcaption></figure></details></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="daily"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">날짜 30부터 일지를 만들어 다시 시작합니다</h2></div><div class="ce-chapter__body"><p>일일 입력을 <strong>テンプレート/日.md</strong>에 저장합니다. 여기서 사용하는 날짜 변수는 Obsidian의 네이티브 형식입니다.</p><div class="code-heading"><strong>일일 템플릿 입력 전체</strong><button type="button" class="copy-button" data-copy="daily-template">본문을 복사</button></div><pre class="capture-code" tabindex="0"><code data-code="daily-template"># {{date:YYYY-MM-DD}}
+
+これは著者作成のデイリーノート用テンプレートです。
+
+## 確認
+
+- [ ] 保存した本文をもう一度開く
+- [[索引]]
+</code></pre><div class="download-row"><a class="md-download" data-file="daily-template" href="/assets/downloads/obsidian-daily-note-plugins/daily-template.md" download="daily-template.md">Markdown을 획득 (170 바이트)</a></div><ol class="steps-list"><li>Calendar의 2026년9월30일을 선택합니다. 이번에는 확인 화면이 열려 있던 Settings의 별도 창에 나왔습니다.</li><li><strong>New Daily Note</strong>에서 대상 2026-09-30을 확인하고, 해당 화면의 <strong>Create</strong>를 선택합니다. 메인 화면의 편집기에서 日誌/2026-09-30.md가 열렸습니다.</li><li>제목이 2026-09-30으로 교체된 본문에 확인문을 한 줄 추가하고, Ctrl+S로 저장했습니다.</li><li>인덱스를 선택하고 다른 본문으로 이동한 뒤, 왼쪽 파일 목록에서 日誌/2026-09-30.md을 한 번 다시 선택했습니다. 저장한 235 bytes의 본문은 다시 검토한 후에도 일치했습니다.</li></ol><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/daily.png" target="_blank" rel="noopener" aria-label="Calendar 날짜에서 만든 일지를 다시 연 후 실제 화면을 원래 크기로 엽니다"><img src="/assets/img/obsidian-daily-note-plugins/daily.png" width="1720" height="1000" loading="lazy" decoding="async" alt="Calendar 날짜에서 만든 일지를 다시 연 후 실제 화면"></a><figcaption>날짜 클릭부터 생성하고, 저자 확인문을 저장한 후, 파일 목록에서 동일한 노트를 다시 연 원본 화면. 날짜 제목과 본문을 저장 파일과 대조했습니다. <a href="/assets/img/obsidian-daily-note-plugins/daily.png" target="_blank" rel="noopener">원 이미지를 엽니다</a></figcaption></figure><details class="proof-details"><summary>일지의 실제 저장 전체 텍스트와 작성 확인 화면</summary><div class="code-heading"><strong>GUI에 저장하고 다시 연 일일 본문의 전체</strong><button type="button" class="copy-button" data-copy="daily-saved">본문을 복사</button></div><pre class="capture-code" tabindex="0"><code data-code="daily-saved"># 2026-09-30
+
+これは著者作成のデイリーノート用テンプレートです。
+
+## 確認
+
+- [ ] 保存した本文をもう一度開く
+- [[索引]]
+
+著者確認: Calendarの日付クリックで開いた本文を保存。</code></pre><div class="download-row"><a class="md-download" data-file="daily-saved" href="/assets/downloads/obsidian-daily-note-plugins/daily-saved.md" download="daily-saved.md">Markdown을 획득 (235 바이트)</a></div><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/daily-confirm.png" target="_blank" rel="noopener" aria-label="New Daily Note에서 2026-09-30을 Create하는 실제 확인 화면을 원래 크기로 엽니다"><img src="/assets/img/obsidian-daily-note-plugins/daily-confirm.png" width="900" height="700" loading="lazy" decoding="async" alt="New Daily Note에서 2026-09-30을 생성하는 실제 확인 화면"></a><figcaption>메인과는 다른 Settings 창에 표시된 실제 생성 확인. 그 Create를 선택하여 일지를 만들었습니다. <a href="/assets/img/obsidian-daily-note-plugins/daily-confirm.png" target="_blank" rel="noopener">원 이미지를 엽니다</a></figcaption></figure></details></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="weekly"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">주 번호 40에서 주간지를 만들어 다시 시작합니다</h2></div><div class="ce-chapter__body"><p>주간 입력을 <strong>テンプレート/週.md</strong>에 저장합니다. 주간 본문은 정적인 저자 템플릿입니다. 임의의 주 변수가 대체된 사례로는 다루지 않습니다.</p><div class="code-heading"><strong>주간 템플릿 입력 전체</strong><button type="button" class="copy-button" data-copy="weekly-template">본문을 복사</button></div><pre class="capture-code" tabindex="0"><code data-code="weekly-template"># 週の確認
+
+これは著者作成の週間ノート用テンプレートです。
+
+## 確認
+
+- [ ] 一週間の対象を記録する
+- [[索引]]
+</code></pre><div class="download-row"><a class="md-download" data-file="weekly-template" href="/assets/downloads/obsidian-daily-note-plugins/weekly-template.md" download="weekly-template.md">Markdown을 획득 (151 바이트)</a></div><ol class="steps-list"><li>주 번호 열을 표시한 캘린더에서 <strong>40</strong>을 선택합니다. 이 환경에서는 대상의 이름이 2026-W40였습니다.</li><li>Settings의 다른 창에 나타난 <strong>New Weekly Note</strong>의 2026-W40을 확인하고, 실제 <strong>Create</strong>를 선택합니다.</li><li>週誌/2026-W40.md에 열린 본문에 확인문을 한 줄 추가하고, Ctrl+S로 저장했습니다. 원래의 정적 주간 템플릿에 이 줄을 추가한 결과입니다.</li><li>색인으로 이동하여, 왼쪽 파일 목록에서 週誌/2026-W40.md을 한 번 다시 선택했습니다. 저장한 219 바이트의 본문은 다시 연 후에도 일치했습니다.</li></ol><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/weekly.png" target="_blank" rel="noopener" aria-label="Calendar의 주 번호 40으로 만든 주간지를 다시 연 후 실제 화면을 원래 크기로 엽니다"><img src="/assets/img/obsidian-daily-note-plugins/weekly.png" width="1720" height="1000" loading="lazy" decoding="async" alt="Calendar의 주 번호 40으로 만든 주간지 재오픈 후 실제 화면"></a><figcaption>주 번호에서 생성하고, 저자의 확인문을 저장한 후, 파일 목록에서 다시 열린 원본 화면. 주 번호 40와 정적인 본문·추가된 확인문을 관측했습니다. <a href="/assets/img/obsidian-daily-note-plugins/weekly.png" target="_blank" rel="noopener">원상 이미지 열기</a></figcaption></figure><details class="proof-details"><summary>주간지의 실제 저장 전체 텍스트와 작성 확인 화면</summary><div class="code-heading"><strong>GUI에서 저장하고 다시 연 주간 본문의 전체</strong><button type="button" class="copy-button" data-copy="weekly-saved">본문을 복사</button></div><pre class="capture-code" tabindex="0"><code data-code="weekly-saved"># 週の確認
+
+これは著者作成の週間ノート用テンプレートです。
+
+## 確認
+
+- [ ] 一週間の対象を記録する
+- [[索引]]
+
+著者確認: Calendarの週番号から開いた本文を保存。</code></pre><div class="download-row"><a class="md-download" data-file="weekly-saved" href="/assets/downloads/obsidian-daily-note-plugins/weekly-saved.md" download="weekly-saved.md">Markdown을 획득 (219 바이트)</a></div><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/weekly-confirm.png" target="_blank" rel="noopener" aria-label="New Weekly Note에서 2026-W40을 생성하는 실제 확인 화면을 원래 크기로 엽니다"><img src="/assets/img/obsidian-daily-note-plugins/weekly-confirm.png" width="900" height="700" loading="lazy" decoding="async" alt="New Weekly Note에서 2026-W40을 생성하는 실제 확인 화면"></a><figcaption>일일과는 다른 한 번의 실제 클릭으로 나온 주간 생성 확인. 대상은 2026-W40입니다. <a href="/assets/img/obsidian-daily-note-plugins/weekly-confirm.png" target="_blank" rel="noopener">원상 이미지 열기</a></figcaption></figure></details>
+<details class="proof-details"><summary>전월로 이동하고, 당월에 원래 화면으로 되돌렸습니다</summary><p>다른 고정 시도에서는 Calendar의 이전 월을 한 번 선택하여 Sep 2026에서 Aug 2026로 이동하고, Next Month를 한 번 선택하여 Sep 2026로 돌아왔습니다. 모든 월·연도 경계 작업을 확인한 결과가 아닙니다.</p><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/august.png" target="_blank" rel="noopener" aria-label="Calendar에서 전월의 2026년 8월을 표시한 원본 화면을 원래 크기로 엽니다"><img src="/assets/img/obsidian-daily-note-plugins/august.png" width="1720" height="1000" loading="lazy" decoding="async" alt="Calendar에서 전월의 2026년 8월을 표시한 원본 화면"></a><figcaption>전월에 한 번 이동한 실제 화면의 제목은 Aug 2026입니다. <a href="/assets/img/obsidian-daily-note-plugins/august.png" target="_blank" rel="noopener">원 이미지를 엽니다</a></figcaption></figure><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/september.png" target="_blank" rel="noopener" aria-label="Calendar에서 해당 월의 2026년 9월로 돌아온 원본 화면을 원래 크기로 엽니다"><img src="/assets/img/obsidian-daily-note-plugins/september.png" width="1720" height="1000" loading="lazy" decoding="async" alt="Calendar에서 해당 월의 2026년 9월로 돌아온 원본 화면"></a><figcaption>다음 달로 한 번 이동하여 돌아온 실제 화면의 제목은 Sep 2026입니다. <a href="/assets/img/obsidian-daily-note-plugins/september.png" target="_blank" rel="noopener">원상 이미지 열기</a></figcaption></figure></details></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="downloads"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">연습용 입력과 실제 저장 예시를 가져옵니다</h2></div><div class="ce-chapter__body"><p>입력 인덱스와 템플릿 3건, GUI로 만든 저장 예시 2건을 구분하고 있습니다. 플러그인 본체 및 설정 JSON는 포함되지 않습니다. 기존 노트를 덮어쓰지 않도록 입력을 자신의 연습용 Vault에 배치하는 구성입니다. 독자의 Vault에 대한 가져오기 작업은 아직 검증되지 않았습니다.</p><div class="download-row"><a class="md-download" data-file="index" href="/assets/downloads/obsidian-daily-note-plugins/index.md" download="index.md">입력 인덱스 Markdown（214 바이트）</a><a class="zip-download" href="/assets/downloads/obsidian-daily-note-plugins/author-inputs-and-saved-examples.zip" download="author-inputs-and-saved-examples.zip">입력3건+실저장예시2건의 ZIP</a></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">우선했을 때 확인 및 FAQ</h2></div><div class="ce-chapter__body"><details class="faq-item"><summary class="faq-summary">Calendar와 Periodic Notes는 둘 다 필요합니까?</summary><div class="faq-answer">날짜를 선택하는 입력과 일일·주간 노트 설정을 결합하고 싶을 때, 이 예시의 두 가지를 사용합니다. Calendar는 캘린더의 입구이며, Periodic Notes는 Daily/Weekly의 폴더·서식·템플릿을 설정하는 측입니다. 일일 기본 설정을 알고 싶으시면, 부모 기사의 데일리 노트 해설부터 시작하실 수 있습니다.</div></details><details class="faq-item"><summary class="faq-summary">주 번호가 표시되지 않을 때는?</summary><div class="faq-answer">이번 Calendar1.5.10에서는 Settings의 Calendar에 있는 Show week number를 ON으로 설정하면 왼쪽 끝에 주 번호 열이 표시되었습니다. 오른쪽 사이드바를 여는 것만으로는 Backlinks와 같은 별도의 탭이 선택되어 있을 수 있으므로, Calendar 탭을 선택하십시오.</div></details><details class="faq-item"><summary class="faq-summary">날짜를 클릭해도 본문으로 이동할 수 없을 때는?</summary><div class="faq-answer">이번에는 New Daily Note와 New Weekly Note의 생성 확인이 메인 화면이 아니라 열려 있던 Settings의 별도 창에 표시되었습니다. 양쪽 화면을 확인하고, 대상 파일명을 확인한 뒤, 해당 확인 화면의 Create를 선택합니다. 확인 전에 같은 날짜를 여러 번 눌렀을 때의 결과는 검증되지 않았습니다.</div></details><details class="faq-item"><summary class="faq-summary">주차의 형식은 YYYY와 gggg 중 어느 것인가요?</summary><div class="faq-answer">이 고정 예제에서 사용한 값은 gggg-[W]ww이며, 2026-09-30 환경에서는 2026-W40를 생성했습니다. 주의 연도를 나타내는 서식과 날짜의 연도는 경계에서 일치하지 않을 수 있으므로, 형식을 섞지 않고, 앱의 주 시작일과 로케일도 확인합니다. 모든 연경계·로케일·타임존 결과는 아직 검증되지 않았습니다.</div></details><details class="faq-item"><summary class="faq-summary">템플릿 변수와 Templater도 사용하고 계십니까?</summary><div class="faq-answer">일일 입력에는 Obsidian의 네이티브 {{date:YYYY-MM-DD}}를 사용했으며, 실제 작성에서 2026-09-30로의 교체를 확인했습니다. 주차는 저자의 정적인 본문입니다. Templater, JavaScript, 임의의 변수 및 모든 형식 토큰의 실행은 이 예에 포함되지 않습니다.</div></details><details class="faq-item"><summary class="faq-summary">iPhone, SimpleMemo, 동기화에서도 동일하게 동작합니까?</summary><div class="faq-answer">실제 조작을 확인한 사람은 Linux 버전 Obsidian1.13.7의 저자 Vault입니다. iOS, Android, 기타 OS, Obsidian Sync, SimpleMemo와의 연동, 기기 간 동기화, 속도·생산성·유입 효과는 이 기록에서 검증하지 않았습니다. iPhone에서 일지에 추가할 루트는 다른 데일리 노트 기사를 참조하십시오.</div></details></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">실제 확인한 범위와 공식 자료</h2></div><div class="ce-chapter__body"><ul><li>공식 Linux 버전 Obsidian 1.13.7/Installer 1.13.7, 영어 UI. Calendar 1.5.10/Periodic Notes 0.0.17의 실제 버전 표시.</li><li>저자 Vault에서 실제 GUI 설정, 일일 및 주간 각각 하나의 생성 확인·본문·저장·동일한 앱 내 재오픈. 월 이동은 다른 고정 시도로 확인했습니다.</li><li>플러그인의 공식 릴리스 자산은 수동으로 배치됩니다. 보조 코드는 초기 환경 준비와 상태·저장 파일의 읽기, 원본 복사에 사용했습니다. 노트의 생성·편집·저장·재오픈을 API로 대체하고 있지 않습니다.</li><li>공개하는 PNG와 Markdown은 원본 파일의 바이트를 유지하고 있습니다. iOS, 기타 OS, SimpleMemo, Sync, 전체 날짜·주·월·시간·시간대, 생산성·유입에 대한 효과는 아직 검증되지 않았습니다.</li></ul>
+<p>준비 단계의 시작 정지, 베타 버전 화면과 저장 설정 불일치, 숨김 탭 클릭, 별도 창 확인 화면을 놓친 실패는 원래 실패로 남겨두고 있습니다. 이 기사 작성·저장 예시는 별도의 고정 시도에 기반합니다. Ctrl+O에서는 Quick switcher 화면을 확인할 수 없었으며, 동일한 저장 대상 파일 목록에서 실제 클릭으로 처음으로 다시 열었습니다. 상세와 원본 파일의 대응은 <a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/daily-note-plugins-20260930.md" target="_blank" rel="noopener">검증 기록</a>에 정리합니다.</p>
+<details class="proof-details"><summary>실제 General 버전 화면</summary><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/version.png" target="_blank" rel="noopener" aria-label="General에 표시된 실제 Obsidian 버전 1.13.7과 Installer 버전 1.13.7를 원래 크기로 엽니다"><img src="/assets/img/obsidian-daily-note-plugins/version.png" width="900" height="700" loading="lazy" decoding="async" alt="General에 표시된 실제 Obsidian 버전 1.13.7와 Installer 버전 1.13.7"></a><figcaption>별도 창에 남아 있는 생성 확인을 처리한 후, 실제 GUI에서 General을 한 번 선택하고, 앱과 설치 프로그램의 1.13.7을 관측했습니다. <a href="/assets/img/obsidian-daily-note-plugins/version.png" target="_blank" rel="noopener">원 이미지를 엽니다</a></figcaption></figure></details>
+<ul class="source-list"><li><a href="https://github.com/liamcain/obsidian-calendar-plugin/blob/7d2aebda7f4a280bedc6da6d25f4da611d1625ef/README.md" target="_blank" rel="noopener">Calendar 1.5.10의 고정 커밋·공식 README</a></li><li><a href="https://github.com/liamcain/obsidian-calendar-plugin/blob/7d2aebda7f4a280bedc6da6d25f4da611d1625ef/src/settings.ts" target="_blank" rel="noopener">Calendar의 고정 설정source</a></li><li><a href="https://github.com/liamcain/obsidian-periodic-notes/blob/5b96e4f14130b0c024edb5ddb7871d01d61d9522/README.md" target="_blank" rel="noopener">Periodic Notes 0.0.17의 고정 커밋·공식 README</a></li><li><a href="https://github.com/liamcain/obsidian-periodic-notes/blob/5b96e4f14130b0c024edb5ddb7871d01d61d9522/src/settings/SettingsTab.svelte" target="_blank" rel="noopener">Periodic Notes의 고정 설정 UI 소스</a></li></ul>
+<p class="receipt-line">원본·설정과 실제 작업 기록은 별도로 대조하고 있습니다. 공식 릴리스 파일과 소스의 동일 빌드 재현까지는 검증하지 않았습니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="next"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">다음은 일지에 메모를 남기는 입구를 결정합니다</h2></div><div class="ce-chapter__body"><p>날짜·주 번호에서 여는 형태를 준비한 후에는, 매일의 짧은 메모를 어디서 추가할지 선택할 수 있습니다. iPhone에서 Obsidian의 일지에 추가하는 경로와 표준 일일 노트 및 날짜 형식 확인은 부모 기사에서 다루고 있습니다.</p><div class="internal-links"><a data-next-step="daily-note" href="/ko/obsidian/daily-note/">데일리 노트의 부모 기사로</a><a href="/ko/obsidian/plugins/templater/">Templater 사용 방법</a></div></div></section></article></main><script>document.querySelectorAll('[data-copy]').forEach(function(b){b.addEventListener('click',async function(){var k=b.getAttribute('data-copy'),e=document.querySelector('[data-code="'+k+'"]');try{await navigator.clipboard.writeText(e.textContent);b.textContent=globalThis.SimpleMemoI18n.text("コピーしました");setTimeout(function(){b.textContent=globalThis.SimpleMemoI18n.text("本文をコピー")},1600)}catch(err){b.textContent=globalThis.SimpleMemoI18n.text("コピーできませんでした")}})});</script><footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ko" dir="ltr"><a class="site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">작은 메모, 다음 한 걸음.</p><p class="site-footer-description">iPhone에서 Obsidian과 이메일로 메모를 보내세요.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="푸터 탐색 메뉴">
+      <div class="footer__col">
+        <p class="footer__col-title">프로덕트</p>
+        <a href="/ko/download/" class="footer__link">다운로드</a>
+        <a href="/ko/" class="footer__link">홈</a>
+        <a href="/ko/apple-watch/" class="footer__link">Apple Watch</a>
+        <a href="/ko/obsidian/" class="footer__link">Obsidian 연동</a>
+        <a href="/ko/use-cases/" class="footer__link">활용 사례</a>
+        <a href="/ko/guides/" class="footer__link">사용 가이드</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">비교·전환</p>
+        <a href="/ko/note-to-email/" class="footer__link">메모를 이메일로</a>
+        <a href="/ko/vs/" class="footer__link">비교</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">지원</p>
+        <a href="/ko/roadmap/" class="footer__link">공개 로드맵</a>
+        <a href="/ko/devlog/" class="footer__link">개발 기록</a>
+        <a href="/ko/about/" class="footer__link">개발자 소개</a>
+        <a href="/ko/faq" class="footer__link">자주 묻는 질문</a>
+        <a href="/ko/privacy" class="footer__link">개인정보 보호</a>
+        <a href="/ko/contact" class="footer__link">문의</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 운영: YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

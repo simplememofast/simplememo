@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/blog/benchmark-methodology">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Transparencia de los métodos de medición — Las medidas de referencia SimpleMemo como esta</title>
+  <meta name="description" content="¿Cómo se mide el segundo inicio de 0.4 (arranque en caliente) y la transmisión con un solo toque de SimpleMemo? Es un documento de metodología de medición E-E-A-T que revela de forma transparente el entorno de prueba, cómo medir la velocidad de inicio y la velocidad de transmisión, los datos sin procesar, los procedimientos de comparación con otras aplicaciones y las restricciones.">
+  <meta name="theme-color" content="#070b14">
+
+  <meta property="og:title" content="Transparencia de los métodos de medición — Las medidas de referencia SimpleMemo como esta">
+  <meta property="og:description" content="¿Cómo se mide la &quot;segundo inicio&quot; de 0.4 (inicio en caliente) &quot;transmisión con un solo toque&quot; de SimpleMemo? El entorno de prueba, el método de medición y las restricciones se divulgan de forma transparente.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-16T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/es/blog/benchmark-methodology">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog-benchmark-methodology.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Transparencia de los métodos de medición — Las medidas de referencia SimpleMemo como esta">
+  <meta name="twitter:description" content="¿Cómo se mide la &quot;segundo inicio&quot; de 0.4 (inicio en caliente) &quot;transmisión con un solo toque&quot; de SimpleMemo? El entorno de prueba, el método de medición y las restricciones se divulgan de forma transparente.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-benchmark-methodology.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/es/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/benchmark-methodology">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/es/blog/benchmark-methodology#article",
+  "inLanguage": "es",
+  "image": "https://simplememofast.com/assets/img/og/blog-benchmark-methodology.png",
+  "headline": "Transparencia de los métodos de medición — Las medidas de referencia SimpleMemo como esta",
+  "description": "¿Cómo se mide la \"0.4 segundo inicio\" (inicio caliente) \"transmisión con un solo toque\" de SimpleMemo? El entorno de prueba, el método de medición y las restricciones se divulgan de forma transparente.",
+  "url": "https://simplememofast.com/es/blog/benchmark-methodology",
+  "datePublished": "2026-03-16",
+  "dateModified": "2026-10-04",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/es/blog/benchmark-methodology"
+  }
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Inicio",
+      "item": "https://simplememofast.com/es/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://simplememofast.com/es/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Transparencia de los métodos de medición",
+      "item": "https://simplememofast.com/es/blog/benchmark-methodology"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/es/blog/benchmark-methodology#webpage",
+  "inLanguage": "es",
+  "name": "Transparencia de los métodos de medición - Metodología de referencia",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/es/#website"
+  },
+  "url": "https://simplememofast.com/es/blog/benchmark-methodology"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}.lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .app-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;margin-bottom:1rem}.app-card__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem}.app-card__name{font-size:1.05rem;font-weight:700}.app-card__rank{font-size:.875rem;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:12px;padding:.2rem .6rem;font-weight:700}.app-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.75rem}
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}.cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}.cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}.internal-links a:hover{border-color:var(--accent)}
+    .disclosure{background:rgba(245,180,60,.06);border:1px solid rgba(245,180,60,.2);border-left:3px solid rgba(245,180,60,.5);border-radius:var(--radius-sm);padding:1rem 1.25rem;margin:1.5rem 0;font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+    .citation-notice{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.25rem;margin:2rem 0;font-size:.875rem;color:var(--text-muted);line-height:1.7;text-align:center}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+    .comparison-table{width:100%;border-collapse:collapse;margin:1.5rem 0 2rem;font-size:.875rem}
+    .comparison-table th,.comparison-table td{padding:.75rem 1rem;text-align:center;border-bottom:1px solid var(--border)}
+    .comparison-table th{color:var(--text-muted);font-weight:400;font-size:.875rem;text-transform:uppercase;letter-spacing:.05em}
+    .comparison-table td:first-child{font-weight:700;color:var(--text-secondary);white-space:nowrap;text-align:left}
+    .comparison-table thead th{border-bottom:2px solid var(--border)}
+    .comparison-table .highlight{color:var(--accent);font-weight:700}
+    .video-note{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1rem 1.25rem;margin:1.5rem 0;font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Navegación principal" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/es/guides/">Guías</a><a href="/es/use-cases/">Casos de uso</a><a href="/es/vs/">Comparar</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/es/guides/">Guías</a></li>
+        <li><a href="/es/use-cases/">Casos de uso</a></li>
+        <li><a href="/es/vs/">Comparar</a></li>
+        <li><a href="/es/methods/"><span>Método</span></a></li>
+        <li><a href="/es/blog/"><span>Blog</span></a></li>
+        <li><a href="/es/glossary/"><span>Glosario</span></a></li>
+        <li><a href="/es/faq">Preguntas frecuentes</a></li>
+        <li><a href="/es/about/">Sobre el desarrollador</a></li>
+        <li><a href="/es/devlog/">Registro de desarrollo</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>Descargar</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Español · Elegir idioma"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ES</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="es" dir="ltr"><p class="site-language-title">Elegir idioma</p><div class="site-language-grid"><a href="/blog/benchmark-methodology" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/benchmark-methodology" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/blog/benchmark-methodology" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/blog/benchmark-methodology" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/benchmark-methodology" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="es" aria-current="page"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/pt-BR/blog/benchmark-methodology" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/benchmark-methodology" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/benchmark-methodology" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/benchmark-methodology" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">Descargar</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menú"><span>Menú</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+
+<main class="page-content"><div class="container">
+
+    <div class="lp-hero sd-hero"><div class="sd-hero-copy">
+      <div class="lp-hero__label"><span>Metodología de medición</span></div>
+      <h1 class="lp-hero__title"><span>Transparencia de los métodos de medición - El punto de referencia de <br>SimpleMemo se mide de la siguiente manera</span></h1>
+      <p class="lp-hero__sub"><span>¿Cómo se midieron los números de "0.4 segundo inicio" y "transmisión con un solo toque" publicados por SimpleMemo? Todo el entorno de prueba, los procedimientos de medición y las restricciones se divulgarán de forma transparente. Creo que las afirmaciones de rendimiento sin metodología no tienen sentido. </span></p>
+      <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>Autor: <a href="/es/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Fecha de lanzamiento: <time datetime="2026-03-16">2026 03 mes 16</time></span> </p>
+    </div><nav class="sd-hero-index" aria-label="Contenido de esta página"><p>Contenido de esta página</p><a href="#reading-01"><span aria-hidden="true">01</span><span>¿Por qué publicas el método de medición?</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Entorno de medición</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Cómo medir la velocidad de inicio</span><span aria-hidden="true">↗</span></a></nav></div>
+
+    <!-- TL;DR Summary for AI Citation -->
+    <div class="tldr" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:2rem;font-size:.9rem;line-height:1.8;">
+      <div style="font-weight:700;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">TL;DR</div>
+      <p style="color:var(--text-secondary);margin:0;">0.4 segundos hasta que se pueda ingresar SimpleMemo desde el toque se mide mediante grabación de pantalla con iPhone 16e (A18) y iOS 26.5.2 → análisis de fotogramas (inicio en caliente, 5 veces el valor medio). El tiempo de ida y vuelta de la solicitud de transmisión era anteriormente un valor medido en Charles Proxy, pero como no hay registro de la medición (fecha y hora y el valor de cada vez), el número se ha detenido (2026-09-30). Es una medición en un solo dispositivo y no es una prueba de laboratorio estadísticamente rigurosa.</p>
+
+    </div>
+
+    <!-- Disclosure -->
+    <div class="disclosure">
+      <span><strong>Revelación de información:</strong> El autor (AI ATAKA) es el desarrollador de SimpleMemo. Este artículo revela el método de medición para la reclamación de rendimiento de nuestros propios productos. Tenga en cuenta que, dado que es una autoprueba realizada por el desarrollador, es diferente de la verificación de terceros.</span>
+
+    </div>
+
+    <!-- Section 1: Why We Publish Our Methodology -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"><span>¿Por qué publicas el método de medición?</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Compromiso con la transparencia</span><span class="app-card__rank">E-E-A-T</span></div>
+          <div class="app-card__desc">
+            <p>Es fácil afirmar el rendimiento de la aplicación. Cualquiera puede hacerlo si solo escribe "iniciar 0.4 segundos" y "transmisión con un solo toque". Sin embargo, las reclamaciones de rendimiento que no especifican el método de medición no tienen sentido inherentemente.</p>
+            <p style="margin-top:.75rem">Creemos que los usuarios deberían ser capaces de entender el proceso de medición detrás de los números. En qué dispositivo, bajo qué condiciones, cuántas veces se probaron y qué estadísticas se adoptaron. No es sincero afirmar ser "el más rápido" sin esta información.</p>
+            <p style="margin-top:.75rem">En este artículo, revelaremos de forma transparente cómo se derivaron todos los números de referencia del SimpleMemo. Dado que se mide en un método reproducible, es posible verificarlo en las mismas condiciones.</p>
+          </div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <!-- Section 2: Test Environment -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02"><span>Entorno de medición</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Detalles del entorno de prueba</span><span class="app-card__rank">Medio ambiente</span></div>
+          <div class="app-card__desc">
+            <ul style="padding-left:1.2rem;line-height:2.2;">
+              <li><strong>Terminal:</strong> iPhone 16e (chip A18)</li>
+              <li><strong>OS:</strong> iOS 26.5.2</li>
+              <li><strong>Almacenamiento:</strong> 256GB, gratis 14.29GB</li>
+              <li><strong>Red:</strong> Wi-Fi (durante la prueba de transmisión), modo en vuelo (durante la prueba de cola sin conexión)</li>
+              <li><strong>SimpleMemo Versión:</strong> 5.7.3 (App Store Versión de lanzamiento)</li>
+              <li><strong>Última fecha de implementación de la prueba:</strong> 2026 año 8 mes 11 día</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <!-- Section 3: Launch Speed Measurement -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"><span>Cómo medir la velocidad de inicio</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">La base de 0.4 segundos</span><span class="app-card__rank">Velocidad de inicio</span></div>
+          <div class="app-card__desc">
+            <ul style="padding-left:1.2rem;line-height:2.2;">
+              <li><strong>Método de medición:</strong> La grabación de pantalla de 60fps se realiza y se analiza por fotograma</li>
+              <li><strong>Intervalo de medición:</strong> Desde el momento en que tocas el icono de la aplicación (el marco donde se separa el dedo) hasta que el cursor parpadea en el campo de texto</li>
+              <li><strong>Condiciones de inicio:</strong> Fuerza la salida del conmutador de aplicaciones y espere más de 5 segundos antes de iniciar. Sin embargo, en iOS 26.5.2, incluso si sigues este procedimiento, en realidad se <strong>st con un cálido</strong> (confirmación visual de todas las startups mediante grabación). El valor publicado es el valor de la startup cálida</li>
+              <li><strong>Número de intentos:</strong> 5 veces medido y se adopta el valor medio</li>
+              <li><strong>Resultado:</strong> 0.4 segundos (18 fotogramas a 60fps)</li>
+            </ul>
+            <p style="margin-top:.75rem"><strong>Corrección (2026-08-11):</strong> Anteriormente se escribió aquí que "el inicio en caliente es aún más rápido, pero se publican valores de inicio en frío más conservadores". <strong>Eso fue un error. </strong> La terminación forzada y la espera de más de un segundo de 5 se llevan a cabo cada vez, pero iOS 26.5.2 en realidad comienza con un cálido, y el valor publicado es el valor del inicio caliente. Todas las aplicaciones tienen las mismas condiciones, por lo que se puede usar como comparación, pero no es un "valor conservador".</p>
+          </div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <!-- Section 3.5: Raw Data Table -->
+    <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04"><span>Datos de Rad hasta el inicio de la entrada</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1rem">Medición real en iPhone 16e (A18) y iOS 26.5.2 (2026 año 8 mes 11, inicio caliente (se apaga a la fuerza desde el conmutador de aplicaciones y espera más de 5 segundos antes de comenzar, pero iOS 26.5.2 confirma visualmente que realmente se levanta con un calor)). El número es de segundos. <strong>"Hasta el inicio de la entrada"</strong> es desde tocar el icono hasta que salga el teclado y pueda escribir, incluidos los toques necesarios en el medio.</p>
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Tabla que se puede desplazar horizontalmente">
+          <table class="comparison-table">
+            <thead>
+              <tr><th scope="col" style="text-align:left">Aplicación</th><th scope="col">Valor de medición real de cada vez</th><th scope="col">Valor publicado</th><th scope="col">Número de veces</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">SimpleMemo</th><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">No guardado (rango 0.37–0.43)</span></td><td class="highlight">0.40</td><td>5</td></tr>
+              <tr><th scope="row">Drafts</th><td style="font-variant-numeric:tabular-nums">0.90 / 1.55 / 1.45 / 1.38 / 1.57</td><td>0.90<span style="color:var(--text-muted)">(valor más rápido)</span></td><td>5</td></tr>
+              <tr><th scope="row">Bear</th><td style="font-variant-numeric:tabular-nums">0.95 / 0.93 / 0.92 / 0.92 / 0.92</td><td>0.92</td><td>5</td></tr>
+              <tr><th scope="row">Apple Notes</th><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">No guardado (rango 1.20–2.37)</span></td><td>1.73</td><td>10</td></tr>
+              <tr><th scope="row">Google Keep</th><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">No guardado (rango 1.97–2.23)</span></td><td>2.07</td><td>4</td></tr>
+              <tr><th scope="row">Evernote</th><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">No guardado (rango 2.30–5.10)</span></td><td>2.50</td><td>5</td></tr>
+              <tr><th scope="row">OneNote</th><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">No guardado (rango 2.20–3.30)</span></td><td>2.60</td><td>5</td></tr>
+              <tr><th scope="row">Notion</th><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">No guardado (rango 2.50–3.50)</span></td><td>2.80</td><td>5</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:.8rem;color:var(--text-muted);line-height:1.7;margin:.75rem 0 1.5rem">Bear y Drafts se remedieron de acuerdo con las condiciones porque hubo una gran variación en la medición 1nd, y el valor de cada vez permanece. Otras aplicaciones 6 solo guardan la mediana y el rango, por lo que se muestran de esa manera. <strong>No rellenes la tabla con números que no tengas. </strong></p>
+
+        <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1rem">Referencia: <strong>hasta que aparezca el primer carácter en la pantalla</strong> (agregando la tecla 1 veces al "hasta el inicio de la entrada" anterior). Aquí, el valor de cada episodio permanece en todas las aplicaciones. Las pulsaciones de teclas variaron entre las aplicaciones de 0.2 a 0.5 segundos - era tiempo de la mano, no tiempo de aplicación, por lo que no se adoptó para el valor público.</p>
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Tabla que se puede desplazar horizontalmente">
+          <table class="comparison-table">
+            <thead>
+              <tr><th scope="col" style="text-align:left">Aplicación</th><th scope="col">Valor de medición real de cada vez</th><th scope="col">mediana</th><th scope="col">Número de veces</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">SimpleMemo</th><td style="font-variant-numeric:tabular-nums">1.00 / 0.50 / 0.60 / 0.53 / 0.67</td><td class="highlight">0.60</td><td>5</td></tr>
+              <tr><th scope="row">Drafts</th><td style="font-variant-numeric:tabular-nums">1.33 / 1.75 / 1.62 / 1.67 / 1.73</td><td>1.67</td><td>5</td></tr>
+              <tr><th scope="row">Bear</th><td style="font-variant-numeric:tabular-nums">1.45 / 1.52 / 2.25 / 1.28 / 1.35</td><td>1.45</td><td>5</td></tr>
+              <tr><th scope="row">Apple Notes</th><td style="font-variant-numeric:tabular-nums">2.20 / 2.80 / 1.30 / 1.70 / 2.70 / 2.14 / 2.88 / 1.47 / 1.68 / 2.73</td><td>2.17</td><td>10</td></tr>
+              <tr><th scope="row">Google Keep</th><td style="font-variant-numeric:tabular-nums">2.44 / 2.43 / 2.17 / 2.09</td><td>2.30</td><td>4</td></tr>
+              <tr><th scope="row">Evernote</th><td style="font-variant-numeric:tabular-nums">2.70 / 5.40 / 2.80 / 2.90 / 2.60</td><td>2.80</td><td>5</td></tr>
+              <tr><th scope="row">OneNote</th><td style="font-variant-numeric:tabular-nums">3.30 / 3.50 / 3.00 / 2.60 / 2.80</td><td>3.00</td><td>5</td></tr>
+              <tr><th scope="row">Notion</th><td style="font-variant-numeric:tabular-nums">3.10 / 3.30 / 2.80 / 3.80 / 3.80</td><td>3.30</td><td>5</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="video-note">
+          <strong>Acerca del vídeo de medición:</strong> El archivo de vídeo en la pantalla no está disponible actualmente. </div>
+      </div>
+
+    </div></section>
+
+    <!-- Section 4: Send Speed Measurement -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05"><span>Cómo medir la velocidad de transmisión</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Tiempo de ida y vuelta para enviar solicitudes</span><span class="app-card__rank">Velocidad de transmisión</span></div>
+          <div class="app-card__desc">
+            <ul style="padding-left:1.2rem;line-height:2.2;">
+              <li><strong>Método de medición:</strong> Medición del tiempo de la red por Charles Proxy</li>
+              <li><strong>Sección de medición:</strong> Desde tocar el botón de envío hasta la respuesta de confirmación del servidor (HTTP 200)</li>
+              <li><strong>Red:</strong> Entorno Wi-Fi de 15ms con latencia al borde Cloudflare</li>
+              <li><strong>Número de intentos:</strong> 10 veces medido y se adopta el valor medio</li>
+              <li><strong>Resultado:</strong> El número ha sido publicado. Esto se debe a que no hay registro de la fecha y hora de esta medición y el valor de cada vez, y no se puede volver a confirmar (2026-09-30. "El tiempo de envío de la solicitud (API ida y vuelta)" en la página superior se ha eliminado)</li>
+            </ul>
+            <p style="margin-top:.75rem"><strong>Suplemento:</strong> Este número no incluye el tiempo de entrega a la bandeja de entrada de correo. El tiempo que se tarda en llegar a su bandeja de entrada depende del proveedor de correo electrónico y del estado de la comunicación, y no se mide.</p>
+          </div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <!-- Section 5: Competitor Measurement -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06"><span>Comparación de medición con otras aplicaciones</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Para una comparación justa</span><span class="app-card__rank">Método de comparación</span></div>
+          <div class="app-card__desc">
+            <ul style="padding-left:1.2rem;line-height:2.2;">
+              <li><strong>Mismo dispositivo:</strong> Prueba todas las aplicaciones en el mismo iPhone 16e (A18)</li>
+              <li><strong>Mismas condiciones:</strong> Medido el mismo día y en el mismo entorno de red</li>
+              <li><strong>Última versión:</strong>Actualizado a la última versión disponible a partir de la fecha de prueba</li>
+              <li><strong>Cumplido con las condiciones de activación:</strong> Fuerza la aplicación a cerrar antes de cada medición y espera más de 5 segundos (en realidad será un comienzo cálido)</li>
+              <li><strong>Número de intentos:</strong> Se mide 5 veces por aplicación y se adopta el valor medio (Apple Notes 10 veces, Google Keep 4 veces)</li>
+              <li><strong>Instalación real:</strong> Reporte solo las aplicaciones que realmente ha instalado y probado usted mismo</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <!-- Section 6: Limitations and Caveats -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07"><span>Restricciones y precauciones</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Lo que quieres saber</span><span class="app-card__rank">Precaución</span></div>
+          <div class="app-card__desc">
+            <ul style="padding-left:1.2rem;line-height:2.2;">
+              <li>Los resultados pueden variar según el modelo del dispositivo, la versión iOS, el estado de almacenamiento</li>
+              <li>Probado solo en dispositivos 1 y no es una prueba de laboratorio estadísticamente estricta</li>
+              <li>Las actualizaciones pueden mejorar el rendimiento de las aplicaciones de la competencia</li>
+              <li>El número en la tabla es la medida de 2026 año 8 mes 11 día. Las actualizaciones posteriores de iOS y de la aplicación pueden cambiar los resultados</li>
+              <li><strong>Última actualización: 2026-10-03</strong></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <!-- Citation Notice -->
+    <div class="citation-notice">
+      <span>Puedes usar libremente esta metodología de medición con un enlace de origen. Fuente: simplememofast.com/blog/benchmark-methodology</span>
+
+    </div>
+
+    <!-- CTA Box -->
+    <div class="cta-box">
+      <div class="cta-box__title"><span>Empieza a escribir en 0.4 segundos</span></div>
+      <div class="cta-box__desc"><span>En la comparación de la aplicación 8 que publicó el método de medición, la aplicación de notas que tuvo el tiempo más corto para entrar (inicio caliente). La descarga es gratuita.</span></div>
+      <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="Descargar de App Store"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="Descargar de App Store" loading="lazy"></a>
+
+    </div>
+
+    <!-- Related Articles -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08"><span>Artículos relacionados</span></h2></div><div class="ce-chapter__body">
+      <div class="internal-links">
+        <a href="/es/blog/fastest-memo-app-benchmark"> <span>Punto de referencia de velocidad de inicio 2026</span> </a>
+        <a href="/es/blog/memo-app-speed-test-2026"> <span>Prueba de velocidad de la aplicación Memo 2026</span> </a>
+        <a href="/es/blog/best-memo-apps-2026"> <span>Aplicación de notas recomendada 10 selección 2026</span> </a>
+      </div>
+    </div></section>
+
+    <!-- Related Pages -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09"><span>Páginas relacionadas</span></h2></div><div class="ce-chapter__body">
+      <div class="internal-links">
+        <a href="/es/vs/"><span>Comparativa de aplicaciones</span></a>
+        <a href="/es/devlog/"><span>Diario de desarrollo</span></a>
+        <a href="/es/captio-alternative/"><span>Alternativas a Captio</span></a>
+        <a href="/es/blog/"><span>Lista del blog</span></a>
+      </div>
+    </div></section>
+
+  </div>
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/es/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>Siguiente lectura</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Crea un lugar para almacenar notas con la colaboración Obsidian</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span> Si estableces el enlace y guardas el destino en iPhone, también puedes dejar las notas enviadas a Obsidian. </span></span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>Contenido relacionado</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/es/blog/fastest-memo-app-benchmark" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Punto de referencia de velocidad de inicio 2026</span></a></li>
+    <li><a href="/es/blog/memo-app-speed-test-2026" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Prueba de velocidad de la aplicación Memo 2026</span></a></li>
+    <li><a href="/es/devlog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Diario de desarrollo</span></a></li>
+    <li><a href="/es/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Comparación de aplicaciones alternativas Captio</span></a></li>
+  </ul>
+</section>
+<!-- Author Bio -->
+<aside class="author-bio" style="margin:3rem auto 2rem;max-width:800px;padding:1.5rem 2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;gap:1.25rem;align-items:flex-start;">
+  <img src="/assets/img/app-icon-56.png" alt="Simple Memo - para Obsidian" width="48" height="48" loading="lazy" style="border-radius:50%;flex-shrink:0;margin-top:.2rem;">
+  <div>
+    <p style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">AI ATAKA</p>
+    <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;"><span>SimpleMemo. Desde iPhone, estamos desarrollando una aplicación que deja texto en las notas de la dirección de correo electrónico establecida y del socio. </span></p>
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+      <a href="/es/about/" style="font-size:.8rem;color:var(--accent);text-decoration:none;">Perfil</a>
+      <a href="https://x.com/simplememofast" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">X/Twitter</a>
+      <a href="https://github.com/simplememofast" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">GitHub</a>
+    </div>
+  </div>
+</aside>
+<section class="related-links ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-10" data-ce-number="10"><span>Método de agregación relacionado</span></h2></div><div class="ce-chapter__body"><p><a href="/es/data/voice-shift/">El método de agregación y el estado público de la encuesta de punto fijo "cambio de voz"</a> explica cómo contar los registros de uso y las condiciones de confirmación antes de la publicación. Las cifras confirmadas de la encuesta no se publican.</p></div></section>
+</main>
+
+    <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="es" dir="ltr"><a class="site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Una pequeña nota. Un paso más.</p><p class="site-footer-description">Envía notas desde tu iPhone a Obsidian y por correo electrónico.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="Navegación del pie de página">
+      <div class="footer__col">
+        <p class="footer__col-title">Producto</p>
+        <a href="/es/download/" class="footer__link">Descargar</a>
+        <a href="/es/" class="footer__link">Inicio</a>
+        <a href="/es/use-cases/" class="footer__link">Casos de uso</a>
+        <a href="/es/guides/" class="footer__link">Guías</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Comparar y cambiar</p>
+        <a href="/es/captio-alternative/" class="footer__link"><span>Alternativas a Captio</span></a>
+        <a href="/es/note-to-email/" class="footer__link">Notas por correo</a>
+        <a href="/es/vs/" class="footer__link">Comparar</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Lecturas</p>
+        <a href="/es/blog/" class="footer__link"><span>Blog</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Soporte</p>
+        <a href="/es/roadmap/" class="footer__link">Hoja de ruta pública</a>
+        <a href="/es/devlog/" class="footer__link">Registro de desarrollo</a>
+        <a href="/es/about/" class="footer__link">Sobre el desarrollador</a>
+        <a href="/es/faq" class="footer__link">Preguntas frecuentes</a>
+        <a href="/es/privacy" class="footer__link">Privacidad</a>
+        <a href="/es/contact" class="footer__link">Contacto</a>
+      </div>
+      </nav><p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Operado por YURIKA, K.K.</p></div></footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

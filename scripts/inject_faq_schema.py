@@ -317,7 +317,8 @@ def discover() -> list[tuple[Path, str, str]]:
         if hand_written_faqpage(text):
             print(f"[keep] {rel}: hand-written FAQPage left alone")
             continue
-        lang = "en" if rel.parts[0] == "en" else "ja"
+        document_language = re.search(r'<html\b[^>]*\blang=["\']([^"\']+)', text, re.IGNORECASE)
+        lang = document_language.group(1) if document_language else ("en" if rel.parts[0] == "en" else "ja")
         targets.append((path, page_url_for(path), lang))
     return targets
 
@@ -450,11 +451,18 @@ def check_committed(targets: list[tuple[Path, str, str]], pages=None) -> int:
         print(line)
     problems += len(sweep)
 
-    # Language-aware comparison is independent of generation. A different
-    # wording is a review candidate, not a reason to overwrite hand-written JSON-LD.
+    # Hand-written FAQPage blocks must cite questions readers can actually see.
+    # Generation never overwrites these blocks; fail CI until an editor aligns
+    # or removes the unsupported markup.
     from faq_question_audit import audit_questions
     questions = audit_questions(pages)
-    print(f"FAQ question review: {questions['pages']} pages; {questions['states']} (report only)")
+    print(f"FAQ question review: {questions['pages']} pages; {questions['states']}")
+    for row in questions['rows']:
+        if row['state'] != 'match':
+            print(f"  FAQ QUESTION MISMATCH {row['path']}: {row['state']}"
+                  f" (missing {len(row.get('missing', []))} question(s),"
+                  f" {len(row.get('answer_missing', []))} answer(s))")
+            problems += 1
 
     if problems:
         print(

@@ -1,5 +1,9 @@
 # 自律申請ポリシーの有効化
 
+## 提出前待機ルール
+
+`min_testflight_soak_hours=0`とし、提出に独自の24時間待機を要求しない。TestFlight VALID・同一ビルドの実機確認・CI・署名・購入QA・データ保全・日次上限・提出枠・独立した公開条件は維持する。`min_approved_soak_hours=6`は変更しない。
+
 2026-09-08のオーナーの恒常的な委任に基づき、公開側の申請ポリシーを有効化する。
 変更は `enabled=true` と `dry_run=false` の2項目で、判定関数や品質条件は変更しない。
 
@@ -10,7 +14,7 @@
 - リポジトリ変数 `DELEGATED_SUBMISSION_ENABLED=true`。
 - mainに対する `autonomous_submit=true` の明示dispatch。preflight overrideは禁止。
 - 対象版・ソース・ビルドが一致した新しい材料と、すべてのゲートの成功。
-- 実機確認、TestFlight 24時間、日英ノート、空いた提出枠、段階公開設定。
+- 実機確認、TestFlight VALID、日英ノート、空いた提出枠、段階公開設定。
 - 提出準備時にASCの実提出履歴を確認し、当日の既存提出が0件であること。
 
 5.8.46は個別承認で提出済みであり、今回再提出しない。現在のWatch確認を全項目の

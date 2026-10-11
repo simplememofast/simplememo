@@ -4,6 +4,7 @@ import { clusterOf, summarizeClusters, QUERY_CLASSIFIER_VERSION } from './cluste
 import { assessComparison, selectComparison } from './comparison.mjs';
 import { auditOverlaps, experimentScope } from './experiment-overlap.mjs';
 import { summarizeAiProbes } from './ai-probes.mjs';
+import { summarize } from './ledger.mjs';
 
 test('AI probes separate missing answers, brand questions and changed conditions', () => {
   const row = { date: '2026-09-05', question_set: 'v1', question_id: 'Q1', question_type: 'nonbrand',
@@ -51,7 +52,7 @@ test('query shares are mutually exclusive and unknown positions do not become ze
 });
 
 const snapshot = (start, end, extra = {}) => ({ meta: {
-  period_start: start, period_end: end, totals: { source: 'dates' }, ...extra,
+  period_start: start, period_end: end, source: 'bigquery', totals: { source: 'dates' }, ...extra,
 } });
 test('overlap audit resolves legacy page lists and preserves global/external scopes', () => {
   const ledger = { experiments: [
@@ -78,10 +79,16 @@ test('period comparison rejects partial, overlapping, missing and mixed-surface 
     bigquery: { window_days_available: 24, window_days_requested: 28 },
   }), before).comparable, false);
   assert.equal(assessComparison(snapshot('2026-09-07', '2026-10-04', { search_type: 'IMAGE' }), before).comparable, false);
+  assert.deepEqual(assessComparison(snapshot('2026-09-07', '2026-10-04', { source: 'csv-export' }), before), {
+    comparable: false, current_days: 28, previous_days: 28, reason: 'different_or_unknown_source',
+  });
+  assert.equal(assessComparison(snapshot('2026-09-07', '2026-10-04', { source: undefined }), before).reason,
+    'different_or_unknown_source');
+  assert.equal(selectComparison(current, [snapshot('2026-08-10', '2026-09-06', { source: 'csv-export' })]), null);
 });
 
 test('authorized global observation preserves history and releases only future running ownership', async () => {
-  const {contractHash,nonexclusiveObservation,changeScope}=await import('./experiment-coexistence.mjs');
+  const {contractHash,nonexclusiveObservation,classifyDueOwnership,changeScope}=await import('./experiment-coexistence.mjs');
   const {ownershipConflict}=await import('./experiment-overlap.mjs');
   const e={id:'global-observation',page:'(サイト全体 + サイト外4面)',status:'running',baseline:{value:5},started_at:'2026-01-01',evaluation_at:'2026-12-01',stop_conditions:['Retain original exclusion']};
   e.coexistence={schema_version:1,experiment_id:e.id,from:'exclusive_intervention',to:'nonexclusive_observation',decided_at:'2026-09-15T00:00:00Z',effective_at:'2026-09-16T00:00:00Z',authorized_by:'user',authorization:{request:'反映させてデプロイ',thread_id:'01a0a1b9-4982-70f3-b2d6-eed77be68e26'},original_contract_sha256:contractHash(e),interpretation:'descriptive_only_no_isolated_causal_claim',reason:'Explicit transition with historical contract preserved.'};
@@ -89,6 +96,10 @@ test('authorized global observation preserves history and releases only future r
   assert.equal(ownershipConflict(e,target,{now:new Date('2026-09-15T12:00Z')}),true);
   assert.equal(ownershipConflict(e,target,{now:new Date('2026-09-17T00:00Z')}),false);
   assert.equal(nonexclusiveObservation({...e,status:'frozen'},{now:new Date('2026-09-17T00:00Z')}),false);
+  const due=summarize({experiments:[e]},'2026-12-02').due;
+  assert.equal(due.length,1);
+  assert.deepEqual(classifyDueOwnership(due,{now:'2026-12-02T00:00:00Z'}),{blocking:[],observations:[e]});
+  assert.equal(classifyDueOwnership([{...e,coexistence:undefined}],{now:'2026-12-02T00:00:00Z'}).blocking.length,1);
   assert.equal(ownershipConflict(e,target,{now:new Date('2026-09-17T00:00Z'),followup:true}),true);
   assert.throws(()=>nonexclusiveObservation({...e,baseline:{value:0}}),/historical/);
   assert.throws(()=>nonexclusiveObservation({...e,coexistence:{...e.coexistence,effective_at:'2026-09-14T00:00:00Z'}}),/predate/);

@@ -10,6 +10,7 @@
  *   node scripts/autopilot-runs.mjs --since 2026-08-15
  *   node scripts/autopilot-runs.mjs --append --run-id ... --date ... --route ... --outcome ...
  *        [--failure-class ... --failed-at ... --detected-at ... --needs-triage true]
+ *        [--interventions-json '[{"kind":"request","note":"observed"}]' | '[]']
  *   node scripts/autopilot-runs.mjs --classify-codex-failures # verified original runtime codes only
  *
  * 【何を測るか】外部レビュー（2026-08-22）が求めた指標のうち、
@@ -22,7 +23,9 @@
  *   無運転日     = どの経路も動かなかった日（**これだけは正常系ではない**）
  *
  * 【単位を1つにしない — 2026-08-22追記】
- * `human_intervention_rate` は「その実行に人が1回でも触ったか」の**二値**で、
+ * `human_intervention_rate` は「その実行に介入が1回でも記録されたか」の**二値**で、
+ * 未指定/null/不正値が混ざる総率は未観測。明示[]は記録上ゼロであり、
+ * すべての人介入を観測したことや実際のzero-touch完遂を証明しない。
  * YAMLの権限を1行直しただけの日も丸ごと「介入あり」になる。これは
  * **AIの自律性を構造的に過少評価する。** 実測でも、run単位では 53.8% だが、
  * 同期間の変更行の 94.2% はAI著者のコミットだった（scripts/code-authorship.mjs の実測。
@@ -50,6 +53,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readLedger, readLedgerScenarios } from './lib/read-ledger.mjs';
 import { FAULT_GATE_CODES } from './lib/autopilot-gate-codes.mjs';
+import { INTERVENTION_KINDS, interventionObservation, interventionSummary, parseInterventionsJson } from './lib/intervention-observation.mjs';
+import { execFileSync } from 'node:child_process';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const RUNS_PATH = path.join(ROOT, 'data/autopilot-runs.json');
@@ -457,7 +462,10 @@ export function validate(doc) {
       problems.push(`${at}: ${r.outcome} なのに failure_reason が無い — 「なぜ落ちたか」の無い失敗は再発防止に使えない`);
     }
     if (!r.source) problems.push(`${at}: source is required — 後から検算できない行は指標として存在しないのと同じ`);
-    if (r.interventions && !Array.isArray(r.interventions)) problems.push(`${at}: interventions must be an array`);
+    const intervention = interventionObservation(r);
+    if (['invalid_type', 'invalid_event'].includes(intervention.reason)) {
+      problems.push(`${at}: interventions must be null (unobserved) or an array of recorded intervention events`);
+    }
     problems.push(...stageProblems(r, at));
   });
   if (doc.retracted_observations !== undefined) {
@@ -609,9 +617,20 @@ export function shippingStreaks(runs) {
  * 落ちた主系を人が直した日も、**オーナーの手は動いている。**
  */
 export function handsOffStreaks(runs) {
-  return streakWalk(runs, (rows) =>
-    rows.some((r) => r.outcome === 'shipped')
-    && !rows.some((r) => (r.interventions || []).length > 0));
+  const unknownDays = [...new Set(runs.filter(r => r?.date_jst).map(r => r.date_jst))].sort().filter(day => {
+    const rows = runs.filter(r => r.date_jst === day);
+    return rows.some(r => r.outcome === 'shipped')
+      && !rows.some(r => interventionObservation(r).events.length > 0)
+      && rows.some(r => interventionObservation(r).state === 'unknown');
+  });
+  const recorded = streakWalk(runs, rows => rows.some(r => r.outcome === 'shipped')
+    && rows.every(r => interventionObservation(r).state === 'recorded_zero'));
+  if (!unknownDays.length) return recorded;
+  const current = recorded.current.days === 0 && !unknownDays.includes(recorded.last_day)
+    ? recorded.current : { days: null, from: null };
+  return { current, longest: { days: null, from: null, to: null },
+    active_days: null, last_day: recorded.last_day, measurement_state: 'unknown', unknown_days: unknownDays,
+    recorded_lower_bound: recorded, scope: 'recorded fields only; unknown days cannot establish zero intervention' };
 }
 
 /**
@@ -706,20 +725,24 @@ export function summarize(doc, { since = null, costDoc = null, statusDoc = null,
   const shipped = runs.filter((r) => r.outcome === 'shipped');
   const failed = runs.filter((r) => FAILED.has(r.outcome));
   const noRun = runs.filter((r) => r.outcome === 'no_run');
-  const withIntervention = attempted.filter((r) => (r.interventions || []).length > 0);
+  const intervention = interventionSummary(attempted);
+  const shippedIntervention = interventionSummary(shipped);
+  const withIntervention = attempted.filter(r => interventionObservation(r).events.length > 0);
   const rate0 = (n, d) => (d > 0 ? n / d : null);
 
   // 介入の内訳。kind ごとに「その kind の介入を含む実行」を数える
   // （1実行に複数kindがありうるので、合計が withIntervention と一致するとは限らない）。
-  const KINDS = ['artifact', 'infra', 'substitute', 'bootstrap', 'request'];
+  const KINDS = INTERVENTION_KINDS;
   const byKind = {};
   for (const k of KINDS) {
-    const runsWith = attempted.filter((r) => (r.interventions || []).some((i) => i.kind === k));
-    byKind[k] = { runs: runsWith.length, rate: rate0(runsWith.length, attempted.length) };
+    const runsWith = attempted.filter(r => interventionObservation(r).events.some(i => i.kind === k));
+    byKind[k] = { runs: runsWith.length,
+      rate: intervention.unknown_runs ? null : rate0(runsWith.length, attempted.length),
+      unknown_runs: intervention.unknown_runs, count_scope: 'recorded positive events' };
   }
   // 出荷物のうち、人が中身に手を入れたもの。**AIの自律性の中核はここ。**
   const shippedWithArtifactIntervention = runs.filter(
-    (r) => r.outcome === 'shipped' && (r.interventions || []).some((i) => i.kind === 'artifact'));
+    r => r.outcome === 'shipped' && interventionObservation(r).events.some(i => i.kind === 'artifact'));
 
   const days = [...new Set(runs.map((r) => r.date_jst))].sort();
   const shippedDays = new Set(shipped.map((r) => r.date_jst));
@@ -756,11 +779,13 @@ export function summarize(doc, { since = null, costDoc = null, statusDoc = null,
     // レビューが求めた指標。分母は attempted（§ヘッダの理由）。
     completion_rate: rate(shipped.length, attempted.length),
     change_failure_rate: rate(failed.length, attempted.length),
-    human_intervention_rate: rate(withIntervention.length, attempted.length),
+    human_intervention_rate: intervention.unknown_runs ? null : rate(withIntervention.length, attempted.length),
+    intervention_observation: { attempted: intervention, shipped: shippedIntervention },
     // 内訳。総計だけ出すと過少評価、内訳だけ出すと都合のよい分母選びになる。両方出す。
     intervention_by_kind: byKind,
     // 出荷物のうち人が中身に手を入れた割合。**AIの自律性の中核。**
-    artifact_autonomy_rate: rate(shipped.length - shippedWithArtifactIntervention.length, shipped.length),
+    artifact_autonomy_rate: shippedIntervention.unknown_runs ? null
+      : rate(shipped.length - shippedWithArtifactIntervention.length, shipped.length),
     shipping_day_rate: rate(shippedDays.size, days.length),
     no_run_days: noRun.map((r) => r.date_jst),
     // 「連続稼働」の定義つきの値。**書くならここから引く。**
@@ -775,7 +800,7 @@ export function summarize(doc, { since = null, costDoc = null, statusDoc = null,
     // 「主系が一度も出荷していない」を機械が言えるようにする（＝切替の証拠）
     primary_ever_shipped: (byRoute.primary?.shipped ?? 0) > 0,
     interventions: withIntervention.flatMap((r) =>
-      (r.interventions || []).map((i) => ({ run_id: r.run_id, date_jst: r.date_jst, ...i }))),
+      interventionObservation(r).events.map(i => ({ run_id: r.run_id, date_jst: r.date_jst, ...i }))),
     cost: costLinked,
     timings: timings(runs),
     // 台帳そのものが書かれ続けているか。**壊れた行より、書かれなかった行のほうが見つけにくい。**
@@ -793,14 +818,14 @@ function render(s, doc) {
   o.push('');
   o.push(`  AI完走率      ${pct(s.completion_rate)}   (${s.totals.shipped} / ${s.totals.attempted} 着手)`);
   o.push(`  変更失敗率    ${pct(s.change_failure_rate)}   (${s.totals.failed} / ${s.totals.attempted} 着手)`);
-  o.push(`  人間介入率    ${pct(s.human_intervention_rate)}   (${s.interventions.length} 件の介入)`);
+  o.push(`  記録上の人間介入率 ${pct(s.human_intervention_rate)}   (記録済み ${s.interventions.length} 件 / 未観測 ${s.intervention_observation.attempted.unknown_runs} 実行)`);
   const bk = s.intervention_by_kind ?? {};
   o.push(`    ├ 成果物への介入   ${pct(bk.artifact?.rate)}  (${bk.artifact?.runs ?? 0} 実行)  ← AIの自律性の中核`);
   o.push(`    ├ 基盤の修理       ${pct(bk.infra?.rate)}  (${bk.infra?.runs ?? 0} 実行)`);
   o.push(`    ├ 代走             ${pct(bk.substitute?.rate)}  (${bk.substitute?.runs ?? 0} 実行)`);
   o.push(`    ├ 立ち上げ         ${pct(bk.bootstrap?.rate)}  (${bk.bootstrap?.runs ?? 0} 実行・一度きり)`);
   o.push(`    └ 起票のみ         ${pct(bk.request?.rate)}  (${bk.request?.runs ?? 0} 実行・未実行)`);
-  o.push(`  成果物のAI自律率 ${pct(s.artifact_autonomy_rate)}   (出荷 ${s.totals.shipped} 件のうち人が中身に触っていない割合)`);
+  o.push(`  成果物の記録上AI自律率 ${pct(s.artifact_autonomy_rate)}   (出荷 ${s.totals.shipped} 件の介入記録に基づく。実際のzero-touch証明ではない)`);
   o.push(`  出荷日率      ${pct(s.shipping_day_rate)}   (${s.window.days} 日中)`);
   o.push('');
   o.push(`  経路別:  主系 ${s.by_route.primary?.shipped ?? 0}/${s.by_route.primary?.attempted ?? 0} 出荷` +
@@ -824,6 +849,7 @@ function render(s, doc) {
   // 出荷ゼロ3日をまたいでいることが読めない（2026-09-02 の実物がその形）。
   const fmt = (st, zero) => {
     if (!st) return null;
+    if (st.measurement_state === 'unknown') return `未観測（${st.unknown_days.length} 日の介入記録を確認できない）`;
     const c = st.current.days ? `${st.current.days} 日（${st.current.from}〜${st.last_day}）` : zero;
     const l = st.longest.days ? `${st.longest.days} 日（${st.longest.from}〜${st.longest.to}）` : '0 日';
     return `現在 ${c} ／ 最長 ${l}`;
@@ -850,8 +876,8 @@ function render(s, doc) {
   }
   const ho = fmt(s.hands_off_streaks, '0 日（最終記入日に無介入の出荷が無い）');
   if (ho) {
-    o.push(`  無介入出荷    ${ho}`);
-    o.push('    （出荷があり、その日のどの行にも介入が無い日の連続。**率と違って天井が無い**）');
+    o.push(`  記録上無介入出荷 ${ho}`);
+    o.push('    （出荷があり、その日のどの行にも介入の記録が無い日の連続。完全な人介入観測の証明ではない）');
     o.push('    （出荷を条件に入れてある。入れないと「壊れたまま誰も触らない日」が無介入で積み上がる）');
   }
   const st = s.staleness;
@@ -918,6 +944,88 @@ function selftest() {
     n++;
     if (got !== want) { bad++; console.error(`  ✗ ${msg}\n      got=${JSON.stringify(got)} want=${JSON.stringify(want)}`); }
   };
+  {
+    const ship = (id, interventions) => ({ run_id: id, date_jst: '2026-09-30', route: 'owner-session',
+      attempted: true, outcome: 'shipped', pr: 1, source: 'session', interventions });
+    const zero = ship('zero', []), positive = ship('positive', [{ kind: 'request', note: 'recorded request' }]);
+    const missing = ship('missing'); delete missing.interventions;
+    const original = JSON.stringify([zero, positive, missing]);
+    const known = summarize({ runs: [zero, positive] });
+    eq(known.human_intervention_rate, 0.5, '明示した記録上ゼロとpositiveは元の分母で集計する');
+    const mixed = summarize({ runs: [zero, positive, missing] });
+    eq(mixed.human_intervention_rate, null, '既知0・positive・欠測の混合総率はunknown');
+    eq(mixed.artifact_autonomy_rate, null, '出荷の欠測から成果物の100%自律を作らない');
+    eq(mixed.intervention_observation.attempted.unknown_runs, 1, '未観測の実行数を保つ');
+    eq(mixed.interventions.length, 1, '混合集計でも既知positiveイベントを保つ');
+    eq(mixed.totals.attempted, 3, '欠測を分母から除かない');
+    eq(JSON.stringify([zero, positive, missing]), original, '集計で原記録を変えない');
+    for (const value of [null, false, 0, '', '[]', {}, [null], [{ kind: 'unknown' }]]) {
+      const row = ship('unobserved', value), result = summarize({ runs: [zero, row] });
+      eq(result.human_intervention_rate, null, '欠測・不正型を既知0に昇格させない: ' + JSON.stringify(value));
+      eq(result.intervention_observation.attempted.unknown_runs, 1, '不正型はthrowではなくunknownとして集計');
+      if (value !== null) eq(validate({ runs: [row] }).length > 0, true, '明示された不正型はvalidatorで拒否');
+    }
+    const partial = ship('partial', [{ kind: 'infra' }, null]);
+    const partialResult = summarize({ runs: [partial] });
+    eq(partialResult.human_intervention_rate, null, '一部不正のイベント配列は総率unknown');
+    eq(partialResult.interventions.length, 1, '一部不正でも実在のpositiveイベントを失わない');
+    eq(handsOffStreaks([missing]).current.days, null, '介入欠測の出荷日は記録上無介入連続へ数えない');
+    eq(handsOffStreaks([zero]).current.days, 1, '明示空配列の記録上連続を保持');
+    eq(validate({ runs: [missing] }).length, 0, 'legacy欠測は観測unknownとして保持できる');
+
+    // Execute the real producer in an isolated checkout; no original ledger or
+    // status is touched, and invalid input must leave the saved bytes intact.
+    const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'ap-interventions-')));
+    try {
+      for (const file of ['scripts/autopilot-runs.mjs', 'scripts/lib/intervention-observation.mjs',
+        'scripts/lib/selftest.mjs', 'scripts/lib/read-ledger.mjs', 'scripts/lib/autopilot-gate-codes.mjs']) {
+        const target = path.join(dir, file); fs.mkdirSync(path.dirname(target), { recursive: true });
+        fs.copyFileSync(path.join(ROOT, file), target);
+      }
+      const ledger = path.join(dir, 'data/autopilot-runs.json');
+      fs.mkdirSync(path.dirname(ledger)); fs.writeFileSync(ledger, '{"runs":[]}\n');
+      const append = (id, ...args) => execFileSync(process.execPath, [path.join(dir, 'scripts/autopilot-runs.mjs'),
+        '--append', '--allow-merged-branch', '--run-id', id, '--date', '2026-09-30', '--route', 'owner-session',
+        '--outcome', 'shipped', '--pr', '1', ...args], { cwd: dir, stdio: 'pipe' });
+      append('unspecified'); append('explicit-zero', '--interventions-json', '[]');
+      append('explicit-positive', '--interventions-json', '[{"kind":"request","note":"observed"}]');
+      const saved = JSON.parse(fs.readFileSync(ledger));
+      eq(saved.runs[0].interventions, null, '実appendの観測未指定はnullで保存');
+      eq(Array.isArray(saved.runs[1].interventions) && saved.runs[1].interventions.length, 0, '実appendの明示[]は保存');
+      eq(saved.runs[2].interventions[0].kind, 'request', '実appendのpositive観測は保存');
+      const bytes = fs.readFileSync(ledger, 'utf8');
+      for (const args of [['--interventions-json', '{broken'], ['--interventions-json', 'null'], ['--interventions-json']]) {
+        let rejected = false; try { append('invalid', ...args); } catch { rejected = true; }
+        eq(rejected, true, '実producerは不正/値欠落の観測JSONを拒否');
+        eq(fs.readFileSync(ledger, 'utf8'), bytes, '不正producer入力で保存済み原記録を変えない');
+      }
+      fs.writeFileSync(ledger, '{broken');
+      let unreadable = false; try { append('unreadable'); } catch { unreadable = true; }
+      eq(unreadable, true, '実producerは未読/破損の台帳を空台帳へ変えない');
+      eq(fs.readFileSync(ledger, 'utf8'), '{broken', '未読時は台帳へ書かない');
+
+      // Exercise the actual downstream HTML/CLI consumer with synthetic data.
+      // The source ledgers are neither read nor rewritten by this scenario.
+      fs.cpSync(path.join(ROOT, 'scripts'), path.join(dir, 'scripts'), { recursive: true });
+      const fixtures = {
+        'autopilot-runs': { runs: [{ ...zero, route: 'actions' }, positive, missing] },
+        'automation-coverage': { tasks: [{ area: 'fixture', executor: 'human_only' }] },
+        'autopilot-cost': { budget: { monthly_usd_cap: 100, cap_set_by: 'placeholder' }, runs: [] },
+        'authority-matrix': { domains: [] },
+        'credential-expiry': { policy: { fail_days: 7, warn_days: 30 }, credentials: [] },
+      };
+      for (const [name, fixture] of Object.entries(fixtures)) {
+        fs.writeFileSync(path.join(dir, `data/${name}.json`), JSON.stringify(fixture));
+      }
+      const output = path.join(dir, 'dashboard.html');
+      const stdout = execFileSync(process.execPath, [path.join(dir, 'scripts/dashboard.mjs'), '--out', output], { cwd: dir, encoding: 'utf8' });
+      const html = fs.readFileSync(output, 'utf8');
+      eq(/成果物の記録上AI自律率<\/div>\s*<div class="readout__value">未観測<\/div>/.test(html), true, '実HTMLは出荷の欠測を100%や0%へ変えない');
+      eq(html.includes('人間介入の記録 — 総率 未観測'), true, '実HTMLの混合総率は未観測');
+      eq(/class="bar is-unknown"[\s\S]*?<div class="bar__track"><\/div>/.test(html), true, '実HTMLの未知率はゼロ幅棒ではなく未知表示');
+      eq(stdout.includes('未観測%'), false, '実CLIは未知をパーセント値のように表示しない');
+    } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+  }
   const actionsEnv = { GITHUB_ACTIONS: 'true', GITHUB_WORKFLOW: 'Obsidian Autopilot', GITHUB_RUN_ID: '33815445009' };
   {
     const previous = { run_id: 'ap-20260905-actions-33959414641', external_ref: '33959414641',
@@ -1306,6 +1414,9 @@ if (isMain) {
   }
 
   if (has('append')) {
+    if (has('interventions-json') && val('interventions-json', null) === null) {
+      throw new Error('--interventions-json requires an explicit JSON array value');
+    }
     // **書く先を間違えていたら、書く前に止める。**（refusesMergedDayBranch の理由）
     if (!has('allow-merged-branch')) {
       let branch = null;
@@ -1353,7 +1464,7 @@ if (isMain) {
       artifact: val('artifact', null),
       failure_reason: val('failure-reason', null),
       external_ref: externalRefFor(val('route'), val('external-ref', null)),
-      interventions: [],
+      interventions: parseInterventionsJson(val('interventions-json', null)),
       source: val('source', 'session'),
     };
     // 失敗の付帯情報。**種別が分からない回に種別を書かない**ため、
@@ -1423,6 +1534,7 @@ if (isMain) {
     completion_rate: s.completion_rate === null ? null : Number(s.completion_rate.toFixed(4)),
     change_failure_rate: s.change_failure_rate === null ? null : Number(s.change_failure_rate.toFixed(4)),
     human_intervention_rate: s.human_intervention_rate === null ? null : Number(s.human_intervention_rate.toFixed(4)),
+    intervention_observation: s.intervention_observation,
     intervention_by_kind: s.intervention_by_kind,
     artifact_autonomy_rate: s.artifact_autonomy_rate === null ? null : Number(s.artifact_autonomy_rate.toFixed(4)),
     shipping_day_rate: s.shipping_day_rate === null ? null : Number(s.shipping_day_rate.toFixed(4)),
@@ -1439,7 +1551,8 @@ if (isMain) {
     // ここに導出値を並べて置く。突き合わせる側が現れたときの正はこちら。
     publishing_streaks: s.publishing_streaks,
     last_publishing: s.last_publishing,
-    intervention_count: s.interventions.length,
+    intervention_count: s.intervention_observation.attempted.unknown_runs ? null : s.interventions.length,
+    recorded_intervention_count: s.interventions.length,
     timings: s.timings,
   };
 

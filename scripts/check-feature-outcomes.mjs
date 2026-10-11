@@ -38,6 +38,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { VERDICTS } from './check-operating-memory.mjs';
+import { selftestTally } from './lib/tally.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const LEDGER_PATH = path.join(ROOT, 'data/feature-outcomes.json');
@@ -139,8 +140,7 @@ export function summarize(doc) {
 }
 
 function selftest() {
-  let total = 0; const failures = [];
-  const t = (n, c) => { total += 1; if (!c) failures.push(n); console.log(`  ${c ? 'ok  ' : 'FAIL'} ${n}`); };
+  const { t, finish } = selftestTally();
   const base = (over = {}) => ({ features: [{
     id: 'f1', declared_at: '2026-08-01', shipped_at: '2026-08-10', evaluation_at: '2026-09-10',
     metric: { key: 'obsidian_append_rate', numerator: 'obsidian_append_ok',
@@ -199,9 +199,7 @@ function selftest() {
   ] });
   t('完走の数と出荷の数を分けて数える', s.shipped === 2 && s.completed === 1);
 
-  if (failures.length) { console.log(`\nselftest: ${total}件中 ${failures.length}件 失敗 — ${failures.join(' / ')}`); return 1; }
-  console.log(`\nselftest: 全${total}件 通過`);
-  return 0;
+  return finish();
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);

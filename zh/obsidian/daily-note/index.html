@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/daily-note/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>不打开iPhone，在Obsidian的每日笔记中补充的方法 | SimpleMemo</title>
+  <meta name="description" content="在Obsidian的每日笔记本上追加备忘录的3的路线，用“不碰iPhone到什么程度”进行比较。 1.11的捕获动作、快捷键+URL方案、邮件发送型应用程序的自动补充。 容易成为不被追记的原因的日期格式的配合方法。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="不打开iPhone，在Obsidian的每日笔记中补充的方法 | SimpleMemo">
+  <meta property="og:description" content="在每日笔记中补充的3路线，通过“不接触iPhone到什么程度”进行比较。 1.11的捕获动作、快捷键+URL方案、邮件发送型应用程序的自动补充。 日期格式的配合方法也是。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-11T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh/obsidian/daily-note/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-daily-note.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_CN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="不打开iPhone，在Obsidian的每日笔记中补充的方法 | SimpleMemo">
+  <meta name="twitter:description" content="在每日笔记中补充的3路线，通过“不碰iPhone到什么程度”进行比较。 解说日期格式不匹配而补记迷路的问题的方法。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-daily-note.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh/obsidian/daily-note/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/daily-note/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/daily-note/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/daily-note/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/daily-note/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/daily-note/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/daily-note/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/daily-note/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/daily-note/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/daily-note/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/daily-note/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/daily-note/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主页",
+      "item": "https://simplememofast.com/zh/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian合作",
+      "item": "https://simplememofast.com/zh/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "在每日笔记中补充",
+      "item": "https://simplememofast.com/zh/obsidian/daily-note/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh/obsidian/daily-note/#article",
+  "inLanguage": "zh-Hans",
+  "headline": "不打开iPhone，在Obsidian的每日笔记中追加",
+  "description": "在Obsidian的每日笔记中追加记的3的路线，以“不碰iPhone到什么程度”为轴心进行比较，总结追记迷路的原因和应对措施。",
+  "url": "https://simplememofast.com/zh/obsidian/daily-note/",
+  "datePublished": "2026-08-11",
+  "dateModified": "2026-10-04",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-daily-note.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh/obsidian/daily-note/"
+  }
+}</script>
+
+  <!-- JSON-LD: FAQPage -->
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh/obsidian/daily-note/#webpage",
+  "inLanguage": "zh-Hans",
+  "name": "不打开iPhone，在Obsidian的每日笔记中补充的方法 | SimpleMemo",
+  "url": "https://simplememofast.com/zh/obsidian/daily-note/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh/#website"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    /* 中央揃えの和文は行頭が毎行ずれて読みにくい。狭い画面では左揃えにし、
+       行が2〜3行に収まる広い画面だけ中央のままにする。 */
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    /* ── 「開かず」の段階 ──────────────────────────────
+       この記事の骨子。読者が言う「開かず」と記事が指す「開かず」は
+       ずれていることが多いので、先に3段階へ分解して合意を取る。 */
+    .lv{display:grid;grid-template-columns:auto 1fr;gap:0 1.1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.3rem 1.3rem;margin:.85rem 0}
+    .lv__n{grid-row:1/3;width:2.6rem;height:2.6rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;align-self:start}
+    .lv__t{font-size:1.05rem;font-weight:700;line-height:1.55;margin:0 0 .4rem}
+    .lv__d{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0}
+    @media(max-width:520px){
+      .lv{grid-template-columns:1fr;gap:.6rem}
+      .lv__n{grid-row:auto}
+    }
+
+    /* 原因ブロック */
+    .cz{background:var(--surface);border:1px solid var(--border);border-left:3px solid rgba(255,183,52,.55);border-radius:var(--radius-sm);padding:1.35rem 1.3rem;margin:1rem 0}
+    .cz__n{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#ffc76b;margin-bottom:.4rem}
+    .cz__t{font-size:1.05rem;font-weight:700;line-height:1.6;margin:0 0 .55rem}
+    .cz p{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0 0 .7rem}
+    .cz p:last-child{margin-bottom:0}
+    .cz ol,.cz ul{margin:.2rem 0 .7rem;padding-left:1.35rem;font-size:.95rem;line-height:1.9;color:var(--text-secondary)}
+    .cz li{margin-bottom:.3rem}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em}
+
+    /* ── 比較表 ────────────────────────────────────────
+       狭い画面で列を縦に割ると見出し列が語中で折り返して読めなくなる
+       ので、行ごとのカードに組み替えて全幅を使わせる（/siri/ と同じ流儀）。 */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:26%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/capture-next.css?v=4e62584640">
+<link rel="stylesheet" href="/assets/css/capture-third.css?v=ce878a94dc">
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/zh/obsidian/daily-note/#faq","inLanguage":"zh-Hans","mainEntity":[{"@type":"Question","name":"应该是补充的，但是笔记本上什么都没有增加","acceptedAnswer":{"@type":"Answer","text":"在很多情况下，写入本身是成功的，并且与你所看到的笔记不同的文件。 大部分原因是日期格式或保存文件夹不一致。 Obsidian的设置→请在每日笔记中确认“日期格式”和“新文件的制作地点”，与发送方逐字一致。 如果用文件名搜索整个保管库，可以确认无意中的同名笔记是否增加了。"}},{"@type":"Question","name":"当天的每日笔记还没有的时候会怎么样呢？","acceptedAnswer":{"@type":"Answer","text":"根据路线不同而变化。 如果是新建文件后补充的方式的话，早上第一个笔记就能制作当天的笔记。 在只对现有笔记进行补充的方式，在没有目标文件的时候会失败，或者在无意的地方创建新文件。 使用模板时，请注意自动创建的笔记中可能不适用模板。"}},{"@type":"Question","name":"每日笔记本和Inbox笔记本，应该收集到哪个？","acceptedAnswer":{"@type":"Answer","text":"1如果想把一天的流程作为时间序列的日志留下的话，就用每日笔记，如果以后想作为整理分类的收件箱使用的话，固定的Inbox笔记就合适。 运用不稳定的时候，Inbox笔记本比较安全。 因为不依赖于日期，所以不会因为日期格式不一致而发生追记迷路的事故。 即使习惯了之后切换到每日笔记，过去的记录也不会丢失。"}},{"@type":"Question","name":"可以指定补充位置吗（特定标题下等）","acceptedAnswer":{"@type":"Answer","text":"取决于路线。 通常可以选择在笔记的末尾补充或插入到开头的方式，如果想要插入特定标题的正下方，则需要具有该功能的专用快捷操作或社区插件。 在很多用途中，将带有时间的1行堆放在末尾，整理的话以后在Obsidian那边进行的话更不容易破产。"}},{"@type":"Question","name":"虽然被追加了，但是没有反映在其他终端的Obsidian上","acceptedAnswer":{"@type":"Answer","text":"在iCloud Drive上同步时，写入本身会立即进行，但可能需要几秒钟到数十秒才能反映在其他终端上。 首先用iPhone一侧的Obsidian打开笔记，确认是否反映在那里。 在iPhone上可以看到，在其他终端上看不到的话，同步延迟，在iPhone上也看不到的话，追记目的地本身就偏离了。 这种延迟和2台同时编辑时的冲突是另一种现象。 与iCloud Drive以外的同步方法的区别是同步方法总结进行比较。"}},{"@type":"Question","name":"可以不插入插件在每日笔记中补充吗？","acceptedAnswer":{"@type":"Answer","text":"可以。 这篇报道的3路线都不需要社区插件。 在SimpleMemo的情况下，保管库只是作为文件夹（iCloud Drive或“这个iPhone内”）处理，应用程序将Markdown文件直接写入那里。 也不需要改变Obsidian方面的设置。"}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full capture-next capture-third site-designed" data-design-family="refined">
+<a class="ce-skip" href="#main-content">跳到正文</a>
+  <!-- Global Navigation -->
+  <nav aria-label="主导航" class="global-nav" data-site-header="">
+<div class="global-nav__inner">
+<a class="global-nav__logo site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh/guides/">使用指南</a><a href="/zh/use-cases/">使用场景</a><a href="/zh/vs/">对比</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+<li><a href="/zh/guides/">使用指南</a></li>
+<li><a href="/zh/use-cases/">使用场景</a></li>
+<li><a href="/zh/vs/">对比</a></li>
+<li><a href="/zh/methods/"><span>方法</span></a></li>
+<li><a href="/zh/blog/"><span>博客</span></a></li>
+<li><a href="/zh/glossary/"><span>术语集</span></a></li>
+<li><a href="/zh/faq">常见问题</a></li>
+<li><a href="/zh/about/">关于开发者</a></li>
+<li><a href="/zh/devlog/">开发日志</a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="obsidian" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>下载</span></a></li>
+</ul>
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="简体中文 · 选择语言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>简中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hans" dir="ltr"><p class="site-language-title">选择语言</p><div class="site-language-grid"><a href="/obsidian/daily-note/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/daily-note/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hans" aria-current="page"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh-Hant/obsidian/daily-note/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/daily-note/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/daily-note/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/daily-note/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/daily-note/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/daily-note/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/daily-note/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+<a class="global-nav__cta" data-cta-cluster="obsidian" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">下载</a>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="菜单"><span>菜单</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+</div>
+</div>
+</nav>
+
+<main class="page-content" id="main-content">
+<div class="container">
+<!-- Hero -->
+<div class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy">
+<div class="lp-hero__label">
+<span>Obsidian 每日笔记 × 快速捕捉</span>
+</div>
+<h1 class="lp-hero__title"> <span>不打开iPhone，在Obsidian的每日笔记本上追加</span> </h1>
+<p class="guide-note" data-translation-example-note="">下方的语音指令为日语示例。请确认 Siri 的语言设置，以及设备上已注册的快捷指令。</p>
+
+<p class="lp-hero__sub"> <span>想到的事情，只要在当天的笔记本上加1行。 仅此而已，需要打开应用程序、查找笔记、将光标放在末尾。 这里以<strong>“不碰iPhone到什么程度”</strong>这个轴线比较3个路线，整理了容易迷路的设置方法。 </span> </p>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;"> <span>作者: <a href="/zh/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> ・ 公开: <time datetime="2026-08-11">2026年8月11日</time></span> </p>
+<a class="ce-read-link" href="#capture-section-1">阅读正文 <span aria-hidden="true">↓</span></a></div><nav aria-label="从想读的内容中选择" class="ce-routes"><a class="ce-route" href="#capture-section-1"><span>01</span><b>3的阶段</b></a><a class="ce-route" href="#capture-section-2"><span>02</span><b>比较路径</b></a><a class="ce-route" href="#capture-section-3"><span>03</span><b>确认追记地址</b></a></nav><figure aria-hidden="true" class="ce-stage cn-concept"><p class="ce-stage-label">每日笔记/三个级别</p><div class="cn-concept-list"><div class="cn-concept-row"><span>01</span><strong>无法打开Obsidian</strong></div><div class="cn-concept-row"><span>02</span><strong>不打开应用程序</strong></div><div class="cn-concept-row"><span>03</span><strong>不取出iPhone</strong></div></div><figcaption class="ce-stage-foot">减少操作的3阶段（概念图）</figcaption></figure></div><div class="ce-article"><details class="ce-index"><summary>本页目录</summary><nav aria-label="目录"><a href="#capture-section-1">“不打开iPhone”有3阶段</a><a href="#capture-section-2">比较3的路线</a><a href="#capture-section-3">不进入每日笔记 — 3大原因</a><a href="#capture-section-4">达到等级3 — 从声音和Apple Watch开始</a><a href="#capture-section-5">常见问题</a><a href="#capture-section-6">相关页面</a><a href="#capture-section-7">参考文献</a></nav></details>
+<!-- Answer-first (AIO) -->
+<section class="lp-section" style="padding-top:1rem;">
+<div class="tip-box" style="font-size:.95rem;">
+<div class="tip-box__title"><span>一言以蔽之</span></div>
+<p><span>在每日笔记中补充的方法主要有3。 <strong>1Obsidian 1.11以后的应用程序内置捕获动作</strong>（不用打开Obsidian就可以补充。 设置最少），<strong>2快捷键+<code>obsidian://</code> URL方案</strong>（虽然自由度很高，但每次执行Obsidian都会在前面打开，URL的组装需要自己维护），<strong>3直接写入保管库文件夹的应用程序</strong>（不取出iPhone，即使从声音或Apple Watch也能收到）。  <strong>如果“不打开应用程序”就足够了1，如果要求“不取出iPhone”的话是3</strong>。 而且，无法进入追记时的原因，与路径不分，<strong>日期格式和保存目的地文件夹的不一致</strong>占大部分。 </span></p>
+</div>
+</section>
+<!-- Define "without opening" -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="01" id="capture-section-1"> <span>“不打开iPhone”有3阶段</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span>这句话根据作者的不同，所指的范围也不同。 如果先决定自己想要哪个级别，就会唯一决定应该选择的路线。 很多解说报道都写着“打不开”是指等级1，<strong>从口袋里拿出iPhone的动作本身仍然存在</strong>。 </span> </p>
+<div class="lv">
+<div class="lv__n">Lv.1</div>
+<div>
+<h3 class="lv__t"><span>不打开Obsidian</span></h3>
+<p class="lv__d"><span>iPhone是拿在手里操作的，但是可以省去打开Obsidian本体寻找笔记本的工序。 可以从快捷图标或小部件开始输入。 <strong>反映到其他终端的时间，取决于使用的同步方法和通信状态。 </strong></span></p>
+</div>
+</div>
+<div class="lv">
+<div class="lv__n">Lv.2</div>
+<div>
+<h3 class="lv__t"><span>不打开应用程序</span></h3>
+<p class="lv__d"><span>iPhone拿起来，从动作按钮和背面点击等<strong>物理入口</strong>直接开始输入。 因为没有时间看着主页寻找图标，所以“从想到开始写”的时间缩短了几秒。 能否从锁屏启动是这里的分界线。 </span></p>
+</div>
+</div>
+<div class="lv">
+<div class="lv__n">Lv.3</div>
+<div>
+<h3 class="lv__t"><span>不取出iPhone</span></h3>
+<p class="lv__d"><span>从声音（Siri・AirPods）或Apple Watch开始输入，iPhone放在口袋里。 行走中、开车前后、烹饪中、就寝前等，<strong>根本看不到画面的场景</strong>是唯一能发挥作用的水平。 走到这一步，可以捕捉的场景数量本身就变了。 </span></p>
+</div>
+</div>
+</div></section>
+<!-- Route comparison -->
+<section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="02" id="capture-section-2"> <span>比较3个路线</span> </h2></div><div class="ce-chapter__body">
+
+<div aria-labelledby="capture-section-2" class="ce-table-scroll" role="region" tabindex="0">
+<table class="rt-table">
+<thead>
+<tr>
+<th scope="col"><span>项目</span></th>
+<th scope="col"><span>1 内置捕获动作</span></th>
+<th scope="col"><span>2 快捷键+URL方案</span></th>
+<th scope="col"><span>3 直接写到保管库的应用程序</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row"><span>可以达到的水平</span></th>
+<td data-label="1 内置动作">Lv.1〜2</td>
+<td data-label="2 URL方案">Lv.1〜2</td>
+<td data-label="3 直接写"><span class="mk-yes">Lv.3</span></td>
+</tr>
+<tr>
+<th scope="row"><span>Obsidian打开吗</span></th>
+<td data-label="1 内置动作"><span class="mk-yes">打不开</span></td>
+<td data-label="2 URL方案"><span class="mk-no">每次打开</span></td>
+<td data-label="3 直接写"><span class="mk-yes">打不开</span></td>
+</tr>
+<tr>
+<th scope="row"><span>必要的准备</span></th>
+<td data-label="1 内置动作"><span>放置动作1</span></td>
+<td data-label="2 URL方案"><span>URL组装・日期格式・编码</span></td>
+<td data-label="3 直接写"><span>选择一次文件夹</span></td>
+</tr>
+<tr>
+<th scope="row"><span>只用声音完成</span></th>
+<td data-label="1 内置动作"><span class="mk-part">△</span> <span>Siri对应</span></td>
+<td data-label="2 URL方案"><span class="mk-no">×</span> <span>应用程序打开</span></td>
+<td data-label="3 直接写"><span class="mk-yes">◎</span></td>
+</tr>
+<tr>
+<th scope="row"><span>从Apple Watch</span></th>
+<td data-label="1 内置动作"><span class="mk-no">×</span></td>
+<td data-label="2 URL方案"><span class="mk-no">×</span></td>
+<td data-label="3 直接写"><span class="mk-part">△</span> <span>仅限于有Watch应用程序的</span></td>
+</tr>
+<tr>
+<th scope="row"><span>可以在圈外写吗</span></th>
+<td data-label="1 内置动作"><span class="mk-yes">◎</span> <span>如果保管库在终端</span></td>
+<td data-label="2 URL方案"><span class="mk-yes">◎</span> <span>同上</span></td>
+<td data-label="3 直接写"><span class="mk-yes">◎</span></td>
+</tr>
+<tr>
+<th scope="row"><span>易碎性</span></th>
+<td data-label="1 内置动作"><span>低</span></td>
+<td data-label="2 URL方案"><span class="mk-no">高</span> <span>安静地坏掉</span></td>
+<td data-label="3 直接写"><span>低</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="reason-cards">
+<div class="reason-card">
+<div class="reason-card__title">① <span>内置捕获动作</span></div>
+<div class="reason-card__desc"><span>Obsidian移动1.11以后添加的快捷动作。 对笔记的补充（截图）是<strong>不要把应用程序放在前面</strong>可以执行，不需要自己组装URL。 首先尝试这个是最短的。 如果少于1.11，请用App Store更新。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">② <span>快捷键+URL方案</span></div>
+<div class="reason-card__desc"><span>通过传统方法，可以进行精细的控制，但每次执行时Obsidian都会在前面打开。 需要自己维持日期格式、文件夹、URL编码，只要更改保管库名称就会安静地损坏。 现在也有效的是，如果想通过内置动作进行无法到达的操作。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">③ <span>直接写入保管库的应用程序</span></div>
+<div class="reason-card__desc"><span>捕获专用应用程序，直接在保管库文件夹中追加。 不用自制捷径，所以不容易坏掉，也有声音和Apple Watch作为入口的东西。<strong>实际上只有这条路线才能到达Lv.3</strong>。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">🧭 <span>选择方法的基准</span></div>
+<div class="reason-card__desc"><span>如果以桌子前的截图为中心的话，1就足够了。 移动中、工作中想到的人越多，如果不做3的话，最终会洒出来。 请将2视为“1中无论如何都有不足的操作”时的选择。</span></div>
+</div>
+</div>
+</div></section>
+<!-- Why appends go missing -->
+<section class="lp-section ce-chapter" id="missing"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="03" id="capture-section-3"> <span>不进入每日笔记 — 3大原因</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span>无论哪条路线都共同走的就是这里。 而且<strong>在大部分情况下，写入本身是成功的</strong>——只是，它和你看到的笔记不同，只是放在了不同的文件中。 不会出现错误，是几周后才发现的棘手症状。 </span> </p>
+<div class="cz">
+<div class="cz__n"><span>原因 1 — 最频繁</span></div>
+<h3 class="cz__t"><span>日期格式不一致</span></h3>
+<p><span>Obsidian的每日笔记默认为<code>YYYY-MM-DD</code>，但将其改为<code>YYYY/MM/DD</code>或<code>YYYYMMDD</code>，或者包含星期的格式的人不少。 如果发送方按既定状态进行组装，<strong>会瞄准不存在的文件名新建</strong>。 </span></p>
+<ol>
+<li><span>Obsidian的设置→打开每日笔记。 </span></li>
+<li><span>保留“日期格式”中显示的格式。 </span></li>
+<li><span>快捷键侧的日期格式，与<strong>一字不差</strong>相同。 </span></li>
+</ol>
+</div>
+<div class="cz">
+<div class="cz__n"><span>原因 2</span></div>
+<h3 class="cz__t"><span>保存文件夹缺失</span></h3>
+<p><span>每日笔记放在<code>日記/</code>或<code>Journal/</code>等文件夹里，但发送方只传递文件名的情况。 结果，在保管库的路线正下方制作了同名笔记本，从Obsidian的日历看不到的地方每天增加1张。 </span></p>
+<p><span>处理方式是传递包含<strong>文件夹的路径</strong>而不是文件名。 已经增加的笔记本，在保管库中搜索文件名就能找到。 里面的东西很多，请在删除之前确认。 </span></p>
+</div>
+<div class="cz">
+<div class="cz__n"><span>原因 3</span></div>
+<h3 class="cz__t"><span>当天的每日笔记还不存在</span></h3>
+<p><span>如果只进行“对现有笔记的补充”的设置，那天还没有打开Obsidian的早上第一的笔记就会失去去向。“ 从白天开始活动，但只有早上才会失败”这种症状就是这个。 使用模板时，自动创建的笔记中可能会出现模板不对的情况。 </span></p><p><span>在桌面上从日期和周号制作笔记时，请参考<a href="/zh/obsidian/daily-note-plugins/">确认用Linux制作、保存、重新显示的Calendar/Periodic Notes的设定例子</a>。 </span></p>
+<p><span>如果没有笔记的话，选择制作后再补充的路径，或者切换到不依赖日期的<strong>固定的Inbox笔记</strong>收集的运用，这个原因就会从根本上消失。 </span></p>
+<p><span>Templater的记法保持原样时，请确认<a href="/zh/obsidian/plugins/templater/#not-applied">Templater的每日笔记设置和不适用的条件</a>。 与文件的制作、补充地址的问题分开调查。 </span></p>
+</div>
+<div class="tip-box">
+<div class="tip-box__title"><span>如果犹豫不决，从Inbox笔记开始</span></div>
+<p><span>在运用尚未确定的时候，比起每日笔记，收集到<strong>固定的1文件（Inbox笔记）</strong>比较安全。 因为不依赖于日期格式和文件夹设置，所以上面的3主要原因在结构上不会发生。 即使想用时间序列的日志切换到每日笔记，之前的记录也不会丢失。 </span></p>
+</div>
+</div></section>
+<!-- Reaching Lv3 -->
+<section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="04" id="capture-section-4"> <span>达到等级3 — 从声音和Apple Watch开始</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span>SimpleMemo是对应于路线3的应用程序。 发送的备忘录会发送到自己的邮件中，如果打开Obsidian连接，就会同时在保管库文件夹的每日笔记中，不打开<strong>Obsidian</strong>1行逐行添加（邮件和保管库是不同的路径）。 <strong>社区插件和快捷键的自制都不需要</strong>，设置只需选择一次保管库文件夹即可。 </span> </p>
+<pre aria-label="Markdown的描述例子" class="note-sample" role="region" tabindex="0"><code># 2026-08-11
+
+- 09:14 駅で思いついた記事の見出し案
+- 12:38 ランチで聞いた競合の新機能をあとで調べる
+- 21:05 読み終えた本の引用メモ</code></pre>
+<div class="reason-cards">
+<div class="reason-card">
+<div class="reason-card__title">🗣️ <span>用声音补充</span></div>
+<div class="reason-card__desc"><span>「<span lang="ja" translate="no">Hey Siri、シンプルメモで残す</span>”说话，Siri的“要记什么？” 回答本文的话，可以通过App Intents不打开应用程序就交给发送处理。 戴着AirPods的话，即使把iPhone放在口袋里也可以说话。 根据锁定中的设置和终端状态，需要解除或操作画面，请在每日笔记中确认最初的1件。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">⌚ <span>从Apple Watch开始补充</span></div>
+<div class="reason-card__desc"><span>打开Watch应用程序后，输入画面会自动打开，用语音输入说话，只需按下“完成”即可。 写入由配对中的iPhone负责（不是Watch直接写入保管库）。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">✈️ <span>在圈外也会被补充</span></div>
+<div class="reason-card__desc"><span>因为写入保管库文件夹是本地处理的，所以即使没有通信也会当场补充。 邮件发送方在加密的发送队列中等待，回到线上后会自动发送。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">📬 <span>邮件中也留下了同样的内容</span></div>
+<div class="reason-card__desc"><span>即使设置了追记地址错误，同样的备忘录也会留在自己的邮件中。“ 安静地消失，几周后才注意到”，这种类型特有的事故很难发生。</span></div>
+</div>
+</div>
+<ol class="steps-list">
+<li><strong><span>打开Obsidian连接</span></strong><br/><span>打开设置画面的“Obsidian”栏中的“Obsidian 连接”。 </span></li>
+<li><strong><span>选择保管库文件夹</span></strong><br/><span>iCloud Drive或选择“这个iPhone内”中的Obsidian保管库文件夹。 应用程序只保存那个文件夹的访问权限。 </span></li>
+<li><strong><span>选择追加目的地</span></strong><br/><span>选择“每日笔记”或“指定笔记”（默认笔记名为Inbox）。 使用每日笔记时，请确认Obsidian的文件名是<code>yyyy-MM-dd.md</code>。 </span></li>
+<li><strong><span>剩下的就是发送</span></strong><br/><span>以后，发送的备忘录会以<code>- HH:mm メモ</code>的形式自动补充。 因为是iCloud同步，所以可能需要几秒钟才能反映在其他终端的Obsidian上。 </span></li>
+</ol>
+<div class="tip-box">
+<div class="tip-box__title"><span>准确的地方</span></div>
+<p><span>如果自定义了每日笔记的保存文件夹或命名，可能会偏离补充地址。 在这种情况下，选择“指定的笔记”肯定会到达1文件。 目标文件夹在iCloud Drive或“这个iPhone内”，需要从文件App访问。 Obsidian Sync专用的保管库有时会不出现文件夹选择，在这种情况下会回退到URL方案方式（发送时Obsidian瞬间打开并补充）。 本应用程序不是Obsidian官方的应用程序、插件，而是YURIKA, K.K.开发的独立应用程序。  Obsidian是Dynalist Inc. 的商标。 </span></p>
+</div>
+<div class="cta-box">
+<div class="cta-box__title"><span>在当天的笔记本上，只需添加1行的功夫</span></div>
+<p class="cta-box__desc"><span>下载免费。 Obsidian连接的设置，只需选择一次保管库文件夹。 </span></p>
+<a aria-label="从App Store下载" class="app-store-badge" data-cta-cluster="obsidian" data-cta-placement="mid" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"> <img alt="从App Store下载" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="109"/> </a>
+</div>
+</div></section>
+<!-- FAQ -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="05" id="capture-section-5"> <span>常见问题</span> </h2></div><div class="ce-chapter__body">
+
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span>应该是补充的，但是笔记本上什么都没有增加</span></summary>
+<div class="faq-answer"><span>在很多情况下，写入本身是成功的，并且与你所看到的笔记不同的文件。 大部分原因是日期格式或保存文件夹不一致。 Obsidian的设置→请在每日笔记中确认“日期格式”和“新文件的制作地点”，与发送方逐字一致。 如果用文件名搜索整个保管库，可以确认无意中的同名笔记是否增加了。</span></div>
+</details>
+</div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span>当天的每日笔记还没有的时候会怎么样呢？ </span></summary>
+<div class="faq-answer"><span>根据路线不同而变化。 如果是新建文件后补充的方式的话，早上第一个笔记就能制作当天的笔记。 在只对现有笔记进行补充的方式，在没有目标文件的时候会失败，或者在无意的地方创建新文件。 使用模板时，请注意自动创建的笔记中可能不适用模板。</span></div>
+</details>
+</div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span>每日笔记本和Inbox笔记本，应该收集到哪个？ </span></summary>
+<div class="faq-answer"><span>1如果想把一天的流程作为时间序列的日志留下的话，就用每日笔记，如果以后想作为整理分类的收件箱使用的话，固定的Inbox笔记就合适。 运用不稳定的时候，Inbox笔记本比较安全。 因为不依赖于日期，所以不会因为日期格式不一致而发生追记迷路的事故。 即使习惯了之后切换到每日笔记，过去的记录也不会丢失。</span></div>
+</details>
+</div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span>可以指定补充位置吗（特定标题下等）</span></summary>
+<div class="faq-answer"><span>取决于路线。 通常可以选择在笔记的末尾补充或插入到开头的方式，如果想要插入特定标题的正下方，则需要具有该功能的专用快捷操作或社区插件。 在很多用途中，将带有时间的1行堆放在末尾，整理的话以后在Obsidian那边进行的话更不容易破产。</span></div>
+</details>
+</div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span>虽然被追加了，但是没有反映在其他终端的Obsidian上</span></summary>
+<div class="faq-answer"><span>在iCloud Drive上同步时，写入本身会立即进行，但可能需要几秒钟到数十秒才能反映在其他终端上。 首先用iPhone一侧的Obsidian打开笔记，确认是否反映在那里。 在iPhone上可以看到，在其他终端上看不到的话，同步延迟，在iPhone上也看不到的话，追记目的地本身就偏离了。 这种延迟和2台同时编辑时的冲突是另一种现象。 与iCloud Drive以外的同步方法的区别是<a href="/zh/obsidian/sync/">同步方法总结</a>进行比较。</span></div>
+</details>
+</div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span>可以不插入插件在每日笔记中补充吗？ </span></summary>
+<div class="faq-answer"><span>可以。 这篇报道的3路线都不需要社区插件。 在SimpleMemo的情况下，保管库只是作为文件夹（iCloud Drive或“这个iPhone内”）处理，应用程序将Markdown文件直接写入那里。 也不需要改变Obsidian方面的设置。</span></div>
+</details>
+</div>
+</div></section>
+<!-- Internal Links -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="06" id="capture-section-6"> <span>相关页面</span> </h2></div><div class="ce-chapter__body">
+
+<div class="internal-links">
+<a href="/zh/obsidian/"><span>Obsidian合作详情</span></a>
+<a href="/zh/obsidian/sync/"><span>同步方法总结（iCloud/官方Sync/Git/Syncthing）</span></a>
+<a href="/zh/obsidian/sync/icloud/"><span>用iCloud同步的设置步骤（iPhone×Mac）</span></a>
+<a href="/zh/obsidian/shortcuts-not-working/"><span>快捷指令不动的时候</span></a>
+<a href="/zh/obsidian/apple-watch-not-working/"><span>不能从Apple Watch发送的理由</span></a>
+<a href="/zh/blog/obsidian-iphone-memo"><span>从iPhone发送到Obsidian的方法6选</span></a>
+<a href="/zh/blog/obsidian-voice-input"><span>Obsidian语音输入的方法4选</span></a>
+<a href="/zh/obsidian/getting-started/"><span>Obsidian的开始方法（实际画面指南）</span></a>
+<a href="/zh/obsidian/compare/logseq/"><span>Obsidian vs Logseq 比较验证</span></a>
+<a href="/zh/siri/"><span>用Siri和AirPods进行语音备忘录</span></a>
+<a href="/zh/methods/second-brain/"><span>第二脑</span></a>
+<a href="/zh/faq"><span>常见问题</span></a>
+</div>
+</div></section>
+<section class="references ce-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);"><div class="ce-chapter__head"><h2 data-ce-number="07" id="capture-section-7" style="font-size:1.1rem;margin-bottom:1rem;"> <span>参考文献</span> </h2></div><div class="ce-chapter__body">
+
+
+<ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+<li><a href="https://help.obsidian.md/" rel="noopener" style="color:var(--accent);" target="_blank">Obsidian Help</a> — <span>关于每日笔记的日期格式、保存地址、模板的官方帮助</span></li>
+<li><a href="https://obsidian.md/changelog/2026-01-12-mobile-v1.11.4/" rel="noopener" style="color:var(--accent);" target="_blank">Obsidian 1.11 Mobile changelog</a> — <span>增加了不打开应用程序就能在笔记中补充的快捷动作的发布</span></li>
+<li><a href="https://help.obsidian.md/Extending+Obsidian/Obsidian+URI" rel="noopener" style="color:var(--accent);" target="_blank">Obsidian Help — Obsidian URI</a> — <span>URL方案方式可以使用的动作和参数的官方文档</span></li>
+<li><a href="https://support.apple.com/ja-jp/guide/shortcuts/welcome/ios" rel="noopener" style="color:var(--accent);" target="_blank">快捷键用户指南（Apple）</a> — <span>关于动作、自动化、日期格式指定的官方指南</span></li>
+<li><a data-cta-cluster="obsidian" data-cta-placement="reference" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948" rel="noopener" style="color:var(--accent);" target="_blank">SimpleMemo — App Store</a> — <span>App Store的下载页面</span></li>
+</ul>
+
+</div></section><aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="explore" href="/zh/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>接下来阅读</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>通过Obsidian合作，创建保存备忘录的地方</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>在iPhone中设置合作和保存地址，发送的备忘录也可以留在Obsidian中。 </span> </span> </a>
+</aside><section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+
+<h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>相关内容</span> </h3>
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/zh/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>方法一览</span></a></li>
+<li><a href="/zh/use-cases/journaling/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>日报</span></a></li>
+<li><a href="/zh/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>博客文章一览</span></a></li>
+<li><a href="/zh/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>常见问题</span></a></li>
+</ul>
+
+</section><aside class="" style="margin:1rem auto 2rem"><p><span>如果不知道该在日期笔记本上写什么，请转到<a href="/zh/obsidian/journaling/">日记记录示例和手动模板</a>。 与追记的设定分开，介绍简短的记录和回顾方法。 </span></p></aside></div></div>
+
+<!-- SEO: Auto-generated related content links -->
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+
+
+
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hans" dir="ltr"><a class="site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">记下一点想法，迈出下一步。</p><p class="site-footer-description">从 iPhone 向 Obsidian 和电子邮件发送笔记。</p></div></div><!-- /site-chrome:intro -->
+<div class="container">
+<nav aria-label="页脚导航" class="footer__nav">
+<div class="footer__col">
+<p class="footer__col-title">产品</p>
+<a class="footer__link" href="/zh/download/">下载</a>
+<a class="footer__link" href="/zh/">首页</a>
+<a class="footer__link" href="/zh/apple-watch/">Apple Watch</a>
+<a class="footer__link" href="/zh/obsidian/">Obsidian 集成</a>
+<a class="footer__link" href="/zh/use-cases/">使用场景</a>
+<a class="footer__link" href="/zh/guides/">使用指南</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">比较与迁移</p>
+<a class="footer__link" href="/zh/note-to-email/">将笔记发送到邮箱</a>
+<a class="footer__link" href="/zh/vs/">对比</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">支持</p>
+<a class="footer__link" href="/zh/roadmap/">公开路线图</a>
+<a class="footer__link" href="/zh/devlog/">开发日志</a>
+<a class="footer__link" href="/zh/about/">关于开发者</a>
+<a class="footer__link" href="/zh/faq">常见问题</a>
+<a class="footer__link" href="/zh/privacy">隐私</a>
+<a class="footer__link" href="/zh/contact">联系我们</a>
+</div>
+</nav>
+<p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 运营：YURIKA, K.K.</p>
+</div>
+</footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

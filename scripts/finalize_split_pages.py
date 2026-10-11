@@ -244,7 +244,24 @@ def finish_faq(text: str, page_url: str) -> str:
     return text
 
 
-def finish_breadcrumbs(text: str, root: Path) -> str:
+def rewrite_jsonld(text: str, localize) -> str:
+    """Apply `localize` (in-place) to every JSON-LD block; re-serialize only blocks it changed."""
+    def rewrite(match):
+        payload = json.loads(match[1])
+        before = json.dumps(payload, ensure_ascii=False)
+        localize(payload)
+        if json.dumps(payload, ensure_ascii=False) == before:
+            return match[0]
+        return match[0].replace(match[1], json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+    return JSONLD_RE.sub(rewrite, text)
+
+
+def finish_breadcrumbs(text: str, root: Path, documents: dict[str, str] | None = None) -> str:
+    # Legacy bilingual documents retain their editorial breadcrumb labels, as
+    # they do in finalize(). Keep the translation builder on the same rule.
+    if re.search(r'<script[^>]+src=["\'][^"\']*/js/lang\.js', text):
+        return text
+    documents = documents or {}
     def localize(value, breadcrumb=False):
         if isinstance(value, list):
             for item in value:
@@ -257,9 +274,9 @@ def finish_breadcrumbs(text: str, root: Path) -> str:
                 if url.netloc in ("", "simplememofast.com") and url.path.startswith("/en/"):
                     rel = url.path.lstrip("/") + ("index.html" if url.path.endswith("/") else ".html")
                     path = root / rel
-                    if path.is_file():
+                    if rel in documents or path.is_file():
                         reader = MarkupReader()
-                        reader.feed(path.read_text(encoding="utf-8"))
+                        reader.feed(documents[rel] if rel in documents else path.read_text(encoding="utf-8"))
                         heading = " ".join(" ".join(reader.heading).split())
                         if heading:
                             value["item"] = target
@@ -268,14 +285,7 @@ def finish_breadcrumbs(text: str, root: Path) -> str:
                 if isinstance(item, (dict, list)):
                     localize(item, value.get("@type") == "BreadcrumbList" and key == "itemListElement")
 
-    def rewrite(match):
-        payload = json.loads(match[1])
-        before = json.dumps(payload, ensure_ascii=False)
-        localize(payload)
-        if json.dumps(payload, ensure_ascii=False) == before:
-            return match[0]
-        return match[0].replace(match[1], json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
-    return JSONLD_RE.sub(rewrite, text)
+    return rewrite_jsonld(text, localize)
 
 
 def finish_schema_names(text: str, root: Path) -> str:
@@ -307,14 +317,7 @@ def finish_schema_names(text: str, root: Path) -> str:
                 if isinstance(row, (dict, list)):
                     localize(row)
 
-    def rewrite(match):
-        payload = json.loads(match[1])
-        before = json.dumps(payload, ensure_ascii=False)
-        localize(payload)
-        if json.dumps(payload, ensure_ascii=False) == before:
-            return match[0]
-        return match[0].replace(match[1], json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
-    return JSONLD_RE.sub(rewrite, text)
+    return rewrite_jsonld(text, localize)
 
 
 def finish_product_schema(text: str, rel: str) -> str:

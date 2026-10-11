@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Geliştirme Günlüğü | SimpleMemo</title>
+  <meta name="description" content="SimpleMemo geliştirme günlüğü. Bu, Captio deneyimini yeniden üretmek için birikmiş bir teknik karar verme kaydıdır. UIKit&#x27;i seçme nedenlerini, Outbox mimarisini, Relay API tasarımını, önce gizlilik tasarımını ve daha fazlasını inceleyeceğiz.">
+  <meta name="theme-color" content="#070b14">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- OGP -->
+  <meta property="og:title" content="Geliştirme Günlüğü | SimpleMemo">
+  <meta property="og:description" content="SimpleMemo geliştirme günlüğü. Captio deneyimini yeniden üretmek için UIKit, Outbox mimarisi ve gizlilik tasarımı gibi teknik kararların kayıtları.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://simplememofast.com/tr/devlog/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Geliştirme Günlüğü | SimpleMemo">
+  <meta name="twitter:description" content="SimpleMemo geliştirme günlüğü. Captio deneyimini yeniden üretmek için UIKit, Outbox mimarisi ve gizlilik tasarımı gibi teknik kararların kayıtları.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog.png">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/tr/devlog/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: CollectionPage + BreadcrumbList (moved to top of head for consistency) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "@id": "https://simplememofast.com/tr/devlog/#webpage",
+  "inLanguage": "tr",
+  "name": "Geliştirme Günlüğü - SimpleMemo",
+  "description": "SimpleMemo geliştirme günlüğü. Captio'in teknik karar verme ve deneyim yeniden üretimi kaydı.",
+  "url": "https://simplememofast.com/tr/devlog/",
+  "hasPart": [
+    {
+      "@type": "Article",
+      "inLanguage": "tr",
+      "image": "https://simplememofast.com/assets/img/og/devlog.png",
+      "headline": "[Geliştirme Günlüğü Günü1] Captio'i o kadar çok seviyorum ki o deneyimi tekrar yaratmak istedim",
+      "url": "https://simplememofast.com/tr/devlog/day1"
+    },
+    {
+      "@type": "Article",
+      "inLanguage": "tr",
+      "image": "https://simplememofast.com/assets/img/og/devlog.png",
+      "headline": "UIKit vs SwiftUI: Başlangıç hızı için seçim",
+      "url": "https://simplememofast.com/tr/devlog/uikit-vs-swiftui"
+    },
+    {
+      "@type": "Article",
+      "inLanguage": "tr",
+      "image": "https://simplememofast.com/assets/img/og/devlog.png",
+      "headline": "Outbox mimarisi: dökülmeyi önlemek için tasarım",
+      "url": "https://simplememofast.com/tr/devlog/outbox-architecture"
+    },
+    {
+      "@type": "Article",
+      "inLanguage": "tr",
+      "image": "https://simplememofast.com/assets/img/og/devlog.png",
+      "headline": "Röle API: Cloudflare Çalışanları ile bir e-posta dağıtım üssü oluşturun",
+      "url": "https://simplememofast.com/tr/devlog/relay-api-design"
+    },
+    {
+      "@type": "Article",
+      "inLanguage": "tr",
+      "image": "https://simplememofast.com/assets/img/og/devlog.png",
+      "headline": "Önce Gizlilik Tasarımı: Paranoyak Taahhüt",
+      "url": "https://simplememofast.com/tr/devlog/privacy-first-design"
+    }
+  ],
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Ana sayfa",
+        "item": "https://simplememofast.com/tr/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Geliştirme Günlüğü",
+        "item": "https://simplememofast.com/tr/devlog/"
+      }
+    ]
+  },
+  "isPartOf": {
+    "@id": "https://simplememofast.com/tr/#website"
+  }
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container { display: flex; justify-content: flex-end; padding: 1.25rem 0; }
+    .lang-switcher { display: inline-flex; background: rgba(18, 26, 46, 0.95); border: 1px solid rgba(82, 160, 255, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .lang-switcher__btn { background: transparent; border: none; color: #c9d4ec; padding: 0.75rem 1.1rem;
+      min-height: 48px; border-radius: 19px; cursor: pointer; font-size: 0.8rem; font-weight: 400; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.02em; }
+    .lang-switcher__btn:hover { color: #f2f6ff; }
+    .lang-switcher__btn:focus-visible { outline: 2px solid #4da3ff; outline-offset: 2px; }
+    .lang-switcher__btn.active { background: rgba(82, 160, 255, 0.25); border: 1px solid rgba(82, 160, 255, 0.2); color: #fff; box-shadow: 0 0 12px rgba(82, 160, 255, 0.1); }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+    @media (prefers-reduced-motion: reduce) { .lang-switcher__btn { transition: none; } }
+
+    .devlog-intro { text-align: center; margin-bottom: 40px; }
+    .devlog-intro p { color: var(--text-secondary); line-height: 1.8; font-size: 0.95rem; }
+    .article-list { display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px; }
+    .article-card { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s; text-decoration: none; color: inherit; display: block; box-shadow: var(--shadow-card); }
+    .article-card:hover { border-color: var(--border-highlight); box-shadow: var(--shadow-lift); transform: translateY(-2px); }
+    .article-card__date { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 700; }
+    .article-card__title { font-size: 1.15rem; font-weight: 800; color: var(--text); margin-bottom: 10px; line-height: 1.5; letter-spacing: -0.01em; }
+    .article-card__excerpt { font-size: 0.92rem; color: var(--text-secondary); line-height: 1.75; }
+    .article-card__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+    .article-card__tag { font-size: 0.72rem; background: rgba(82, 160, 255, 0.10); border: 1px solid rgba(82, 160, 255, 0.25); border-radius: 12px; padding: 3px 10px; color: var(--accent); font-weight: 700; }
+    .topic-section { margin-bottom: 50px; }
+    .topic-section h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 18px; color: var(--text); letter-spacing: -0.01em; }
+    .topic-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 600px) { .topic-grid { grid-template-columns: 1fr 1fr; } }
+    .topic-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 18px; text-decoration: none; color: inherit; transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s; display: block; }
+    .topic-card:hover { border-color: var(--border-highlight); box-shadow: var(--shadow-soft); transform: translateY(-1px); background: var(--surface-elevated); }
+    .topic-card__title { font-size: 0.98rem; font-weight: 800; color: var(--text); margin-bottom: 6px; letter-spacing: -0.005em; }
+    .topic-card__desc { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.7; }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Ana gezinme" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/tr/guides/">Kılavuzlar</a><a href="/tr/use-cases/">Kullanım örnekleri</a><a href="/tr/vs/">Karşılaştır</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/tr/guides/">Kılavuzlar</a></li>
+        <li><a href="/tr/use-cases/">Kullanım örnekleri</a></li>
+        <li><a href="/tr/vs/">Karşılaştır</a></li>
+        <li><a href="/tr/methods/"><span>Yöntemler</span></a></li>
+        <li><a href="/tr/blog/"><span>Blog</span></a></li>
+        <li><a href="/tr/glossary/"><span>Sözlük</span></a></li>
+        <li><a href="/tr/faq">Sık sorulan sorular</a></li>
+        <li><a href="/tr/about/">Geliştirici hakkında</a></li>
+        <li><a href="/tr/devlog/">Geliştirme günlüğü</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>İndir</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Türkçe · Dil seçin"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>TR</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="tr" dir="ltr"><p class="site-language-title">Dil seçin</p><div class="site-language-grid"><a href="/devlog/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/devlog/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/devlog/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/devlog/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/devlog/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/devlog/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/devlog/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/devlog/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/devlog/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="tr" aria-current="page"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true">✓</span></span></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">İndir</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menü"><span>Menü</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title sd-title"> <span>Geliştirme günlüğü</span> </h1>
+
+      <div class="devlog-intro">
+        <div>
+          <p>Captio adlı uygulamayı o kadar çok sevdim ki bu deneyimi tekrar yaşamak istedim. <br> "SimpleMemo"nin geliştirme süreci teknik karar verme ile birlikte kaydedilmiştir.</p>
+          <p>Bundan sonra ne yapmalı <a href="/tr/roadmap/">Bundan sonra ne yapmalı</a>'de özetlenmiştir. Öncelikleri belirlemek için bir anket de var.</p>
+        </div>
+
+      </div>
+
+      <!-- Article List -->
+      <div>
+        <div class="article-list">
+          <a href="/tr/devlog/day1" class="article-card">
+            <div class="article-card__date">2026 yıl 2 ay 13 gün</div>
+            <div class="article-card__title">[Day1] Captio'i o kadar çok seviyorum ki "o deneyimi" tekrar yapmak istedim</div>
+            <div class="article-card__excerpt">Dökülmeleri önlemek için tek dokunuşla iletim ve tasarım - Captio deneyimini söken ve UIKit, Outbox mimarisi, Relay API ve gizlilik tasarımından tüm teknik yargıları kaydeden ilk geliştirme günlüğü.</div>
+            <div class="article-card__tags">
+              <span class="article-card__tag">UIKit</span>
+              <span class="article-card__tag">Outbox</span>
+              <span class="article-card__tag">Cloudflare Çalışanları</span>
+              <span class="article-card__tag">Gizlilik</span>
+              <span class="article-card__tag">Swift</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Topic Deep Dives -->
+      <div class="topic-section">
+        <h2 id="reading-01" data-ce-number="01"> <span>Teknik konuların derinlemesine kazılması</span> </h2>
+        <div>
+          <div class="topic-grid">
+            <a href="/tr/devlog/uikit-vs-swiftui" class="topic-card">
+              <div class="topic-card__title">UIKit vs SwiftUI: Başlangıç hızı için seçim</div>
+              <div class="topic-card__desc">2026'de UIKit'i seçmemin nedeni. Time-to-Text 500ms veya daha azını hedefleyen mimari tasarım.</div>
+            </a>
+            <a href="/tr/devlog/outbox-architecture" class="topic-card">
+              <div class="topic-card__title">Outbox mimarisi: dökülmeyi önlemek için tasarım</div>
+              <div class="topic-card__desc">Kullanıcı arayüzü gönderilir gönderilmez temizlenir, ancak gönderilmeyen mesaj terminalde kalır ve yeniden gönderilir. AES-GCM şifreleme Outbox modelinin tam resmi.</div>
+            </a>
+            <a href="/tr/devlog/relay-api-design" class="topic-card">
+              <div class="topic-card__title">Röle API: Cloudflare Çalışanları ile bir e-posta dağıtım üssü oluşturun</div>
+              <div class="topic-card__desc">Posta kutusunda OAuth işbirliğine güvenmeden gönderme. Kenarda hareket eden API rölesinden (Cloudflare Workers) Resend ile gönderin.</div>
+            </a>
+            <a href="/tr/devlog/privacy-first-design" class="topic-card">
+              <div class="topic-card__title">Önce Gizlilik Tasarımı: Paranoyak Taahhüt</div>
+              <div class="topic-card__desc">Terminal içi şifreleme, iletişim önbelleği, günlükler ve kullanım analizinin kapsamı. Uygulama değiştirici ile notları gizlemeyen mevcut spesifikasyon da açıklanmıştır.</div>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/tr/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>Sonraki okuma</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Obsidian işbirliğiyle notları saklamak için bir yer oluşturun</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span> Bağlantıyı iPhone'de ayarlar ve hedefi kaydederseniz gönderilen notu Obsidian'ye de bırakabilirsiniz. </span> </span> </a>
+  </aside>
+
+  </main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="tr" dir="ltr"><a class="site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Küçük bir not. Bir sonraki adım.</p><p class="site-footer-description">iPhone'unuzdan Obsidian'a ve e-postaya not gönderin.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="Alt bilgi gezinmesi">
+      <div class="footer__col">
+        <p class="footer__col-title">Ürün</p>
+        <a href="/tr/download/" class="footer__link">İndir</a>
+        <a href="/tr/" class="footer__link">Ana sayfa</a>
+        <a href="/tr/how-to/" class="footer__link"><span>Kılavuzlar</span> </a>
+        <a href="/tr/templates/" class="footer__link"><span>Şablonlar</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Karşılaştırmalar ve geçiş</p>
+        <a href="/tr/captio/" class="footer__link"><span>Captio yöntemi</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Yazılar</p>
+        <a href="/tr/devlog/" class="footer__link">Geliştirme günlüğü</a>
+        <a href="/tr/autopilot/" class="footer__link"><span>Otonom uygulama yönetimi</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Destek</p>
+        <a href="/tr/roadmap/" class="footer__link">Açık yol haritası</a>
+        <a href="/tr/about/" class="footer__link">Geliştirici hakkında</a>
+        <a href="/tr/terms" class="footer__link"><span>Kullanım koşulları</span> </a>
+        <a href="/tr/privacy" class="footer__link">Gizlilik</a>
+        <a href="/tr/contact" class="footer__link">İletişim</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / İşleten: YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

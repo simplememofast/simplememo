@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/methods/zettelkasten/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>제텔카스텐 × 메일 메모 — SimpleMemo로 Zettelkasten을 실천</title>
+  <meta name="description" content="Zettel Casten (Zettelkasten)의 프리팅 노트를 메일 메모로 고속 캡처하는 방법을 설명합니다. 탭에서 0.4초(웜 실행 실측)로 쓰기 시작하고 플래시를 기록하여 영구 노트로 발전시키는 실전 가이드. 절차와 계속하는 요령, 넘어지기 쉬운 포인트까지 구체적인 예시와 함께 설명합니다.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="제텔카스텐 × 메일 메모 — SimpleMemo로 Zettelkasten을 실천">
+  <meta property="og:description" content="체텔카스텐의 프리팅 노트에 메일 메모를 활용합니다. 플래시를 즉시 기록하고 영구 노트로 발전시키는 실전 가이드. HowTo 포함.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-05T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/ko/methods/zettelkasten/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/methods-zettelkasten.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="제텔카스텐 × 메일 메모 — SimpleMemo로 Zettelkasten을 실천">
+  <meta name="twitter:description" content="제텔카스텐의 프리팅 노트에 메일 메모를 활용합니다. 플래시를 즉시 기록하고 영구 노트로 발전시키는 실전 가이드.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/methods-zettelkasten.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ko/methods/zettelkasten/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/methods/zettelkasten/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/methods/zettelkasten/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/methods/zettelkasten/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/methods/zettelkasten/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/methods/zettelkasten/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/methods/zettelkasten/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/methods/zettelkasten/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/methods/zettelkasten/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/methods/zettelkasten/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/methods/zettelkasten/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/methods/zettelkasten/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/ko/methods/zettelkasten/#article",
+  "inLanguage": "ko",
+  "image": "https://simplememofast.com/assets/img/og/methods-zettelkasten.png",
+  "headline": "제텔카스텐 × 메일 메모 — SimpleMemo로 Zettelkasten을 실천",
+  "description": "Zette르카스텐(Zettelkasten)의 프리팅 노트를 메일 메모로 고속 캡처하는 방법. 플래시를 즉시 기록하고 영구 노트로 발전시키는 실전 가이드.",
+  "url": "https://simplememofast.com/ko/methods/zettelkasten/",
+  "datePublished": "2026-03-05",
+  "dateModified": "2026-10-03",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/ko/methods/zettelkasten/"
+  }
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "홈",
+      "item": "https://simplememofast.com/ko/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "생산성 메소드",
+      "item": "https://simplememofast.com/ko/methods/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "츠텔카스텐 × 메일 메모",
+      "item": "https://simplememofast.com/ko/methods/zettelkasten/"
+    }
+  ]
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem}
+    .steps-list li{counter-increment:step;position:relative;padding:1rem 1rem 1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+    .steps-list li strong{display:block;margin-bottom:.3rem;color:var(--text)}
+
+    .reason-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .reason-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+
+    .scenario-box{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.5rem;margin:1.5rem 0 2rem;font-size:.9rem;line-height:1.8}
+    .scenario-box__title{font-weight:700;margin-bottom:.75rem;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em}
+    .scenario-box p{color:var(--text-secondary);margin-bottom:.5rem}
+    .scenario-box p:last-child{margin-bottom:0}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+
+  <!-- JSON-LD: Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/ko/methods/zettelkasten/#webpage",
+  "inLanguage": "ko",
+  "name": "제텔카스텐 × 메일 메모 실전 가이드",
+  "url": "https://simplememofast.com/ko/methods/zettelkasten/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/ko/#website"
+  }
+}</script>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/ko/methods/zettelkasten/#faq","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"제텔카스텐의 프리팅 노트는 무엇입니까?","acceptedAnswer":{"@type":"Answer","text":"프리팅 노트(fleeting note)는 일상 생활 중에 갑자기 떠오른 아이디어와 깨달음을 빠르게 메모한 것입니다. 니클라스 루만의 체텔카스텐에서는 이 프리팅 노트가 모든 지식의 출발점이 됩니다. 나중에 되돌아보면, 가치 있는 것은 영구 노트(permanent note)로 발전시킵니다."}},{"@type":"Question","name":"Zettel Casten에서 SimpleMemo를 어떻게 사용합니까?","acceptedAnswer":{"@type":"Answer","text":"SimpleMemo는 프리팅 노트의 고속 캡처 도구로 사용합니다. 번뜩이는 순간 앱을 열고(0.4초, iPhone 16e·웜 실행 실측), 1개의 아이디어를 입력하여 이메일로 전송합니다. 후 검토 시 메일 수신함을 통해 프리팅 노트를 확인하고, 영구 노트로 발전시킬지 판단합니다."}},{"@type":"Question","name":"체텔카스텐의 “1 노트=1 아이디어” 규칙은 무엇입니까?","acceptedAnswer":{"@type":"Answer","text":"제텔카스텐의 근본 원칙에 따라, 각 노트에는 1개의 개념·아이디어·주장만을 적습니다. 이를 통해 노트들을 유연하게 연결할 수 있으며, 서로 다른 맥락에서 재사용할 수 있습니다. SimpleMemo의 “메모→즉시 전송”의 단순함은 이 원칙과 자연스럽게 일치합니다."}},{"@type":"Question","name":"츠텔카스텐에 추천하는 앱은 무엇인가요?","acceptedAnswer":{"@type":"Answer","text":"영구 노트 관리에는 Obsidian, Logseq, Notion, Scrapbox 등이 인기가 있습니다. 다만, 프리팅 노트 캡처에는 이러한 앱이 실행 및 조작이 너무 무거운 경우가 있습니다. SimpleMemo에서 프리팅 노트를 빠르게 캡처하고, 이후 이러한 앱에 영구 노트로 정리하는 워크플로우가 효율적입니다."}},{"@type":"Question","name":"프리팅 노트는 얼마나 자주 다시 확인해야 합니까?","acceptedAnswer":{"@type":"Answer","text":"매일 1회, 가능하면 같은 시간에 검토하시는 것을 권장합니다. 프리팅 노트는 시간이 지나면 문맥을 잊어버리기 때문에, 24 이내의 처리가 이상적입니다. 아침 업무 시작 전이나 취침 전의 10분을 검토 시간으로 설정하면 습관화되기 쉬워집니다."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="메인 내비게이션" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/ko/guides/">사용 가이드</a><a href="/ko/use-cases/">활용 사례</a><a href="/ko/vs/">비교</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/ko/guides/">사용 가이드</a></li>
+        <li><a href="/ko/use-cases/">활용 사례</a></li>
+        <li><a href="/ko/vs/">비교</a></li>
+        <li><a href="/ko/methods/"><span>메소드</span></a></li>
+        <li><a href="/ko/blog/"><span>블로그</span></a></li>
+        <li><a href="/ko/glossary/"><span>용어집</span></a></li>
+        <li><a href="/ko/faq">자주 묻는 질문</a></li>
+        <li><a href="/ko/about/">개발자 소개</a></li>
+        <li><a href="/ko/devlog/">개발 기록</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>다운로드</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="한국어 · 언어 선택"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>KO</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ko" dir="ltr"><p class="site-language-title">언어 선택</p><div class="site-language-grid"><a href="/methods/zettelkasten/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/methods/zettelkasten/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/methods/zettelkasten/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/methods/zettelkasten/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ko" aria-current="page"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/es/methods/zettelkasten/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/methods/zettelkasten/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/methods/zettelkasten/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/methods/zettelkasten/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/methods/zettelkasten/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">다운로드</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="메뉴"><span>메뉴</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
+        <div class="lp-hero__label">
+          <span>츠텔카스텐 × 메일 메모</span>
+
+        </div>
+        <h1 class="lp-hero__title"> <span>제텔카스텐 × 메일 메모 <br>SimpleMemo로 <br> 프리팅 노트를 고속 캡처</span> </h1>
+        <p class="lp-hero__sub"> <span>제텔카스텐의 가장 큰 과제는 “번뜩임이 사라지기 전에 메모하는 것”입니다. 시동 0.4초(iPhone 16e·웜 실행 실측)·원터치 전송 SimpleMemo라면, 프리팅 노트를 즉시 캡처합니다. 메일에 도착한 메모를 검토 시 영구 노트로 발전시킵시다. </span> </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>저자: <a href="/ko/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a></span> </p>
+      </div><nav class="sd-hero-index" aria-label="이 페이지의 내용"><p>이 페이지의 내용</p><a href="#reading-01"><span aria-hidden="true">01</span><span>제트르카스텐(Zettelkasten)이란</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>왜 메일 메모가 츠텔카스텐에 최적인지</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>제텔카스텐 × 메일 메모 실전 6 스텝</span><span aria-hidden="true">↗</span></a></nav></div>
+
+      <!-- What is Zettelkasten -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"> <span>제텔카스텐(Zettelkasten)이란</span> </h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>제텔카스텐(Zettelkasten, 독일어로 “메모함”)은 독일의 사회학자 니클라스 루만(1927-1998)이 평생 실천한 노트 관리 방법입니다. 루먼은 이 시스템을 사용하여 70권 이상의 저서와 400권 이상의 논문을 집필했습니다. </span> </p>
+        <p class="lp-section__lead"> <span>체터카스텐의 핵심은 “아토믹 노트”의 개념입니다. 1 카드(노트)에는 1 하나의 아이디어만 적고, 고유한 ID를 부여하여 다른 노트와 링크로 연결합니다. 이로 인해 지식이 네트워크 형태로 성장하고, 기존의 아이디어들이 예상치 못한 형태로 연결되는 “세렌디피티”가 생겨납니다. </span> </p>
+        <p class="lp-section__lead"> <span>제터카스텐 워크플로우에서는 3 종류의 노트를 구분해서 사용합니다. 플리팅 노트(fleeting note)는 일상에서 떠오른 아이디어의 빠른 메모입니다. 문헌 노트(literature note)는 독서에서 얻은 요점입니다. 그리고 “영구 노트(permanent note)”는 자신의 말로 다시 쓴 지식의 결정체입니다. 가장 중요하고 가장 놓기 쉬운 것은 프리팅 노트 단계입니다. </span> </p>
+      </div></section>
+
+      <!-- Why Email Memo fits Zettelkasten -->
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02"> <span>왜 메일 메모가 제텔카스텐에 최적인지</span> </h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>SimpleMemo의 메일 메모는 ZETTER 카스텐의 프리팅 노트 문제를 3의 방법으로 해결합니다. </span> </p>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span>번뜩임이 사라지기 전에 캡처</span>
+
+            </div>
+            <div class="reason-card__desc">
+              <span>프리팅 노트의 본질은 “순간에 사라지는 생각을 포착하는 것”이다. 시작 0.4초(iPhone 16e·웜 실행 실측)·원터치 전송 SimpleMemo이라면, Obsidian을 열어 파일을 생성하는 시간조차 필요하지 않습니다. 생각이 사라지기 전 몇 초 동안 캡처할 수 있습니다.</span>
+
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span>캡처와 처리를 자연스럽게 분리</span>
+
+            </div>
+            <div class="reason-card__desc">
+              <span>제텔카스텐에서는 “캡처”와 “영구 노트화”가 별개의 작업입니다. 메일 메모라면, 캡처는 몇 초 만에 완료되고, 영구 메모화는 검토 시에 천천히 할 수 있습니다. 캡처 순간에 링크나 구조를 고려할 필요가 없습니다.</span>
+
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span>메일 수신함이 프리팅 노트 인박스에</span>
+
+            </div>
+            <div class="reason-card__desc">
+              <span>메모가 이메일로 도착하므로, 검토 시 “미처리 프리팅 노트”가 한눈에 명확합니다. 처리된 것은 아카이브만 하면 됩니다. Zettel 카스텐 전용 인박스가 메일에 자연스럽게 완성됩니다.</span>
+
+            </div>
+          </div>
+        </div>
+      </div></section>
+
+      <!-- Step by Step -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"> <span>제텔카스텐 × 메일 메모 실전 6 스텝</span> </h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>프리팅 노트의 캡처부터 영구 노트로의 발전까지, 메일 메모에서 어떻게 실천하는지 구체적으로 설명합니다. </span> </p>
+
+        <ol class="steps-list">
+          <li> <strong>번뜩임을 의식한다 — 프리팅 노트의 원재료</strong> 독서 중에 “이 개념은 〇〇와 관련이 있을지도 모른다”라고 생각하거나, 산책 중에 아이디어가 떠오르거나, 대화 중에 깨달음을 얻기도 합니다. 이 모든 것이 체텔카스텐의 원재료인 “<a href="/ko/blog/fleeting-notes">프리팅 노트</a>”입니다. 중요한 것은 이 순간의 번뜩임을 “의식”하는 것입니다. </li>
+          <li> <strong>SimpleMemo 열기（0.4초, iPhone 16e·웜 실행 실측）</strong> 번뜩임은 금방 사라지는 경향이 있습니다. '나중에 메모하자'라고 생각한 것은 그대로 잊어버리는 경우가 자주 있습니다. 생각난 순간에 SimpleMemo를 열어봅시다. 0.4초(iPhone 16e·웜 실행 실측)에서 커서가 입력란에 자동으로 포커스되어 즉시 입력을 시작할 수 있습니다. </li>
+          <li> <strong>1개의 개념만 입력합니다</strong> 체텔카스텐의 원칙「1노트=1아이디어(아토미시티)」에 따라, 1개의 개념·인식·주장만 씁니다。「 〇〇와 △△에는 공통된 구조가 있습니다. “이 방법은 □□ 문제를 해결할 수 있을지도”와 같이, 1개의 생각만 입력합니다. 여러 아이디어가 떠오르면 각각 별개의 메모로 전송합니다. </li>
+          <li> <strong>메일로 자신에게 보내기</strong> 원터치로, 프리팅 노트를 메일 수신함으로 전송합니다. 오프라인에서도 AES-GCM 암호화의 아웃박스에 저장되며, 연결 복구 시 자동으로 전송됩니다. </li>
+          <li> <strong>리뷰 시간에 영구 노트화를 판단합니다</strong> 1 하루의 끝이나 정기적인 리뷰 시간에 받은 편지함 메모를 확인합니다. 각 프리팅 노트에 대해 “이것은 영구 노트로 만들 가치가 있습니까?” 기존의 어느 노트와 관련이 있습니까? 판단합니다. 모든 프리팅 노트가 영구 노트가 되는 것은 아닙니다. 선별이 바로 지식의 질을 향상시킵니다. </li>
+          <li> <strong>제텔카스텐에 연결하여 추가</strong> 영구 노트로 만들어야 할 것은 자신의 말로 다시 작성하고, Obsidian·Logseq 등 제텔카스텐 툴에 추가합니다. 가장 중요한 것은 기존 노트와의 연관(링크)을 추가하는 것입니다. 이 노트는 노트 #42와 모순됩니다」「노트 #108의 구체적인 예가 됩니다」와 같이 연결을 명시합니다. Obsidian 내에서 노트와 링크를 준비하는 절차는 <a href="/ko/obsidian/zettelkasten/">Zettelkasten의 구현 가이드</a>를 참조하십시오. </li>
+        </ol>
+
+      </div></section>
+
+      <!-- Real Scenario -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04"> <span>시나리오 예：1일의 체텔카스텐 × 메일 메모</span> </h2></div><div class="ce-chapter__body">
+
+        <div class="scenario-box">
+          <div class="scenario-box__title">일요일의 스즈키 씨(소프트웨어 엔지니어·독서가)</div>
+          <p><strong>09:00</strong> 아침 커피를 마시면서 책을 읽고 있습니다。「 다니엘 카네만의 시스템 1/시스템 2의 프레임워크는 UX 디자인의 유리스틱스와 동일한 구조라는 것을 깨달았다. SimpleMemo를 열고 “카네만 S1/S2 = UX 휴리스틱스 동구조”라고 전송합니다. 몇 초 만에 완료됩니다. 독서로 돌아갑니다.</p>
+          <p><strong>11:30</strong> 산책 중에 문득 “지난주 읽은 논문의 오류 처리 패턴, 사실 함수형 프로그래밍의 Monad와 같은 생각이 아닌가요?” 생각이 납니다. 멈춰서 메모를 전송합니다. 오류 처리 패턴 = Monad? 두 경우 모두 문맥을 포괄하는 추상화라고 전송한다.</p>
+          <p><strong>15:00</strong> 친구와의 대화에서 “교육에서 피드백 루프의 속도가 학습 효율을 결정한다”는 주제가 등장한다. 대화를 중단하지 않고 스마트폰으로 빠르게 전송합니다. 피드백 루프 속도 → 학습 효율 결정 요인</p>
+          <p><strong>21:00</strong> 취침 전 10분 리뷰 타임. 받은 편지함에 3건의 프리팅 노트가 도착했습니다. 1건 “카네만 S1/S2 = UX 휴리스틱스” → 영구 노트화 결정. Obsidian에서 자신의 말로 다시 작성하고, 기존의 “인지 편향” 노트와 “UX 설계 원칙” 노트에 연결합니다. 2건의 Monad 이야기는 조사가 필요하므로 내일 조사 리스트에 추가합니다. 3건은 재미있지만 얕으니, 좀 더 생각한 뒤에 판단하겠습니다. 메일 수신함은 0건입니다.</p>
+        </div>
+
+      </div></section>
+
+      <!-- FAQ -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05"> <span>자주 묻는 질문(제텔카스텐 × 이메일 메모)</span> </h2></div><div class="ce-chapter__body">
+        <div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">제텔카스텐의 프리팅 노트는 무엇입니까?</summary><div class="faq-answer"><p>프리팅 노트(fleeting note)는 일상 생활 중에 갑자기 떠오른 아이디어와 깨달음을 빠르게 메모한 것입니다. 니클라스 루만의 체텔카스텐에서는 이 프리팅 노트가 모든 지식의 출발점이 됩니다. 나중에 되돌아보면, 가치 있는 것은 영구 노트(permanent note)로 발전시킵니다.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Zettel Casten에서 SimpleMemo를 어떻게 사용합니까?</summary><div class="faq-answer"><p>SimpleMemo는 프리팅 노트의 고속 캡처 도구로 사용합니다. 번뜩이는 순간 앱을 열고(0.4초, iPhone 16e·웜 실행 실측), 1개의 아이디어를 입력하여 이메일로 전송합니다. 후 검토 시 메일 수신함을 통해 프리팅 노트를 확인하고, 영구 노트로 발전시킬지 판단합니다.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">체텔카스텐의 “1 노트=1 아이디어” 규칙은 무엇입니까?</summary><div class="faq-answer"><p>제텔카스텐의 근본 원칙에 따라, 각 노트에는 1개의 개념·아이디어·주장만을 적습니다. 이를 통해 노트들을 유연하게 연결할 수 있으며, 서로 다른 맥락에서 재사용할 수 있습니다. SimpleMemo의 “메모→즉시 전송”의 단순함은 이 원칙과 자연스럽게 일치합니다.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">츠텔카스텐에 추천하는 앱은 무엇인가요?</summary><div class="faq-answer"><p>영구 노트 관리에는 Obsidian, Logseq, Notion, Scrapbox 등이 인기가 있습니다. 다만, 프리팅 노트 캡처에는 이러한 앱이 실행 및 조작이 너무 무거운 경우가 있습니다. SimpleMemo에서 프리팅 노트를 빠르게 캡처하고, 이후 이러한 앱에 영구 노트로 정리하는 워크플로우가 효율적입니다.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">프리팅 노트는 얼마나 자주 다시 확인해야 합니까?</summary><div class="faq-answer"><p>매일 1회, 가능하면 같은 시간에 검토하시는 것을 권장합니다. 프리팅 노트는 시간이 지나면 문맥을 잊어버리기 때문에, 24 이내의 처리가 이상적입니다. 아침 업무 시작 전이나 취침 전의 10분을 검토 시간으로 설정하면 습관화되기 쉬워집니다.</p></div></details></div>
+        </div>
+
+      </div></section>
+
+      <!-- References -->
+      <section class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+        <h3 style="font-size:1rem;margin-bottom:0.75rem">참고문헌·외부 링크</h3>
+        <ul style="font-size:0.85rem;line-height:1.6;list-style:none;padding:0">
+        <li><a href="https://zettelkasten.de/" target="_blank" rel="noopener">Zettelkasten.de — 체터카스텐 종합 리소스</a></li>
+        <li><a href="https://ja.wikipedia.org/wiki/%E3%83%84%E3%82%A7%E3%83%83%E3%83%86%E3%83%AB%E3%82%AB%E3%82%B9%E3%83%86%E3%83%B3" target="_blank" rel="noopener">제텔카스텐 — Wikipedia(일본어)</a></li>
+        <li><a href="https://www.soenkeahrens.de/en/takesmartnotes" target="_blank" rel="noopener">Sönke Ahrens — 스마트 노트 작성 방법</a></li>
+        </ul>
+      </section>
+
+      <!-- CTA -->
+      <div class="cta-box">
+        <div class="cta-box__title">
+          <span>프리팅 노트를 사라지기 전에 적어 두다</span>
+
+        </div>
+        <div class="cta-box__desc">
+          <span>다운로드는 무료입니다. 플리팅 노트를 탭에서 0.4초(iPhone 16e·웜 실행 실측)로 작성을 시작할 수 있습니다.</span>
+
+        </div>
+        <a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="App Store에서 다운로드"> <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="App Store에서 다운로드" loading="lazy"> </a>
+
+      </div>
+
+      <!-- Internal Links -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06"> <span>관련 페이지</span> </h2></div><div class="ce-chapter__body">
+        <div class="internal-links">
+          <a href="/ko/methods/"> <span>생산성 메소드 목록</span> </a>
+          <a href="/ko/methods/gtd/"> <span>GTD × 메일 메모</span> </a>
+          <a href="/ko/methods/pomodoro/"> <span>포모도로 × 메일 메모</span> </a>
+          <a href="/ko/methods/bullet-journal/"> <span>바렛 저널 × 메일 메모</span> </a>
+          <a href="/ko/note-to-email/"> <span>메모→메일이란</span> </a>
+          <a href="/ko/use-cases/"> <span>사용 사례 목록</span> </a>
+        </div>
+      </div></section>
+
+    </div>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="method" href="/ko/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>다음에 읽을</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>쓴 메모를 Obsidian에 저장합니다</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>iPhone에서 보관함에 대한 접근 및 추가 대상을 설정하고, 작성한 메모를 Obsidian에도 남길 수 있습니다. </span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>관련 콘텐츠</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/ko/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>사용 방법 가이드</span></a></li>
+    <li><a href="/ko/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span> 블로그 기사 목록</span></a></li>
+    <li><a href="/ko/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>메모 앱 비교 목록</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ko" dir="ltr"><a class="site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">작은 메모, 다음 한 걸음.</p><p class="site-footer-description">iPhone에서 Obsidian과 이메일로 메모를 보내세요.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="푸터 탐색 메뉴">
+      <div class="footer__col">
+        <p class="footer__col-title">프로덕트</p>
+        <a href="/ko/download/" class="footer__link">다운로드</a>
+        <a href="/ko/" class="footer__link">홈</a>
+        <a href="/ko/use-cases/" class="footer__link">활용 사례</a>
+        <a href="/ko/guides/" class="footer__link">사용 가이드</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">비교·전환</p>
+        <a href="/ko/captio-alternative/" class="footer__link"><span>Captio 대체</span> </a>
+        <a href="/ko/note-to-email/" class="footer__link">메모를 이메일로</a>
+        <a href="/ko/vs/" class="footer__link">비교</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">지원</p>
+        <a href="/ko/roadmap/" class="footer__link">공개 로드맵</a>
+        <a href="/ko/devlog/" class="footer__link">개발 기록</a>
+        <a href="/ko/about/" class="footer__link">개발자 소개</a>
+        <a href="/ko/faq" class="footer__link">자주 묻는 질문</a>
+        <a href="/ko/privacy" class="footer__link">개인정보 보호</a>
+        <a href="/ko/contact" class="footer__link">문의</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 운영: YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

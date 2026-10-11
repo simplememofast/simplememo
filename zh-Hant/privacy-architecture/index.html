@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/privacy-architecture/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>隱私設計 — 備忘錄正文透過哪裡，不留在哪裡</title>
+  <meta name="description" content="SimpleMemo的資料通道全部公開。 Vault追記是本地完成，AI標籤在裝置上不將正文傳送到外部伺服器，郵件配送是標準SMTP，不是E2EE——不隱瞞能做的事情和不能做的事情，明文化。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="隱私設計 — 備忘錄正文透過哪裡，不留在哪裡">
+  <meta property="og:description" content="Vault追記是本地完結。 AI標籤在裝置上。 包括不是E2EE的理由在內，資料的通道全部公開。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-11T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh-Hant/privacy-architecture/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_TW">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="隱私設計 — 備忘錄正文透過哪裡，不留在哪裡">
+  <meta name="twitter:description" content="Vault追記是本地完結。 AI標籤在裝置上。 包括不是E2EE的理由在內，資料的通道全部公開。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh-Hant/privacy-architecture/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/privacy-architecture/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/privacy-architecture/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/privacy-architecture/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/privacy-architecture/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/privacy-architecture/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/privacy-architecture/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/privacy-architecture/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/privacy-architecture/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/privacy-architecture/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/privacy-architecture/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/privacy-architecture/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh-Hant/privacy-architecture/#article",
+  "inLanguage": "zh-Hant",
+  "image": "https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png",
+  "headline": "隱私設計 — 備忘錄正文透過哪裡，不留在哪裡",
+  "description": "SimpleMemo的資料通道全部公開。 Vault追記是本地完成，AI標籤在裝置上，郵件配送是標準SMTP，不是E2EE——不隱瞞能做的事情和不能做的事情的明文化。",
+  "url": "https://simplememofast.com/zh-Hant/privacy-architecture/",
+  "datePublished": "2026-08-11",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh-Hant/privacy-architecture/"
+  }
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主頁",
+      "item": "https://simplememofast.com/zh-Hant/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "隱私設計",
+      "item": "https://simplememofast.com/zh-Hant/privacy-architecture/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh-Hant/privacy-architecture/#webpage",
+  "inLanguage": "zh-Hant",
+  "name": "隱私設計",
+  "url": "https://simplememofast.com/zh-Hant/privacy-architecture/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh-Hant/#website"
+  }
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .flow-steps{list-style:none;margin:1.5rem 0 2rem;padding:0;counter-reset:flow}
+    .flow-steps li{padding:1.25rem 1.25rem 1.25rem 4rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7;position:relative}
+    .flow-steps li::before{counter-increment:flow;content:counter(flow);position:absolute;left:1.25rem;top:1.25rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+    .flow-step__title{display:block;font-weight:700;color:var(--text);margin-bottom:.3rem}
+
+    .compare-table{width:100%;border-collapse:collapse;margin:1.5rem 0 2rem;font-size:.875rem}
+    .compare-table th,.compare-table td{padding:.75rem 1rem;text-align:left;border-bottom:1px solid var(--border)}
+    .compare-table th{color:var(--text-muted);font-weight:400;font-size:.875rem;text-transform:uppercase;letter-spacing:.05em}
+    .compare-table td:first-child{font-weight:700;color:var(--text-secondary)}
+    .compare-table .yes{color:#3fb950} .compare-table .no{color:#f85149}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    .honest-box{background:var(--surface);border:1px solid rgba(248,81,73,.25);border-radius:var(--radius-sm);padding:1.5rem;margin:1.5rem 0;font-size:.92rem;line-height:1.8;color:var(--text-secondary)}
+    .honest-box strong{color:var(--text)}
+
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,0.85);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,0.1)}
+    .global-nav__inner{max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:0.5rem;text-decoration:none;color:#fff;font-weight:700;font-size:0.95rem;letter-spacing:-0.01em}
+    .global-nav__logo img{border-radius:8px}
+    .global-nav__links{display:flex;align-items:center;gap:0.25rem;list-style:none;margin:0;padding:0}
+    .global-nav__links a{color:rgba(255,255,255,0.65);text-decoration:none;font-size:0.875rem;font-weight:400;padding:0.4rem 0.7rem;border-radius:8px;transition:color 0.2s,background 0.2s;min-height:48px;display:inline-flex;align-items:center}
+    .global-nav__links a:hover{color:#fff;background:rgba(100,180,255,0.08)}
+    .global-nav__actions{display:flex;align-items:center;gap:0.5rem}
+    .global-nav__cta{background:linear-gradient(135deg,#007AFF,#5856D6);color:#fff !important;text-decoration:none;font-size:0.875rem;font-weight:700;padding:0.45rem 1rem;border-radius:20px;transition:opacity 0.2s;min-height:48px;display:inline-flex;align-items:center}
+    .global-nav__cta:hover{opacity:0.85}
+    .nav-cta-mobile{display:none}
+    .global-nav__hamburger{display:none;background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;min-width:48px;min-height:48px;padding:0.5rem;line-height:1}
+    @media (max-width:768px){
+      .global-nav__links{display:none}
+      .global-nav__cta{display:none}
+      .global-nav__hamburger{display:block}
+      .global-nav__links.open{display:flex;flex-direction:column;position:absolute;top:56px;left:0;right:0;background:rgba(10,12,18,0.95);backdrop-filter:blur(20px);padding:0.5rem 1rem 1rem;border-bottom:1px solid rgba(100,160,220,0.1);gap:0.5rem}
+      .global-nav__links.open a{color:rgba(255,255,255,0.9);padding:0.7rem 1rem;font-size:0.9rem;min-height:48px;display:flex;align-items:center}
+      .global-nav__links.open .nav-cta-mobile{display:block;text-align:center;margin-top:0.5rem;background:linear-gradient(135deg,#007AFF,#5856D6);color:#fff;border-radius:12px;padding:0.8rem;font-weight:700}
+    }
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/zh-Hant/privacy-architecture/#faq","inLanguage":"zh-Hant","mainEntity":[{"@type":"Question","name":"Obsidian Vault的補充有外部伺服器參與嗎？","acceptedAnswer":{"@type":"Answer","text":"不參與。 Vault追記是將檔案直接寫入終端內的Vault資料夾（不可用時URI回退），不使用外掛和網路。 不附帶郵件傳送的草稿的本地儲存也在終端內完成。"}},{"@type":"Question","name":"透過AI標記，備忘錄的內容不能傳送到Apple或外部伺服器嗎？","acceptedAnswer":{"@type":"Answer","text":"無法傳送。 標記是Apple Foundation Models的裝置上AI只在iPhone中進行，不涉及網路通訊。 Apple Intelligence不支援的機型會自動回退到終端內的輕量整形，在這種情況下也沒有外部傳送。 詳情請看AI標籤自動追加的解說。"}},{"@type":"Question","name":"為什麼不做E2EE呢？","acceptedAnswer":{"@type":"Answer","text":"因為備忘錄的投遞地址是“平時的郵件收件箱”。 在收件箱中讀取=接收伺服器可以解密，所以E2EE在結構上是不成立的。 E2EE優先時，專用客戶端是必須的，與“任何終端的郵件應用程式都可以閱讀”的本應用程式的價值交換。 對於必須使用E2EE的用途，推薦Standard Notes等。"}},{"@type":"Question","name":"這個內容和隱私政策有什麼不同？","acceptedAnswer":{"@type":"Answer","text":"法律處理的全文在隱私政策（特別是§12“關於加密的技術資訊”）。 這個頁面是根據Obsidian使用者的興趣（是否在本地完成）重新構建其技術內容的路徑圖。 如果有矛盾的話，以隱私政策為準。"}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="主導航" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh-Hant/guides/">使用指南</a><a href="/zh-Hant/use-cases/">使用情境</a><a href="/zh-Hant/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/zh-Hant/guides/">使用指南</a></li>
+        <li><a href="/zh-Hant/use-cases/">使用情境</a></li>
+        <li><a href="/zh-Hant/vs/">比較</a></li>
+        <li><a href="/zh-Hant/methods/"><span>方法</span></a></li>
+        <li><a href="/zh-Hant/blog/"><span>部落格</span></a></li>
+        <li><a href="/zh-Hant/glossary/"><span>術語集</span></a></li>
+        <li><a href="/zh-Hant/faq">常見問題</a></li>
+        <li><a href="/zh-Hant/about/">關於開發者</a></li>
+        <li><a href="/zh-Hant/devlog/">開發日誌</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>下載</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="繁體中文 · 選擇語言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>繁中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hant" dir="ltr"><p class="site-language-title">選擇語言</p><div class="site-language-grid"><a href="/privacy-architecture/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/privacy-architecture/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/privacy-architecture/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hant" aria-current="page"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ko/privacy-architecture/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/privacy-architecture/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/privacy-architecture/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/privacy-architecture/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/privacy-architecture/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/privacy-architecture/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">下載</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="選單"><span>選單</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
+        <div class="lp-hero__label">
+          <span>隱私設計</span>
+        </div>
+        <h1 class="lp-hero__title"> <span>備忘錄正文經過哪裡，<br>不留在哪裡</span> </h1>
+        <p class="lp-hero__sub"> <span>“明明是寫在本地Vault的工具，卻要透過外部伺服器嗎？”——Obsidian使用者收到的最多問題，用路徑圖回答的頁面。 完成的事情（Vault補充的本地完成、裝置AI、伺服器非儲存）和未完成的事情（不是E2EE）以相同的解析度書寫。 </span> </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>作者: <a href="/zh-Hant/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · 公開日: <time datetime="2026-08-11">2026年08月11日</time> · 解析條件確認: <time datetime="2026-09-30">2026年09月30日</time></span> </p>
+      </div><nav class="sd-hero-index" aria-label="本頁內容"><p>本頁內容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>備忘錄1通的資料通道</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>留在伺服器的東西・不留的東西</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>備忘錄正文的保護和利用分析</span><span aria-hidden="true">↗</span></a></nav></div>
+
+      <!-- Data path -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"> <span>備忘錄1通的資料通道</span> </h2></div><div class="ce-chapter__body">
+        <ol class="flow-steps">
+          <li><span class="flow-step__title">在終端內建立 — 用AES-GCM-256保護</span>寫的備忘錄首先進入終端內的Outbox（未傳送佇列）。 Outbox和傳送歷史由Apple純正CryptoKit透過<strong>AES-GCM-256</strong>加密，256-bit對稱金鑰儲存在Apple Keychain中。 金鑰是不轉移到其他終端的設定，在應用程式加密、解密時讀取。 備份中包含的金鑰複製也不能在其他終端上使用。 在更換機型之前，請確認必要的備忘錄是否已送達儲存地址。 <a href="/zh-Hant/privacy">鑰匙管理的詳細內容和Apple的說明</a>。 離線的話在這裡等待，線路恢復後自動重新傳送。</li>
+          <li><span class="flow-step__title">Obsidian Vault的追記 — 這裡是完全本地</span>Obsidian啟用關聯時，Vault的追記是<strong>終端內的Vault資料夾直接寫入檔案</strong>（打不開的話URI回退）進行，不使用外掛和外部伺服器。 Vault追記的路徑中沒有網路。</li>
+          <li><span class="flow-step__title">AI標籤—在裝置上完成</span>標題（20字以內）、標籤（1~3個）、種類（todo/idea/log）的自動授予，<strong>Apple Foundation Models的機上AI</strong>只在iPhone中進行。 <strong>為了標記，備忘錄正文不會傳送到外部伺服器。 </strong>Apple Intelligence不支援的機型會自動回退到終端內的輕量整形。</li>
+          <li><span class="flow-step__title">郵件傳送——經 TLS 傳輸，不永久儲存</span>僅在傳送時，正文透過 TLS（HTTPS）<strong>經過</strong>我們的 Relay API（Cloudflare Workers）和外部傳送基礎設施（Resend）。正文不會被永久儲存，也不會寫入日誌。客戶端使用 <code>URLSessionConfiguration.ephemeral</code>，不保留 Cookie 或快取。</li>
+          <li><span class="flow-step__title">到自己的收件箱 — 標準SMTP配送（=不是E2EE）</span>最終配送是標準SMTP。 正因為如此，在平時的郵件軟體上可以直接閱讀，但<strong>不是端到端加密（E2EE）</strong>。 關於這個設計判斷，請看下面的“誠實地寫下來”。</li>
+        </ol>
+      </div></section>
+
+      <!-- What stays / what doesn't -->
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02"> <span>伺服器上殘留的東西・不殘留的東西</span> </h2></div><div class="ce-chapter__body">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格">
+          <table class="compare-table">
+            <thead><tr><th scope="col">資料</th><th scope="col">在哪裡</th><th scope="col">留下嗎</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">備忘錄正文</th><td>本公司伺服器（Relay/傳送基礎）</td><td class="yes">不留（傳送時只透過・日誌非記錄）</td></tr>
+              <tr><th scope="row">備忘錄正文</th><td>你的郵件收件箱</td><td>留下（這就是目的）</td></tr>
+              <tr><th scope="row">備忘錄正文</th><td>你的Obsidian Vault（設定時）</td><td>殘留（終端內本地）</td></tr>
+              <tr><th scope="row">Outbox・傳送記錄</th><td>僅限終端內</td><td>用AES-GCM-256加密儲存</td></tr>
+              <tr><th scope="row">郵箱地址</th><td>Cloudflare D1</td><td class="yes">儲存傳送ID和收件人雜湊的對應。 與選擇加入提醒分開記錄，定期刪除超過35天的內容</td></tr>
+              <tr><th scope="row">使用活動・終端識別符號・診斷資訊</th><td>Cloudflare D1</td><td>定期刪除超過90天的東西。 可以透過傳送ID與收件人雜湊關聯</td></tr>
+              <tr><th scope="row">輸入AI標籤（正文）</th><td>外部伺服器</td><td class="yes">無法傳送（在裝置上處理）</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div></section>
+
+      <!-- Memo protection and analytics -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"> <span>備忘錄正文的保護和利用分析</span> </h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>iOS在應用內，備忘錄正文的加密使用CryptoKit，鑰匙保管使用Keychain，正文的傳送使用URLSession。 GoogleSignIn和Firebase Authentication用於任意郵件自動輸入，Firebase App Check用於後端API的保護。 <strong>本公司的使用分析和AppsFlyer，根據應用版和分析的選擇，處理方式也不同。 </strong></span> </p>
+          <p class="lp-section__lead"> <span>在設定中提供「使用情況分析」選項的版本中，自有使用事件和來自裝置的訂閱狀態分析預設關閉，同意後才開始。在另行提供獲客測量選項之前，這些版本的 AppsFlyer SDK 會保持停止。沒有此選項的版本也會傳送自有使用事件和來自裝置的訂閱狀態分析。我們撤銷自 9 月 28 日起實施的、不儲存舊方式請求的伺服器端限制，不會追溯補齊先前未收集的事件。AppsFlyer 獲客與使用情況測量的條件請參閱隱私權政策。</span> <span>有有效同意的對應版的本公司分析，處理安裝、會話的識別符號、使用事件、傳送結果等。  舊版的AppsFlyer傳送首次備忘錄成功、認證成功、收費畫面顯示、方案選擇、購買成功，將相同的安裝識別符號設定為Customer User ID。 從應用程式設定的活動專案中不直接包含郵箱地址、備忘錄正文、驗證碼，但本公司的傳送ID與收件人雜湊繫結，獲取資訊和使用記錄也會相關聯。 不是完全匿名的解析。 撤銷同意和版本的條件是<a href="/zh-Hant/privacy">政策1(E)</a>，專案詳情請看<a href="/zh-Hant/privacy#technical">隱私政策</a>。 </span> </p>
+      </div></section>
+
+      <!-- Honest limitations -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04"> <span>誠實地寫下來 — 不是E2EE</span> </h2></div><div class="ce-chapter__body">
+        <div class="honest-box">
+          <p style="margin-bottom:.75rem;"><strong>SimpleMemo不是端到端加密（E2EE）。 </strong>郵件正文將以標準SMTP傳送到您的收件箱。“ 因為“在平時的郵件應用程式上可以直接閱讀”和“只有自己擁有密碼金鑰到路徑末端”是不相容的，所以選擇了前者的設計。</p>
+          <p style="margin-bottom:.75rem;">終端內的Outbox和傳送記錄用AES-GCM-256加密，這是<strong>終端內保護</strong>，不能代替E2EE（<a href="/zh-Hant/glossary/e2e-encryption/" style="color:var(--accent);">E2EE是什麼・為什麼本APP不適用</a>）。</p>
+          <p>對於機密性是第一要務，E2EE是必須的人，像Standard Notes這樣的E2EE設計的筆記應用程式更合適。 在明確說明這一點之後，“不將本文留在伺服器上”“在終端內完成標記”“在本地進行Vault追記”是本應用程式的守衛範圍。</p>
+        </div>
+      </div></section>
+
+      <!-- FAQ -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05"> <span>常見問題</span> </h2></div><div class="ce-chapter__body">
+        <div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Obsidian Vault的補充有外部伺服器參與嗎？</summary><div class="faq-answer"><p>不參與。 Vault追記是將檔案直接寫入終端內的Vault資料夾（不可用時URI回退），不使用外掛和網路。 不附帶郵件傳送的草稿的本地儲存也在終端內完成。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">透過AI標記，備忘錄的內容不能傳送到Apple或外部伺服器嗎？</summary><div class="faq-answer"><p>無法傳送。 標記是Apple Foundation Models的裝置上AI只在iPhone中進行，不涉及網路通訊。 Apple Intelligence不支援的機型會自動回退到終端內的輕量整形，在這種情況下也沒有外部傳送。 詳情請看<a href="/zh-Hant/ai-tags/" style="color:var(--accent);">AI標籤自動追加的解說</a>。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">為什麼不做E2EE呢？</summary><div class="faq-answer"><p>因為備忘錄的投遞地址是“平時的郵件收件箱”。 在收件箱中讀取=接收伺服器可以解密，所以E2EE在結構上是不成立的。 E2EE優先時，專用客戶端是必須的，與“任何終端的郵件應用程式都可以閱讀”的本應用程式的價值交換。 對於必須使用E2EE的用途，推薦Standard Notes等。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">這個內容和隱私政策有什麼不同？</summary><div class="faq-answer"><p>法律處理的全文在<a href="/zh-Hant/privacy" style="color:var(--accent);">隱私政策</a>（特別是§12“關於加密的技術資訊”）。 這個頁面是根據Obsidian使用者的興趣（是否在本地完成）重新構建其技術內容的路徑圖。 如果有矛盾的話，以隱私政策為準。</p></div></details></div>
+        </div>
+      </div></section>
+
+      <!-- CTA -->
+      <div class="cta-box">
+        <div class="cta-box__title">
+          <span>確認通道後，嘗試</span>
+        </div>
+        <div class="cta-box__desc">
+          <span>免費3通/天。 Vault追記是本地的，正文不會留在伺服器上。</span>
+        </div>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="從App Store下載"> <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="從App Store下載" loading="lazy"> </a>
+      </div>
+
+      <!-- Internal Links -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06"> <span>相關頁面</span> </h2></div><div class="ce-chapter__body">
+        <div class="internal-links">
+          <a href="/zh-Hant/privacy"><span>隱私政策（正文）</span></a>
+          <a href="/zh-Hant/devlog/privacy-first-design"><span>開發記錄：隱私第一設計</span></a>
+          <a href="/zh-Hant/glossary/e2e-encryption/"><span>E2EE是指（為什麼本APP不適用）</span></a>
+          <a href="/zh-Hant/glossary/aes-gcm/"><span>AES-GCM是什麼</span></a>
+          <a href="/zh-Hant/ai-tags/"><span>自動新增AI標籤（在裝置上）</span></a>
+          <a href="/zh-Hant/obsidian/"><span>Obsidian合作的機制</span></a>
+          <a href="/zh-Hant/vs/obsidian-share-sheet/"><span>與Obsidian共享表的真誠比較</span></a>
+          <a href="/zh-Hant/faq"><span>常見問題</span></a>
+        </div>
+      </div></section>
+
+    </div>
+
+  <!-- One named next step -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="devlog" href="/zh-Hant/devlog/privacy-first-design" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> 接下來閱讀 </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> 為什麼做這個設計 — 開發記錄 </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> 開發者解說隱私第一設計的決策過程。 </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>相關內容</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/zh-Hant/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio替代應用程式比較</span></a></li>
+    <li><a href="/zh-Hant/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>給自己發郵件的方法</span></a></li>
+    <li><a href="/zh-Hant/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>常見問題</span></a></li>
+    <li><a href="/zh-Hant/blog/memo-app-encryption-comparison" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>備忘錄應用程式加密比較</span></a></li>
+  </ul>
+</section>
+
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hant" dir="ltr"><a class="site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">記下一點想法，邁出下一步。</p><p class="site-footer-description">從 iPhone 將筆記傳送至 Obsidian 和電子郵件。</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="頁尾導航">
+      <div class="footer__col">
+        <p class="footer__col-title">產品</p>
+        <a href="/zh-Hant/download/" class="footer__link">下載</a>
+        <a href="/zh-Hant/" class="footer__link">首頁</a>
+        <a href="/zh-Hant/use-cases/" class="footer__link">使用情境</a>
+        <a href="/zh-Hant/guides/" class="footer__link">使用指南</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較與遷移</p>
+        <a href="/zh-Hant/captio-alternative/" class="footer__link"><span>Captio替代</span></a>
+        <a href="/zh-Hant/note-to-email/" class="footer__link">將筆記傳送至信箱</a>
+        <a href="/zh-Hant/vs/" class="footer__link">比較</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">支援</p>
+        <a href="/zh-Hant/roadmap/" class="footer__link">公開路線圖</a>
+        <a href="/zh-Hant/devlog/" class="footer__link">開發日誌</a>
+        <a href="/zh-Hant/about/" class="footer__link">關於開發者</a>
+        <a href="/zh-Hant/faq" class="footer__link">常見問題</a>
+        <a href="/zh-Hant/privacy" class="footer__link">隱私</a>
+        <a href="/zh-Hant/contact" class="footer__link">聯絡我們</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 營運：YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

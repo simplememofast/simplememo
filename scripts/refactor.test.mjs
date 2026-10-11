@@ -1,5 +1,6 @@
 // Exercise the real publishing shell with synthetic, network-isolated commands.
 import './autopilot-act-publish.test.mjs';
+import './lib/refactor-behavior.test.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';

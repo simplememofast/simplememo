@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/ai-plugins/">
+  <title>AI plugins for Obsidian: capabilities and risks in 2026 | SimpleMemo</title>
+  <meta name="description" content="We compare 3 AI plugins for Obsidian using official documentation and source code captured on 2026-9-30. For Copilot, Smart Connections, and Text Generator, we examine destinations, note context and indexing, and differences in key storage. Vendor descriptions are distinguished from actual network behavior that has not been verified. Local support or an empty key field does not establish that all network communication stops or that data is encrypted.">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Current location of Obsidian×AI plug-in - What can and is dangerous [2026]">
+  <meta property="og:description" content="We compare 3 AI plugins for Obsidian using official documentation and source code captured on 2026-9-30. For Copilot, Smart Connections, and Text Generator, we examine destinations, note context and indexing, and differences in key storage. Vendor descriptions are distinguished from actual network behavior that has not been verified. Local support or an empty key field does not establish that all network communication stops or that data is encrypted.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-01">
+  <meta property="og:url" content="https://simplememofast.com/en/obsidian/ai-plugins/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-ai-plugins.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Current location of Obsidian×AI plug-in - What can and is dangerous [2026]">
+  <meta name="twitter:description" content="We compare 3 AI plugins for Obsidian using official documentation and source code captured on 2026-9-30. For Copilot, Smart Connections, and Text Generator, we examine destinations, note context and indexing, and differences in key storage. Vendor descriptions are distinguished from actual network behavior that has not been verified. Local support or an empty key field does not establish that all network communication stops or that data is encrypted.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-ai-plugins.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/en/obsidian/ai-plugins/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/ai-plugins/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/ai-plugins/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/ai-plugins/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/ai-plugins/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/ai-plugins/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/ai-plugins/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/ai-plugins/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/ai-plugins/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/ai-plugins/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/ai-plugins/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/ai-plugins/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.capture-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.capture-note{color:var(--text-secondary);font-size:.9rem}</style>
+<style>.lp-section code,.tip-box code,.faq-answer{overflow-wrap:anywhere}.capture-code{max-width:100%;min-width:0;font-size:.9rem}.capture-toc a{min-height:44px;display:inline-flex;align-items:center}.capture-results{display:grid;gap:1rem}.capture-results>div{min-width:0}.source-list a{overflow-wrap:anywhere}@media(min-width:701px){.capture-results{grid-template-columns:1fr 1fr}}</style>
+<style>
+.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem}.capture-toc a{padding:.4rem .2rem;min-height:44px}.article-meta{font-size:.9rem;line-height:1.8;color:var(--text-secondary)}.shot a{display:block}.shot figcaption a{display:inline}.lp-section code,.tip-box code{overflow-wrap:anywhere}.settings-table tbody th{width:32%}.role-map{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}.role-route{min-width:0;padding:1.25rem;border:1px solid var(--border);border-radius:12px;background:var(--surface)}.role-route h3{font-size:1.1rem;line-height:1.6;margin:0 0 1rem}.role-route ol{list-style:none!important;margin:0;padding:0!important}.role-route li{margin:0;padding:.75rem 1rem;line-height:1.75;background:rgba(100,180,255,.06);border-radius:8px}.role-route li+li{margin-top:1.35rem;position:relative}.role-route li+li:before{content:"↓";position:absolute;top:-1.5rem;left:calc(50% - .4rem);color:var(--accent-bright)}.role-caption{font-size:.875rem;color:var(--text-secondary);line-height:1.8}.capture-checks{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.capture-checks>div{min-width:0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px}.capture-checks h3{font-size:1rem;margin:0 0 .5rem}.capture-checks p{margin:.5rem 0}.source-list a{overflow-wrap:anywhere}.quickadd-crumb{font-size:.875rem;line-height:1.8;margin-bottom:1rem}.quickadd-crumb a{color:var(--accent-bright)}
+@media(max-width:700px){.role-map,.capture-checks{grid-template-columns:1fr}.role-route{padding:1rem}.settings-table tbody th{width:auto}.global-nav__inner{padding:0 1rem}.global-nav__logo{min-width:0;font-size:.82rem}.global-nav__logo img{flex-shrink:0}.lp-hero{padding-top:2.25rem}.lp-section{padding:2rem 0}.capture-toc{gap:.4rem .9rem}.shot{margin:1.25rem 0}.role-caption{text-align:left}}
+</style>
+
+<style>.zettel-guide .sample-code{max-width:100%;padding:1rem 1.15rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem;line-height:1.9}.zettel-guide :not(pre)>code{white-space:normal;overflow-wrap:anywhere}.zettel-guide .note-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;margin:1.5rem 0}.zettel-guide .note-flow>div{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;line-height:1.8}.zettel-guide .note-flow strong{display:block;color:var(--accent-bright);margin-bottom:.5rem}.zettel-guide .source-note{font-size:.85rem;color:var(--text-muted);line-height:1.8}.zettel-guide .raw-link{display:inline-block;padding:.5rem 0;min-height:44px}.zettel-guide h2,.zettel-guide h3{scroll-margin-top:76px}@media(max-width:720px){.zettel-guide .note-flow{grid-template-columns:1fr}.zettel-guide .sample-code{padding:.85rem;font-size:.85rem}}</style>
+<style>.lp-hero__title span{font-size:.78em}.reader-flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.7rem;padding:0!important;list-style:none;counter-reset:flow}.reader-flow li{counter-increment:flow;border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:1rem;min-width:0}.reader-flow strong,.reader-flow span{display:block}.reader-flow strong:before{content:counter(flow)". ";color:var(--accent-bright)}.reader-flow span{font-size:.86rem;color:var(--text-secondary);margin-top:.4rem}.comparison-table{font-size:.9rem;table-layout:fixed}.comparison-table th:first-child{width:15%}.rt-table caption{text-align:left;color:var(--text-secondary);font-size:.86rem;padding-bottom:.7rem}.comparison-table td{vertical-align:top;overflow-wrap:anywhere}.source-cites{font-size:.8rem;white-space:normal}.source-excerpt{margin:.8rem 0;padding:1rem;border:1px solid var(--border);background:var(--surface);border-radius:8px}.source-excerpt summary{cursor:pointer;min-height:32px;font-weight:700;overflow-wrap:anywhere}.source-excerpt pre{font-size:.8rem;line-height:1.7;overflow:auto;max-height:420px;white-space:pre-wrap;overflow-wrap:anywhere}.version-list{padding-left:1.3rem}.version-list li{margin:.7rem 0}.next-step{margin:2rem 0 3rem}.next-step>a{display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;text-decoration:none;color:inherit}.next-step span{display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem}.lp-section h3{margin:1.8rem 0 .8rem;font-size:1.15rem}.lp-section p{overflow-wrap:anywhere}.source-cites a{padding:0 .1rem}@media(max-width:800px){.comparison-table caption,.decision-table caption{display:block;width:100%;box-sizing:border-box}.reader-flow{grid-template-columns:repeat(2,minmax(0,1fr))}.comparison-table,.decision-table,.comparison-table tbody,.decision-table tbody{display:block}.comparison-table thead,.decision-table thead{display:none}.comparison-table tr,.decision-table tr{display:block;margin:1.1rem 0;border:1px solid var(--border);border-radius:8px;overflow:hidden}.comparison-table th,.comparison-table td,.decision-table th,.decision-table td{display:block!important;width:auto!important;white-space:normal!important;padding:1rem!important;border:0!important}.comparison-table th,.decision-table th{background:var(--surface)}.comparison-table td:before,.decision-table td:before{content:attr(data-label);display:block;font-weight:700;color:var(--accent-bright);margin-bottom:.45rem}.lp-hero{padding-top:2.5rem}}@media(max-width:360px){.reader-flow{grid-template-columns:1fr}}</style>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/en/obsidian/ai-plugins/#article",
+  "inLanguage": "en",
+  "headline": "Current location of Obsidian×AI plug-in - What can and is dangerous [2026]",
+  "description": "We compare 3 AI plugins for Obsidian using official documentation and source code captured on 2026-9-30. For Copilot, Smart Connections, and Text Generator, we examine destinations, note context and indexing, and differences in key storage. Vendor descriptions are distinguished from actual network behavior that has not been verified. Local support or an empty key field does not establish that all network communication stops or that data is encrypted.",
+  "url": "https://simplememofast.com/en/obsidian/ai-plugins/",
+  "datePublished": "2026-10-01",
+  "dateModified": "2026-10-01",
+  "author": {
+    "@type": "Person",
+    "name": "SimpleMemo Developer",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-ai-plugins.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/en/obsidian/ai-plugins/"
+  }
+}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/en/"},{"@type":"ListItem","position":2,"name":"Write on iPhone. Find it in your chosen Obsidian note.","item":"https://simplememofast.com/en/obsidian/"},{"@type":"ListItem","position":3,"name":"AI plugins for Obsidian Capabilities and risks in 2026","item":"https://simplememofast.com/en/obsidian/ai-plugins/"}]}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "en",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "If I select a local model, won't the plug-in communicate at all?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Model processing, indexing, web search, document conversion, and update checks use separate routes. Copilot’s documentation distinguishes routes for additional features; Smart Connections’ own code includes a GitHub update-check GET request. This document review did not establish that every feature avoids network communication or verify what is actually transmitted."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does Smart Connections send notes to the outside?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The pinned README states that a built-in local model creates embeddings and an index. This is the provider’s description. The project’s own source includes URL for update checks and initial guidance, while some model and settings code relies on external dependencies. This comparison did not measure whether notes were actually transmitted or whether any other network communication occurred."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does includeClipboard=true in Text Generator mean that the clipboard must be sent?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "source, there is a branch that the context builder can retrieve the clipboard when the setting is true. On the other hand, the initial template posted uses title, starredBlocks, and tg_selection, and does not specify the clipboard. The available value is different from the content of the request that is actually assembled. The actual payload is unmeasured."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "If the api_key of the saved data is empty, is the key encrypted?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can't judge from an empty key field alone. In Text Generator 0.8.7, there is a save process that emptys the plain key field and another save field, and if encryption is not available or if encrypt_keys is disabled, there is a branch that returns a fixed prefix and input key. I haven't tried the actual key storage or platform encryption behavior."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does this article compare the quality of AI responses, fees, and iPhone operation?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The comparison target is the data path and settings indicated in the official materials and code of the fixed 3 version. We have not confirmed the installation of plug-ins, the actual operation of the setting screen, model generation, billing, actual communication, the operation of terminals including iPhone, and compliance with the provider's storage and non-learning policies."
+      }
+    }
+  ],
+  "@id": "https://simplememofast.com/en/obsidian/ai-plugins/#faq"
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
+  <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="ai-plugins-guide site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="Global navigation" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/en/guides/">Guides</a></li><li><a href="/en/use-cases/">Use cases</a></li><li><a href="/en/vs/">Compare</a></li><li><a href="/en/blog/">Blog</a></li><li><a href="/en/about/">About the developer</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">Download</a><details class="site-languages"><summary aria-label="English · Choose a language"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>EN</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="en" dir="ltr"><p class="site-language-title">Choose a language</p><div class="site-language-grid"><a href="/obsidian/ai-plugins/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="en" aria-current="page"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh/obsidian/ai-plugins/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/ai-plugins/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/ai-plugins/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/ai-plugins/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/ai-plugins/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/ai-plugins/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/ai-plugins/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/ai-plugins/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content"><article class="container" style="max-width:980px">
+<header class="lp-hero sd-hero"><div class="sd-hero-copy"><p class="quickadd-crumb"><a href="/en/obsidian/">Obsidian</a> / Data path of AI plug-in</p><span class="lp-hero__label">Confirm with official materials and fixed sources</span><h1 class="lp-hero__title">AI plugins for Obsidian<br><span>Capabilities and risks in 2026</span></h1><p class="lp-hero__sub">Which part of the notebook goes from which function to where? Read the fixed version of Copilot, Smart Connections, and Text Generator, and compare the unconfirmed parts of the actual communication with those that can be understood in the material.</p><p class="article-meta">Written by: <a href="/en/about/">SimpleMemo Developer</a> · Sources checked: <time datetime="2026-09-30">2026-9-30</time></p></div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Before choosing, look at the model, context, index, and additional functions</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Compare the fixed version of the 3 with the destination and settings</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Copilot: Even if you choose a model, the path of additional functions remains separately</span><span aria-hidden="true">↗</span></a></nav></header>
+<section class="lp-section ce-chapter sd-chapter" id="answer"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">Before choosing, look at the model, context, index, and additional functions</h2></div><div class="ce-chapter__body"><p>The word "local support" alone does not determine the destination of the entire plug-in. Excerpts of notes passed to the model, where to make an index, web search and document conversion services, and diagnosis and update confirmation are checked separately.</p><ol class="reader-flow" aria-label="Four routes to be confirmed"><li><strong>Model</strong><span>provider・endpoint・agent</span></li><li><strong>Context to refer to</strong><span>Selections, excerpts, templates</span></li><li><strong>Index and search</strong><span>Local or another server</span></li><li><strong>Additional functions</strong><span>Web, document conversion, diagnosis, update</span></li></ol><p class="source-note">This diagram organizes the official documentation; it is not a record of actual network traffic. The comparison examines pinned documents and source code. It does not include operating settings screens, making actual requests, or auditing providers’ operations.</p><p>First of all, check the path of the function you use in the table below. The <strong>"source"</strong> in the table represents the constants and branches read from the code, and <strong>"source description"</strong> represents the description of the README and guide.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="comparison"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">Compare the 3 fixed versions with the destination and settings</h2></div><div class="ce-chapter__body"><div class="sd-table" tabindex="0" role="region" aria-label="Scrollable table"><table class="rt-table comparison-table"><caption>Official documents acquired on 2026 year 9 month 30. It is not a result table of actual communication.</caption><thead><tr><th scope="col">Fixed version</th><th scope="col">The route shown in the document</th><th scope="col">Context and index</th><th scope="col">Check key settings</th><th scope="col">Remaining unconfirmed</th></tr></thead><tbody>
+<tr><th scope="row">Copilot<br><small>4.0.12</small></th><td data-label="route"><strong>Explanation of the provider: </strong>hosted is Brevilabs and enterprise provider. Cloud BYOK is the specified provider/endpoint, and Local BYOK is the local endpoint. Opencode, Claude, and Codex also have their own routes. <span class="source-cites"><a href="https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/docs/copilot-plus-and-self-host.md#L75-L100" target="_blank" rel="noopener">Q03</a></span></td><td data-label="Context and index">The excerpt of the selected note is the model context. Miyo's index and search destination are local/remote in a separate setting. Check the additional route for web search, document conversion, and project context. <span class="source-cites"><a href="https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/docs/copilot-plus-and-self-host.md#L75-L100" target="_blank" rel="noopener">Q03</a>/<a href="https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/docs/vault-search-and-indexing.md#L17-L44" target="_blank" rel="noopener">Q05</a></span></td><td data-label="Key and Settings"><strong>Source: </strong>getter to check the availability of SecretStorage. Initial constants such as <code>enableMiyo=false</code> and <code>activeBackend=opencode</code>. The actual storage and the current GUI have not been confirmed. <span class="source-cites"><a href="https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/src/constants.ts#L801-L812" target="_blank" rel="noopener">Q07</a> / <a href="https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/src/constants.ts#L842-L859" target="_blank" rel="noopener">Q08</a> / <a href="https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/src/services/keychainService.ts#L239-L274" target="_blank" rel="noopener">Q09</a></span></td><td data-label="Unconfirmed">Compliance with actual payload, index target, terminal key storage and encryption, backend retention, non-learning policy. Self-selected diagnostic ZIP upload is usually distinguished from request.</td></tr>
+<tr><th scope="row">Smart Connections<br><small>4.7.2</small></th><td data-label="route"><strong>Explanation of the provider: </strong> Guide to the built-in local embedding model. It explains how to create an index that does not require the API key. <span class="source-cites"><a href="https://github.com/brianpetro/obsidian-smart-connections/blob/92e8d56c668f7711054b3a9de16bb73c12e5fa83/README.md#L24-L41" target="_blank" rel="noopener">Q10</a>/<a href="https://github.com/brianpetro/obsidian-smart-connections/blob/92e8d56c668f7711054b3a9de16bb73c12e5fa83/README.md#L98-L109" target="_blank" rel="noopener">Q11</a></span></td><td data-label="Context and index">README explains that it creates an index of Vault after enable. Some of the settings and models are externally dependent. The data path of all configurations has not been read.</td><td data-label="Key and Settings"><strong>Source: </strong> There is a GET to GitHub latest-release and URL that will be passed to the initial information. From the explanation of local embedding, it cannot be determined that there is no full communication. <span class="source-cites"><a href="https://github.com/brianpetro/obsidian-smart-connections/blob/92e8d56c668f7711054b3a9de16bb73c12e5fa83/src/main.js#L52-L99" target="_blank" rel="noopener">Q12</a>/<a href="https://github.com/brianpetro/obsidian-smart-connections/blob/92e8d56c668f7711054b3a9de16bb73c12e5fa83/src/main.js#L144-L169" target="_blank" rel="noopener">Q13</a></span></td><td data-label="Unconfirmed">Real index and model acquisition, entire dependency, actual communication and payload, alternative model, key storage, telemetry/retention.</td></tr>
+<tr><th scope="row">Text Generator<br><small>0.8.7</small></th><td data-label="route"><strong>Source initial value:</strong>OpenAI Chat (Langchain), <code>https://api.openai.com/v1</code>, key is empty. Ollama provider receives the set basePath. <span class="source-cites"><a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/default-settings.ts#L4-L40" target="_blank" rel="noopener">Q15</a> / <a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/LLMProviders/langchain/ollama.tsx#L14-L40" target="_blank" rel="noopener">Q23</a> / <a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/LLMProviders/langchain/openaiChat.tsx#L46-L74" target="_blank" rel="noopener">Q24</a></span></td><td data-label="Context and index">A branch that can get a value with <code>includeClipboard=true</code>. The initial template is title・starredBlocks・tg_selection. The value included in the actual prompt needs to be checked separately. <span class="source-cites"><a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/default-settings.ts#L4-L40" target="_blank" rel="noopener">Q15</a>/ <a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/scope/context-manager.ts#L355-L374" target="_blank" rel="noopener">Q17</a></span></td><td data-label="Key and Settings"><strong>Source initial value:</strong><code>encrypt_keys=false</code>. If it cannot be encrypted/is invalid, it is a branch that returns a fixed prefix + input key. Even if the plain key field is empty, it cannot be determined that it has been encrypted. <span class="source-cites"><a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/default-settings.ts#L4-L40" target="_blank" rel="noopener">Q15</a> / <a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/main.ts#L365-L373" target="_blank" rel="noopener">Q19</a> / <a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/main.ts#L664-L712" target="_blank" rel="noopener">Q20</a> / <a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/main.ts#L742-L749" target="_blank" rel="noopener">Q21</a> / <a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/constants.ts#L35-L39" target="_blank" rel="noopener">Q22</a></span></td><td data-label="Unconfirmed">Actual payload, current GUI, terminal encryption results, full-function communication, billing and response quality, and overall telemetry/retention.</td></tr>
+</tbody></table></div><p class="source-note">BYOK is a method that uses its own keys and endpoints. " "Use your own key" and "the processing will remain only in the terminal" are different conditions.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="copilot"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">Copilot: Even if you choose a model, the route of additional functions remains separately</h2></div><div class="ce-chapter__body"><p>The fixed version of the guide is divided into hosted, Cloud BYOK, Local BYOK, opencode, Claude, and Codex processing destinations. For example, even if the Local BYOK model is explained as a local endpoint, another service may be involved depending on the skill and project context used. <span class="source-cites"><a href="https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/docs/copilot-plus-and-self-host.md#L75-L100" target="_blank" rel="noopener">Q03</a></span></p><h3>Separe note references and Miyo indexes</h3><p>The document explains that the agent reads the notes and puts the necessary parts into the prompt of the selection model. " The behavior of "uploading the entire Vault just by opening Agent Chat" is not explained. Miyo has a local connection and a remote server connection, and the index and search destination are selected separately. The excerpt found in the search also fits into the context of the model. Just by using the local index, it cannot be said that the excerpt does not pass to the model provider. <span class="source-cites"><a href="https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/docs/copilot-plus-and-self-host.md#L75-L100" target="_blank" rel="noopener">Q03</a>/<a href="https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/docs/vault-search-and-indexing.md#L17-L44" target="_blank" rel="noopener">Q05</a></span></p><p>Document processing is not uniform. According to the document, Agent Chat's Miyo processing is done by local CLI, Quick Chat uses the connection destination Miyo service, and if it is remote, it is processed by that server. Saved project context that uses Web, YouTube, and binary files may use hosted project service, and it is a different route from Miyo's selection. <span class="source-cites"><a href="https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/docs/copilot-plus-and-self-host.md#L75-L100" target="_blank" rel="noopener">Q03</a></span></p><h3>Self-Host Mode is not guaranteed to block communication</h3><p>guide specifies that cloud does not disable even in Self-Host Mode. The route sent to the selected Claude, Codex, cloud model, search provider, etc. will remain. This is a setting for each function to check whether the function you want to use and the acceptable processing destination match. <span class="source-cites"><a href="https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/docs/copilot-plus-and-self-host.md#L103-L117" target="_blank" rel="noopener">Q04</a></span></p><h3>The key getter, initial constant, and diagnostic policy are read on their own basis</h3><p>The scope of KeychainService confirmed is a getter that checks the presence or absence of <code>app.secretStorage</code>, and if not, it causes an error. It is not a result of actually saving the key or a record of verifying the encryption of the OS. <code>enableMiyo=false</code>, <code>enableMiyoSearchSkill=false</code>, <code>activeBackend=opencode</code>, <code>debugFullFrames=true</code> are the initial values in the source and do not show the value of the migrated settings or the reader GUI. <span class="source-cites"><a href="https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/src/constants.ts#L801-L812" target="_blank" rel="noopener">Q07</a>/<a href="https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/src/constants.ts#L842-L859" target="_blank" rel="noopener">Q08</a>/<a href="https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/src/services/keychainService.ts#L239-L274" target="_blank" rel="noopener">Q09</a></span></p><p>README describes the random UUID of the hosted request and the diagnostic ZIP that the reader chooses to upload. ZIP's 60 days later deletion, temporary processing, non-retention, and non-learning of hosted requests are the policy explained by <strong> provider</strong>. We did not audit the operation of the backend here. It is also impossible to determine that the diagnostic ZIP will be sent automatically from <code>debugFullFrames=true</code> alone. <span class="source-cites"><a href="https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/README.md#L145-L154" target="_blank" rel="noopener">Q02</a></span></p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="smart"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">Smart Connections: Explanation of local embedding and the presence or absence of all communication</h2></div><div class="ce-chapter__body"><p>The README states that the built-in local model indexes your Vault without an API key. This describes how it can find related notes, but we did not run the model or observe actual indexing or network communication in this comparison. We also treat the README’s claims about privacy, offline operation, and mobile support as statements from the provider. <span class="source-cites"><a href="https://github.com/brianpetro/obsidian-smart-connections/blob/92e8d56c668f7711054b3a9de16bb73c12e5fa83/README.md#L24-L41" target="_blank" rel="noopener">Q10</a> / <a href="https://github.com/brianpetro/obsidian-smart-connections/blob/92e8d56c668f7711054b3a9de16bb73c12e5fa83/README.md#L98-L109" target="_blank" rel="noopener">Q11</a></span></p><p>The project’s own <code>src/main.js</code> contains code that schedules a GET request to GitHub latest-release during the update check after initialization. <code>smartconnections.app</code>’s URL is passed to StoryModal for first-time users. This confirms a code path related to network communication. StoryModal is implemented in a dependency; whether URL was actually loaded and what payload was passed remain unverified. <span class="source-cites"><a href="https://github.com/brianpetro/obsidian-smart-connections/blob/92e8d56c668f7711054b3a9de16bb73c12e5fa83/src/main.js#L52-L99" target="_blank" rel="noopener">Q12</a> / <a href="https://github.com/brianpetro/obsidian-smart-connections/blob/92e8d56c668f7711054b3a9de16bb73c12e5fa83/src/main.js#L144-L169" target="_blank" rel="noopener">Q13</a></span></p><p>Some model, settings, and HTTP code refers to external Smart Environment/jsbrains packages. This scope alone cannot establish that all features remain on the device, that telemetry is absent, or that notes are always transmitted. Distinguishing the local-index description, update-check code, and unexamined dependencies and network behavior shows what still needs investigation. <span class="source-cites"><a href="https://github.com/brianpetro/obsidian-smart-connections/blob/92e8d56c668f7711054b3a9de16bb73c12e5fa83/package.json#L30-L62" target="_blank" rel="noopener">Q14</a></span></p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="text"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">Text Generator: Check context candidates and key storage branches</h2></div><div class="ce-chapter__body"><h3>The settings that can get the clipboard and the actual prompt are different</h3><p>The initial setting of the fixed version has <code>includeClipboard=true</code>, and the context builder has a branch that can get the clipboard if the value is true. On the other hand, the <code>title</code>, <code>starredBlocks</code>, and <code>tg_selection</code> in the initial template quoted are not clipboard placeholders. <span class="source-cites"><a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/default-settings.ts#L4-L40" target="_blank" rel="noopener">Q15</a>/<a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/scope/context-manager.ts#L355-L374" target="_blank" rel="noopener">Q17</a></span></p><p>The value to be resolved changes depending on the template, frontmatter, context options, and selection range. Do not treat the list of available values as the values in the actual request as the same. This code confirmation does not result that "clipboard is always sent" or "all Vault is always sent". <span class="source-cites"><a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/scope/context-manager.ts#L355-L374" target="_blank" rel="noopener">Q17</a>/<a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/scope/context-manager.ts#L404-L462" target="_blank" rel="noopener">Q18</a></span></p><h3>Empty characters in the plain key field are not evidence of encryption</h3><p>The initial value is <code>encrypt_keys=false</code>. There is a process of emptying the plain key column when saving, and a process of preparing another secret-related field. When encryption is unavailable or encrypt_keys is disabled, <code>getEncryptedKey</code> returns a value that connects the fixed prefix and the input key. Even if the field name contains encrypted/hashed, it cannot be determined that it is encrypted bytes by itself. <span class="source-cites"><a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/default-settings.ts#L4-L40" target="_blank" rel="noopener">Q15</a> / <a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/main.ts#L365-L373" target="_blank" rel="noopener">Q19</a> / <a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/main.ts#L664-L712" target="_blank" rel="noopener">Q20</a> / <a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/main.ts#L742-L749" target="_blank" rel="noopener">Q21</a> / <a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/constants.ts#L35-L39" target="_blank" rel="noopener">Q22</a></span></p><p>key has not been entered, so the contents of the actual storage and the safeStorage operation of this terminal have not been confirmed. Before sharing configuration files and diagnostic records containing keys, you need to look not only at the plain column but also to other values that are saved.</p><h3>Select the initial provider and local correspondence separately</h3><p>The default provider in the source is OpenAI Chat (Langchain), with <code>https://api.openai.com/v1</code> as its endpoint. The Ollama provider has an implementation that accepts a configured basePath. The existence of a local provider alone does not establish where other features process data or prove that no network communication occurs. <span class="source-cites"><a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/default-settings.ts#L4-L40" target="_blank" rel="noopener">Q15</a> / <a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/LLMProviders/langchain/ollama.tsx#L14-L40" target="_blank" rel="noopener">Q23</a> / <a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/LLMProviders/langchain/openaiChat.tsx#L46-L74" target="_blank" rel="noopener">Q24</a></span></p><p>Attached request, automatic suggestions, slash suggestions, and JavaScript execution are OFF in the quoted initial value. These are also not the actual measurements of the current GUI. Please check the template you want to use and the saved settings in your environment. <span class="source-cites"><a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/default-settings.ts#L4-L40" target="_blank" rel="noopener">Q15</a> / <a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/default-settings.ts#L73-L102" target="_blank" rel="noopener">Q16</a></span></p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="choose"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">Decide on the settings to check according to your usage</h2></div><div class="ce-chapter__body"><div class="sd-table" tabindex="0" role="region" aria-label="Scrollable table"><table class="rt-table decision-table"><thead><tr><th scope="col">What I want to do</th><th scope="col">Target to be confirmed</th><th scope="col">What you can't understand from this comparison alone</th></tr></thead><tbody><tr><th scope="row">Handling notes in a cloud model</th><td data-label="Confirmation target">model/provider/endpoint, selection, excerpt, template, agent/skill to use</td><td data-label="Unconfirmed">Operation, billing, and response quality of actual payload, provider</td></tr><tr><th scope="row">I want to make an index locally</th><td data-label="Confirmation target">Embedding/index processing destination, remote server configuration, later model, model acquisition and additional functions</td><td data-label="Unconfirmed">Communication stoppage of all functions, all dependent routes, actual index on the terminal</td></tr><tr><th scope="row">I want to know the range of saving and sharing keys</th><td data-label="Confirmation target">Fields to be saved, branches that cannot be encrypted, and where to share logs/diagnostics/settings</td><td data-label="Unconfirmed">Compliance with the actual storage bytes and backend retention and deletion of the terminal</td></tr></tbody></table></div><p>This table does not report measurements taken after changing settings. Before using your own notes, use it to decide which features to enable and which data you are willing to send to each destination.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">Frequently Asked Questions</h2></div><div class="ce-chapter__body"><details class="faq-item"><summary class="faq-summary">If I select a local model, won't the plug-in communicate at all?</summary><div class="faq-answer">Model processing, indexing, web search, document conversion, and update checks use separate routes. Copilot’s documentation distinguishes routes for additional features; Smart Connections’ own code includes a GitHub update-check GET request. This document review did not establish that every feature avoids network communication or verify what is actually transmitted.</div></details>
+<details class="faq-item"><summary class="faq-summary">Does Smart Connections send notes to the outside?</summary><div class="faq-answer">The pinned README states that a built-in local model creates embeddings and an index. This is the provider’s description. The project’s own source includes URL for update checks and initial guidance, while some model and settings code relies on external dependencies. This comparison did not measure whether notes were actually transmitted or whether any other network communication occurred.</div></details>
+<details class="faq-item"><summary class="faq-summary">Does includeClipboard=true in Text Generator mean that the clipboard must be sent?</summary><div class="faq-answer">source, there is a branch that the context builder can retrieve the clipboard when the setting is true. On the other hand, the initial template posted uses title, starredBlocks, and tg_selection, and does not specify the clipboard. The available value is different from the content of the request that is actually assembled. The actual payload is unmeasured.</div></details>
+<details class="faq-item"><summary class="faq-summary">If the api_key of the saved data is empty, is the key encrypted?</summary><div class="faq-answer">You can't judge from an empty key field alone. In Text Generator 0.8.7, there is a save process that emptys the plain key field and another save field, and if encryption is not available or if encrypt_keys is disabled, there is a branch that returns a fixed prefix and input key. I haven't tried the actual key storage or platform encryption behavior.</div></details>
+<details class="faq-item"><summary class="faq-summary">Does this article compare the quality of AI responses, fees, and iPhone operation?</summary><div class="faq-answer">The comparison target is the data path and settings indicated in the official materials and code of the fixed 3 version. We have not confirmed the installation of plug-ins, the actual operation of the setting screen, model generation, billing, actual communication, the operation of terminals including iPhone, and compliance with the provider's storage and non-learning policies.</div></details></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="sources"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">Confirmed version and the original text of the basis</h2></div><div class="ce-chapter__body"><p>These are the official releases and pinned commits recorded on 2026-9-30 at 14:25 UTC. They were the versions checked at that time and are not guaranteed to remain the latest. Minimum Obsidian comes from the manifest. We do not infer actual device behavior from the mobile-support flag.</p><ul class="version-list"><li><strong>Copilot 4.0.12</strong> · minimum Obsidian 1.11.4 · <a href="https://github.com/logancyang/obsidian-copilot/releases/tag/4.0.12" target="_blank" rel="noopener">release</a> · <a href="https://github.com/logancyang/obsidian-copilot/tree/8c56781c43fd696e8b2707f170b1f2e2fc61f28b" target="_blank" rel="noopener">commit 8c56781c43</a></li><li><strong>Smart Connections 4.7.2</strong> · minimum Obsidian 1.8.7 · <a href="https://github.com/brianpetro/obsidian-smart-connections/releases/tag/4.7.2" target="_blank" rel="noopener">release</a> · <a href="https://github.com/brianpetro/obsidian-smart-connections/tree/92e8d56c668f7711054b3a9de16bb73c12e5fa83" target="_blank" rel="noopener">commit 92e8d56c66</a></li><li><strong>Text Generator 0.8.7</strong> · minimum Obsidian 1.6.0 · <a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/releases/tag/0.8.7" target="_blank" rel="noopener">release</a> · <a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/tree/4b9ddf876793d79ba680941d0d093471eaa150eb" target="_blank" rel="noopener">commit 4b9ddf8767</a></li></ul><p>The official registry has also been fixed to commit <code>2db5da29e67e7600176c8c9450fd1c36c3a6831b</code>. For the 24 quote, 14 file, and 579 line, we have confirmed that it matches the bytes/SHA256, line range, and quotation of the original file. It is a check to confirm the reproducibility of the fixed version of the material, and it is not a runtime privacy authentication.</p><p><a href="/assets/downloads/obsidian-ai-plugins/source-quotes-20260930.json" download="source-quotes-20260930.json">Read the fixed quotations and confirmation range of 24 with JSON</a></p><h3>Main explanation and code quote</h3><p>The original English text and code are within the scope of the fixed commit. You can proceed to the original text of GitHub from the Q number on the table.</p><details class="source-excerpt"><summary>Copilot · docs/copilot-plus-and-self-host.md · Q03</summary><p><a href="https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/docs/copilot-plus-and-self-host.md#L75-L100" target="_blank" rel="noopener">Open the original text of the fixed commit</a></p><pre tabindex="0"><code>75: 
+76: | Model source                | How access works                                               | Who processes the prompt                                        |
+77: | --------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------- |
+78: | **Copilot-hosted**          | Lite, Plus, or included Supporter access                       | Brevilabs and the enterprise model provider used for that model |
+79: | **Cloud BYOK**              | Your API key under BYOK                                        | The provider and endpoint you configured                        |
+80: | **Local BYOK**              | Ollama, LM Studio, or another local OpenAI-compatible endpoint | Your local endpoint                                             |
+81: | **opencode-reported model** | Authentication managed by opencode                             | The provider behind that opencode model                         |
+82: | **Claude**                  | Claude Code login or environment                               | Anthropic under your Claude account                             |
+83: | **Codex**                   | Codex CLI login through `codex-acp`                            | OpenAI under your Codex or ChatGPT account                      |
+84: 
+85: A Claude or ChatGPT subscription is not an API key. Use the Claude or Codex Agent Chat setup for those subscriptions. Use BYOK only when you have API access or an OpenAI-compatible endpoint.
+86: 
+87: ## Understand service data routes
+88: 
+89: The selected model is only one possible route. A feature may call another service for the part of the task you asked it to perform:
+90: 
+91: - A **Copilot-hosted Skill** sends the search query, URL, or document needed by that Skill to Brevilabs.
+92: - **Plus document processing** sends the supported document to Copilot&#x27;s hosted processor.
+93: - In **Agent Chat**, **Miyo document processing** runs through the local Miyo CLI, so PDF and EPUB parsing stays on this computer even when search uses a remote Miyo server.
+94: - In **Quick Chat**, **Miyo document processing** uses the connected Miyo service. A configured remote Miyo server processes the document there rather than on this computer.
+95: - Saved **project context** that needs web, YouTube, or binary-file conversion can use Copilot&#x27;s hosted project service. The Miyo Document Processor choice does not change that project route.
+96: - An agent can read a local note and include relevant text in the prompt sent to the selected model. Opening Agent Chat alone does not upload the whole vault.
+97: 
+98: For a workflow that does not send task content to Brevilabs, use direct Markdown context, local tools or local Miyo, and a local model. Disable Copilot&#x27;s cloud-backed Skills for every agent you use. Do not add web pages, YouTube links, or binary files as saved project context when their hosted conversion is outside your intended boundary.
+99: 
+100: The [privacy policy](https://www.obsidiancopilot.com/en/privacy) describes how Copilot&#x27;s hosted requests are processed. Your model provider and Miyo server have their own boundaries and terms.</code></pre></details><details class="source-excerpt"><summary>Copilot · docs/copilot-plus-and-self-host.md · Q04</summary><p><a href="https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/docs/copilot-plus-and-self-host.md#L103-L117" target="_blank" rel="noopener">Open the original text of the fixed commit</a></p><pre tabindex="0"><code>103: 
+104: Supporter and eligible legacy licenses can open **Settings → Copilot → Self-Host** and enable **Self-Host Mode**.
+105: 
+106: When it is on, Copilot:
+107: 
+108: - Lets you supply Firecrawl, Perplexity, Parallel, or Exa credentials for web search.
+109: - With OpenCode selected, routes Agent Chat web searches through that selected provider while keeping its API key inside Obsidian. This does not require Obsidian&#x27;s command line interface.
+110: - Disables OpenCode&#x27;s native web-search and web-fetch tools so they cannot bypass the selected route. Full-page fetching through OpenCode is unavailable until the self-host providers share a supported fetch interface.
+111: - Lets you supply a Supadata key for YouTube transcripts.
+112: - Directs you to BYOK for local or self-hosted model endpoints.
+113: - Flags and sorts cloud agents and models below local or self-hosted choices.
+114: 
+115: It does not disable the cloud. Claude, Codex, Copilot-hosted models, cloud BYOK providers, Firecrawl, Perplexity, Parallel, Exa, and Supadata can still send data to their services when you select them. The warnings make those routes visible so you can decide.
+116: 
+117: You do not need Self-Host Mode to use a local BYOK model or local Miyo. Those are available independently.</code></pre></details><details class="source-excerpt"><summary>Copilot · src/services/keychainService.ts · Q09</summary><p><a href="https://github.com/logancyang/obsidian-copilot/blob/8c56781c43fd696e8b2707f170b1f2e2fc61f28b/src/services/keychainService.ts#L239-L274" target="_blank" rel="noopener">Open the original text of the fixed commit</a></p><pre tabindex="0"><code>239:   /** Whether the OS keychain is available in this Obsidian version. */
+240:   // DESIGN NOTE — intentionally only checks for the `secretStorage` object,
+241:   // not individual methods (`getSecret`/`setSecret`/`listSecrets`). Obsidian
+242:   // ships SecretStorage as a single API surface (1.11.4); there is no
+243:   // released version where the object exists but methods are missing.
+244:   // Capability-probing each method would add branching for a partial-API
+245:   // world that does not exist. If a future review flags this again, point
+246:   // them at this note.
+247:   isAvailable(): boolean {
+248:     return !!this.app.secretStorage;
+249:   }
+250: 
+251:   /** Get the current vault namespace ID. */
+252:   getVaultId(): string {
+253:     return this.vaultId;
+254:   }
+255: 
+256:   /**
+257:    * Set the vault namespace ID from persisted settings.
+258:    * Reason: called during load to replace the path-derived fallback with the
+259:    * stable persisted ID, so vault renames don&#x27;t orphan keychain entries.
+260:    */
+261:   setVaultId(id: string): void {
+262:     this.vaultId = id;
+263:   }
+264: 
+265:   /**
+266:    * Access SecretStorage with a runtime guard.
+267:    * Reason: replaces scattered non-null assertions with a single guard
+268:    * that produces a clear error when keychain is unavailable.
+269:    */
+270:   private get storage(): SecretStorage {
+271:     if (!this.app.secretStorage) {
+272:       throw new Error(&quot;OS keychain (SecretStorage) is not available.&quot;);
+273:     }
+274:     return this.app.secretStorage;</code></pre></details><details class="source-excerpt"><summary>Smart Connections · src/main.js · Q13</summary><p><a href="https://github.com/brianpetro/obsidian-smart-connections/blob/92e8d56c668f7711054b3a9de16bb73c12e5fa83/src/main.js#L144-L169" target="_blank" rel="noopener">Open the original text of the fixed commit</a></p><pre tabindex="0"><code>144:   async check_for_updates() {
+145:     if (await this.is_new_plugin_version(this.manifest.version)) {
+146:       // console.log(&quot;opening release notes modal&quot;);
+147:       try {
+148:         this.ReleaseNotesView.open(this.app.workspace, this.manifest.version);
+149:       } catch (error) {
+150:         console.error(&#x27;Failed to open ReleaseNotesView&#x27;, error);
+151:       }
+152:       await this.set_last_known_version(this.manifest.version);
+153:     }
+154:     window.setTimeout(this.check_for_update.bind(this), 3000);
+155:   }
+156: 
+157:   async check_for_update() {
+158:     try {
+159:       const { json: response } = await requestUrl({
+160:         url: &quot;https://api.github.com/repos/brianpetro/obsidian-smart-connections/releases/latest&quot;,
+161:         method: &quot;GET&quot;,
+162:         headers: {
+163:           &quot;Content-Type&quot;: &quot;application/json&quot;,
+164:         },
+165:         contentType: &quot;application/json&quot;,
+166:       });
+167:       const latest_release = response.tag_name;
+168:       if (latest_release !== this.manifest.version) {
+169:         if (!this.update_available || this.latest_release_version !== latest_release) {</code></pre></details><details class="source-excerpt"><summary>Text Generator · src/default-settings.ts · Q15</summary><p><a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/default-settings.ts#L4-L40" target="_blank" rel="noopener">Open the original text of the fixed commit</a></p><pre tabindex="0"><code>4: const DEFAULT_SETTINGS: TextGeneratorSettings = {
+5:   version: pkg.version as any,
+6:   endpoint: &quot;https://api.openai.com/v1&quot;,
+7:   models: [],
+8:   api_key: &quot;&quot;,
+9:   encrypt_keys: false,
+10:   selectedProvider: &quot;OpenAI Chat (Langchain)&quot;,
+11:   max_tokens: 5000,
+12:   temperature: 0.7,
+13:   frequency_penalty: 0.5,
+14:   showStatusBar: true,
+15:   outputToBlockQuote: false,
+16:   freeCursorOnStreaming: false,
+17:   allowJavascriptRun: false,
+18:   experiment: false,
+19:   promptsPath: &quot;textgenerator/templates&quot;,
+20:   textGenPath: &quot;textgenerator/&quot;,
+21:   prefix: &quot;\n\n&quot;,
+22:   tgSelectionLimiter: &quot;^\\*\\*\\*&quot;,
+23:   stream: true,
+24:   context: {
+25:     customInstructEnabled: true,
+26:     includeClipboard: true,
+27:     customInstruct: `Title: {{title}}
+28:   
+29: Starred Blocks: {{starredBlocks}}
+30: 	  
+31: {{tg_selection}}`,
+32: 
+33:     contextTemplate: `Title: {{title}}
+34: 	
+35: Starred Blocks: {{starredBlocks}}
+36: 	  
+37: {{tg_selection}}`,
+38:   },
+39:   requestTimeout: 300000,
+40:   options: {</code></pre></details><details class="source-excerpt"><summary>Text Generator · src/scope/context-manager.ts · Q17</summary><p><a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/scope/context-manager.ts#L355-L374" target="_blank" rel="noopener">Open the original text of the fixed commit</a></p><pre tabindex="0"><code>355:       {},
+356:       this.getFrontmatter(this.getMetaData(templatePath)),
+357:       contextObj.frontmatter
+358:     );
+359: 
+360:     if (contextOptions.includeClipboard)
+361:       try {
+362:         blocks[&quot;clipboard&quot;] = await this.getClipboard();
+363:       } catch {
+364:         // empty
+365:       }
+366: 
+367:     const options = {
+368:       selection,
+369:       selections,
+370:       ...blocks[&quot;frontmatter&quot;],
+371:       ...blocks[&quot;headings&quot;],
+372:       content: ctnt,
+373:       context,
+374:       ...blocks,</code></pre></details><details class="source-excerpt"><summary>Text Generator · src/main.ts · Q20</summary><p><a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/main.ts#L664-L712" target="_blank" rel="noopener">Open the original text of the fixed commit</a></p><pre tabindex="0"><code>664:   encryptAllKeys() {
+665:     // check if user have LLMProviderOptionsKeysHashed object (upgrading from older version)
+666:     this.settings.LLMProviderOptionsKeysHashed ??= {};
+667: 
+668:     const keyList: string[] = [];
+669: 
+670:     this.settings.api_key_encrypted = this.getEncryptedKey(
+671:       this.settings.api_key
+672:     );
+673: 
+674:     // get all secret keys
+675:     Object.entries(this.settings?.LLMProviderOptions).forEach(([key1, l1]) =&gt; {
+676:       if (typeof l1 != &quot;object&quot;) return;
+677:       Object.entries(l1).forEach(([key2, l2]) =&gt; {
+678:         if (key2.toLowerCase().includes(&quot;key&quot;) &amp;&amp; typeof l2 == &quot;string&quot;) {
+679:           keyList.push(`${key1}.${key2}`);
+680:         }
+681:       });
+682:     });
+683: 
+684:     keyList.forEach((pth) =&gt; {
+685:       const keyval =
+686:         (get(this.settings?.LLMProviderOptions, pth) as never as string) || &quot;&quot;;
+687: 
+688:       const encrypted = this.getEncryptedKey(keyval);
+689:       this.settings.LLMProviderOptionsKeysHashed[pth] = encrypted;
+690:     });
+691:   }
+692: 
+693:   removeApikeys(settings: typeof this.settings): typeof this.settings {
+694:     const LLMProviderOptions = JSON.parse(
+695:       JSON.stringify(settings?.LLMProviderOptions)
+696:     ) as typeof this.settings.LLMProviderOptions;
+697: 
+698:     // get all secret keys
+699:     Object.entries(LLMProviderOptions).forEach(([key1, l1]) =&gt; {
+700:       if (typeof l1 != &quot;object&quot;) return;
+701:       Object.entries(l1).forEach(([key2, l2]) =&gt; {
+702:         if (key2.toLowerCase().includes(&quot;key&quot;) &amp;&amp; typeof l2 == &quot;string&quot;) {
+703:           set(LLMProviderOptions, `${key1}.${key2}`, &quot;&quot;);
+704:         }
+705:       });
+706:     });
+707: 
+708:     return {
+709:       ...settings,
+710:       api_key: &quot;&quot;,
+711:       LLMProviderOptions,
+712:     };</code></pre></details><details class="source-excerpt"><summary>Text Generator · src/main.ts · Q21</summary><p><a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/main.ts#L742-L749" target="_blank" rel="noopener">Open the original text of the fixed commit</a></p><pre tabindex="0"><code>742:   getEncryptedKey(apiKey: string) {
+743:     if (!safeStorage?.isEncryptionAvailable() || !this.settings.encrypt_keys) {
+744:       return `${DecryptKeyPrefix}${apiKey}`;
+745:     }
+746: 
+747:     return safeStorage.encryptString(apiKey) as Buffer;
+748:   }
+749: </code></pre></details><details class="source-excerpt"><summary>Text Generator · src/constants.ts · Q22</summary><p><a href="https://github.com/nhaouari/obsidian-textgenerator-plugin/blob/4b9ddf876793d79ba680941d0d093471eaa150eb/src/constants.ts#L35-L39" target="_blank" rel="noopener">Open the original text of the fixed commit</a></p><pre tabindex="0"><code>35:   custom_header: true,
+36: };
+37: 
+38: export const DecryptKeyPrefix = &quot;__@#key_prefix#@__&quot;;
+39: </code></pre></details><h3>What not confirmed in this comparison</h3><p>We did not verify plugin installation or activation, the settings GUI, generation, calls to a model/API, real keys, transmitted packets, a network audit of all dependencies, or compliance with provider-backend retention, training, and deletion policies. SimpleMemo input, delivery, AI tags, synchronization, device-specific behavior, speed, productivity, traffic, and AI-citation effects are also outside the scope.</p><p class="source-note">Written by SimpleMemo Developer. This comparison of source materials appears on a site operated by YURIKA, K.K.. It is not an official Obsidian endorsement or a privacy certification of the plugins.</p></div></section>
+<aside class="next-step"><a data-next-step="explore" href="/en/obsidian/plugins/"><span>Next read</span><strong>How to choose the entire plug-in and check the existing guide</strong></a></aside>
+</article></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="Footer navigation"><div class="footer__col"><p class="footer__col-title">Product</p><a href="/en/download/" class="footer__link">Download</a><a href="/en/" class="footer__link">Home</a><a href="/en/obsidian/" class="footer__link">Obsidian integration</a></div><div class="footer__col"><p class="footer__col-title">Compare and switch</p><a href="/en/vs/" class="footer__link">Compare</a><a href="/en/obsidian/compare/" class="footer__link">Obsidian comparison</a></div><div class="footer__col"><p class="footer__col-title">Support</p><a href="/en/about/" class="footer__link">About the developer</a><a href="/en/faq" class="footer__link">FAQ</a><a href="/en/privacy" class="footer__link">Privacy</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

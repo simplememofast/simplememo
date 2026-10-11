@@ -15,6 +15,19 @@ on:
       - 'assets/**'
       - 'scripts/perf/**'
       - '.github/workflows/pagespeed-audit.yml'
+  # 公開後の速度監査は main への push でしか走らなかった。auto-merge は
+  # GITHUB_TOKEN でマージするため GitHub の再帰防止で push run が起きず、
+  # 2026-09-19T02:35Z 以降この監査は1回も走っていない（その間に監査対象パスへ
+  # 触れたコミットが8件 main に入った）。escalation-rules.json の
+  # post-merge-performance-budget（who: self_then_owner / within_hours: 24 /
+  # channel: daily_report・2026-09-18 オーナー承認）は、この監査が走ることを
+  # 前提にした規則なので、経路が無いままでは死文になる。
+  #
+  # 日次にするのは規則の cadence に合わせたため。09:00 JST の
+  # autopilot-act.mjs による failure 取り込みより前に終わる時刻に置く。
+  # **GitHub の scheduled 起動は数十分遅れることがある**ので 05:30 JST は公称値。
+  schedule:
+    - cron: '30 20 * * *'   # 05:30 JST
   workflow_dispatch:
 permissions:
   contents: read
@@ -82,7 +95,10 @@ jobs:
             measure https://simplememofast.com/en/ "production-en-$run"
           done
           NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/browser_checks.cjs 2>&1 | tee "$PERF_RESULTS/browser-output.txt"
-          if [[ "$GITHUB_EVENT_NAME" == "push" && "$GITHUB_REF" == "refs/heads/main" ]]; then
+          # **本番を測る唯一の経路。**PERF_BASE_URL を production へ向けるのは
+          # リポジトリ内でここだけ（grep -rn PERF_BASE_URL）。push が起きない
+          # auto-merge 経由のデプロイを拾うため、schedule も同じ扱いにする。
+          if [[ ( "$GITHUB_EVENT_NAME" == "push" || "$GITHUB_EVENT_NAME" == "schedule" ) && "$GITHUB_REF" == "refs/heads/main" ]]; then
             PERF_BASE_URL=https://simplememofast.com PERF_RESULTS="$PERF_RESULTS/production-browser" NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/browser_checks.cjs 2>&1 | tee "$PERF_RESULTS/production-browser-output.txt"
           fi
       - name: Report all runs and check mobile regression budgets

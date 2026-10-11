@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/blog/memo-app-encryption-comparison">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script><title>Comparar el cifrado de las aplicaciones de notas | ¿Cuál se puede dejar segura?</title>
+  <meta name="description" content="Compare los tipos de aplicaciones de notas 10 en términos de rango de cifrado y gestión de claves en el terminal, comunicación y almacenamiento en la nube. Además de las diferencias entre AES-GCM, CBC y E2EE, se organizan el cifrado adjunto de Bear, el nuevo método de Joplin y la protección avanzada de datos del memorando Apple. También explicaremos las condiciones de configuración y cómo comprobar el destino de copia de seguridad y exportación.">
+  <meta property="og:title" content="Comparar el cifrado de las aplicaciones de notas | ¿Cuál se puede dejar segura?">
+  <meta property="og:description" content="Compare los tipos de aplicaciones de notas 10 en términos de rango de cifrado y gestión de claves en el terminal, comunicación y almacenamiento en la nube. Además de las diferencias entre AES-GCM, CBC y E2EE, se organizan el cifrado adjunto de Bear, el nuevo método de Joplin y la protección avanzada de datos del memorando Apple. También explicaremos las condiciones de configuración y cómo comprobar el destino de copia de seguridad y exportación.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-21T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/es/blog/memo-app-encryption-comparison">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog-memo-app-encryption-comparison.png?v=9d06fe45e8">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Comparar el cifrado de las aplicaciones de notas | ¿Cuál se puede dejar segura?">
+  <meta name="twitter:description" content="Compare los tipos de aplicaciones de notas 10 en términos de rango de cifrado y gestión de claves en el terminal, comunicación y almacenamiento en la nube. Además de las diferencias entre AES-GCM, CBC y E2EE, se organizan el cifrado adjunto de Bear, el nuevo método de Joplin y la protección avanzada de datos del memorando Apple. También explicaremos las condiciones de configuración y cómo comprobar el destino de copia de seguridad y exportación.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-memo-app-encryption-comparison.png?v=9d06fe45e8">
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/es/blog/memo-app-encryption-comparison#article",
+  "inLanguage": "es",
+  "image": "https://simplememofast.com/assets/img/og/blog-memo-app-encryption-comparison.png?v=9d06fe45e8",
+  "headline": "Comparar el cifrado de las aplicaciones de notas | ¿Cuál se puede dejar segura?",
+  "description": "Compare los tipos de aplicaciones de notas 10 en términos de rango de cifrado y gestión de claves en el terminal, comunicación y almacenamiento en la nube. Además de las diferencias entre AES-GCM, CBC y E2EE, se organizan el cifrado adjunto de Bear, el nuevo método de Joplin y la protección avanzada de datos del memorando Apple. También explicaremos las condiciones de configuración y cómo comprobar el destino de copia de seguridad y exportación.",
+  "url": "https://simplememofast.com/es/blog/memo-app-encryption-comparison",
+  "datePublished": "2026-03-21",
+  "dateModified": "2026-09-09",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/es/blog/memo-app-encryption-comparison"
+  }
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Inicio",
+      "item": "https://simplememofast.com/es/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://simplememofast.com/es/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Comparación del cifrado de las aplicaciones de notas",
+      "item": "https://simplememofast.com/es/blog/memo-app-encryption-comparison"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/es/blog/memo-app-encryption-comparison#webpage",
+  "inLanguage": "es",
+  "name": "Comparación de cifrado de aplicaciones de notas [2026 años]",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/es/#website"
+  },
+  "url": "https://simplememofast.com/es/blog/memo-app-encryption-comparison"
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <style>.lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}[data-lang="en"]{display:none}[data-lang].active{display:block}span[data-lang].active{display:inline}.lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}.lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}.lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.tip-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;margin-bottom:1rem}.tip-card__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem}.tip-card__name{font-size:1.05rem;font-weight:700}.tip-card__rank{font-size:.875rem;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:12px;padding:.2rem .6rem;font-weight:700}.tip-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.75rem}.tip-card__example{font-size:.875rem;color:var(--text-secondary);line-height:1.7;background:rgba(100,180,255,.04);border-left:3px solid var(--accent);padding:.75rem 1rem;border-radius:0 6px 6px 0;margin-top:.5rem}.faq-item{border-bottom:1px solid var(--border)}.faq-details{padding:0}.faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}.faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}.faq-details[open] .faq-summary::after{transform:rotate(45deg)}.faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}.cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}.cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}.cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}.internal-links a:hover{border-color:var(--accent)}.step-number{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);border-radius:50%;font-size:.875rem;font-weight:700;color:var(--accent);margin-right:.5rem;flex-shrink:0}@media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+    .encryption-table{width:100%;border-collapse:collapse;font-size:.8rem;margin:1.5rem 0;overflow-x:auto;display:block}
+    .encryption-table th,.encryption-table td{padding:.6rem .5rem;border:1px solid var(--border);text-align:left;vertical-align:top;white-space:nowrap}
+    .encryption-table th{background:rgba(100,180,255,.08);color:var(--accent);font-weight:700;position:sticky;top:0}
+    .encryption-table td:first-child{font-weight:700;color:#fff}
+    .encryption-table tr:nth-child(even){background:rgba(255,255,255,.02)}
+    .badge-e2e{background:rgba(52,199,89,.15);color:#34c759;padding:.15rem .4rem;border-radius:4px;font-size:.75rem;font-weight:700}
+    .badge-partial{background:rgba(255,159,10,.15);color:#ff9f0a;padding:.15rem .4rem;border-radius:4px;font-size:.75rem;font-weight:700}
+    .badge-none{background:rgba(255,69,58,.1);color:#ff453a;padding:.15rem .4rem;border-radius:4px;font-size:.75rem;font-weight:700}
+    @media(max-width:768px){.encryption-table{font-size:.7rem}.encryption-table th,.encryption-table td{padding:.4rem .3rem}}
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+    .tldr{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:1.5rem;line-height:1.85}
+    .encryption-review,.table-hint{font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+    .lp-section p{line-height:1.85;margin:.75rem 0}.lp-section a,.encryption-callout a{color:var(--accent);text-underline-offset:3px}
+    .lp-section[id]{scroll-margin-top:76px}.tip-card h3{font-size:1rem;line-height:1.7}
+    .encryption-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:8px;margin:1rem 0}.encryption-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+    .encryption-table{display:table;width:100%;min-width:1000px;font-size:.85rem;margin:0;table-layout:fixed}
+    .encryption-table th,.encryption-table td{white-space:normal;overflow-wrap:anywhere;padding:.8rem;line-height:1.75}
+    .encryption-table th:first-child{width:14%}.encryption-table th:last-child{width:15%}.encryption-table tbody th{background:transparent;color:var(--text);position:static}
+    .encryption-table caption{text-align:left;padding:1rem;font-weight:700;color:var(--text)}
+    .encryption-steps{padding-left:1.4rem;line-height:1.9}.encryption-steps li{margin:1rem 0}
+    .encryption-callout{margin:1.75rem 0;padding:1.25rem;border-left:3px solid var(--accent);background:rgba(77,163,255,.07);border-radius:0 8px 8px 0;line-height:1.85}
+</style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+    <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/es/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/memo-app-encryption-comparison">
+
+  <!-- JSON-LD: FAQPage (auto-generated from visible FAQ content) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/es/blog/memo-app-encryption-comparison#faq",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Si es AES-256, ¿es E2EE?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. AES-256 representa el código y la longitud de la clave. Si es E2EE o no está determinado por dónde está cifrado y descifrado y quién puede usar la clave. El almacenamiento AES-256, en el que el servidor administra la clave, y el diseño que descifra solo en el terminal del usuario son diferentes."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Cuál es la diferencia entre AES-GCM y AES-CBC?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "GCM combina cifrado y autenticación. CBC no detecta la manipulación del cifrado solo, por lo que es necesario combinar correctamente el mecanismo de autenticación. La seguridad de toda la aplicación no se puede clasificar solo por el nombre del método."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Si es E2EE, ¿los archivos en el terminal también se cifrarán?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ese no es necesariamente el caso. El cifrado síncrono de Obsidian Sync y Joplin no cifra los archivos y bases de datos locales en el terminal de la misma manera. Por favor, compruebe el cifrado de disco del terminal, la protección local de la aplicación y la copia de seguridad por separado."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Puedo cifrar notas que contienen imágenes y PDF con Bear?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Bear 2.4 y posteriores pueden cifrar notas individuales, incluidos los archivos adjuntos con Bear Pro. Agregue una contraseña a la nota de destino y actualice la aplicación de destino de sincronización a una versión compatible. La visualización del título y las notas no cifradas deben revisarse por separado."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿El viejo diario del Día Uno también se convierte automáticamente en E2EE?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Las nuevas revistas por defecto son E2EE después de 4.2, pero las antiguas deben revisarse individualmente. Las preguntas frecuentes oficiales actuales le muestran cómo copiar las entradas al nuevo diario E2EE en lugar de cambiar directamente al diario cifrado estándar."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿El correo electrónico que se le envió desde SimpleMemo E2EE?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. El cifrado de la Outbox y en el terminal del historial de transmisión es independiente de la entrega de correo electrónico. El texto pasa por el API saliente y la plataforma de distribución externa, y una copia permanece en el lado del servicio de correo. Por favor, compruebe también la configuración de protección y uso compartido de la bandeja de entrada y del socio."
+      }
+    }
+  ],
+  "inLanguage": "es"
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2"/>
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be"/>
+<link rel="stylesheet" href="/assets/css/capture-next.css?v=4e62584640"/>
+<link rel="stylesheet" href="/assets/css/capture-third.css?v=ce878a94dc"/>
+<link rel="stylesheet" href="/assets/css/capture-fourth.css?v=b5c0888897"/>
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full capture-next capture-third capture-fourth site-designed" data-design-family="refined">
+  <!-- Global Navigation -->
+  <nav aria-label="Navegación principal" class="global-nav" data-site-header="">
+<div class="global-nav__inner">
+<a class="global-nav__logo site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/es/guides/">Guías</a><a href="/es/use-cases/">Casos de uso</a><a href="/es/vs/">Comparar</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+<li><a href="/es/guides/">Guías</a></li>
+<li><a href="/es/use-cases/">Casos de uso</a></li>
+<li><a href="/es/vs/">Comparar</a></li>
+<li><a href="/es/methods/"><span>Método</span></a></li>
+<li><a href="/es/blog/"><span>Blog</span></a></li>
+<li><a href="/es/glossary/"><span>Glosario</span></a></li>
+<li><a href="/es/faq">Preguntas frecuentes</a></li>
+<li><a href="/es/about/">Sobre el desarrollador</a></li>
+<li><a href="/es/devlog/">Registro de desarrollo</a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="blog" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>Descargar</span></a></li>
+</ul>
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="Español · Elegir idioma"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ES</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="es" dir="ltr"><p class="site-language-title">Elegir idioma</p><div class="site-language-grid"><a href="/blog/memo-app-encryption-comparison" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/memo-app-encryption-comparison" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/blog/memo-app-encryption-comparison" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/blog/memo-app-encryption-comparison" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/memo-app-encryption-comparison" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="es" aria-current="page"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/pt-BR/blog/memo-app-encryption-comparison" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/memo-app-encryption-comparison" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/memo-app-encryption-comparison" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/memo-app-encryption-comparison" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+<a class="global-nav__cta" data-cta-cluster="blog" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">Descargar</a>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menú"><span>Menú</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+</div>
+</div>
+</nav>
+
+<main class="page-content"><div class="container"><header class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy"><div class="lp-hero__label"><span>Cifrado y seguridad</span></div><h1 class="lp-hero__title"><span>Comparación del cifrado de la aplicación Memo <br/> [2026]</span></h1><p class="lp-hero__sub"><span> "compatible con AES-256" y "el operador no puede leer el texto" son condiciones diferentes. Según los documentos oficiales de la aplicación 10, compare qué copias están encriptadas, quién maneja la clave de descifrado y qué se activa a sí mismas. </span></p>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>Autor: <a href="/es/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Fecha de lanzamiento: <time datetime="2026-03-21">2026 03 mes 21</time></span> </p><a class="ce-read-link" href="#encryption-scopes">Lee el texto <span aria-hidden="true">↓</span></a></div><nav aria-label="Elige el contenido que quieres leer" class="ce-routes"><a class="ce-route" href="#heading-encryption-scopes"><span>01</span><b>Conozca el rango de protección</b></a><a class="ce-route" href="#heading-ten-apps"><span>02</span><b>Comparar aplicaciones 10</b></a><a class="ce-route" href="#heading-check-your-copy"><span>03</span><b>Comprobar la configuración</b></a></nav><figure aria-hidden="true" class="ce-stage cn-concept"><p class="ce-stage-label">SEGURIDAD / TRES CAPAS</p><div class="cn-concept-list"><div class="cn-concept-row"><span>01</span><strong>Comunicación</strong></div><div class="cn-concept-row"><span>02</span><strong>Al guardar</strong></div><div class="cn-concept-row"><span>03</span><strong>E2EE</strong></div></div><figcaption class="ce-stage-foot">Compruebe el área de protección de cifrado por separado</figcaption></figure></header><div class="ce-article">
+
+<div class="tldr ce-lede"><p><span><strong>Para comprobar primero: </strong> La escena de protección para TLS de comunicación, almacenamiento cifrado en terminales y servidores, y E2EE es diferente. Incluso si la sincronización es E2EE, el mismo cifrado no necesariamente continúa con los archivos locales y los PDF exportados en el terminal. </span></p></div>
+<p class="encryption-review"><span>Última confirmación: <time datetime="2026-09-09">2026 año 9 mes 9</time>. El autor es el desarrollador de SimpleMemo. Los productos de otras empresas comparan materiales oficiales y no son el resultado de pruebas de intrusión o auditorías de seguridad independientes para cada aplicación. </span></p>
+<nav aria-label="Tabla de contenido del artículo" class="internal-links"><a href="#encryption-scopes"><span>Rengo de cifrado</span></a><a href="#ten-apps"><span>Comparación de aplicaciones 10</span></a><a href="#check-your-copy"><span>Compruebe su configuración</span></a><a href="#simplememo-scope"><span>Rango SimpleMemo</span></a></nav>
+<section class="lp-section ce-chapter" id="encryption-scopes"><div class="ce-chapter__head"><h2 data-ce-number="01" id="heading-encryption-scopes"><span>TLS・Cifrado al guardar・E2EE ¿Cuál es la diferencia? </span></h2></div><div class="ce-chapter__body"><div><div class="tip-card"><h3>Durante la comunicación: Proteger la ruta al destino de la conexión</h3><p>TLS protege los canales de comunicación como aplicaciones y servidores. No es un mecanismo que se oculta del destino de la conexión hasta que el texto es procesado por el destino de la conexión. No hay contradicción con el servicio buscando y distribuyendo la nota enviada por HTTPS.</p></div>
+<div class="tip-card"><h3>Al guardar: ¿Qué archivo y cuya clave debe cifrarse?</h3><p>La base de datos, el servidor de sincronización y la copia de seguridad en el terminal son copias separadas. Incluso si el disco del servidor está encriptado, si el servicio gestiona la clave, se puede descifrar durante el procesamiento necesario. También distingue entre el cifrado de todo el terminal y el mecanismo por el cual la aplicación cifra cada nota.</p></div>
+<div class="tip-card"><h3>E2EE: No pase la clave de descifrado del texto al destino de sincronización</h3><p>El cifrado de extremo a extremo cifra y descifra en el lado del terminal correspondiente. Sin embargo, los metadatos como títulos y horarios, enlaces públicos, transmisión a funciones de IA y exportación después del descifrado deben confirmarse por separado. Incluso si la aplicación tiene la función E2EE, es posible que no sea válida en su cuaderno.</p></div></div></div></section>
+<section class="lp-section ce-chapter" id="cipher-and-keys"><div class="ce-chapter__head"><h2 data-ce-number="02" id="heading-cipher-and-keys"><span>AES-GCM・AES-CBC・Lectura cero conocimiento</span></h2></div><div class="ce-chapter__body"><div><p><strong>AES-GCM</strong> combina cifrado y autenticación para generar etiquetas de autenticación utilizadas para la detección de manipulaciones. <strong>AES-CBC</strong> es un modo que proporciona secreto y no detecta la manipulación por sí mismo. LA AUTENTICACIÓN DEBE COMBINARSE ADECUADAMENTE CON OTROS MECANISMOS COMO MAC. El nombre CBC por sí solo no puede determinar que el producto se haya roto. <a href="https://csrc.nist.gov/pubs/sp/800/38/d/final">Especificación GCM de NIST</a>, <a href="https://csrc.nist.gov/pubs/sp/800/38/a/final">especificación de modo de cifrado, incluyendo CBC</a>.</p><p>"256" es la longitud de la clave y no explica quién tendrá la clave o la configuración de copia de seguridad. El E2EE, que utiliza el AES-GCM, también está diseñado para proteger solo el interior del terminal con el AES-GCM.</p><p><strong>Cero conocimiento</strong> se utiliza como un término para describir el diseño de "el operador no puede descifrar el texto" en productos de almacenamiento. No hay garantía de que no se recopile el nombre del método de cifrado o de todos los datos. Dado que también hay un diseño para almacenar la clave cifrada en el servidor, no determina solo por "la clave no existe en el servidor", y comprueba el sujeto y los datos de destino que se pueden descifrar.</p></div></div></section>
+<section class="lp-section ce-chapter ce-chapter--wide" id="ten-apps"><div class="ce-chapter__head"><h2 data-ce-number="03" id="heading-ten-apps"><span>Aplicación 10: Compare el rango y la configuración antes del método</span></h2></div><div class="ce-chapter__body"><div><p class="table-hint">Puede desplazarse hacia un lado para comprobar "condiciones" y "copia para ser revisada por separado". La mesa también se puede mover hacia un lado en el teclado.</p><div aria-labelledby="ten-apps" class="encryption-scroll ce-table-scroll" role="region" tabindex="0"><table class="encryption-table"><caption>Comparación de materiales oficiales (2026 año 9 mes 9 confirmado)</caption><thead><tr><th scope="col">Aplicación</th><th scope="col">Rengo de cifrado</th><th scope="col">Condiciones de activación y confirmación</th><th scope="col">Copia y permiso para ser confirmados por separado</th><th scope="col">Ensis</th></tr></thead><tbody><tr><th scope="row">Standard Notes</th><td>Cifra y sincroniza el contenido en el lado del terminal. La especificación pública es XChaCha20-Poly1305.</td><td>Los datos locales también se cifran cuando se utiliza una cuenta. Para su uso sin cuenta, la protección del código de acceso, etc. se establece por separado.</td><td>Compruebe las condiciones del destino guardado para archivos exportados y textos copiados a otra aplicación.</td><td><a href="https://standardnotes.com/help/security/encryption">Rango de cifrado</a> · <a href="https://standardnotes.com/help/3/how-does-standard-notes-secure-my-notes">Método</a></td></tr><tr><th scope="row">Obsidian Sync</th><td>La configuración predeterminada para cifrar Vault remoto con E2EE. AES-256-GCM.</td><td>En el remoto Vault que eligió el cifrado estándar, el lado Obsidian administra la clave. Compruebe la configuración y la contraseña de cifrado.</td><td>El archivo Markdown del Vault local no está cifrado por el propio Obsidian. El cifrado de disco y la copia de seguridad del terminal son diferentes.</td><td><a href="https://obsidian.md/help/sync/security">Seguridad de sincronización</a></td></tr><tr><th scope="row">Notion</th><td>La comunicación es TLS 1.2 o superior, AES-256 al guardar.</td><td>El documento oficial explica el cifrado en el lado del servicio. Se distingue del E2EE de todo el cuaderno que solo el usuario tiene una clave de descifrado.</td><td>También se confirma el permiso para pasar a la página pública, invitado y servicio de colaboración. El cifrado por sí solo no limita el alcance de la publicación.</td><td><a href="https://www.notion.com/help/security-and-privacy">Política de seguridad</a></td></tr><tr><th scope="row">Evernote</th><td>Almacenamiento AES-256 por comunicación TLS y clave de gestión Google. El texto seleccionado también tiene cifrado de frases de contraseña.</td><td>El método para publicar el texto seleccionado es AES-128-CBC. Es diferente de la función de convertir toda la nota y los archivos adjuntos a E2EE en masa.</td><td>Los textos, títulos y archivos adjuntos fuera del rango cifrado no se tratan como la misma protección de frases de contraseña.</td><td><a href="https://evernote.com/en-us/security">Guardar y comunicar</a> · <a href="https://help.evernote.com/hc/en-us/articles/208314128-What-type-of-encryption-does-Evernote-use">Cifrado de texto</a></td></tr><tr><th scope="row">Apple Memo / Apple Notes</th><td>La protección normal de iCloud está encriptada durante la comunicación y el almacenamiento. El memorando iCloud está sujeto a E2EE con protección avanzada de datos (ADP).</td><td>Comprueba el estado activo de ADP y los métodos de recuperación. Todos los participantes necesitan ADP para mantener el E2EE del ADP en la nota compartida.</td><td>Algunos metadatos están protegidos por el estándar. Los archivos PDF y archivos adjuntos de correo electrónico exportados son copias diferentes de la nota iCloud original.</td><td><a href="https://support.apple.com/en-us/102651">Ángo de protección de iCloud</a></td></tr><tr><th scope="row">Google Keep</th><td>Cifrado durante la comunicación y el almacenamiento. Procese el contenido para proporcionar funciones como la búsqueda.</td><td>La protección de los documentos oficiales no se lee como E2EE, donde solo el usuario tiene la clave.</td><td>Compruebe la protección del socio compartido y la cuenta Google. La política de no utilizar contenido en publicidad y el diseño de no procesar contenido son diferentes.</td><td><a href="https://support.google.com/keep/answer/10431250?hl=en">Privacidad y protección en Keep</a></td></tr><tr><th scope="row">Bear</th><td>Cifra las notas individuales con Bear Pro. Después de 2.4, los archivos adjuntos como imágenes y PDF también son elegibles.</td><td>Añade una contraseña a la nota de destino y actualiza la aplicación del dispositivo para sincronizar. Distinguido por el bloqueo de toda la aplicación.</td><td>El título se mostrará en la lista de cuadernos. El ADP de iCloud también está confirmado, incluyendo el rango de títulos, etiquetas, etc.</td><td><a href="https://bear.app/faq/how-to-encrypt-lock-notes-with-bear/">Cifrado de notas</a> · <a href="https://blog.bear.app/2025/05/bear-2-4-update-better-encryption-smarter-todo-and-more/">Soporte de archivos adjuntos 2.4</a> · <a href="https://bear.app/faq/syncing-privacy/">Rango de sincronización</a></td></tr><tr><th scope="row">Joplin</th><td>E2EE con sincronización activada. El nuevo método nativo de v3.2 es AES-256-GCM.</td><td>Utilice el procedimiento oficial para activar el cifrado con un dispositivo y espere a que se complete la sincronización y establezca la clave en otro terminal.</td><td>Los datos locales no están protegidos por este cifrado sincrónico. Compruebe también el cifrado del disco del terminal.</td><td><a href="https://joplinapp.org/help/apps/sync/e2ee/">Procedimiento de configuración</a> · <a href="https://joplinapp.org/help/dev/spec/e2ee/native_encryption/">Nuevo método</a> · <a href="https://github.com/laurent22/joplin/blob/dev/SECURITY.md">Datos en el terminal</a></td></tr><tr><th scope="row">Día Uno</th><td>El nuevo diario que se creará después de 4.2 es E2EE por defecto. El texto y los medios son elegibles.</td><td>Compruebe el estado de los diarios antiguos individualmente. Las preguntas frecuentes oficiales actuales no pueden cambiar directamente del cifrado estándar, y se copian en el nuevo diario E2EE.</td><td>Compruebe también la dirección de almacenamiento de la llave. El llavero iCloud es E2EE, pero la copia de seguridad de clave iCloud única de Day One no se convierte en E2EE incluso si ADP está habilitado. Otra copia del diario que escribí.</td><td><a href="https://dayoneapp.com/guides/day-one-sync/end-to-end-encryption-faq/">Preguntas frecuentes de E2EE</a></td></tr><tr><th scope="row">SimpleMemo / Simple Memo</th><td>Cifra la Outbox y el historial de transmisión en el terminal con AES-GCM de CryptoKit. La nueva clave se guarda en el llavero con 256-bit.</td><td>El envío de correo electrónico no es E2EE. La transmisión API pasa por la plataforma de distribución externa, y una copia permanece en la bandeja de entrada.</td><td>La protección en el terminal no garantiza el servicio de correo ni el método de almacenamiento del Obsidian Vault vinculado.</td><td><a href="/es/privacy#technical">Descripción técnica</a></td></tr></tbody></table></div></div></div></section>
+<p class="encryption-callout"><span>Si quieres dejar una nota corta en tu bandeja de entrada, <a data-cta-cluster="blog" data-cta-placement="mid" data-cta-position="mid" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">SimpleMemo</a> también es una opción. Por favor, compruebe el cifrado en el terminal y la configuración de almacenamiento y uso compartido para los correos electrónicos salientes, respectivamente. </span></p>
+<section class="lp-section ce-chapter" id="check-your-copy"><div class="ce-chapter__head"><h2 data-ce-number="04" id="heading-check-your-copy"><span>Antes de usar, compruebe la configuración y copie los puntos 5</span></h2></div><div class="ce-chapter__body"><div><ol class="encryption-steps"><li><strong>Abra la configuración de los datos existentes. </strong>No juzgues solo por el nombre de la aplicación, comprueba si el cifrado es válido con la nota compartida del diario Vault que utilizas. El valor predeterminado para los datos nuevos no se aplica necesariamente también a los datos antiguos.</li><li><strong>Asegure el método de recuperación. </strong>Compruebe cómo lo guiará el producto, como contraseñas de sincronización, claves de cifrado y contactos de recuperación. Por favor, evite borrar el terminal con la llave perdida e intentarlo.</li><li><strong>Compruebe el alcance de la divulgación, el intercambio y la cooperación. </strong>El envío de enlaces públicos y servicios externos es diferente del cifrado en el momento del almacenamiento. La información de trabajo se ajustará al rango de almacenamiento y uso compartido aprobado por la afiliación.</li><li><strong>Compruebe la sincronización y el archivo adjunto con el 1 del maniquí. </strong> No utilice información confidencial en el contenido y compruebe si está abierto en otro terminal, si el archivo adjunto es correcto y cómo se muestra el estado de cifrado. Esto por sí solo no prueba la seguridad de la implementación del cifrado.</li><li><strong>Compruebe el destino de exportación y la copia de seguridad. </strong>Las copias hechas a las carpetas Markdown, PDF, correo electrónico y descarga pueden salir del E2EE de la aplicación original. No elimine los datos originales antes de que se complete la confirmación de la migración.</li></ol></div></div></section>
+<section class="lp-section ce-chapter" id="simplememo-scope"><div class="ce-chapter__head"><h2 data-ce-number="05" id="heading-simplememo-scope"><span>El alcance protegido por SimpleMemo y lo que queda después de la transmisión</span></h2></div><div class="ce-chapter__body"><div><p>SimpleMemo cifra las notas pendientes en Outbox y el historial de envíos en el dispositivo mediante AES-GCM. El componente de cifrado compartido de las aplicaciones publicadas crea claves de 256 bits, las guarda en Keychain y utiliza CryptoKit para cifrar y descifrar. Esta implementación protege los datos locales incluidos en ese ámbito.</p><p><strong> No es el E2EE de toda la ruta de correo electrónico. </strong>Envíe desde la aplicación a API con HTTPS, y se enviará a su bandeja de entrada a través de una plataforma de entrega de correo electrónico externa. " "Las notas no transmitidas en el terminal están encriptadas" no significa que "el texto no se manejará en el proceso de entrega" o "no pasará por el servidor externo".</p><p>Incluso si se ha enviado y el elemento objetivo de Outbox está excluido, el historial de transmisión, los correos electrónicos entrantes y las notas al enlace no desaparecerán. La operación de eliminación de archivos no se denomina eliminación completa del medio de almacenamiento. Puede consultar el destino de almacenamiento y el período de retención en <a href="/es/privacy#technical"> Descripción técnica de la política de privacidad</a> y <a href="/es/privacy-architecture/"> Data Passage</a>.</p><p>Al usar guardar en Obsidian, la protección de la sincronización y la copia de seguridad con Vault local depende de su configuración. Para aplicaciones en las que es esencial que la empresa no pueda descifrar el texto, seleccione primero el almacenamiento y el funcionamiento del E2EE que cumpla con las condiciones.</p></div></div></section>
+<section class="lp-section ce-chapter" id="encryption-faq"><div class="ce-chapter__head"><h2 data-ce-number="06" id="heading-encryption-faq"><span>Preguntas frecuentes</span></h2></div><div class="ce-chapter__body"><div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Si es AES-256, ¿es E2EE?</summary><div class="faq-answer"><p>No. AES-256 representa el código y la longitud de la clave. Si es E2EE o no está determinado por dónde está cifrado y descifrado y quién puede usar la clave. El almacenamiento AES-256, en el que el servidor administra la clave, y el diseño que descifra solo en el terminal del usuario son diferentes.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">¿Cuál es la diferencia entre AES-GCM y AES-CBC?</summary><div class="faq-answer"><p>GCM combina cifrado y autenticación. CBC no detecta la manipulación del cifrado solo, por lo que es necesario combinar correctamente el mecanismo de autenticación. La seguridad de toda la aplicación no se puede clasificar solo por el nombre del método.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Si es E2EE, ¿los archivos en el terminal también se cifrarán?</summary><div class="faq-answer"><p>Ese no es necesariamente el caso. El cifrado síncrono de Obsidian Sync y Joplin no cifra los archivos y bases de datos locales en el terminal de la misma manera. Por favor, compruebe el cifrado de disco del terminal, la protección local de la aplicación y la copia de seguridad por separado.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">¿Puedo cifrar notas que contienen imágenes y PDF con Bear?</summary><div class="faq-answer"><p>Bear 2.4 y posteriores pueden cifrar notas individuales, incluidos los archivos adjuntos con Bear Pro. Agregue una contraseña a la nota de destino y actualice la aplicación de destino de sincronización a una versión compatible. La visualización del título y las notas no cifradas deben revisarse por separado.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">¿El viejo diario del Día Uno también se convierte automáticamente en E2EE?</summary><div class="faq-answer"><p>Las nuevas revistas por defecto son E2EE después de 4.2, pero las antiguas deben revisarse individualmente. Las preguntas frecuentes oficiales actuales le muestran cómo copiar las entradas al nuevo diario E2EE en lugar de cambiar directamente al diario cifrado estándar.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">¿El correo electrónico que se le envió desde SimpleMemo E2EE?</summary><div class="faq-answer"><p>No. El cifrado de la Outbox y en el terminal del historial de transmisión es independiente de la entrega de correo electrónico. El texto pasa por el API saliente y la plataforma de distribución externa, y una copia permanece en el lado del servicio de correo. Por favor, compruebe también la configuración de protección y uso compartido de la bandeja de entrada y del socio.</p></div></details></div></div></div></section>
+<!-- Related Articles -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="07" id="chapter-7"> <span>Artículos relacionados</span> </h2></div><div class="ce-chapter__body">
+
+<div class="internal-links">
+<a href="/es/blog/memo-app-security-comparison"> <span>Comparación de seguridad de aplicaciones de notas</span> </a>
+<a href="/es/blog/memo-app-privacy"> <span>Comparación de privacidad de las aplicaciones de notas</span> </a>
+<a href="/es/vs/standard-notes/"> <span>SimpleMemo contra Standard Notes</span> </a>
+<a href="/es/vs/obsidian/"> <span>SimpleMemo contra Obsidian</span> </a>
+<a href="/es/vs/notion/"> <span>SimpleMemo contra Notion</span> </a>
+<a href="/es/vs/evernote/"> <span>SimpleMemo contra Evernote</span> </a>
+</div>
+</div></section>
+<div class="cta-box"><div class="cta-box__title"><span>Deja una nota en tu bandeja de entrada</span></div><div class="cta-box__desc"><span>Cifra Outbox y el historial de envíos en el dispositivo. Consulta también el alcance de la protección durante el envío y en el destino.</span></div><a aria-label="Descargar de App Store" class="app-store-badge" data-cta-cluster="blog" data-cta-placement="bottom" data-cta-position="bottom" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><img alt="Descargar de App Store" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="109"/></a></div>
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="08" id="chapter-8"><span>Páginas relacionadas</span></h2></div><div class="ce-chapter__body"><div class="internal-links"><a href="/es/blog/free-memo-apps-ranking"><span>Clasificación de aplicaciones de notas gratuitas</span></a><a href="/es/blog/offline-memo-apps"><span>Aplicación de notas sin conexión</span></a><a href="/es/blog/memo-taking-tips"><span>Consejos sobre cómo tomar notas 10 selección</span></a><a href="/es/blog/best-memo-apps-2026"><span>Aplicación de notas recomendada 20 selección</span></a><a href="/es/blog/business-memo-apps-2026"><span>Selección de la aplicación Business Memo 7</span></a><a href="/es/glossary/e2e-encryption/"><span>Terminología: cifrado E2E</span></a><a href="/es/glossary/aes-gcm/"><span>Terminología: AES-GCM</span></a><a href="/es/blog/"><span>Lista del blog</span></a></div></div></section>
+<aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="compare" href="/es/blog/fastest-memo-app-benchmark" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>Leer a continuación</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Junto a la comparación, vea el valor medido real</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>Hay una tabla que realmente mide el inicio de la aplicación de notas principal y el inicio de la entrada. </span> </span> </a>
+</aside><section class="related-links ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="09" id="chapter-9"> <span>Contenido relacionado</span> </h2></div><div class="ce-chapter__body">
+
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/es/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Comparación de aplicaciones alternativas Captio</span></a></li>
+<li><a href="/es/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Cómo enviarte un correo electrónico a ti mismo</span></a></li>
+<li><a href="/es/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Lista de comparación de aplicaciones de memos</span></a></li>
+<li><a href="/es/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Guía de uso</span></a></li>
+<li><a href="/es/comparison/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Guía de comparación completa</span></a></li>
+<li><a href="/es/blog/business-memo-apps-2026" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Aplicación de notas de negocios 2026</span></a></li>
+</ul>
+</div></section><aside class="author-bio" style="margin:3rem auto 2rem;max-width:800px;padding:1.5rem 2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;gap:1.25rem;align-items:flex-start;">
+<img alt="Simple Memo - para Obsidian" height="48" loading="lazy" src="/assets/img/app-icon-56.png" style="border-radius:50%;flex-shrink:0;margin-top:.2rem;" width="48"/>
+<div>
+<p style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">AI ATAKA</p>
+<p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;"><span>SimpleMemo. Desde iPhone, estamos desarrollando una aplicación que deja texto en las notas de la dirección de correo electrónico establecida y del socio. </span></p>
+<div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+<a href="/es/about/" style="font-size:.8rem;color:var(--accent);text-decoration:none;">Perfil</a>
+<a href="https://x.com/simplememofast" rel="me noopener" style="font-size:.8rem;color:var(--accent);text-decoration:none;" target="_blank">X/Twitter</a>
+<a href="https://github.com/simplememofast" rel="me noopener" style="font-size:.8rem;color:var(--accent);text-decoration:none;" target="_blank">GitHub</a>
+</div>
+</div>
+</aside></div></div>
+<!-- SEO: Auto-generated related content links -->
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+
+
+<!-- Author Bio -->
+
+</main>
+
+      <section class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+        <h3 style="font-size:1rem;margin-bottom:0.75rem">Referencias</h3>
+        <ul style="font-size:0.85rem;line-height:1.6;list-style:none;padding:0">
+        <li><a href="https://csrc.nist.gov/pubs/sp/800/38/d/final" target="_blank" rel="noopener">NIST (2007). SP 800-38D: Recomendación para los modos de operación de cifrado en bloque: Modo Galois/Counter (GCM) y GMAC.</a></li>
+        <li><a href="https://www.rfc-editor.org/rfc/rfc8446" target="_blank" rel="noopener">Rescorla, E. (2018) RFC 8446: La versión del protocolo de seguridad de la capa de transporte (TLS) 1.3. IETF.</a></li>
+        <li><a href="https://csrc.nist.gov/pubs/sp/800/38/a/final" target="_blank" rel="noopener">NIST (2001). SP 800-38A: Recomendación para los modos de funcionamiento del cifrado en bloque (CBC, CFB, OFB, CTR).</a></li>
+        <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener">Apple Inc. Documentación de Apple CryptoKit.</a></li>
+        </ul>
+      </section>
+
+    <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="es" dir="ltr"><a class="site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Una pequeña nota. Un paso más.</p><p class="site-footer-description">Envía notas desde tu iPhone a Obsidian y por correo electrónico.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav aria-label="Navegación del pie de página" class="footer__nav capture-footer-wide">
+<div class="footer__col">
+<p class="footer__col-title">Producto</p>
+<a class="footer__link" href="/es/download/">Descargar</a>
+<a class="footer__link" href="/es/">Inicio</a>
+<a class="footer__link" href="/es/use-cases/">Casos de uso</a>
+<a class="footer__link" href="/es/guides/">Guías</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Comparar y cambiar</p>
+<a class="footer__link" href="/es/captio-alternative/"><span>Alternativas a Captio</span></a>
+<a class="footer__link" href="/es/note-to-email/">Notas por correo</a>
+<a class="footer__link" href="/es/vs/">Comparar</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Lecturas</p>
+<a class="footer__link" href="/es/blog/"><span>Blog</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Soporte</p>
+<a class="footer__link" href="/es/roadmap/">Hoja de ruta pública</a>
+<a class="footer__link" href="/es/devlog/">Registro de desarrollo</a>
+<a class="footer__link" href="/es/about/">Sobre el desarrollador</a>
+<a class="footer__link" href="/es/faq">Preguntas frecuentes</a>
+<a class="footer__link" href="/es/privacy">Privacidad</a>
+<a class="footer__link" href="/es/contact">Contacto</a>
+</div>
+</nav><p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Operado por YURIKA, K.K.</p></div></footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body></html>

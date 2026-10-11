@@ -46,6 +46,37 @@
  * 法務ページは JS で本文を描くものがある。取れた HTML が殻だけでも 200 は返るので、
  * **殻の指紋が「安定している」ように見える。**改定を永久に見逃す形なので、
  * 本文らしさ（長さと語）を確かめてから指紋を取る。
+ *
+ * 【指紋は本文だけに取る — 2026-09-24】
+ * **ページ全体の指紋は、メニューが1語増えるだけで動いていた。**Web アーカイブの
+ * 写しで同じ関数を回して確かめた（写しの指紋が台帳の値と一致することで、CI が見た
+ * 本文と同じだと確認したうえで比べた）:
+ *
+ *   anthropic  09-08 / 09-15 / 09-21 / 09-22 と4回指紋が変わったが、差分はフッターの
+ *              メニュー（Commerce / Scientists / Sales / Developer blog の追加）だけ。
+ *              条項の本文（<main> の中）は 4回とも同じ
+ *   appsflyer  08-25〜09-24 に3回変わったが、差分はヘッダーのメニューと顧客事例の並び
+ *              （eBay → Soundcloud 等）だけ。<main> の中は3回とも同じ
+ *   search_console 09-15 に変わったが、差分はヘッダーのメニューの並び順だけ
+ *
+ * **戻す側に倒してある設計でも、これは戻しすぎの誤りでは済まない。**毎週のように
+ * 人の判定が消えると、読み直しが「メニューが動いた合図」になって読まれなくなる ——
+ * 2026-09-24 にオーナーが32マスを付け直した翌週（09-28）に、うち8マス（anthropic・
+ * appsflyer）が本文の変わらないまま戻る状態だった。
+ *
+ * だから台帳の行に `body_scope` を持たせ、**指紋を取る範囲を本文に絞る**:
+ *
+ *   "main"               … ページの <main> 要素（ちょうど1つのときだけ）の中の文字
+ *   { "from", "to" }     … ページの文字のうち、from の最初の出現から、その後ろの to の
+ *                          直前まで（<main> が無いページ用）
+ *   なし                 … これまでどおりページ全体
+ *
+ * 記録した指紋がどの範囲のものかは `fingerprint_scope` に残す（なし＝ページ全体）。
+ * **範囲を取れなかった回は、戻す側に倒す**（unknown にすると、作りが変わった日から
+ * 嘘の ok が永久に残る）。ただしページ全体が前回と1文字も変わっていなければ戻さない
+ * （範囲の設定を間違えただけで人の判定を消さない）。
+ * 範囲を初めて付けた行は、**ページ全体の指紋が前回と同じときだけ**本文の指紋へ
+ * 付け替える。違っていれば本文が変わったかは判らないので、戻す。
  */
 
 import fs from 'node:fs';
@@ -88,6 +119,97 @@ export function toText(html) {
     .replace(/&nbsp;/gi, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+// [2026-09-24] **toText は変えないこと。**範囲を初めて付ける回は「ページ全体の指紋が
+// 前回と同じか」で付け替えを決める。toText の出力が1文字でも変わると、全社が
+// 「ページが変わった」になって一斉に戻る。
+
+/**
+ * `<main>` 要素の中身。**ちょうど1つのときだけ**返す（0個・2個以上は null）。
+ *
+ * 数えるのは script / style / コメントを落としたあと —— JS の文字列に `<main` が
+ * 入っているページで数え違えないため。入れ子や2個目を推測で選ばない
+ * （**選び方を間違えた範囲の指紋は、安定して間違い続ける**）。
+ */
+export function mainElement(html) {
+  if (typeof html !== 'string') return null;
+  const clean = html
+    .replace(/<script\b[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style\b[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<!--[\s\S]*?-->/g, ' ');
+  const opens = clean.match(/<main\b/gi) || [];
+  const closes = clean.match(/<\/main\s*>/gi) || [];
+  if (opens.length !== 1 || closes.length !== 1) return null;
+  const m = clean.match(/<main\b[^>]*>([\s\S]*)<\/main\s*>/i);
+  return m ? m[1] : null;
+}
+
+/**
+ * 指紋を取る範囲の名前。記録した指紋に `fingerprint_scope` として添える。
+ *
+ *   なし → 'page' / "main" → 'main' / { from, to } → 'anchors:<8桁>'
+ *
+ * 目印は名前に焼き込む（目印の文字の sha256 先頭8桁）。**目印を書き換えたら別の範囲**
+ * なので、前の指紋と比べずに戻す側へ倒すため。読めない書き方は null。
+ */
+export function scopeKey(bodyScope) {
+  if (bodyScope === undefined || bodyScope === null) return 'page';
+  if (bodyScope === 'main') return 'main';
+  if (bodyScope && typeof bodyScope === 'object' && !Array.isArray(bodyScope)
+      && typeof bodyScope.from === 'string' && bodyScope.from.trim() !== ''
+      && typeof bodyScope.to === 'string' && bodyScope.to.trim() !== '') {
+    const h = crypto.createHash('sha256')
+      .update(`${bodyScope.from}\u0000${bodyScope.to}`, 'utf8').digest('hex').slice(0, 8);
+    return `anchors:${h}`;
+  }
+  return null;
+}
+
+/**
+ * ページから、指紋を取る範囲の文字を切り出す。**純関数。**
+ * 返すのは `{ body, key, why }`。body が null なら範囲が取れなかった（why に理由）。
+ *
+ * 目印は「from の最初の出現」から「その後ろの to の最初の出現」の直前まで。
+ * to を from より前から探さない（ヘッダーに同じ語があるページで、本文が空になる）。
+ */
+export function extractBody({ html, text }, bodyScope) {
+  const key = scopeKey(bodyScope);
+  if (key === null) return { body: null, key, why: 'body_scope の書き方が読めない' };
+  if (key === 'page') return { body: text, key, why: null };
+  if (key === 'main') {
+    const inner = mainElement(html);
+    if (inner === null) return { body: null, key, why: '本文の枠（ちょうど1つの <main>）が見つからない' };
+    return { body: toText(inner), key, why: null };
+  }
+  const i = text.indexOf(bodyScope.from);
+  if (i < 0) return { body: null, key, why: `本文の始まりの目印が見つからない（${bodyScope.from}）` };
+  const j = text.indexOf(bodyScope.to, i + bodyScope.from.length);
+  if (j < 0) return { body: null, key, why: `本文の終わりの目印が見つからない（${bodyScope.to}）` };
+  return { body: text.slice(i, j).trim(), key, why: null };
+}
+
+/**
+ * 台帳の `body_scope` / `fingerprint_scope` の書き方の検査（ネットを見ない）。
+ * **読めない設定は実行時に unknown になり、見張りが黙って外れる**ので、PR の時点で落とす。
+ */
+export function scopeProblems(vendors) {
+  const problems = [];
+  for (const v of vendors || []) {
+    if ('body_scope' in v && scopeKey(v.body_scope) === null) {
+      problems.push(`${v.id}: body_scope が読めない（"main" か { "from", "to" } の空でない文字列）`
+        + ' — **読めない設定では指紋が取れず、見張りが黙って外れる**');
+    }
+    if ('fingerprint_scope' in v && !(v.fingerprint_scope === 'main'
+        || /^anchors:[0-9a-f]{8}$/.test(String(v.fingerprint_scope)))) {
+      problems.push(`${v.id}: fingerprint_scope が読めない（${JSON.stringify(v.fingerprint_scope)}）`
+        + ' — ページ全体の指紋なら欄ごと無しにする');
+    }
+    if ('fingerprint_scope' in v && !v.fingerprint) {
+      problems.push(`${v.id}: 指紋が無いのに fingerprint_scope がある`);
+    }
+  }
+  return problems;
 }
 
 /**
@@ -144,18 +266,62 @@ export function fingerprint(text) {
  *   unseen     … 初めて指紋を取った（レビュー状態は動かさない）
  *   unchanged  … 前回と同じ本文
  *   changed    … **本文が変わった。**reviewed な観点を unreviewed へ戻す
+ *
+ * [2026-09-24] 指紋は `recorded.body_scope` の範囲で取る（なし＝ページ全体・これまでどおり）。
+ * 返す `scope` は、返した指紋がどの範囲のものか（`fingerprint_scope` に残す）。
+ * `label` は戻したときの理由の見出し（`reset_reason` に使う）。
  */
-export function reconcile({ text, fetchError, recorded }) {
+export function reconcile({ text, html = null, fetchError, recorded }) {
   if (fetchError) return { verdict: 'unknown', fingerprint: recorded?.fingerprint ?? null, why: fetchError };
   const shape = looksLikeTerms(text);
   if (!shape.ok) return { verdict: 'unknown', fingerprint: recorded?.fingerprint ?? null, why: shape.why };
 
-  const fp = fingerprint(text);
   const before = recorded?.fingerprint ?? null;
-  if (!before) return { verdict: 'unseen', fingerprint: fp, why: '初めて指紋を取った' };
-  if (before === fp) return { verdict: 'unchanged', fingerprint: fp, why: '前回と同じ本文' };
-  return { verdict: 'changed', fingerprint: fp, before,
-           why: `**本文が変わった**（${before} → ${fp}）` };
+  const beforeScope = recorded?.fingerprint_scope ?? 'page';
+  const pageFp = fingerprint(text);
+  const { body, key, why: cutWhy } = extractBody({ html, text }, recorded?.body_scope);
+  // 読めない設定は scopeProblems が PR の時点で落とす。ここへ来たら台帳を触らない
+  // （設定の誤りで人の判定を消さない。見張りが外れていることは why で名指しする）
+  if (key === null) {
+    return { verdict: 'unknown', fingerprint: before, why: '**body_scope が読めない** — 台帳を直すまで、この社は見張れていない' };
+  }
+
+  const bodyShape = body === null ? null : looksLikeTerms(body);
+  if (body === null || !bodyShape.ok) {
+    const whyCut = body === null ? cutWhy : `切り出した範囲が本文らしくない（${bodyShape.why}）`;
+    // **ページ全体が前回と1文字も変わっていなければ戻さない。**範囲の設定の誤りで
+    // 人の判定を消さない（ページ全体の指紋を記録している行だけ、この比較ができる）
+    if (before && beforeScope === 'page' && before === pageFp) {
+      return { verdict: 'unchanged', fingerprint: pageFp, scope: 'page',
+               why: `ページ全体は前回と同じ。**ただし ${whyCut}** — body_scope を見直すこと` };
+    }
+    // それ以外は戻す側に倒す。**unknown にすると、作りが変わった日から嘘の ok が残る。**
+    // 記録するのはページ全体の指紋（次の回に範囲が取れたら、そこから付け替えられる）
+    if (!before) return { verdict: 'unseen', fingerprint: pageFp, scope: 'page', why: `初めて指紋を取った（ページ全体。${whyCut}）` };
+    return { verdict: 'changed', fingerprint: pageFp, scope: 'page', before, label: '本文の範囲が取れない',
+             why: `**${whyCut}** — 作りか本文が変わった。読み直しと body_scope の見直しが要る` };
+  }
+
+  const fp = fingerprint(body);
+  if (!before) return { verdict: 'unseen', fingerprint: fp, scope: key, why: '初めて指紋を取った' };
+  if (beforeScope === key) {
+    if (before === fp) return { verdict: 'unchanged', fingerprint: fp, scope: key, why: '前回と同じ本文' };
+    return { verdict: 'changed', fingerprint: fp, scope: key, before,
+             why: `**本文が変わった**（${before} → ${fp}）` };
+  }
+  // 範囲の付け替え。**前の指紋がページ全体のものなら、ページ全体で比べられる。**
+  if (beforeScope === 'page') {
+    if (before === pageFp) {
+      return { verdict: 'unchanged', fingerprint: fp, scope: key,
+               why: `指紋の範囲をページ全体から本文（${key}）へ移した — ページ全体は前回と同じ` };
+    }
+    return { verdict: 'changed', fingerprint: fp, scope: key, before, label: '範囲を移す回にページ全体が変わっていた',
+             why: `**範囲を移す回に、ページ全体が前回と違った**（${before} → ${pageFp}）`
+               + ' — 本文が変わったかは判らないので読み直しへ' };
+  }
+  // 前の指紋が別の範囲（目印を書き換えた等）のものなら、比べようがない
+  return { verdict: 'changed', fingerprint: fp, scope: key, before, label: '指紋の範囲の設定が変わった',
+           why: `**指紋の範囲の設定が変わった**（${beforeScope} → ${key}）— 前の指紋と比べられないので読み直しへ` };
 }
 
 /**
@@ -170,6 +336,9 @@ export function reconcile({ text, fetchError, recorded }) {
 export function applyVerdict(row, r, today) {
   if (r.verdict === 'unknown') return { row, reset: [] };
   const next = { ...row, fingerprint: r.fingerprint, fetched_at: today };
+  // [2026-09-24] 指紋がどの範囲のものか。ページ全体なら欄を置かない（これまでの行の形のまま）
+  if (r.scope && r.scope !== 'page') next.fingerprint_scope = r.scope;
+  else delete next.fingerprint_scope;
   const reset = [];
   if (r.verdict === 'changed') {
     for (const c of CLAUSES) {
@@ -186,7 +355,7 @@ export function applyVerdict(row, r, today) {
       delete next.draft_note;
       delete next.draft_clauses;
       delete next.risk_note;
-      next.reset_reason = `本文が改定された（${r.before} → ${r.fingerprint}・${today}）`
+      next.reset_reason = `${r.label ?? '本文が改定された'}（${r.before} → ${r.fingerprint}・${today}）`
         + ' — **前の判定は前の本文に対するもの。**読み直すまで unreviewed';
       // [2026-08-29] **戻した日と、戻した観点を残す。**
       // check-corporate が「改定で戻された直後」と「ずっと読んでいない」を
@@ -217,11 +386,13 @@ export async function fetchTerms(url, { fetchImpl = fetch } = {}) {
       headers: { Accept: 'text/html,application/xhtml+xml', 'User-Agent': 'simplememo-vendor-terms/1.0' },
       signal: AbortSignal.timeout(20000),
     });
-    if (!res.ok) return { text: null, fetchError: `HTTP ${res.status}` };
+    if (!res.ok) return { text: null, html: null, fetchError: `HTTP ${res.status}` };
     const bytes = new Uint8Array(await res.arrayBuffer());
-    return { text: toText(decodeTermsHtml(bytes, res.headers.get('content-type') || '')), fetchError: null };
+    // [2026-09-24] html も返す（`body_scope: "main"` は <main> 要素を HTML から切り出す）
+    const html = decodeTermsHtml(bytes, res.headers.get('content-type') || '');
+    return { text: toText(html), html, fetchError: null };
   } catch (e) {
-    return { text: null, fetchError: `取得に失敗: ${String(e).slice(0, 100)}` };
+    return { text: null, html: null, fetchError: `取得に失敗: ${String(e).slice(0, 100)}` };
   }
 }
 
@@ -354,6 +525,113 @@ export function selftest() {
   const done = cr2(2, ['aaa', 'bbb']);
   eq(tightenFingerprintBudget(done).after, 0, '全社そろっても 0 まで落ちない');
 
+  // --- [2026-09-24] 指紋は本文だけに取る ---
+  // 検体: 本文は <main> の中、メニューは外。**メニューだけが動いた2枚**と、本文が動いた1枚
+  const legal = `Terms of Service Effective June 1, 2026 ${'The liability of each party is limited. '.repeat(80)}`;
+  const pageOf = (menu, body) => `<html><header><nav>${menu}</nav></header>`
+    + `<script>var x="<main>"</script><main><h1>${body}</h1></main><footer>${menu} Privacy</footer></html>`;
+  const menuA = 'Products Claude Research News Careers '.repeat(60);
+  const menuB = 'Products Claude Commerce Research News Scientists Careers '.repeat(60);
+  const v1 = pageOf(menuA, legal);
+  const v2 = pageOf(menuB, legal);
+  const v3 = pageOf(menuA, `${legal} A new clause about liability.`);
+  const t = (html) => ({ html, text: toText(html) });
+
+  // <main> は script の中の文字を数えない。ちょうど1つのときだけ
+  eq(toText(mainElement(v1)), toText(`<h1>${legal}</h1>`), '**<main> の中身を取り出せていない**（script の中の <main> を数えた）');
+  eq(mainElement('<main>a</main><main>b</main>'), null, '**<main> が2つあるのに片方を選んでいる**（選び方を推測している）');
+  eq(mainElement('<div>x</div>'), null, '<main> が無いのに何かを返している');
+  eq(mainElement(null), null, 'null で落ちる');
+
+  // 範囲の名前
+  eq(scopeKey(undefined), 'page', '設定なしがページ全体になっていない');
+  eq(scopeKey('main'), 'main', '"main" を読めない');
+  const anchors = { from: 'Terms of Service Effective', to: 'Privacy' };
+  eq(/^anchors:[0-9a-f]{8}$/.test(scopeKey(anchors)), true, '目印の範囲名が読めない形');
+  eq(scopeKey(anchors) === scopeKey({ from: 'Terms of Service Effective', to: 'Careers' }), false,
+     '**目印を書き換えても同じ範囲名になる**（前の指紋と比べてしまう）');
+  for (const bad of ['body', { from: 'x' }, { from: '', to: 'y' }, ['main'], 1]) {
+    eq(scopeKey(bad), null, `読めない設定を読めたことにしている（${JSON.stringify(bad)}）`);
+  }
+
+  // 目印: to は from の後ろから探す
+  const anchored = extractBody(t(v1), anchors);
+  // 切り出せなかったとき（null）に次の2行が空振りで通らないよう、型を先に固定する
+  eq(typeof anchored.body, 'string', '**目印で切り出せていない**');
+  eq(String(anchored.body).startsWith('Terms of Service Effective'), true, '目印の始まりから切り出せていない');
+  eq(String(anchored.body).includes('Privacy'), false, '終わりの目印を範囲に含めている');
+  eq(extractBody(t(v1), { from: 'Not on the page', to: 'Privacy' }).body, null, '始まりの目印が無いのに切り出している');
+  eq(extractBody(t(v1), { from: 'Terms of Service Effective', to: 'Not on the page' }).body, null, '終わりの目印が無いのに切り出している');
+  eq(extractBody(t(`<p>Privacy ${legal}</p>`), anchors).body, null,
+     '**終わりの目印を始まりより前から探している**（ヘッダーに同じ語があると本文が空になる）');
+
+  // **本体。**メニューだけが動いても unchanged、本文が動いたら changed
+  const mainRow = { id: 'x', body_scope: 'main', fingerprint_scope: 'main', liability_cap: 'ok' };
+  const firstMain = reconcile({ ...t(v1), recorded: { ...mainRow, fingerprint: null } });
+  eq(firstMain.verdict, 'unseen', '範囲つきの初回が unseen でない');
+  eq(firstMain.scope, 'main', '範囲つきの初回に範囲名が付いていない');
+  const rowMain = { ...mainRow, fingerprint: firstMain.fingerprint };
+  eq(reconcile({ ...t(v2), recorded: rowMain }).verdict, 'unchanged',
+     '**メニューが動いただけで本文が変わったことにしている**（毎週人の判定が消える）');
+  eq(reconcile({ ...t(v3), recorded: rowMain }).verdict, 'changed', '**本文の改定を見逃している**');
+  // 同じ検体で、範囲なし（これまでの動き）はメニューの変化で動く —— 上の unchanged が
+  // 範囲のおかげで通っていることの確認（検体がたまたま同じ指紋になっていないこと）
+  const pageRow = { id: 'x', fingerprint: fingerprint(toText(v1)), liability_cap: 'ok' };
+  eq(reconcile({ ...t(v2), recorded: pageRow }).verdict, 'changed', '検体のメニューの変化がページ全体の指紋に出ていない（検体が壊れている）');
+
+  // **範囲が取れない回は戻す。**unknown にすると、作りが変わった日から嘘の ok が残る
+  const noMain = `<html><nav>${menuA}</nav><div>${legal}</div></html>`;
+  const lost = reconcile({ ...t(noMain), recorded: rowMain });
+  eq(lost.verdict, 'changed', '**<main> が消えたのに戻していない**（作りが変わった日から嘘の ok が残る）');
+  eq(lost.scope, 'page', '範囲が取れない回にページ全体の指紋を記録していない');
+  eq(typeof lost.label, 'string', '範囲が取れない回の理由の見出しが無い');
+  // 本文らしくない範囲（殻）も同じ
+  const shellMain = `<html><nav>${menuA} Terms Privacy</nav><main><div id=app></div></main><footer>${legal}</footer></html>`;
+  eq(reconcile({ ...t(shellMain), recorded: rowMain }).verdict, 'changed', '**<main> が殻なのに unchanged / unknown にしている**');
+  // **殻の指紋は安定する。**殻のまま記録された行が、翌週も殻なら unchanged を返し続ける形を作らない
+  eq(reconcile({ ...t(shellMain), recorded: { ...rowMain, fingerprint: fingerprint(toText(mainElement(shellMain))) } }).verdict, 'changed',
+     '**殻の <main> の指紋を「前回と同じ本文」と読んでいる**（改定を永久に見逃す）');
+  eq(reconcile({ ...t(shellMain), recorded: { ...mainRow, fingerprint: null } }).scope, 'page',
+     '**殻の <main> の指紋を本文の指紋として記録している**');
+  // ただし、ページ全体が前回と1文字も変わっていなければ戻さない（設定の誤りで判定を消さない）
+  const misconfigured = { id: 'x', body_scope: { from: 'typo', to: 'Privacy' }, fingerprint: fingerprint(toText(v1)), liability_cap: 'ok' };
+  eq(reconcile({ ...t(v1), recorded: misconfigured }).verdict, 'unchanged',
+     '**ページが1文字も変わっていないのに、目印の打ち間違いで判定を消している**');
+
+  // 付け替え: 前の指紋がページ全体のもの
+  const migrating = { id: 'x', body_scope: 'main', fingerprint: fingerprint(toText(v1)), liability_cap: 'ok' };
+  const moved = reconcile({ ...t(v1), recorded: migrating });
+  eq(moved.verdict, 'unchanged', '**ページが同じなのに、範囲を移す回に戻している**');
+  eq(moved.fingerprint, firstMain.fingerprint, '付け替え後の指紋が本文の指紋でない');
+  eq(moved.scope, 'main', '付け替え後の範囲名が無い');
+  eq(reconcile({ ...t(v2), recorded: migrating }).verdict, 'changed',
+     '**範囲を移す回にページが変わっていたのに戻していない**（本文が変わったかは判らない）');
+  // 前の指紋が別の範囲（目印を書き換えた）なら比べようがない。**指紋が同じ値でも比べない** ——
+  // 検体の指紋をわざと今の範囲の値にしておく（違う値だと、比べても changed になって素通りする）
+  const reanchored = { id: 'x', body_scope: anchors, fingerprint: fingerprint(anchored.body),
+                       fingerprint_scope: 'anchors:00000000', liability_cap: 'ok' };
+  eq(reconcile({ ...t(v1), recorded: reanchored }).verdict, 'changed',
+     '**範囲の設定が変わったのに、前の指紋と比べている**');
+  // 読めない設定は触らない（scopeProblems が PR で落とす）
+  eq(reconcile({ ...t(v1), recorded: { ...rowMain, body_scope: 'body' } }).verdict, 'unknown', '読めない設定で判定を動かしている');
+  // 範囲なしの行は、これまでとまったく同じ動き（toText を変えると全社が一斉に戻る）
+  eq(reconcile({ ...t(v1), recorded: pageRow }).verdict, 'unchanged', '**範囲なしの行の動きが変わった**');
+  eq(reconcile({ text: toText(v1), recorded: pageRow }).verdict, 'unchanged', 'html を渡さない呼び出しで範囲なしの行が動かない');
+
+  // 書き戻し: 範囲名を残す／ページ全体なら欄を置かない
+  eq(applyVerdict(rowMain, moved, '2026-09-24').row.fingerprint_scope, 'main', '**指紋の範囲を台帳に残していない**');
+  eq('fingerprint_scope' in applyVerdict(rowMain, lost, '2026-09-24').row, false,
+     'ページ全体の指紋に範囲名を残している（次の回に付け替えられない）');
+  const lostRow = applyVerdict(rowMain, lost, '2026-09-24').row;
+  eq(lostRow.liability_cap, 'unreviewed', '範囲が取れない回に判定を戻していない');
+  eq(String(lostRow.reset_reason ?? '').startsWith(String(lost.label)), true, '戻した理由の見出しが「本文が改定された」のまま');
+
+  // 台帳の設定の検査
+  eq(scopeProblems([{ id: 'a', body_scope: 'main', fingerprint: 'x', fingerprint_scope: 'main' }]).length, 0, '正しい設定を落としている');
+  eq(scopeProblems([{ id: 'a', body_scope: 'body' }]).length, 1, '**読めない body_scope を通している**（見張りが黙って外れる）');
+  eq(scopeProblems([{ id: 'a', fingerprint: 'x', fingerprint_scope: 'page' }]).length, 1, 'ページ全体の範囲名を欄で書いた行を通している');
+  eq(scopeProblems([{ id: 'a', fingerprint_scope: 'main' }]).length, 1, '指紋が無いのに範囲名がある行を通している');
+
   return p;
 }
 
@@ -363,6 +641,9 @@ if (isMain) {
 
   if (argv.includes('--selftest')) {
     const problems = selftest();
+    // [2026-09-24] 台帳の範囲の設定もここで見る（CI で走るのはこのモードだけ）。
+    // **読めない設定は実行時に unknown になり、見張りが黙って外れる**ので PR の時点で落とす
+    problems.push(...scopeProblems(readLedger().contract_review?.vendors).map((x) => `台帳: ${x}`));
     if (problems.length) {
       console.error('自己検査で問題:');
       for (const x of problems) console.error(`  - ${x}`);
@@ -381,6 +662,7 @@ if (isMain) {
   const today = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
 
   const problems = selftest();
+  problems.push(...scopeProblems(cr.vendors).map((x) => `台帳: ${x}`));
   // **台帳の観点とこの script の観点がずれていないか。**片方だけ増えると素通りする
   const declared = cr.clauses ?? [];
   if (declared.join(',') !== CLAUSES.join(',')) {
@@ -400,10 +682,10 @@ if (isMain) {
 
   for (const [i, row] of cr.vendors.entries()) {
     if (!row.source) { console.log(`  ${row.id.padEnd(14)} source が無い — 飛ばす`); continue; }
-    const { text, fetchError } = argv.includes('--offline')
-      ? { text: null, fetchError: '--offline' }
+    const { text, html, fetchError } = argv.includes('--offline')
+      ? { text: null, html: null, fetchError: '--offline' }
       : await fetchTerms(row.source);
-    const r = reconcile({ text, fetchError, recorded: row });
+    const r = reconcile({ text, html, fetchError, recorded: row });
     counts[r.verdict] += 1;
     const { row: next, reset } = applyVerdict(row, r, today);
     cr.vendors[i] = next;

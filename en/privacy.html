@@ -8,22 +8,22 @@
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- Google tag (gtag.js) - deferred for LCP -->
   <script>
-    window.addEventListener('load', function() {
+    (function() {
       if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
-      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
-      ric(function() {
-        var s = document.createElement('script');
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
-        s.async = true;
-        document.head.appendChild(s);
-        s.onload = function() {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
-        };
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
       });
-    });
+    })();
   </script>
   <title>Privacy Policy — Simple Memo - for Obsidian</title>
   <meta name="description" content="Privacy Policy for Simple Memo - for Obsidian. Our privacy-first design: AES-GCM encryption, TLS transport, ephemeral URLSession, data minimization.">
@@ -52,6 +52,14 @@
   <link rel="canonical" href="https://simplememofast.com/en/privacy">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/privacy">
   <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/privacy">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/privacy">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/privacy">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/privacy">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/privacy">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/privacy">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/privacy">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/privacy">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/privacy">
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/privacy">
 
   <!-- Favicon -->
@@ -228,45 +236,48 @@
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="Main navigation">
+  <nav class="global-nav" aria-label="Main navigation" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/en/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager">
-        Simple Memo - for Obsidian
-      </a>
-      <ul class="global-nav__links" id="navLinks">
+      <a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/">Guides</a><a href="/en/use-cases/">Use cases</a><a href="/en/vs/">Compare</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
         <li><a href="/en/guides/">Guides</a></li>
-        <li><a href="/en/use-cases/">Use Cases</a></li>
+        <li><a href="/en/use-cases/">Use cases</a></li>
         <li><a href="/en/vs/">Compare</a></li>
         <li><a href="/en/methods/">Methods</a></li>
         <li><a href="/en/blog/">Blog</a></li>
         <li><a href="/en/glossary/">Glossary</a></li>
         <li><a href="/en/faq">FAQ</a></li>
-        <li><a href="/en/about/">About</a></li>
-        <li><a href="/en/devlog/">Dev Log</a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8">Download</a></li>
+        <li><a href="/en/about/">About the developer</a></li>
+        <li><a href="/en/devlog/">Development log</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">Download</a></li>
       </ul>
-      <div class="global-nav__actions">
-        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8" class="global-nav__cta">
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="English · Choose a language"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>EN</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="en" dir="ltr"><p class="site-language-title">Choose a language</p><div class="site-language-grid"><a href="/privacy" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="en" aria-current="page"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh/privacy" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/privacy" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/privacy" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/privacy" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/privacy" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/privacy" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/privacy" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/privacy" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
           Download
         </a>
-        <button class="global-nav__hamburger" aria-label="Menu" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">&#9776;</button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
 </nav>
 
   <main class="page-content">
     <div class="container">
-      <h1 class="page-content__title">Privacy Policy</h1>
-      <p class="page-content__date">Last updated: <time datetime="2026-09-09">September 9, 2026</time></p>
+      <h1 class="page-content__title sd-title">Privacy Policy</h1>
+      <p class="page-content__date">Last updated: <time datetime="2026-10-07">October 7, 2026</time></p>
 
       <div class="page-content__body">
         <p>YURIKA, K.K. ("we," "us," or "our") describes how we handle user information in "Simple Memo - for Obsidian" (also known as "Simple Memo - for Obsidian," hereinafter the "Service").</p>
 
-        <h2>1. Information We Collect</h2>
+        <h2 id="reading-01">1. Information We Collect</h2>
         <p>We may collect the following information:</p>
 
         <h3>(A) Information you provide</h3>
@@ -284,7 +295,7 @@
           <li>Technical data for abuse prevention and rate limiting (IP address, request metadata)</li>
         </ul>
 
-        <p>Usage events do not contain email addresses or memo text, but a send ID can link them to the recipient email hash in our delivery records. We therefore treat these events, device identifiers, and diagnostics as data that can be linked to the user.</p>
+        <p>Usage events do not contain email addresses or memo text, but a send ID can link them to the recipient email hash in our delivery records. We therefore treat these events, device identifiers, and diagnostics as data that can be linked to the user. Section 12 describes where the device identifier is stored and what happens to it after the app is deleted.</p>
 
         <h3>(C) Subscription and Refund Notifications From Apple</h3>
         <p>To understand subscription operations and billing failures, we verify signed notifications from Apple and record subscription starts, renewals, changes to automatic renewal, failed renewals, expirations, refunds, and related events. Stored fields include notification and transaction identifiers, subscription product identifiers, notification types and subtypes, production or test environment, dates such as purchase, expiration, revocation, signing and receipt, and revocation reasons supplied by Apple. These Apple identifiers are not treated as fully anonymous information. These notification records contain no email addresses, memo content or installation identifiers. We do not retain a mapping from Apple transaction identifiers to installation identifiers or recipient email addresses. Section (D) describes matching notifications during processing to create separate analytics records. We cannot locate the original notification records from an email-address-only deletion request.</p>
@@ -293,7 +304,15 @@
         <p>When this analytics feature is enabled in a supported app, we receive signed purchase and renewal information from Apple through the device, verify it, and store subscription facts with an installation identifier for comparison with usage-retention events. Recorded fields include the subscription product, purchased or family-shared ownership, price and currency, dates such as purchase, expiration, revocation, signing, observation and receipt, automatic-renewal status, billing retry, grace period, expiration reason, production or test environment, and the app's runtime environment. During processing, Apple transaction identifiers are used to match the notifications described in (C); counts and latest dates by notification type available at that time are also recorded. Apple transaction identifiers and raw signed information are not retained alongside these analytics records. The records also exclude email addresses and memo content, but installation identifiers, products, dates and prices can be linked to usage information and are not treated as anonymous.</p>
         <p>Scheduled cleanup deletes these analytics records more than 90 days after receipt. Deletion through a supported app removes records associated with the deletion information retained on that device and rejects delayed uploads under the erased information. This does not collectively delete the original Apple notification records in (C), another device's records, or records held by external analytics services. We may be unable to identify the affected records if, for example, the device's deletion information has been lost.</p>
 
-        <h2>2. How We Use Information</h2>
+        <h3>(E) Usage Analysis Choice in Supported App Versions</h3>
+        <p>In app versions with a “Usage analytics” choice in Settings, the regular in-app usage-event stream and device-originated subscription-state analytics are off by default. These streams begin only when the user selects “Agree and turn on”; they do not begin if the user declines. This choice is separate from email reminder consent and Apple's device-level App Analytics sharing setting. Withdrawing it in the app stops new collection for these streams and attempts to remove their unsent events on that device. The app reports a cleanup failure when deletion cannot be confirmed, and events created under an earlier grant are not replayed after a later grant. An upload already in progress may complete, and withdrawal alone does not delete records already received by us. Measurement of action order and delivery outcomes in the internal Capture pilot is part of this same usage-analysis and quality-improvement purpose. Participation also requires a separate, scope- and time-bound pilot consent; this choice alone does not enroll anyone. Withdrawing this choice stops new pilot measurement. To erase pilot records already stored, use the pilot's participation-withdrawal and deletion control. App versions without this choice send the usage events described in Section 12 and the subscription observations described in (D) as part of app operation. We are removing the server restriction introduced on September 28, 2026 that prevented storage of requests using the original contract, and accept analytics requests from both types of app version. Previously uncollected events are not reconstructed. Versions that retain the choice continue to start or stop collection according to their in-app setting. AppsFlyer acquisition and usage measurement is described in Section 12.</p>
+        <p>This choice does not authorize AppsFlyer acquisition measurement. Versions with “App discovery measurement” start the SDK only with the separate choice in (F) and iPhone tracking permission. Usage-consent versions without that separate choice keep the SDK stopped. Section 12 describes the handling in app versions without this choice.</p>
+
+        <h3>(F) Acquisition measurement in supported app versions</h3>
+        <p>“App discovery measurement” is optional and off by default. Only when you agree to this choice and allow iPhone tracking, AppsFlyer receives app launches, acquisition source and campaign, advertising identifier, IP address, device model, OS and app version, and SDK identifiers to measure which download links lead to the app. We do not provide our first-party usage-analysis identifier as a Customer User ID. We do not send memo text, email addresses, purchase events or ordinary in-app usage events for this purpose. Sharing with advertising partners and advertising personalization are disabled, as are SKAdNetwork, IDFV and Apple Ads measurement in this path. Records containing identifiers are not treated as anonymous.</p>
+        <p>Declining preserves all app features. Withdrawal in Settings stops new measurement and removes local attribution evidence. An in-progress request may complete. Withdrawal does not erase data already received by AppsFlyer or change your iPhone tracking setting. This choice is independent of Usage analytics, email reminder consent and Apple's App Analytics sharing setting.</p>
+
+        <h2 id="reading-02">2. How We Use Information</h2>
         <p>We use collected information for the following purposes:</p>
         <ul>
           <li>Providing email sending features (send, outbox/pending management, resend, history)</li>
@@ -304,22 +323,23 @@
           <li>Complying with legal obligations</li>
         </ul>
 
-        <h2>3. Plan Differences</h2>
+        <h2 id="reading-03">3. Plan Differences</h2>
         <p>Data handling is generally the same for Free and Premium plans. Premium is primarily offered to remove the Free daily sending limit. Safety and infrastructure limits (e.g., cooldowns and server-side caps) may still apply to both plans.</p>
 
-        <h2>4. Handling of Memo Content (Important)</h2>
+        <h2 id="reading-04">4. Handling of Memo Content (Important)</h2>
         <ul>
           <li>Memo content is sent as an email based on your action.</li>
           <li>For delivery, memo content and recipient details may pass through our sending infrastructure (including third-party providers).</li>
           <li>We do not intend to store or view memo content on an ongoing basis except where necessary for legitimate purposes such as legal compliance, abuse prevention, or troubleshooting.</li>
         </ul>
 
-        <h2>5. Email Reminder Feature (Optional)</h2>
+        <h2 id="reading-05">5. Email Reminder Feature (Optional)</h2>
         <p>To help you build a memo-writing habit, we offer an optional reminder email feature for users who explicitly opt in.</p>
 
         <h3>(A) Consent</h3>
         <ul>
           <li>This feature is <strong>disabled by default</strong>. We send reminder emails only after you explicitly enable it on the verification screen or in Settings.</li>
+          <li>If you have not enabled reminders, we may send <strong>one</strong> email asking whether you would like to receive them, once your email address is verified and you have not sent a memo for a while (roughly 72 hours after your last send). We send no reminders unless you choose to receive them.</li>
           <li>You can disable it at any time from Settings (one tap), or from the unsubscribe link in any reminder email.</li>
         </ul>
 
@@ -345,7 +365,7 @@
         <h3>(E) Service Provider</h3>
         <p>Reminder email delivery and contact management are handled by Resend, Inc. (USA) under appropriate <a href="https://resend.com/legal/dpa" rel="noopener">Data Processing Agreement</a> and compliance with international email regulations (CAN-SPAM, GDPR, the Japanese Act on Regulation of Transmission of Specified Electronic Mail, etc.).</p>
 
-        <h2>6. Sharing With Third Parties</h2>
+        <h2 id="reading-06">6. Sharing With Third Parties</h2>
         <p>We do not share personal information with third parties except in the following cases:</p>
         <ul>
           <li>With your consent</li>
@@ -354,19 +374,19 @@
           <li>To service providers to the extent necessary (see Section 7)</li>
         </ul>
 
-        <h2>7. Service Providers</h2>
+        <h2 id="reading-07">7. Service Providers</h2>
         <p>We may use third-party vendors for email delivery, operations, maintenance, and analytics. In such cases, we appropriately supervise these providers.</p>
 
-        <h2>8. Security</h2>
+        <h2 id="reading-08">8. Security</h2>
         <p>We take reasonable measures to protect information against leaks, loss, and damage.</p>
 
-        <h2>9. Retention</h2>
+        <h2 id="reading-09">9. Retention</h2>
         <p>We aim not to retain information longer than necessary for the stated purposes. Scheduled cleanup deletes usage events and the subscription-state analytics records in Section 1(D) older than 90 days, and send ID-to-recipient-hash records older than 35 days. Daily cleanup deletes the original Apple subscription and refund notification records more than 180 days after receipt. Each run has a processing limit, so a backlog continues in subsequent daily runs. Other logs may be retained for limited periods for security and operational purposes.</p>
 
-        <h2>10. Updates</h2>
+        <h2 id="reading-10">10. Updates</h2>
         <p>We may update this Policy as needed. The updated version will be posted on the Service or our website.</p>
 
-        <h2>11. Contact</h2>
+        <h2 id="reading-11">11. Contact</h2>
         <p><!--email_off--><a href="mailto:support&#64;simplememofast.com">support&#64;simplememofast.com</a><!--/email_off--></p>
 
         <h2 id="technical">12. Technical notes on encryption (for reference)</h2>
@@ -379,11 +399,25 @@
           <li><strong>Email address storage on the server</strong>: Cloudflare D1 stores a mapping between send IDs and recipient email hashes derived from SHA-256. These delivery records are created regardless of reminder opt-in. Reminder contacts are managed through Resend's Contact API.</li>
           <li><strong>Dependencies on the data path</strong>: Memo body encryption (CryptoKit), key storage (Keychain Services), and network transport (URLSession / Network.framework) are all Apple-native — no third-party SDK sits in the data path.</li>
             <li><strong>Sign-in and abuse-prevention SDKs</strong>: Optional email auto-fill from a Google account uses GoogleSignIn-iOS and Firebase Authentication. Firebase App Check initializes at launch and uses Apple App Attest to protect backend API access.</li>
-            <li><strong>First-party usage analytics</strong>: We send events to our <code>/v1/analytics/event</code> endpoint to understand usage and improve quality. Fields include a random installation identifier, session identifier, event type, event identifier and time, app version and build, language, and allowed attributes such as send outcomes. The payload is designed to exclude raw email addresses, memo text, and verification codes, but send IDs can link events to recipient email hashes.</li>
-            <li><strong>AppsFlyer acquisition and usage analytics</strong>: We start the AppsFlyer SDK and send events for first successful memo send, successful verification, paywall views, plan selection, and successful purchases. Fields set by the app include purchase price, currency, subscription period, and the originating screen category where applicable. We set the same installation identifier used in first-party analytics as AppsFlyer’s Customer User ID, allowing acquisition and usage records to be linked. Event fields set by our app do not directly include email addresses, memo text, or verification codes. This describes fields explicitly set by the app, not an exhaustive list of technical information collected by the SDK. Identifiers and linkable records are not treated as fully anonymous information.</li>
+            <li><strong>First-party usage analytics</strong>: We send events to our <code>/v1/analytics/event</code> endpoint to understand usage and improve quality. Fields include a random installation identifier, session identifier, event type, event identifier and time, app version and build, language, and allowed attributes such as send outcomes. The payload is designed to exclude raw email addresses, memo text, and verification codes, but send IDs can link events to recipient email hashes. This installation identifier is stored in the device's Keychain. Because of how iOS works, Keychain items may remain on the device after the app is deleted; in that case, the same identifier is used again after reinstalling (the legacy AppsFlyer integration below also uses it as Customer User ID).</li>
+            <li><strong>AppsFlyer acquisition and usage analytics</strong>: In app versions without the choice described in Section 1(E), we start the AppsFlyer SDK and send events for first successful memo send, successful verification, paywall views, plan selection, and successful purchases. Fields set by the app include purchase price, currency, subscription period, and the originating screen category where applicable. We set the same installation identifier used in first-party analytics as AppsFlyer’s Customer User ID, allowing acquisition and usage records to be linked. Event fields set by our app do not directly include email addresses, memo text, or verification codes. This describes fields explicitly set by the app, not an exhaustive list of technical information collected by the SDK. Identifiers and linkable records are not treated as fully anonymous information. Usage-consent versions keep the SDK stopped; versions supporting (F) start acquisition measurement only after both its separate permission and iPhone tracking authorization.</li>
         </ul>
         <p><strong>Note</strong>: The Service is <strong>not End-to-End Encrypted (E2EE)</strong>. Memo bodies are delivered through standard SMTP so you (the recipient) can read them in your normal mail client. For workloads requiring true E2EE, consider purpose-built services such as Standard Notes, Signal, or ProtonMail.</p>
         <p>These notes are restated as a route map for Obsidian users on the <a href="/en/privacy-architecture/">Privacy Architecture</a> page.</p>
+
+        <h2 id="website-analytics">13. Analytics on our website</h2>
+        <p>Our website (simplememofast.com) uses the following analytics to understand how its pages are used and to improve them. This is separate from the app (Service) usage data described above.</p>
+        <h3>(A) Google Analytics (Google LLC, United States)</h3>
+        <ul>
+          <li>Google Analytics stores a random identifier for your browser in first-party cookies (such as <code>_ga</code>) to distinguish users and sessions.</li>
+          <li>It collects information such as the pages you view, the referring site, approximate location, browser and device type, and interactions on our pages (such as views and clicks of links to the App Store). Google states that Google Analytics 4 does not log or store IP addresses.</li>
+          <li>Google processes this information. See <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">How Google uses information from sites or apps that use our services</a>.</li>
+          <li>To opt out, use the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener">Google Analytics Opt-out Browser Add-on</a> or disable cookies in your browser settings.</li>
+        </ul>
+        <h3>(B) Ahrefs Web Analytics (Ahrefs Pte. Ltd., Singapore)</h3>
+        <ul>
+          <li>We use it to count page views. Ahrefs <a href="https://help.ahrefs.com/en/articles/10247870-about-ahrefs-web-analytics" target="_blank" rel="noopener">states</a> that this tool does not use cookies and does not store raw IP addresses.</li>
+        </ul>
       </div>
     </div>
   <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
@@ -405,13 +439,13 @@
 
   </main>
 
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">Product</p>
         <a href="/en/download/" class="footer__link">Download</a>
-        <a href="/en/use-cases/" class="footer__link">Use Cases</a>
+        <a href="/en/use-cases/" class="footer__link">Use cases</a>
         <a href="/en/guides/" class="footer__link">Guides</a>
         <a href="/en/how-to/" class="footer__link">How to Use</a>
         <a href="/en/templates/" class="footer__link">Templates</a>
@@ -419,15 +453,15 @@
       <div class="footer__col">
         <p class="footer__col-title">Compare & Switch</p>
         <a href="/en/captio-alternative/" class="footer__link">Captio Alternative</a>
-        <a href="/en/note-to-email/" class="footer__link">Note to Email</a>
-        <a href="/en/vs/" class="footer__link">Comparisons</a>
-        <a href="/captio/" class="footer__link">Captio Method</a>
+        <a href="/en/note-to-email/" class="footer__link">Notes to email</a>
+        <a href="/en/vs/" class="footer__link">Compare</a>
+        <a href="/en/captio/" class="footer__link">Captio Method</a>
         <a href="/en/comparison/" class="footer__link">Comparison Guide</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">Read</p>
-        <a href="/en/about/" class="footer__link">About</a>
-        <a href="/en/devlog/" class="footer__link">Dev Log</a>
+        <a href="/en/about/" class="footer__link">About the developer</a>
+        <a href="/en/devlog/" class="footer__link">Development log</a>
         <a href="/en/methods/" class="footer__link">Methods</a>
         <a href="/en/blog/" class="footer__link">Blog</a>
         <a href="/en/glossary/" class="footer__link">Glossary</a>
@@ -449,16 +483,12 @@
         <a href="https://github.com/simplememofast" rel="me noopener" target="_blank" class="footer__link">GitHub</a>
       </nav>
       <p class="footer__copyright">
-        © 2026 Simple Memo - for Obsidian / Yurika Inc.
+        © 2026 Simple Memo - for Obsidian / YURIKA, K.K.
       </p>
     </div>
   </footer>
 
-  <script>
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

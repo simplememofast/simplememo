@@ -3,7 +3,7 @@
 import re,os,glob,collections,sys
 from urllib.parse import urlparse, unquote
 from bs4 import BeautifulSoup
-W="/private/tmp/claude-501/-Users-hajimeataka-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad/wt"
+W="/private/tmp/claude-501/-Users-<user>-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad/wt"
 os.chdir(W)
 files=[f for f in glob.glob("**/*.html",recursive=True) if not f.startswith(("node_modules/","docs/","fixtures/","scripts/","tools/","growth/",".git/"))]
 RETIRED={"/blog/captio-alternatives-comparison":"/captio-alternative/","/blog/line-keep-migration":"/blog/line-keep-alternative","/blog/memo-app-free-guide":"/blog/free-memo-apps-ranking","/blog/memo-shuukan-tips":"/blog/memo-habit","/devlog/captio-alternative":"/captio-alternative/","/en/blog/why-captio-died":"/en/captio-alternative/","/privacy-policy":"/privacy","/privacy-policy/":"/privacy","/vs/whatsapp/":"/vs/","/vs/telegram/":"/vs/","/vs/trello/":"/vs/","/vs/mem/":"/vs/","/vs/slack-self-dm/":"/vs/","/)":"/","/%29":"/"}

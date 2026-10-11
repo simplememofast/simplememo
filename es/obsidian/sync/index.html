@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/sync/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Comparación del método de sincronización Obsidian - iCloud・Sync・Git・Syncthing [2026] | SimpleMemo</title>
+  <meta name="description" content="Compare los métodos de sincronización de Obsidian con 4. Hemos organizado el costo, el sistema operativo compatible y el comportamiento de conflicto para iCloud Drive, sincronización oficial, Git y Syncthing. Git y Syncthing en realidad causan ediciones competitivas y realmente miden cómo se rompen en este entorno.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Comparación del método de sincronización Obsidian - iCloud・Sync・Git・Syncthing [2026] | SimpleMemo">
+  <meta property="og:description" content="Compare los métodos de sincronización de 4 por costo, sistema operativo compatible y comportamiento de conflicto. Git y Syncthing en realidad causan ediciones competitivas y realmente miden cómo se rompen en este entorno.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-26T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/es/obsidian/sync/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-sync.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="es_ES">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Comparación del método de sincronización Obsidian - iCloud・Sync・Git・Syncthing [2026] | SimpleMemo">
+  <meta name="twitter:description" content="Compare los métodos de sincronización de 4 por costo, sistema operativo compatible y comportamiento de conflicto. Git y Syncthing en realidad causan ediciones competitivas y realmente miden cómo se rompen en este entorno.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-sync.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/es/obsidian/sync/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/sync/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/sync/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/sync/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/sync/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/sync/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/sync/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/sync/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/sync/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/sync/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/sync/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/sync/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Inicio",
+      "item": "https://simplememofast.com/es/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Integración con Obsidian",
+      "item": "https://simplememofast.com/es/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Resumen de los métodos de sincronización",
+      "item": "https://simplememofast.com/es/obsidian/sync/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/es/obsidian/sync/#article",
+  "inLanguage": "es",
+  "headline": "Resumen del método de sincronización Obsidian — iCloud/Compare official Sync/Git/Syncthing",
+  "description": "El método de sincronización Obsidian 4 (iCloud Drive, oficial Obsidian Sync, Git, Syncthing) se compararon por costo, sistema operativo compatible y comportamiento de conflicto, y Git y Syncthing en realidad reprodujeron la edición en competencia y verificaron cómo se rompió.",
+  "url": "https://simplememofast.com/es/obsidian/sync/",
+  "datePublished": "2026-08-26",
+  "dateModified": "2026-10-01",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-sync.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/es/obsidian/sync/"
+  }
+}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/es/obsidian/sync/#faq",
+  "inLanguage": "es",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿Cuál debería elegir al final?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Si solo usas el producto Apple, la unidad iCloud, que ya está encendida, es la más fácil. Si también usas Windows/Android, o si quieres historial de versiones oficiales y soporte, el Obsidian Sync de pago. Si está familiarizado con Git y desea dejar cambios en el repositorio como un historial de confirmación, Git. Si no desea usar un operador en la nube de forma gratuita, es Syncthing (iPhone y iPad se tratan como \"no compatibles oficialmente\" en la ayuda oficial de Obsidian)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Puedo sincronizar con varios terminales sin usar Obsidian Sync?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "se puede hacer. La bóveda es solo una colección de archivos Markdown que no tienen un formato especial, por lo que puede usar la sincronización de archivos estándar del sistema operativo como iCloud Drive, Dropbox, Google Drive y herramientas de sincronización de uso general como Git y Syncthing. Obsidian Sync es una de las opciones para los métodos de sincronización y no es obligatorio."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Qué pasa si edito con el 2 al mismo tiempo?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Cada método falla de forma distinta. En nuestras pruebas, Git insertó marcadores de conflicto (<<<<<<<) directamente en el mismo archivo, lo que exigió resolverlo manualmente. Syncthing eligió automáticamente una versión y guardó la otra en un archivo separado llamado sync-conflict, sin perder datos. No pudimos probar iCloud Drive ni Obsidian Sync en dispositivos reales en este entorno Linux sin macOS/iOS."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Puedo usar varios métodos de sincronización al mismo tiempo?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "La ayuda oficial de Obsidian recomienda hacer una copia de seguridad del almacenamiento, diciendo que los conflictos de sincronización ocurrirán cuando el Obsidian Sync se use con otro almacenamiento en la nube como Dropbox, Google Drive y OneDrive. Evite superponer el mecanismo de doble sincronización en la misma carpeta, y es seguro mantener los métodos de sincronización 1 en el almacenamiento 1."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Puedo deshacerlo si lo sobrescribo por error con Obsidian Sync?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Según la ayuda oficial, puede ver y restaurar la versión anterior de cada nota con la función Historial de versiones. El período de retención es de 1 meses con el plan Estándar, 12 meses con el plan Plus, y el archivo adjunto es 2 semanas (comprobado con la ayuda oficial en 2026 años 8 26). Seleccione un archivo para restaurar de \"Abrir historial de versiones\"."
+      }
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/es/obsidian/sync/#webpage",
+  "inLanguage": "es",
+  "name": "Comparación del método de sincronización Obsidian - iCloud・Sync・Git・Syncthing [2026] | SimpleMemo",
+  "url": "https://simplememofast.com/es/obsidian/sync/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/es/#website"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    /* 原因/事象ブロック（コンフリクトの実測結果を並べる） */
+    .cz{background:var(--surface);border:1px solid var(--border);border-left:3px solid rgba(255,183,52,.55);border-radius:var(--radius-sm);padding:1.35rem 1.3rem;margin:1rem 0}
+    .cz__n{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#ffc76b;margin-bottom:.4rem}
+    .cz__t{font-size:1.05rem;font-weight:700;line-height:1.6;margin:0 0 .55rem}
+    .cz p{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0 0 .7rem}
+    .cz p:last-child{margin-bottom:0}
+    .cz ol,.cz ul{margin:.2rem 0 .7rem;padding-left:1.35rem;font-size:.95rem;line-height:1.9;color:var(--text-secondary)}
+    .cz li{margin-bottom:.3rem}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em}
+
+    /* ── 比較表 ──────────────────────────────────────── */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:20%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+  <link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+  <noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full site-designed" data-design-family="refined">
+  <a class="ce-skip" href="#main-content">Saltar al texto</a>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Navegación principal" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/es/guides/">Guías</a><a href="/es/use-cases/">Casos de uso</a><a href="/es/vs/">Comparar</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/es/guides/">Guías</a></li>
+        <li><a href="/es/use-cases/">Casos de uso</a></li>
+        <li><a href="/es/vs/">Comparar</a></li>
+        <li><a href="/es/methods/"><span>Método</span></a></li>
+        <li><a href="/es/blog/"><span>Blog</span></a></li>
+        <li><a href="/es/glossary/"><span>Glosario</span></a></li>
+        <li><a href="/es/faq">Preguntas frecuentes</a></li>
+        <li><a href="/es/about/">Sobre el desarrollador</a></li>
+        <li><a href="/es/devlog/">Registro de desarrollo</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>Descargar</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Español · Elegir idioma"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ES</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="es" dir="ltr"><p class="site-language-title">Elegir idioma</p><div class="site-language-grid"><a href="/obsidian/sync/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/sync/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/sync/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/sync/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/sync/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="es" aria-current="page"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/pt-BR/obsidian/sync/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/sync/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/sync/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/sync/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="global-nav__cta">Descargar</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menú"><span>Menú</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content" id="main-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero">
+<div class="ce-hero-copy">
+        <div class="lp-hero__label">
+          <span>Obsidian Comparación de métodos de sincronización</span>
+        </div>
+        <h1 class="lp-hero__title"><span class="ce-title-line">Obsidian</span><span class="ce-title-line"><span class="ce-title-accent">sincronización con múltiples terminales</span></span><span class="ce-title-line">métodos 4</span></h1>
+        <p class="lp-hero__sub"> <span>El almacenamiento es solo una carpeta Markdown que no tiene un formato especial. Por lo tanto, el método de sincronización no está vinculado por Obsidian en sí, y puede elegir libremente entre la sincronización estándar del sistema operativo como <strong>iCloud Drive, Obsidian Sync oficial de pago, control de versiones como Git y herramientas de sincronización autohospedadas como Syncthing</strong>. Aquí, comparamos el método 4 por costo, sistema operativo compatible y comportamiento de conflicto, y <strong> Git y Syncthing en realidad golpearon la edición fuera de línea del 2 para confirmar cómo se rompió</strong>. </span> </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;"> <span>Autor: <a href="/es/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> ・ Publicado: <time datetime="2026-08-26">2026 año 8 mes 26</time></span> </p>
+      <a class="ce-read-link" href="#guide-section-1">Lee el texto <span aria-hidden="true">↓</span></a></div>
+<div class="ce-stage" aria-hidden="true"><p class="ce-stage-label">UNA BÓVEDA · TUS DISPOSITIVOS</p><div class="ce-window"><div class="ce-window-top"><i></i><i></i><i></i><span>Elija el método de sincronización</span></div><div class="ce-chip-grid"><div class="ce-chip">Accionamiento iCloud</div><div class="ce-chip">Obsidian Sync</div><div class="ce-chip">Git</div><div class="ce-chip">Sincronización de cosas</div></div><div class="ce-connector">↓</div><div class="ce-folder"><div class="ce-note">Vault /<br>Nota .md<br>Archivo adjunto</div></div></div><p class="ce-stage-foot">Imagen de composición</p></div>
+</div>
+<div class="ce-routes" aria-label="Elige el contenido que quieres leer"><a class="ce-route" href="#guide-section-1"><span>01</span><b>Conozca el método 4</b></a><a class="ce-route" href="#guide-section-2"><span>02</span><b>Comparar costes y sistema operativo</b></a><a class="ce-route" href="#guide-section-3"><span>03</span><b>Ver comportamiento durante la competición</b></a></div>
+<div class="ce-article"><details class="ce-index"><summary>Tabla de contenido de esta página</summary><nav aria-label="Tabla de contenido en la página"><a href="#guide-section-1">01 4 Método de sincronización</a><a href="#guide-section-2">Tabla de comparación 02</a><a href="#guide-section-3">03 Comparar cómo romper - En realidad traté de causar un conflicto</a><a href="#guide-section-4">04 Directrices sobre cómo elegir</a><a href="#guide-section-5">05 En cualquier método de sincronización, el almacenamiento es solo una carpeta</a><a href="#guide-section-6">06 Preguntas frecuentes</a><a href="#guide-section-7">07 Páginas relacionadas</a></nav></details>
+
+
+      <!-- Answer-first (AIO) -->
+      <section class="lp-section" style="padding-top:1rem;">
+        <div class="tip-box" style="font-size:.95rem;">
+          <div class="tip-box__title"><span>En una palabra</span></div>
+          <p><span>Si desea completar el producto Apple solo, <strong>iCloud Drive</strong> (funcionando por defecto y sin costo adicional) es suficiente. Si desea el historial y el soporte de Windows/Android o oficial, <strong>Obsidian Sync</strong> (de pago). Si está familiarizado con Git y desea mantener el historial de cambios como una confirmación, <strong>Git</strong> (gratis, se requiere configuración). Si desea sincronizar de forma gratuita sin pasar por un operador en la nube, <strong>Syncthing</strong> (gratis, se requiere configuración. iPhone y iPad no son compatibles oficialmente). <strong>La diferencia encontrada por la medición real es "cómo romper cuando se produce un conflicto (edición de conflictos)"</strong>, Git inserta marcadores de conflicto directamente en el cuerpo de la nota y requiere resolución manual, y Syncthing automáticamente deja un lado y guarda el otro como un archivo separado. </span></p>
+        </div>
+      </section>
+
+      <!-- Voice route — GROWTH_LTV_ENGAGEMENT_2026-09-01 §6 P1: every hub child points at the
+           shortest iPhone→voice→vault path once, below the answer block so the answer stays first. -->
+      <p class="voice-route" style="margin:0 0 1.5rem;padding:.75rem 1rem;border-left:3px solid var(--accent);background:rgba(77,163,255,.07);border-radius:0 8px 8px 0;font-size:.9rem;line-height:1.7;"> <span>iPhone a <strong>hablar con la voz y déjalo a Obsidian</strong>El método más corto se resume en <a href="/es/blog/obsidian-voice-input">Comparación del método 4 (con procedimiento sin plug-in)</a>. </span> </p>
+
+      <!-- Four methods overview -->
+      <section class="lp-section ce-chapter ce-chapter--wide">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-1" data-ce-number="01"> <span>Métodos de sincronización 4</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span> Todos ellos hacen el mismo trabajo de "alinear el contenido de la carpeta de almacenamiento en múltiples terminales", pero el mecanismo es diferente. </span> </p>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">☁️ <span>Accionamiento iCloud</span></div>
+            <div class="reason-card__desc"><span>Sincronización de archivos genuinos Apple. Simplemente coloque la carpeta de almacenamiento en la unidad iCloud, y no habrá configuraciones adicionales entre Mac/iPhone/iPad. Windows/Android/Linux no llega.<a href="/es/obsidian/sync/icloud/">El procedimiento de configuración está en una página separada</a> reúne esta información.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🔄 <span>Obsidian Sync (oficial y pagado)</span></div>
+            <div class="reason-card__desc"><span>El servicio oficial proporcionado por el desarrollador de Obsidian. Tiene el cifrado E2E y la función de historial de versiones y es compatible con todas las plataformas. El precio es<a href="/es/obsidian/pricing/">En realidad medido en otro artículo</a>,<a href="/es/obsidian/sync/official-sync/">Estándar/Plus ¿Cuál necesitas?</a>también está organizado en una página separada.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🌿 <span>Git</span></div>
+            <div class="reason-card__desc"><span>Es un método para tratar el repositorio como un repositorio Git y sincronizarlo con commit, push y pull. También puede automatizar el uso de complementos de la comunidad (como Obsidian Git). Si bien todos los cambios permanecen como un historial, la resolución de conflictos requiere conocimiento de Git.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🔁 <span>Sincronización de cosas</span></div>
+            <div class="reason-card__desc"><span>Sincronización de archivos autohospedados de código abierto. Los terminales se sincronizan directamente entre sí (P2P) sin pasar por un operador en la nube. Hay una versión oficial para ordenadores gratuitos y personales (Windows, Mac, Linux). Después del desarrollo de la aplicación oficial, Android utilizará la versión de la comunidad (Syncthing-Fork). iPhone y iPad son tratados como "no admitidos oficialmente" en la ayuda oficial de Obsidian y son evitados por las aplicaciones de otras empresas (como Synctrain). También existe la molestia de emparejar la aplicación en cada terminal.</span></div>
+          </div>
+        </div>
+      </div></section>
+
+      <!-- Comparison table -->
+      <section class="lp-section ce-chapter ce-chapter--wide">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-2" data-ce-number="02"> <span>Tabla de comparación</span> </h2></header><div class="ce-chapter__body">
+        <div style="overflow-x:auto" class="ce-table-scroll" role="region" tabindex="0" aria-label="Tabla de comparación (se puede desplazar horizontalmente)">
+          <table class="rt-table">
+          <thead>
+            <tr>
+              <th scope="col"><span>Artículo</span></th>
+              <th scope="col">Accionamiento iCloud</th>
+              <th scope="col"><span>Obsidian Sync (oficial)</span></th>
+              <th scope="col">Git</th>
+              <th scope="col">Sincronización de cosas</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row"><span>Costo</span></th>
+              <td data-label="Accionamiento iCloud"><span class="mk-yes"><span>Gratis</span></span> <span>(dentro de la capacidad predeterminada de iCloud)</span></td>
+              <td data-label="Obsidian Sync"><span class="mk-no"><span>Pagado</span></span> <span>(<a href="/es/obsidian/pricing/">Detalles del precio</a>)</span></td>
+              <td data-label="Git"><span class="mk-yes"><span>Gratis</span></span> <span>(Dependiendo de la capacidad del host)</span></td>
+              <td data-label="Sincronización de cosas"><span class="mk-yes"><span>Gratis</span></span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span>Esfuerzo de configuración</span></th>
+              <td data-label="Accionamiento iCloud"><span class="mk-yes"><span>Casi ninguno</span></span></td>
+              <td data-label="Obsidian Sync"><span class="mk-yes"><span>low</span></span> <span>(completado en la aplicación)</span></td>
+              <td data-label="Git"><span class="mk-no"><span>alto</span></span> <span>(configuración del complemento del repositorio)</span></td>
+              <td data-label="Sincronización de cosas"><span class="mk-part"><span>medio</span></span> <span>(emparejamiento para cada terminal)</span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span>Plataforma Compatible</span></th>
+              <td data-label="Accionamiento iCloud"><span class="mk-no">Apple<span>solo</span></span></td>
+              <td data-label="Obsidian Sync"><span class="mk-yes"><span>Todas las plataformas</span></span></td>
+              <td data-label="Git"><span class="mk-yes"><span>Todas las plataformas</span></span> <span>(El móvil depende del plug-in)</span></td>
+              <td data-label="Sincronización de cosas"><span class="mk-part"><span>PC・Android</span></span> <span> (Android es una versión de la comunidad. iPhone・iPad no son compatibles oficialmente)</span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span>Comportamiento en conflicto</span></th>
+              <td data-label="Accionamiento iCloud"><span>Archilo duplicado numerado (ayuda oficial de Apple, no se ha llevado a cabo la verificación real de la máquina en Obsidian)</span></td>
+              <td data-label="Obsidian Sync"><span>El procesamiento específico no se describe en la ayuda oficial. Se puede restaurar con el historial de versiones</span></td>
+              <td data-label="Git"><span class="mk-part"><span>Inserte un marcador de colisión en el texto (medición real)</span></span></td>
+              <td data-label="Sincronización de cosas"><span class="mk-part"><span>Guardar ambos como archivos separados (medición real)</span></span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span>historial de versiones</span></th>
+              <td data-label="Accionamiento iCloud"><span class="mk-no"><span>Ninguno</span></span> <span>(archivo Markdown solo)</span></td>
+              <td data-label="Obsidian Sync"><span class="mk-yes"><span>Sí</span></span> <span>(Estándar 1 meses・Plus 12 meses de retención)</span></td>
+              <td data-label="Git"><span class="mk-yes"><span>Sí</span></span> <span>(indefinido, unidad de confirmación)</span></td>
+              <td data-label="Sincronización de cosas"><span class="mk-part"><span>El defecto está desactivado</span></span> <span>(se puede habilitar en la configuración)</span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span>Cifrado de la comunicación</span></th>
+              <td data-label="Accionamiento iCloud"><span class="mk-yes"><span>Sí</span></span></td>
+              <td data-label="Obsidian Sync"><span class="mk-yes"><span>Cifrado E2E</span></span></td>
+              <td data-label="Git"><span class="mk-part"><span>Dependiente del anfitrión</span></span> <span>(HTTPS/SSH)</span></td>
+              <td data-label="Sincronización de cosas"><span class="mk-yes"><span>TLS・P2P conexión directa</span></span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span>¿Puedo escribir sin conexión?</span></th>
+              <td data-label="Accionamiento iCloud"><span class="mk-yes">◎</span></td>
+              <td data-label="Obsidian Sync"><span class="mk-yes">◎</span></td>
+              <td data-label="Git"><span class="mk-yes">◎</span></td>
+              <td data-label="Sincronización de cosas"><span class="mk-yes">◎</span></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+        <p style="font-size:.85rem;color:var(--text-muted);line-height:1.8;"><span>※ Algunas celdas de "Comportamiento en conflicto" e "historial de versiones" tienen diferentes rangos de verificación. Para obtener más información, consulte el siguiente capítulo y "Entorno de verificación y rango de verificación" al final. </span></p>
+      </div></section>
+
+      <!-- Failure modes — the unique value of this article -->
+      <section class="lp-section ce-chapter" id="conflicts">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-3" data-ce-number="03"> <span>Compare cómo romper - En realidad traté de causar un conflicto</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>A menudo se ven comparaciones catalogales del método de sincronización, pero no hay muchos artículos que se hayan confirmado moviendo sus manos a <strong> "¿Qué sucederá realmente si edita en el 2 al mismo tiempo?". </strong>Aquí, en realidad configuro Git y Syncthing en este entorno de verificación (Ubuntu 24.04・GitHub Acciones), y <strong>Agregué líneas 1 separadas sin conexión en una carpeta que imita el terminal 2 y luego reinicié la sincronización</strong>. La unidad iCloud y Obsidian Sync no se pueden reproducir en la máquina real porque no hay macOS/iOS en este entorno, y se basan en la descripción de la ayuda oficial. </span> </p>
+
+        <div class="cz">
+          <div class="cz__n"><span>Medición real - Git</span></div>
+          <h3 class="cz__t"><span>El marcador de colisión se inserta en el cuerpo de la nota como está</span></h3>
+          <p><span> Creé un repositorio central 1, y los clones 2 eran cada uno como un terminal separado. Con ambos "fuera de línea", agregue otra línea 1 al final de la misma nota y confírela, y empújela en orden. </span></p>
+          <pre class="note-sample" tabindex="0" role="region" aria-label="Ejemplo de texto (se puede desplazar horizontalmente)"><code># デバイスAを先にpush → 成功
+$ git push origin master
+   ba48c62..f0be52e  master -> master
+
+# デバイスBをpush → 拒否される
+$ git push origin master
+ ! [rejected]  master -> master (fetch first)
+
+# デバイスBがpull（マージを試み、衝突）
+$ git pull origin master --no-rebase
+Auto-merging Daily Notes/2026-08-26.md
+CONFLICT (content): Merge conflict in Daily Notes/2026-08-26.md
+
+# ノートの中身（Obsidianで開くとこのまま見える）
+# 2026-08-26
+
+- 08:00 起床
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+- 09:15 買い物メモ
+&#61;&#61;&#61;&#61;&#61;&#61;&#61;
+- 09:00 会議メモ
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; f0be52e...</code></pre>
+          <p><span><strong>Los datos no se perderán</strong>, pero el cuaderno con el marcador de colisión se abrirá como está con Obsidian. Si lo lees sin darte cuenta, puedes leerlo mal como tu propia oración, y para resolverlo, necesitas editarlo manualmente y volver a comprometerlo después de entender el significado de <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> / <code>=======</code> / <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>. Incluso si utilizas un plug-in como Obsidian Git, esta resolución final de colisiones es una tarea que requiere conocimiento de Git. </span></p>
+        </div>
+
+        <div class="cz">
+          <div class="cz__n"><span>Medición real — Syncthing</span></div>
+          <h3 class="cz__t"><span>Deja uno y evacua el otro a otro archivo</span></h3>
+          <p><span>Cuando lo probé con el mismo procedimiento (iniciando la instancia 2 de Syncthing v1.27.2 instalada a través de apt y emparejándola directamente con TCP local), se rompió de una manera completamente diferente a Git. </span></p>
+          <pre class="note-sample" tabindex="0" role="region" aria-label="Ejemplo de texto (se puede desplazar horizontalmente)"><code># 同期再開後のvault-a
+Daily Notes/2026-08-26.md
+Daily Notes/2026-08-26.sync-conflict-20260825-212901-P2RW67Y.md
+
+# 2026-08-26.md（採用された側）
+# 2026-08-26
+
+- 08:00 起床
+- 09:15 買い物メモ（デバイスBで追記）
+
+# 2026-08-26.sync-conflict-....md（退避された側）
+# 2026-08-26
+
+- 08:00 起床
+- 09:00 会議メモ（デバイスAで追記）</code></pre>
+          <p><span>Syncthing automáticamente deja uno de ellos como el nombre de archivo original y guarda el otro como <strong>otra nota llamada <code>*.sync-conflict-日時-デバイスID.md</code></strong>. Los marcadores no se mezclan en el texto, y no se requiere el conocimiento de Git. Sin embargo, <strong>no se fusiona automáticamente</strong>, por lo que si lo dejas sin notar la nota evacuada, la nota sobre el mismo tema permanecerá dividida en archivos 2. El hecho de que los nombres de archivos desconocidos aumenten en los resultados de búsqueda de almacenamiento puede ser un ruido operativo. </span></p>
+        </div>
+
+        <div class="cz">
+          <div class="cz__n"><span>Información oficial y no verificada — iCloud Drive</span></div>
+          <h3 class="cz__t"><span>Archivos duplicados con números en la ayuda oficial de Apple</span></h3>
+          <p><span>La ayuda oficial de Mac de Apple explica que cuando la versión de un documento entra en conflicto en la unidad iCloud, puede seleccionar y mantener cada versión en el cuadro de diálogo de resolución de conflictos, y si tiene más de una, permanece en el nombre de archivo <strong> numerado al final</strong> como "Seven Wonders" y "Seven Wonders 2". Sin embargo, este cuadro de diálogo es un comportamiento para aplicaciones (Pages, etc.) que admiten el control de versiones de documentos Apple API, y el mismo cuadro de diálogo no aparece necesariamente en una aplicación que lee y escribe directamente en el sistema de archivos como <strong>Obsidian</strong>. No hay macOS/iOS en este entorno, y la verificación real de la máquina no se ha realizado con la unidad Obsidian+iCloud. </span></p>
+          <p><span>El retraso de sincronización (tarda de unos pocos segundos a decenas de segundos en reflejarse, incluso si la escritura se escribe inmediatamente) tratado en el capítulo <a href="/es/obsidian/daily-note/#missing"> "No entrar en la nota diaria"</a> del artículo existente es un fenómeno diferente al de esta competencia. Si conoces ambos, será más rápido aislar los problemas a través de iCloud. </span></p>
+        </div>
+
+        <div class="cz">
+          <div class="cz__n"><span>Información oficial y no verificada — Obsidian Sync</span></div>
+          <h3 class="cz__t"><span> Los algoritmos de resolución de conflictos no se revelan. En lo que puedes confiar es en el historial de versiones</span></h3>
+          <p><span>En la ayuda oficial (obsidian.md/help/sync, consultada el 2026-8-26) no encontramos una descripción del algoritmo concreto que elige qué versión conservar ante ediciones simultáneas. Sí incluye la advertencia oficial de <strong>hacer una copia de seguridad de la bóveda, porque combinar Obsidian Sync con otros servicios de almacenamiento en la nube, como Dropbox, Google Drive o OneDrive, puede provocar conflictos de sincronización</strong>. Por tanto, el concepto de conflicto también existe en Obsidian Sync. La función indicada expresamente como método de recuperación es <strong>Version History</strong>, que permite elegir y restaurar una versión anterior de cada nota. El historial se conserva durante 1 mes en el plan Standard y 12 meses en el plan Plus. Los archivos adjuntos se conservan durante 2 semanas, independientemente del plan.</span></p>
+          <p><span>En este entorno, no podemos crear una cuenta Obsidian Sync porque se requiere el pago y la competencia real no se puede reproducir. </span></p>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-box__title"><span>Lección común</span></div>
+          <p><span>Del método 4, tanto Git como Syncthing que se podían medir <strong> no perdieron datos</strong>. La diferencia entre cómo romper es "si el marcador está mezclado en el texto" y "si se divide en archivos separados", y ambos <strong> se dejan en silencio si no lo notas</strong> en común. La medida preventiva más fiable es no sincronizar dos veces las bóvedas 1 con múltiples métodos de sincronización (esto también está claramente indicado por la fórmula Obsidian). </span></p>
+        </div>
+      </div></section>
+
+      <!-- How to choose -->
+      <section class="lp-section ce-chapter ce-chapter--wide">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-4" data-ce-number="04"> <span>Directrices para la selección</span> </h2></header><div class="ce-chapter__body">
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">🍎 <span>Uso solo para productos Apple</span></div>
+            <div class="reason-card__desc"><span>iCloud Drive es suficiente. Ya está encendido, y no hay necesidad de costos adicionales o configuración.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🖥️ <span>Windows/Android también está disponible</span></div>
+            <div class="reason-card__desc"><span>Si desea obtener soporte oficial e historial de versiones sin conocimientos técnicos, Obsidian Sync. Si es gratis, Syncthing es un competidor.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🌿 <span>Estoy acostumbrado a Git</span></div>
+            <div class="reason-card__desc"><span>Si quieres dejar el cambio en el propio almacenamiento como un historial de confirmación, Git. La premisa es que puedes resolver los conflictos tú mismo.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🔒 <span>No quiero pasar por un operador en la nube</span></div>
+            <div class="reason-card__desc"><span>Del 4, solo Syncthing se puede sincronizar directamente entre sí. Aunque es gratuito, iPhone y iPad son tratados como "no compatibles oficialmente" en la ayuda oficial de Obsidian, y también puede configurar cada terminal usted mismo.</span></div>
+          </div>
+        </div>
+      </div></section>
+
+      <!-- SimpleMemo tie-in -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-5" data-ce-number="05"> <span>En cualquier método de sincronización, la bóveda es solo una carpeta</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span> Qué método de sincronización elegir es solo cuestión de decidir cómo "alinear" la carpeta de almacenamiento. SimpleMemo deja la nota enviada en el correo electrónico dirigido a sí mismo y <strong>lo agrega directamente a las notas diarias en la carpeta de almacenamiento en la unidad iCloud</strong>. Las carpetas de almacenamiento que están sincronizadas con iCloud Drive son elegibles, y las carpetas de almacenamiento que funcionan solo con Git y Syncthing (no a través de iCloud Drive) no son elegibles en este momento. </span> </p>
+        <div class="cta-box">
+          <div class="cta-box__title"><span>No importa qué método de sincronización, el destino es la misma carpeta</span></div>
+          <p class="cta-box__desc"><span> La descarga es gratuita. Simplemente seleccione la carpeta de almacenamiento en la unidad iCloud una vez para completar la configuración. </span></p>
+          <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="app-store-badge" aria-label="Descargar de App Store"> <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="Descargar de App Store" loading="lazy"> </a>
+          <div class="cta-qr">
+            <img src="/assets/img/qr-obsidian-sync-ja.svg?v=45629ebf9d" width="132" height="132" alt="Código QR para descargar en App Store" loading="lazy">
+
+            <small><span>Para usuarios de PC, lea con su teléfono inteligente</span></small>
+          </div>
+        </div>
+      </div></section>
+
+      <!-- FAQ -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-6" data-ce-number="06"> <span>Preguntas frecuentes</span> </h2></header><div class="ce-chapter__body">
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>¿Cuál debería elegir al final? </span></summary>
+            <div class="faq-answer"><span>Si solo usas el producto Apple, la unidad iCloud, que ya está encendida, es la más fácil. Si también usas Windows/Android, o si quieres historial de versiones oficiales y soporte, el Obsidian Sync de pago. Si está familiarizado con Git y desea dejar cambios en el repositorio como un historial de confirmación, Git. Si no desea usar un operador en la nube de forma gratuita, es Syncthing (iPhone y iPad se tratan como "no compatibles oficialmente" en la ayuda oficial de Obsidian).</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>¿Puedo sincronizar con varios terminales sin usar Obsidian Sync? </span></summary>
+            <div class="faq-answer"><span>se puede hacer. La bóveda es solo una colección de archivos Markdown que no tienen un formato especial, por lo que puede usar la sincronización de archivos estándar del sistema operativo como iCloud Drive, Dropbox, Google Drive y herramientas de sincronización de uso general como Git y Syncthing. Obsidian Sync es una de las opciones para los métodos de sincronización y no es obligatorio.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>¿Qué pasa si edito con el 2 al mismo tiempo? </span></summary>
+            <div class="faq-answer"><span>Cada método falla de forma distinta. En nuestras pruebas, Git insertó marcadores de conflicto (&lt;&lt;&lt;&lt;&lt;&lt;&lt;) directamente en el mismo archivo, lo que exigió resolverlo manualmente. Syncthing eligió automáticamente una versión y guardó la otra en un archivo separado llamado sync-conflict, sin perder datos. No pudimos probar iCloud Drive ni Obsidian Sync en dispositivos reales en este entorno Linux sin macOS/iOS.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>¿Puedo usar varios métodos de sincronización al mismo tiempo? </span></summary>
+            <div class="faq-answer"><span>La ayuda oficial de Obsidian recomienda hacer una copia de seguridad del almacenamiento, diciendo que los conflictos de sincronización ocurrirán cuando el Obsidian Sync se use con otro almacenamiento en la nube como Dropbox, Google Drive y OneDrive. Evite superponer el mecanismo de doble sincronización en la misma carpeta, y es seguro mantener los métodos de sincronización 1 en el almacenamiento 1.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>¿Puedo deshacerlo si lo sobrescribo por error con Obsidian Sync? </span></summary>
+            <div class="faq-answer"><span>Según la ayuda oficial, puede ver y restaurar la versión anterior de cada nota con la función Historial de versiones. El período de retención es de 1 meses con el plan Estándar, 12 meses con el plan Plus, y el archivo adjunto es 2 semanas (comprobado con la ayuda oficial en 2026 años 8 26). Seleccione un archivo para restaurar de "Abrir historial de versiones".</span></div>
+          </details>
+        </div>
+      </div></section>
+
+      <!-- Verification scope -->
+      <section class="lp-section">
+        <div class="tip-box">
+          <div class="tip-box__title"><span>Entorno de verificación y rango de verificación</span></div>
+          <p style="margin:0;"><span>Fecha de comprobación: 2026-8-26. Entorno: escritorio Linux (Ubuntu 24.04, entorno de ejecución de GitHub Actions). <strong>Pruebas realizadas en esta sesión</strong>: con Git 2.x, 1 repositorio central y 2 clones, se reprodujeron las ediciones simultáneas sin conexión, el rechazo del push, el conflicto de fusión al hacer pull y la inserción de marcadores de conflicto en el texto. Con Syncthing v1.27.2, instalado mediante apt, se reprodujo el mismo escenario entre 2 instancias emparejadas directamente por TCP local y se confirmó la creación de un archivo <code>sync-conflict-*.md</code>. <strong>Información basada en fuentes oficiales, sin comprobación práctica</strong>: los períodos de conservación del historial de Obsidian Sync y las precauciones al combinarlo con otras nubes (obsidian.md/help/sync, consultado directamente durante esta sesión el 2026-8-26); los nombres de archivo numerados ante conflictos de documentos en iCloud Drive (ayuda oficial de Mac de Apple); y los dispositivos compatibles con Syncthing (obsidian.md/help/sync-notes y la documentación de Syncthing, consultados el 2026-10-1). <strong>No se pudo comprobar en este entorno</strong>: el comportamiento real de los conflictos al combinar iCloud Drive y Obsidian, por no disponer de macOS ni iOS; ni reproducir conflictos reales en Obsidian Sync, al no tener contratado ese servicio de pago. Las versiones de Obsidian y el comportamiento de las herramientas pueden cambiar. Consulta los sitios oficiales para obtener información actualizada.</span></p>
+        </div>
+      </section>
+
+      <!-- Internal Links -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-7" data-ce-number="07"> <span>Páginas relacionadas</span> </h2></header><div class="ce-chapter__body">
+        <div class="internal-links">
+          <a href="/es/obsidian/sync/icloud/"><span>Pasos de configuración para sincronizar con iCloud (iPhone x Mac)</span></a>
+          <a href="/es/obsidian/sync/official-sync/"><span>Estándar/Plus, ¿cuál necesitas?</span></a>
+          <a href="/es/obsidian/"><span>Obsidian detalles de cooperación</span></a>
+          <a href="/es/obsidian/daily-note/"><span>Cómo añadir al cuaderno diario</span></a>
+          <a href="/es/obsidian/what-is-vault/"><span>Qué es una bóveda (Vault): en realidad, una carpeta</span></a>
+          <a href="/es/obsidian/pricing/"><span>Precios de Obsidian: qué puedes hacer gratis</span></a>
+          <a href="/es/obsidian/getting-started/"><span>Primeros pasos con Obsidian, con capturas reales</span></a>
+          <a href="/es/obsidian/compare/logseq/"><span>Obsidian frente a Logseq: una comparación probada</span></a>
+          <a href="/es/faq"><span>Preguntas frecuentes</span></a>
+        </div>
+      </div></section>
+
+    </div>
+</div>
+
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="container">
+  <h2 style="font-size:1.1rem;margin-bottom:1rem;"> <span>Referencias</span> </h2>
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://obsidian.md/help/sync" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Ayuda — Sincronización</a> — <span>ayuda oficial de Obsidian Sync. Adquirido directamente de esta sesión en 2026 año 8 mes 26</span></li>
+    <li><a href="https://obsidian.md/help/sync/version-history" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Ayuda — Historial de versiones</a> — <span>Ayuda oficial sobre cómo mantener el historial de versiones y restaurarlo</span></li>
+    <li><a href="https://support.apple.com/en-in/guide/mac-help/mh40780/mac" target="_blank" rel="noopener" style="color:var(--accent);">Si las versiones de los documentos entran en conflicto en iCloud Drive en Mac — Apple Support</a> — <span>Guía oficial para documentar el comportamiento de conflictos en iCloud Drive</span></li>
+    <li><a href="https://git-scm.com/docs/git-merge" target="_blank" rel="noopener" style="color:var(--accent);">git-merge — Documentación oficial de Git</a>— <span>Referencia oficial sobre cómo funcionan los conflictos de fusión</span></li>
+    <li><a href="https://docs.syncthing.net/users/syncing.html" target="_blank" rel="noopener" style="color:var(--accent);">Documentación de Syncthing — Control de versiones y conflictos de archivos</a> — <span>Documento oficial sobre las reglas de nomación de archivos de conflicto de Syncthing</span></li>
+    <li><a href="https://obsidian.md/help/sync-notes" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Ayuda - Sincroniza tus notas entre dispositivos</a> — <span> Ayuda oficial sobre cómo sincronizar cada dispositivo (iPhone y iPad enumeran Syncthing como una opción "oficialmente no compatible", y Android informa a la versión de la comunidad cuando se ha completado el desarrollo de la aplicación oficial). 2026 año 10 mes 1 confirmado</span></li>
+    <li><a href="https://docs.syncthing.net/users/contrib.html" target="_blank" rel="noopener" style="color:var(--accent);">Documentación de Syncthing — Contribuciones de la comunidad</a> — <span>Lista de aplicaciones de la comunidad para Android (Syncthing-Fork, etc.) y iPhone・iPad (Synctrain)</span></li>
+    <li><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="reference" href="https://apps.apple.com/jp/app/id6758438948" target="_blank" rel="noopener" style="color:var(--accent);">SimpleMemo — App Store</a> — <span>Página de descarga de App Store</span></li>
+  </ul>
+  </div>
+</section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/es/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>Siguiente lectura</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Crea un lugar para almacenar notas con la colaboración Obsidian</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span> Si estableces el enlace y guardas el destino en iPhone, también puedes dejar las notas enviadas a Obsidian. </span></span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <div class="container">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>Contenido relacionado</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/es/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Todos los métodos</span></a></li>
+    <li><a href="/es/use-cases/journaling/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>diario</span></a></li>
+    <li><a href="/es/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Todos los artículos del blog</span></a></li>
+    <li><a href="/es/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Preguntas frecuentes</span></a></li>
+  </ul>
+  </div>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="es" dir="ltr"><a class="site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Una pequeña nota. Un paso más.</p><p class="site-footer-description">Envía notas desde tu iPhone a Obsidian y por correo electrónico.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+
+      <nav class="footer__nav" aria-label="Navegación del pie de página">
+      <div class="footer__col">
+        <p class="footer__col-title">Producto</p>
+        <a href="/es/download/" class="footer__link">Descargar</a>
+        <a href="/es/" class="footer__link">Inicio</a>
+        <a href="/es/apple-watch/" class="footer__link">Apple Watch</a>
+        <a href="/es/obsidian/" class="footer__link">Integración con Obsidian</a>
+        <a href="/es/use-cases/" class="footer__link">Casos de uso</a>
+        <a href="/es/guides/" class="footer__link">Guías</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Comparar y cambiar</p>
+        <a href="/es/note-to-email/" class="footer__link">Notas por correo</a>
+        <a href="/es/vs/" class="footer__link">Comparar</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Soporte</p>
+        <a href="/es/roadmap/" class="footer__link">Hoja de ruta pública</a>
+        <a href="/es/devlog/" class="footer__link">Registro de desarrollo</a>
+        <a href="/es/about/" class="footer__link">Sobre el desarrollador</a>
+        <a href="/es/faq" class="footer__link">Preguntas frecuentes</a>
+        <a href="/es/privacy" class="footer__link">Privacidad</a>
+        <a href="/es/contact" class="footer__link">Contacto</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Operado por YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

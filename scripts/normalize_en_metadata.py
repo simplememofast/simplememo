@@ -8,9 +8,7 @@ when present.
 from __future__ import annotations
 from pathlib import Path
 from bs4 import BeautifulSoup
-import html,re,sys
-sys.path.insert(0,str(Path(__file__).resolve().parent))
-from i18n_config import JA_EN_PAIRS
+import html,re
 
 ROOT=Path(__file__).resolve().parent.parent
 MIN_DESC=110

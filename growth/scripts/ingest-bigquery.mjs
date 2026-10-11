@@ -41,15 +41,13 @@ import path from 'node:path';
 import { ROOT, GSC_DIR, toPath } from '../lib/gsc.mjs';
 import { buildMeta, emptyBuckets, mergeByKey, summarise, writeSnapshot } from '../lib/snapshot.mjs';
 import { connect, query, tableExists, listTables } from '../lib/bigquery.mjs';
+import { flagReader } from '../lib/cli.mjs';
 
 const SITE_TABLE = 'searchdata_site_impression';
 const URL_TABLE = 'searchdata_url_impression';
 
 const argv = process.argv.slice(2);
-const flag = (n, d = null) => {
-  const i = argv.indexOf(`--${n}`);
-  return i >= 0 && argv[i + 1] && !argv[i + 1].startsWith('--') ? argv[i + 1] : d;
-};
+const flag = flagReader(argv);
 const dryRun = argv.includes('--dry-run');
 
 const project = flag('project', process.env.GCP_PROJECT_ID);

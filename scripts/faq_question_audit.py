@@ -14,6 +14,10 @@ def normalize(text):
     return re.sub(r"\s+", " ", unicodedata.normalize("NFKC", text)).strip()
 
 
+def compact(text):
+    return re.sub(r"\s+", "", normalize(text)).casefold()
+
+
 class Element:
     def __init__(self, tag, attrs=(), parent=None):
         self.tag, self.attrs, self.parent = tag, dict(attrs), parent
@@ -26,6 +30,10 @@ class Element:
                 yield from child.walk()
 
     def text(self, lang=None, inherited="ja"):
+        if self.attrs.get("translate") == "no" and lang == inherited.split("-")[0]:
+            # A quoted command in another language is visible inside this
+            # language's answer, rather than an alternative localized UI.
+            lang = None
         chosen = (self.attrs.get("data-lang") or self.attrs.get("lang") or inherited).split("-")[0]
         if self.tag in {"script", "style", "template", "noscript", "head"} or "hidden" in self.attrs:
             return ""
@@ -89,7 +97,7 @@ def question_elements(root):
         while parent:
             ancestors.append(parent)
             parent = parent.parent
-        if node.tag == "summary" or classes & {"faq-question", "faq-q"} or (
+        if node.tag == "summary" or "data-faq-question" in node.attrs or classes & {"faq-question", "faq-q"} or (
             "app-card__name" in classes and any(p.attrs.get("id") == "faq" for p in ancestors)
         ):
             found.append(node)
@@ -130,6 +138,7 @@ def eligible_content(node):
 def audit_page(label, raw):
     doc = Document(raw)
     nodes = list(doc.root.walk())
+    visible_body = compact(doc.root.text())
     default = next((n.attrs.get("lang", "ja").split("-")[0] for n in nodes if n.tag == "html"), "ja")
     languages = {default} | {(n.attrs.get("data-lang") or n.attrs.get("lang")).split("-")[0]
                             for n in nodes if n.attrs.get("data-lang") or n.attrs.get("lang")}
@@ -162,9 +171,19 @@ def audit_page(label, raw):
             actual = set().union(*(visible.get(lang, set()) for lang in langs))
             expected = {normalize(q["name"]) for q in entities}
             missing = sorted(expected - actual)
+            answer_missing = []
+            for q in entities:
+                answer = q.get("acceptedAnswer")
+                if isinstance(answer, dict) and isinstance(answer.get("text"), str):
+                    # FAQ answer text may contain safe HTML. Parse it as HTML
+                    # before comparing with what a reader can see in the body.
+                    rendered = compact(Document(answer["text"]).root.text())
+                    if rendered and rendered not in visible_body:
+                        answer_missing.append(q["name"])
             rows.append({"path": label, "languages": langs, "schema_questions": len(expected),
                          "html_questions": len(actual), "missing": missing,
-                         "state": "unread" if not actual else "candidate" if missing else "match"})
+                         "answer_missing": answer_missing,
+                         "state": "unread" if not actual else "candidate" if missing or answer_missing else "match"})
     return rows
 
 
@@ -205,4 +224,10 @@ def selftest():
         assert audit_page("fixture", raw)[0]["state"] != "match"
     assert audit_page("missing", page(["Q?"], ""))[0]["state"] == "unread"
     assert audit_page("invalid", '<script type="application/ld+json">{</script>')[0]["state"] == "unread"
+    answer_page = ('<html><head><script type="application/ld+json">'
+                   + json.dumps({"@type": "FAQPage", "mainEntity": [{"@type": "Question",
+                       "name": "Q?", "acceptedAnswer": {"text": "The answer"}}]})
+                   + '</script></head><body><summary>Q?</summary><p>Different answer</p></body></html>')
+    assert audit_page("hidden-answer", answer_page)[0]["answer_missing"] == ["Q?"]
+    assert audit_page("visible-answer", answer_page.replace("Different answer", "The answer"))[0]["state"] == "match"
     print(f"FAQ question audit: false positives 0/{len(positives)}, missed defects 0/{len(negatives)}; unread cases passed")

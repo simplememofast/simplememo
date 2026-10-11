@@ -1,6 +1,7 @@
 name: SEO Validation
 
 on:
+  workflow_call:
   push:
     branches: [main]
   pull_request:
@@ -31,11 +32,14 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Auto-merge identity guard regression
+        run: node scripts/merge-identity-check.js --selftest
+
       - name: Refactoring regression tests (no network)
         run: node --test scripts/refactor.test.mjs
 
       - name: Acquisition measurement and GSC aggregation regressions
-        run: node --test growth/lib/measurement.test.mjs growth/lib/ingest-gsc.test.mjs growth/lib/cta-tracking.test.mjs growth/lib/analytics.test.mjs
+        run: node --test growth/lib/measurement.test.mjs growth/lib/ingest-gsc.test.mjs growth/lib/ai-gsc-export.test.mjs growth/lib/gsc-privacy.test.mjs growth/lib/cta-tracking.test.mjs growth/lib/analytics.test.mjs
 
       - name: Contact form reproduction details and failed delivery
         run: node --test scripts/contact-form.test.mjs
@@ -82,6 +86,9 @@ jobs:
           node --test scripts/qr-routing.test.mjs
           node scripts/generate-qr-codes.mjs --check
 
+      - name: Public evidence asset pins match the checkout (no HTTP)
+        run: node --test scripts/full-public-assets-rate-limit.test.mjs
+
       - name: Prospective decisions and recovery safety
         run: |
           node scripts/autopilot-data.mjs --selftest
@@ -90,6 +97,8 @@ jobs:
           node scripts/autopilot-checkpoint.mjs --check
           node scripts/autopilot-output.mjs --selftest
           node scripts/autopilot-output.mjs --check
+          node scripts/autopilot-diagnostics.mjs --selftest
+          node scripts/autopilot-diagnostics.mjs --check
           node scripts/value-contracts.mjs --selftest
           node scripts/value-contracts.mjs --check
           node scripts/decision-ci.mjs --selftest
@@ -133,6 +142,21 @@ jobs:
       # still read ?v=20260529-titlefix, and _headers serves /*.js as
       # immutable/max-age=604800 — so returning visitors had been holding a
       # month-old lang.js. Only CSS was covered, so nothing could report it.
+      - name: Shared chrome rules fire (self-test)
+        run: python3 scripts/sync_shared_chrome.py --selftest
+      - name: Shared chrome matches maintained source
+        run: python3 scripts/sync_shared_chrome.py --check
+
+      - name: Page design preserves content and language (self-test)
+        run: python3 scripts/sync_page_design.py --selftest
+      - name: Public pages use the shared reading design
+        run: python3 scripts/sync_page_design.py --check
+
+      - name: Static translation safeguards fire (self-test)
+        run: python3 scripts/build_site_translations.py --selftest
+      - name: All public topics have complete current translations
+        run: python3 scripts/build_site_translations.py --check
+
       - name: Cache-busters match asset contents (CSS + JS)
         run: node scripts/check-css-version.mjs
 
@@ -631,7 +655,10 @@ jobs:
       - name: Release gate (App Review / App Store)
         run: |
           node scripts/check-release-gate.mjs --selftest
+          node --test scripts/one-release-local-quality.test.mjs
           node scripts/check-release-gate.mjs --check
+          # Read-only evidence classifier; this never authorizes publication.
+          node scripts/assess-release-health-evidence.mjs --selftest
 
       # 【出荷の門が変わったことを、変えたPRの中で気づかせる】
       # 判断は公開側（ここ）、実行は非公開側（simplememo-ios の release.yml。
@@ -825,7 +852,9 @@ jobs:
       # **静かに欠けたデータ**。重複と内部不整合は落とす（数字が黙って嘘になる）。
       # 日付の欠けと鮮度は報告のみ — 元データ側の遅れで無関係な出荷を止めない。
       - name: Data quality (GSC snapshots)
-        run: node growth/scripts/check-data-quality.mjs --check
+        run: |
+          node growth/scripts/check-data-quality.mjs --selftest
+          node growth/scripts/check-data-quality.mjs --check
 
       # 【シグナル台帳】要望・レビュー・問い合わせ・競合を1つの台帳に集め、
       # **同じ話を1行にする**。声の大きさを「何回転記されたか」で測らないため。
@@ -893,18 +922,40 @@ jobs:
       # ここも同じ扱いにする。**ただし黙らせない** —— 失敗すると手順が赤い警告で残り、
       # 検査本体も `WebKit — **測れなかった**` と理由つきで出す。
       # `|| true` にしないのはそのため（それだと成功と見分けがつかない）。
+      #
+      # `timeout-minutes` は**失敗しないまま止まる**ときのため。2026-09-30 の深夜（JST）、PR #1774 の
+      # 検証（SEO Validation #4014 の1回目）がこの手順で `sudo apt-get update -qq` のあと何も出さずに
+      # 1時間22分止まり（23:42 開始、01:05 に取り消し）、流し直すまでマージされなかった。
+      # 流し直しでは27秒で通り、同じ時間帯の #1775・#1777・#1770 の検証も通っている。
+      # 上限が無いとジョブの既定の360分まで待つので、「apt の不調で本番デプロイを止めない」が
+      # 止まりのときには成り立たない。ふだんは約30秒なので10分で切り、失敗と同じ扱いで先へ進める。
+      #
+      # [2026-10-04] **Ubuntu 26.04 には `webkit2gtk-driver` が無い**（`webkitgtk-webdriver` が置き換える）。
+      # `ubuntu-latest` は 2026-10-19〜11-19 に 26.04 へ切り替わる（GitHub の注記と actions/runner-images#14748）。
+      # 切り替わる前に、この検証を `ubuntu-26.04` で流して確かめた（下書きの PR #1987）——
+      # 1回目は `E: Package 'webkit2gtk-driver' has no installation candidate` で入らず、
+      # 横漏れの検査が「WebKit — 測れなかった: WebKitWebDriver が無い」になった（門は緑のまま）。
+      # 先に `webkit2gtk-driver` を試し、無ければ `webkitgtk-webdriver` を入れる形にした2回目は、
+      # WebKit で 500 通りを実測できた（ドライバは今の探し方 `findWebKitDriver` のままで見つかった）。
+      # 24.04 では1つ目がそのまま通るので、今の動きは変わらない。
       - name: Install WebKit (WebKitGTK + WebDriver)
         continue-on-error: true
+        timeout-minutes: 10
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends webkit2gtk-driver xvfb x11-utils
+          if ! sudo apt-get install -y --no-install-recommends webkit2gtk-driver xvfb x11-utils; then
+            sudo apt-get install -y --no-install-recommends webkitgtk-webdriver xvfb x11-utils
+          fi
 
       - name: WebKit transport failures retain evidence and bound cleanup
-        run: node --test scripts/webkit-driver.test.mjs scripts/viewport-health.test.mjs
+        run: node --test scripts/webkit-driver.test.mjs scripts/viewport-health.test.mjs scripts/viewport-pool.test.mjs
 
       - name: Landing pages do not scroll sideways (report-only)
+        # Keep every page/width and both engines after the ten-language expansion.
+        timeout-minutes: 60
         run: |
           npm i --no-save playwright-core
+          node --test scripts/viewport-pool-browser.test.mjs
           node scripts/check-viewport-overflow.mjs --selftest || true
           node scripts/check-viewport-overflow.mjs --report
 
@@ -912,7 +963,9 @@ jobs:
       # 組み合わせ**を総当たりで踏む。2026-08-21の二重着手は、まさに
       # 書かれていなかった組み合わせだった。種を固定して反例を再現可能にする。
       - name: Property-based tests
-        run: node scripts/property-tests.mjs --check
+        run: |
+          node scripts/property-tests.mjs --selftest
+          node scripts/property-tests.mjs --check
 
       # 【モデル評価セット】替えたあとに「前より良くなった気がする」で決めない。
       # 入力と合格条件を先に固定し、**結果が無いことを空配列として持つ。**
@@ -1109,7 +1162,14 @@ jobs:
       # 直すには --bump <id> --why "..." が要る（履歴が残る）。
       # **黙って定義を変えて数字を良くする経路をつぶすための検査。**
       - name: KPI definitions vs source
-        run: node scripts/check-definitions.mjs --check
+        run: |
+          node scripts/check-definitions.mjs --selftest
+          node scripts/check-definitions.mjs --check
+
+      - name: Existing SQL definitions and lineage (no query)
+        run: |
+          node scripts/check-query-definitions.mjs --check
+          node --test scripts/check-query-definitions.test.mjs
 
       # 【コード著者率】原稿の「変更行の98.8%」は**再現できなかった。**
       #
@@ -1142,7 +1202,9 @@ jobs:
       # 検知器と書いたファイルが実在するかと、**実際に起きた障害種別に
       # 検知経路があるか**を見る（起きた実績があるものは、次も起きる）。
       - name: Monitoring coverage
-        run: node scripts/check-monitoring.mjs --check
+        run: |
+          node scripts/check-monitoring.mjs --selftest
+          node scripts/check-monitoring.mjs --check
 
       # 【ベンダー】依存している外部サービスの棚卸し。
       #
@@ -1312,7 +1374,19 @@ jobs:
       #   - 合格ライン60未満のまま running
       # どれも「配信してから気づく」と取り返しがつかない。
       - name: PR release D-SCORE consistency
-        run: node growth/scripts/d-score.mjs --check
+        run: |
+          node growth/scripts/d-score.mjs --selftest
+          node growth/scripts/d-score.mjs --check
+
+      # 【配信が両方の台帳に載っているか】上の --check は**レコードがあるもの**しか見ない。
+      # 2026-09-24、PR⑦（対話メモ）は annotations.json にだけ入り experiments.json に
+      # 無かった。帰結は pr-evaluation-due.mjs が **2026-10-08 の D+14 を永久に拾わない**
+      # こと（実測: due(ledger,'2026-10-08') が [] を返す）。
+      # 「レコードが存在しない」はレコードを見ても分からないので、別の検査にしてある。
+      - name: PR release ledger completeness
+        run: |
+          node scripts/check-pr-release-ledger.mjs --selftest
+          node scripts/check-pr-release-ledger.mjs --check
 
       # BigQuery の資格情報まわり。ネットワークにもGCPにも触らない
       # （token エンドポイントは fetch を差し替えて潰してある）ので、
@@ -1327,10 +1401,15 @@ jobs:
         run: python3 growth/queries/gsc-intent.test.py
 
       - name: Private analytics API retrieval
-        run: node --test growth/lib/analytics-export.test.mjs growth/lib/backup-inventory.test.mjs growth/lib/gcp-schedule-inventory.test.mjs
+        run: node --test growth/lib/analytics-export.test.mjs growth/lib/cta-page-manifest.test.mjs growth/lib/backup-inventory.test.mjs growth/lib/gcp-schedule-inventory.test.mjs
+
+      - name: GA4 tag queue ordering
+        run: node --test scripts/ga4-tag-order.test.mjs
 
       - name: Autonomous Company source boundaries and recovery
         run: node --test growth/lib/company.test.mjs growth/lib/company-connection-evidence.test.mjs growth/lib/company-goal-followup.test.mjs
+      - name: Website acquisition source attribution
+        run: node --test growth/lib/company-acquisition.test.mjs
       - name: Bing source boundaries and retry handling
         run: node --test growth/lib/bing-webmaster.test.mjs growth/lib/company-bing.test.mjs
       - name: Test GA4 funnel SQL with synthetic events
@@ -1339,6 +1418,7 @@ jobs:
           "$RUNNER_TEMP/ga4-sql-tests/bin/python" -m pip install --disable-pip-version-check -r growth/tests/requirements-sql.txt
           "$RUNNER_TEMP/ga4-sql-tests/bin/python" growth/tests/ga4-funnel-sql.test.py
           "$RUNNER_TEMP/ga4-sql-tests/bin/python" growth/tests/ga4-journey-sql.test.py
+          "$RUNNER_TEMP/ga4-sql-tests/bin/python" growth/tests/ga4-cta-pages-sql.test.py
 
       # 一括エクスポートの「届いているように見えて欠けている」判定。
       # これもネットワークに触らない（テーブル名と日付の配列だけを渡す）。
@@ -1357,6 +1437,13 @@ jobs:
         run: python3 scripts/generate_sitemap.py --selftest
       - name: Sitemap lists every page with content-derived dates
         run: python3 scripts/generate_sitemap.py --check
+      # 開発記事のフィード（en/devlog/feed.xml）は、記事の h1・meta description・dateModified から作る。
+      # 2026-09-24 に #1563 が relay-api-design の説明文を変えたままフィードを作り直さず、
+      # フィードだけ古い説明文で配られていた。記事を直したら `python3 scripts/generate_dev_feed.py` を回す。
+      - name: Developer feed matches the articles
+        run: |
+          python3 scripts/generate_dev_feed.py --selftest
+          python3 scripts/generate_dev_feed.py --check
 
       # --since 1 = HEAD~1..HEAD（マージは首親差分）で実際に変わった .html だけを
       # 通知する。以前は mtime 判定で、新規 checkout では全ファイルが「更新済み」に

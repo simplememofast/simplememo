@@ -462,6 +462,26 @@ AI面のシェアを追いたいなら、このCSVだけは月1回でも落と�
 `meta.bigquery.surfaces` は `search_type`（WEB / DISCOVER / NEWS …）の内訳で、
 これとは別の切り口。
 
+検証済みのSEO Daily受領データと同じ28日窓のAI CSVがある場合は、ZIPを
+**非公開ディレクトリ**に展開し、次を実行する。
+
+```sh
+node growth/scripts/merge-ai-gsc-export.mjs --ai-dir /private/gsc-ai-export --dry-run
+node growth/scripts/merge-ai-gsc-export.mjs --ai-dir /private/gsc-ai-export
+```
+
+このコマンドは受領済みWebデータの実行元・ハッシュを再検証し、AIのページ・
+日付・国・端末CSVを別バケットに追加する。日付が一致しない、ページなどの追加フィルタがある、
+表示回数が0・非表示・無効、国・端末と日付の合計が違う場合は保存しない。
+Googleは画面の非表示値をCSVで0に変えることがあるため、CSVの0だけでは
+真の0と区別できない。0を含むエクスポートは画面の読戻しと別記録が必要で、
+このコマンドでは取り込まない。
+同じラベルのスナップショットも上書きしない。生CSVはリポジトリに置かず、
+`meta.aio_export`にファイルハッシュを残す。ページ別の表示回数合計は
+プロパティ合計と異なり得るため、両方を別の値として読む。公開用の
+クエリ行から個人連絡先を含むものを除外し、除外件数だけを
+`meta.public_query_omissions`に記録する。サイト総計は日付集計から維持する。
+
 サイト側のAIO施策（`llms.txt`、JSON-LD、FAQスキーマ、AIクローラの許可）は
 既に入っている。`robots.txt` は GPTBot / ClaudeBot / PerplexityBot /
 OAI-SearchBot ほかを明示的に許可済み。

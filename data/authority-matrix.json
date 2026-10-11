@@ -138,7 +138,7 @@
       "reversible": false,
       "ai_may": [
         "提出の提案",
-        "**ゲートを通った提出の実行**（CI緑・実機確認の記録あり・TestFlightで24時間以上・1日1回）",
+        "**ゲートを通った提出の実行**（CI緑・実機確認の記録あり・TestFlight VALID・提出前の独自待機0時間・1日1回）",
         "ユーザーが利用を指示し接続・信頼した端末で、同じ配布版の実機テストを操作し、項目別の実結果を記録する"
       ],
       "requires_approval": false,
@@ -147,7 +147,7 @@
         "kill_switch を倒す操作",
         "端末のロック解除、Apple Accountの本人認証、サイドボタン認証など本人操作が必要な前提"
       ],
-      "gate": "evaluateSubmission() が唯一の関門。CI が同一コミットで success、リリースノートが ja-JP/en-US とも揃い、TestFlight が VALID で24時間以上寝ていて、未解決のブロッカーが0で、**実機確認の記録が同一コミットに対して存在し**、審査が進行中でなく（**版の状態と、アプリ単位の提出枠の両方**）、本日まだ1件も出していないときだけ通る。**どれか1つでも材料が無ければ hold** **[2026-09-03] 段階リリースの確認を提出側にも足した** —— 承認後の公開が自動になったので、公開を決める時点が提出の時点へ移った。`review.phased_release` が true でなければ提出しない。",
+      "gate": "evaluateSubmission() が唯一の関門。CI が同一コミットで success、リリースノートが ja-JP/en-US とも揃い、TestFlight が VALID であり（提出前の独自待機は0時間）、未解決のブロッカーが0で、**実機確認の記録が同一コミットに対して存在し**、審査が進行中でなく（**版の状態と、アプリ単位の提出枠の両方**）、本日まだ1件も出していないときだけ通る。**どれか1つでも材料が無ければ hold** **[2026-09-03] 段階リリースの確認を提出側にも足した** —— 承認後の公開が自動になったので、公開を決める時点が提出の時点へ移った。`review.phased_release` が true でなければ提出しない。",
       "evidence": [
         "scripts/check-release-gate.mjs",
         "data/release-gate.json",
@@ -199,20 +199,25 @@
     {
       "domain": "価格・プラン・無料枠の変更",
       "reversible": false,
-      "ai_may": [],
+      "ai_may": [
+        "価格の原資料照合・影響分析・変更案の作成",
+        "案件ごとに人が事前承認した価格変更の実設定・本番読戻し"
+      ],
       "requires_approval": true,
       "human_only": [
-        "すべて"
+        "価格・対象SKU・地域・開始日・既存購読者の扱いの事業判断と実適用承認",
+        "プラン構造・無料枠・例外・契約・課金同意の判断"
       ],
-      "gate": "自動化していない。data/site-constants.json の値変更はCIが表示との整合だけ見る",
+      "gate": "2026-09-28の委任は将来の価格変更に限る。自律変更幅は未設定なので実価格の変更は全件、SKU・地域・新旧価格・開始日・既存購読者の扱い・Appleの通知/同意・公開表示を記した案件別の人の事前承認が必要。AIは承認範囲だけ正規経路で実設定し、ASCと本番表示を読戻す。差分・認証・読戻しが不明なら停止して人へ移管する。プラン構造・無料枠は別承認。data/site-constants.json の値はASC実価格の証明ではない",
       "evidence": [
         "data/site-constants.json",
-        "scripts/sync_constants.js"
+        "scripts/sync_constants.js",
+        "docs/price-change-delegation-20260928.md"
       ],
       "status": "active",
       "threshold": {
         "set_by": "unset",
-        "note": "変更幅の上限も承認フローも未設計。現行値は月額500円/年額5,000円/無料枠1日3通で data/site-constants.json が正。**AIは値を提案もしない**（課金は不可逆で、既存契約者への影響が読めないため）。設計するなら autopilot-maturity-backlog.md ⑨ から"
+        "note": "自律変更幅は未設定で、全ての実価格変更は案件別の人の事前承認が必要。価格・地域・日付は現行ASCを実際に読んで確認する。data/site-constants.json は公開表示側の値であり、ASC価格の実証ではない。提案・CI・承認だけで正式実行加点しない"
       }
     },
     {
@@ -692,6 +697,29 @@
       ],
       "status": "active",
       "note": "2026-09-12の必要な実行・デプロイを承認し都度確認不要というオーナー委任を具体化。今回の実行対象はAct経路。アプリKill・資格情報失効・全体停止の実証や、本物の停止の無条件解除を今回の記録から推定しない。カナリアガードの既存権限は変更していない。"
+    },
+    {
+      "domain": "外部ブログへの記事投稿（dev.to・はてなブログ2つ・ライブドアブログ）",
+      "reversible": true,
+      "ai_may": [
+        "devlog-syndication.yml の門（緊急停止・投稿用の鍵の有無・公開面の最新投稿から66時間・1日1本）と機械検査を通った記事を、dev.to（simple_memo）、はてなブログ（はてなID simplememofast の2つ: simplememofast.hatenablog.com と「メモの設計図」simplememofast.hatenadiary.jp）、ライブドアブログ（captio.livedoor.blog）へ公式APIで公開し、公開ページの自社リンクの rel と meta robots を読み戻す"
+      ],
+      "requires_approval": false,
+      "human_only": [
+        "投稿用の鍵（DEVTO_API_KEY・HATENA_API_KEY・LIVEDOOR_API_KEY）の発行・登録・失効",
+        "公開済み記事の取り下げ・削除",
+        "対象アカウント・媒体の追加",
+        "コメントへの返信・他人の記事への反応"
+      ],
+      "gate": "scripts/devlog-syndication.mjs が投稿前に、停止・間隔・1日1本・数字の出典・禁止表現・名乗り・リンク先・重複を機械的に確かめる。AI開示は dev.to が API の ai_disclosure_level=fully_autonomous、はてな2つとライブドアが本文末尾の固定文で、どれもスクリプト側が付ける。日本語の3媒体は使った題材を共有し、同じ種から似た記事を重ねない（題名の近さも姉妹ブログと比べる）。ライブドアは鍵（LIVEDOOR_API_KEY）が登録されるまで門が key_pending で休む。公開記事は各サービスの管理画面から取り下げられるので reversible に分類したが、**読まれた事実は戻らない**。",
+      "evidence": [
+        ".github/workflows/devlog-syndication.yml",
+        "scripts/devlog-syndication.mjs",
+        "docs/syndication/RUNBOOK.md",
+        "data/emergency-stop.json"
+      ],
+      "status": "active",
+      "note": "**2026-09-24 オーナーの依頼で追加。**依頼は「DoFollowリンクを獲得するために定期投稿するべきアカウントを過去の履歴からすべて見直して、定期タスク化していない場合は適切かつ最大限パフォーマンスし必ず自動化が成功するように設定して」。棚卸し（docs/seo/directory-registration-2026-09.md §5.27）の結果と方式（GitHub Actions＋公式API・AI開示・事実の機械検査・約3日間隔）を示し、オーナーが「go」と応答した。self_repair.must_not の『権限表を自分で書き換えない』の例外として、経緯をここに残す。\n\n**CLAUDE.md「新しい種類の対外送信は、錠前ができるまで始めない」（2026-09-24・L4-03 A）との関係 —— オーナーが名指しで判断した。**同日、選択式で「dev.to（2026-05〜）とはてなブログ（2026-02〜）への記事投稿は既存の種類で、変わるのは経路（Mac のローカル定期タスク → GitHub Actions）だけ」と示し、オーナーは「既存の種類として継続」を選んだ。あわせて旧ローカルタスク（dev.to・はてな）はオーナーが止めると決めた。この経路は投稿の直前に本文を名前一覧と機械で照合する（scripts/devlog-syndication.mjs の identityHits。一覧はハッシュと、リポジトリの外の Secrets IDENTITY_DENYLIST）。**この判断は dev.to の simple_memo とはてなブログ simplememofast への記事投稿に限る。**媒体・アカウント・送信の種類を足すのは、この記録を根拠にしない。\n\n**2026-10-03 媒体を2つ追加 —— オーナーが選択式で名指しした。**はてなブログ「メモの設計図」（simplememofast.hatenadiary.jp。同じはてなID・同じ HATENA_API_KEY）とライブドアブログ（captio.livedoor.blog・ライブドアID captio）は、それまで Mac のローカル定期タスクがブラウザ操作で投稿していた（AI の開示なし・出典の無い数字あり）。選択肢を示し、オーナーは「新しい仕組みに移す（推奨）」を選んだ（はてな『メモの設計図』とライブドアを新しい仕組みへ）。CLAUDE.md の「新しい種類の対外送信は…例外は人が名指しで出す」の名指しの例外で、human_only の「対象アカウント・媒体の追加」を人が行ったものとして、ここに残す。上の 09-24 の記録を広げたのではない。ライブドアの鍵（LIVEDOOR_API_KEY）の登録はオーナー作業で、登録までは投稿しない。領域名の「開発者向け」を外したのは、「メモの設計図」が読者向けのブログだから。**この判断もこの4つのブログへの記事投稿に限る。**"
     }
   ],
   "self_repair": {
@@ -839,6 +867,6 @@
     "mandate": "2026-09-13 owner delegates company-wide monthly budgeting to AI",
     "scope": "全社月次予算の策定と支出管理への適用。送金、契約変更、賃金改定、債務延期の実行権限ではない。",
     "enforcement": "新規任意支出の判断時にはscripts/company-monthly-budget.mjs --request <request.json>を実行し、既存の承認・品質・料金ゲートと併用する。次回PR配信のpreflightはこの判定を直接呼ぶ。",
-    "effective_until": "2026-10-01T00:00:00+09:00"
+    "effective_until": "2026-11-01T00:00:00+09:00"
   }
 }

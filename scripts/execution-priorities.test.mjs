@@ -1,8 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { prioritize } from './execution-priorities.mjs';
-import { analyse, planTo, executionPlan } from './autonomy-gap.mjs';
+import { analyse, planTo, executionPlan, UNLOCKS } from './autonomy-gap.mjs';
 
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const now = new Date('2026-09-09T07:00:00Z');
 const task = (name, executor, blocker = 'not_started') => ({ area: 'A', task: name, executor, blocker });
 const coverage = { tasks: [task('done', 'ai_autonomous'), task('transfer', 'ai_proposes'),
@@ -108,6 +113,99 @@ test('fresh act assessments cannot override unmet inventory prerequisites', () =
   const row = r.opportunities.find(t => t.task === 'transfer');
   assert.equal(row.state, 'wait');
   assert.equal(row.unmet_prerequisites.length, 1);
+});
+
+test('malformed inventory prerequisites cannot disappear into an act recommendation', () => {
+  for (const blocked_on of ['invalid', {}, 28]) {
+    const doc = structuredClone(coverage);
+    doc.tasks[1].blocked_on = blocked_on;
+    assert.throws(() => prioritize(doc, { entries: [assessment('transfer')] }, now), /Invalid inventory prerequisites/);
+  }
+});
+
+function withRevenueMaterials(covered_days, run) {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'priorities-materials-'));
+  const file = path.join(root, 'series.json');
+  try {
+    fs.writeFileSync(file, JSON.stringify({ covered_days,
+      ai_cost_allocation: 'unknown', acquisition_denominator: 'unknown', cohort_history_complete: false }));
+    const doc = structuredClone(coverage);
+    for (const index of [1, 2]) Object.assign(doc.tasks[index], {
+      blocker: 'external_data', unlock: 'revenue_28d',
+      blocked_on: [{ ...UNLOCKS.revenue_28d.satisfied_when[0], file: path.relative(ROOT, file) }],
+    });
+    run(doc);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+}
+
+test('unmet 28-day observation materials remain waiting despite fresh act assessments', () => {
+  for (const days of [20, 27]) withRevenueMaterials(days, doc => {
+    const before = JSON.stringify(doc);
+    const result = prioritize(doc, { entries: [assessment('transfer'), assessment('start')] }, now);
+    for (const row of result.opportunities.filter(candidate => ['transfer', 'start'].includes(candidate.task))) {
+      assert.equal(row.state, 'wait');
+      assert.equal(row.prerequisite_scope, 'materials_only');
+      assert.equal(row.materials_satisfied, false);
+      assert.equal(row.unmet_prerequisites.length, 1);
+      assert.equal(row.estimated_delta_pp_per_hour, null);
+    }
+    assert.equal(JSON.stringify(doc), before);
+  });
+});
+
+test('28-day materials require inspection of the remaining business conditions before acting', () => {
+  withRevenueMaterials(28, doc => {
+    const before = JSON.stringify(doc), counts = executionPlan(doc).current;
+    const result = prioritize(doc, { entries: [assessment('transfer'), assessment('start')] }, now);
+    for (const row of result.opportunities.filter(candidate => ['transfer', 'start'].includes(candidate.task))) {
+      assert.equal(row.state, 'inspect');
+      assert.equal(row.materials_satisfied, true);
+      assert.equal(row.prerequisite_scope, 'materials_only');
+      assert.deepEqual(row.unmet_prerequisites, []);
+      assert.equal(row.remaining_verification, UNLOCKS.revenue_28d.needs);
+      assert.ok(row.next_step.includes(UNLOCKS.revenue_28d.needs));
+      assert.notEqual(row.next_step, 'Execute and verify');
+      assert.equal(row.estimated_delta_pp_per_hour, null);
+    }
+    assert.deepEqual(result.current, counts);
+    assert.equal(JSON.stringify(doc), before);
+  });
+});
+
+test('fulfilled observation materials preserve explicit waiting, deferral and boundaries', () => {
+  withRevenueMaterials(28, doc => {
+    for (const state of ['wait', 'defer']) for (const expires_at of ['2026-09-10T06:00:00Z', now.toISOString()]) {
+      const prior = assessment('transfer', { state, expires_at, next_step: 'Keep the existing hold until new evidence' });
+      const row = prioritize(doc, { entries: [prior] }, now).opportunities.find(candidate => candidate.task === 'transfer');
+      assert.equal(row.state, state);
+      assert.equal(row.next_step, prior.next_step);
+      assert.deepEqual(row.evidence, prior.evidence);
+      assert.equal(row.estimated_delta_pp_per_hour, null);
+    }
+    Object.assign(doc.tasks[1], { blocker: 'physical_human' });
+    const boundary = prioritize(doc, { entries: [assessment('transfer')] }, now)
+      .opportunities.find(candidate => candidate.task === 'transfer');
+    assert.equal(boundary.state, 'boundary');
+    assert.equal(boundary.estimated_delta_pp_per_hour, null);
+  });
+});
+
+test('complete prerequisites retain their existing act recommendation and effort score', () => {
+  const doc = structuredClone(coverage);
+  Object.assign(doc.tasks[1], { blocker: 'external_data', unlock: 'company_facts',
+    blocked_on: [{ file: 'scripts/execution-priorities.mjs' }] });
+  const before = JSON.stringify(doc);
+  const row = prioritize(doc, { entries: [assessment('transfer')] }, now)
+    .opportunities.find(candidate => candidate.task === 'transfer');
+  assert.equal(row.prerequisite_scope, 'complete');
+  assert.equal(row.materials_satisfied, true);
+  assert.equal(row.state, 'act');
+  assert.equal(row.next_step, 'Execute and verify');
+  assert.ok(row.estimated_delta_pp_per_hour > 0);
+  assert.equal(row.remaining_verification, null);
+  assert.equal(JSON.stringify(doc), before);
 });
 
 test('effort sorts eligible work without hiding low impact or unknown tasks', () => {

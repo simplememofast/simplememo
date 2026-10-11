@@ -7,11 +7,22 @@ import { summarize as coverageSummary } from '../../scripts/automation-rate.mjs'
 import { analyse as gapSummary, BLOCKERS } from '../../scripts/autonomy-gap.mjs';
 import { summarize as runSummary } from '../../scripts/autopilot-runs.mjs';
 import { score, loadContext } from '../../scripts/autonomy-score.mjs';
+import { interventionObservation, interventionSummary } from '../../scripts/lib/intervention-observation.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 export const digest = value => createHash('sha256').update(typeof value === 'string' ? value : JSON.stringify(value)).digest('hex');
 const read = file => JSON.parse(fs.readFileSync(path.join(ROOT, file), 'utf8'));
 export const taskKey = task => digest([task.area, task.task]);
+const INTERVENTION_SOURCE = 'scripts/lib/intervention-observation.mjs';
+const INTERVENTION_DEPENDENTS = new Set(['scripts/autopilot-runs.mjs', 'scripts/autonomy-score.mjs']);
+const validDependencyEvidence = (metric, sources) => {
+  const dependencies = metric?.source_dependencies;
+  return dependencies !== null && typeof dependencies === 'object' && !Array.isArray(dependencies)
+    && Object.keys(dependencies).length === 1
+    && /^[a-f0-9]{64}$/.test(dependencies[INTERVENTION_SOURCE] ?? '')
+    && dependencies[INTERVENTION_SOURCE] === sources?.[INTERVENTION_SOURCE]
+    && metric.source_dependency_fingerprint === digest(dependencies);
+};
 
 export function formalMetrics({ coverage = read('data/automation-coverage.json'),
   runs = read('data/autopilot-runs.json'), costs = read('data/autopilot-cost.json'),
@@ -21,13 +32,17 @@ export function formalMetrics({ coverage = read('data/automation-coverage.json')
   const r = runSummary(runs, { costDoc: costs });
   const sources = Object.fromEntries([
     'scripts/automation-rate.mjs', 'scripts/autonomy-gap.mjs', 'scripts/autopilot-runs.mjs',
-    'scripts/autonomy-score.mjs', 'data/automation-coverage.json', 'data/autonomy-score.json',
+    'scripts/autonomy-score.mjs', INTERVENTION_SOURCE, 'data/automation-coverage.json', 'data/autonomy-score.json',
     'data/autopilot-runs.json', 'data/autopilot-cost.json',
   ].map(file => [file, digest(fs.readFileSync(path.join(ROOT, file), 'utf8'))]));
-  const definition = (id, formula, numerator, denominator, value, source, exclusions, version) => ({
-    id, formula, numerator, denominator, value, source, source_sha256: sources[source],
-    exclusions, version, last_calculated: now.toISOString(),
-  });
+  const definition = (id, formula, numerator, denominator, value, source, exclusions, version) => {
+    const dependencies = INTERVENTION_DEPENDENTS.has(source) ? { [INTERVENTION_SOURCE]: sources[INTERVENTION_SOURCE] } : null;
+    return {
+      id, formula, numerator, denominator, value, source, source_sha256: sources[source],
+      ...(dependencies ? { source_dependencies: dependencies, source_dependency_fingerprint: digest(dependencies) } : {}),
+      exclusions, version, last_calculated: now.toISOString(),
+    };
+  };
   return {
     schema_version: 1, calculated_at: now.toISOString(), sources,
     scope_fingerprint: digest(coverage.tasks.map(t => [taskKey(t), t.executor === 'intentional_no'])),
@@ -82,7 +97,11 @@ export function compareMetrics(before, after) {
     },
     metrics: after.metrics.map(m => {
       const b = old.get(m.id);
-      const formulaComparable = b?.version === m.version && b?.formula === m.formula && b?.source_sha256 === m.source_sha256;
+      const dependencyComparable = !INTERVENTION_DEPENDENTS.has(m.source)
+        || (validDependencyEvidence(b, before.sources) && validDependencyEvidence(m, after.sources)
+          && b.source_dependency_fingerprint === m.source_dependency_fingerprint);
+      const formulaComparable = b?.version === m.version && b?.formula === m.formula
+        && b?.source_sha256 === m.source_sha256 && dependencyComparable;
       const policyComparable = m.id !== 'autonomy_score' || before.policy_fingerprint === after.policy_fingerprint;
       const scopeComparable = ['ai_completion_rate', 'autonomy_score'].includes(m.id) || sameScope;
       const comparable = formulaComparable && policyComparable && scopeComparable;
@@ -94,25 +113,33 @@ export function compareMetrics(before, after) {
 }
 
 export function humanTouchMetrics(runsDoc) {
+  if (!Array.isArray(runsDoc?.runs)) throw new Error('Human touch source runs are unreadable or malformed');
   const attempted = runsDoc.runs.filter(r => r.attempted);
   const shipped = attempted.filter(r => r.outcome === 'shipped');
-  const observed = shipped.filter(r => Array.isArray(r.interventions));
-  const touches = observed.flatMap(r => r.interventions);
-  const unknown = shipped.length - observed.length;
-  const kinds = kind => attempted.filter(r => r.interventions?.some(i => i.kind === kind)).length;
+  const shipObservation = interventionSummary(shipped), attemptObservation = interventionSummary(attempted);
+  const observed = shipped.filter(r => interventionObservation(r).state !== 'unknown');
+  const touches = shipped.flatMap(r => interventionObservation(r).events);
+  const unknown = shipObservation.unknown_runs;
+  const kinds = kind => attempted.filter(r => interventionObservation(r).events.some(i => i.kind === kind)).length;
+  const recordedStarts = attempted.filter(r => interventionObservation(r).events.some(i => ['bootstrap', 'request'].includes(i.kind))).length;
   return {
     version: 'recorded-human-touch-v1', source: 'data/autopilot-runs.json',
     successful_outputs: shipped.length, intervention_field_observed: observed.length, unknown_successes: unknown,
     recorded_touches_per_successful_output: unknown || !shipped.length ? null : touches.length / shipped.length,
-    recorded_zero_touch_completion_rate: unknown || !shipped.length ? null : observed.filter(r => !r.interventions.length).length / shipped.length,
-    manual_starts: attempted.filter(r => r.interventions?.some(i => ['bootstrap', 'request'].includes(i.kind))).length,
-    manual_starts_by_kind: { bootstrap: kinds('bootstrap'), request: kinds('request') },
-    manual_starts_note: 'Distinct runs with a recorded bootstrap/request; historical unrecorded starts remain unknown.',
+    recorded_zero_touch_completion_rate: unknown || !shipped.length ? null
+      : observed.filter(r => interventionObservation(r).state === 'recorded_zero').length / shipped.length,
+    intervention_observation: { attempted: attemptObservation, shipped: shipObservation },
+    manual_starts: attemptObservation.unknown_runs ? null : recordedStarts,
+    recorded_manual_starts: recordedStarts,
+    manual_starts_by_kind: { bootstrap: attemptObservation.unknown_runs ? null : kinds('bootstrap'),
+      request: attemptObservation.unknown_runs ? null : kinds('request') },
+    recorded_manual_starts_by_kind: { bootstrap: kinds('bootstrap'), request: kinds('request') },
+    manual_starts_note: 'Recorded bootstrap/request events only. A total is unknown when attempted runs lack valid intervention fields.',
     human_blocked_runs: null,
     recorded_owner_required_failures: attempted.filter(r => r.failure_class === 'owner_required').length,
     manual_decisions: null, manual_verification: null, manual_reporting: null,
     missing_dimensions: ['historical manual decision/verification/reporting events not separately instrumented'],
-    warning: 'No recorded intervention is not proof of native scheduled origin. Bootstrap and manual runs remain labeled.',
+    warning: 'An explicit [] is recorded zero only, not complete human-activity or native scheduled zero-touch proof. Bootstrap and manual runs remain labeled.',
   };
 }
 

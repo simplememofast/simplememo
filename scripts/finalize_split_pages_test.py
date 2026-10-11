@@ -9,6 +9,28 @@ from normalize_i18n_head import HeadInventory, build_block, replace_i18n_lines, 
 
 
 class SplitPageRegressionTests(unittest.TestCase):
+    def test_legacy_language_pages_keep_editorial_breadcrumbs(self):
+        src = '<script src="/js/lang.js?v=example"></script>' + \
+            '<script type="application/ld+json">' + json.dumps({
+                '@type': 'BreadcrumbList', 'itemListElement': [
+                    {'@type': 'ListItem', 'name': 'Editorial label',
+                     'item': 'https://simplememofast.com/en/new-topic/'}
+                ]}) + '</script>'
+        documents = {'en/new-topic/index.html': '<h1>Different heading</h1>'}
+        self.assertEqual(finish_breadcrumbs(src, self.root, documents), src)
+
+    def test_breadcrumbs_use_complete_build_before_pages_are_written(self):
+        src = '<script type="application/ld+json">' + json.dumps({
+            '@type':'BreadcrumbList', 'itemListElement':[
+                {'@type':'ListItem','name':'Old title','item':'https://simplememofast.com/en/new-topic/'}
+            ]}) + '</script>'
+        documents = {'en/new-topic/index.html':'<h1>New <em>topic</em> guide</h1>'}
+        out = finish_breadcrumbs(src, self.root, documents)
+        self.assertIn('New topic guide', out)
+        self.assertNotIn('Old title', out)
+        self.assertEqual(finish_breadcrumbs(out, self.root, documents), out)
+        self.assertFalse((self.root/'en/new-topic/index.html').exists())
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
@@ -137,7 +159,9 @@ class SplitPageRegressionTests(unittest.TestCase):
         self.assertEqual([x['price'] for x in en['offers']], ['0', C['priceMonthlyUsd'], C['priceYearlyUsd']])
         self.assertEqual([x['priceCurrency'] for x in en['offers']], ['USD'] * 3)
         self.assertEqual([x['price'] for x in ja['offers']], ['0', C['priceMonthlyJpy'], C['priceYearlyJpy'].replace(',', '')])
-        self.assertEqual(en['offers'][0]['description'], f"Up to {C['freeSendsPerDay']} sends a day, free forever")
+        self.assertEqual(en['offers'][0]['description'], f"Up to {C['freeSendsPerDay']} sends a day, with no time limit")
+        self.assertNotIn('aggregateRating', ja)
+        self.assertNotIn('aggregateRating', en)
 
     def test_product_schema_stays_in_place_and_uses_real_head(self):
         from inject_app_schema import build_node, replace_or_insert

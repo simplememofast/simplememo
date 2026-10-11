@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/day1">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>【開發日誌 Day1】Captio太喜歡了，想再創造一次“那個體驗” | SimpleMemo</title>
+  <meta name="description" content="分解Captio的體驗，選擇UIKit的理由，傳送後消失的設計，防止溢位的Outbox架構，Relay API，隱私設計，記錄了所有技術判斷的開發日誌Day1。 公開一鍵傳送和防止溢位的設計。">
+  <meta name="theme-color" content="#070b14">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="author" content="Obsidian連携シンプルメモ開発チーム">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- OGP -->
+  <meta property="og:title" content="【開發日誌 Day1】Captio太喜歡了，想再做一次“那個體驗”">
+  <meta property="og:description" content="分解Captio的體驗，記錄了UIKit・Outbox架構・Relay API・隱私設計等所有技術判斷的開發日誌Day1。 一鍵傳送和防止溢位的設計。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://simplememofast.com/zh-Hant/devlog/day1">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-day1.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_TW">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
+  <meta property="article:author" content="Obsidian連携シンプルメモ開発チーム">
+  <meta property="article:section" content="Development">
+  <meta property="article:tag" content="Captio">
+  <meta property="article:tag" content="UIKit">
+  <meta property="article:tag" content="Outbox Architecture">
+  <meta property="article:tag" content="Privacy">
+  <meta property="article:tag" content="Swift">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="【開發日誌 Day1】Captio太喜歡了，想再做一次“那個體驗”">
+  <meta name="twitter:description" content="分解Captio的體驗，記錄了UIKit・Outbox架構・Relay API・隱私設計等所有技術判斷的開發日誌Day1。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-day1.png">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh-Hant/devlog/day1">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/day1">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/day1">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/day1">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/day1">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/day1">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/day1">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/day1">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/day1">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/day1">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/day1">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/day1">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BlogPosting -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/zh-Hant/devlog/day1#article",
+  "headline": "【開發日誌 Day1】Captio太喜歡了，想再做一次“那個體驗”",
+  "description": "分解Captio的體驗，記錄了UIKit・Outbox架構・Relay API・隱私設計等所有技術判斷的開發日誌Day1。 一鍵傳送和防止溢位的設計。",
+  "url": "https://simplememofast.com/zh-Hant/devlog/day1",
+  "inLanguage": "zh-Hant",
+  "datePublished": "2026-02-13",
+  "dateModified": "2026-10-02",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://simplememofast.com/#organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/devlog-day1.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh-Hant/devlog/day1#webpage"
+  }
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主頁",
+      "item": "https://simplememofast.com/zh-Hant/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "開發日誌",
+      "item": "https://simplememofast.com/zh-Hant/devlog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "開發日誌 Day1",
+      "item": "https://simplememofast.com/zh-Hant/devlog/day1"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Speakable (AIO / Voice Search) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh-Hant/devlog/day1#webpage",
+  "inLanguage": "zh-Hant",
+  "name": "開發日誌 Day1 — Captio太喜歡了，想再做一次那個體驗",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh-Hant/#website"
+  },
+  "url": "https://simplememofast.com/zh-Hant/devlog/day1"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container { display: flex; justify-content: flex-end; padding: 1.25rem 0; }
+    .lang-switcher { display: inline-flex; background: rgba(18, 26, 46, 0.95); border: 1px solid rgba(82, 160, 255, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .lang-switcher__btn { background: transparent; border: none; color: #c9d4ec; padding: 0.75rem 1.1rem;
+      min-height: 48px; border-radius: 19px; cursor: pointer; font-size: 0.8rem; font-weight: 400; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.02em; }
+    .lang-switcher__btn:hover { color: #f2f6ff; }
+    .lang-switcher__btn:focus-visible { outline: 2px solid #4da3ff; outline-offset: 2px; }
+    .lang-switcher__btn.active { background: rgba(82, 160, 255, 0.25); border: 1px solid rgba(82, 160, 255, 0.2); color: #fff; box-shadow: 0 0 12px rgba(82, 160, 255, 0.1); }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+    @media (prefers-reduced-motion: reduce) { .lang-switcher__btn { transition: none; } }
+
+    pre { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 16px 0; }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 0.85rem; color: #e0e0e0; }
+    .article-meta { text-align: center; margin-bottom: 30px; color: var(--text-muted); font-size: 0.85rem; }
+    .article-toc { background: rgba(18, 26, 46, 0.85); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 30px; }
+    .article-toc h2 { font-size: 0.95rem; margin-bottom: 12px; }
+    .article-toc ol { padding-left: 20px; }
+    .article-toc li { margin-bottom: 6px; }
+    .article-toc a { color: var(--accent); text-decoration: none; font-size: 0.875rem; }
+    .article-toc a:hover { text-decoration: underline; }
+    .related-topics { margin-top: 50px; }
+    .related-topics h2 { font-size: 1.1rem; margin-bottom: 16px; }
+    .related-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 600px) { .related-grid { grid-template-columns: 1fr 1fr; } }
+    .related-card { background: rgba(18, 26, 46, 0.85); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; text-decoration: none; color: inherit; display: block; transition: border-color 0.25s; }
+    .related-card:hover { border-color: rgba(82, 160, 255, 0.3); }
+    .related-card__title { font-size: 0.9rem; font-weight: 700; color: var(--text-primary, #fff); margin-bottom: 4px; }
+    .related-card__desc { font-size: 0.8rem; color: var(--text-secondary); }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="主導航" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh-Hant/guides/">使用指南</a><a href="/zh-Hant/use-cases/">使用情境</a><a href="/zh-Hant/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/zh-Hant/guides/">使用指南</a></li>
+        <li><a href="/zh-Hant/use-cases/">使用情境</a></li>
+        <li><a href="/zh-Hant/vs/">比較</a></li>
+        <li><a href="/zh-Hant/methods/"><span>方法</span></a></li>
+        <li><a href="/zh-Hant/blog/"><span>部落格</span></a></li>
+        <li><a href="/zh-Hant/glossary/"><span>術語集</span></a></li>
+        <li><a href="/zh-Hant/faq">常見問題</a></li>
+        <li><a href="/zh-Hant/about/">關於開發者</a></li>
+        <li><a href="/zh-Hant/devlog/">開發日誌</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>下載</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="繁體中文 · 選擇語言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>繁中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hant" dir="ltr"><p class="site-language-title">選擇語言</p><div class="site-language-grid"><a href="/devlog/day1" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/devlog/day1" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/devlog/day1" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hant" aria-current="page"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ko/devlog/day1" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/devlog/day1" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/devlog/day1" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/devlog/day1" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/devlog/day1" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/devlog/day1" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">下載</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="選單"><span>選單</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- ======================== -->
+      <!-- JAPANESE VERSION         -->
+      <!-- ======================== -->
+      <div>
+        <h1 class="page-content__title sd-title">【開發日誌 Day1】Captio太喜歡了，想再做一次“那個體驗”</h1>
+        <div class="article-meta">2026年2月13日</div>
+
+        <!-- Table of Contents -->
+        <nav class="article-toc">
+          <h2>目錄</h2>
+          <ol>
+            <li><a href="#ja-intro">開始：Captio的存在</a></li>
+            <li><a href="#ja-section1">Captio的“什麼”好——試著拆解體驗</a></li>
+            <li><a href="#ja-section2">架構：為什麼不是“SwiftUI”而是UIKit</a></li>
+            <li><a href="#ja-section3">一鍵實現“傳送就會消失”的設計</a></li>
+            <li><a href="#ja-section4">防止溢位的Outbox架構</a></li>
+            <li><a href="#ja-section5">Relay API：郵箱的OAuth 不依賴配合的傳送</a></li>
+            <li><a href="#ja-section6">今天做的事情：一點一點地消除小小的違和感</a></li>
+            <li><a href="#ja-section7">解決了History的顯示狀態不一致</a></li>
+            <li><a href="#ja-section8">對隱私的偏執執</a></li>
+            <li><a href="#ja-section9">10語言對應：想傳達給全世界的Captio使用者</a></li>
+            <li><a href="#ja-section10">今天的學習：產品是“安心感”的設計</a></li>
+            <li><a href="#ja-section11">下次（Day2）預告</a></li>
+          </ol>
+        </nav>
+
+        <div class="page-content__body">
+
+          <!-- Introduction -->
+          <section id="ja-intro">
+            <p>Captio這個軟體嗎？</p>
+            <p>寫好備忘錄，按下傳送按鈕。 僅憑這一點，自己的郵箱就能收到備忘錄。 啟動的瞬間會顯示鍵盤，寫的話會傳送，傳送的話會消失。 沒有任何多餘的功能。 只是那樣的應用程式。</p>
+            <p>但是“僅此而已”，非常舒服。</p>
+            <p>在通勤電車上想到的想法，會議中突然想到的任務，睡前閃過腦海的一句話——Captio立刻把這一切送到了郵箱裡。 開啟備忘錄軟體，選擇資料夾，加上標題......完全沒有麻煩。 那個“零摩擦”的體驗，一旦知道就放不下。</p>
+            <p>那個Captio終止了服務。</p>
+            <p>嘗試了幾個替代軟體，但都離那個體驗還很遠。 啟動緩慢，UI有多餘的要素，傳送後留下備忘錄——雖然可能看起來是微不足道的差異，但Captio創造的體驗的本質，正是那些“瑣碎的事情”的積累。</p>
+            <p>所以決定自己做。 再體驗一次Captio。</p>
+            <p>這是“SimpleMemo”的開發日誌Day1。 在這篇文章中，我們將分解Captio的體驗，並記錄在現代技術堆疊中如何再現它的所有技術判斷。</p>
+          </section>
+
+          <!-- Section 1 -->
+          <section id="ja-section1" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-01">1。 Captio的“什麼”好——試著拆解體驗</h2></div><div class="ce-chapter__body">
+            <p>為了將Captio的體驗語言化，試著分解為3的要素。</p>
+
+            <h3>要素1：啟動即輸入（Instant Launch-to-Input）</h3>
+            <p>Captio啟動後，會立即顯示鍵盤，可以輸入文字。 沒有在啟動螢幕後顯示主頁畫面，然後按下備忘錄製作按鈕......這樣的步驟。 啟動=輸入。 這個“從啟動到可以輸入文字的時間”，我們稱之為<strong>Time-to-Text</strong>。 Captio的那個，體感是0.5秒以下。</p>
+
+            <h3>要素2：傳送後立即消失（Instant Clear After Send）</h3>
+            <p>按下傳送按鈕，畫面會立即清除。“ 傳送中......”沒有時間盯著進度條等待。 寫下的備忘錄消失的瞬間，帶著“啊，發的啊”的安心感，可以轉移到下一個行動上。 這個“從按下傳送按鈕到UI通關的時間”，我們稱之為<strong>Send-to-Reset</strong>。 目標是在感覺被等待之前讓畫面變空。</p>
+
+            <h3>要素3：沒有任何多餘的東西（Nothing Unnecessary）</h3>
+            <p>資料夾功能、標籤功能、富文字、下拉選單對應——Captio這些都沒有。 只有文字輸入欄和傳送按鈕。 這種潔度使認知負荷接近於零。“ 不需要考慮“應該做什麼”的應用程式。 那是Captio。</p>
+
+            <p>這個3的要素，透過現代的iOS開發再現。 那就是“SimpleMemo”的任務。</p>
+          </div></section>
+
+          <!-- Section 2 -->
+          <section id="ja-section2" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-02">2。 架構：為什麼SwiftUI“不是”而是UIKit</h2></div><div class="ce-chapter__body">
+            <p>在2026年的iOS開發中，選擇UIKit而不是SwiftUI可能會顯得異端。 但是，我們的首要目標很明確——<strong>Time-to-Text 500ms以下</strong>。</p>
+
+            <p>SwiftUI的`body`重新評估、`StateObject`的初始化、`@Environment`的解決——這些開銷在普通的應用程式開發中是可以忽略的範圍，但是實現“啟動即輸入”是不能忽略的。 1ms也想快速地聚焦在文字欄位上。</p>
+
+            <p>在那裡採用的是<strong>不使用Storyboard的UIKit直接構建</strong>。</p>
+
+            <p>在SceneDelegate中生成window，直接在rootViewController上設定ComposeViewController。 甚至跳過Storyboard的解析處理。</p>
+
+<pre tabindex="0"><code>// SceneDelegate.swift
+func scene(_ scene: UIScene,
+           willConnectTo session: UISceneSession,
+           options connectionOptions: UIScene.ConnectionOptions) {
+    guard let windowScene = (scene as? UIWindowScene) else { return }
+    let window = UIWindow(windowScene: windowScene)
+    window.rootViewController = ComposeViewController()
+    window.makeKeyAndVisible()
+    self.window = window
+}</code></pre>
+
+            <p>然後用ComposeViewController的`viewDidAppear`，立即聚焦在文字檢視上。</p>
+
+<pre tabindex="0"><code>// ComposeViewController.swift
+override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    textView.becomeFirstResponder()
+}</code></pre>
+
+            <p>僅憑這個2個程式碼，從啟動到鍵盤顯示的路徑是最短的。</p>
+
+            <p>目標是500ms以下。 之後透過畫面錄影測量的記錄（2026年8月11日，iPhone 16e・warm啟動）中，從點選圖示到鍵盤顯示完成是0.4秒。 在SwiftUI中很難細化地控制`@FocusState`和body的重新評價的時機，判斷很難填充這條路徑（兩者不是在同一條件下測量比較的）。</p>
+
+            <p>UIKit可能是“舊的”。 但是“很快”。 在這個1點中，UIKit現在也是最好的選擇。</p>
+          </div></section>
+
+          <!-- Section 3 -->
+          <section id="ja-section3" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-03">3。 “傳送後消失”一鍵實現的設計</h2></div><div class="ce-chapter__body">
+            <p>為了再現Captio的“傳送就會消失”的體驗，有最重要的設計判斷。 那就是將<strong>傳送動畫和UI清除與網路響應完全分離</strong>。</p>
+
+            <p>一般應用程式的傳送流程是這樣的：</p>
+            <ol>
+              <li>按下傳送按鈕</li>
+              <li>顯示載入指示器</li>
+              <li>等待伺服器的響應</li>
+              <li>成功的話清除UI，失敗的話顯示錯誤</li>
+            </ol>
+
+            <p>在這個流程中，網路的延遲直接變成了UI的延遲。 我們的流程是這樣的：</p>
+            <ol>
+              <li>按下傳送按鈕</li>
+              <li><strong>瞬間</strong>清除UI（動畫：0.25秒）</li>
+              <li>後臺網路傳送</li>
+              <li>成功→安靜地從Outbox中刪除/失敗→在後臺重試</li>
+            </ol>
+
+<pre tabindex="0"><code>// ComposeViewController.swift
+private func performSendAnimation() {
+    UIView.animate(withDuration: 0.25,
+                   delay: 0,
+                   options: .curveEaseOut) {
+        self.textView.alpha = 0
+        self.subjectField.alpha = 0
+    } completion: { _ in
+        self.textView.text = ""
+        self.subjectField.text = ""
+        self.textView.alpha = 1
+        self.subjectField.alpha = 1
+        self.textView.becomeFirstResponder()
+    }
+}</code></pre>
+
+            <p>對於使用者來說，按下傳送按鈕的瞬間，備忘錄“消失”，進入可以寫下下一個備忘錄的狀態。 網路的成敗，在使用者看不見的地方進行處理。</p>
+
+            <p>“但是，如果傳送失敗怎麼辦？”——回答這個疑問的是下一節的Outbox架構。</p>
+          </div></section>
+
+          <!-- Section 4 -->
+          <section id="ja-section4" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-04">4。 防止溢位的Outbox架構</h2></div><div class="ce-chapter__body">
+            <p>將傳送UI與網路響應分開意味著可能會出現“UI被清除，但實際上郵件傳送失敗”的情況。 這是絕對不能容忍的。 使用者認為“傳送”的備忘錄，實際上並沒有傳送——這對備忘錄應用程式來說是致命的信任損失。</p>
+
+            <p>在那裡採用的是<strong>Outbox模式</strong>。</p>
+
+            <p>資訊的傳送流程如下：</p>
+            <ol>
+              <li><strong>傳送按鈕點選</strong>：資訊AES-GCM加密後儲存在Outbox（本地儲存）</li>
+              <li><strong>UI清除</strong>：performSendAnimation即時清除畫面</li>
+              <li><strong>後臺傳送</strong>：從Outbox中取出資訊傳送到Relay API</li>
+              <li><strong>成功</strong>：從Outbox刪除資訊</li>
+              <li><strong>失敗</strong>：等待傳送，稍後重新傳送</li>
+              <li><strong>離線</strong>：用NWPathMonitor監視連線，恢復時自動重新傳送</li>
+            </ol>
+
+            <p>重要的是，<strong>網路傳送前儲存在Outbox</strong>的順序。 因此，即使應用程式突然崩潰，即使終端斷電，Outbox上寫的資訊也會留下。</p>
+
+            <p>Outbox中儲存的資訊，透過使用CryptoKit的AES-GCM加密進行保護。 加密金鑰儲存在Keychain中，無法從應用程式的沙盒外訪問。</p>
+
+<pre tabindex="0"><code>// OutboxManager.swift
+func enqueue(message: OutboxMessage) throws {
+    let key = try KeychainHelper.getOrCreateSymmetricKey()
+    let sealedBox = try AES.GCM.seal(
+        message.plainData,
+        using: key
+    )
+    let encrypted = EncryptedOutboxEntry(
+        id: message.id,
+        sealedData: sealedBox.combined!,
+        createdAt: Date(),
+        retryCount: 0
+    )
+    try persistenceStore.save(encrypted)
+}</code></pre>
+
+            <p>另外，因為全部由自己實現，所以<strong>對外部庫的依賴為零</strong>。 CryptoKit、NWPathMonitor、URLSession——全部用Apple純正的框架完成。 從第三方庫的版本管理和安全審計中解放出來，對小規模團隊來說是一個很大的好處。</p>
+          </div></section>
+
+          <!-- Section 5 -->
+          <section id="ja-section5" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-05">5。 Relay API：郵箱的OAuth 不依賴配合的傳送</h2></div><div class="ce-chapter__body">
+            <p>Captio的傳送機制沒有正式公開。 開發方的終止通知提出的理由是，為了保持應用程式的穩定性和安全性，無法繼續花費精力，所以傳送方式沒有被列為理由。 只是一般來說，依靠外部郵件API的傳送，容易受到提供者要求變更和訪問限制的影響。</p>
+
+            <p>我們選擇了<strong>Cloudflare Workers + Resend API</strong>的構成。</p>
+
+            <p>Cloudflare Workers是邊緣計算基礎，在離全世界使用者最近的資料中心執行程式碼。 來自日本的請求由日本的邊緣處理，來自美國的請求由美國的邊緣處理。 因此，與以往的無伺服器（AWS Lambda等）相比，冷啟動的問題幾乎解決了。</p>
+
+            <p>郵件傳送使用Resend API。 Resend是面向開發者的郵件傳送API。</p>
+
+            <h3>郵件認證流程</h3>
+            <p>使用者設定收件人郵箱地址時，使用6位數的驗證碼進行郵件認證。 這樣可以防止向第三方的郵箱地址傳送非法。</p>
+
+            <h3>多層速率限制</h3>
+            <p>為了防止非法使用，實施了多層的費率限制。</p>
+
+<pre tabindex="0"><code>// Cloudflare Worker - Rate Limit Configuration
+const RATE_LIMITS = {
+  devicePerMinute: 30,    // 1デバイスあたり1分30回
+  devicePerDay: 200,      // 1デバイスあたり1日200回
+  ipPerHour: 120,         // 1IPあたり1時間120回
+  globalPerDay: 300       // サービス全体で1日300回（調整可能）
+};</code></pre>
+
+            <p>透過以裝置單位、IP單位、全球單位的3層進行速率限制，可以阻止單一裝置的暴走和殭屍網路攻擊。</p>
+
+            <p><strong>2026-09 追記：</strong>每個終端的上限和整體的1日的上限，在2026年6月被拆除。 現在的傳送上限是每個IP地址的1小時的上限。</p>
+
+            <h3>冪等性的保證</h3>
+            <p>為了防止網路不穩定導致的重複傳送，為每個資訊分配UUID，在Relay API側進行重複檢查。 重新傳送相同UUID的資訊時，2第1次以後不傳送郵件，返回成功回覆。 因此，即使結合Outbox模式的重試機構，使用者也不會重複接收相同的備忘錄。</p>
+
+            <p><strong>2026-10 追記：</strong>現在的傳送用伺服器，自己沒有進行重複的確認。 將資訊ID作為向Resend請求的冪等鍵（Idempotency-Key）傳遞，Resend記住相同的鍵24小時，對相同內容的請求返回與之前相同的響應。 因此，24小時內不會重複傳送相同的備忘錄（詳情請見<a href="/zh-Hant/devlog/relay-api-design">Relay API的設計</a>）。</p>
+          </div></section>
+
+          <!-- Section 6 -->
+          <section id="ja-section6" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-06">6。 今天做的事情：一點一點地消除小小的違和感</h2></div><div class="ce-chapter__body">
+            <p>Day1的實施工作大部分都花在了重新審視星級評價對話方塊上。 App Store的評價是應用程式的生命線，但不能以損害使用者體驗的形式要求評價。</p>
+
+            <h3>重新設計顯示條件</h3>
+            <p>將星級評價對話方塊的顯示條件設定如下：</p>
+            <ul>
+              <li><strong>100通顯示</strong>：僅對充分使用應用程式的使用者顯示</li>
+              <li><strong>最低14天的間隔</strong>：距離上次顯示14天以上</li>
+              <li><strong>關閉後30天不顯示</strong>：使用者關閉時，30天不重新顯示</li>
+            </ul>
+
+            <h3>星星圖示的點選區域修正</h3>
+            <p>Apple Human Interface Guidelines中，建議觸控目標的尺寸最低為44x44pt。 因為星星圖示的點選區域不符合這個標準，所以修正了。</p>
+
+<pre tabindex="0"><code>// StarRatingView.swift
+private func createStarButton() -> UIButton {
+    let button = UIButton(type: .custom)
+    button.translatesAutoresizingMaskIntoConstraints = false
+    NSLayoutConstraint.activate([
+        button.widthAnchor.constraint(greaterThanOrEqualToConstant: 44),
+        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44)
+    ])
+    return button
+}</code></pre>
+
+            <h3>星星圖示的扭曲修正</h3>
+            <p>修正了UIStackView的`.fillEqually` distribution導致星星圖示扭曲的問題。 將`contentMode`設定為`.scaleAspectFit`，將StackView的distribution改為`.equalSpacing`。</p>
+
+            <h3>評價後的流程</h3>
+            <ul>
+              <li><strong>5星</strong>：轉入App Store的評論畫面（`SKStoreReviewController`）</li>
+              <li><strong>4星以下</strong>：安靜地顯示“謝謝”的吐司後結束。 不將負面評論引導到App Store。</li>
+            </ul>
+          </div></section>
+
+          <!-- Section 7 -->
+          <section id="ja-section7" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-07">7。 消除了History的顯示狀態不一致</h2></div><div class="ce-chapter__body">
+            <p>在傳送記錄畫面（History）中，發現了一個bug。 儘管已經傳送完畢，但狀態還是“傳送中”不變的資訊。</p>
+
+            <p>調查原因的結果，發現狀態更新的邏輯有問題。 在以往的實現中，以資訊的文字內容為關鍵來更新狀態。 但是，如果多次傳送相同內容的備忘錄，基於文字的搜尋無法確定正確的資訊。</p>
+
+            <p>修正簡單明瞭。 將基於文字的搜尋改為<strong>基於ID的狀態更新</strong>。 每個資訊在Outbox儲存時都分配了UUID，所以使用這個ID更新History的狀態。</p>
+
+<pre tabindex="0"><code>// HistoryManager.swift
+// Before: テキストベースの検索（バグの原因）
+// func updateStatus(forText text: String, status: SendStatus)
+
+// After: IDベースのステータス更新
+func updateStatus(forMessageId id: UUID, status: SendStatus) {
+    guard let index = entries.firstIndex(where: { $0.messageId == id }) else {
+        return
+    }
+    entries[index].status = status
+    persistEntries()
+}</code></pre>
+
+            <p>透過這個修正，無論傳送多少次相同內容的備忘錄，每個狀態都會正確顯示。</p>
+          </div></section>
+
+          <!-- Section 8 -->
+          <section id="ja-section8" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-08">8。 對隱私的偏執的執著</h2></div><div class="ce-chapter__body">
+            <p>備忘錄軟體會寫私人資訊。 密碼、個人煩惱、商業想法——無法預測使用者會寫什麼。 正因如此，隱私保護不是“充分”而是“過度”。</p>
+
+            <h3>應用程式切換器的隱私覆蓋</h3>
+            <p>在iOS的應用程式切換器中，應用程式的畫面會顯示為縮圖。 為了不讓應用程式切換器的畫面看不到備忘錄的內容，在應用程式轉移到後臺時顯示隱私疊加。</p>
+
+            <p><strong>2026-09 追記：</strong>在現在的應用程式中，這個保護沒有生效（顯示用的處理保留在源中，但沒有被呼叫）。 顯示中的備忘錄可能會留在應用程式切換器的影象中。 詳情請看“隱私設計”的報道。</p>
+
+            <h3>短暫的URLSession</h3>
+            <p>通常的URLSession將快取、cookie、認證資訊儲存在磁碟上。 我們透過使用`URLSessionConfiguration.ephemeral`，使這些資訊完全不留在磁碟上。 作為通訊的快取，為了不讓備忘錄的內容留在儲存中。</p>
+
+            <h3>日誌的無害化</h3>
+            <p>開發中的除錯日誌需要注意。“ 將傳送的備忘錄內容輸出到日誌中”這種看似無害的處理，可能會成為安全漏洞。 我們的政策很明確：</p>
+            <ul>
+              <li>備忘錄的內容，即使是DEBUG構建<strong>也不會記錄在日誌中</strong></li>
+              <li>錯誤日誌不使用`localizedDescription`，<strong>`type(of: error)`只記錄</strong></li>
+              <li>理由：因為`localizedDescription`可能包含使用者輸入</li>
+            </ul>
+
+<pre tabindex="0"><code>// NetworkManager.swift
+// BAD: エラーの詳細をログに出力
+// Logger.error("Send failed: \(error.localizedDescription)")
+
+// GOOD: エラーの型のみをログに出力
+Logger.error("Send failed: \(type(of: error))")</code></pre>
+
+            <p>可能看起來偏執。 但是，為了讓大家信任並使用備忘錄軟體，我認為這種程度的偏執是必要的。</p>
+          </div></section>
+
+          <!-- Section 9 -->
+          <section id="ja-section9" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-09">9。 10語言對應：想傳達給全世界的Captio使用者</h2></div><div class="ce-chapter__body">
+            <p>Captio以英語圈為中心，全世界都有使用者。 為了向原使用者傳遞“SimpleMemo”，從首次釋出開始對應10語言。</p>
+
+            <p>對應語言：日語、英語、西班牙語、法語、德語、義大利語、葡萄牙語、韓語、中文（簡體字）、阿拉伯語。</p>
+
+            <p><strong>2026-09 追記：</strong>現在的App Store的記號，對應語言是日語、英語、西班牙語、法語、德語、葡萄牙語、俄語、中文（簡體字）、中文（繁體字）、阿拉伯語的10語言。 上面列表中的義大利語和韓語，不包括在現在的記號中。</p>
+
+            <p>特別是<strong>阿拉伯語的RTL（Right-to-Left）對應</strong>是技術性的挑戰。 不僅需要映象文字的方向，還需要映象整個UI佈局。 透過始終如一地使用Auto Layout的`leading`/`trailing`約束，在RTL環境下也能實現自然的佈局。</p>
+
+            <h3>應用內語言切換</h3>
+            <p>除了iOS 16以後的應用內語言切換之外，還實施了獨特的語言切換機制。 語言切換時，透過`cross-dissolve`過渡替換ViewController，提供流暢的切換體驗。</p>
+
+<pre tabindex="0"><code>// LanguageManager.swift
+func applyLanguageChange() {
+    guard let window = UIApplication.shared.connectedScenes
+        .compactMap({ $0 as? UIWindowScene })
+        .first?.windows.first else { return }
+
+    let newVC = ComposeViewController()
+    newVC.view.frame = window.bounds
+    UIView.transition(with: window,
+                      duration: 0.3,
+                      options: .transitionCrossDissolve,
+                      animations: {
+        window.rootViewController = newVC
+    })
+}</code></pre>
+          </div></section>
+
+          <!-- Section 10 -->
+          <section id="ja-section10" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-10">10。 今天的學習：產品是“安心感”的設計</h2></div><div class="ce-chapter__body">
+            <p>Day1結束後想到的是，這個產品的本質是“安心感”的設計。</p>
+
+            <p>總結一下技術性的數值：</p>
+            <ul>
+              <li><strong>Time-to-Text</strong>：500ms以下（目標）</li>
+              <li><strong>Send-to-Reset</strong>：感覺不到等待的短暫（目標）</li>
+              <li><strong>資訊溢問題</strong>：用Outbox模式防止</li>
+              <li><strong>加密</strong>：AES-GCM（CryptoKit）</li>
+              <li><strong>外部庫依賴</strong>：零</li>
+            </ul>
+
+            <p>但是，這些數值都被歸納為“安心感”這個目標。</p>
+
+            <p>啟動快→“隨時都能馬上寫”的安心感。 <br> 傳送後消失→“已處理”的安心感。 <br> 溢位對策→“未傳送狀態不會消失”安心感。 <br> 加密→“任何人都看不到”的安心感。</p>
+
+            <p>Captio之所以受到喜愛，並不是因為功能優秀。“ 因為徹底磨練了“可以放心使用”的體驗。 我想繼承那個。</p>
+          </div></section>
+
+          <!-- Section 11 -->
+          <section id="ja-section11" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-11">11。 下次（Day2）預告</h2></div><div class="ce-chapter__body">
+            <p>Day2計劃致力於以下主題：</p>
+            <ul>
+              <li><strong>傳送動畫的精煉</strong>：從現在的0.25秒淡出，到更舒適的動畫</li>
+              <li><strong>History狀態更新的時機最佳化</strong>：實時更新 vs 批次更新的比較探討</li>
+              <li><strong>成功吐司真的有必要嗎？ </strong>：關於傳送成功的反饋，探討“不顯示”的選項</li>
+            </ul>
+            <p>以Captio的“一無所有”的潔度為目標，繼續到Day2。</p>
+          </div></section>
+
+        </div>
+      </div>
+
+      <!-- ======================== -->
+      <!-- ENGLISH VERSION          -->
+      <!-- ======================== -->
+
+      <!-- ======================== -->
+      <!-- RELATED TOPICS (shared)  -->
+      <!-- ======================== -->
+      <div class="related-topics">
+        <h2 id="reading-12" data-ce-number="12"> <span>深入挖掘相關話題</span> </h2>
+        <div class="related-grid">
+          <a href="/zh-Hant/devlog/uikit-vs-swiftui" class="related-card">
+            <div class="related-card__title">
+              <span>UIKit vs SwiftUI：啟動速度的選擇</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>2026年選擇UIKit的理由。 以Time-to-Text 500ms以下為目標的架構設計。</span>
+
+            </div>
+          </a>
+          <a href="/zh-Hant/devlog/outbox-architecture" class="related-card">
+            <div class="related-card__title">
+              <span>Outbox架構：防止溢位的設計</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>傳送即UI清除，但是未傳送的資訊會留在終端上，重新傳送。 AES-GCM加密Outbox模式的全貌。</span>
+
+            </div>
+          </a>
+          <a href="/zh-Hant/devlog/relay-api-design" class="related-card">
+            <div class="related-card__title">
+              <span>Relay API：用Cloudflare Workers構建郵件傳送基礎</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>不依賴郵箱的OAuth配合傳送。 從在邊緣移動的轉播API（Cloudflare Workers）用Resend傳送。</span>
+
+            </div>
+          </a>
+          <a href="/zh-Hant/devlog/privacy-first-design" class="related-card">
+            <div class="related-card__title">
+              <span>隱私第一設計：偏執的執著</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>ephemeral URLSession、日誌的處理、應用程式切換器的現行規格（自動隱藏備忘錄的功能無效）。</span>
+
+            </div>
+          </a>
+          <a href="/zh-Hant/captio-alternative/" class="related-card">
+            <div class="related-card__title">
+              <span>Captio替代應用程式比較・轉移指南</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>從Captio過渡步驟、功能比較表、FAQ。 正在考慮換乘的人請看這邊。</span>
+
+            </div>
+          </a>
+          <a href="/zh-Hant/note-to-email/" class="related-card">
+            <div class="related-card__title">
+              <span>用郵件給自己傳送備忘錄的方法</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>想到的點子，馬上發郵件。 備忘錄→郵件活用指南。</span>
+
+            </div>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-13" data-ce-number="13"> <span>參考文獻</span> </h2></div><div class="ce-chapter__body">
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developer.apple.com/documentation/uikit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — UIKit Documentation</a> — <span>UIKit框架的官方參考。 用於SimpleMemo的UI構建</span></li>
+    <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — CryptoKit Documentation</a> — <span>用於透過AES-GCM加密實現Outbox資料保護</span></li>
+    <li><a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener" style="color:var(--accent);">Cloudflare Workers Documentation</a> — <span>作為郵件中繼API的無伺服器基礎採用</span></li>
+    <li><a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener" style="color:var(--accent);">Chris Richardson — Pattern: Transactional outbox (microservices.io)</a> — <span>傳送的資訊首先寫在等待傳送表（Outbox）上，其他處理傳送的設計模式。 SimpleMemo在終端中使用了同樣的想法</span></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc5321" target="_blank" rel="noopener" style="color:var(--accent);">RFC 5321 — Simple Mail Transfer Protocol (SMTP)</a> — <span>郵件傳送協議的標準規格</span></li>
+  </ul>
+</div></section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/zh-Hant/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>接下來閱讀</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>透過Obsidian合作，建立儲存備忘錄的地方</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>在iPhone中設定合作和儲存地址，傳送的備忘錄也可以留在Obsidian中。 </span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>相關內容</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/zh-Hant/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio替代應用程式比較</span></a></li>
+    <li><a href="/zh-Hant/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>部落格文章一覽</span></a></li>
+    <li><a href="/zh-Hant/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>備忘錄應用程式比較一覽</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hant" dir="ltr"><a class="site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">記下一點想法，邁出下一步。</p><p class="site-footer-description">從 iPhone 將筆記傳送至 Obsidian 和電子郵件。</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="頁尾導航">
+      <div class="footer__col">
+        <p class="footer__col-title">產品</p>
+        <a href="/zh-Hant/download/" class="footer__link">下載</a>
+        <a href="/zh-Hant/" class="footer__link">首頁</a>
+        <a href="/zh-Hant/how-to/" class="footer__link"><span>使用方法</span> </a>
+        <a href="/zh-Hant/templates/" class="footer__link"><span>模板</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較與遷移</p>
+        <a href="/zh-Hant/captio/" class="footer__link"><span>Captio式</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">讀物</p>
+        <a href="/zh-Hant/devlog/" class="footer__link">開發日誌</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">支援</p>
+        <a href="/zh-Hant/roadmap/" class="footer__link">公開路線圖</a>
+        <a href="/zh-Hant/about/" class="footer__link">關於開發者</a>
+        <a href="/zh-Hant/terms" class="footer__link"><span>使用規則</span> </a>
+        <a href="/zh-Hant/privacy" class="footer__link">隱私</a>
+        <a href="/zh-Hant/contact" class="footer__link">聯絡我們</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 營運：YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

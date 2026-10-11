@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/compare/memos/">
+  <title>Obsidian and memos: choosing a self-hosted approach (2026) | SimpleMemo</title>
+  <meta name="description" content="Compare Obsidian and memos from the difference between the original Markdown file and self-host SQLite. I started Memos 0.30.0 on the Apple Silicon Mac and checked the actual Japanese notes, tags, tasks, and timeline saving.">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Comparison of Obsidian and memos - The fork in the road of self-hosting">
+  <meta property="og:description" content="Obsidian gives you direct ownership of files; memos requires you to operate your own server. Using actual screens from Memos 0.30.0, we explain the difference in what you manage.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-08T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/en/obsidian/compare/memos/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-memos.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Comparison of Obsidian and memos - The fork in the road of self-hosting">
+  <meta name="twitter:description" content="Obsidian gives you direct ownership of files; memos requires you to operate your own server. We tested both through saving on an actual device.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-memos.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/en/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/compare/memos/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/en/obsidian/compare/memos/#article",
+  "inLanguage": "en",
+  "headline": "Comparison of Obsidian and memos - The fork in the road of self-hosting",
+  "description": "Compare Obsidian and memos in term of storage method and operational responsibility. Memos 0.30.0 includes actual machine confirmation.",
+  "url": "https://simplememofast.com/en/obsidian/compare/memos/",
+  "datePublished": "2026-09-08",
+  "dateModified": "2026-10-03",
+  "author": {
+    "@type": "Person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-memos.png"
+}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/en/"},{"@type":"ListItem","position":2,"name":"What should you compare Obsidian against?","item":"https://simplememofast.com/en/obsidian/compare/"},{"@type":"ListItem","position":3,"name":"Obsidian and memos Choosing a self-hosted approach","item":"https://simplememofast.com/en/obsidian/compare/memos/"}]}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Which should I choose, Obsidian or memos?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "If you want to manage the Markdown file directly, Obsidian, and if you want to record briefly in a web app that you run yourself and look back in the timeline, memos is a candidate."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can memos use the Obsidian storage room as it is?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "cannot be used. SQLite was initialized in this standard startup. It is not a mechanism to directly edit the Markdown folder of Obsidian."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is memos free of charge?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The main body is open source. However, the cost of publicly operated servers and domains, and the time to manage updates, backups, and security are required separately."
+      }
+    }
+  ],
+  "inLanguage": "en",
+  "@id": "https://simplememofast.com/en/obsidian/compare/memos/#faq"
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
+  <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="Global navigation" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/en/guides/">Guides</a></li><li><a href="/en/use-cases/">Use cases</a></li><li><a href="/en/vs/">Compare</a></li><li><a href="/en/blog/">Blog</a></li><li><a href="/en/about/">About the developer</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">Download</a><details class="site-languages"><summary aria-label="English · Choose a language"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>EN</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="en" dir="ltr"><p class="site-language-title">Choose a language</p><div class="site-language-grid"><a href="/obsidian/compare/memos/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="en" aria-current="page"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh/obsidian/compare/memos/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/compare/memos/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/compare/memos/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/compare/memos/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/compare/memos/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/compare/memos/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/compare/memos/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/compare/memos/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content"><div class="container" style="max-width:880px">
+  <header class="lp-hero sd-hero"><div class="sd-hero-copy"><div class="lp-hero__label">Obsidian × memos</div><h1 class="lp-hero__title">Obsidian and memos<br>Choosing a self-hosted approach</h1><p class="lp-hero__sub">Both are "own" notebooks, but the ones you hold are different. Obsidian manages Markdown files, and memos manages web applications and databases by itself. I actually launched Memos 0.30.0 on my Mac and saved short notes to see the difference.</p><p class="article-meta">Author: <a href="/en/about/">AI ATAKA</a> · Published and checked: <time datetime="2026-09-08">2026-9-8</time></p></div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Conclusion: Have a file or run the service</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Comparison table: The similarity is the sense of ownership, the difference is the original</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>I tried to start Memos 0.30.0 locally and save it</span><span aria-hidden="true">↗</span></a></nav></header>
+  <aside class="tip-box">This page is<strong>Comparison of storage and operation of Obsidian and memos</strong>. Do not assume that all self-hosted options are equivalent; consider what you actually need to manage in each case.</aside>
+  <section class="lp-section ce-chapter sd-chapter" style="padding-top:1rem"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">Conclusion: Do you have a file or run the service</h2></div><div class="ce-chapter__body"><p class="lp-section__lead"><strong> If you want to treat the original notebook directly as a normal file, Obsidian. If you want to write briefly from the browser and treat the timeline, tags, and public scope as a single web app, memos is a candidate. </strong></p><p>Self-hosting memos does not make the authoritative data the same Markdown folder used by Obsidian. During this launch, Memos initialized SQLite in its configured data directory. That flexibility comes with responsibility for operating the service, including backups and updates.</p></div></section>
+  <section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="comparison"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">Comparison table: Similarity is the sense of ownership, the difference is the original</h2></div><div class="ce-chapter__body"><div class="sd-table" tabindex="0" role="region" aria-label="Scrollable table"><table class="rt-table"><thead><tr><th>Axis of judgment</th><th>Obsidian</th><th>memos</th></tr></thead><tbody>
+    <tr><th>Mashomoto</th><td data-label="Obsidian">Markdown file in the storage room</td><td data-label="memos">A database handled by web applications. The standard startup this time is SQLite</td></tr>
+    <tr><th>Main entrance</th><td data-label="Obsidian">Open notes on desktop/mobile app</td><td data-label="memos">Post to the timeline from the browser composer</td></tr>
+    <tr><th>Organize</th><td data-label="Obsidian">Folders, links, properties, plug-ins</td><td data-label="memos">Tag, search, calendar, pin, relations, Saved Views</td></tr>
+    <tr><th>Share</th><td data-label="Obsidian">Select Publish separately</td><td data-label="memos">Have a public range for each memo</td></tr>
+    <tr><th>What you manage yourself</th><td data-label="Obsidian">File placement and synchronization method</td><td data-label="memos">HTTPS at the time of server, data, update, backup, and publication</td></tr>
+    <tr><th>Confirmation this time</th><td data-label="Obsidian">Official storage specification</td><td data-label="memos">Local startup of 0.30.0, administrator creation, Japanese memo saving</td></tr>
+  </tbody></table></div><p>The composition and operational responsibility of memos is confirmed in <a href="https://usememos.com/docs/deploy/binary" target="_blank" rel="noopener">Official Binary Guide</a>, and the editing, tags, Relations, and public scope are confirmed in <a href="https://usememos.com/docs/usage/memos" target="_blank" rel="noopener">Official Usage Guide</a>.</p></div></section>
+  <section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="hands-on"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">I tried to start Memos 0.30.0 locally and save it</h2></div><div class="ce-chapter__body"><p class="lp-section__lead">Obtained the Apple Silicon archive of the official GitHub Releases, confirmed that the public checksums and SHA-256 matched, and then started it in a non-public local environment.</p><ol class="steps-list">
+    <li><strong>Start in a new data area. </strong><br> When you specified a temporary directory dedicated to the task, SQLite was initialized and started with private access.</li>
+    <li><strong>Create the first administrator. </strong><br> I created an administrator for local verification on the first screen. Search, calendar, tag, public range, and input fields are lined up on the home page.</li>
+    <li><strong>Save a short note in Japanese. </strong><br> tags, uncompleted check items, bullets, and body were entered into one note.</li>
+    <li><strong> timeline. </strong>A note was displayed immediately after saving <br>, a tag was added to the left, and 1 was displayed on the calendar of the day.</li>
+  </ol>
+  <figure class="shot"><a href="/assets/img/obsidian/memos-home.png"><img src="/assets/img/obsidian/memos-home.png" alt="Empty timeline displayed after local startup of Memos 0.30.0 and administrator creation" width="1200" height="649" loading="lazy"></a><figcaption>Actual machine shooting: Home immediately after the administrator's creation. It is a local empty instance and does not include personal data.</figcaption></figure>
+  <figure class="shot"><a href="/assets/img/obsidian/memos-note.png"><img src="/assets/img/obsidian/memos-note.png" alt="Timeline that saves Japanese tags, check items, and bullet points in Memos 0.30.0" width="1200" height="649" loading="lazy"></a><figcaption>Actual shooting: After saving the comparison memo. I checked the number of tags, tasks, and dates.</figcaption></figure>
+  </div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="storage"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">Even a self-host does not necessarily mean that you have "Markdown directly"</h2></div><div class="ce-chapter__body"><p>In Obsidian, you can check the substance of the notebook by opening the storage app with the file management app. Being able to read the same Markdown in another editor is an escape when changing tools.</p><p>memos provides a screen in which the server reads and writes the database. In the official document, the standard is SQLite, and you can also choose MySQL and PostgreSQL. While this is strong in the sense that you can put the data under your control, it is not a form of opening the Obsidian storage room and using it together. If you assume migration, you should try backing up, restoring, and exporting to the required format with a small amount before putting it into production. This time, they have not been verified.</p></div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="operations"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">Choosing memos increases the operational responsibility rather than the note function</h2></div><div class="ce-chapter__body"><p>Updates and backups are required even if you only use them at home or in-house. If you publish it to the Internet, it will also deal with domains, reverse proxy, HTTPS, access control, and recovery in the event of failure. The official guide also explains that binary users manage upgrades, rollbacks, process monitoring, data permissions, and HTTPS.</p><p><strong> If you can enjoy the server operation itself, or if you already have an operating infrastructure, memos self-hosting is a natural choice. </strong> If you want to focus only on notes, the Obsidian, which handles local files, makes it easier to narrow the scope of responsibility.</p></div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="capture"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">No matter which one you choose, think about the moving entrance separately</h2></div><div class="ce-chapter__body"><p>Obsidian is a tool to store and connect knowledge, and memos is designed as a tool to stream short records to the timeline. However, the speed of leaving a word from Apple Watch and Siri is another issue. If SimpleMemo has the Obsidian link turned on, it will be added to the daily note of Obsidian, etc. while keeping the email. <strong>There is no function to post directly to memos. </strong>If the destination is Obsidian, it can be used as an auxiliary entrance.</p><aside class="tip-box"><strong>Don't mix roles:</strong> Memos' self-host and SimpleMemo do not work directly. Avoid expressions that can be read so that they can be linked, and decide on the actual storage destination first.</aside></div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">Frequently Asked Questions</h2></div><div class="ce-chapter__body">
+    <div class="faq-item"><details><summary class="faq-summary">Which should I choose, Obsidian or memos?</summary><div class="faq-answer">If you want to manage the Markdown file directly, Obsidian, and if you want to record briefly in a web app that you run yourself and look back in the timeline, memos is a candidate.</div></details></div>
+    <div class="faq-item"><details><summary class="faq-summary">Can memos use the Obsidian storage room as it is?</summary><div class="faq-answer">cannot be used. SQLite was initialized in this standard startup. It is not a mechanism to directly edit the Markdown folder of Obsidian.</div></details></div>
+    <div class="faq-item"><details><summary class="faq-summary">Is memos free of charge?</summary><div class="faq-answer">The main body is open source. However, the cost of publicly operated servers and domains, and the time to manage updates, backups, and security are required separately.</div></details></div>
+  </div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="verification"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">Verification environment and range</h2></div><div class="ce-chapter__body"><div class="tip-box"><p><strong>Actual machine confirmation:</strong> 2026 year 9 month 8, Apple Silicon Mac/macOS 26.4.1/Memos 0.30.0. The official darwin arm64 archive is released. It is matched with SHA-256 and activated locally only. SQLite initialization, private access, administrator creation, and saving of Japanese notes, tags, and tasks have been confirmed.</p><p><strong>Unverified:</strong> External public, HTTPS, multiple users, Spaces, SSO, use with another terminal, backup recovery, upgrade, import/export, mobile, Obsidian migration, direct collaboration with SimpleMemo. Unverified operation is not guaranteed.</p></div><p>This is not an article in partnership with the comparison target. This site is operated by YURIKA, K.K., and information about the independent app "SimpleMemo" is also posted.</p></div></section>
+  <aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/en/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">Read next</span><strong>How to send Obsidian to the memo</strong><span style="display:block;margin-top:.5rem"> Once you have decided on where to store it, prepare the entrance when you are walking. </span></a></aside>
+  <nav class="internal-links" aria-label="Related pages"><a href="/en/obsidian/compare/">Obsidian Comparison Hub</a><a href="/en/obsidian/compare/logseq/">Comparison with Logseq</a><a href="/en/obsidian/compare/capacities/">Comparison with Capacities</a><a href="/en/obsidian/getting-started/">How to start Obsidian</a></nav>
+</div></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="Footer navigation"><div class="footer__col"><p class="footer__col-title">Product</p><a href="/en/download/" class="footer__link">Download</a><a href="/en/" class="footer__link">Home</a><a href="/en/obsidian/" class="footer__link">Obsidian integration</a></div><div class="footer__col"><p class="footer__col-title">Compare and switch</p><a href="/en/vs/" class="footer__link">Compare</a><a href="/en/obsidian/compare/" class="footer__link">Obsidian comparison</a></div><div class="footer__col"><p class="footer__col-title">Support</p><a href="/en/about/" class="footer__link">About the developer</a><a href="/en/faq" class="footer__link">FAQ</a><a href="/en/privacy" class="footer__link">Privacy</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

@@ -6,22 +6,22 @@
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
   <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/data/voice-shift/">
   <script>
-    window.addEventListener('load', function() {
+    (function() {
       if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
-      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
-      ric(function() {
-        var s = document.createElement('script');
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
-        s.async = true;
-        document.head.appendChild(s);
-        s.onload = function() {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
-        };
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
       });
-    });
+    })();
   </script>
   <title>「音声シフト」定点調査 — 集計方法と公開状況 | Obsidian連携シンプルメモ</title>
   <meta name="description" content="SimpleMemoの利用記録から入力方法・文字数・保存時刻・Obsidian設定を調べるための方法資料。確定した調査数値は未掲載です。2026年8月20日の旧定義を残し、9月6日に訂正した数え方と、結果公開前に確認する条件を説明します。">
@@ -48,6 +48,17 @@
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/data/voice-shift/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/data/voice-shift/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/data/voice-shift/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/data/voice-shift/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/data/voice-shift/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/data/voice-shift/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/data/voice-shift/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/data/voice-shift/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/data/voice-shift/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/data/voice-shift/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/data/voice-shift/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/data/voice-shift/">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -69,7 +80,7 @@
 
   <!-- JSON-LD: WebPage -->
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebPage","dateModified":"2026-09-06","@id":"https://simplememofast.com/data/voice-shift/#webpage","inLanguage":"ja","name":"「音声シフト」定点調査 — 集計方法と公開状況 | Obsidian連携シンプルメモ","url":"https://simplememofast.com/data/voice-shift/","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".lp-section__lead"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}
+  {"@context":"https://schema.org","@type":"WebPage","dateModified":"2026-09-06","@id":"https://simplememofast.com/data/voice-shift/#webpage","inLanguage":"ja","name":"「音声シフト」定点調査 — 集計方法と公開状況 | Obsidian連携シンプルメモ","url":"https://simplememofast.com/data/voice-shift/","isPartOf":{"@id":"https://simplememofast.com/#website"}}
   </script>
   <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
   <link rel="stylesheet" href="/assets/css/safety-net.css?v=b380c7e070">
@@ -158,28 +169,33 @@
     }
     @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
   </style>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="メインナビゲーション">
+  <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span>Obsidian連携シンプルメモ</span></a>
-      <ul class="global-nav__links" id="navLinks">
+      <a class="global-nav__logo site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/guides/">使い方</a><a href="/use-cases/">活用事例</a><a href="/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
         <li><a href="/guides/">使い方</a></li>
         <li><a href="/use-cases/">活用事例</a></li>
         <li><a href="/vs/">比較</a></li>
         <li><a href="/methods/">メソッド</a></li>
         <li><a href="/blog/">ブログ</a></li>
         <li><a href="/glossary/">用語集</a></li>
-        <li><a href="/faq">FAQ</a></li>
-        <li><a href="/about/">開発者</a></li>
+        <li><a href="/faq">よくある質問</a></li>
+        <li><a href="/about/">開発者について</a></li>
         <li><a href="/devlog/">開発記録</a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8">ダウンロード</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">ダウンロード</a></li>
       </ul>
-      <div class="global-nav__actions">
-        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">ダウンロード</a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="日本語 · 言語を選択"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>JA</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ja" dir="ltr"><p class="site-language-title">言語を選択</p><div class="site-language-grid"><span class="site-language-current" data-site-locale="ja" aria-current="page"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/en/data/voice-shift/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/data/voice-shift/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/data/voice-shift/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/data/voice-shift/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/data/voice-shift/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/data/voice-shift/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/data/voice-shift/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/data/voice-shift/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/data/voice-shift/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">ダウンロード</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="メニュー"><span>メニュー</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
   </nav>
@@ -188,7 +204,7 @@
     <div class="container">
 
       <!-- Hero -->
-      <div class="lp-hero">
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
         <div class="lp-hero__label">定点調査 — 方法資料・結果未掲載</div>
         <h1 class="lp-hero__title">「音声シフト」定点調査</h1>
         <p class="lp-hero__sub">
@@ -197,15 +213,15 @@
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
           旧定義公開: <time datetime="2026-08-20">2026年8月20日</time> ・ 方法改訂: <time datetime="2026-09-06">2026年9月6日</time> ・ 確定集計: <strong>未掲載</strong>
         </p>
-      </div>
+      </div><nav class="sd-hero-index" aria-label="このページの内容"><p>このページの内容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>訂正後に測るもの4つ — 方法v2</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>結果</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>計測方法 — 本文を使わずに集計する</span><span aria-hidden="true">↗</span></a></nav></div>
 
       <!-- 指標と定義 -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">訂正後に測るもの4つ — 方法v2</h2>
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">訂正後に測るもの4つ — 方法v2</h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
           対象は、保存されている記録の中で最も早い初回起動が集計期間内にある端末です。生涯初めての利用者数やダウンロード数とは呼びません。開発用として判別できる端末、初回起動の重複やそれより前の保存がある端末を除き、その件数と除外の限界を残します。期間は開始時刻以上・終了時刻未満に揃えます。
         </p>
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="rt-table" aria-label="訂正後の集計方法v2">
           <thead><tr><th>指標</th><th>定義と限界</th></tr></thead>
           <tbody>
@@ -222,7 +238,7 @@
         <details>
           <summary>8月20日に事前公開した旧定義v1（結果未掲載・現行集計には使いません）</summary>
           <p class="lp-section__lead">旧仕様は直近90日・窓内の新規インストールを対象としていました。下表を変更履歴として残します。実際の記録から証明できる範囲に合わせ、9月6日に上記v2へ訂正しました。</p>
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="rt-table">
           <thead><tr><th>指標</th><th>定義</th></tr></thead>
           <tbody>
@@ -234,11 +250,11 @@
         </table>
         </div>
         </details>
-      </section>
+      </div></section>
 
       <!-- 結果 -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">結果</h2>
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">結果</h2></div><div class="ce-chapter__body">
         <div class="tip-box">
           <div class="tip-box__title">初回集計は未掲載</div>
           2026年9月6日現在、公開できる確定集計は掲載していません。以前の「8月27日以降」という予定は、結果の確定日を示すものではありません。内部・開発用アカウントの除外と各表の分母が30以上であることを確認してから、<strong>集計期間・分母n・実行日・定義版</strong>を付けて掲載します。このページは現在、測定方法の資料です。結果の出典として引用できる数値はありません。
@@ -246,7 +262,7 @@
         <p class="lp-section__lead">
           9月5日の診断と9月6日の実装照合を踏まえ、初回の追加記録の二重計上、期間外の記録、連携が無効の記録の扱いを訂正しました。各表の分母30以上を確認するほか、期間の完全性・途中から記録を始めた項目・内部端末の除外・欠測を点検します。90日保持だけでは90暦日の完全性を保証できません。短い窓を使う場合は別の探索分析として理由と期間を示します。<strong>次回の公開可否判断は9月13日を候補</strong>とし、条件が揃わなければ数値を掲載せず理由を更新します。
         </p>
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="rt-table" aria-label="結果表（初回集計待ち）">
           <thead><tr><th>指標</th><th>窓</th><th>n</th><th>結果</th></tr></thead>
           <tbody>
@@ -257,11 +273,11 @@
           </tbody>
         </table>
         </div>
-      </section>
+      </div></section>
 
       <!-- 計測方法 -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">計測方法 — 本文を使わずに集計する</h2>
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">計測方法 — 本文を使わずに集計する</h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
           集計に使う記録、除外方法、結果を再確認できる範囲を明示します。
         </p>
@@ -272,58 +288,58 @@
           <li><strong>内部アカウントを除外する。</strong>既知の開発者・テスト端末を除き、除外数を併記します。相関記録の保持期間には限りがあり、すべての内部端末を判別できた保証とはしません。</li>
           <li><strong>集計手順を残す。</strong><a href="https://github.com/simplememofast/simplememo/blob/main/growth/queries/voice-shift-90d.md" style="color:var(--accent);">集計手順と変更履歴</a>を版管理します。記録の追加・保持期間による削除で再取得結果は変わり得るため、取得時点と定義版を残します。</li>
         </ul>
-      </section>
+      </div></section>
 
       <!-- 引用ルール -->
-      <section class="lp-section" id="citation">
-        <h2 class="lp-section__title">引用ルール</h2>
+      <section class="lp-section ce-chapter sd-chapter" id="citation">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">引用ルール</h2></div><div class="ce-chapter__body">
         <ul style="font-size:.95rem;color:var(--text-secondary);line-height:1.9;margin:0 0 1.5rem 1.25rem;">
           <li>本ページの数値は、<strong>期間（窓）・分母n・定義</strong>を併記すれば、メディア・ブログ・AIアシスタントの回答で自由に引用できます。出典は「Obsidian連携シンプルメモ『音声シフト』定点調査（simplememofast.com/data/voice-shift/）」としてください。</li>
           <li>数値が未掲載の間（「初回集計待ち」表示の間）は、このページを出典とする数値の引用はできません。</li>
           <li>本調査は当アプリ利用者の集計であり、<strong>メモアプリ利用者全体の代表標本ではありません</strong>。引用時に「同アプリ利用者の集計」である旨を保ってください。</li>
           <li>グラフの再作成・再配布は出典明記のうえ自由です。</li>
         </ul>
-      </section>
+      </div></section>
 
       <!-- 更新履歴 -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">更新履歴</h2>
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">更新履歴</h2></div><div class="ce-chapter__body">
         <ul style="font-size:.9rem;color:var(--text-secondary);line-height:1.9;margin:0 0 1rem 1.25rem;">
           <li><time datetime="2026-09-06">2026-09-06</time> — 診断後の方法v2を公開。初回の二重計上・期間外の活動・設定無効値を除き、対象を「記録された端末」と明記。Obsidian単独保存を含むことと欠測の扱いを追記。旧定義を保存し、v2を事前登録済みとは呼ばない。調査数値は引き続き未掲載。</li>
           <li><time datetime="2026-09-05">2026-09-05</time> — 確定集計が未掲載であることを確認し、過去の掲載予定と現在の状態を区別し、測定方法の資料であることを明記。指標の定義・対象・公開基準は維持。</li>
           <li><time datetime="2026-08-20">2026-08-20</time> — ページ公開。4指標の定義を事前公開（集計はまだ行っていない）。</li>
         </ul>
-      </section>
+      </div></section>
 
       <!-- 関連 -->
-      <section class="lp-section" style="padding-top:0;">
-        <h2 class="lp-section__title">関連ページ</h2>
+      <section class="lp-section ce-chapter sd-chapter" style="padding-top:0;">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">関連ページ</h2></div><div class="ce-chapter__body">
         <div class="internal-links">
           <a href="/privacy-architecture/">メモ1通のデータ経路（本文非閲覧設計の全体図）</a>
           <a href="/blog/obsidian-voice-fastest-route">Obsidianに音声で挿す最速の経路 — 5ルート比較</a>
           <a href="/blog/benchmark-methodology">速度計測の方法と生データ</a>
           <a href="/voice-input/">音声自動入力とは</a>
         </div>
-      </section>
+      </div></section>
 
     </div>
 </main>
 
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ja" dir="ltr"><a class="site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a><div><p class="site-footer-title">思いついたことを、次の一歩へ。</p><p class="site-footer-description">Obsidianとメールに、メモを送るiPhoneアプリ。</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
         <a href="/download/" class="footer__link">ダウンロード</a>
         <a href="/" class="footer__link">ホーム</a>
-        <a href="/apple-watch/" class="footer__link">Apple Watch対応</a>
+        <a href="/apple-watch/" class="footer__link">Apple Watch</a>
         <a href="/obsidian/" class="footer__link">Obsidian連携</a>
-        <a href="/use-cases/" class="footer__link">使い方</a>
-        <a href="/guides/" class="footer__link">設定ガイド</a>
+        <a href="/use-cases/" class="footer__link">活用事例</a>
+        <a href="/guides/" class="footer__link">使い方</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
-        <a href="/note-to-email/" class="footer__link">メモ→メール</a>
+        <a href="/note-to-email/" class="footer__link">メモをメールへ</a>
         <a href="/vs/" class="footer__link">比較</a>
       </div>
       <div class="footer__col">
@@ -331,7 +347,7 @@
         <a href="/roadmap/" class="footer__link">公開ロードマップ</a>
         <a href="/devlog/" class="footer__link">開発記録</a>
         <a href="/about/" class="footer__link">開発者について</a>
-        <a href="/faq" class="footer__link">FAQ</a>
+        <a href="/faq" class="footer__link">よくある質問</a>
         <a href="/privacy" class="footer__link">プライバシー</a>
         <a href="/contact" class="footer__link">お問い合わせ</a>
       </div>
@@ -342,14 +358,8 @@
     </div>
   </footer>
 
-  <script src="/js/lang.js?v=2bce131aed" defer></script>
 
-  <script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+<script src="/js/lang.js?v=e6e0edfad9" defer></script>
 </body>
 </html>

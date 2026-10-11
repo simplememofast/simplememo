@@ -5,13 +5,15 @@ import crypto from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
 import { execFileSync } from 'node:child_process';
 import { ROOT, formalMetrics, compareMetrics } from './company-metrics.mjs';
-import { atomicJson, privateState, acquireLock } from './company-loop.mjs';
+import { atomicJson, privateState, acquireLock, observe, opportunities } from './company-loop.mjs';
 import { verifyAppsFlyer } from './company-data.mjs';
 import { startOperationalFollowup } from './company-followup.mjs';
 import {decisionCommitment,verifyDecisionContract,verifyDecisionDelivery,decisionTrace,candidateDigest} from './company-decision.mjs';
-import {verifyMeasurementInput,verifyMeasurementDelivery} from './company-measurement.mjs';
-import {observe,opportunities} from './company-loop.mjs';
+import {verifyMeasurementInput,verifyMeasurementDelivery,verifyMeasurementMergeScope} from './company-measurement.mjs';
 import {intentPath} from '../../scripts/value-contracts.mjs';
+import {parentReportedInterventions} from './company-observability.mjs';
+import {decisionCheckRuns} from '../../scripts/decision-monitor.mjs';
+import {finishExperimentEvaluation} from './company-evaluation.mjs';
 
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -52,7 +54,8 @@ export function verifyRetainedCompanyDelivery(receipt,{stateRoot,root=ROOT,call=
     if(contract.id!==receipt.decision.input.contract_id||contract.run_id!==receipt.bound_autopilot_run_id||
       !isDeepStrictEqual(contract.candidates?.find(c=>c.id===contract.id)?.company_decision,seal))throw new Error('Git declaration does not bind retained decision');
   }
-  call('git',['diff','--quiet',merge.head_sha,merge.merge_sha,'--',...receipt.decision.input.scope.paths]);
+  const mergeScope=verifyMeasurementMergeScope(receipt,{stateRoot,head:merge.head_sha,mergeSha:merge.merge_sha,mergedAt:merge.merged_at,call});
+  if(!isDeepStrictEqual(mergeScope,receipt.evidence_of_completion?.decision_trace?.merge_scope_verification??null))throw new Error('Retained merge scope proof changed');
   const measurement=verifyMeasurementDelivery(receipt,{stateRoot,root,head:merge.head_sha,mergeSha:merge.merge_sha,mergedAt:merge.merged_at,call});
   if(!isDeepStrictEqual(measurement,receipt.followup))throw new Error('Retained measurement delivery changed');
   return merge;
@@ -121,9 +124,9 @@ export function verifyIntegrationLedger(receipt,merge,call=run) {
 }
 
 export async function verifyOperationalDelivery(merge,call=run,fetchImpl=fetch) {
-  const checks=JSON.parse(call('gh',['api',`repos/simplememofast/simplememo/commits/${merge.merge_sha}/check-runs`]));
-  const pages=checks.check_runs?.find(c=>c.name==='Cloudflare Pages' && c.status==='completed' && c.conclusion==='success' && c.head_sha===merge.merge_sha);
-  if(!pages) throw new Error('Merged integration has no successful exact-commit Pages deployment');
+  const checks=decisionCheckRuns(merge.merge_sha,'Cloudflare Pages',route=>JSON.parse(call('gh',['api',`repos/simplememofast/simplememo/${route}`])));
+  const pages=checks.sort((a,b)=>b.id-a.id)[0];
+  if(pages?.status!=='completed' || pages.conclusion!=='success') throw new Error('Merged integration has no successful exact-commit Pages deployment');
   // The middleware intentionally returns 404 for /scripts and /growth. Keep
   // that boundary; verify the actual public status consumed by the site.
   const publicOutput=await verifyPublishedArtifact('/data/autopilot-status.json',merge.merge_sha,call,fetchImpl);
@@ -140,6 +143,7 @@ export async function verifyActionDelivery(artifact,merge,call=run,fetchImpl=fet
 }
 
 export async function finishExistingRun({stateRoot,id,evidenceFile,call=run,cwd=ROOT,fetchImpl=fetch,now=new Date()}) {
+  if(read(evidenceFile).kind==='experiment_evaluation')return finishExperimentEvaluation({stateRoot,id,evidenceFile,call,root:cwd,fetchImpl,now});
   if (!/^[a-f0-9-]{36}$/.test(id)) throw new Error('Invalid Company run ID');
   const dir=privateState(stateRoot), release=acquireLock(dir);
   if (!release) return {status:'busy'};
@@ -164,7 +168,7 @@ export async function finishExistingRun({stateRoot,id,evidenceFile,call=run,cwd=
     if(prior.runs.some(r=>r.run_id===evidence.run_id)) throw new Error('Merge did not introduce this run');
     const contract=JSON.parse(call('git',['show',merge.merge_sha+':'+intentPath(receipt.decision.input.contract_id)]));
     call('git',['fetch','origin',`refs/pull/${merge.pr}/head`]);
-    const trace=await verifyDecisionDelivery(receipt,contract,row,prior.runs,ledger.runs,merge,call,cwd);
+    const trace=await verifyDecisionDelivery(receipt,contract,row,prior.runs,ledger.runs,merge,call,cwd,{stateRoot:dir});
     const artifactProof=await verifyActionDelivery(row.artifact,merge,call,fetchImpl);
     if(row.artifact!==null && !receipt.decision.input.scope.paths.includes(artifactProof.artifact_source))throw new Error('Actually served source was not the declared changed target');
     const measurement=verifyMeasurementDelivery(receipt,{stateRoot:dir,root:cwd,head:merge.head_sha,mergeSha:merge.merge_sha,mergedAt:merge.merged_at,call});
@@ -173,6 +177,7 @@ export async function finishExistingRun({stateRoot,id,evidenceFile,call=run,cwd=
     receipt.evidence_of_completion={merge,canonical_run_id:row.run_id,canonical_source:'data/autopilot-runs.json',artifact:row.artifact,...artifactProof,decision_trace:trace,
       limitation:'Exact final SHA CI and canonical run/merge are verified. Domain-specific effect and rollback evidence remain in the existing experiment/PR.'};
     receipt.human_interventions=row.interventions??null;
+    receipt.parent_reported_interventions=parentReportedInterventions({stateRoot:dir,runId:receipt.id,startedAt:receipt.started_at,finishedAt:receipt.finished_at,canonicalInterventions:receipt.human_interventions,now});
     receipt.learnings=typeof evidence.learning==='string'&&evidence.learning.length<=2000 ? [evidence.learning] : ['Implementation verified; business impact awaits its existing experiment horizon.'];
     receipt.followup=measurement??{source:'growth/experiments/experiments.json and existing value contracts',status:'preserve original evaluation date and evidence gate'};
     atomicJson(file,receipt);atomicJson(path.join(dir,'latest-run.json'),receipt);return receipt;

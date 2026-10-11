@@ -7,29 +7,29 @@
 <meta content="index,follow,max-image-preview:large,max-snippet:-1" name="robots"/>
 <meta content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/sync/" name="apple-itunes-app"/>
 <script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
     window.addEventListener('load', function() {
-      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
       var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
       ric(function() {
         var s = document.createElement('script');
         s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
         s.async = true;
         document.head.appendChild(s);
-        s.onload = function() {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
-        };
       });
     });
-  </script>
+  })();
+</script>
 <title>Four ways to sync your Obsidian vault across devices | Simple Memo</title>
-<meta content="The shortest path from a spoken note on iPhone into your vault is in the four-route comparison (no plugin needed) ." name="description"/>
+<meta content="Four ways to sync an Obsidian vault compared: iCloud Drive, Obsidian Sync, Git and Syncthing, by cost, supported platforms and what happens on a conflict. For Git and Syncthing we created real conflicting edits and recorded how each one broke." name="description"/>
 <meta content="#070b14" name="theme-color"/>
 <!-- OGP -->
 <meta content="Four ways to sync your Obsidian vault across devices | Simple Memo" property="og:title"/>
-<meta content="The shortest path from a spoken note on iPhone into your vault is in the four-route comparison (no plugin needed) ." property="og:description"/>
+<meta content="Four ways to sync an Obsidian vault compared: iCloud Drive, Obsidian Sync, Git and Syncthing, by cost, supported platforms and what happens on a conflict. For Git and Syncthing we created real conflicting edits and recorded how each one broke." property="og:description"/>
 <meta content="article" property="og:type"/>
 <meta content="2026-08-26T00:00:00+09:00" property="article:published_time"/>
 <meta content="https://simplememofast.com/en/obsidian/sync/" property="og:url"/>
@@ -42,7 +42,7 @@
 <meta content="summary_large_image" name="twitter:card"/>
 <meta content="@simplememofast" name="twitter:site"/>
 <meta content="Four ways to sync your Obsidian vault across devices | Simple Memo" name="twitter:title"/>
-<meta content="The shortest path from a spoken note on iPhone into your vault is in the four-route comparison (no plugin needed) ." name="twitter:description"/>
+<meta content="Four ways to sync an Obsidian vault compared: iCloud Drive, Obsidian Sync, Git and Syncthing, by cost, supported platforms and what happens on a conflict. For Git and Syncthing we created real conflicting edits and recorded how each one broke." name="twitter:description"/>
 <meta content="https://simplememofast.com/assets/img/og/obsidian-sync.png" name="twitter:image"/>
 <link href="https://analytics.ahrefs.com" rel="preconnect"/>
 
@@ -55,11 +55,11 @@
 <!-- JSON-LD: BreadcrumbList -->
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/en/"},{"@type":"ListItem","position":2,"name":"Write on iPhone. Find it in your chosen Obsidian note.","item":"https://simplememofast.com/en/obsidian/"},{"@type":"ListItem","position":3,"name":"Four ways to sync your Obsidian vault across devices","item":"https://simplememofast.com/en/obsidian/sync/"}]}</script>
 <!-- JSON-LD: Article -->
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/en/obsidian/sync/#article","inLanguage":"en","headline":"Four ways to sync your Obsidian vault across devices | Simple Memo","description":"The shortest path from a spoken note on iPhone into your vault is in the four-route comparison (no plugin needed) .","url":"https://simplememofast.com/en/obsidian/sync/","datePublished":"2026-08-26","dateModified":"2026-08-26","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Simple Memo - for Obsidian","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"image":"https://simplememofast.com/assets/img/og/obsidian-sync.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/obsidian/sync/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/en/obsidian/sync/#article","inLanguage":"en","headline":"Four ways to sync your Obsidian vault across devices | Simple Memo","description":"Four ways to sync an Obsidian vault compared: iCloud Drive, Obsidian Sync, Git and Syncthing, by cost, supported platforms and what happens on a conflict. For Git and Syncthing we created real conflicting edits and recorded how each one broke.","url":"https://simplememofast.com/en/obsidian/sync/","datePublished":"2026-08-26","dateModified":"2026-10-04","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Simple Memo - for Obsidian","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"image":"https://simplememofast.com/assets/img/og/obsidian-sync.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/obsidian/sync/"}}</script>
 <!-- JSON-LD: FAQPage -->
 
 <!-- JSON-LD: WebPage with Speakable -->
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/obsidian/sync/#webpage","inLanguage":"en","name":"Four ways to sync your Obsidian vault across devices | Simple Memo","url":"https://simplememofast.com/en/obsidian/sync/","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".lp-section__lead"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/obsidian/sync/#webpage","inLanguage":"en","name":"Four ways to sync your Obsidian vault across devices | Simple Memo","url":"https://simplememofast.com/en/obsidian/sync/","isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
 <link href="/assets/css/style.min.css?v=aa4747a0f6" rel="stylesheet"/>
 <link as="font" crossorigin="" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" rel="preload" type="font/woff2"/>
 <link as="font" crossorigin="" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" rel="preload" type="font/woff2"/>
@@ -276,42 +276,55 @@
   <link rel="canonical" href="https://simplememofast.com/en/obsidian/sync/">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/sync/">
   <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/sync/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/sync/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/sync/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/sync/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/sync/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/sync/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/sync/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/sync/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/sync/">
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/sync/">
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/obsidian/sync/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Which one should I actually pick?","acceptedAnswer":{"@type":"Answer","text":"Apple-only: iCloud Drive, already on, least effort. Also on Windows/Android, or want official version history and support: paid Obsidian Sync. Comfortable with Git and want the vault's history as commits: Git. Free, cross-platform, no cloud vendor: Syncthing."}},{"@type":"Question","name":"Can I sync across devices without Obsidian Sync?","acceptedAnswer":{"@type":"Answer","text":"Yes. A vault has no special format — it's just Markdown files — so OS-native sync (iCloud Drive, Dropbox, Google Drive) or general-purpose tools like Git and Syncthing all work as-is. Obsidian Sync is one option among several, not a requirement."}},{"@type":"Question","name":"What happens if I edit from two devices at once?","acceptedAnswer":{"@type":"Answer","text":"The failure mode differs by tool. We measured Git inserting conflict markers (&lt;&lt;&lt;&lt;&lt;&lt;&lt;) straight into the file, needing a manual resolve. Syncthing auto-picked one version and saved the other as a separate \"sync-conflict\" file — no data lost either way. iCloud Drive and Obsidian Sync couldn't be tested hands-on in this environment (Linux, no macOS/iOS)."}},{"@type":"Question","name":"Can I run more than one sync method at once?","acceptedAnswer":{"@type":"Answer","text":"Obsidian's own help says pairing Obsidian Sync with other cloud storage like Dropbox, Google Drive, or OneDrive can cause sync conflicts, and recommends backing up your vault. Stick to one sync method per vault rather than layering two onto the same folder."}},{"@type":"Question","name":"If Obsidian Sync overwrites something by mistake, can I undo it?","acceptedAnswer":{"@type":"Answer","text":"Per the official help, Version History lets you view and restore past versions of a note. Retention is 1 month on Standard, 12 months on Plus, and 2 weeks for attachments (checked against the official help on August 26, 2026). Restore by selecting the file and choosing \"Open version history\"."}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/obsidian/sync/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Which one should I actually pick?","acceptedAnswer":{"@type":"Answer","text":"Apple-only: iCloud Drive, already on, least effort. Also on Windows/Android, or want official version history and support: paid Obsidian Sync. Comfortable with Git and want the vault's history as commits: Git. Free, no cloud vendor: Syncthing (Obsidian's help lists it as not officially supported on iPhone and iPad)."}},{"@type":"Question","name":"Can I sync across devices without Obsidian Sync?","acceptedAnswer":{"@type":"Answer","text":"Yes. A vault has no special format — it's just Markdown files — so OS-native sync (iCloud Drive, Dropbox, Google Drive) or general-purpose tools like Git and Syncthing all work as-is. Obsidian Sync is one option among several, not a requirement."}},{"@type":"Question","name":"What happens if I edit from two devices at once?","acceptedAnswer":{"@type":"Answer","text":"The failure mode differs by tool. We measured Git inserting conflict markers (&lt;&lt;&lt;&lt;&lt;&lt;&lt;) straight into the file, needing a manual resolve. Syncthing auto-picked one version and saved the other as a separate \"sync-conflict\" file — no data lost either way. iCloud Drive and Obsidian Sync couldn't be tested hands-on in this environment (Linux, no macOS/iOS)."}},{"@type":"Question","name":"Can I run more than one sync method at once?","acceptedAnswer":{"@type":"Answer","text":"Obsidian's own help says pairing Obsidian Sync with other cloud storage like Dropbox, Google Drive, or OneDrive can cause sync conflicts, and recommends backing up your vault. Stick to one sync method per vault rather than layering two onto the same folder."}},{"@type":"Question","name":"If Obsidian Sync overwrites something by mistake, can I undo it?","acceptedAnswer":{"@type":"Answer","text":"Per the official help, Version History lets you view and restore past versions of a note. Retention is 1 month on Standard, 12 months on Plus, and 2 weeks for attachments (checked against the official help on August 26, 2026). Restore by selecting the file and choosing \"Open version history\"."}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
-<nav aria-label="Main navigation" class="global-nav">
+<nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
-<a class="global-nav__logo" href="/en/">
-<img alt="Simple Memo - for Obsidian" height="28" loading="eager" src="/assets/img/app-icon-56.png" width="28"/><span lang="en">Simple Memo - for Obsidian</span></a>
-<ul class="global-nav__links" id="navLinks">
-<li><a href="/en/guides/"><span lang="en">Guides</span></a></li>
-<li><a href="/en/use-cases/"><span lang="en">Use Cases</span></a></li>
-<li><a href="/en/vs/"><span lang="en">Compare</span></a></li>
+<a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/">Guides</a><a href="/en/use-cases/">Use cases</a><a href="/en/vs/">Compare</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+<li><a href="/en/guides/">Guides</a></li>
+<li><a href="/en/use-cases/">Use cases</a></li>
+<li><a href="/en/vs/">Compare</a></li>
 <li><a href="/en/methods/"><span lang="en">Methods</span></a></li>
 <li><a href="/en/blog/"><span lang="en">Blog</span></a></li>
 <li><a href="/en/glossary/"><span lang="en">Glossary</span></a></li>
-<li><a href="/en/faq"><span lang="en">FAQ</span></a></li>
-<li><a href="/en/about/"><span lang="en">About</span></a></li>
-<li><a href="/en/devlog/"><span lang="en">Dev Log</span></a></li>
-<li class="nav-cta-mobile"><a data-cta-cluster="obsidian" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=en__nav&amp;mt=8"><span lang="en">Download</span></a></li>
+<li><a href="/en/faq">FAQ</a></li>
+<li><a href="/en/about/">About the developer</a></li>
+<li><a href="/en/devlog/">Development log</a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="obsidian" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span lang="en">Download</span></a></li>
 </ul>
-<div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn" href="/obsidian/sync/" hreflang="ja" aria-label="日本語" style="text-decoration:none">JA</a><a class="lang-switcher__btn active" href="/en/obsidian/sync/" hreflang="en" aria-label="Switch to English" aria-current="page" style="text-decoration:none">EN</a></div>
-<a class="global-nav__cta" data-cta-cluster="obsidian" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=en__nav&amp;mt=8">
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="English · Choose a language"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>EN</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="en" dir="ltr"><p class="site-language-title">Choose a language</p><div class="site-language-grid"><a href="/obsidian/sync/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="en" aria-current="page"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh/obsidian/sync/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/sync/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/sync/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/sync/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/sync/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/sync/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/sync/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/sync/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+<a class="global-nav__cta" data-cta-cluster="obsidian" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">
 <span lang="en">Download</span>
 </a>
-<button aria-controls="navLinks" aria-expanded="false" aria-label="Menu" class="global-nav__hamburger" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
 </div>
 </div>
 </nav>
 <main class="page-content">
 <div class="container">
 <!-- Hero -->
-<div class="lp-hero">
+<div class="lp-hero sd-hero"><div class="sd-hero-copy">
 <div class="lp-hero__label">
 <span lang="en">Obsidian sync methods compared</span>
 </div>
@@ -324,12 +337,12 @@
 <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
 <span lang="en">By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Published <time datetime="2026-08-26">August 26, 2026</time></span>
 </p>
-</div>
+</div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>The four methods</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Comparison table</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Comparing failure modes — we actually triggered a conflict</span><span aria-hidden="true">↗</span></a></nav></div>
 <!-- Answer-first (AIO) -->
 <section class="lp-section" style="padding-top:1rem;">
 <div class="tip-box" style="font-size:.95rem;">
 <div class="tip-box__title"><span lang="en">SHORT ANSWER</span></div>
-<p><span lang="en">If you're Apple-only, <strong>iCloud Drive</strong> is already on and costs nothing extra. Crossing into Windows/Android, or wanting official version history and support, points to <strong>Obsidian Sync</strong> (paid). Comfortable with Git and want change history as commits? Use <strong>Git</strong> (free, needs setup). Want free, cross-platform, no cloud vendor in the loop? <strong>Syncthing</strong> (free, needs setup). <strong>What we actually measured is how each one breaks on conflict</strong>: Git inserts conflict markers straight into the note body and needs a manual resolve; Syncthing keeps one version under the original name and saves the other as a separate file automatically.</span></p>
+<p><span lang="en">If you're Apple-only, <strong>iCloud Drive</strong> is already on and costs nothing extra. Crossing into Windows/Android, or wanting official version history and support, points to <strong>Obsidian Sync</strong> (paid). Comfortable with Git and want change history as commits? Use <strong>Git</strong> (free, needs setup). Want free sync with no cloud vendor in the loop? <strong>Syncthing</strong> (free, needs setup; not officially supported on iPhone and iPad). <strong>What we actually measured is how each one breaks on conflict</strong>: Git inserts conflict markers straight into the note body and needs a manual resolve; Syncthing keeps one version under the original name and saves the other as a separate file automatically.</span></p>
 </div>
 </section>
 <!-- Voice route — GROWTH_LTV_ENGAGEMENT_2026-09-01 §6 P1: every hub child points at the
@@ -339,10 +352,10 @@
 <span lang="en">The shortest path from a spoken note on iPhone into your vault is in <a href="/en/blog/obsidian-voice-input">the four-route comparison (no plugin needed)</a>.</span>
 </p>
 <!-- Four methods overview -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
 <span lang="en">The four methods</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">All four do the same job — keeping a vault folder identical across devices — but the mechanism differs.</span>
 </p>
@@ -361,16 +374,16 @@
 </div>
 <div class="reason-card">
 <div class="reason-card__title">🔁 <span lang="en">Syncthing</span></div>
-<div class="reason-card__desc"><span lang="en">Open-source, self-hosted file sync. Devices talk directly (P2P) with no cloud provider in between. Free and cross-platform, but you install it on every device and pair them yourself.</span></div>
+<div class="reason-card__desc"><span lang="en">Open-source, self-hosted file sync. Devices talk directly (P2P) with no cloud provider in between. It is free, with official builds for Windows, macOS and Linux. On Android the official app is no longer maintained, so you use the community fork (Syncthing-Fork); on iPhone and iPad, Obsidian's help lists Syncthing as not officially supported, and the workaround is a third-party app such as Synctrain. You also install it on every device and pair them yourself.</span></div>
 </div>
 </div>
-</section>
+</div></section>
 <!-- Comparison table -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
 <span lang="en">Comparison table</span>
-</h2>
-<div style="overflow-x:auto">
+</h2></div><div class="ce-chapter__body">
+<div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Scrollable table">
 <table class="rt-table">
 <thead>
 <tr>
@@ -401,7 +414,7 @@
 <td data-label="iCloud Drive"><span class="mk-no">Apple<span lang="en"> only</span></span></td>
 <td data-label="Obsidian Sync"><span class="mk-yes"><span lang="en">All platforms</span></span></td>
 <td data-label="Git"><span class="mk-yes"><span lang="en">All platforms</span></span> <span lang="en">(mobile depends on plugins)</span></td>
-<td data-label="Syncthing"><span class="mk-yes"><span lang="en">All platforms</span></span></td>
+<td data-label="Syncthing"><span class="mk-part"><span lang="en">Desktop and Android</span></span> <span lang="en">(Android via the community fork; not officially supported on iPhone and iPad)</span></td>
 </tr>
 <tr>
 <th scope="row"><span lang="en">On conflict</span></th>
@@ -435,12 +448,12 @@
 </table>
 </div>
 <p style="font-size:.85rem;color:var(--text-muted);line-height:1.8;"><span lang="en">※ Rows on conflict behavior and version history mix directly-tested and documentation-based cells. See the next section and the test-scope box at the end.</span></p>
-</section>
+</div></section>
 <!-- Failure modes — the unique value of this article -->
-<section class="lp-section" id="conflicts">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="conflicts">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
 <span lang="en">Comparing failure modes — we actually triggered a conflict</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">Feature-comparison tables for sync tools are common; articles that actually collide two devices and record what happens are not. In this test environment (Ubuntu 24.04, GitHub Actions) we set up real Git and Syncthing instances, wrote a different line to each of two folders standing in for two devices while offline, then let them sync again. iCloud Drive and Obsidian Sync couldn't be reproduced hands-on — no macOS/iOS is available here — so those two rely on official documentation instead.</span>
 </p>
@@ -448,7 +461,7 @@
 <div class="cz__n"><span lang="en">MEASURED — Git</span></div>
 <h3 class="cz__t"><span lang="en">Conflict markers land directly inside the note body</span></h3>
 <p><span lang="en">We created one bare repository and cloned it twice, standing in for two devices. With both "offline", each appended a different line to the same note and committed, then pushed one after the other.</span></p>
-<pre class="note-sample"><code># デバイスAを先にpush → 成功
+<pre class="note-sample" tabindex="0"><code># デバイスAを先にpush → 成功
 $ git push origin master
    ba48c62..f0be52e  master -&gt; master
 
@@ -476,7 +489,7 @@ CONFLICT (content): Merge conflict in Daily Notes/2026-08-26.md
 <div class="cz__n"><span lang="en">MEASURED — Syncthing</span></div>
 <h3 class="cz__t"><span lang="en">Keeps one version, exiles the other to a separate file</span></h3>
 <p><span lang="en">Running the same scenario — two Syncthing v1.27.2 instances (installed via apt) paired directly over local TCP — broke in a completely different way from Git.</span></p>
-<pre class="note-sample"><code># 同期再開後のvault-a
+<pre class="note-sample" tabindex="0"><code># 同期再開後のvault-a
 Daily Notes/2026-08-26.md
 Daily Notes/2026-08-26.sync-conflict-20260825-212901-P2RW67Y.md
 
@@ -509,12 +522,12 @@ Daily Notes/2026-08-26.sync-conflict-20260825-212901-P2RW67Y.md
 <div class="tip-box__title"><span lang="en">THE COMMON LESSON</span></div>
 <p><span lang="en">Of the four, the two we could measure — Git and Syncthing — both preserved every byte of data. The difference is where the mess lands: markers mixed into the text, or a split into two files. Both share the same risk: <strong>nothing forces you to notice</strong>. The single most reliable precaution is not layering two sync methods onto the same vault at once — which is exactly what Obsidian's own warning calls out.</span></p>
 </div>
-</section>
+</div></section>
 <!-- How to choose -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
 <span lang="en">How to choose</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="reason-cards">
 <div class="reason-card">
 <div class="reason-card__title">🍎 <span lang="en">Apple devices only</span></div>
@@ -530,22 +543,22 @@ Daily Notes/2026-08-26.sync-conflict-20260825-212901-P2RW67Y.md
 </div>
 <div class="reason-card">
 <div class="reason-card__title">🔒 <span lang="en">No third-party cloud in the loop</span></div>
-<div class="reason-card__desc"><span lang="en">Syncthing is the only option where devices talk directly. Free and cross-platform, but you set up every device yourself.</span></div>
+<div class="reason-card__desc"><span lang="en">Of the four, Syncthing is the only one where devices talk directly. It is free, but Obsidian's help lists it as not officially supported on iPhone and iPad, and you set up every device yourself.</span></div>
 </div>
 </div>
-</section>
+</div></section>
 <!-- SimpleMemo tie-in -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
 <span lang="en">Whatever you choose, the vault is still just a folder</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">Choosing a sync method only decides how the vault folder stays identical across devices. Simple Memo emails each note to you and <strong>appends it directly into the daily note inside your vault folder on iCloud Drive</strong>. That means vaults synced via iCloud Drive; a vault run purely through Git or Syncthing, with no iCloud Drive in the picture, is out of scope today.</span>
 </p>
 <div class="cta-box">
 <div class="cta-box__title"><span lang="en">Whichever sync method you use, it lands in the same folder</span></div>
 <p class="cta-box__desc"><span lang="en">Free to download. Setup is picking your vault folder in iCloud Drive once.</span></p>
-<a aria-label="Download on the App Store" class="app-store-badge" data-cta-cluster="obsidian" data-cta-placement="mid" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=en__mid&amp;mt=8">
+<a aria-label="Download on the App Store" class="app-store-badge" data-cta-cluster="obsidian" data-cta-placement="mid" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">
 <img alt="Download on the App Store" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="109"/>
 </a>
 <div class="cta-qr">
@@ -554,16 +567,16 @@ Daily Notes/2026-08-26.sync-conflict-20260825-212901-P2RW67Y.md
 <small><span lang="en">On desktop? Scan with your phone</span></small>
 </div>
 </div>
-</section>
+</div></section>
 <!-- FAQ -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
 <span lang="en">FAQ</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="faq-item">
 <details class="faq-details">
 <summary class="faq-summary"><span lang="en">Which one should I actually pick?</span></summary>
-<div class="faq-answer"><span lang="en">Apple-only: iCloud Drive, already on, least effort. Also on Windows/Android, or want official version history and support: paid Obsidian Sync. Comfortable with Git and want the vault's history as commits: Git. Free, cross-platform, no cloud vendor: Syncthing.</span></div>
+<div class="faq-answer"><span lang="en">Apple-only: iCloud Drive, already on, least effort. Also on Windows/Android, or want official version history and support: paid Obsidian Sync. Comfortable with Git and want the vault's history as commits: Git. Free, no cloud vendor: Syncthing (Obsidian's help lists it as not officially supported on iPhone and iPad).</span></div>
 </details>
 </div>
 <div class="faq-item">
@@ -590,19 +603,19 @@ Daily Notes/2026-08-26.sync-conflict-20260825-212901-P2RW67Y.md
 <div class="faq-answer"><span lang="en">Per the official help, Version History lets you view and restore past versions of a note. Retention is 1 month on Standard, 12 months on Plus, and 2 weeks for attachments (checked against the official help on August 26, 2026). Restore by selecting the file and choosing "Open version history".</span></div>
 </details>
 </div>
-</section>
+</div></section>
 <!-- Verification scope -->
 <section class="lp-section">
 <div class="tip-box">
 <div class="tip-box__title"><span lang="en">TEST ENVIRONMENT &amp; SCOPE</span></div>
-<p style="margin:0;"><span lang="en">Tested August 26, 2026 on Linux desktop (Ubuntu 24.04, GitHub Actions runner). <strong>Hands-on (actually run in this session)</strong>: Git 2.x — one bare repo with two clones reproduced an offline concurrent edit, a rejected push, a merge conflict on pull, and conflict markers landing in the note body. Syncthing v1.27.2 (installed via apt) — two instances paired directly over local TCP reproduced the same scenario and produced a <code>sync-conflict-*.md</code> file. <strong>Based on official documentation (not hands-on)</strong>: Obsidian Sync's version-history retention and its warning about combining with other cloud storage (obsidian.md/help/sync, fetched directly from this session on August 26, 2026); iCloud Drive's numbered-filename behavior on document conflicts (Apple's own Mac Help). <strong>Not testable in this environment</strong>: actual conflict behavior for Obsidian plus iCloud Drive (no macOS/iOS here) and an actual conflict on Obsidian Sync (a paid service we don't have an account for). Tool behavior can change over time — check each official site for the latest.</span></p>
+<p style="margin:0;"><span lang="en">Tested August 26, 2026 on Linux desktop (Ubuntu 24.04, GitHub Actions runner). <strong>Hands-on (actually run in this session)</strong>: Git 2.x — one bare repo with two clones reproduced an offline concurrent edit, a rejected push, a merge conflict on pull, and conflict markers landing in the note body. Syncthing v1.27.2 (installed via apt) — two instances paired directly over local TCP reproduced the same scenario and produced a <code>sync-conflict-*.md</code> file. <strong>Based on official documentation (not hands-on)</strong>: Obsidian Sync's version-history retention and its warning about combining with other cloud storage (obsidian.md/help/sync, fetched directly from this session on August 26, 2026); iCloud Drive's numbered-filename behavior on document conflicts (Apple's own Mac Help); which devices Syncthing supports (obsidian.md/help/sync-notes and Syncthing's documentation, checked October 1, 2026). <strong>Not testable in this environment</strong>: actual conflict behavior for Obsidian plus iCloud Drive (no macOS/iOS here) and an actual conflict on Obsidian Sync (a paid service we don't have an account for). Tool behavior can change over time — check each official site for the latest.</span></p>
 </div>
 </section>
 <!-- Internal Links -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">
 <span lang="en">Related pages</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="internal-links">
 <a href="/en/obsidian/sync/icloud/"><span lang="en">Syncing with iCloud (setup)</span></a>
 <a href="/en/obsidian/sync/official-sync/"><span lang="en">Standard vs. Plus: which do you need?</span></a>
@@ -614,22 +627,24 @@ Daily Notes/2026-08-26.sync-conflict-20260825-212901-P2RW67Y.md
 <a href="/en/obsidian/compare/logseq/"><span lang="en">Obsidian vs Logseq</span></a>
 <a href="/en/faq"><span lang="en">FAQ</span></a>
 </div>
-</section>
+</div></section>
 </div>
 <section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-<div class="container">
-<h2 style="font-size:1.1rem;margin-bottom:1rem;">
+<div class="container ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-08" data-ce-number="08">
 <span lang="en">References</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
 <li><a href="https://obsidian.md/help/sync" rel="noopener" style="color:var(--accent);" target="_blank">Obsidian Help — Sync</a> — <span lang="en">Official help for Obsidian Sync, fetched directly from this session on August 26, 2026</span></li>
 <li><a href="https://obsidian.md/help/sync/version-history" rel="noopener" style="color:var(--accent);" target="_blank">Obsidian Help — Version History</a> — <span lang="en">Official help on version-history retention and restore</span></li>
 <li><a href="https://support.apple.com/en-in/guide/mac-help/mh40780/mac" rel="noopener" style="color:var(--accent);" target="_blank">If document versions conflict in iCloud Drive on Mac — Apple Support</a> — <span lang="en">Apple's own guide to what happens when iCloud Drive documents conflict</span></li>
 <li><a href="https://git-scm.com/docs/git-merge" rel="noopener" style="color:var(--accent);" target="_blank">git-merge — official Git documentation</a> — <span lang="en">Official reference for how merge conflicts work</span></li>
 <li><a href="https://docs.syncthing.net/users/syncing.html" rel="noopener" style="color:var(--accent);" target="_blank">Syncthing Documentation — File Versioning &amp; Conflicts</a> — <span lang="en">Official documentation on Syncthing's conflict-file naming</span></li>
+<li><a href="https://obsidian.md/help/sync-notes" rel="noopener" style="color:var(--accent);" target="_blank">Obsidian Help — Sync your notes across devices</a> — <span lang="en">Official help on sync options by device (lists Syncthing among the options not officially supported on iPhone and iPad, and points Android users to the community fork because the official app is no longer maintained). Checked October 1, 2026</span></li>
+<li><a href="https://docs.syncthing.net/users/contrib.html" rel="noopener" style="color:var(--accent);" target="_blank">Syncthing Documentation — Community Contributions</a> — <span lang="en">Lists community apps for Android (such as Syncthing-Fork) and iPhone/iPad (Synctrain)</span></li>
 <li><a data-cta-cluster="obsidian" data-cta-placement="reference" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948" rel="noopener" style="color:var(--accent);" target="_blank">Simple Memo - for Obsidian — App Store</a> — <span lang="en">App Store download page</span></li>
 </ul>
-</div>
+</div></div>
 </section>
 <!-- SEO: Auto-generated related content links -->
 <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
@@ -661,45 +676,40 @@ Daily Notes/2026-08-26.sync-conflict-20260825-212901-P2RW67Y.md
 </div>
 </section>
 </main>
-<footer class="footer">
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro -->
 <div class="container">
 <nav aria-label="Footer navigation" class="footer__nav">
 <div class="footer__col">
 <p class="footer__col-title">Product</p>
-<a class="footer__link" href="/en/download/"><span lang="en">Download</span></a>
-<a class="footer__link" href="/en/"><span lang="en">Home</span></a>
-<a class="footer__link" href="/en/apple-watch/"><span lang="en">Apple Watch</span></a>
-<a class="footer__link" href="/en/obsidian/"><span lang="en">Obsidian</span></a>
-<a class="footer__link" href="/en/use-cases/"><span lang="en">Use cases</span></a>
-<a class="footer__link" href="/en/guides/"><span lang="en">Guides</span></a>
+<a class="footer__link" href="/en/download/">Download</a>
+<a class="footer__link" href="/en/">Home</a>
+<a class="footer__link" href="/en/apple-watch/">Apple Watch</a>
+<a class="footer__link" href="/en/obsidian/">Obsidian integration</a>
+<a class="footer__link" href="/en/use-cases/">Use cases</a>
+<a class="footer__link" href="/en/guides/">Guides</a>
 </div>
 <div class="footer__col">
 <p class="footer__col-title">Compare & Switch</p>
-<a class="footer__link" href="/en/note-to-email/"><span lang="en">Note to email</span></a>
-<a class="footer__link" href="/en/vs/"><span lang="en">Compare</span></a>
+<a class="footer__link" href="/en/note-to-email/">Notes to email</a>
+<a class="footer__link" href="/en/vs/">Compare</a>
 </div>
 <div class="footer__col">
 <p class="footer__col-title">Support</p>
-<a class="footer__link" href="/en/roadmap/"><span lang="en">Public roadmap</span></a>
-<a class="footer__link" href="/en/devlog/"><span lang="en">Dev log</span></a>
-<a class="footer__link" href="/en/about/"><span lang="en">About the developer</span></a>
-<a class="footer__link" href="/en/faq"><span lang="en">FAQ</span></a>
-<a class="footer__link" href="/en/privacy"><span lang="en">Privacy</span></a>
-<a class="footer__link" href="/en/contact"><span lang="en">Contact</span></a>
+<a class="footer__link" href="/en/roadmap/">Public roadmap</a>
+<a class="footer__link" href="/en/devlog/">Development log</a>
+<a class="footer__link" href="/en/about/">About the developer</a>
+<a class="footer__link" href="/en/faq">FAQ</a>
+<a class="footer__link" href="/en/privacy">Privacy</a>
+<a class="footer__link" href="/en/contact">Contact</a>
 </div>
 </nav>
 <p class="footer__copyright">
-        © 2026 Simple Memo - for Obsidian / Yurika Inc.
+        © 2026 Simple Memo - for Obsidian / YURIKA, K.K.
       </p>
 </div>
 </footer>
 
-<script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
 <script defer="" src="/js/app-store-tracking.js?v=fd48cabcf6"></script>
 </body>
 </html>

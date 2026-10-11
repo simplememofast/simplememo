@@ -90,6 +90,20 @@ async function main() {
             }
           }
           await loadLazyImages(page);
+          // A PR audit can still see the previous homepage in production.
+          if (!locale && await page.locator('body.capture-full').count()) {
+            await page.locator('.capture-full .pricing-cards').scrollIntoViewIfNeeded();
+            const prices = await page.locator('.capture-full .pricing-card').evaluateAll(cards => cards.map(card => {
+              const price = card.querySelector('.pricing-card__price,.pricing-card__price-row');
+              const bounds = card.getBoundingClientRect();
+              const range = document.createRange();
+              range.selectNodeContents(price);
+              return { text: price.textContent.trim(), fits: price.scrollWidth <= price.clientWidth + 1 &&
+                [...range.getClientRects()].every(rect => rect.left >= bounds.left && rect.right <= bounds.right) };
+            }));
+            assert.equal(prices.length, 3, 'All three Japanese price cards are checked');
+            assert(prices.every(price => price.fits), `Price text must remain readable inside each card: ${JSON.stringify(prices)}`);
+          }
           assert.deepEqual(failures, [], 'No JavaScript errors or missing same-origin resources');
           record.images = await page.locator('picture:has(source[data-home-perf="image"]) img').evaluateAll(images => images.map(img => ({ url: img.currentSrc, cssWidth: img.getBoundingClientRect().width, dpr: devicePixelRatio })));
           for (const image of record.images) {

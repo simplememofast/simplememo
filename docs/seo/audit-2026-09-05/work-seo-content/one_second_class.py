@@ -1,5 +1,5 @@
 import re,os,json
-S='/private/tmp/claude-501/-Users-hajimeataka-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad'
+S='/private/tmp/claude-501/-Users-<user>-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad'
 files=[l.strip() for l in open(S+'/work-seo-content/html_files.txt')]
 rx=re.compile(r'~ ?1[- ]second|~1s\b|about 1 second launch|1 second launch|約1秒|1秒で起動|起動約1秒|約1秒起動|about 1\.0s|in about 1\.0s|launched in about 1\.0s|\b1\.0s\b',re.I)
 OWN=re.compile(r'Obsidian連携シンプルメモ|シンプルメモ|Simple ?Memo|SimpleMemoFast|our app|this app|the app\b|ranked|Captio-style|memo app',re.I)

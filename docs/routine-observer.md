@@ -25,3 +25,11 @@
 `--probe`は同じ実取得・台帳検査まで行い、push/PRを行わない。`--install`はユーザーの`~/.local/libexec/`と`~/Library/LaunchAgents/com.simplememo.routine-observer.plist`に実行ファイルと設定を配置する。起動は`launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.simplememo.routine-observer.plist`。止めるときは同じplistを`launchctl bootout`する。認証値をplistへ保存しない。
 
 Macがスリープ・停止中、Keychainが利用不能、認証の期限切れの間は観測できない。1時間ごとの確認が完走しなかった場合は次の定期実行へ残し、モデル呼出や別の認証へ切り替えない。ログは`~/Library/Caches/com.simplememo.routine-observer/runner*.log`。このローカル経路だけで常時クラウド監視が完成したとは扱わない。
+
+## ソースが参照できなくなった場合
+
+全件一覧から登録タスクが消えた場合は、同じIDを個別GETし、現在の404を確認する。認証失敗や通信失敗を404として扱わない。現在の状態は `observation_unavailable` とし、有効・無効や実行結果はnull、最後の実測は元の時刻付きの `last_verified` に保持する。既存の停止判断は維持し、それ以外は未解消一覧に残す。欠落で登録数を減らしたり、復旧として閉じたりしない。再出現しても古い成功では異常を閉じない。`auto_disabled_session_gone` はAPIによる無効化の事実だけを表し、実行成功や退役を意味しない。
+
+Codexの観測schema 5も、現在のSQLiteを読み直した時刻と、参照できない過去のセッション証跡を分ける。元のターン・失敗分類・検出証跡は `last_verified` に元の観測時刻のまま保持し、再観測で歴史の時刻を更新しない。履歴の入れ子、別タスクへの差し替え、現在の成功への流用は拒否する。ソースが戻った場合も確定済みターンや失敗分類の書き換えは拒否する。SQLite上の登録済み実行そのものが消えた場合や、全件取得できない場合は引き続き更新を拒否する。
+
+`initial_failed` は確認済みの初回失敗を履歴も含めて数え、`historical_initial_failed` はそのうち現在ソースを参照できない分を示す。`unavailable_transcripts` は現在の欠損数。履歴は新しい実行として再取り込みせず、未記帳または未分類で参照不可の実行が残る間は記帳アクションを解消しない。出荷や事業成果を推測しない。検査の成功は、欠損や未解消を含めた台帳の整合性を表すもので、全タスクの健全性を表さない。

@@ -59,7 +59,7 @@ test('every indexable HTML page with an own-app CTA includes tracking and GA4', 
   assert.deepEqual(missing, []);
 });
 
-test('every inline GA4 loader blocks previews/local QA and still configures production', () => {
+test('every inline GA4 loader queues production config before deferred loading and blocks previews', () => {
   const files = execFileSync('git', ['ls-files', '*.html'], { cwd: root, encoding: 'utf8' }).trim().split('\n');
   let checked = 0;
   for (const file of files) {
@@ -75,15 +75,20 @@ test('every inline GA4 loader blocks previews/local QA and still configures prod
           requestIdleCallback: callback => callback(), addEventListener: (_, callback) => listeners.push(callback) };
         context.window = context;
         vm.runInNewContext(match[1], context);
-        listeners.forEach(callback => callback());
         const production = ['simplememofast.com', 'www.simplememofast.com'].includes(hostname);
-        assert.equal(appended.length, production ? 1 : 0, `${file} on ${hostname}`);
         if (production) {
-          appended[0].onload();
+          const commands = Array.from(context.dataLayer, args => args[0]);
+          assert.deepEqual(commands, ['js', 'config'], `${file} on ${hostname}`);
           const configs = Array.from(context.dataLayer).filter(args => args[0] === 'config');
           assert.equal(configs.length, 1, file);
           assert.equal(configs[0][1], 'G-EPZVZKCVQG', file);
-        } else assert.equal(context.dataLayer, undefined, file);
+        } else {
+          assert.equal(context.dataLayer, undefined, file);
+          assert.equal(listeners.length, 0, `${file} on ${hostname}`);
+        }
+        listeners.forEach(callback => callback());
+        assert.equal(appended.length, production ? 1 : 0, `${file} on ${hostname}`);
+        if (production) assert.equal(appended[0].onload, undefined, file);
       }
     }
   }

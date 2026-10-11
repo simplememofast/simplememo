@@ -12,7 +12,7 @@ export function experimentScope(exp) {
   let global = /サイト全体|全コンテンツページ/.test(value);
   const pages = exp.pages ? [...exp.pages] : (value.startsWith('/') || /^https?:\/\//.test(value) ? [value]
     : [...value.matchAll(/(?:^|[\s,:：])(\/[\w./-]*)/g)].map(m => m[1]));
-  if(exp.change_paths){const s=changeScope(exp.page,exp.change_paths);global ||= s.global;pages.push(...s.pages);}
+  if(exp.change_paths){const s=changeScope(exp.page,exp.change_paths,exp.supporting_changes);global ||= s.global;pages.push(...s.pages);}
   return { global, pages: [...new Set(pages.filter(p=>!/^https?:\/\//.test(p)||new URL(p).hostname==='simplememofast.com').map(canonicalPage))],
     unenumerated: !global && pages.length === 0 };
 }
@@ -37,7 +37,7 @@ export function auditOverlaps(ledger, {now=new Date()}={}) {
 export function ownershipConflict(exp,target,{now=new Date(),followup=false}={}) {
   const scope=experimentScope(exp);
   if(nonexclusiveObservation(exp,{now,followup}))return false;
-  const affected=exp.change_paths?changeScope(exp.page,exp.change_paths):scope;
+  const affected=exp.change_paths?changeScope(exp.page,exp.change_paths,exp.supporting_changes):scope;
   return scope.global||affected.global||target.global||scope.pages.some(p=>target.pages.includes(p))
-    ||affected.pages.some(p=>target.pages.includes(p))||(exp.change_paths??[]).some(p=>target.paths?.includes(p));
+    ||affected.pages.some(p=>target.pages.includes(p))||(exp.change_paths??[]).some(p=>target.paths?.includes(p)&&!(affected.supporting_paths?.includes(p)&&target.supporting_paths?.includes(p)));
 }

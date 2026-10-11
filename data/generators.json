@@ -97,6 +97,14 @@
       "needs": "siblings"
     },
     {
+      "cmd": "growth/scripts/intent-axes.mjs --write",
+      "writes": [
+        "data/relevance-undecided.json"
+      ],
+      "why": "Reconcile only observed below-threshold intent exceptions when a weekly GSC snapshot changes.",
+      "deterministic_why": "Uses the committed complete weekly snapshot and existing threshold. No network, new intent declaration, missing-page inference, or wall-clock timestamp."
+    },
+    {
       "cmd": "growth/scripts/build-queues.mjs --write",
       "writes": [
         "growth/content/refresh-queue.json"
@@ -145,6 +153,14 @@
         "data/decision-review.json"
       ],
       "why": "決済済み契約から成熟判定と探索状態を導く。CIの隔離コピーで実際に書いて整合を確認する。"
+    },
+    {
+      "cmd": "scripts/sync-shared-chrome.mjs --write",
+      "writes": [
+        "*.html"
+      ],
+      "why": "Preserve shared navigation and footer branding across static pages; citation page generation uses the same transformer.",
+      "deterministic_why": "Reads only tracked HTML and content-hashed local CSS/JS. No network, clock or credentials."
     }
   ],
   "never_run": [
@@ -226,6 +242,10 @@
     {
       "file": "scripts/monthly-budget.mjs",
       "why": "--applyはAIの予算判断を4台帳に適用する実行側。候補と実績の確認が必要で、自動再生成では回さない。CIはmonthly-budget.test.mjsとcheck-financial-policyで検証する。"
+    },
+    {
+      "file": "scripts/check-query-definitions.mjs",
+      "why": "**--bump は既存SQL定義の版を上げる。**理由（--why）を人が書くための操作で、機械が自動再生成するものではない。SQLの実行・測定値の生成は行わない"
     }
   ]
 }

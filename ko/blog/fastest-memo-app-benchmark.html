@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<script src="/js/i18n/ko/messages.c10b3b710ae9.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/blog/fastest-memo-app-benchmark">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>가장 빠른 메모 앱은 어느 것인가요? 시동 속도 벤치마크 2026 — 실측 데이터로 비교</title>
+  <meta name="description" content="메모 앱 8을 실측 비교합니다. 탭에서 입력할 수 있을 때까지, SimpleMemo 0.4초, Apple Notes 1.7초, Notion 2.8초. iPhone 16e / iOS 26.5.2으로 각 5회 측정한 중앙값입니다. 속도가 메모의 질을 어떻게 변화시키는지 뇌과학의 관점에서 설명합니다.">
+  <meta name="theme-color" content="#070b14">
+
+  <meta property="og:title" content="가장 빠른 메모 앱은 어느 것인가요? 시동 속도 벤치마크 2026 — 실측 데이터로 비교">
+  <meta property="og:description" content="메모 앱 8을 실측 비교합니다. 탭에서 입력할 수 있을 때까지 SimpleMemo 0.4초, Apple Notes 1.7초, Notion 2.8초. 속도가 메모의 질을 결정하는 이유를 설명합니다.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-16T00:00:00+09:00">
+  <meta property="article:modified_time" content="2026-09-18T18:20:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/ko/blog/fastest-memo-app-benchmark">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog-fastest-memo-app-benchmark.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="가장 빠른 메모 앱은 어느 것인가요? 시동 속도 벤치마크 2026 — 실측 데이터로 비교">
+  <meta name="twitter:description" content="메모 앱 8을 실측 비교합니다. 탭에서 입력할 수 있을 때까지 SimpleMemo 0.4초, Apple Notes 1.7초, Notion 2.8초. 속도가 메모의 질을 결정하는 이유를 설명합니다.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-fastest-memo-app-benchmark.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ko/blog/fastest-memo-app-benchmark">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/fastest-memo-app-benchmark">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/fastest-memo-app-benchmark">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/fastest-memo-app-benchmark">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/fastest-memo-app-benchmark">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/fastest-memo-app-benchmark">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/fastest-memo-app-benchmark">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/fastest-memo-app-benchmark">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/fastest-memo-app-benchmark">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/fastest-memo-app-benchmark">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/fastest-memo-app-benchmark">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/fastest-memo-app-benchmark">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/ko/blog/fastest-memo-app-benchmark#article",
+  "inLanguage": "ko",
+  "image": "https://simplememofast.com/assets/img/og/blog-fastest-memo-app-benchmark.png",
+  "headline": "가장 빠른 메모 앱은 어느 것인가요? 시동 속도 벤치마크 2026 — 실측 데이터로 비교",
+  "description": "메모 앱 8을 실측 비교합니다. 탭에서 입력할 수 있을 때까지 SimpleMemo 0.4초, Apple Notes 1.7초, Notion 2.8초. 왜 속도가 메모의 질을 결정하는지, 뇌과학의 관점에서 설명합니다.",
+  "url": "https://simplememofast.com/ko/blog/fastest-memo-app-benchmark",
+  "datePublished": "2026-03-16",
+  "dateModified": "2026-09-26",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/ko/blog/fastest-memo-app-benchmark"
+  }
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "홈",
+      "item": "https://simplememofast.com/ko/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "블로그",
+      "item": "https://simplememofast.com/ko/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "최속 메모 앱 벤치마크 2026",
+      "item": "https://simplememofast.com/ko/blog/fastest-memo-app-benchmark"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/ko/blog/fastest-memo-app-benchmark#webpage",
+  "inLanguage": "ko",
+  "name": "최속 메모 앱 벤치마크 2026",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/ko/#website"
+  },
+  "url": "https://simplememofast.com/ko/blog/fastest-memo-app-benchmark"
+}</script>
+
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "@id": "https://simplememofast.com/ko/blog/fastest-memo-app-benchmark#dataset",
+  "name": "iPhone 메모 앱 입력 시작 속도 벤치마크 2026",
+  "description": "iPhone 16e (A18) / iOS 26.5.2에서, 8개의 메모 앱을 아이콘 탭부터 입력 가능 상태까지 화면에 기록하고 프레임 단위로 비교한 데이터셋.",
+  "url": "https://simplememofast.com/ko/blog/fastest-memo-app-benchmark",
+  "dateCreated": "2026-08-11",
+  "dateModified": "2026-09-26",
+  "inLanguage": "ko",
+  "creator": {
+    "@id": "https://simplememofast.com/#organization"
+  },
+  "measurementTechnique": "iOS screen recording analyzed frame by frame; icon tap to keyboard fully presented and ready for input",
+  "isBasedOn": "https://simplememofast.com/ko/blog/benchmark-methodology",
+  "distribution": [
+    {
+      "@type": "DataDownload",
+      "encodingFormat": "text/csv",
+      "contentUrl": "https://simplememofast.com/data/benchmark-2026.csv"
+    }
+  ]
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}.lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .app-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;margin-bottom:1rem}.app-card__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem}.app-card__name{font-size:1.05rem;font-weight:700}.app-card__rank{font-size:.875rem;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:12px;padding:.2rem .6rem;font-weight:700}.app-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.75rem}.app-card__meta{display:flex;gap:1.5rem;font-size:.875rem;color:var(--text-muted);flex-wrap:wrap}.app-card__pros{color:#3fb950}.app-card__cons{color:#f85149}.app-card__for{color:var(--accent)}
+    .faq-item{border-bottom:1px solid var(--border)}.faq-details{padding:0}.faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}.faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}.faq-details[open] .faq-summary::after{transform:rotate(45deg)}.faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}.cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}.cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}.internal-links a:hover{border-color:var(--accent)}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+    .comparison-table{width:100%;border-collapse:collapse;font-size:.875rem;margin:1.5rem 0;overflow-x:auto;display:block}.comparison-table th,.comparison-table td{padding:.6rem .5rem;border:1px solid var(--border);text-align:center;white-space:nowrap}.comparison-table th{background:var(--surface);font-weight:700;color:var(--text-secondary);position:sticky;top:0}.comparison-table td:first-child,.comparison-table th:first-child{text-align:left;font-weight:700;position:sticky;left:0;background:var(--surface);z-index:1}.comparison-table tr:nth-child(even){background:rgba(100,180,255,.03)}.comparison-table .highlight-col{background:rgba(100,180,255,.06)}
+    .disclosure{background:rgba(245,180,60,.06);border:1px solid rgba(245,180,60,.2);border-left:3px solid rgba(245,180,60,.5);border-radius:var(--radius-sm);padding:1rem 1.25rem;margin:1.5rem 0;font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+    .citation-notice{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.25rem;margin:2rem 0;font-size:.875rem;color:var(--text-muted);line-height:1.7;text-align:center}
+    .media-kit{background:linear-gradient(180deg,rgba(100,180,255,.07),rgba(100,180,255,.02));border:1px solid rgba(100,180,255,.2);border-radius:var(--radius-lg);padding:1.5rem;margin:1.5rem 0}.media-kit__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:1rem}.media-kit__links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1rem 0}.media-kit__links a{display:inline-flex;align-items:center;min-height:48px;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;color:var(--accent);text-decoration:none;font-size:.875rem;font-weight:700}.media-kit__links a:hover{border-color:var(--accent)}.media-kit__citation{background:rgba(0,0,0,.16);border:1px solid var(--border);border-radius:8px;padding:1rem;font-size:.84rem;line-height:1.7;color:var(--text-secondary);overflow-wrap:anywhere}.media-kit__note{font-size:.8rem;line-height:1.7;color:var(--text-muted);margin-top:.85rem}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+      .comparison-table{font-size:.875rem}
+      .comparison-table th,.comparison-table td{padding:.4rem .3rem}
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2"/>
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be"/>
+<link rel="stylesheet" href="/assets/css/capture-next.css?v=4e62584640"/>
+<link rel="stylesheet" href="/assets/css/capture-third.css?v=ce878a94dc"/>
+<link rel="stylesheet" href="/assets/css/capture-fourth.css?v=b5c0888897"/>
+<link rel="stylesheet" href="/assets/css/capture-seventh.css?v=61aa35da17"/>
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/ko/blog/fastest-memo-app-benchmark#faq","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"시동 속도 측정 방법은 신뢰할 수 있습니까?","acceptedAnswer":{"@type":"Answer","text":"iPhone 16e (A18)（iOS 26.5.2)에서 화면 녹화를 수행하고, 프레임 단위로 앱 아이콘을 탭한 후 입력 가능한 상태까지 측정하고 있습니다. 각 5회 측정하고, 중앙값을 채택합니다(Apple Notes 10회, Google Keep 4회, Drafts만 빠른 측의 실제 측정값). 시작 조건은 웜 실행(앱 스위처에서 강제 종료하고 5초 이상 기다린 후 시작하지만, iOS와 26.5.2에서는 실제로 웜으로 부팅되는 것을 육안으로 확인하고 있습니다). 변동이 컸던 Bear와 Drafts는 조건을 맞추어 재측정했습니다. 그 외의 6 앱은 녹음에 문제가 없으며, 값은 그대로 채택하고 있습니다. 즉 표의 범위에는 측정의 거칠기가 아니라 앱 측의 실제 변동입니다. Evernote가 5.1초가 걸린 회와, Apple Notes가 10회 중 2.37초까지 열린 회차가 실제로 발생하고 있습니다. 중앙값만으로는 사라지므로 범위를 함께 표시하고 있습니다."}},{"@type":"Question","name":"시작 속도는 업데이트에 따라 변합니까?","acceptedAnswer":{"@type":"Answer","text":"예, 앱 업데이트 및 iOS의 버전업에 따라 변동됩니다. 본 기사의 비교 데이터는 2026년 8월 11일에 측정한 것입니다. 큰 업데이트가 있을 경우 재측정하고, 기사를 업데이트하겠습니다. 또한, 앱의 기본 설계(시작 시 내비게이션이 필요한지 여부)는 크게 변하지 않으므로, 순위가 급격히 변동할 가능성은 낮다고 생각합니다."}},{"@type":"Question","name":"왜 시작 속도가 메모 앱에서 가장 중요한가요?","acceptedAnswer":{"@type":"Answer","text":"단기 기억 연구(Peterson &amp; Peterson, 1959)에서는 머리 속에서 반복할 수 없는 상태로 만들면, 막 기억한 정보가 수십 초 만에 크게 떠오르기 어려워졌습니다. 글을 쓰기 시작하기까지 기다려야 할수록 아이디어의 세부 사항이 빠지기 쉬워집니다. 시작 0.4초의 SimpleMemo라면, 생각난 순간 바로 작성을 시작할 수 있습니다. 물론 메모 정리와 검색도 중요하지만, 그것은 “캡처 후”에 관한 이야기입니다. 먼저 기록하지 않으면 시작되지 않습니다."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full capture-next capture-third capture-fourth capture-seventh site-designed" data-design-family="refined">
+  <!-- Global Navigation -->
+  <nav aria-label="메인 내비게이션" class="global-nav" data-site-header="">
+<div class="global-nav__inner">
+<a class="global-nav__logo site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/ko/guides/">사용 가이드</a><a href="/ko/use-cases/">활용 사례</a><a href="/ko/vs/">비교</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+<li><a href="/ko/guides/">사용 가이드</a></li>
+<li><a href="/ko/use-cases/">활용 사례</a></li>
+<li><a href="/ko/vs/">비교</a></li>
+<li><a href="/ko/methods/"><span>메소드</span></a></li>
+<li><a href="/ko/blog/"><span>블로그</span></a></li>
+<li><a href="/ko/glossary/"><span>용어집</span></a></li>
+<li><a href="/ko/faq">자주 묻는 질문</a></li>
+<li><a href="/ko/about/">개발자 소개</a></li>
+<li><a href="/ko/devlog/">개발 기록</a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="blog" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>다운로드</span></a></li>
+</ul>
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="한국어 · 언어 선택"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>KO</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ko" dir="ltr"><p class="site-language-title">언어 선택</p><div class="site-language-grid"><a href="/blog/fastest-memo-app-benchmark" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/fastest-memo-app-benchmark" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/blog/fastest-memo-app-benchmark" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/blog/fastest-memo-app-benchmark" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ko" aria-current="page"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/es/blog/fastest-memo-app-benchmark" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/fastest-memo-app-benchmark" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/fastest-memo-app-benchmark" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/fastest-memo-app-benchmark" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/fastest-memo-app-benchmark" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+<a class="global-nav__cta" data-cta-cluster="blog" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">다운로드</a>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="메뉴"><span>메뉴</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+</div>
+</div>
+</nav>
+
+
+<main class="page-content"><div class="container"><header class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy">
+<div class="lp-hero__label"><span>실측 데이터</span></div>
+<h1 class="lp-hero__title"><span>가장 빠른 메모 앱은 어느 것인가요? <br/> 시동 속도 벤치마크2026</span></h1>
+<p class="lp-hero__sub"><span>메모 앱 8을 실측 비교했습니다. 아이콘을 탭한 후 실제로 입력할 수 있을 때까지, SimpleMemo 0.4초, Apple Notes 1.7초, Notion 2.8초. 생각해 내기 시작한 시점부터 글을 쓰기 시작하기까지의 차이가 메모의 질과 양을 어떻게 변화시키는지 설명합니다. </span></p>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>저자: <a href="/ko/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · 공개일: <time datetime="2026-03-16">2026년03월16일</time></span> </p>
+<a class="ce-read-link" href="#chapter-1">본문 읽기 <span aria-hidden="true">↓</span></a></div><nav aria-label="읽고 싶은 내용 중에서 선택하세요" class="ce-routes"><a class="ce-route" href="#chapter-1"><span>01</span><b>왜 시작 속도가 중요한가</b></a><a class="ce-route" href="#chapter-2"><span>02</span><b>테스트 방법</b></a><a class="ce-route" href="#heading-benchmark-results"><span>03</span><b>벤치마크 결과</b></a></nav><figure aria-hidden="true" class="ce-stage cn-concept"><p class="ce-stage-label">속도 / 벤치마크</p><div class="cn-concept-list"><div class="cn-concept-row"><span>01</span><strong>측정 조건</strong></div><div class="cn-concept-row"><span>02</span><strong>비교 결과</strong></div><div class="cn-concept-row"><span>03</span><strong>대기 시간을 체감</strong></div></div><figcaption class="ce-stage-foot">속도를 조건과 함께 읽다</figcaption></figure></header><div class="ce-article">
+
+<!-- TL;DR Summary for AI Citation -->
+<div class="tldr ce-lede">
+<div style="font-weight:700;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">요약</div>
+<p style="color:var(--text-secondary);margin:0;">메모 앱 8개를 iPhone 16e(A18) / iOS 26.5.2에서 실측했습니다(각 5회, 웜 실행). 측정한 것은 <strong>아이콘을 누른 뒤 실제로 글자를 입력할 수 있을 때까지</strong>이며, 중간에 필요한 탭도 포함합니다. 가장 빠른 것은 <a href="/ko/" style="color:var(--accent)">SimpleMemo</a>의 0.4초입니다. Drafts와 Bear이 나란히 0.9초, 이어서 Apple Notes 1.7초, Notion 2.8초였습니다. 쓰기 시작하기까지 오래 기다릴수록 떠오른 생각의 세부 사항을 놓치기 쉽습니다.</p>
+</div>
+<!-- Disclosure -->
+<div class="disclosure">
+<span><strong>정보 공개:</strong> 필자(AI ATAKA)는 SimpleMemo의 개발자입니다. 본 기사에서는 SimpleMemo를 포함한 8개의 메모 앱의 실행 속도를 측정하고 있으나, 저자가 개발한 앱이므로 편향이 있을 가능성이 있음을 양해해 주시기 바랍니다. 측정 방법은 화면 녹화와 프레임 분석으로, 가능한 한 객관적인 데이터를 기반으로 합니다.</span>
+</div>
+<!-- Section 1: Why Launch Speed Matters -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="01" id="chapter-1"><span>왜 시작 속도가 중요한가</span></h2></div><div class="ce-chapter__body">
+
+<div>
+<div class="app-card">
+<div class="app-card__header"><span class="app-card__name">워킹 메모리와 “캡처 갭”</span><span class="app-card__rank">뇌과학</span></div>
+<div class="app-card__desc">
+<p><a href="https://doi.org/10.1037/h0049234" rel="noopener" style="color:var(--accent)" target="_blank">단기 기억 연구（Peterson &amp; Peterson, 1959）</a>에서는 머리 속에서 반복할 수 없는 상태로 만들면, 막 외운 문자들의 배열이 수십 초 만에 크게 떠오르지 않게 되었습니다. 전철 안에서 “그 일은 이렇게 하면 된다”는 생각이 떠오르는 순간부터 그 아이디어의 신선함이 급속히 사라집니다.</p>
+<p style="margin-top:.75rem">여기서 중요한 것은 “캡처 갭”이라는 개념입니다. 캡처 갭이란 아이디어가 떠오른 시점부터 메모 앱에 입력을 시작할 때까지의 시간 차이를 말합니다. 이 격차가 클수록 메모에 기록되는 내용은 얇아집니다.</p>
+<p style="margin-top:.75rem">0.4초에 입력할 수 있는 앱과 2.8초가 걸리는 앱에서는 캡처 간격에 2.4초 차이가 있습니다. 단지 2.4초라고 생각하실 수도 있지만, 기다리는 앱에서는 “귀찮으니 나중에 쓰자”는 심리적 마찰이 생겨 메모 자체를 포기하게 되는 경우도 있습니다.</p>
+</div>
+</div>
+</div>
+</div></section>
+<!-- Section 2: Test Methodology -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="02" id="chapter-2"><span>테스트 방법</span></h2></div><div class="ce-chapter__body">
+
+<div>
+<div class="app-card">
+<div class="app-card__header"><span class="app-card__name">측정 조건</span><span class="app-card__rank">실측</span></div>
+<div class="app-card__desc">
+<ul style="padding-left:1.2rem;line-height:2.2;">
+<li><strong>단말기:</strong> iPhone 16e (A18)、iOS 26.5.2</li>
+<li><strong>방법:</strong> iOS 화면 녹화 시 앱 실행을 녹화하고, 프레임 단위로 분석합니다</li>
+<li><strong>측정 구간:</strong> 앱 아이콘을 탭하는 것부터<strong>키보드가 모두 나타나 실제로 입력할 수 있을 때까지</strong>. 중간에 필요한 탭(새 메모 버튼 등)을 포함합니다</li>
+<li><strong>시도 횟수:</strong> 각 앱 5회 측정하고, 중앙값을 채택합니다(Apple Notes 10회, Google Keep 4회)</li>
+<li><strong>환경:</strong> 스토리지 256GB, 14.29GB 무료, 자체 앱 v5.7.3</li>
+<li><strong>시작 조건:</strong> 웜 실행(앱 스위처에서 강제 종료하고 5초 이상 기다린 후 부팅하고 있지만, iOS 26.5.2에서는 실제로 웜으로 부팅되는 것을 육안으로 확인하고 있습니다). 모든 앱은 동일한 조건입니다</li>
+<li><strong>측정일:</strong> 2026년 8월 11일（Bear와 Drafts는 같은 날에 조건을 맞추어 재계측)</li>
+</ul>
+<p style="margin-top:.75rem">측정 프로토콜에 대한 자세한 내용은 <a href="/ko/blog/benchmark-methodology" style="color:var(--accent)">벤치마크 측정 방법</a>을(를) 참조하십시오.</p>
+</div>
+</div>
+</div>
+</div></section>
+<!-- Section 3: Benchmark Results -->
+<section class="lp-section ce-chapter ce-chapter--wide" id="benchmark-results"><div class="ce-chapter__head"><h2 data-ce-number="03" id="heading-benchmark-results"><span>벤치마크 결과</span></h2></div><div class="ce-chapter__body">
+
+<div>
+<div aria-labelledby="heading-benchmark-results" class="ce-table-scroll" role="region" tabindex="0">
+<table class="comparison-table" style="display:table;min-width:600px;">
+<thead>
+<tr>
+<th scope="col">순위</th>
+<th scope="col">앱명</th>
+<th scope="col">입력 시작까지</th>
+<th scope="col">범대</th>
+<th scope="col">포커스까지</th>
+<th scope="col">실측 횟수</th>
+<th scope="col">평가</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th class="highlight-col" scope="row"><strong>1</strong></th>
+<td class="highlight-col"><strong>SimpleMemo</strong></td>
+<td class="highlight-col"><strong>0.4초</strong></td>
+<td class="highlight-col"><strong>0.37–0.43</strong></td>
+<td class="highlight-col"><strong>0.2초</strong></td>
+<td class="highlight-col"><strong>5</strong></td>
+<td class="highlight-col"><strong>최빠름</strong></td>
+</tr>
+<tr>
+<th scope="row">2</th>
+<td>Drafts</td>
+<td>0.9초</td>
+<td>0.90–1.57</td>
+<td>1.0초</td>
+<td>5</td>
+<td>고속</td>
+</tr>
+<tr>
+<th scope="row">2</th>
+<td>Bear</td>
+<td>0.9초</td>
+<td>0.92–0.95</td>
+<td>0.6초</td>
+<td>5</td>
+<td>고속</td>
+</tr>
+<tr>
+<th scope="row">4</th>
+<td>Apple Notes</td>
+<td>1.7초</td>
+<td>1.20–2.37</td>
+<td>1.3초</td>
+<td>10</td>
+<td>보통</td>
+</tr>
+<tr>
+<th scope="row">5</th>
+<td>Google Keep</td>
+<td>2.1초</td>
+<td>1.97–2.23</td>
+<td>1.7초</td>
+<td>4</td>
+<td>보통</td>
+</tr>
+<tr>
+<th scope="row">6</th>
+<td>Evernote</td>
+<td>2.5초</td>
+<td>2.30–5.10</td>
+<td>2.2초</td>
+<td>5</td>
+<td>다소 늦습니다</td>
+</tr>
+<tr>
+<th scope="row">7</th>
+<td>OneNote</td>
+<td>2.6초</td>
+<td>2.20–3.30</td>
+<td>2.3초</td>
+<td>5</td>
+<td>다소 늦습니다</td>
+</tr>
+<tr>
+<th scope="row">8</th>
+<td>Notion</td>
+<td>2.8초</td>
+<td>2.50–3.50</td>
+<td>2.5초</td>
+<td>5</td>
+<td>느립니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">※ iPhone 16e (A18), iOS 26.5.2에 대한 실측값. 웜 실행(앱 스위처에서 강제 종료하고 5초 이상 기다린 후 부팅하고 있지만, iOS 26.5.2에서는 실제로 웜으로 부팅되는 것을 육안으로 확인하고 있습니다). '입력 시작까지'는 아이콘을 탭한 뒤 키보드가 정렬되어 실제로 입력할 수 있을 때까지이며, 중간에 필요한 탭을 포함합니다. 각 앱 5회의 중앙값(Apple Notes 10회, Google Keep 4회). Bear와 Drafts는 2026년 8월 11일에 조건을 맞추어 재측정하고 있습니다. <br/>Drafts만은 중앙값이 아니라 <strong>빠른 측의 실측값(0.90초)</strong>을 게시하고 있습니다(5회 중 1회는 0.90초이며, 나머지 4회는 1.4초 전후입니다). Drafts와 Bear의 차이 0.017초는 이 측정의 경계 오차(±0.02~0.05초) 안에 있으므로 동일 순서로 정했습니다.</p>
+</div>
+<div>
+<p style="font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-top:1rem;">완전한 측정 방법과 생데이터에 대해서는 <a href="/ko/blog/memo-app-speed-test-2026" style="color:var(--accent)">메모 앱 속도 테스트 2026</a>에 게재하고 있습니다.</p>
+</div>
+</div></section>
+<!-- Interactive: 入力開始までの体感テスト — docs/SEO_AIO_PLAN_2026-08.md §4 P1-2.
+         The site had no interactive element on any of its 240 pages. This one replays the
+         measured time-to-input values from the table above so the difference is felt rather
+         than read. It does NOT measure the visitor's device, and says so on screen — a widget
+         that produced a number people mistook for their own measurement would be worse than
+         no widget, and this page's whole value is that its numbers can be trusted. -->
+<section class="lp-section ce-chapter ce-chapter--wide" id="wait-test"><div class="ce-chapter__head"><h2 data-ce-number="04" id="heading-wait-test"><span>입력 시작까지의 체감 테스트</span></h2></div><div class="ce-chapter__body">
+
+<p style="font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:1.25rem;"> <span> 위의 측정표의 “입력 시작까지”를 그대로 대기 시간으로 재생합니다. 시작 버튼을 누르면 각 칸이 실제 측정값의 시간만 경과한 후에 입력할 수 있게 됩니다. <strong>귀하의 단말기를 측정하고 있는 것이 아닙니다. </strong></span> </p>
+<noscript><p>체감 테스트에는 JavaScript이 필요합니다. 비교 결과는 위의 측정표에서 확인할 수 있습니다.</p><style>.capture-seventh [data-wt] { display:none!important; }</style></noscript><div class="wt" data-wt="">
+<div class="csv-controls">
+<label for="wt-rival"> <span>비교할 상대</span> </label>
+<select id="wt-rival">
+<option value="0.900">Drafts — 0.9초</option>
+<option value="0.917">Bear — 0.9초</option>
+<option value="1.726">Apple Notes — 1.7초</option>
+<option value="2.068">Google Keep — 2.1초</option>
+<option value="2.500">Evernote — 2.5초</option>
+<option value="2.600">OneNote — 2.6초</option>
+<option selected="" value="2.800">Notion — 2.8초</option>
+</select>
+<button id="wt-go" type="button"> <span>시작</span> </button>
+</div>
+<div class="csv-lanes">
+<div data-wt-lane="self">
+<p>SimpleMemo — 0.4초</p>
+<input aria-label="SimpleMemo" data-wt-input="" disabled="" type="text"/>
+<p data-wt-status="">—</p>
+</div>
+<div data-wt-lane="rival">
+<p data-wt-name="">Notion — 2.8초</p>
+<input aria-label="비교 대상 앱" data-wt-input="" disabled="" type="text"/>
+<p data-wt-status="">—</p>
+</div>
+</div>
+<p aria-live="polite" data-wt-result="" role="status"></p>
+<p> <span>출처: 이 페이지의 측정표. 재생 중인 값은 실제 측정값이며, 이 자리에서 측정한 값이 아닙니다. </span> </p>
+</div>
+</div></section>
+<script>
+    /* Replays measured time-to-input as a real wait. Guarded so a failure here
+       can never take the article down with it. */
+    (function () {
+      "use strict";
+      var root = document.querySelector("[data-wt]");
+      if (!root || !window.requestAnimationFrame) return;
+
+      var SELF = 0.4;                       // per the table above; keep in step with data/benchmark.json
+      var go = root.querySelector("#wt-go");
+      var sel = root.querySelector("#wt-rival");
+      var name = root.querySelector("[data-wt-name]");
+      var out = root.querySelector("[data-wt-result]");
+      var lanes = {};
+      Array.prototype.forEach.call(root.querySelectorAll("[data-wt-lane]"), function (el) {
+        lanes[el.getAttribute("data-wt-lane")] = {
+          input: el.querySelector("[data-wt-input]"),
+          status: el.querySelector("[data-wt-status]")
+        };
+      });
+      var ja = document.documentElement.lang !== "en";
+      var running = false;
+
+      // <option> cannot hold the per-language <span> pair the rest of the page
+      // uses, so the unit is localised here instead of leaving "6.5s" in the
+      // menu next to "6.5秒" in the panel beside it.
+      if (ja) {
+        Array.prototype.forEach.call(sel.options, function (o) {
+          o.text = o.text.replace(/ — ([\d.]+)s$/, globalThis.SimpleMemoI18n.text(" — $1秒"));
+        });
+      }
+      function label() {
+        name.textContent = sel.options[sel.selectedIndex].text;
+      }
+      sel.addEventListener("change", label);
+      label();
+
+      function lane(key, seconds, tag) {
+        var l = lanes[key];
+        l.input.disabled = true;
+        l.input.value = "";
+        var t0 = performance.now();
+        (function tick() {
+          var el = (performance.now() - t0) / 1000;
+          if (el >= seconds) {
+            l.input.disabled = false;
+            l.status.textContent = (ja ? globalThis.SimpleMemoI18n.text("入力できます · ") : "ready · ") + seconds.toFixed(1) + "s";
+            l.status.style.color = "var(--accent)";
+            if (key === "self") l.input.focus();
+            return;
+          }
+          l.status.textContent = (ja ? globalThis.SimpleMemoI18n.text("待機中 ") : "waiting ") + el.toFixed(1) + "s";
+          requestAnimationFrame(tick);
+        })();
+      }
+
+      go.addEventListener("click", function () {
+        if (running) return;
+        running = true;
+        go.disabled = true;
+        sel.disabled = true;
+        out.textContent = "";
+        var rival = parseFloat(sel.value);
+        var rivalName = sel.options[sel.selectedIndex].text.split(" — ")[0];
+        Object.keys(lanes).forEach(function (k) {
+          lanes[k].status.style.color = "var(--text-muted)";
+        });
+        lane("self", SELF, "self");
+        lane("rival", rival, "rival");
+        window.setTimeout(function () {
+          var d = (rival - SELF);
+          out.textContent = d > 0
+            ? (ja ? globalThis.SimpleMemoI18n.format("差は {0} 秒。1日20回メモを取るなら、{1}では毎日 {2} 秒を待つことに使われます。",[d.toFixed(1),rivalName,(d * 20).toFixed(0)])
+                  : "A " + d.toFixed(1) + "s gap. At 20 notes a day, " + rivalName + " spends " + (d * 20).toFixed(0) + "s a day waiting.")
+            : (ja ? globalThis.SimpleMemoI18n.format("{0} のほうが {1} 秒速い、というのが実測結果です。",[rivalName,Math.abs(d).toFixed(1)])
+                  : rivalName + " is " + Math.abs(d).toFixed(1) + "s faster — that is what the measurement says.");
+          go.disabled = false;
+          sel.disabled = false;
+          running = false;
+        }, Math.max(SELF, rival) * 1000 + 120);
+      });
+    })();
+    </script>
+<!-- Section 4: Not Just Speed — Time to First Input -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="05" id="chapter-5"><span>속도뿐만 아니라「입력 시작까지」</span></h2></div><div class="ce-chapter__body">
+
+<div>
+<div class="app-card">
+<div class="app-card__header"><span class="app-card__name">시작 속도와 입력 시작의 차이</span><span class="app-card__rank">중요</span></div>
+<div class="app-card__desc">
+<p>표에 “입력 시작까지”와 “포커스까지”의 2 열을 설정한 이유가 있습니다. 많은 메모 앱은 실행 후 메모를 작성하기 시작하기까지 추가 작업이 필요하며, 그 작업 시간은 두 열 모두에 별도로 표시되기 때문입니다. 다음 초는 모두<strong>아이콘을 탭한 후 입력할 수 있을 때까지</strong>이며, 중간에 탭하는 것을 포함합니다.</p>
+<p style="margin-top:.75rem"><strong>SimpleMemo（0.4초）:</strong> 시작 = 입력 가능. 앱을 열자마자 커서가 포커스되고(0.2초), 키보드가 표시됩니다. 네비게이션 작업은 전혀 필요하지 않습니다. 이것이 Captio의 사상을 가장 충실히 재현한 설계입니다.</p>
+<p style="margin-top:.75rem"><strong>Drafts(0.9초):</strong> 설계 철학이 비슷하며 실행과 동시에 새 초안이 열립니다. 표시한 값은 5회 중 가장 빠른 0.90초이고, 나머지 4회는 1.4초 전후였습니다. 빠를 때는 Bear과 비슷하지만 항상 그런 것은 아닙니다. 이 1개 앱만 다른 앱과 집계 방식이 달라 명시합니다.</p>
+<p style="margin-top:.75rem"><strong>Bear（0.9초）:</strong> 실행하면, 편집하고 있던 노트가 그대로 열립니다. 키보드도 그대로 남아 있으므로<strong>탭은 필요하지 않습니다</strong>. Drafts와 나란히 이번에 가장 근접한 경쟁이며, 5의 실제 측정은 0.92~0.95초입니다. 8 앱 중 가장 변동이 적은 것은 Bear이었습니다(Drafts의 0.9초는 5회 중 1회인 반면, Bear는 매번 이 속도입니다). 단, 이것은 <strong>「열린 상태로 닫힌」 상태에서 되돌아갔을 때</strong>의 속도입니다. 노트 목록에서 시작할 때는 오른쪽 아래의 연필을 탭해야 하며, 그만큼 지연됩니다. SimpleMemo는 항상 이 상태인 반면, Bear는 이전 사용 방식에 따라 달라지는 차이입니다.</p>
+<p style="margin-top:.75rem"><strong>Apple Notes（1.7초）:</strong> 시작 후에 노트 목록이 표시됩니다. 여기서부터 “새 메모”를 탭하고, 포커스가 1.3초가 되고, 키보드가 모두 나타나서 입력할 수 있을 때까지 1.7초가 걸립니다. 10를 측정해도 1.20~2.37초 범위가 있습니다.</p>
+<p style="margin-top:.75rem"><strong>Notion（2.8초）:</strong> 새 페이지 → 페이지 로드 대기 → 입력 시작. 각각은 짧더라도, 쌓아 올리면 2.8초가 됩니다. '시작이 빠른지'가 아니라 '시작할 수 있을 때까지 몇 초인가'로 보면, 차이는 여기서 나옵니다.</p>
+</div>
+</div>
+</div>
+</div></section>
+<!-- Section 5: How Speed Changes Behavior -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="06" id="chapter-6"><span>속도가 만들어 나는 행동 변화</span></h2></div><div class="ce-chapter__body">
+
+<div>
+<div class="app-card">
+<div class="app-card__header"><span class="app-card__name">속도는 습관을 바꾸고, 습관은 아이디어를 바꿉니다.</span><span class="app-card__rank">행동 변화</span></div>
+<div class="app-card__desc">
+<p>메모 앱의 실행 속도는 사양표의 숫자에 관한 것만은 아닙니다. 기다리는 시간이 짧을수록, “쓸 정도는 아닐까”라고 고민하는 상황에서도 글을 쓰기가 쉬워집니다.</p>
+<p style="margin-top:.75rem"><strong> 빠르게 쓰기 시작하면, 쓰는 횟수가 늘어나기 쉽습니다. </strong>시작 대기 시간이 짧은 앱은 심리적 걸림이 적어, 작은 생각만으로도 적어두기 쉬워집니다(사용자의 1일당 메모 수 집계는 공개하지 않습니다).</p>
+<p style="margin-top:.75rem"><strong>번제는 습관의 적입니다. </strong>습관 만들기에 관한 책이나 연구에서는 시작하기까지의 수고를 줄이는 것이 자주 권장됩니다. 시작을 몇 초 동안 기다리게 되면, “나중에 쓰자”, “기억하자”라고 미루게 되고, 쓰지 않은 채로 끝나는 경우가 늘어납니다.</p>
+<p style="margin-top:.75rem"><strong> 적어 놓은 만큼, 나중에 사용할 수 있습니다. </strong>쓰지 않은 생각은 나중에 찾을 수 없습니다. 즉시 쓰기 시작할 수 있는 앱으로 기록하는 횟수가 늘어나면, 그만큼 되돌아볼 수 있는 자료가 늘어납니다.</p>
+</div>
+</div>
+</div>
+</div></section>
+<!-- Section 6: FAQ -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="07" id="chapter-7"><span>자주 묻는 질문</span></h2></div><div class="ce-chapter__body">
+
+<div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">시동 속도 측정 방법은 신뢰할 수 있습니까?</summary><div class="faq-answer"><p>iPhone 16e (A18)（iOS 26.5.2)에서 화면 녹화를 수행하고, 프레임 단위로 앱 아이콘을 탭한 후 입력 가능한 상태까지 측정하고 있습니다. 각 5회 측정하고, 중앙값을 채택합니다(Apple Notes 10회, Google Keep 4회, Drafts만 빠른 측의 실제 측정값). 시작 조건은 웜 실행(앱 스위처에서 강제 종료하고 5초 이상 기다린 후 시작하지만, iOS와 26.5.2에서는 실제로 웜으로 부팅되는 것을 육안으로 확인하고 있습니다). 변동이 컸던 Bear와 Drafts는 조건을 맞추어 재측정했습니다. 그 외의 6 앱은 녹음에 문제가 없으며, 값은 그대로 채택하고 있습니다. 즉 표의 <strong>범위에</strong>는 측정의 거칠기가 아니라 <strong>앱 측의 실제 변동</strong>입니다. Evernote가 5.1초가 걸린 회와, Apple Notes가 10회 중 2.37초까지 열린 회차가 실제로 발생하고 있습니다. 중앙값만으로는 사라지므로 범위를 함께 표시하고 있습니다.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">시작 속도는 업데이트에 따라 변합니까?</summary><div class="faq-answer"><p>예, 앱 업데이트 및 iOS의 버전업에 따라 변동됩니다. 본 기사의 비교 데이터는 2026년 8월 11일에 측정한 것입니다. 큰 업데이트가 있을 경우 재측정하고, 기사를 업데이트하겠습니다. 또한, 앱의 기본 설계(시작 시 내비게이션이 필요한지 여부)는 크게 변하지 않으므로, 순위가 급격히 변동할 가능성은 낮다고 생각합니다.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">왜 시작 속도가 메모 앱에서 가장 중요한가요?</summary><div class="faq-answer"><p>단기 기억 연구(Peterson &amp; Peterson, 1959)에서는 머리 속에서 반복할 수 없는 상태로 만들면, 막 기억한 정보가 수십 초 만에 크게 떠오르기 어려워졌습니다. 글을 쓰기 시작하기까지 기다려야 할수록 아이디어의 세부 사항이 빠지기 쉬워집니다. 시작 0.4초의 SimpleMemo라면, 생각난 순간 바로 작성을 시작할 수 있습니다. 물론 메모 정리와 검색도 중요하지만, 그것은 “캡처 후”에 관한 이야기입니다. 먼저 기록하지 않으면 시작되지 않습니다.</p></div></details></div>
+</div>
+</div></section>
+<!-- Media / citation kit: make the benchmark independently reusable and linkable -->
+<section class="lp-section ce-chapter" id="media-kit"><div class="ce-chapter__head"><h2 data-ce-number="08" id="heading-media-kit"><span>미디어·편집자를 위한 인용 자료</span></h2></div><div class="ce-chapter__body">
+
+<div class="media-kit">
+<div>
+<p class="media-kit__lead">기사·리뷰·연구 메모에서 수치를 검증하기 쉽도록, 게재표와 동일한 1차 데이터를 CSV로 공개하고 있습니다. 출처 링크와 <strong> 측정일·단말기·OS·'입력 시작까지'의 정의</strong>를 함께 기재하여 이용해 주시기 바랍니다.</p>
+<div class="media-kit__links">
+<a download="" href="/data/benchmark-2026.csv">CSV를 가져오기</a>
+<a href="/ko/blog/benchmark-methodology">측정 방법</a>
+<a href="#benchmark-results">게시표로</a>
+</div>
+<div class="media-kit__citation"><strong>추천 출처 표기:</strong><br/>‘iPhone 메모 앱 입력 시작 속도 벤치마크 2026’ SimpleMemo, 2026년 8월 11일 측정. iPhone 16e(A18) / iOS 26.5.2. https://simplememofast.com/blog/fastest-memo-app-benchmark</div>
+<p class="media-kit__note">주의: 개발자가 직접 측정한 것입니다. Drafts만 중앙값이 아니라 빠른 측의 실측값을 게시하고 있습니다. 비교 조건·시도 횟수·제한 사항은 측정 방법과 게재표의 주석을 확인해 주세요.</p>
+</div>
+</div>
+</div></section>
+<div class="citation-notice">
+<span>숫자의 인용·참조는 출처 링크와 함께 이용하실 수 있습니다. CSV는 위의 인용 자료에서 얻을 수 있습니다.</span>
+</div>
+<!-- CTA Box -->
+<div class="cta-box">
+<div class="cta-box__title"><span>0.4초에 쓰기 시작합니다</span></div>
+<div class="cta-box__desc"><span>벤치마크에서 가장 빠른 메모 앱. 시작하자마자 입력할 수 있습니다. 다운로드는 무료입니다.</span></div>
+<a aria-label="App Store에서 다운로드" class="app-store-badge" data-cta-cluster="blog" data-cta-placement="bottom" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><img alt="App Store에서 다운로드" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="109"/></a>
+<div class="cta-qr">
+<img alt="App Store 다운로드 QR코드" height="132" loading="lazy" src="/assets/img/qr-blog-fastest-memo-app-benchmark-ja.svg?v=ba8bc86e54" width="132"/>
+<small><span>PC 사용자는 스마트폰으로 읽어야 합니다</span></small>
+</div>
+</div>
+<!-- Related Articles -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="09" id="chapter-9"><span>관련 기사</span></h2></div><div class="ce-chapter__body">
+
+<div class="internal-links">
+<a href="/ko/blog/memo-app-speed-test-2026"> <span>메모 앱 속도 테스트2026</span> </a>
+<a href="/ko/blog/best-memo-apps-2026"> <span>추천 메모 앱 10선 2026</span> </a>
+<a href="/ko/captio-alternative/"> <span>Captio 대체 서비스 완전 비교</span> </a>
+<a href="/ko/blog/memo-app-encryption-comparison"> <span>메모 앱의 암호화를 비교</span> </a>
+<a href="/ko/glossary/aes-gcm/"> <span>AES-GCM 암호화란</span> </a>
+</div>
+</div></section>
+<!-- Related Pages -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="10" id="chapter-10"><span>관련 페이지</span></h2></div><div class="ce-chapter__body">
+
+<div class="internal-links">
+<a href="/ko/vs/"><span>앱 비교 목록</span></a>
+<a href="/ko/vs/notion/"><span>vs Notion</span></a>
+<a href="/ko/vs/evernote/"><span>vs Evernote</span></a>
+<a href="/ko/vs/drafts/"><span>vs Drafts</span></a>
+<a href="/ko/captio-alternative/"><span>Captio 대체</span></a>
+<a href="/ko/blog/instant-capture-workflow"><span>즉시 캡처 워크플로우</span></a>
+<a href="/ko/blog/"><span>블로그 목록</span></a>
+</div>
+</div></section>
+<aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="explore" href="/ko/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>다음 읽기</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Obsidian 연동으로 메모를 저장할 장소를 만들 수 있습니다</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>iPhone에서 연동 및 저장 위치를 설정하면, 전송한 메모를 Obsidian에도 남길 수 있습니다. </span> </span> </a>
+</aside><section class="related-links ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="11" id="chapter-11"> <span>관련 콘텐츠</span> </h2></div><div class="ce-chapter__body">
+
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/ko/blog/memo-app-speed-test-2026" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>메모 앱 속도 테스트2026</span></a></li>
+<li><a href="/ko/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>메모 앱 비교 목록</span></a></li>
+<li><a href="/ko/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio 대체 앱 비교</span></a></li>
+<li><a href="/ko/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>사용 방법 가이드</span></a></li>
+</ul>
+</div></section><aside class="author-bio" style="margin:3rem auto 2rem;max-width:800px;padding:1.5rem 2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;gap:1.25rem;align-items:flex-start;">
+<img alt="Simple Memo - Obsidian용" height="48" loading="lazy" src="/assets/img/app-icon-56.png" style="border-radius:50%;flex-shrink:0;margin-top:.2rem;" width="48"/>
+<div>
+<p style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">AI ATAKA</p>
+<p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;"><span>SimpleMemo의 개발자. iPhone에서 설정한 이메일 주소와 연동 대상 노트에 글을 남기는 앱을 개발하고 있습니다. </span></p>
+<div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+<a href="/ko/about/" style="font-size:.8rem;color:var(--accent);text-decoration:none;">프로필</a>
+<a href="https://x.com/simplememofast" rel="me noopener" style="font-size:.8rem;color:var(--accent);text-decoration:none;" target="_blank">X / 트위터</a>
+<a href="https://github.com/simplememofast" rel="me noopener" style="font-size:.8rem;color:var(--accent);text-decoration:none;" target="_blank">GitHub</a>
+</div>
+</div>
+</aside></div></div>
+<!-- SEO: Auto-generated related content links -->
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+
+
+<!-- Author Bio -->
+
+</main>
+
+      <section class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+        <h3 style="font-size:1rem;margin-bottom:0.75rem">참고문헌</h3>
+        <ul style="font-size:0.85rem;line-height:1.6;list-style:none;padding:0">
+        <li><a href="https://doi.org/10.1017/s0140525x01003922" target="_blank" rel="noopener">넬슨 코완 (2001). 단기 기억 속의 마법 숫자 4: 정신적 저장 용량에 대한 재검토. 행동 및 뇌 과학 24(1), 87-114.</a></li>
+        <li><a href="https://www.nngroup.com/articles/response-times-3-important-limits/" target="_blank" rel="noopener">Nielsen, J. (1993). 응답 시간: 3의 중요한 한계. Nielsen Norman Group.</a></li>
+        <li><a href="https://doi.org/10.1037/bul0000046" target="_blank" rel="noopener">클라우스 오베라우어 외 (2016). 작업 메모리 용량을 제한하는 것은 무엇입니까? 심리 게시판 142(7), 758-799.</a></li>
+        </ul>
+      </section>
+
+    <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ko" dir="ltr"><a class="site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">작은 메모, 다음 한 걸음.</p><p class="site-footer-description">iPhone에서 Obsidian과 이메일로 메모를 보내세요.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav aria-label="푸터 탐색 메뉴" class="footer__nav capture-footer-wide">
+<div class="footer__col">
+<p class="footer__col-title">프로덕트</p>
+<a class="footer__link" href="/ko/download/">다운로드</a>
+<a class="footer__link" href="/ko/">홈</a>
+<a class="footer__link" href="/ko/use-cases/">활용 사례</a>
+<a class="footer__link" href="/ko/guides/">사용 가이드</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">비교·전환</p>
+<a class="footer__link" href="/ko/captio-alternative/"><span>Captio 대체</span></a>
+<a class="footer__link" href="/ko/note-to-email/">메모를 이메일로</a>
+<a class="footer__link" href="/ko/vs/">비교</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">읽을거리</p>
+<a class="footer__link" href="/ko/blog/"><span>블로그</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">지원</p>
+<a class="footer__link" href="/ko/roadmap/">공개 로드맵</a>
+<a class="footer__link" href="/ko/devlog/">개발 기록</a>
+<a class="footer__link" href="/ko/about/">개발자 소개</a>
+<a class="footer__link" href="/ko/faq">자주 묻는 질문</a>
+<a class="footer__link" href="/ko/privacy">개인정보 보호</a>
+<a class="footer__link" href="/ko/contact">문의</a>
+</div>
+</nav><p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 운영: YURIKA, K.K.</p></div></footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

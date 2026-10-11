@@ -35,6 +35,7 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { latestSnapshot } from '../lib/gsc.mjs';
 import { loadLedger } from '../lib/ledger.mjs';
+import { selftestTally } from '../../scripts/lib/tally.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 export const QUEUE_PATH = path.join(ROOT, 'growth/content/refresh-queue.json');
@@ -94,18 +95,18 @@ export function merge(existing, rows, unreachable = new Map()) {
     const k = keyOf(row);
     const prev = byKey.get(k);
 
+    if (prev && STICKY_STATES.includes(prev.status)) {
+      // **戻さない。**判断は観測より新しい情報。
+      blocked.push(prev);
+      items.push(prev);
+      byKey.delete(k);
+      continue;
+    }
     // **到達不能と判定済みのページへは積み直さない。**
     const lands = [row.key, ...(row.ranking_pages || []).map((p) => p.page)];
     const hit = lands.find((p) => unreachable.has(p));
     if (hit) {
       skippedUnreachable.push({ key: k, page: hit, experiment: unreachable.get(hit) });
-      byKey.delete(k);
-      continue;
-    }
-    if (prev && STICKY_STATES.includes(prev.status)) {
-      // **戻さない。**判断は観測より新しい情報。
-      blocked.push(prev);
-      items.push(prev);
       byKey.delete(k);
       continue;
     }
@@ -157,8 +158,7 @@ export function runAnalyze() {
 }
 
 function selftest() {
-  let total = 0; const failures = [];
-  const t = (n, c) => { total += 1; if (!c) failures.push(n); console.log(`  ${c ? 'ok  ' : 'FAIL'} ${n}`); };
+  const { t, finish } = selftestTally();
   const row = (key, kind = 'query', exp = 5) => ({
     kind, key, impressions: 100, position: 6, expected_ctr: 0.05, expected_clicks: exp, ranking_pages: [],
   });
@@ -235,9 +235,45 @@ function selftest() {
   t('abandoned だけを集める', up.has('/a') && !up.has('/b'));
   t('ページ集合は対象にしない（1ページに対応しないため）', up.size === 1);
 
-  if (failures.length) { console.log(`\nselftest: ${total}件中 ${failures.length}件 失敗 — ${failures.join(' / ')}`); return 1; }
-  console.log(`\nselftest: 全${total}件 通過`);
-  return 0;
+  // settledな判断は、後のabandoned観測でも消さない。新規投入は引き続き止める。
+  for (const status of ['dropped', 'done']) {
+    for (const kind of ['query', 'page']) {
+      const observation = kind === 'query'
+        ? { ...row('settled-query'), ranking_pages: [{ page: '/blog/x', impressions: 200 }] }
+        : row('/blog/x', 'page');
+      const previous = {
+        id: 'A7', origin: MACHINE_ORIGIN, source_key: keyOf(observation), kind,
+        target: observation.key, status, rank: 4,
+        observed: { impressions: 80, position: 8, expected_clicks: 1.5 },
+        ranking_pages: [{ page: '/previous-landing', impressions: 80 }],
+        dropped_reason: status === 'dropped' ? '判断済みの却下理由' : null,
+        completed_at: status === 'done' ? '2026-08-25' : null,
+        review: { reference: 'synthetic-review', decision: status, reason: '既存判断を保持する' },
+      };
+      const before = JSON.stringify(previous);
+      const retained = merge([previous], [observation], unreach);
+      t(`sticky ${status} ${kind} survives abandoned landing unchanged`,
+        retained.items.length === 1 && JSON.stringify(retained.items[0]) === before
+        && JSON.stringify(previous) === before && retained.items[0] === previous
+        && retained.blocked.length === 1 && retained.blocked[0] === previous
+        && retained.added.length === 0 && retained.kept.length === 0
+        && retained.items.every(item => item.status !== 'queued'));
+    }
+  }
+  for (const kind of ['query', 'page']) {
+    const observation = kind === 'query'
+      ? { ...row('queued-query'), ranking_pages: [{ page: '/blog/x' }] }
+      : row('/blog/x', 'page');
+    const queued = { id: 'A7', origin: MACHINE_ORIGIN, source_key: keyOf(observation), status: 'queued' };
+    const before = JSON.stringify(queued);
+    const rejected = merge([queued], [observation], unreach);
+    t(`queued ${kind} remains excluded at abandoned landing`,
+      rejected.items.length === 0 && rejected.unreachable.length === 1
+      && rejected.added.length === 0 && rejected.kept.length === 0
+      && rejected.blocked.length === 0 && JSON.stringify(queued) === before);
+  }
+
+  return finish();
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);

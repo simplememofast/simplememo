@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/sync/icloud/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Obsidian與iCloud同步的設定步驟 — iPhone和Mac【2026】 | SimpleMemo</title>
+  <meta name="description" content="iPhone和Mac的Obsidian用iCloud Drive同步的設定步驟。 確認相同的Apple Account、保管庫的位置、檔案的下載狀態。 介紹SimpleMemo的聯動設定和寫入測試，其他終端的同步確認。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Obsidian與iCloud同步的設定步驟 — iPhone和Mac【2026】 | SimpleMemo">
+  <meta property="og:description" content="iPhone和Mac的Obsidian用iCloud Drive同步的設定步驟。 確認相同的Apple Account、保管庫的位置、檔案的下載狀態。 介紹SimpleMemo的聯動設定和寫入測試，其他終端的同步確認。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-27T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh-Hant/obsidian/sync/icloud/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-sync-icloud.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_TW">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian與iCloud同步的設定步驟 — iPhone和Mac【2026】 | SimpleMemo">
+  <meta name="twitter:description" content="iPhone和Mac的Obsidian用iCloud Drive同步的設定步驟。 確認相同的Apple Account、保管庫的位置、檔案的下載狀態。 介紹SimpleMemo的聯動設定和寫入測試，其他終端的同步確認。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-sync-icloud.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh-Hant/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/sync/icloud/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主頁",
+      "item": "https://simplememofast.com/zh-Hant/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian合作",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "同步方法總結",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/sync/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "用iCloud同步",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/sync/icloud/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh-Hant/obsidian/sync/icloud/#article",
+  "inLanguage": "zh-Hant",
+  "headline": "用iCloud同步Obsidian的設定步驟—iPhone和Mac",
+  "description": "iPhone和Mac的Obsidian用iCloud Drive同步的設定步驟。 確認相同的Apple Account、保管庫的位置、檔案的下載狀態。 介紹SimpleMemo的聯動設定和寫入測試，其他終端的同步確認。",
+  "url": "https://simplememofast.com/zh-Hant/obsidian/sync/icloud/",
+  "datePublished": "2026-08-27",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-sync-icloud.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh-Hant/obsidian/sync/icloud/"
+  }
+}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/zh-Hant/obsidian/sync/icloud/#faq",
+  "inLanguage": "zh-Hant",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "保管庫放在iCloud Drive的什麼地方好呢？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "不是iCloud Drive的正下方，而是iCloud Drive中的“Obsidian”資料夾中。 官方檔案是 iCloud Drive/Obsidian/[保管庫名] 這一位置，並明確要求使用帶有 Obsidian 應用圖示的資料夾，不要使用沒有該圖示的普通資料夾。請在“檔案”App 中開啟“瀏覽 → iCloud Drive”，確認庫位於 Obsidian 資料夾內。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "在iPhone中筆記本是空的或者不是最新的",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "檔案的未下載，還要確認賬戶、保管庫的位置、iCloud Drive的狀態。 Obsidian官方解釋說，檔案退避可能會引起同步問題。 在Mac端，確認macOS 15以後的“保持下載”、14之前的“最佳化Mac儲存”的設定。 僅透過Mac的設定變更，iPhone方面的問題不一定能解決。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "iCloud和官方Obsidian Sync都可以同時使用嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "官方檔案以“避免同步服務的混合”為指導，不要將同一個保管庫同步到多個服務（例如：Obsidian Sync和iCloud同時使用）。 理由是為了防止資料的衝突和損壞。 1個保管庫請保留1個同步方法。 方式本身的比較是同步方法總結。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Windows的iCloud Drive也可以同步嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "官方檔案明確規定，iCloud的推薦系統為macOS・iOS・iPadOS，Windows上的iCloud Drive可能會發生檔案重複和損壞。 如果想包含Windows和Android的話，請選擇iCloud以外的同步方法。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "SimpleMemo可以寫入iCloud上面的保管庫嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "需要訪問對應的保管庫和Obsidian連線，設定追記地址。 直接寫入資料夾的話，不開啟Obsidian就追加。 首先在“Obsidian 寫入測試”中確認儲存目的地的正文，然後用其他終端開啟相同的筆記，確認iCloud的反映。 寫入、同步時間、同時編輯時的成功不能一律保證。"
+      }
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh-Hant/obsidian/sync/icloud/#webpage",
+  "inLanguage": "zh-Hant",
+  "name": "Obsidian與iCloud同步的設定步驟 — iPhone和Mac【2026】 | SimpleMemo",
+  "url": "https://simplememofast.com/zh-Hant/obsidian/sync/icloud/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh-Hant/#website"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    /* 注意ブロック（つまずきどころを並べる） */
+    .cz{background:var(--surface);border:1px solid var(--border);border-left:3px solid rgba(255,183,52,.55);border-radius:var(--radius-sm);padding:1.35rem 1.3rem;margin:1rem 0}
+    .cz__n{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#ffc76b;margin-bottom:.4rem}
+    .cz__t{font-size:1.05rem;font-weight:700;line-height:1.6;margin:0 0 .55rem}
+    .cz p{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0 0 .7rem}
+    .cz p:last-child{margin-bottom:0}
+    .cz ol,.cz ul{margin:.2rem 0 .7rem;padding-left:1.35rem;font-size:.95rem;line-height:1.9;color:var(--text-secondary)}
+    .cz li{margin-bottom:.3rem}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em}
+
+    /* ── 表 ──────────────────────────────────────── */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:28%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+  <link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+  <noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full site-designed" data-design-family="refined">
+  <a class="ce-skip" href="#main-content">跳到正文</a>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="主導航" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh-Hant/guides/">使用指南</a><a href="/zh-Hant/use-cases/">使用情境</a><a href="/zh-Hant/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/zh-Hant/guides/">使用指南</a></li>
+        <li><a href="/zh-Hant/use-cases/">使用情境</a></li>
+        <li><a href="/zh-Hant/vs/">比較</a></li>
+        <li><a href="/zh-Hant/methods/"><span>方法</span></a></li>
+        <li><a href="/zh-Hant/blog/"><span>部落格</span></a></li>
+        <li><a href="/zh-Hant/glossary/"><span>術語集</span></a></li>
+        <li><a href="/zh-Hant/faq">常見問題</a></li>
+        <li><a href="/zh-Hant/about/">關於開發者</a></li>
+        <li><a href="/zh-Hant/devlog/">開發日誌</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>下載</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="繁體中文 · 選擇語言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>繁中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hant" dir="ltr"><p class="site-language-title">選擇語言</p><div class="site-language-grid"><a href="/obsidian/sync/icloud/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/sync/icloud/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/sync/icloud/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hant" aria-current="page"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ko/obsidian/sync/icloud/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/sync/icloud/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/sync/icloud/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/sync/icloud/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/sync/icloud/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/sync/icloud/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="global-nav__cta">下載</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="選單"><span>選單</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content" id="main-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero">
+<div class="ce-hero-copy">
+        <div class="lp-hero__label">
+          <span>Obsidian × iCloud的設定步驟</span>
+        </div>
+        <h1 class="lp-hero__title"><span class="ce-title-line">Obsidian</span><span class="ce-title-line"><span class="ce-title-accent">iCloud</span>同步</span><span class="ce-title-line">設定步驟</span></h1>
+        <p class="lp-hero__sub"> <span>將iPhone和Mac的Obsidian連線到iCloud Drive的同一個保管庫的步驟。 確認相同的Apple Account、保管庫的放置位置、終端上的檔案。 從SimpleMemo開始追記時，也要設定連線、儲存地址，分別確認寫入和其他終端的同步。 </span> </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;"> <span>作者: <a href="/zh-Hant/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> ・ 公開: <time datetime="2026-08-27">2026年8月27日</time></span> </p>
+      <a class="ce-read-link" href="#guide-section-1">閱讀正文 <span aria-hidden="true">↓</span></a></div>
+<div class="ce-stage" aria-hidden="true"><p class="ce-stage-label">蘋果手機 ↔ 蘋果電腦</p><div class="ce-window"><div class="ce-window-top"><i></i><i></i><i></i><span>開啟同一個保管庫</span></div><div class="ce-chip-grid"><div class="ce-chip">iPhone / iPad</div><div class="ce-chip">Mac</div></div><div class="ce-connector">↕</div><div class="ce-folder"><div class="ce-note">iCloud 驅動器/<br>Obsidian /<br>你的保管庫</div></div></div><p>Apple Account・儲存地點・確認終端上的檔案。</p><p class="ce-stage-foot">構成影象</p></div>
+</div>
+<div class="ce-routes" aria-label="從想讀的內容中選擇"><a class="ce-route" href="#guide-section-2"><span>01</span><b>準備iCloud驅動器</b></a><a class="ce-route" href="#guide-section-3"><span>02</span><b>佈置保管庫</b></a><a class="ce-route" href="#guide-section-4"><span>03</span><b>2臺目開啟</b></a></div>
+<div class="ce-article"><details class="ce-index"><summary>本頁目錄</summary><nav aria-label="頁面內的目錄"><a href="#guide-section-1">01 Obsidian要怎麼用iCloud同步呢？</a><a href="#guide-section-2">02 步驟1: 開啟iCloud Drive</a><a href="#guide-section-3">03 步驟2: 在iCloud裡面做保管庫</a><a href="#guide-section-4">04 步驟3: 2臺開啟同一個保管庫</a><a href="#guide-section-5">05 在官方程式中確認的3專案</a><a href="#guide-section-6">06 iCloud攜帶的是“整個資料夾”</a><a href="#guide-section-7">07 官方資料和實機確認範圍</a><a href="#guide-section-8">08 iCloud上面的保管庫，從外面寫入</a><a href="#guide-section-9">09 常見問題</a><a href="#guide-section-10">10 相關頁面</a></nav></details>
+
+
+      <!-- Answer block (AIO) -->
+      <section class="lp-section ce-chapter" data-answer-block="obsidian-icloud-sync" style="padding-top:1rem;">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-1" data-ce-number="01"><span>Obsidian用iCloud同步怎麼辦？ </span></h2></header><div class="ce-chapter__body">
+        <div class="tip-box">
+          <div class="tip-box__title">一言以蔽之</div>
+          <p style="margin:0 0 .6rem;"><strong>開啟iCloud Drive後，在“iCloud Drive → Obsidian”資料夾中建立保管庫。 </strong>iPhone的話，在新建保管庫時開啟“儲存到iCloud”即可，如果是Mac的話，只需在檔案選擇器中選擇iCloud Drive中的Obsidian資料夾即可。</p>
+          <p style="margin:0;">2臺從“作為保管庫開啟資料夾”開始指定相同的資料夾。 官方檔案提醒<strong>放置位置</strong>，如果在<code>iCloud Drive/Obsidian/[保管庫名]</code>之外製作的話，可能會出現同步問題。</p>
+        </div>
+
+      </div></section>
+
+      <!-- Step 0: enable iCloud Drive -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-2" data-ce-number="02"> <span>步驟1: 開啟iCloud Drive</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>在同步的終端上登入同一個Apple Account，啟用iCloud Drive。 設定畫面的名稱因OS版本而異，所以<a href="https://support.apple.com/ja-jp/118443" target="_blank" rel="noopener">Apple的設定指南</a>也請確認。 </span> </p>
+        <ol class="steps-list">
+          <li><strong><span>iPhone / iPad</span></strong><br><span>“設定”→自己的賬戶→在“iCloud”中開啟Drive，開啟“同步這個iPhone”或“同步這個iPad”。 </span></li>
+          <li><strong><span>Mac</span></strong><br><span>“系統設定”→自己的賬戶→“iCloud”→“Drive”開啟“同步此Mac”。 </span></li>
+        </ol>
+      </div></section>
+
+      <!-- Step: create vault -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-3" data-ce-number="03"> <span>步驟2：在iCloud裡面建造保管庫</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>用第一個1臺製作。 從iPhone和Mac哪個製作都可以，但是<strong>製作方法不一樣</strong>。 iPhone是切換1個，Mac是自己選擇資料夾。 </span> </p>
+
+        <h3 style="font-size:1.1rem;font-weight:700;margin:1.5rem 0 .5rem;"><span>用iPhone / iPad製作時</span></h3>
+        <ol class="steps-list">
+          <li><span>Obsidian，點選<strong>“新建保管庫”</strong>。 </span></li>
+          <li><span>輸入保管庫的名字。 </span></li>
+          <li><span><strong>開啟“儲存到iCloud”。 </strong>這裡是本體。 在關閉狀態下製作的話，那個保管庫只留在終端裡面。 </span></li>
+          <li><span>點選“製作”。 </span></li>
+        </ol>
+
+        <h3 style="font-size:1.1rem;font-weight:700;margin:1.5rem 0 .5rem;"><span>用Mac製作時</span></h3>
+        <ol class="steps-list">
+          <li><span>Obsidian，選擇<strong>“新建保管庫”</strong>。 </span></li>
+          <li><span>檔案選擇器移動到<strong>iCloud Drive → Obsidian</strong>。 </span></li>
+          <li><span>製作保管庫用的資料夾，並命名。 </span></li>
+          <li><span>選擇“製作”就完成了。 </span></li>
+        </ol>
+
+        <div class="tip-box">
+          <div class="tip-box__title"><span>為什麼在“Obsidian”資料夾裡</span></div>
+          <p style="margin:0;"><span>iCloud Drive中，有應用程式為自己使用的領域。 帶有Obsidian應用程式圖示的“Obsidian”資料夾就是那個，iOS版的Obsidian讀寫就是這裡面。 用相同名字自己製作的純資料夾是另一回事，官方檔案<strong>“請不要使用沒有應用程式圖示的純資料夾”</strong>點名警告。 </span></p>
+        </div>
+      </div></section>
+
+      <!-- Step: open on second device -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-4" data-ce-number="04"> <span>步驟3：2臺開啟同一個保管庫</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>2臺<strong>不新建</strong>。 去開啟已有的資料夾。 如果在這裡新建的話，就會排列一個同名的保管庫2。 </span> </p>
+        <ol class="steps-list">
+          <li><span>在2臺的Mac或iPhone上開啟Obsidian。 </span></li>
+          <li><span>開啟保管庫切換器，選擇<strong>“作為保管庫開啟資料夾”</strong>。 </span></li>
+          <li><span><strong>iCloud Drive → Obsidian</strong>，選擇1臺製作的保管庫資料夾。 </span></li>
+        </ol>
+      </div></section>
+
+      <!-- Pitfalls -->
+      <section class="lp-section ce-chapter ce-chapter--wide">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-5" data-ce-number="05"> <span>官方程式確認的3專案</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>官方指南提醒注意的是<strong>保管庫的位置、檔案的退避、同步方式的混合</strong>。 確認以下專案，操作後用同一個筆記確認反映。 </span> </p>
+
+        <div class="cz">
+          <div class="cz__n"><span>絆倒 1</span></div>
+          <p class="cz__t"><span>保管庫在“Obsidian”資料夾外面</span></p>
+          <p><span>正確的位置是<code>iCloud Drive/Obsidian/[保管庫名]</code>。 iCloud Drive正下方和“檔案”中建造的保管庫，從iOS版的Obsidian看不到，會產生同步問題。 確認方法如下。 </span></p>
+          <ol>
+            <li><span>用iPhone開啟“檔案”App。 </span></li>
+            <li><span>點選“瀏覽”，選擇“地點”下方的<strong>iCloud Drive</strong>。 </span></li>
+            <li><span>保管庫在<strong>Obsidian</strong>資料夾中。 在更改位置之前，請備份到另一個位置，確認不要覆蓋同名的保管庫。 變更後用Obsidian開啟，確認筆記本和其他終端的同步。 </span></li>
+          </ol>
+        </div>
+
+        <div class="cz">
+          <div class="cz__n"><span>絆倒 2</span></div>
+          <p class="cz__t"><span>iCloud正在從終端撤離檔案</span></p>
+          <p><span>iCloud有將未使用的檔案實體從終端中驅逐出來，只留在雲端的機制。 <strong>Obsidian可以直接訪問保管庫裡的東西，如果沒有實體的話，就會被當作找不到檔案。 </strong>官方文件的FAQ明確指出，這種退避是同步問題的原因。 處理方式在macOS的版本中不同。 </span></p>
+          <div style="overflow-x:auto" class="ce-table-scroll" role="region" tabindex="0" aria-label="對比表（可以橫向滾動）">
+            <table class="rt-table">
+            <thead>
+              <tr>
+                <th scope="col"><span>環境</span></th>
+                <th scope="col"><span>要做的事情</span></th>
+                <th scope="col"><span>影響範圍</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row"><span>macOS 15（紅杉）以後</span></th>
+                <td data-label="要做的事情"><span>iCloud Drive內的<strong>Obsidian</strong>資料夾右擊，選擇<strong>“維持下載”</strong></span></td>
+                <td data-label="影響範圍"><span class="mk-yes"><span>只有Obsidian的資料夾</span></span></td>
+              </tr>
+              <tr>
+                <th scope="row"><span>macOS 14（Sonoma）以前</span></th>
+                <td data-label="要做的事情"><span>iCloud設定的<strong>關閉“最佳化Mac儲存”</strong></span></td>
+                <td data-label="影響範圍"><span class="mk-part"><span>終端上的所有iCloud儲存</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+          <p><span>官方文件將此定位為“是任意的，但為了保持讀取速度，強烈推薦”。 <strong>macOS 14之前的設定除了Obsidian以外也有效果</strong>，所以需要了解這一點後再關閉。 </span></p>
+        </div>
+
+        <div class="cz">
+          <div class="cz__n"><span>絆倒 3</span></div>
+          <p class="cz__t"><span>重複同步方式</span></p>
+          <p><span>官方文件在<strong>“避免混用同步服務”</strong>一節中說明，不要用多個服務同步同一個庫，例如同時使用 Obsidian Sync 與 iCloud。這是為了防止資料衝突或損壞。如果免費的 iCloud 已能滿足需求，但仍想試用官方 Sync，請<strong>先將同步方式統一為其中一種</strong>，再進行切換。</span></p>
+          <p><span>出於同樣的原因，<strong>避免Windows的iCloud Drive</strong>。 官方文件明確指出，iCloud的推薦系統為macOS、iOS、iPadOS，Windows上的iCloud Drive可能會發生<strong>檔案的重複和損壞</strong>。 如果同時使用Windows和Android的話，就會選擇iCloud以外的方式。 </span></p>
+        </div>
+      </div></section>
+
+      <!-- What actually syncs -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-6" data-ce-number="06"> <span>iCloud攜帶的是“整個資料夾”</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>保管庫是<a href="/zh-Hant/obsidian/what-is-vault/">只是一個資料夾</a>，裡面除了寫的Markdown檔案外，還有包含設定的<code>.obsidian</code>資料夾。 iCloud Drive以資料夾為單位同步，所以<strong>不僅是筆記，設定也會一起攜帶</strong>。 對很多人來說，這是方便的預設（主題和熱鍵都在2臺上）。 </span> </p>
+        <p class="lp-section__lead"> <span>如果想按終端劃分設定的話，官方文件<strong>介紹按終端更改設定資料夾的功能</strong>（Syncthing的章節中也寫著“如果想按終端劃分設定，請將<code>.obsidian</code>從同步物件中移除”，前提是設定在保管庫中）。 iCloud沒有排除指定，如果想分開的話就使用這個功能。 </span> </p>
+      </div></section>
+
+      <section class="lp-section ce-chapter"><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-7" data-ce-number="07"><span>官方資料和實機確認範圍</span></h2></header><div class="ce-chapter__body"><p><span>2026年9月30日重讀了Obsidian官方的英語・日語同步指南。 參考了關於保管庫的位置、下載狀態、同步方式的混合的指南。 翻譯的更新時間可能因語言而異，如果操作不一致，也請確認英文版。 <strong>閱讀資料和實施，以及在終端之間同步是另外的確認。 </strong>這次更新沒有實際測量iCloud的同步時間和同時編輯時的行為。 </span></p></div></section>
+
+      <!-- SimpleMemo tie-in -->
+      <section class="lp-section ce-chapter ce-chapter--wide">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-8" data-ce-number="08"> <span>iCloud上面的保管庫，從外面寫入</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>SimpleMemo可以直接在允許訪問的保管庫的筆記本上補充。 在iPhone上寫入和透過iCloud在其他終端上反映是不同的階段。 首先確認儲存地址的寫入，然後確認Mac等相同的筆記。 </span> </p>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">📁 <span>設定連線和保管庫的訪問</span></div>
+            <div class="reason-card__desc"><span>在iPhone上開啟Obsidian連線，從檔案App中選擇可用的保管庫資料夾允許訪問。 訪問資訊會保留，但移動或許可權變更後可能需要重新選擇。 可以直接寫入選定的資料夾時，無需開啟Obsidian即可新增。</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">📝 <span>留言地址</span></div>
+            <div class="reason-card__desc"><span>追記地址是設定的每日筆記或Inbox筆記。 確認檔名、儲存位置，開啟“Obsidian 寫入測試”中顯示的筆記，確認測試文。<a href="/zh-Hant/obsidian/daily-note/">每日筆記的補充詳情</a>也可以參考。</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🤝 <span>按順序處理寫入</span></div>
+            <div class="reason-card__desc"><span>實現中<code>NSFileCoordinator</code>來協調檔案訪問，並透過佇列依次處理寫入。這是應對寫入衝突的措施，並不保證在包括其他裝置同時編輯和 iCloud 同步在內的所有環節中，都不會遺漏寫入。</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">⏳ <span>沒寫的部分</span></div>
+            <div class="reason-card__desc"><span>無法立即寫入的專案，在對應的路徑中保留在終端內，在應用程式的正面迴歸時再次嘗試。 保留正文是用AES-GCM加密儲存的實現。 請確認保留、失敗顯示和儲存目的地的筆記。 在iCloud上反映到其他終端的時間會根據通訊、檔案的狀態而變化，不一定是一定的秒數。</span></div>
+          </div>
+        </div>
+        <div class="cta-box">
+          <div class="cta-box__title"><span>確認在保管庫的留言</span></div>
+          <p class="cta-box__desc"><span>開啟連線，設定保管庫和補充地址，確認簡短的測試文。 寫入測試不傳送郵件，之後確認iCloud同步到其他終端。 </span></p>
+          <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="mid" data-cta-position="mid" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="app-store-badge" aria-label="從App Store下載"> <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="從App Store下載" loading="lazy"> </a>
+          <div class="cta-qr">
+            <img src="/assets/img/qr-obsidian-sync-icloud-ja.svg?v=bb2961b2c1" width="132" height="132" alt="App Store下載二維碼" loading="lazy">
+
+            <small><span>PC使用者用智慧手機讀取</span></small>
+          </div>
+        </div>
+      </div></section>
+
+      <!-- FAQ -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-9" data-ce-number="09"> <span>常見問題</span> </h2></header><div class="ce-chapter__body">
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>保管庫放在iCloud Drive的什麼地方好呢？ </span></summary>
+            <div class="faq-answer"><span>不是iCloud Drive的正下方，而是iCloud Drive中的“Obsidian”資料夾中。 官方檔案是 <code>iCloud Drive/Obsidian/[保管庫名]</code> 這一位置，並明確要求使用帶有 Obsidian 應用圖示的資料夾，不要使用沒有該圖示的普通資料夾。請在“檔案”App 中開啟“瀏覽 → iCloud Drive”，確認庫位於 Obsidian 資料夾內。</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>在iPhone中筆記本是空的或者不是最新的</span></summary>
+            <div class="faq-answer"><span>檔案的未下載，還要確認賬戶、保管庫的位置、iCloud Drive的狀態。 Obsidian官方解釋說，檔案退避可能會引起同步問題。 在Mac端，確認macOS 15以後的“保持下載”、14之前的“最佳化Mac儲存”的設定。 僅透過Mac的設定變更，iPhone方面的問題不一定能解決。</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>iCloud和官方Obsidian Sync都可以同時使用嗎？ </span></summary>
+            <div class="faq-answer"><span>官方檔案以“避免同步服務的混合”為指導，不要將同一個保管庫同步到多個服務（例如：Obsidian Sync和iCloud同時使用）。 理由是為了防止資料的衝突和損壞。 1個保管庫請保留1個同步方法。 方式本身的比較是<a href="/zh-Hant/obsidian/sync/">同步方法總結</a>。</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>Windows的iCloud Drive也可以同步嗎？ </span></summary>
+            <div class="faq-answer"><span>官方檔案明確規定，iCloud的推薦系統為macOS・iOS・iPadOS，Windows上的iCloud Drive可能會發生檔案重複和損壞。 如果想包含Windows和Android的話，請選擇iCloud以外的同步方法。</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>SimpleMemo可以寫入iCloud上面的保管庫嗎？ </span></summary>
+            <div class="faq-answer"><span>需要訪問對應的保管庫和Obsidian連線，設定追記地址。 直接寫入資料夾的話，不開啟Obsidian就追加。 首先在“Obsidian 寫入測試”中確認儲存目的地的正文，然後用其他終端開啟相同的筆記，確認iCloud的反映。 寫入、同步時間、同時編輯時的成功不能一律保證。</span></div>
+          </details>
+        </div>
+      </div></section>
+
+      <!-- Verification scope -->
+      <section class="lp-section">
+        <div class="tip-box">
+          <div class="tip-box__title"><span>驗證環境和驗證範圍</span></div>
+          <p style="margin:0;"><span>更新確認：2026年9月30日。 核對了Obsidian官方的同步指南和Apple的iCloud Drive設定指南、SimpleMemo的保管庫訪問、寫入、保留處理的來源。 <strong>沒有進行實機測量。 </strong>同步時間、同時編輯時的結果、分發版中所有條件的動作，僅憑這個核對無法確認。 2026年8月27日記載的Linux資料比較也不是iCloud的實機驗證。  設定變更後，請確認簡短的測試文的儲存和其他終端的反映。 </span></p>
+        </div>
+      </section>
+
+      <!-- Internal Links -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-10" data-ce-number="10"> <span>相關頁面</span> </h2></header><div class="ce-chapter__body">
+        <div class="internal-links">
+          <a href="/zh-Hant/obsidian/sync/official-sync/"><span>Obsidian Sync的設定和使用區分</span></a>
+          <a href="/zh-Hant/obsidian/sync/"><span>同步方法彙總（4方式的比較）</span></a>
+          <a href="/zh-Hant/obsidian/"><span>Obsidian合作詳情</span></a>
+          <a href="/zh-Hant/obsidian/daily-note/"><span>在每日筆記中補充的方法</span></a>
+          <a href="/zh-Hant/obsidian/what-is-vault/"><span>保管庫（Vault）是指 — 實體只是資料夾</span></a>
+          <a href="/zh-Hant/obsidian/getting-started/"><span>Obsidian的開始方法（實際畫面指南）</span></a>
+          <a href="/zh-Hant/obsidian/pricing/"><span>Obsidian的費用 — 免費能用到什麼程度</span></a>
+          <a href="/zh-Hant/faq"><span>常見問題</span></a>
+        </div>
+      </div></section>
+
+    </div>
+</div>
+
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="container">
+  <h2 style="font-size:1.1rem;margin-bottom:1rem;"> <span>參考文獻</span> </h2>
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://github.com/obsidianmd/obsidian-help/blob/master/en/Getting%20started/Sync%20your%20notes%20across%20devices.md" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Help — Sync your notes across devices（英語・原文來源）</a> — <span>官方文件的源儲存庫。 2026年9月30日再次確認原文。 公開版是help.obsidian.md/sync-notes</span></li>
+    <li><a href="https://github.com/obsidianmd/obsidian-help/blob/master/ja/%E3%81%AF%E3%81%98%E3%82%81%E3%81%AB/%E3%83%87%E3%83%90%E3%82%A4%E3%82%B9%E9%96%93%E3%81%A7%E3%83%8E%E3%83%BC%E3%83%88%E3%82%92%E5%90%8C%E6%9C%9F%E3%81%99%E3%82%8B.md" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian 幫助 — 在裝置之間同步筆記（日語版）</a> — <span>同一儲存庫的日語版。 用於與英文版的對比</span></li>
+    <li><a href="https://github.com/obsidianmd/obsidian-help" target="_blank" rel="noopener" style="color:var(--accent);">obsidianmd/obsidian-help</a> — <span>“以英文版為正，所有頁面在各語言中準備1對1”的翻譯方針的出處</span></li>
+    <li><a href="/zh-Hant/obsidian/sync/" style="color:var(--accent);"><span>Obsidian的同步方法比較（本網站）</span></a> — <span>實測Git和Syncthing競爭時的破壞方式的報道。 與iCloud的比較定位在這裡。 手動修復Git的正文衝突的例子，請參考<a href="/zh-Hant/obsidian/troubleshooting/sync-conflict/">留下原文比較的步驟</a>。 </span></li>
+    <li><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="reference" href="https://apps.apple.com/jp/app/id6758438948" target="_blank" rel="noopener" style="color:var(--accent);">SimpleMemo — App Store</a> — <span>App Store的下載頁面</span></li>
+  </ul>
+  </div>
+</section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/zh-Hant/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>接下來閱讀</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>透過Obsidian合作，建立儲存備忘錄的地方</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>在iPhone中設定合作和儲存地址，傳送的備忘錄也可以留在Obsidian中。 </span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <div class="container">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>相關內容</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/zh-Hant/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>方法一覽</span></a></li>
+    <li><a href="/zh-Hant/use-cases/journaling/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>日報</span></a></li>
+    <li><a href="/zh-Hant/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>部落格文章一覽</span></a></li>
+    <li><a href="/zh-Hant/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>常見問題</span></a></li>
+  </ul>
+  </div>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hant" dir="ltr"><a class="site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">記下一點想法，邁出下一步。</p><p class="site-footer-description">從 iPhone 將筆記傳送至 Obsidian 和電子郵件。</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+
+      <nav class="footer__nav" aria-label="頁尾導航">
+      <div class="footer__col">
+        <p class="footer__col-title">產品</p>
+        <a href="/zh-Hant/download/" class="footer__link">下載</a>
+        <a href="/zh-Hant/" class="footer__link">首頁</a>
+        <a href="/zh-Hant/apple-watch/" class="footer__link">Apple Watch</a>
+        <a href="/zh-Hant/obsidian/" class="footer__link">Obsidian 整合</a>
+        <a href="/zh-Hant/use-cases/" class="footer__link">使用情境</a>
+        <a href="/zh-Hant/guides/" class="footer__link">使用指南</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較與遷移</p>
+        <a href="/zh-Hant/note-to-email/" class="footer__link">將筆記傳送至信箱</a>
+        <a href="/zh-Hant/vs/" class="footer__link">比較</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">支援</p>
+        <a href="/zh-Hant/roadmap/" class="footer__link">公開路線圖</a>
+        <a href="/zh-Hant/devlog/" class="footer__link">開發日誌</a>
+        <a href="/zh-Hant/about/" class="footer__link">關於開發者</a>
+        <a href="/zh-Hant/faq" class="footer__link">常見問題</a>
+        <a href="/zh-Hant/privacy" class="footer__link">隱私</a>
+        <a href="/zh-Hant/contact" class="footer__link">聯絡我們</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 營運：YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

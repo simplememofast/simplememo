@@ -35,6 +35,7 @@
 
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { todayJst } from './lib/jst.mjs';
 
 /** 判定コード。文字列を直接比較させない（typoが静かに通るため）。 */
 export const CODES = {
@@ -354,9 +355,7 @@ export function ageMinutes(iso, now = Date.now()) {
 }
 
 /** JSTの当日（YYYY-MM-DD）。 */
-export function todayJst(now = new Date()) {
-  return new Date(now.getTime() + 9 * 3600 * 1000).toISOString().slice(0, 10);
-}
+export { todayJst };
 
 /**
  * 占有の中身を1つの compare 応答から読む。**1つでも欠けたら null を返す。**

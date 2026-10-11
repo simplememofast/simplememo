@@ -7,22 +7,22 @@
   <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/privacy">
     <!-- Google tag (gtag.js) -->
   <script>
-    window.addEventListener('load', function() {
+    (function() {
       if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
-      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
-      ric(function() {
-        var s = document.createElement('script');
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
-        s.async = true;
-        document.head.appendChild(s);
-        s.onload = function() {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
-        };
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
       });
-    });
+    })();
   </script>
   <title>プライバシーポリシー | Obsidian連携シンプルメモ</title>
   <meta name="description" content="Obsidian連携シンプルメモのプライバシーポリシー。メモ本文の AES-GCM 暗号化と通信路 TLS、ephemeral URLSession、データ最小化など、プライバシーファースト設計の詳細をご確認いただけます。">
@@ -51,6 +51,14 @@
   <link rel="canonical" href="https://simplememofast.com/privacy">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/privacy">
   <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/privacy">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/privacy">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/privacy">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/privacy">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/privacy">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/privacy">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/privacy">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/privacy">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/privacy">
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/privacy">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -271,30 +279,35 @@
 
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="メインナビゲーション">
+  <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span>Obsidian連携シンプルメモ</span></a>
-      <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span>使い方</span></a></li>
-        <li><a href="/use-cases/"><span>活用事例</span></a></li>
-        <li><a href="/vs/"><span>比較</span></a></li>
+      <a class="global-nav__logo site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/guides/">使い方</a><a href="/use-cases/">活用事例</a><a href="/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/">使い方</a></li>
+        <li><a href="/use-cases/">活用事例</a></li>
+        <li><a href="/vs/">比較</a></li>
         <li><a href="/methods/"><span>メソッド</span></a></li>
         <li><a href="/blog/"><span>ブログ</span></a></li>
         <li><a href="/glossary/"><span>用語集</span></a></li>
-        <li><a href="/faq"><span>FAQ</span></a></li>
-        <li><a href="/about/"><span>開発者</span></a></li>
-        <li><a href="/devlog/"><span>開発記録</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span>ダウンロード</span></a></li>
+        <li><a href="/faq">よくある質問</a></li>
+        <li><a href="/about/">開発者について</a></li>
+        <li><a href="/devlog/">開発記録</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/privacy" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/privacy" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
-        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="日本語 · 言語を選択"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>JA</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ja" dir="ltr"><p class="site-language-title">言語を選択</p><div class="site-language-grid"><span class="site-language-current" data-site-locale="ja" aria-current="page"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/en/privacy" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/privacy" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/privacy" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/privacy" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/privacy" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/privacy" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/privacy" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/privacy" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/privacy" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
           <span>ダウンロード</span>
         </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="メニュー"><span>メニュー</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
 </nav>
@@ -305,18 +318,18 @@
 <!-- Content -->
   <main class="page-content">
     <div class="container">
-      <h1 class="page-content__title">
+      <h1 class="page-content__title sd-title">
         <span>プライバシーポリシー</span>
 
       </h1>
 
       <!-- Japanese Content -->
       <div class="lang-body">
-        <p class="page-content__date">最終更新日：<time datetime="2026-09-09">2026年9月9日</time></p>
+        <p class="page-content__date">最終更新日：<time datetime="2026-10-07">2026年10月7日</time></p>
         <div class="page-content__body">
           <p>株式会社ユリカ（以下「当社」）は、「Obsidian連携シンプルメモ」（以下「本サービス」）におけるユーザー情報の取り扱いについて、以下のとおりプライバシーポリシーを定めます。</p>
 
-          <h2>1. 取得する情報</h2>
+          <h2 id="reading-01">1. 取得する情報</h2>
           <p>当社は、以下の情報を取得する場合があります。</p>
 
           <h3>(A) ユーザーが入力・設定する情報</h3>
@@ -334,7 +347,7 @@
             <li>不正利用対策やレート制限のための技術情報（IPアドレス、リクエスト情報等）</li>
           </ul>
 
-          <p>利用イベントにはメールアドレスやメモ本文を含めませんが、送信IDを介して送信記録の宛先メールアドレスのハッシュと紐付けられます。このため、これらのイベントや端末識別子、診断情報はユーザーと結び付けられる情報として扱います。</p>
+          <p>利用イベントにはメールアドレスやメモ本文を含めませんが、送信IDを介して送信記録の宛先メールアドレスのハッシュと紐付けられます。このため、これらのイベントや端末識別子、診断情報はユーザーと結び付けられる情報として扱います。端末識別子の保存場所と、アプリを削除したあとの扱いは下記12に記載します。</p>
 
           <h3>(C) Appleから受け取る購読・返金通知</h3>
           <p>購読の運用状況や支払い失敗を把握するため、Appleから受け取る署名付き通知を検証し、購読開始・更新・自動更新設定の変更・更新失敗・期限切れ・返金などを記録します。保存する項目は通知と取引の識別子、購読商品の識別子、通知の種類・区分、本番またはテスト環境の区分、購入・有効期限・取消・通知・受信などの日時、およびAppleが通知する取消理由です。Apple側の識別子を含むため、完全に匿名の情報とは扱いません。この通知記録にはメールアドレス・メモ本文・インストール識別子を保存せず、Appleの取引識別子とインストール識別子や宛先メールアドレスの対応表も保存しません。下記(D)では処理中に通知を照合し、別の分析記録を作成します。メールアドレスだけに基づく削除要求から、元の通知記録を特定することはできません。</p>
@@ -343,7 +356,15 @@
           <p>対応するアプリでこの分析が有効な場合、端末からAppleの署名付き購入・更新情報を受け取り、検証した購読状態を端末単位の識別子とともに記録し、利用継続のイベントと照合します。記録する項目は、購読商品、本人購入または家族共有の区分、価格・通貨、購入・有効期限・取消・署名・観測・受信などの日時、自動更新の状態、請求再試行・猶予期間・期限切れ理由、本番またはテスト環境の区分、およびアプリの動作環境です。処理中にAppleの取引識別子で上記(C)の通知を照合し、その時点で確認できた通知の種類別件数と最終日時も記録します。Appleの取引識別子や署名付き情報の原文を、この分析記録と一緒に保存することはありません。メールアドレスやメモ本文も含めませんが、端末識別子・商品・日時・価格などは利用情報と結び付けられるため、匿名の情報とは扱いません。</p>
           <p>この分析記録は受信から90日を超えたものを定期削除します。対応するアプリからの削除では、端末が保持する削除用情報に対応した分析記録を削除し、削除済みの情報が遅れて再送されても保存しません。この操作は、上記(C)の元のApple通知記録、別の端末の記録、または外部の分析サービスの記録を一括して削除するものではありません。端末の削除用情報を失った場合など、対象を特定できないことがあります。</p>
 
-          <h2>2. 利用目的</h2>
+          <h3>(E) 対応アプリ版での利用状況分析の選択</h3>
+          <p>設定に「利用状況の分析」の選択画面があるアプリ版では、通常のアプリ内利用イベントと端末からの購読状態分析は初期状態で停止します。利用者が「同意してオンにする」を選んだ時点からこれらの収集を始め、選ばない場合は始めません。この選択はメールリマインダーの同意やApple端末のApp Analytics共有設定とは別です。アプリ内で撤回するとこれらの新規収集を停止し、端末内の未送信イベントの削除を試みます。削除が確認できない場合は画面に表示し、以前の同意で作られたイベントを後の再同意で再送しません。通信中の送信が完了する場合があり、撤回だけでは既に当社が受信した記録は削除されません。内部検証用Capture試験での操作順序や配送成否などの計測も、この利用状況分析と品質改善の目的に含みます。ただし、試験への参加には対象・期間を表示した別の参加同意も必要です。この選択だけで試験への参加を登録しません。この選択を撤回すると新しい試験計測も停止します。既に保存された試験記録の削除には、試験の参加停止・削除操作を利用してください。この選択画面がないアプリ版では、下記12の利用イベントと上記(D)の購読状態分析をアプリの動作に伴って送信します。2026年9月28日から行っていた旧方式のリクエストを保存しないサーバー側の制限は撤廃し、旧方式と選択画面がある版の両方からの分析リクエストを受け付けます。取得できなかった過去のイベントを遡って補完することはありません。選択画面が残る版の収集開始・停止は、そのアプリ内の設定に従います。AppsFlyer SDKによる獲得・利用計測は下記12のとおりです。</p>
+          <p>この選択はAppsFlyerによる獲得計測への同意ではありません。設定に「アプリを知った経路の計測」がある版では、下記(F)の別の選択とiPhoneのトラッキング許可が両方ある場合だけAppsFlyer SDKを開始します。この別の選択がない利用状況分析対応版ではSDKを停止します。選択画面のないアプリ版での取扱いは下記12に記載します。</p>
+
+          <h3>(F) 対応アプリ版での獲得計測の選択</h3>
+          <p>「アプリを知った経路の計測」は任意で、初期状態はオフです。この選択への同意とiPhoneのトラッキング許可が両方ある場合、ダウンロードリンクからの獲得状況を把握するため、AppsFlyerへアプリの起動・獲得元・キャンペーン情報、広告識別子、IPアドレス、端末モデル、OS・アプリの版などの技術情報を送信します。SDK固有の識別子を使用しますが、自社の利用状況分析の識別子をCustomer User IDとして渡しません。この目的でメモ本文・メールアドレス・購入イベント・通常のアプリ内利用イベントを送信せず、広告パートナーへの共有と広告の個別最適化を無効にします。SKAdNetwork、IDFVとApple Adsによる計測もこの経路では無効にします。識別子を含むため匿名の情報とは扱いません。</p>
+          <p>同意しなくてもアプリを利用できます。設定で撤回すると新しい計測を停止し、端末内の獲得元の確認記録を削除します。通信中の要求が完了する場合があり、既にAppsFlyerが受信したデータの削除やiPhoneのトラッキング設定の変更は、この操作には含まれません。利用状況分析への同意、メールリマインダーの同意、AppleのApp Analytics共有設定とは独立した選択です。</p>
+
+          <h2 id="reading-02">2. 利用目的</h2>
           <p>取得した情報は、以下の目的で利用します。</p>
           <ul>
             <li>メール送信機能の提供（送信、未送信管理／再送、履歴表示）</li>
@@ -354,22 +375,23 @@
             <li>法令遵守</li>
           </ul>
 
-          <h2>3. プランによる差分</h2>
+          <h2 id="reading-03">3. プランによる差分</h2>
           <p>本サービスの情報取り扱いは、Free/Premiumで基本的に同一です。Premiumは、送信回数制限の無効化（Freeの「1日3通」制限の解除）を目的として提供されますが、セキュリティや送信基盤保護のための制限（クールダウン等）は、Free/Premiumを問わず適用される場合があります。</p>
 
-          <h2>4. メモ内容の取り扱い（重要）</h2>
+          <h2 id="reading-04">4. メモ内容の取り扱い（重要）</h2>
           <ul>
             <li>メモ本文は、ユーザーの操作によりメール送信されます。</li>
             <li>送信処理のため、メモ本文および宛先情報が、当社が利用する送信基盤（外部サービスを含む）を通過する場合があります。</li>
             <li>当社は、法令対応や不正対策、障害対応等の正当な必要性がある場合を除き、メモ内容を恒常的に保存・閲覧することを目的としていません。</li>
           </ul>
 
-          <h2>5. メールリマインダー機能（任意）</h2>
+          <h2 id="reading-05">5. メールリマインダー機能（任意）</h2>
           <p>本サービスは、メモ送信の習慣化を支援するため、希望されたユーザーに対してリマインダーメールを送信する任意機能を提供しています。</p>
 
           <h3>(A) 同意の取得</h3>
           <ul>
             <li>本機能は<strong>既定で無効</strong>であり、認証画面または設定画面でユーザーが明示的に有効化した場合にのみ送信します。</li>
+            <li>リマインダーを有効にしていない方にも、メールアドレスの確認が済んでいて、しばらくメモの送信がないとき（目安：最後の送信から72時間）に、リマインダーを受け取るかどうかを尋ねる案内メールを<strong>1回だけ</strong>お送りすることがあります。受け取りを選ばない限り、リマインダーは送りません。</li>
             <li>有効化後も、設定画面から1タップで停止できます。各リマインダーメール末尾の解除リンクからも停止可能です。</li>
           </ul>
 
@@ -395,7 +417,7 @@
           <h3>(E) 委託先</h3>
           <p>リマインダーメールの送信および連絡先管理は、Resend, Inc.（米国）に委託しています。同社は <a href="https://resend.com/legal/dpa" rel="noopener">Data Processing Agreement</a> および国際的なメール送信規制（CAN-SPAM、GDPR、特定電子メール法等）に準拠しています。</p>
 
-          <h2>6. 第三者提供</h2>
+          <h2 id="reading-06">6. 第三者提供</h2>
           <p>当社は、以下の場合を除き、個人情報を第三者に提供しません。</p>
           <ul>
             <li>ユーザーの同意がある場合</li>
@@ -404,19 +426,19 @@
             <li>業務委託先に必要な範囲で提供する場合（次項）</li>
           </ul>
 
-          <h2>7. 委託（メール送信等）</h2>
+          <h2 id="reading-07">7. 委託（メール送信等）</h2>
           <p>当社は、メール送信の提供、運用保守、分析等のため、外部事業者に業務を委託することがあります。その場合、委託先を適切に監督します。</p>
 
-          <h2>8. 安全管理</h2>
+          <h2 id="reading-08">8. 安全管理</h2>
           <p>当社は、情報の漏えい、滅失、毀損の防止等のため、合理的な安全対策を講じます。</p>
 
-          <h2>9. 保管期間</h2>
+          <h2 id="reading-09">9. 保管期間</h2>
           <p>当社は、利用目的に必要な期間を超えて情報を保管しないよう努めます。利用イベントと上記1(D)の購読状態の分析記録は90日、送信IDと宛先ハッシュの対応記録は35日を超えたものを定期削除します。Appleの購読・返金通知の元の記録は受信から180日を超えたものを毎日の処理で削除します。一度の処理件数に上限があるため、削除待ちが多い場合には翌日以降に続けて処理します。その他のログ等は、不正対策や運用上必要な範囲で一定期間保管される場合があります。</p>
 
-          <h2>10. 改定</h2>
+          <h2 id="reading-10">10. 改定</h2>
           <p>当社は、本ポリシーを必要に応じて改定します。改定後は本サービスまたは当社ウェブサイト等に掲示します。</p>
 
-          <h2>11. お問い合わせ</h2>
+          <h2 id="reading-11">11. お問い合わせ</h2>
           <p><!--email_off--><a href="mailto:support&#64;simplememofast.com">support&#64;simplememofast.com</a><!--/email_off--></p>
 
           <h2 id="technical">12. 暗号化に関する技術的な情報（参考）</h2>
@@ -429,11 +451,25 @@
             <li><strong>メールアドレスのサーバ保存</strong>: 送信IDと宛先メールアドレスのハッシュ（SHA-256から生成）の対応を Cloudflare D1 に保存します。この対応記録はリマインダーのオプトインにかかわらず作成されます。リマインダー用の連絡先は Resend の Contact API で管理します。</li>
             <li><strong>暗号化・保管・通信路の依存関係</strong>: メモ本文の暗号化（CryptoKit）、鍵保管（Keychain Services）、通信（URLSession / Network.framework）はすべて Apple 純正フレームワークで完結し、サードパーティ SDK を介しません。</li>
             <li><strong>サインインと不正利用防止のSDK</strong>: 任意のオンボーディング短縮機能としてGoogleアカウントからメールアドレスを取り込む際に、GoogleSignIn-iOS SDKとFirebase Authentication SDKを使います。Firebase App Check SDKは起動時に初期化し、Apple App Attestを用いてバックエンドAPIへの不正アクセスを防ぎます。</li>
-            <li><strong>自社の利用解析</strong>: 品質改善や利用状況の把握のため、当社の<code>/v1/analytics/event</code>へイベントを送信します。項目にはランダムなインストール識別子、セッション識別子、イベントの種類・識別子・時刻、アプリの版・ビルド、言語、送信結果などの許可された属性が含まれます。メールアドレス・メモ本文・認証コードを直接含めない設計ですが、送信IDを介して宛先メールアドレスのハッシュと紐付けられます。</li>
-            <li><strong>AppsFlyerによる獲得・利用解析</strong>: AppsFlyer SDKを起動し、初回メモ送信成功、認証成功、課金画面表示、プラン選択、購入成功をイベントとして送信します。アプリから設定する属性には、該当する場合、購入金額・通貨・購読期間・画面の区分が含まれます。自社解析と同じインストール識別子をAppsFlyerのCustomer User IDに設定するため、獲得情報と利用記録を関連付けられます。アプリから設定するイベント項目にはメールアドレス・メモ本文・認証コードを直接含めません。ここに挙げた項目はアプリが明示的に設定するもので、SDKが取得する技術情報の全項目を列挙したものではありません。識別子や関連付け可能な記録は、完全に匿名の情報として扱いません。</li>
+            <li><strong>自社の利用解析</strong>: 品質改善や利用状況の把握のため、当社の<code>/v1/analytics/event</code>へイベントを送信します。項目にはランダムなインストール識別子、セッション識別子、イベントの種類・識別子・時刻、アプリの版・ビルド、言語、送信結果などの許可された属性が含まれます。メールアドレス・メモ本文・認証コードを直接含めない設計ですが、送信IDを介して宛先メールアドレスのハッシュと紐付けられます。このインストール識別子は端末のキーチェーンに保存します。iOSの仕組み上、キーチェーンの項目はアプリを削除しても端末に残ることがあり、その場合は再インストール後も同じ識別子を使います（下記の旧版AppsFlyer連携ではCustomer User IDにも同じ識別子を使います）。</li>
+            <li><strong>AppsFlyerによる獲得・利用解析</strong>: 上記1(E)の選択画面がないアプリ版では、AppsFlyer SDKを起動し、初回メモ送信成功、認証成功、課金画面表示、プラン選択、購入成功をイベントとして送信します。アプリから設定する属性には、該当する場合、購入金額・通貨・購読期間・画面の区分が含まれます。自社解析と同じインストール識別子をAppsFlyerのCustomer User IDに設定するため、獲得情報と利用記録を関連付けられます。アプリから設定するイベント項目にはメールアドレス・メモ本文・認証コードを直接含めません。ここに挙げた項目はアプリが明示的に設定するもので、SDKが取得する技術情報の全項目を列挙したものではありません。識別子や関連付け可能な記録は、完全に匿名の情報として扱いません。利用状況分析の選択がある版ではSDKを停止し、上記(F)に対応する版に限り、その別目的の同意とiPhoneのトラッキング許可の両方がある場合に獲得計測だけを開始します。</li>
           </ul>
           <p><strong>注意</strong>: 本サービスは <strong>End-to-End 暗号化（E2EE）を提供していません</strong>。受信者であるユーザーご自身のメールクライアントで通常通り本文を読めるよう、メール本文は標準的な SMTP プロトコルで配信されます。E2EE が必要な用途には、Standard Notes・Signal・ProtonMail などの専用サービスをご検討ください。</p>
           <p>この節の内容は、Obsidianユーザー向けに「データの通り道」の図解として<a href="/privacy-architecture/">プライバシー設計</a>ページにまとめ直しています。</p>
+
+          <h2 id="website-analytics">13. 当社ウェブサイトのアクセス解析</h2>
+          <p>当社のウェブサイト（simplememofast.com）では、閲覧の状況を把握して内容を改善するため、次のアクセス解析を使っています。上記のアプリ（本サービス）の利用データとは別のものです。</p>
+          <h3>(A) Google アナリティクス（Google LLC・米国）</h3>
+          <ul>
+            <li>Cookie（ファーストパーティ Cookie「_ga」など）に、ブラウザごとのランダムな識別子を保存し、利用者数やセッションを区別します。</li>
+            <li>集める情報は、閲覧したページ、参照元、おおよその地域、ブラウザと端末の種類、ページ上の操作（App Store へのリンクの表示とクリックなど）などです。Google は、Google アナリティクス 4 は IP アドレスを記録・保存しないと説明しています。</li>
+            <li>集めた情報は Google が処理します。Google による使い方は「<a href="https://policies.google.com/technologies/partner-sites?hl=ja" target="_blank" rel="noopener">Google のサービスを使用するサイトやアプリから収集した情報の Google による使用</a>」をご覧ください。</li>
+            <li>集計の対象から外れたい場合は、<a href="https://tools.google.com/dlpage/gaoptout?hl=ja" target="_blank" rel="noopener">Google アナリティクス オプトアウト アドオン</a>を使うか、ブラウザの設定で Cookie を無効にしてください。</li>
+          </ul>
+          <h3>(B) Ahrefs Web Analytics（Ahrefs Pte. Ltd.・シンガポール）</h3>
+          <ul>
+            <li>閲覧数などの集計に使っています。Ahrefs は、このツールは Cookie を使わず、IP アドレスをそのまま保存しないと<a href="https://help.ahrefs.com/en/articles/10247870-about-ahrefs-web-analytics" target="_blank" rel="noopener">説明しています</a>。</li>
+          </ul>
         </div>
       </div>
 
@@ -443,12 +479,12 @@
   </main>
 
   <!-- Footer -->
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ja" dir="ltr"><a class="site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a><div><p class="site-footer-title">思いついたことを、次の一歩へ。</p><p class="site-footer-description">Obsidianとメールに、メモを送るiPhoneアプリ。</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span>ダウンロード</span> </a>
+        <a href="/download/" class="footer__link">ダウンロード</a>
         <a href="/how-to/" class="footer__link"><span>使い方</span></a>
         <a href="/templates/" class="footer__link"><span>テンプレ</span></a>
       </div>
@@ -458,17 +494,17 @@
       </div>
       <div class="footer__col">
         <p class="footer__col-title">読みもの</p>
-        <a href="/devlog/" class="footer__link"><span>開発日誌</span></a>
+        <a href="/devlog/" class="footer__link">開発記録</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span>公開ロードマップ</span> </a>
-        <a href="/about/" class="footer__link"><span>開発者について</span> </a>
+        <a href="/roadmap/" class="footer__link">公開ロードマップ</a>
+        <a href="/about/" class="footer__link">開発者について</a>
         <a href="/terms" class="footer__link"><span>利用規約</span></a>
-        <a href="/privacy" class="footer__link"><span>プライバシーポリシー</span></a>
-        <a href="/faq" class="footer__link"><span>よくあるご質問</span></a>
+        <a href="/privacy" class="footer__link">プライバシー</a>
+        <a href="/faq" class="footer__link">よくある質問</a>
         <a href="/legal" class="footer__link footer__link--legal"><span>特定商取引法に基づく表記</span></a>
-        <a href="/contact" class="footer__link"><span>お問い合わせ</span></a>
+        <a href="/contact" class="footer__link">お問い合わせ</a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -477,12 +513,7 @@
     </div>
   </footer>
 
-  <script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

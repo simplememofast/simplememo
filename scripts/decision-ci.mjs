@@ -2,24 +2,28 @@
 // CI uses base-branch policy, never policy supplied by an autonomous PR.
 import fs from 'node:fs';
 import {ownershipConflict,changeScope} from '../growth/lib/experiment-overlap.mjs';
+import {verifySupportingGitDiff} from '../growth/lib/measurement-support.mjs';
 import {isOpen,validate as validateExperiments} from '../growth/lib/ledger.mjs';
+import {verifyEvaluationDecision} from '../growth/lib/company-evaluation.mjs';
 import path from 'node:path';
 import os from 'node:os';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { contractProblems, approvedMetric, METRICS, verifyHistory, selectContract, predictionFeedback } from './value-contracts.mjs';
+import { createRequire } from 'node:module';
+import { contractProblems, approvedMetric, METRICS, verifyHistory, selectContract, predictionFeedback, retireIntent } from './value-contracts.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = 'simplememofast/simplememo';
 export const protectedPaths = ['data/value-metrics.json', 'data/autonomy-score.json', 'data/eligibility-policy.json', 'data/authority-matrix.json',
   'data/value-contracts.json', 'data/decision-recovery.json', 'data/decision-review.json',
   'scripts/value-contracts.mjs', 'scripts/decision-ci.mjs', 'scripts/decision-monitor.mjs', 'scripts/decision-review.mjs', 'scripts/autonomy-score.mjs', 'scripts/autonomy-eligibility.mjs',
-  'scripts/lib/decision-origin.mjs', 'scripts/lib/decision-publication-retry.mjs', 'scripts/decision-monitor-local.py',
-  'growth/lib/company-decision.mjs', 'growth/lib/company-proof.mjs',
-  'growth/lib/company-measurement.mjs', 'growth/lib/experiment-coexistence.mjs', 'growth/lib/experiment-overlap.mjs',
+  'scripts/lib/decision-origin.mjs', 'scripts/lib/decision-publication-retry.mjs', 'scripts/lib/intervention-observation.mjs', 'scripts/decision-monitor-local.py',
+  'growth/lib/company-decision.mjs', 'growth/lib/company-proof.mjs', 'growth/lib/company-evaluation.mjs',
+  'growth/lib/company-measurement.mjs', 'growth/lib/measurement-support.mjs', 'growth/lib/experiment-coexistence.mjs', 'growth/lib/experiment-overlap.mjs',
   'growth/lib/company-search.mjs', 'growth/lib/ledger.mjs',
-  'scripts/autopilot-budget.mjs', 'scripts/check-credential-probe.mjs'];
+  'scripts/autopilot-budget.mjs', 'scripts/check-credential-probe.mjs',
+  'scripts/codex-recovery-permit.py'];
 export function required(branch, paths, metrics) {
   if (!/^claude\/obsidian-auto-/.test(branch)) return false;
   const bookkeeping = p => ['data/autopilot-runs.json', 'data/autopilot-status.json', 'docs/obsidian/AUTOPILOT_LOG.md'].includes(p) || p.startsWith('data/decision-rejections/');
@@ -52,6 +56,26 @@ export function verifyPullBinding(pr, run, branch, head) {
   assert.equal(pr?.head?.sha, head, 'run PR does not contain the checked head');
 }
 
+function verifySupportRegistration(e,base,head,files,git) {
+  const m=e.company_measurement;
+  assert(m?.schema_version===1&&/^[a-f0-9]{64}$/.test(m.plan_sha256??'')
+    &&/^[a-f0-9]{64}$/.test(m.decision_sha256??'')&&/^[a-f0-9-]{36}$/.test(m.company_run_id??''),'support requires prospective Company measurement registration');
+  const intents=files.filter(p=>/^data\/decision-intents\/[a-z0-9-]+\.json$/.test(p));
+  assert.equal(intents.length,1,'support requires one prospective decision declaration');
+  const commits=git('rev-list','--reverse','--first-parent',base+'..'+head).split('\n').filter(Boolean);
+  const registry='growth/experiments/experiments.json';
+  const registration=commits.find(sha=>JSON.parse(git('show',sha+':'+registry)).experiments.some(row=>row.id===e.id));
+  assert(registration,'support registration commit missing');
+  assert.deepEqual(git('diff-tree','--no-commit-id','--name-only','-r',registration).split('\n'),[registry],'support registry must be committed alone before implementation');
+  const declared=JSON.parse(git('show',registration+'^:'+intents[0]));
+  assert(typeof declared.id==='string' && /^[a-z0-9][a-z0-9-]{2,99}$/.test(declared.id),'support declaration requires a valid selected candidate ID');
+  assert(declared.candidates?.some(c=>c.id===declared.id&&c.company_decision?.schema_version===1
+    &&c.company_decision.company_run_id===m.company_run_id&&c.company_decision.sha256===m.decision_sha256),'support registration differs from prior Company declaration');
+  assert.equal(git('show',registration+'^:'+intents[0]),git('show',head+':'+intents[0]),'support declaration changed after registration');
+  assert.deepEqual(JSON.parse(git('show',registration+':'+registry)).experiments.find(row=>row.id===e.id),e,'support registration changed after implementation');
+  git('diff','--quiet',base,registration,'--',...e.change_paths);
+}
+
 export async function verifyDecision({ branch, head, baseRef, pr = null, cwd = ROOT, requireContract = false }) {
   const git = gitAt(cwd);
   const base = git('merge-base', baseRef, head);
@@ -63,15 +87,29 @@ export async function verifyDecision({ branch, head, baseRef, pr = null, cwd = R
     const before=JSON.parse(git('show',baseRef+':growth/experiments/experiments.json')).experiments;
     const after=JSON.parse(git('show',head+':growth/experiments/experiments.json')).experiments;
     assert.deepEqual(validateExperiments({experiments:after}),[],'invalid head experiment ledger');
-    for(const e of after.filter(e=>e.company_measurement&&!before.some(old=>old.id===e.id))) {
-      const scope=changeScope(e.page,e.change_paths);
+    for(const old of before)assert.deepEqual(after.find(e=>e.id===old.id)?.supporting_changes,old.supporting_changes,'autonomous decision cannot reinterpret existing support ownership');
+    for(const e of after.filter(e=>(e.company_measurement||e.supporting_changes!==undefined)&&!before.some(old=>old.id===e.id))) {
+      if(e.supporting_changes!==undefined)verifySupportRegistration(e,base,head,files,git);
+      const scope=changeScope(e.page,e.change_paths,e.supporting_changes);
       for(const owner of after.filter(o=>o.id!==e.id&&isOpen(o)))assert(!ownershipConflict(owner,scope),'active experiment conflicts at final head: '+owner.id);
-      const bookkeeping=p=>['growth/experiments/experiments.json','data/autopilot-runs.json','data/autopilot-status.json','autopilot/index.html','docs/obsidian/AUTOPILOT_LOG.md'].includes(p)||p.startsWith('data/decision-intents/');
+      // A failed declaration is retired before selecting its replacement. Its
+      // JSON record is bookkeeping, as in required() and verifyHistory(). This
+      // does not exempt treatment/support paths or changes to protected gates.
+      const bookkeeping=p=>['growth/experiments/experiments.json','data/autopilot-runs.json','data/autopilot-status.json','autopilot/index.html','docs/obsidian/AUTOPILOT_LOG.md'].includes(p)||p.startsWith('data/decision-intents/')||/^data\/decision-rejections\/[a-z0-9-]+\.json$/.test(p);
       assert(files.every(p=>bookkeeping(p)||e.change_paths.includes(p)),'undeclared measurement change path at final head');
+      verifySupportingGitDiff(e,base,head,(...a)=>execFileSync('git',a,{cwd,encoding:'utf8',maxBuffer:16*1024*1024}));
     }
   }
   const forbidden = files.filter(p => protectedPaths.includes(p) || p.startsWith('.github/workflows/'));
   if (forbidden.length) throw new Error(`autonomous decision cannot change its gate or policy: ${forbidden.join(', ')}`);
+  const evaluations = files.filter(p => p.startsWith('docs/autonomy/company-evaluation-intents/'));
+  if (evaluations.length) {
+    assert(!requireContract, 'a typed experiment evaluation cannot replace a shipped value contract');
+    // This separate business-action contract can change only its declaration
+    // and one original experiment outcome. The original shipment verifier below
+    // still requires its directional value contract and canonical shipped row.
+    return verifyEvaluationDecision({branch,head,baseRef,pr,cwd});
+  }
   if (!requireContract && !required(branch, files, metrics)) return { state: 'not_required' };
   const intents = files.filter(p => /^data\/decision-intents\/[a-z0-9-]+\.json$/.test(p));
   if (intents.length !== 1) throw new Error('exactly one prospective decision contract is required');
@@ -123,7 +161,8 @@ async function selftest() {
   const workflow = fs.readFileSync(path.join(ROOT, '.github/workflows/auto-merge.yml'), 'utf8');
   const body = workflow.match(/          script: \|\n((?:            .*\n|\n)+)/)?.[1];
   assert(body, 'auto-merge workflow script required');
-  const executeMerge = new (Object.getPrototypeOf(async function () {}).constructor)('context', 'github', 'core', body);
+  const executeMerge = new (Object.getPrototypeOf(async function () {}).constructor)('context', 'github', 'core', 'require', body);
+  const identityGuard = createRequire(import.meta.url)('./merge-identity-check.js');
   for (const [branch, event, expected, overrides = {}] of [
     ['claude/obsidian-auto-test', 'push', 0], ['claude/obsidian-auto-test', undefined, 0],
     ['claude/obsidian-auto-test', 'pull_request', 1], ['Codex/user-directed', 'push', 0],
@@ -133,14 +172,31 @@ async function selftest() {
     ['Codex/user-directed', 'pull_request', 0, { sha: 'c'.repeat(40) }],
     ['Codex/user-directed', 'pull_request', 0, { base: 'other' }],
     ['Codex/user-directed', 'pull_request', 0, { repo: 'other/repo' }],
+    ['Codex/user-directed', 'pull_request', 0, { authorName: 'Private Person' }],
+    ['Codex/user-directed', 'pull_request', 0, { openerName: 'SimpleMemo Developer (Private Person)' }],
+    ['Codex/user-directed', 'pull_request', 0, { commitCount: 2 }],
+    ['Codex/user-directed', 'pull_request', 0, { commitCount: 251 }],
   ]) {
     let merged = 0;
     const sha = 'a'.repeat(40);
+    const pr = { number: 123, draft: overrides.draft ?? false,
+      base: { ref: overrides.base ?? 'main' },
+      head: { sha: overrides.sha ?? sha, repo: { full_name: overrides.repo ?? REPO } },
+      user: { login: 'simplememofast' }, commits: overrides.commitCount ?? 1 };
     await executeMerge({ repo: { owner: 'simplememofast', repo: 'simplememo' }, payload: { workflow_run: { head_branch: branch, head_sha: sha, event } } },
       { rest: { pulls: {
-        list: async () => ({ data: [{ number: 123, draft: overrides.draft ?? false, base: { ref: overrides.base ?? 'main' }, head: { sha: overrides.sha ?? sha, repo: { full_name: overrides.repo ?? REPO } } }] }),
+        list: async () => ({ data: [pr] }),
+        get: async () => ({ data: pr }),
+        listCommits: async () => ({}),
         merge: async args => { assert.equal(args.sha, sha); merged++; return { data: { sha: 'b'.repeat(40) } }; },
-      } } }, { info() {}, notice() {}, setOutput() {} });
+      }, users: { getByUsername: async () => ({ data: { login: 'simplememofast',
+        name: overrides.openerName ?? 'SimpleMemo Developer', email: 'simplememo.com@gmail.com' } }) } },
+      paginate: async () => [{ sha, commit: {
+        author: { name: overrides.authorName ?? 'SimpleMemo Developer', email: 'simplememo.com@gmail.com' },
+        committer: { name: 'GitHub', email: 'noreply@github.com' }, message: 'Safe fixture',
+      } }],
+      }, { info() {}, notice() {}, setOutput() {}, setFailed() {} },
+      source => { assert(source.endsWith('/scripts/merge-identity-check.js')); return identityGuard; });
     assert.equal(merged, expected, `auto-merge must respect declaration/PR boundary: ${branch} ${event}`);
   }
 
@@ -160,6 +216,8 @@ async function selftest() {
     save('data/value-metrics.json', m); save('data/autopilot-runs.json', { runs: before });
     save('data/decision-review.json', { selections: [] }); save('data/value-contracts.json', { contracts: [] });
     fs.mkdirSync(path.join(dir, 'scripts'));
+    fs.mkdirSync(path.join(dir, 'scripts/lib'));
+    fs.copyFileSync(path.join(ROOT, 'scripts/lib/intervention-observation.mjs'), path.join(dir, 'scripts/lib/intervention-observation.mjs'));
     fs.writeFileSync(path.join(dir, 'scripts/value-contracts.mjs'), 'export const SELECTION_FEEDBACK_VERSION = 1;\n');
     fs.writeFileSync(path.join(dir, 'index.html'), 'before\n'); g('add', '.'); g('commit', '-m', 'fixture base');
     const baseRef = g('rev-parse', 'HEAD');
@@ -225,14 +283,74 @@ async function selftest() {
     for (const x of legacy.candidates) delete x.calibration;
     save(`data/decision-intents/${c.id}.json`, legacy); g('add', '.'); g('commit', '-m', 'legacy declaration');
     assert.equal((await verifyDecision({ ...options, baseRef: legacyBase, head: g('rev-parse', 'HEAD') })).state, 'declared');
+    for (const gate of ['scripts/lib/decision-publication-retry.mjs', 'scripts/lib/intervention-observation.mjs', 'growth/lib/company-evaluation.mjs']) {
+      g('checkout', '--detach', baseRef);
+      fs.mkdirSync(path.dirname(path.join(dir, gate)), { recursive: true });
+      fs.writeFileSync(path.join(dir, gate), '// candidate attempts to replace a gate or its classifier\n');
+      g('add', '.'); g('commit', '-m', 'attempt to change protected dependency');
+      await assert.rejects(verifyDecision({ ...options, head: g('rev-parse', 'HEAD') }),
+        error => error.message === `autonomous decision cannot change its gate or policy: ${gate}`);
+    }
+    // Real retirement -> replacement declaration -> measurement -> treatment.
+    // The retired JSON must not invalidate the new measurement's final scope.
     g('checkout', '--detach', baseRef);
-    fs.mkdirSync(path.join(dir, 'scripts/lib'), {recursive:true});
-    fs.writeFileSync(path.join(dir, 'scripts/lib/decision-publication-retry.mjs'), '// candidate attempts to replace retry gates\n');
-    g('add', '.'); g('commit', '-m', 'attempt to change publication retry policy');
-    await assert.rejects(verifyDecision({...options,head:g('rev-parse','HEAD')}),
-      /cannot change its gate or policy: scripts\/lib\/decision-publication-retry\.mjs/);
+    const registry = 'growth/experiments/experiments.json';
+    save(registry, { experiments: [] }); g('add', '.'); g('commit', '-m', 'measurement fixture base');
+    const measurementBase = g('rev-parse', 'HEAD');
+    save(`data/decision-intents/${c.id}.json`, c); g('add', '.'); g('commit', '-m', 'abandoned fixture declaration');
+    save(`data/decision-rejections/${c.id}.json`, retireIntent(c, {
+      reason: 'Declaring fixture failed before treatment; select a prospective replacement.',
+      now: new Date('2026-09-04T00:00:00Z'),
+    }));
+    fs.rmSync(path.join(dir, `data/decision-intents/${c.id}.json`));
+    g('add', '-A'); g('commit', '-m', 'retire fixture before replacement');
+    const measurementChoices = choices.map((x, i) => ({ ...x,
+      id: i ? 'measurement-alternative' : 'measurement-contract', run_id: 'measurement-run',
+      touches: ['index.html', registry],
+      counterfactual: { id: i ? 'measurement-contract' : 'measurement-alternative', reason: 'Compare two prospective fixture improvements' },
+    }));
+    const replacement = await selectContract(measurementChoices, { metrics: m, runs: before,
+      costs: read('data/autopilot-cost.json').runs, now: new Date('2026-09-04T00:00:00Z'), eligibility: {
+        policy: read('data/eligibility-policy.json'), scorePolicy: read('data/autonomy-score.json'),
+        authority: read('data/authority-matrix.json'), routing: read('data/model-routing.json'), costDoc: read('data/autopilot-cost.json'),
+      } }, { selections: [] }, []);
+    save(`data/decision-intents/${replacement.id}.json`, replacement);
+    g('add', '.'); g('commit', '-m', 'declare measurement fixture');
+    const experiment = { id: 'fixture-measurement', page: '/fixture', type: 'title', status: 'running',
+      started_at: '2026-09-04', evaluation_at: '2026-10-04', change_paths: ['index.html'],
+      target_metric: 'ctr', baseline: { clicks: 2, impressions: 200, ctr: .01, position: 8 },
+      control: { kind: 'pre_post', note: 'Compare the same fixture page and fixed source before and after.',
+        confounders: ['Provider changes and other website treatments cannot establish causality.'] },
+      min_sample: { metric: 'impressions', threshold: 150, rationale: 'Retain the fixed minimum cohort for this synthetic regression.' },
+      stop_conditions: ['Stop if the registered page scope changes.'],
+      company_measurement: { schema_version: 1, company_run_id: '00000000-0000-0000-0000-000000000001' } };
+    save(registry, { experiments: [experiment] }); g('add', '.'); g('commit', '-m', 'register measurement fixture');
+    fs.writeFileSync(path.join(dir, 'index.html'), 'measured treatment\n');
+    save('data/autopilot-runs.json', { runs: [...before, { ...run, run_id: replacement.run_id }] });
+    g('add', '.'); g('commit', '-m', 'implement and record measurement fixture');
+    const measurementHead = g('rev-parse', 'HEAD');
+    const measurementOptions = { ...options, baseRef: measurementBase, head: measurementHead,
+      pr: { ...pr, head: { ...pr.head, sha: measurementHead } } };
+    assert.equal((await verifyDecision(measurementOptions)).state, 'bound');
+    for (const extra of ['other.html', 'assets/shared.js', 'data/decision-rejections/hidden.html',
+      'data/decision-rejections/nested/hidden.json', 'scripts/decision-ci.mjs']) {
+      g('checkout', '--detach', measurementHead);
+      save(extra, { undeclared: true }); g('add', '.'); g('commit', '-m', 'undeclared measurement change');
+      await assert.rejects(verifyDecision({ ...measurementOptions, head: g('rev-parse', 'HEAD') }),
+        /undeclared measurement change path at final head/, extra);
+    }
+    g('checkout', '--detach', measurementHead);
+    save('data/decision-rejections/late-retirement.json', { stage: 'execution', reason: 'Too late for undeclared history metadata.' });
+    g('add', '.'); g('commit', '-m', 'undeclared retirement after replacement declaration');
+    await assert.rejects(verifyDecision({ ...measurementOptions, head: g('rev-parse', 'HEAD') }),
+      /undeclared path: data\/decision-rejections\/late-retirement.json/);
+    g('checkout', '--detach', measurementHead);
+    save(registry, { experiments: [experiment, { ...experiment, id: 'other-owner', company_measurement: undefined }] });
+    g('add', '.'); g('commit', '-m', 'conflicting measurement owner');
+    await assert.rejects(verifyDecision({ ...measurementOptions, head: g('rev-parse', 'HEAD') }),
+      /active experiment conflicts at final head/);
   } finally { fs.rmSync(dir, { recursive: true }); }
-  console.log('decision-ci: real Git declaration-to-run binding and PR-only autonomous merge checks passed');
+  console.log('decision-ci: real Git declaration, retirement/measurement scope, run binding and PR-only autonomous merge checks passed');
 }
 
 async function main() {
@@ -241,11 +359,16 @@ async function main() {
   const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
   const pr = event.pull_request;
   const branch = pr?.head.ref ?? process.env.GITHUB_REF_NAME;
-  if (!/^claude\/obsidian-auto-/.test(branch ?? '')) { console.log('decision-ci: not an autonomous picker branch'); return; }
-  gitAt(ROOT)('fetch', 'origin', 'main');
-  const result = await verifyDecision({ branch, head: pr?.head.sha ?? process.env.GITHUB_SHA,
-    baseRef: pr?.base.sha ?? 'origin/main', pr,
-  });
+  const head = pr?.head.sha ?? process.env.GITHUB_SHA;
+  const baseRef = pr?.base.sha ?? 'origin/main';
+  const git = gitAt(ROOT);
+  if (!/^claude\/obsidian-auto-/.test(branch ?? '')) {
+    const typedPr = pr && git('diff', '--name-only', git('merge-base', baseRef, head), head)
+      .split('\n').some(p => p.startsWith('docs/autonomy/company-evaluation-intents/'));
+    if (!typedPr) { console.log('decision-ci: not an autonomous picker branch or typed evaluation PR'); return; }
+  }
+  git('fetch', 'origin', 'main');
+  const result = await verifyDecision({ branch, head, baseRef, pr });
   console.log(JSON.stringify(result, null, 2));
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

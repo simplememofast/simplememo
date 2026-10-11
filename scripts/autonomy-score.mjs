@@ -34,6 +34,7 @@
 import fs from 'node:fs';
 import { verifiedSettlement } from './value-contracts.mjs';
 import { automatedDecisionOrigin } from './lib/decision-origin.mjs';
+import { interventionObservation } from './lib/intervention-observation.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, run as runScenarios } from './lib/selftest.mjs';
@@ -67,7 +68,7 @@ export function windowOf(runs, days, today = todayJst()) {
 }
 
 const inWindow = (r, w) => (r.date_jst || '') >= w.from && (r.date_jst || '') <= w.to;
-const handsOff = (r) => !(r.interventions || []).length;
+const handsOff = r => interventionObservation(r).state === 'recorded_zero';
 
 /** 出荷行の可逆性クラス。**data/autonomy-score.json の lane_action_class を正とする。** */
 export function classOfRun(r, policy) {
@@ -120,7 +121,8 @@ export function umr(runs, policy) {
   const shipped = runs.filter((r) => r.outcome === 'shipped');
   const rows = shipped.map((r) => {
     const cls = classOfRun(r, policy);
-    return { run_id: r.run_id, cls, w: weightOf(cls, policy), handsOff: handsOff(r) };
+    return { run_id: r.run_id, cls, w: weightOf(cls, policy), handsOff: handsOff(r),
+      interventionUnknown: interventionObservation(r).state === 'unknown' };
   });
   const total = rows.reduce((s, x) => s + x.w, 0);
   const byClass = {};
@@ -138,12 +140,16 @@ export function umr(runs, policy) {
     const allowed = cap.max_share_of_weight * total;
     if (r0 > allowed) { num = rawNum - (r0 - allowed); capped = true; }
   }
-  const rate = total ? num / total : 0;
+  const unknown = rows.filter(r => r.interventionUnknown).length;
+  const rate = unknown ? null : total ? num / total : 0;
   return {
     id: 'umr', rate, n: shipped.length, weight_total: total, weight_hands_off: rawNum,
     weight_counted: num, r0_capped: capped, by_class: byClass,
-    max: policy.weights.umr, points: policy.weights.umr * rate, measurable: shipped.length > 0,
-    why: shipped.length ? null : '窓内に出荷が無い',
+    max: policy.weights.umr, points: rate === null ? 0 : policy.weights.umr * rate,
+    measurable: shipped.length > 0 && unknown === 0, unknown_intervention_runs: unknown,
+    measurement_scope: 'recorded intervention fields; not proof of complete human observation',
+    why: unknown ? `出荷 ${unknown} 件の介入記録が未観測。UMRは測定不能で加点しない`
+      : shipped.length ? null : '窓内に出荷が無い',
   };
 }
 
@@ -162,6 +168,8 @@ export function ra(runs, allRuns, policy, { recoveries = [], window = null } = {
     const rep = repairedBy(r.run_id);
     return Boolean(rep) && handsOff(rep) && handsOff(r);
   });
+  const unknownRecoveries = breakages.filter(r => interventionObservation(r).state === 'unknown'
+    || (repairedBy(r.run_id) && interventionObservation(repairedBy(r.run_id)).state === 'unknown')).length;
   const incidents = recoveries.filter(r => r.mode === 'production' && r.before?.failed === true
     && /^[a-f0-9]{40}$/.test(r.target_sha ?? '') && Number.isFinite(Date.parse(r.detected_at))
     && (!window || (r.detected_at.slice(0, 10) >= window.from && r.detected_at.slice(0, 10) <= window.to)));
@@ -190,7 +198,7 @@ export function ra(runs, allRuns, policy, { recoveries = [], window = null } = {
   const beatenByDispatch = breakages.filter((r) => String(r.source ?? '').startsWith('act-')
     && !src.has(r.source)).length;
   const dRate = n ? (detected.length + machineIncidents.length) / n : 0;
-  const rRate = n ? (recoveredHandsOff.length + recoveredIncidents.length) / n : 0;
+  const rRate = unknownRecoveries ? null : n ? (recoveredHandsOff.length + recoveredIncidents.length) / n : 0;
   // 自動 revert は「出荷後の指標劣化を検知して人手なしで巻き戻した」回。台帳に語彙が無い＝0。
   const autoRevert = recoveries.filter((r) => r.mode === 'production' && r.before?.failed === true && recovered(r)).length;
   return {
@@ -207,11 +215,15 @@ export function ra(runs, allRuns, policy, { recoveries = [], window = null } = {
                       + `（手動 dispatch・セッション）。**検出器が動いていないのではなく、先を越されている**`
                     : ' —— 拾えていないのは故障のほう')
                 : null },
-    recover: { rate: rRate, hit: recoveredHandsOff.length + recoveredIncidents.length, points: half * rRate, max: half },
+    recover: { rate: rRate, hit: recoveredHandsOff.length + recoveredIncidents.length,
+      points: rRate === null ? 0 : half * rRate, max: half, unknown_intervention_runs: unknownRecoveries,
+      why: unknownRecoveries ? '故障または修理の介入記録が未観測。復旧自律性は加点しない' : null },
     auto_revert_count: autoRevert,
-    rate: n ? (dRate + rRate) / 2 : 0,
-    max: policy.weights.ra, points: half * dRate + half * rRate, measurable: n > 0,
-    why: n ? null : '窓内に故障が無い（＝分母が無い。満点ではない）',
+    rate: rRate === null ? null : n ? (dRate + rRate) / 2 : 0,
+    max: policy.weights.ra, points: half * dRate + (rRate === null ? 0 : half * rRate),
+    measurable: n > 0 && unknownRecoveries === 0,
+    why: unknownRecoveries ? '介入記録が未観測の復旧は加点しない。検知の証拠は別に保持'
+      : n ? null : '窓内に故障が無い（＝分母が無い。満点ではない）',
   };
 }
 
@@ -400,6 +412,10 @@ export function carryForward(components, allRuns, w, policy, { rules, actions } 
       return;
     }
     const { rate, share } = measure(sample);
+    if (!Number.isFinite(rate)) {
+      skipped.push({ id, why: '介入記録が未観測で率を測定できない。据え置きにも無介入加点にも使わない', measurement_unknown: true });
+      return;
+    }
     if (!Number.isFinite(share) || share < 0 || share > 1) { skipped.push({ id, why: `取り分を計算できない（${share}）` }); return; }
     items.push({ id, rate, share, n: sample.length, measured_at: sample[0]?.date_jst, age_days: age });
   };
@@ -432,11 +448,19 @@ export function applyCarry(components, carried, policy) {
       + 'この窓で測り直したものではない';
     byId[id].carried = (byId[id].carried || []).concat(item);
   }
+  for (const item of carried.skipped || []) {
+    if (!item.measurement_unknown) continue;
+    const [id, part] = item.id.split('.'), target = byId[id]?.[part];
+    if (target) { target.rate = null; target.points = 0; target.why = item.why; }
+  }
   const raC = byId.ra, epC = byId.ep;
-  if (raC?.carried) {
+  if (raC?.carried || raC?.recover?.rate === null) {
     raC.points = raC.detect.points + raC.recover.points;
-    raC.rate = (raC.detect.rate + raC.recover.rate) / 2;
-    raC.why = '窓内に故障が無い。**最後に測れた率を据え置いている**（満点ではない）';
+    raC.rate = Number.isFinite(raC.detect.rate) && Number.isFinite(raC.recover.rate)
+      ? (raC.detect.rate + raC.recover.rate) / 2 : null;
+    raC.why = raC.carried
+      ? '窓内に故障が無い。**最後に測れた率を据え置いている**（満点ではない）'
+      : raC.recover.why;
   }
   if (epC?.carried) {
     epC.points = epC.miss.points + epC.precision.points;
@@ -683,7 +707,16 @@ export function check(s, policy, { blindness = [] } = {}) {
   for (const c of Object.values(s.components)) {
     const labelled = Array.isArray(c.carried) && c.carried.length
       && c.carried.every((x) => x.measured_at && Number.isFinite(x.rate) && Number.isFinite(x.n));
-    if (c.points > 0 && c.measurable === false && !labelled) {
+    // A known detection may retain its existing credit when recovery is unknown;
+    // no recovery/hands-off credit may be hidden in that partial component.
+    const partialRa = c.id === 'ra' && c.rate === null && Number.isInteger(c.n) && c.n > 0
+      && c.recover?.rate === null && c.recover.points === 0 && c.recover.unknown_intervention_runs > 0
+      && Number.isFinite(c.detect?.rate) && c.detect.rate >= 0 && c.detect.rate <= 1
+      && Number.isInteger(c.detect.hit) && c.detect.hit >= 0 && c.detect.hit <= c.n
+      && c.detect.hit / c.n === c.detect.rate && c.detect.max === policy.weights.ra / 2
+      && c.detect.points === c.detect.max * c.detect.rate
+      && c.points === c.detect.points;
+    if (c.points > 0 && c.measurable === false && !labelled && !partialRa) {
       problems.push(`成分 ${c.id} は measurable=false なのに ${c.points} 点入っている`
         + '（据え置きなら carried に measured_at / rate / n を残すこと）');
     }
@@ -805,6 +838,13 @@ function selftest() {
   eq(Math.round(umr(manyR0, P).rate * 100), 60, 'R0 の寄与は総重みの60%まで');
   eq(umr([ship('a', { lane: 'E', action: 'new' })], P).r0_capped, false, 'R1 は上限に当たらない');
   eq(umr([], P).points, 0, '**出荷ゼロは0点**（分母が無いことを満点にしない）');
+  for (const interventions of [undefined, null, false, {}, [null]]) {
+    const row = ship('unknown', { interventions }), observed = umr([ship('known'), row], P);
+    eq(observed.rate, null, '介入欠測/不正型が混ざるUMRは測定不能');
+    eq(observed.points, 0, '介入未観測を無介入加点へ昇格させない');
+    eq(observed.unknown_intervention_runs, 1, '未知の出荷を分母に残し件数を報告');
+    eq(observed.n, 2, '未知の出荷をUMR分母から除かない');
+  }
 
   // --- RA ---
   const brk = (id, over = {}) => ({ run_id: id, date_jst: '2026-09-01', outcome: 'failed', failure_stage: 'execution', source: 'session', interventions: [], ...over });
@@ -815,6 +855,13 @@ function selftest() {
      '**`act-reconcile-session` は機械の検知に数えない**（人が起こしたセッションが回した形）');
   const withRepair = [brk('f1'), ship('r1', { repair_of: ['f1'] })];
   eq(ra([brk('f1')], withRepair, P).recover.rate, 1, '無介入の修理があれば復旧側は満点');
+  for (const target of ['failure', 'repair']) {
+    const failed = brk('unknown'), repair = ship('unknown-repair', { repair_of: ['unknown'] });
+    delete (target === 'failure' ? failed : repair).interventions;
+    const observed = ra([failed], [failed, repair], P);
+    eq(observed.recover.rate, null, '故障か修理の介入欠測は自律復旧unknown');
+    eq(observed.recover.points, 0, '未知の復旧へ無介入加点しない');
+  }
   const dirtyRepair = [brk('f1'), ship('r1', { repair_of: ['f1'], interventions: [{ kind: 'infra' }] })];
   eq(ra([brk('f1')], dirtyRepair, P).recover.rate, 0, '**人が触った修理は自律復旧ではない**');
   eq(ra([brk('f1', { interventions: [{ kind: 'infra' }] })], [brk('f1', { interventions: [{ kind: 'infra' }] }), ship('r1', { repair_of: ['f1'] })], P).recover.rate, 0,
@@ -922,6 +969,27 @@ function selftest() {
     runsDoc: { runs: [ship('a', { date_jst: '2026-09-04' })] },
   };
   const s1 = score(base);
+  ok('score統合も介入欠測をUMR/RAの無介入加点へ変えない', () => {
+    const unknownShip = ship('unknown-in-window', { date_jst: base.today });
+    delete unknownShip.interventions;
+    const mixed = score({ ...base, runsDoc: { runs: [...base.runsDoc.runs, unknownShip] } });
+    assert(mixed.components.umr.rate === null && mixed.components.umr.points === 0, '合成でUMRの未知が消えた');
+    const failure = brk('unknown-failure', { date_jst: base.today, source: 'act-reconcile' });
+    delete failure.interventions;
+    const partial = score({ ...base, runsDoc: { runs: [failure, ship('repair', { date_jst: base.today, repair_of: [failure.run_id] })] } });
+    assert(partial.components.ra.rate === null && partial.components.ra.recover.rate === null, '合成でRAの未知をゼロへcoerceした');
+    assert(partial.components.ra.recover.points === 0 && partial.components.ra.detect.points === 10, '未知復旧へ加点したか、独立した検知証拠を失った');
+    assert(!check(partial, P, { blindness: [] }).some(x => x.includes('成分 ra は measurable=false')), '既知の検知だけを保持したRAを拒否した');
+    const forged = structuredClone(partial); forged.components.ra.recover.points = 1; forged.components.ra.points += 1;
+    assert(check(forged, P, { blindness: [] }).some(x => x.includes('成分 ra は measurable=false')), '未知復旧の偽の加点を許した');
+    const zeroDetection = structuredClone(partial);
+    zeroDetection.components.ra.detect.hit = 0; zeroDetection.components.ra.detect.rate = 0;
+    assert(check(zeroDetection, P, { blindness: [] }).some(x => x.includes('成分 ra は measurable=false')), '検知0件/0率のまま10点を偽装できた');
+    for (const change of [{ rate: 2 }, { hit: 0 }, { max: 20 }]) {
+      const inconsistent = structuredClone(partial); Object.assign(inconsistent.components.ra.detect, change);
+      assert(check(inconsistent, P, { blindness: [] }).some(x => x.includes('成分 ra は measurable=false')), '検知件数・率・policy半配点が不一致でも例外を通した');
+    }
+  });
   ok('被覆率が同じなら据え置かない', () => {
     const s2 = score({ ...base, history: [{ total: 0, coverage: { demonstrated: 2 } }] });
     assert(s2.held === false, `据え置かれた: ${s2.held_why}`);
@@ -1108,6 +1176,23 @@ function selftest() {
   const carryBase = { ...quietBase, runsDoc: { runs: [...priorFails, ...quietBase.runsDoc.runs] } };
   const carried = score(carryBase);
 
+  ok('過去の介入欠測は据え置きの0率にもならず、RA総率はunknownを保つ', () => {
+    const runs = structuredClone(carryBase.runsDoc.runs);
+    delete runs.find(r => r.run_id === 'o3').interventions;
+    const mixed = score({ ...carryBase, runsDoc: { runs } });
+    assert(mixed.carried.items.every(x => Number.isFinite(x.rate)), 'null率を据え置いた');
+    assert(!mixed.carried.items.some(x => x.id === 'ra.recover'), '未観測の過去復旧を持ち越した');
+    assert(mixed.carried.skipped.some(x => x.id === 'ra.recover' && x.measurement_unknown), '未知で除外した根拠を失った');
+    assert(mixed.components.ra.recover.rate === null && mixed.components.ra.rate === null, '据え置き合成がnullを0へ昇格した');
+    assert(mixed.components.ra.recover.points === 0, '未知の過去復旧へ加点した');
+    assert(mixed.components.ra.detect.points === carried.components.ra.detect.points, '独立した既知検知の配点を変えた');
+    const onlyRecovery = structuredClone(P); onlyRecovery.carry_forward.applies_to = ['ra.recover'];
+    const skippedOnly = score({ ...carryBase, policy: onlyRecovery, runsDoc: { runs } });
+    assert(skippedOnly.carried.items.length === 0 && skippedOnly.carried.skipped.some(x => x.measurement_unknown), '未知だけの据え置き候補を再現できない');
+    assert(skippedOnly.components.ra.recover.rate === null && skippedOnly.components.ra.rate === null, '有効applies_toの未知skip-onlyが親RA率0へ昇格した');
+    assert(skippedOnly.components.ra.points === 0, '未知skip-onlyへ加点した');
+  });
+
   eq(carried.carried?.items?.map((x) => x.id), ['ra.detect', 'ra.recover', 'ep.miss'],
      '**窓の外の直近3件から据え置く**');
   eq(Number(carried.total.toFixed(4)), 59.1667, '据え置きが効いた合計（据え置き前は 35.0）');
@@ -1241,15 +1326,17 @@ function render(s) {
     L.push(`      指標の許可リスト: A ${s.metrics.by_tier.A} / B ${s.metrics.by_tier.B} / C ${s.metrics.by_tier.C}`
       + `  —— **契約に使えるのは承認済みの ${s.metrics.approved} 件**（起案は承認ではない）`);
   }
-  L.push(`  無検査マージ率     UMR  ${pts(c.umr.points, c.umr.max)}   ${pct(c.umr.rate)}  (重み ${c.umr.weight_counted}/${c.umr.weight_total}・出荷 ${c.umr.n})`);
+  L.push(`  記録上無検査マージ率 UMR ${pts(c.umr.points, c.umr.max)}   ${pct(c.umr.rate)}  (重み ${c.umr.weight_counted}/${c.umr.weight_total}・出荷 ${c.umr.n})`);
+  L.push(`      介入記録の未観測 ${c.umr.unknown_intervention_runs} 件。明示[]は記録上ゼロであり、完全な人介入観測や実際のzero-touch証明ではない`);
   for (const [k, v] of Object.entries(c.umr.by_class)) {
-    L.push(`      ${k}  ${v.hands_off}/${v.n} 無介入  （重み ${v.hands_off_weight}/${v.weight}）`);
+    L.push(`      ${k}  ${v.hands_off}/${v.n} 記録上無介入  （重み ${v.hands_off_weight}/${v.weight}）`);
   }
   if (c.umr.r0_capped) L.push(`      ⚠ **R0 の寄与が上限に当たっている** — 可逆で些末な変更の量産では伸びない`);
   L.push(`  復旧自律性         RA   ${pts(c.ra.points, c.ra.max)}   (故障 ${c.ra.n} 件)`);
   L.push(`      検知  ${pts(c.ra.detect.points, c.ra.detect.max)}  ${pct(c.ra.detect.rate)}  (${c.ra.detect.hit}/${c.ra.n} を機械が検知${c.ra.detect.beaten_by_dispatch ? `・先を越された ${c.ra.detect.beaten_by_dispatch}` : ''})`);
   if (c.ra.detect.why) L.push(`            ${c.ra.detect.why}`);
-  L.push(`      復旧  ${pts(c.ra.recover.points, c.ra.recover.max)}  ${pct(c.ra.recover.rate)}  (${c.ra.recover.hit}/${c.ra.n} を人手なしで復旧)`);
+  L.push(`      復旧  ${pts(c.ra.recover.points, c.ra.recover.max)}  ${pct(c.ra.recover.rate)}  (${c.ra.recover.hit}/${c.ra.n} を介入記録上無介入で復旧)`);
+  if (c.ra.recover.why) L.push(`            ${c.ra.recover.why}`);
   L.push(`      自動 revert ${c.ra.auto_revert_count} 回  ← **Phase 6 のハードゲート。点数では代替しない**`);
   L.push(`  エスカレーション精度 EP ${pts(c.ep.points, c.ep.max)}`);
   L.push(`      見逃し ${pts(c.ep.miss.points, c.ep.miss.max)}  ${c.ep.miss.rate === null ? 'n/a' : `遅延 ${c.ep.miss.late}/${c.ep.miss.n}`}`);

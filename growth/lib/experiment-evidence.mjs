@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import { hasPrimaryMetricConflict } from './ledger.mjs';
 
 const DAY = 86400000;
 const SEARCH_METRICS = ['ctr', 'position', 'impressions'];
@@ -67,6 +68,7 @@ function comparablePeriods(exp, before, after, asOf, lagDays) {
 }
 
 export function gscScope(exp) {
+  requireThat(!hasPrimaryMetricConflict(exp), 'Registered primary metric conflicts with CTR; GSC CTR cannot decide this experiment. Resolve the metric contract or use a diagnostic review');
   requireThat(metricSource(exp) === 'gsc' && SEARCH_METRICS.includes(exp.target_metric), 'This metric needs --review with its own source and measurement contract; GSC page data cannot substitute');
   const scope = exp.measurement_scope || { kind: 'page', page: exp.page };
   requireThat(exp.type !== 'faq_add' || exp.measurement_scope, 'FAQ scope must be explicit; page totals cannot substitute for a query');
@@ -173,6 +175,7 @@ export function reviewEvidence(exp, review, { baseDir, asOf, decision, manifestS
       findings: review.findings, artifacts: review.artifacts.map(r => artifact(r, baseDir)), manifest_sha256: manifestSha256,
       validation: 'artifact integrity and explicit diagnostic review; no efficacy comparison' };
   }
+  requireThat(!hasPrimaryMetricConflict(exp), 'Registered primary metric conflict blocks efficacy comparison; resolve the metric contract or record a diagnostic measurement failure');
   requireThat(review.kind === 'comparison' && ['keep', 'revert', 'iterate', 'inconclusive'].includes(decision), 'A comparison review is required for this decision');
   const c = exp.measurement_contract;
   requireThat(c && present(c.definition) && present(c.unit) && present(c.time_zone) && c.scope && typeof c.scope === 'object',

@@ -6,6 +6,11 @@
 (function() {
   'use strict';
 
+  // Static language navigation follows actual translated pages. These legacy
+  // articles only translate parts of their chrome; a stored preference must
+  // not relabel the Japanese body or replace its search metadata with English.
+  if (document.querySelector('.site-languages')) return;
+
   const STORAGE_KEY = 'simple-memo-lang';
   const DEFAULT_LANG = 'ja';
   const SUPPORTED_LANGS = ['ja', 'en'];

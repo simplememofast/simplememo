@@ -13,7 +13,13 @@ export function removeSectionRule(text){
  if(open<0||end<0)throw Error('Unbalanced section-rendering rule');
  const rule=text.slice(start,end);
  if(!rule.includes('@supports (content-visibility: auto)')||!rule.includes('html[lang="ja"] main > section:not(.hero):not(.press-band) {'))throw Error('Unexpected section-rendering rule');
- return text.slice(0,start)+text.slice(end);
+ const deferred=/html\[lang="ja"\] main > section:not\(\.hero\):not\(\.press-band\) \{\s*content-visibility: auto;\s*contain-intrinsic-block-size: auto 600px;\s*\}/g;
+ const matches=[...rule.matchAll(deferred)];
+ if(matches.length!==1)throw Error('Unexpected deferred section assignment');
+ // The shared stylesheet already defers four sections. Removing the fragment
+ // escape too makes the control jump against placeholders, not real geometry.
+ // Keep native fragment/focus escapes common; compare only normal deferral.
+ return text.slice(0,start)+rule.replace(deferred,'')+text.slice(end);
 }
 export function main(){
  const source=fs.realpathSync(process.argv[2]),destination=path.resolve(process.argv[3]);
@@ -22,6 +28,6 @@ export function main(){
  for(const name of ['index.html','en/index.html','assets/css/home-hero.css']){
   const file=path.join(destination,name);fs.writeFileSync(file,removeSectionRule(fs.readFileSync(file,'utf8')));
  }
- console.log('Control has identical candidate content, with only the new screen-only section rendering rule removed. The candidate is not modified.');
+ console.log('Control has identical content and native fragment/focus escapes, with only the new normal-screen deferral assignment removed. The candidate is not modified.');
 }
 if(process.argv[1]&&fs.existsSync(process.argv[1])&&import.meta.url===pathToFileURL(fs.realpathSync(process.argv[1])).href)main();
