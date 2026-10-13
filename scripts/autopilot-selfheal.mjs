@@ -274,7 +274,7 @@ const SCENARIOS = ledgerScenarios(
       }
       const prior = [1, 2, 3].flatMap(i => [
         { ...row, run_id: `unknown-${i}` },
-        { run_id: `repair-${i}`, outcome: 'shipped', repair_of: [`unknown-${i}`] },
+        { run_id: `repair-${i}`, outcome: 'shipped', pr: 900 + i, repair_of: [`unknown-${i}`] },
       ]);
       const limited = analyze({ runs: [...prior, row] }, MATRIX, RULES);
       assert(limited.targets[0].escalate && limited.targets[0].repair_attempts_for_class === 3
