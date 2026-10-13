@@ -14,6 +14,7 @@ import {validate,isOpen,saveLedger} from './ledger.mjs';
 import {ownershipConflict,changeScope} from './experiment-overlap.mjs';
 import {verifySupportingGitDiff,verifySupportingBaseline,verifyInheritedSitemapMerge} from './measurement-support.mjs';
 import {growthFollowups} from './company-growth-followup.mjs';
+import {reportTranslationsAt} from '../../scripts/lib/report-publication.mjs';
 import {decisionTrace,decisionCommitment} from './company-decision.mjs';
 import {nativeOrigin} from './company-origin.mjs';
 import {nativeEventEvidence,nativeThread} from './company-native-evidence.mjs';
@@ -192,7 +193,11 @@ export function verifyMeasurementDelivery(receipt,{stateRoot,root=ROOT,head,merg
     const at=new Date(mergedAt);
     for(const sha of [head,mergeSha])verifyMeasurementOwnership(p,{stateRoot,root,now:at,experiments:show(sha),except:p.id});
     const actual=call('git',['diff','--name-only',registration,head]).trim().split('\n').filter(Boolean);
-    const bookkeeping=new Set(['data/autopilot-runs.json','data/autopilot-status.json','autopilot/index.html','docs/obsidian/AUTOPILOT_LOG.md']);
+    // The report's generated translations ride with autopilot/index.html. The registry is read
+    // before the declaration (only declarations may precede it), so the run cannot widen it.
+    const trusted=r.bound_declaration_sha+'^';
+    const bookkeeping=new Set(['data/autopilot-runs.json','data/autopilot-status.json','autopilot/index.html','docs/obsidian/AUTOPILOT_LOG.md',
+      ...reportTranslationsAt(()=>call('git',['ls-tree',trusted,'--','data/i18n/pages.json']).trim()?call('git',['show',trusted+':data/i18n/pages.json']):null)]);
     assert(actual.every(file=>bookkeeping.has(file)||p.experiment.change_paths.includes(file)),'undeclared measurement change path');
     const inherited=verifyMeasurementMergeScope(r,{stateRoot,head,mergeSha,mergedAt,call});
     verifySupportingGitDiff(p.experiment,r.bound_declaration_sha,head,(...args)=>call('git',args),{now:at});

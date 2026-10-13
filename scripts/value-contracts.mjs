@@ -8,6 +8,7 @@ import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { judge, loadContext as eligibilityContext, todayJst } from './autonomy-eligibility.mjs';
+import { REPORT_PAGE, reportTranslationsAt } from './lib/report-publication.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DAY = 86400000;
@@ -321,7 +322,13 @@ export function verifyHistory(c, base, head, cwd = ROOT) {
   const before = git('diff', '--name-only', base, added).split('\n').filter(Boolean);
   if (before.some(p => !p.startsWith('data/decision-intents/') && !p.startsWith('data/decision-rejections/'))) throw new Error('implementation preceded declaration');
   const nums = git('diff', '--numstat', added, head).split('\n').filter(Boolean).map(l => l.split('\t'));
-  const metadata = new Set(['data/autopilot-runs.json', 'data/autopilot-status.json', 'docs/obsidian/AUTOPILOT_LOG.md', 'data/distribution-queue.json', 'autopilot/index.html']);
+  // The report's generated translations are derived from autopilot/index.html, so
+  // they are bookkeeping on the same terms (decision-monitor --publish-report writes both).
+  // Read from the base commit; an absent or unreadable registry adds nothing (stricter, not wider).
+  const registry = 'data/i18n/pages.json';
+  const translations = reportTranslationsAt(() => git('ls-tree', base, '--', registry) ? git('show', `${base}:${registry}`) : null);
+  const metadata = new Set(['data/autopilot-runs.json', 'data/autopilot-status.json', 'docs/obsidian/AUTOPILOT_LOG.md', 'data/distribution-queue.json', REPORT_PAGE,
+    ...translations]);
   let lines = 0, binaryBytes = 0;
   for (const [a, d, p] of nums) {
     if (p === f) throw new Error('intent is immutable');
@@ -474,13 +481,39 @@ export async function selftest() {
   const g = (...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
   try {
     g('init'); g('config', 'user.name', 'Test'); g('config', 'user.email', 'test@example.invalid');
-    fs.writeFileSync(path.join(dir, 'index.html'), 'before\n'); g('add', '.'); g('commit', '-m', 'base');
+    fs.writeFileSync(path.join(dir, 'index.html'), 'before\n');
+    const registry = pages => JSON.stringify({ version: 1, pages: [{ source: REPORT_PAGE, sourceLocale: 'ja',
+      existing: { ja: REPORT_PAGE, en: 'en/autopilot/index.html' }, pages }] });
+    const reportPages = { ja: REPORT_PAGE, en: 'en/autopilot/index.html', ko: 'ko/autopilot/index.html' };
+    fs.mkdirSync(path.join(dir, 'data/i18n'), { recursive: true });
+    fs.writeFileSync(path.join(dir, 'data/i18n/pages.json'), registry(reportPages));
+    g('add', '.'); g('commit', '-m', 'base');
     const base = g('rev-parse', 'HEAD');
     fs.mkdirSync(path.join(dir, 'data/decision-intents'), { recursive: true });
     fs.writeFileSync(path.join(dir, intentPath(c.id)), JSON.stringify(c, null, 2) + '\n'); g('add', '.'); g('commit', '-m', 'declare');
     fs.writeFileSync(path.join(dir, 'index.html'), 'after\n'); g('add', '.'); g('commit', '-m', 'implement');
     const head = g('rev-parse', 'HEAD');
     assert.equal(verifyHistory(c, base, head, dir).changed_lines, 2);
+    // The report and its generated translations are bookkeeping written by --publish-report.
+    for (const f of [REPORT_PAGE, 'ko/autopilot/index.html']) {
+      fs.mkdirSync(path.dirname(path.join(dir, f)), { recursive: true }); fs.writeFileSync(path.join(dir, f), 'report\n');
+    }
+    g('add', '.'); g('commit', '-m', 'publish report');
+    const reported = g('rev-parse', 'HEAD');
+    assert.equal(verifyHistory(c, base, reported, dir).changed_lines, 2, 'generated report translations are bookkeeping');
+    // An editorial translation and a route added by the PR itself are not.
+    fs.mkdirSync(path.join(dir, 'en/autopilot'), { recursive: true }); fs.writeFileSync(path.join(dir, 'en/autopilot/index.html'), 'edited\n');
+    g('add', '.'); g('commit', '-m', 'edit editorial');
+    assert.throws(() => verifyHistory(c, base, g('rev-parse', 'HEAD'), dir), /undeclared path: en\/autopilot/);
+    g('reset', '-q', '--hard', reported);
+    const widening = { ...c, id: 'test-contract-widen', touches: [...c.touches, 'data/i18n/pages.json'] };
+    fs.writeFileSync(path.join(dir, intentPath(widening.id)), JSON.stringify(widening, null, 2) + '\n'); g('add', '.'); g('commit', '-m', 'declare widening');
+    fs.writeFileSync(path.join(dir, 'data/i18n/pages.json'), registry({ ...reportPages, tr: 'tr/autopilot/index.html' }));
+    fs.mkdirSync(path.join(dir, 'tr/autopilot'), { recursive: true }); fs.writeFileSync(path.join(dir, 'tr/autopilot/index.html'), 'new\n');
+    g('add', '.'); g('commit', '-m', 'widen own bookkeeping');
+    assert.throws(() => verifyHistory(widening, reported, g('rev-parse', 'HEAD'), dir), /undeclared path: tr\/autopilot/,
+      'the bookkeeping set comes from the base registry, not the PR');
+    g('reset', '-q', '--hard', head);
     fs.writeFileSync(path.join(dir, 'outside.txt'), 'not declared\n'); g('add', '.'); g('commit', '-m', 'escape');
     assert.throws(() => verifyHistory(c, base, g('rev-parse', 'HEAD'), dir), /undeclared path/);
     assert.throws(() => verifyHistory({ ...c, p: .9 }, base, head, dir), /changed after/);
@@ -514,7 +547,7 @@ export async function selftest() {
     // repository. A helper-only test would miss a stale --feedback CLI route.
     g('checkout', '-q', '-b', 'feedback-cli', base);
     const save = (f, x) => { fs.mkdirSync(path.dirname(path.join(dir, f)), { recursive: true }); fs.writeFileSync(path.join(dir, f), JSON.stringify(x, null, 2) + '\n'); };
-    for (const f of ['value-contracts.mjs', 'decision-review.mjs', 'autonomy-eligibility.mjs', 'autonomy-score.mjs', 'lib/selftest.mjs', 'lib/decision-origin.mjs', 'lib/intervention-observation.mjs']) {
+    for (const f of ['value-contracts.mjs', 'decision-review.mjs', 'autonomy-eligibility.mjs', 'autonomy-score.mjs', 'lib/selftest.mjs', 'lib/decision-origin.mjs', 'lib/intervention-observation.mjs', 'lib/report-publication.mjs']) {
       fs.mkdirSync(path.dirname(path.join(dir, 'scripts', f)), { recursive: true });
       fs.copyFileSync(path.join(ROOT, 'scripts', f), path.join(dir, 'scripts', f));
     }

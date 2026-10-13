@@ -177,8 +177,9 @@ head が `Codex/decision-observe-*` の open PR が**1本でもある**と、`pu
 落ちる。2026-10-09〜13 は日次アクチュエータがこれで毎日落ち（#2039 #2041 #2042 #2048 #2050）、
 運転台帳と運転表が main に入らないまま main の日次検証が赤だった（Act は #2052 で直した）。
 訳はサイトマップの日付の元になるので、訳 → サイトマップの順を崩さない。
-**Decision Monitor の公開経路（`synchronizeReportSitemaps`・`pendingPublication` の範囲）は
-まだ訳を持たない。**2026-10-13 時点で、Monitor は 10/05 の #2004 を待って止まっている。
+Decision Monitor の公開経路も #2054 で訳を持った。**ただし 10/05 の #2004 を8日間待って止まっていた
+あいだ、Monitor の run は毎回3秒で緑に終わっていた。**いまは draft 以外の待ちPRが6時間を
+超えると run が赤になる（`stalledPublication`）。閉じるのは人かセッションで、Monitor は閉じない。
 
 **`Codex/decision-observe-*` を merge で更新しない。**main を merge すると、マージコミットが
 first-parent 比較で `/en/`・`/en/blog/`・`/blog/fastest-memo-app-benchmark` など

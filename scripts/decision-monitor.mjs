@@ -12,7 +12,8 @@ import { review, advance, recordSelection } from './decision-review.mjs';
 import { activeStreaks, shippingStreaks } from './autopilot-runs.mjs';
 import { ep as scoreEp, ra as scoreRa } from './autonomy-score.mjs';
 import { automatedDecisionOrigin, runtimeDecisionOrigin, verifyLaunchd, NATIVE_LABEL, NATIVE_SCRIPT } from './lib/decision-origin.mjs';
-import { publicationRetryPlan, retryPendingPublication } from './lib/decision-publication-retry.mjs';
+import { publicationRetryPlan, retryPendingPublication, stalledPublication } from './lib/decision-publication-retry.mjs';
+import { reportTranslationFiles } from './lib/report-publication.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = 'simplememofast/simplememo';
@@ -188,11 +189,15 @@ export function renderRunStreaks(html, runs) {
   const active = activeStreaks(runs), shipping = shippingStreaks(runs);
   const date = day => day.replace(/^(\d{4})-0?(\d+)-0?(\d+)$/, '$1年$2月$3日');
   const range = (from, to) => from ? `（${date(from)}〜${date(to)}）` : '';
+  // **文の形を値で変えない。**この段落は生成翻訳の1単位で、数字と日付だけが置き換え
+  // 記号になる。「現在」の期間は0日で消え1日以上で現れるので、出荷が記録された初日に
+  // 8言語とも訳が無くなり、公開そのものが止まる（2026-10-13 のレビューで再現）。
+  // 「現在」の終点は次の文の最終記入日と同じなので、期間は最長の側にだけ出す。
   const content = `<!-- run-streaks:start -->
-          この定義での連続稼働は現在<b>${active.current.days}</b>日${range(active.current.from, active.last_day)}で、最長も<b>${active.longest.days}</b>日${range(active.longest.from, active.longest.to)}です。
+          この定義での連続稼働は現在<b>${active.current.days}</b>日で、最長も<b>${active.longest.days}</b>日${range(active.longest.from, active.longest.to)}です。
           ${active.last_day ? `「現在」は台帳の最終記入日（${date(active.last_day)}）時点です。` : '台帳の記録はまだありません。'}
           稼働の定義では、失敗して行が立った日も「記録がある日」なので連続が切れません。
-          <b>連続出荷は現在${shipping.current.days}日</b>${range(shipping.current.from, shipping.last_day)}で、<b>連続出荷の最長は${shipping.longest.days}日</b>${range(shipping.longest.from, shipping.longest.to)}です。
+          <b>連続出荷は現在${shipping.current.days}日</b>で、<b>連続出荷の最長は${shipping.longest.days}日</b>${range(shipping.longest.from, shipping.longest.to)}です。
           <!-- run-streaks:end -->`;
   return html.replace(region, () => content);
 }
@@ -347,7 +352,16 @@ async function main() {
       const publication_recovery = retryPendingPublication(pending, { request: api, stopped: stop,
         rerun: id => execFileSync('gh', ['api', '--method', 'POST', `repos/${REPO}/actions/runs/${id}/rerun`],
           { cwd: ROOT, encoding: 'utf8', timeout: 30000, stdio: ['ignore', 'pipe', 'pipe'] }) });
-      console.log(JSON.stringify({ state: 'waiting_for_publication', ...origin, pending, publication_recovery }));
+      // An unreadable PR is unknown, not stalled: the retry path already reports it.
+      const now = new Date();
+      const readPr = number => { try { return api(`pulls/${number}`); } catch { return null; } };
+      const stalled = publication_recovery.state === 'validation_retry_requested' ? []
+        : pending.map(item => stalledPublication(item, readPr(item.pr), now)).filter(Boolean);
+      console.log(JSON.stringify({ state: 'waiting_for_publication', ...origin, pending, publication_recovery, stalled }));
+      if (stalled.length) {
+        throw new Error(`publication_stalled: ${stalled.map(s => `#${s.pr} open ${s.age_hours}h (mergeable_state=${s.mergeable_state})`).join(', ')}. `
+          + 'Nothing settles or publishes until it merges or a person/session closes it as superseded; the next run regenerates from main.');
+      }
       return;
     }
   }
@@ -534,6 +548,8 @@ function selftest() {
   assert.deepEqual(pendingPublication(publicationApi({ detail: { ...publication, changed_files: 5 }, files: translatedFiles })),
     [{ pr: 321, head: publication.head.sha, draft: false }]);
   assert.equal(reportTranslations.length, 8, 'eight generated report translations');
+  // The gates (value-contracts, decision-ci, company-measurement) derive the same set from the registry.
+  assert.deepEqual([...reportTranslations].sort(), reportTranslationFiles(), 'monitor scope and registry list the same report translations');
   for (const bad of [[{ filename: 'es/autopilot/index.html', status: 'modified' }],
     [{ filename: 'autopilot/index.html' }, { filename: 'es/autopilot/index.html', status: 'added' }],
     [{ filename: 'autopilot/index.html' }, { filename: 'es/index.html', status: 'modified' }],
@@ -565,6 +581,14 @@ function selftest() {
     { refreshed: { ...publication, head: { ...publication.head, sha: 'b'.repeat(40) } } }, { branch: 'b'.repeat(40) }]) {
     assert.throws(() => pendingPublication(publicationApi(options)), /pending/);
   }
+  // A publication that cannot merge must turn the monitor red instead of waiting quietly.
+  const opened = '2026-10-05T15:14:57Z', later = h => new Date(Date.parse(opened) + h * 36e5);
+  const blocked = { ...publication, created_at: opened, mergeable_state: 'dirty' };
+  assert.equal(stalledPublication({ pr: 321, draft: false }, blocked, later(5)), null, 'a fresh publication is still in flight');
+  assert.deepEqual(stalledPublication({ pr: 321, draft: false }, blocked, later(190)),
+    { pr: 321, age_hours: 190, mergeable_state: 'dirty' });
+  assert.equal(stalledPublication({ pr: 321, draft: true }, blocked, later(190)), null, 'an operator hold stays quiet');
+  assert.equal(stalledPublication({ pr: 321, draft: false }, { ...blocked, created_at: undefined }, later(190)), null);
   // The remote attempt counter bounds retries across the original owners.
   const ready = {...publication, mergeable: true, mergeable_state: 'clean'};
   const retryPending = [{pr: ready.number, head: ready.head.sha, draft: false}];
@@ -691,19 +715,27 @@ function selftest() {
   const streakTemplate = 'before<!-- run-streaks:start -->stale<!-- run-streaks:end -->after';
   const shippingDays = [1, 2].map(day => ({ date_jst: `2026-09-0${day}`, outcome: 'shipped' }));
   const shippingReport = renderRunStreaks(streakTemplate, shippingDays);
-  assert(shippingReport.includes('連続出荷は現在2日'));
+  assert(shippingReport.includes('連続出荷は現在2日</b>で、'));
   assert(shippingReport.includes('2026年9月1日〜2026年9月2日'));
   const failedDays = [...shippingDays, { date_jst: '2026-09-03', outcome: 'failed' }];
   const failureReport = renderRunStreaks(shippingReport, failedDays);
-  assert(failureReport.includes('連続稼働は現在<b>3</b>日（2026年9月1日〜2026年9月3日）'));
+  assert(failureReport.includes('連続稼働は現在<b>3</b>日で、最長も<b>3</b>日（2026年9月1日〜2026年9月3日）'));
   assert(failureReport.includes('最長も<b>3</b>日'));
   assert(failureReport.includes('連続出荷は現在0日</b>で、'));
   assert(failureReport.includes('連続出荷の最長は2日</b>（2026年9月1日〜2026年9月2日）'));
   assert(failureReport.startsWith('before') && failureReport.endsWith('after'));
   assert.equal(renderRunStreaks(failureReport, failedDays), failureReport);
   const gapReport = renderRunStreaks(streakTemplate, [...shippingDays, { date_jst: '2026-09-04', outcome: 'shipped' }]);
-  assert(gapReport.includes('連続稼働は現在<b>1</b>日（2026年9月4日〜2026年9月4日）'));
+  assert(gapReport.includes('連続稼働は現在<b>1</b>日で、'));
   assert(gapReport.includes('最長も<b>2</b>日'));
+  // The paragraph is one generated-translation unit. Its shape must not depend on
+  // the values, or the first shipped (or first no_run) day has no translation.
+  const shape = runs => renderRunStreaks(streakTemplate, runs).replace(/\d+/g, 'N');
+  const noRunToday = [...failedDays, { date_jst: '2026-09-04', outcome: 'no_run' }];
+  assert.equal(activeStreaks(noRunToday).current.days, 0, 'fixture: an active streak broken today');
+  for (const runs of [failedDays, [...shippingDays, { date_jst: '2026-09-04', outcome: 'shipped' }], noRunToday]) {
+    assert.equal(shape(runs), shape(shippingDays), 'streak sentences keep one shape for 0 and N days');
+  }
   const emptyReport = renderRunStreaks(streakTemplate, []);
   assert(emptyReport.includes('台帳の記録はまだありません。'));
   assert(!emptyReport.includes('null') && !emptyReport.includes('2026'));
