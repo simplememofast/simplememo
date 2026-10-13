@@ -4,7 +4,8 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { modelSummary, receipt, save, checkWiring, EXIT_CODES } from './autopilot-diagnostics.mjs';
+import { modelSummary, receipt, save, checkWiring, EXIT_CODES, AUDIT_VERDICTS } from './autopilot-diagnostics.mjs';
+import { VERDICTS } from './autopilot-audit.mjs';
 import { interpretRun } from './autopilot-act.mjs';
 
 export async function selftest() {
@@ -49,6 +50,14 @@ export async function selftest() {
     assert(r.observations_unknown.includes('num_turns'));
   });
   test('verdict and reason must belong together', () => assert.equal(receipt({ ...env, OUTPUT_REASON_CODE: 'unknown_remote_read' }).output_reason_code, null));
+  test('post-model audit verdict is a finite enum shared with the audit', () => {
+    assert.deepEqual(AUDIT_VERDICTS, VERDICTS);
+    for (const v of VERDICTS) assert.equal(receipt({ ...env, AUDIT_VERDICT: v }).post_model_audit, v);
+    for (const v of ['', 'CLEAN', 'clean\n', 'problems: index.html']) {
+      const r = receipt({ ...env, AUDIT_VERDICT: v });
+      assert.equal(r.post_model_audit, null); assert(r.observations_unknown.includes('post_model_audit'));
+    }
+  });
   test('skipped model verification remains unknown, not missing/zero', () => {
     const r = receipt({ ...env, MODEL_OUTCOME: 'failure', OUTPUT_VERDICT: '', OUTPUT_REASON_CODE: '', MATCHING_PR_COUNT: '' });
     assert.equal(r.output_verdict, null); assert.equal(r.matching_pr_count, null); assert.equal(r.production_verified, false);
@@ -63,7 +72,14 @@ export async function selftest() {
     ['path: ${{ runner.temp }}/autopilot-diagnostic', 'path: ${{ runner.temp }}'],
     ["steps.diagnostics.outputs.saved == 'true'", 'true'],
     ["steps.diagnostics.outputs.saved == 'true'\n        continue-on-error: true", "steps.diagnostics.outputs.saved == 'true'"],
-  ]) test('broken diagnostic wiring is rejected', () => assert.throws(() => checkWiring(workflow.replace(from, to))));
+  ]) test('broken diagnostic wiring is rejected', () => {
+    // Mutate inside the diagnostics step when the text is there: other steps (the post-model
+    // audit) share the same condition, and a first-match replace would miss this step.
+    const step = workflow.split('      - name: Preserve bounded execution diagnostics\n')[1].split('\n      - name:')[0];
+    const mutated = step.includes(from) ? workflow.replace(step, step.replace(from, to)) : workflow.replace(from, to);
+    assert.notEqual(mutated, workflow, `mutation did not apply: ${from}`);
+    assert.throws(() => checkWiring(mutated));
+  });
 
   test('optional diagnostic upload cannot reclassify verified output as no_artifact', () => {
     const steps = [

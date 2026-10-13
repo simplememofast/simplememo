@@ -24,6 +24,8 @@ const CHECKPOINT_REASONS = ['saved', 'no_unpublished_page_changes', 'capture_fai
 export const EXIT_CODES = ['shipped_pr', 'no_ship_pr', 'skipped_already_done', 'blocked_unverifiable',
   'blocked_scope', 'blocked_local_check', 'abandoned_after_declaration', 'tool_denied', 'other'];
 const MAX_EXIT_BYTES = 4096;
+// The post-model audit's verdict (scripts/autopilot-audit.mjs VERDICTS). Its paths stay in its own artifact.
+export const AUDIT_VERDICTS = ['clean', 'problems', 'not_on_day_branch', 'unavailable'];
 const count = value => Number.isSafeInteger(value) && value >= 0 ? value : null;
 const envCount = value => typeof value === 'string' && /^\d+$/.test(value) ? count(Number(value)) : null;
 const oneOf = (value, values) => values.includes(value) ? value : null;
@@ -77,6 +79,7 @@ export function receipt(env, execution = null, executionHash = null, readReason 
     checkpoint_reason: oneOf(env.CHECKPOINT_REASON, CHECKPOINT_REASONS),
     declared_page_change_count: envCount(env.DECLARED_PAGE_CHANGE_COUNT),
     model_exit_code: oneOf(exit.code, EXIT_CODES),
+    post_model_audit: oneOf(env.AUDIT_VERDICT, AUDIT_VERDICTS),
     execution_file_sha256: hash(executionHash, 64),
     production_verified: false,
   };
@@ -157,6 +160,7 @@ export function checkWiring(source) {
   assert.match(step, /node "\$RUNNER_TEMP\/diagnostic-tools\/scripts\/autopilot-diagnostics.mjs" --save "\$RUNNER_TEMP\/autopilot-diagnostic"/);
   assert.match(step, /OUTPUT_REASON_CODE: \$\{\{ steps.output.outputs.reason_code \}\}/);
   assert.match(step, /CHECKPOINT_REASON: \$\{\{ steps.checkpoint.outputs.reason \}\}/);
+  assert.match(step, /AUDIT_VERDICT: \$\{\{ steps.audit.outputs.verdict \}\}/);
   const upload = source.split('      - name: Upload bounded execution diagnostics\n')[1]?.split('\n  #')[0];
   assert(upload, 'diagnostic upload must be wired');
   assert.match(upload, /if: always\(\) && steps.diagnostics.outputs.saved == 'true'/);
