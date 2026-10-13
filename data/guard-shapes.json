@@ -843,6 +843,18 @@
       "expr": "last.routine.observation_state",
       "disposition": "前提",
       "note": "最後の実測に参照不可の写しを入れ子で保存しないための否定条件。直前のID照合・enabledのboolean検査と観測時刻の検査をすべて満たすことをassertで要求する。観測状態がない通常の実測だけを履歴として保持し、現在の参照不可には別途個別GETの404証跡を必須とする。繰り返し観測でも元の履歴時刻を更新しない自己テストあり。"
+    },
+    {
+      "file": "scripts/autopilot-selfheal.mjs",
+      "expr": "r.allowed",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-13: 試運転の許可（actionsRecoveryOnce）の自己テスト。actionsRecoveryOnce は全分岐で allowed を boolean で返す。allowed が欠けた戻り値は、拒否側の検査（!r.allowed && 理由の一致）では理由の不一致で落ち、許可側の検査（r.allowed && 日付・対象の一致）では偽になって落ちる。どちらも「欠けたら通す」にはならない。"
+    },
+    {
+      "file": "scripts/autopilot-selfheal.mjs",
+      "expr": "ancestor.error",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-13: #2062 のマージが HEAD の祖先にあるかの判定。git を起動できない・終了コードが 0 以外・履歴が浅い のどれでも preventionMerged は false になり、許可は prevention_missing で拒否される。照合相手（git の結果）が無いときに許可側へ倒れることは無い。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
@@ -1370,6 +1382,12 @@
       "expr": "value",
       "disposition": "報告のみ",
       "note": "2026-10-06: receiptのObject.entries(result).filter(([, value]) => value === null)は、既にnullとして保持した未観測項目名をobservations_unknownへ列挙する表示処理。値を0や成功に補完せず、元の出力verdict・exit code・公開判定を変更しない。34自己テストの欠測・不正型・壊れたJSON・モデル検証skip・checkpoint失敗でnullと固定理由の保持を確認。"
+    },
+    {
+      "file": "scripts/autopilot-selfheal.mjs",
+      "expr": "value",
+      "disposition": "前提",
+      "note": "2026-10-13: canonicalJson の型の振り分け（null は object 扱いせず JSON.stringify(null) へ回す）。規則ではなく行の指紋の直列化で、欠けた値も \"null\" として指紋に入るので、行の中身が変われば指紋が変わる（自己テストで1項目の書き換えを拒否することを確認）。"
     }
   ]
 }
