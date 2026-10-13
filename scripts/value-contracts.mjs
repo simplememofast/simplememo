@@ -311,6 +311,22 @@ export function loadIntents() {
   return fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => f.endsWith('.json')).sort().map(f => read(`data/decision-intents/${f}`)) : [];
 }
 
+/**
+ * Paths a declared run may change without listing them in `touches`.
+ * The report's generated translations are derived from autopilot/index.html, so
+ * they are bookkeeping on the same terms (decision-monitor --publish-report writes both).
+ * Read from the base commit; an absent or unreadable registry adds nothing (stricter, not wider).
+ * **data/autopilot-actions.json is deliberately absent:** its rows carry close_check and
+ * force_owner, so an undeclared edit could close an escalation. The daily run does not
+ * commit it (Runbook §2 Lane F); Act ingests the health issues.
+ */
+export function historyBookkeeping(base, git) {
+  const registry = 'data/i18n/pages.json';
+  const translations = reportTranslationsAt(() => git('ls-tree', base, '--', registry) ? git('show', `${base}:${registry}`) : null);
+  return new Set(['data/autopilot-runs.json', 'data/autopilot-status.json', 'docs/obsidian/AUTOPILOT_LOG.md', 'data/distribution-queue.json', REPORT_PAGE,
+    ...translations]);
+}
+
 // Verify the pre-declaration is a separate ancestor commit; timestamps alone are forgeable.
 export function verifyHistory(c, base, head, cwd = ROOT) {
   const git = (...args) => execFileSync('git', args, { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }).trim();
@@ -322,17 +338,14 @@ export function verifyHistory(c, base, head, cwd = ROOT) {
   const before = git('diff', '--name-only', base, added).split('\n').filter(Boolean);
   if (before.some(p => !p.startsWith('data/decision-intents/') && !p.startsWith('data/decision-rejections/'))) throw new Error('implementation preceded declaration');
   const nums = git('diff', '--numstat', added, head).split('\n').filter(Boolean).map(l => l.split('\t'));
-  // The report's generated translations are derived from autopilot/index.html, so
-  // they are bookkeeping on the same terms (decision-monitor --publish-report writes both).
-  // Read from the base commit; an absent or unreadable registry adds nothing (stricter, not wider).
-  const registry = 'data/i18n/pages.json';
-  const translations = reportTranslationsAt(() => git('ls-tree', base, '--', registry) ? git('show', `${base}:${registry}`) : null);
-  const metadata = new Set(['data/autopilot-runs.json', 'data/autopilot-status.json', 'docs/obsidian/AUTOPILOT_LOG.md', 'data/distribution-queue.json', REPORT_PAGE,
-    ...translations]);
+  const metadata = historyBookkeeping(base, git);
+  if (nums.some(([, , p]) => p === f)) throw new Error('intent is immutable');
+  // **Report every undeclared path at once.** Throwing on the first one showed
+  // PR #1993 (2026-10-05) as one undeclared png; the branch had six.
+  const undeclared = nums.map(([, , p]) => p).filter(p => !c.touches.includes(p) && !metadata.has(p));
+  if (undeclared.length) throw new Error(`undeclared path: ${undeclared.join(', ')}`);
   let lines = 0, binaryBytes = 0;
   for (const [a, d, p] of nums) {
-    if (p === f) throw new Error('intent is immutable');
-    if (!c.touches.includes(p) && !metadata.has(p)) throw new Error(`undeclared path: ${p}`);
     if (c.touches.includes(p)) {
       if (a === '-' || d === '-') {
         // Deletion has no blob at head; charge the original size in that case.
@@ -516,6 +529,11 @@ export async function selftest() {
     g('reset', '-q', '--hard', head);
     fs.writeFileSync(path.join(dir, 'outside.txt'), 'not declared\n'); g('add', '.'); g('commit', '-m', 'escape');
     assert.throws(() => verifyHistory(c, base, g('rev-parse', 'HEAD'), dir), /undeclared path/);
+    // 2026-10-06 shape: the health-intake ledger committed after the declaration. Every
+    // undeclared path is named at once (PR #1993 surfaced 1 of its 6).
+    fs.writeFileSync(path.join(dir, 'data/autopilot-actions.json'), '{"actions":[]}\n'); g('add', '.'); g('commit', '-m', 'health intake');
+    assert.throws(() => verifyHistory(c, base, g('rev-parse', 'HEAD'), dir), /undeclared path: outside\.txt, data\/autopilot-actions\.json|undeclared path: data\/autopilot-actions\.json, outside\.txt/,
+      'all undeclared paths, including the action ledger, are reported together');
     assert.throws(() => verifyHistory({ ...c, p: .9 }, base, head, dir), /changed after/);
     assert.throws(() => verifyHistory({ ...c, id: 'missing-id' }, base, head, dir), /not added/);
     // Takeover after a declaring run died (2026-09-05): the dead declaration is retired into

@@ -4,7 +4,7 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { modelSummary, receipt, save, checkWiring } from './autopilot-diagnostics.mjs';
+import { modelSummary, receipt, save, checkWiring, EXIT_CODES } from './autopilot-diagnostics.mjs';
 import { interpretRun } from './autopilot-act.mjs';
 
 export async function selftest() {
@@ -139,6 +139,42 @@ export async function selftest() {
       const r = save(output, args); assert(r.observations_unknown.includes('execution_file_oversized'));
     });
     clean();
+    const exitFile = path.join(temp, 'autopilot-exit.json');
+    test('the model exit code is read as an enum only', () => {
+      fs.writeFileSync(exitFile, JSON.stringify({ code: 'abandoned_after_declaration', note: secret }));
+      const r = save(output, args);
+      assert.equal(r.model_exit_code, 'abandoned_after_declaration'); assert(!JSON.stringify(r).includes(secret));
+    });
+    clean();
+    for (const [content, reason] of [[JSON.stringify({ code: secret }), 'exit_report_invalid'], [secret, 'exit_report_invalid'],
+      ['x'.repeat(5000), 'exit_report_oversized']]) {
+      test('an unusable exit report stays unknown, never a code', () => {
+        fs.writeFileSync(exitFile, content);
+        const r = save(output, args);
+        assert.equal(r.model_exit_code, null); assert(r.observations_unknown.includes(reason));
+        assert(!JSON.stringify(r).includes(secret));
+      });
+      clean();
+    }
+    fs.unlinkSync(exitFile);
+    test('a missing exit report is explicit', () => {
+      const r = save(output, args); assert.equal(r.model_exit_code, null);
+      assert(r.observations_unknown.includes('exit_report_missing'));
+    });
+    clean();
+    test('a symlinked exit report is never read', () => {
+      const privatePath = path.join(temp, 'private-exit.json'); fs.writeFileSync(privatePath, JSON.stringify({ code: 'shipped_pr' }));
+      fs.symlinkSync(privatePath, exitFile);
+      const r = save(output, args); assert.equal(r.model_exit_code, null);
+      assert(r.observations_unknown.includes('exit_report_unavailable'));
+    });
+    clean(); fs.unlinkSync(exitFile);
+    test('every exit code is offered by the prompt step that requests the file', () => {
+      const withoutOther = workflow.replace(/\/\s*other。/, '。');
+      assert.notEqual(withoutOther, workflow, 'fixture removes the "other" choice');
+      assert.throws(() => checkWiring(withoutOther), /exit code other/);
+      assert.throws(() => checkWiring(workflow.replace('"$RUNNER_TEMP/autopilot-exit.json"', '"/tmp/x.json"')), /exit code file/);
+    });
     test('checkpoint capture failure is preserved independently of model success', () => {
       const r = receipt({ ...env, CHECKPOINT_OUTCOME: 'failure', CHECKPOINT_SAVED: 'false', CHECKPOINT_REASON: 'capture_failed', DECLARED_PAGE_CHANGE_COUNT: '' }, raw);
       assert.equal(r.checkpoint_saved, false); assert.equal(r.checkpoint_reason, 'capture_failed');

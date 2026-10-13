@@ -237,11 +237,11 @@ export async function codexIntakeSelftest() {
   assert.equal(gated.failure_class, undefined, 'gate codes retain their existing eligibility representation');
   assert.equal(analyze({ runs: [gated] }, matrix).lane_f_required, true, 'recorded preflight faults must reach the existing repair lane');
   const priorFaults = [1, 2, 3].map(i => ({ ...gated, run_id: `prior-${i}` }));
-  const repairRuns = priorFaults.map(r => ({ run_id: `repair-${r.run_id}`, outcome: 'shipped', repair_of: [r.run_id] }));
+  const repairRuns = priorFaults.map((r, i) => ({ run_id: `repair-${r.run_id}`, outcome: 'shipped', pr: 900 + i, repair_of: [r.run_id] }));
   const limited = analyze({ runs: [...priorFaults, ...repairRuns, gated] }, matrix);
   assert.equal(limited.lane_f_required, false, 'preflight faults retain the three-repair limit');
   assert.equal(limited.escalate[0].run_id, gated.run_id);
-  assert.equal(analyze({ runs: [gated, { run_id: 'repair', outcome: 'shipped', repair_of: [gated.run_id] }] }, matrix).lane_f_required, false);
+  assert.equal(analyze({ runs: [gated, { run_id: 'repair', outcome: 'shipped', pr: 910, repair_of: [gated.run_id] }] }, matrix).lane_f_required, false);
   const designed = structuredClone(successful); const r = designed.codex_observation.runs[0].gate_receipt;
   r.code = 'skip_budget'; delete r.sha256; r.sha256 = digest(r);
   assert.equal(analyze({ runs: intake(designed).rows }, matrix).lane_f_required, false, 'budget gates do not become repair work');
