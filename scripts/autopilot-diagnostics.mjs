@@ -165,9 +165,11 @@ export function checkWiring(source) {
   assert.match(upload, /path: \$\{\{ runner.temp \}\}\/autopilot-diagnostic\n/);
   assert.match(upload, /retention-days: 7\n/);
   assert.doesNotMatch(source, /show_full_output:\s*['"]?true/);
-  // The prompt must ask for the finite exit code the receipt reads.
-  assert.match(source, /"\$RUNNER_TEMP\/autopilot-exit\.json"/, 'prompt must request the exit code file');
-  for (const code of EXIT_CODES) assert(source.includes(code), `prompt must offer exit code ${code}`);
+  // The prompt must ask for the finite exit code the receipt reads, on that same line
+  // (a word such as "other" appears elsewhere in the workflow anyway).
+  const exitStep = source.split('\n').find(line => line.includes('"$RUNNER_TEMP/autopilot-exit.json"'));
+  assert(exitStep, 'prompt must request the exit code file');
+  for (const code of EXIT_CODES) assert(new RegExp(`(^|[^a-z_])${code}([^a-z_]|$)`).test(exitStep), `prompt must offer exit code ${code}`);
 }
 
 async function main() {

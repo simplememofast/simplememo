@@ -105,8 +105,9 @@ export function analyze(runsDoc, matrix, escalationRules = []) {
   const runs = runsDoc.runs;
   // **Only a shipped repair repairs.** A repair_of on a failed or no_artifact row is
   // an attempt: it counts toward the limit below but cannot clear a failure or the
-  // containment. Same rule as autonomy-score RA and value-contracts. Every repair_of
-  // in the ledger up to 2026-10-13 sits on a shipped row with a PR, so nothing moves.
+  // containment. Stricter than autonomy-score RA and value-contracts (shipped only):
+  // here the shipped row must also carry its PR number, as autopilot-runs requires.
+  // Every repair_of in the ledger up to 2026-10-13 sits on such a row, so nothing moves.
   const repaired = new Set(runs.filter((r) => r.outcome === 'shipped' && Number.isInteger(r.pr) && r.pr > 0)
     .flatMap((r) => r.repair_of || []));
   const failures = runs.filter(repairFailure);

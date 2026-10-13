@@ -91,10 +91,12 @@ export function verifyLocal({ cwd = ROOT, baseRef = 'origin/main' } = {}) {
   const head = git('rev-parse', 'HEAD');
   const branch = git('rev-parse', '--abbrev-ref', 'HEAD');
   const base = git('merge-base', baseRef, head);
-  const committed = git('diff', '--name-only', base, head).split('\n').filter(Boolean);
+  // --no-renames: a move must show both the deleted source and the new path.
+  const committed = git('diff', '--name-only', '--no-renames', base, head).split('\n').filter(Boolean);
   // Tracked edits (staged or not, deletions included) and untracked files, by name only.
-  const pending = [...new Set([...git('diff', '--name-only', 'HEAD').split('\n'),
-    ...git('ls-files', '--others', '--exclude-standard').split('\n')].filter(Boolean))];
+  const edited = git('diff', '--name-only', '--no-renames', 'HEAD').split('\n').filter(Boolean);
+  const untracked = git('ls-files', '--others', '--exclude-standard').split('\n').filter(Boolean);
+  const pending = [...new Set([...edited, ...untracked])];
   const touched = [...new Set([...committed, ...pending])];
   const problems = [];
   // Same scope as the CI gate: only an autonomous picker branch may not touch its gate.
@@ -102,15 +104,19 @@ export function verifyLocal({ cwd = ROOT, baseRef = 'origin/main' } = {}) {
     ? touched.filter(p => protectedPaths.includes(p) || p.startsWith('.github/workflows/')) : [];
   if (forbidden.length) problems.push(`autonomous decision cannot change its gate or policy: ${forbidden.join(', ')}`);
   const intents = committed.filter(p => /^data\/decision-intents\/[a-z0-9-]+\.json$/.test(p));
-  const uncommittedIntents = pending.filter(p => p.startsWith('data/decision-intents/'));
+  // A committed declaration edited in the work tree is immutable, not "not committed yet".
+  const uncommittedIntents = pending.filter(p => p.startsWith('data/decision-intents/') && !intents.includes(p));
   if (uncommittedIntents.length) problems.push(`declaration not committed and pushed first: ${uncommittedIntents.join(', ')}`);
   if (intents.length > 1) problems.push(`more than one live declaration: ${intents.join(', ')}`);
   else if (intents.length === 1) {
     const c = JSON.parse(git('show', `${head}:${intents[0]}`));
     try { verifyHistory(c, base, head, cwd); } catch (error) { problems.push(error.message); }
+    if (pending.includes(intents[0])) problems.push(`intent is immutable (uncommitted edit): ${intents[0]}`);
     const allowed = historyBookkeeping(base, git);
-    const outside = pending.filter(p => !uncommittedIntents.includes(p) && (p === intents[0] || (!c.touches.includes(p) && !allowed.has(p))));
-    if (outside.length) problems.push(`uncommitted changes outside the declaration: ${outside.join(', ')}`);
+    const outside = p => p !== intents[0] && !uncommittedIntents.includes(p) && !c.touches.includes(p) && !allowed.has(p);
+    const editedOutside = edited.filter(outside), untrackedOutside = untracked.filter(outside);
+    if (editedOutside.length) problems.push(`uncommitted changes outside the declaration: ${editedOutside.join(', ')}`);
+    if (untrackedOutside.length) problems.push(`untracked files outside the declaration (fail once added): ${untrackedOutside.join(', ')}`);
   } else if (required(branch, touched, JSON.parse(git('show', `${base}:data/value-metrics.json`)))) {
     problems.push(`a prospective contract is required for: ${touched.filter(p => !contractExempt(p)).join(', ')}`);
   }
@@ -298,9 +304,18 @@ async function selftest() {
     g('reset', '-q', '--hard', head);
     fs.writeFileSync(path.join(dir, 'stray.txt'), 'not declared\n');
     fs.writeFileSync(path.join(dir, 'index.html'), 'uncommitted but declared\n');
-    assert.deepEqual(verifyLocal({ cwd: dir, baseRef }).problems, ['uncommitted changes outside the declaration: stray.txt'],
-      'uncommitted work is checked against touches and bookkeeping');
+    assert.deepEqual(verifyLocal({ cwd: dir, baseRef }).problems, ['untracked files outside the declaration (fail once added): stray.txt'],
+      'untracked work is checked against touches and bookkeeping, and named as untracked');
     fs.rmSync(path.join(dir, 'stray.txt')); g('checkout', '-q', '--', 'index.html');
+    // A committed declaration edited in place is immutable, not "not committed yet".
+    const live = `data/decision-intents/${c.id}.json`;
+    save(live, { ...c, touches: [...c.touches, 'extra.html'] });
+    assert.deepEqual(verifyLocal({ cwd: dir, baseRef }).problems, [`intent is immutable (uncommitted edit): ${live}`]);
+    g('checkout', '-q', '--', live);
+    // A staged move shows its undeclared source, not only the declared destination.
+    g('mv', 'index.html', 'moved.html');
+    assert.match(verifyLocal({ cwd: dir, baseRef }).problems.join(' | '), /outside the declaration: index\.html|outside the declaration: moved\.html/);
+    g('mv', 'moved.html', 'index.html');
     g('checkout', '-q', '-b', 'claude/obsidian-auto-20260904');
     fs.writeFileSync(path.join(dir, 'scripts/value-contracts.mjs'), '// edited gate\n');
     assert.match(verifyLocal({ cwd: dir, baseRef }).problems.join(' | '), /cannot change its gate or policy: scripts\/value-contracts\.mjs/,
@@ -418,11 +433,15 @@ async function main() {
     const result = verifyLocal(at > 0 ? { baseRef: process.argv[at + 1] } : {});
     console.log(JSON.stringify(result, null, 2));
     if (result.problems.length) {
-      console.error('decision-ci --verify-local: the PR would fail decision-ci. Before opening it:\n'
-        + '  - undeclared or uncommitted paths: revert them (git checkout -- <path> / git revert). The declaration is immutable;\n'
-        + '    if the path is truly needed, `node scripts/value-contracts.mjs --retire` and re-declare it in touches before implementing.\n'
-        + '  - data/autopilot-actions.json: do not commit it on this branch. Autopilot Act ingests the health issues.\n'
-        + '  - no change can ship today: retire the declaration and open the status/LOG-only PR (Runbook §5).');
+      console.error('decision-ci --verify-local: the PR would fail decision-ci. Before opening it (Runbook §2-1 step 6-1):\n'
+        + '  - uncommitted edits outside the declaration: git checkout -- <path>. Untracked files: delete them, do not add them.\n'
+        + '  - committed paths outside the declaration: git revert <commit> (no force push).\n'
+        + '  - the path is truly needed: the declaration is immutable and only the LAST one counts. First git revert every\n'
+        + '    implementation commit after it (net zero), then --retire, push a new declaration with the path in touches,\n'
+        + '    then re-implement (git cherry-pick). Re-declaring on top of the old commits fails "implementation preceded declaration".\n'
+        + '  - data/autopilot-actions.json: do not commit the health-intake rows; Autopilot Act ingests them. Only a day that\n'
+        + '    files an owner request (Runbook §7-1) declares this path in touches.\n'
+        + '  - nothing can ship today: retire the declaration and open the status/LOG-only PR (no run ledger, no report page).');
       process.exitCode = 1;
     }
     return;

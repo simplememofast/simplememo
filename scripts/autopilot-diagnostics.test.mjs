@@ -169,8 +169,11 @@ export async function selftest() {
       assert(r.observations_unknown.includes('exit_report_unavailable'));
     });
     clean(); fs.unlinkSync(exitFile);
-    test('every exit code is offered by the prompt', () => {
-      for (const code of EXIT_CODES) assert(workflow.includes(code), code);
+    test('every exit code is offered by the prompt step that requests the file', () => {
+      const withoutOther = workflow.replace(/\/\s*other。/, '。');
+      assert.notEqual(withoutOther, workflow, 'fixture removes the "other" choice');
+      assert.throws(() => checkWiring(withoutOther), /exit code other/);
+      assert.throws(() => checkWiring(workflow.replace('"$RUNNER_TEMP/autopilot-exit.json"', '"/tmp/x.json"')), /exit code file/);
     });
     test('checkpoint capture failure is preserved independently of model success', () => {
       const r = receipt({ ...env, CHECKPOINT_OUTCOME: 'failure', CHECKPOINT_SAVED: 'false', CHECKPOINT_REASON: 'capture_failed', DECLARED_PAGE_CHANGE_COUNT: '' }, raw);
