@@ -169,7 +169,16 @@ head が `Codex/decision-observe-*` の open PR が**1本でもある**と、`pu
 **手で数字を置き換えない。**`node scripts/decision-monitor.mjs --publish-report` が正。
 成分の本文（出荷◯件・故障◯件・週◯回）も同じ生成器が一緒に書き換えるので、
 **点数だけ直すと本文が取り残される。**ページを変えたら
-`python3 scripts/generate_sitemap.py` も同じコミットに入れる。
+`python3 scripts/build_site_translations.py --write` と `python3 scripts/generate_sitemap.py` を
+**この順に**回し、同じコミットに入れる。
+
+**/autopilot/ は 2026-10-08（#2031）から8言語の生成翻訳を持つ。**日本語のページだけを
+書き換えた PR は SEO Validation の「All public topics have complete current translations」で
+落ちる。2026-10-09〜13 は日次アクチュエータがこれで毎日落ち（#2039 #2041 #2042 #2048 #2050）、
+運転台帳と運転表が main に入らないまま main の日次検証が赤だった（Act は #2052 で直した）。
+訳はサイトマップの日付の元になるので、訳 → サイトマップの順を崩さない。
+**Decision Monitor の公開経路（`synchronizeReportSitemaps`・`pendingPublication` の範囲）は
+まだ訳を持たない。**2026-10-13 時点で、Monitor は 10/05 の #2004 を待って止まっている。
 
 **`Codex/decision-observe-*` を merge で更新しない。**main を merge すると、マージコミットが
 first-parent 比較で `/en/`・`/en/blog/`・`/blog/fastest-memo-app-benchmark` など
