@@ -210,9 +210,14 @@ async function selftest() {
       }
     }
   }
-  assert.throws(() => checkWiring(source.replace("steps.output.outcome == 'failure'", "steps.output.outcome == 'success'")));
-  assert.throws(() => checkWiring(source.replace('!cancelled() &&', 'true &&')));
-  assert.throws(() => checkWiring(source.replace('checkpoint-tools/scripts/autopilot-checkpoint.mjs', 'checkpoint-tools/scripts/unused.mjs')));
+  // Mutate inside the checkpoint step: other steps share the same condition text.
+  const step = source.split('      - name: Preserve declared page work after model or output failure\n')[1].split('\n      - name:')[0];
+  for (const [from, to] of [["steps.output.outcome == 'failure'", "steps.output.outcome == 'success'"], ['!cancelled() &&', 'true &&'],
+    ['checkpoint-tools/scripts/autopilot-checkpoint.mjs', 'checkpoint-tools/scripts/unused.mjs']]) {
+    const mutated = source.replace(step, step.replace(from, to));
+    assert.notEqual(mutated, source, `mutation did not apply: ${from}`);
+    assert.throws(() => checkWiring(mutated));
+  }
   console.log('checkpoint: real Git capture/restore, new binary assets, private-file exclusion, dirty tree, integrity and failure wiring passed');
 }
 

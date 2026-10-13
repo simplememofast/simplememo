@@ -536,6 +536,39 @@ jobs:
         if: always() && steps.claude.outcome == 'success'
         run: 'true'
 
+      # 【モデル後の照合】モデルが手順 4-1（--verify-local）を飛ばしても、宣言と残った作業
+      # （コミット済み・未コミット・未追跡）をここで照らす。2026-10-06 は success・PR なしで
+      # 終わり、何を変えたのか誰にも言えなかった。**判定には使わない（記録だけ）。**
+      # 道具は $GITHUB_SHA の写しから動かす（モデルの作業ツリーのスクリプトを実行しない）。
+      # 外へ出すのは理由のコード・件数・main に既にあるパスだけ（scripts/autopilot-audit.mjs）。
+      # チェックポイントが作業ツリーへ fetch する前に読む。
+      - name: Audit the declaration against the work after the model
+        id: audit
+        if: >-
+          !cancelled() &&
+          (steps.claude.outcome == 'success' || steps.claude.outcome == 'failure')
+        continue-on-error: true
+        env:
+          TODAY_DASH: ${{ steps.gate.outputs.today_dash }}
+        run: |
+          git -c core.hooksPath=/dev/null -c core.fsmonitor=false worktree add --detach "$RUNNER_TEMP/audit-tools" "$GITHUB_SHA"
+          node "$RUNNER_TEMP/audit-tools/scripts/autopilot-audit.mjs" --save "$RUNNER_TEMP/autopilot-audit" --workspace "$GITHUB_WORKSPACE"
+
+      # 照合の結果を Actions API の段名から読めるようにする（判定コードの段と同じ理由）。
+      - name: "モデル後の照合: ${{ steps.audit.outputs.verdict || 'unavailable' }}"
+        if: always() && (steps.claude.outcome == 'success' || steps.claude.outcome == 'failure')
+        run: 'true'
+
+      - name: Upload the post-model audit
+        if: always() && steps.audit.outputs.saved == 'true'
+        continue-on-error: true
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: autopilot-audit-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/autopilot-audit
+          retention-days: 7
+          if-no-files-found: error
+
       # 【実費の記録】claude-code-action の実行ログから total_cost_usd を取り出し、
       # runのサマリと通知に出す。
       #
@@ -653,6 +686,7 @@ jobs:
           CHECKPOINT_SAVED: ${{ steps.checkpoint.outputs.saved }}
           CHECKPOINT_REASON: ${{ steps.checkpoint.outputs.reason }}
           DECLARED_PAGE_CHANGE_COUNT: ${{ steps.checkpoint.outputs.declared_page_change_count }}
+          AUDIT_VERDICT: ${{ steps.audit.outputs.verdict }}
         run: |
           git worktree add --detach "$RUNNER_TEMP/diagnostic-tools" "$GITHUB_SHA"
           node "$RUNNER_TEMP/diagnostic-tools/scripts/autopilot-diagnostics.mjs" --save "$RUNNER_TEMP/autopilot-diagnostic"
