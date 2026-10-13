@@ -193,6 +193,7 @@ export function ownerRequest(target, actionsDoc) {
  */
 export const ACTIONS_RECOVERY = Object.freeze({
   variable: 'AUTOPILOT_RECOVERY_ONCE',
+  workflow_ref: 'simplememofast/simplememo/.github/workflows/obsidian-autopilot.yml@refs/heads/main',
   // PR #2062（PR 前の照合・終了理由の記録）のマージ。これより前のコードでは試さない。
   prevention_sha: 'a35323d7b1723c066a835b0cd024eb1019de99ed',
   limit: 3,
@@ -225,8 +226,10 @@ export function actionsRecoveryOnce({ analysis, problems, rows, stop, env, now, 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return refuse('invalid_date');
   if (date !== new Date(now.getTime() + 9 * 3600e3).toISOString().slice(0, 10)) return refuse('not_today');
   // 定時の1回目だけ。手動起動（AIのセッションも起動できる）と再実行は越えない。
+  // 変数は全ワークフローから読めるので、動いているのが日次実行のワークフロー自身であることも見る。
   if (env.GITHUB_ACTIONS !== 'true' || env.GITHUB_EVENT_NAME !== 'schedule' || env.GITHUB_RUN_ATTEMPT !== '1'
-    || env.GITHUB_REPOSITORY !== 'simplememofast/simplememo' || env.GITHUB_REF !== 'refs/heads/main') {
+    || env.GITHUB_REPOSITORY !== 'simplememofast/simplememo' || env.GITHUB_REF !== 'refs/heads/main'
+    || env.GITHUB_WORKFLOW_REF !== ACTIONS_RECOVERY.workflow_ref) {
     return refuse('not_scheduled_first_attempt');
   }
   if (stop?.stopped !== false || stop?.agents?.actions?.stopped !== false) return refuse('explicit_stop');
@@ -433,7 +436,8 @@ export function checkRecoveryWiring(source) {
   const PINNED_LEDGER = '9d67f58c5e1291d32b4649ad1b063be0e5699ade';
   const NOW = new Date('2026-10-14T22:45:00Z'); // JST 10-15 07:45（定時 07:30 の配信遅れ）
   const ENV = { AUTOPILOT_RECOVERY_ONCE: '2026-10-15', GITHUB_ACTIONS: 'true', GITHUB_EVENT_NAME: 'schedule',
-    GITHUB_RUN_ATTEMPT: '1', GITHUB_REPOSITORY: 'simplememofast/simplememo', GITHUB_REF: 'refs/heads/main' };
+    GITHUB_RUN_ATTEMPT: '1', GITHUB_REPOSITORY: 'simplememofast/simplememo', GITHUB_REF: 'refs/heads/main',
+    GITHUB_WORKFLOW_REF: 'simplememofast/simplememo/.github/workflows/obsidian-autopilot.yml@refs/heads/main' };
   const STOP = { stopped: false, agents: { actions: { stopped: false } } };
   const fixture = () => {
     const shown = spawnSync('git', ['show', `${PINNED_LEDGER}:data/autopilot-runs.json`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 });
@@ -466,7 +470,9 @@ export function checkRecoveryWiring(source) {
     ['試運転の許可: 手動起動・再実行・別の参照では越えない（AI も手動起動できる）', () => {
       for (const change of [{ GITHUB_EVENT_NAME: 'workflow_dispatch' }, { GITHUB_EVENT_NAME: 'repository_dispatch' },
         { GITHUB_RUN_ATTEMPT: '2' }, { GITHUB_ACTIONS: undefined }, { GITHUB_REPOSITORY: 'someone/simplememo' },
-        { GITHUB_REF: 'refs/heads/claude/x' }]) {
+        { GITHUB_REF: 'refs/heads/claude/x' }, { GITHUB_WORKFLOW_REF: undefined },
+        { GITHUB_WORKFLOW_REF: 'simplememofast/simplememo/.github/workflows/other.yml@refs/heads/main' },
+        { GITHUB_WORKFLOW_REF: 'simplememofast/simplememo/.github/workflows/obsidian-autopilot.yml@refs/heads/claude/x' }]) {
         refused({ ...fixture(), env: { ...ENV, ...change } }, 'not_scheduled_first_attempt');
       }
     }],
@@ -663,6 +669,9 @@ if (isMain) {
     process.exit(1);
   }
   if (process.argv.includes('--check')) {
+    // CI が走らせるのは --check だけ。試運転の許可を拒否する検体（と既存の境界の検体）をここでも回す。
+    // 回さないと、許可の条件を1つ外す変更が SEO Validation を緑のまま通る（レビューで再現）。
+    if (run(SCENARIOS) !== 0) process.exit(1);
     checkRecoveryWiring(fs.readFileSync(path.join(ROOT, '.github/workflows/obsidian-autopilot.yml'), 'utf8'));
     const tests = spawnSync('python3', [path.join(ROOT, 'scripts/codex-recovery-permit.py'), '--selftest'],
       { stdio: 'inherit', timeout: 90000 });
