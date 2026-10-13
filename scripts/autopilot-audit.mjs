@@ -29,6 +29,9 @@ const PROBLEMS = [
   ['more than one live declaration', 'multiple_declarations'],
   ['undeclared path', 'undeclared_committed'],
   ['implementation preceded declaration', 'implementation_before_declaration'],
+  ['intent was not added before implementation', 'intent_not_added_first'],
+  ['actual diff exceeds declared budget', 'budget_exceeded'],
+  ['actual binary diff exceeds declared budget', 'budget_exceeded'],
   ['intent is immutable', 'intent_mutated'],
   ['intent changed after declaration', 'intent_mutated'],
   ['uncommitted changes outside the declaration', 'uncommitted_outside'],
@@ -50,7 +53,9 @@ const lines = text => text.split('\n').filter(Boolean);
 
 // verifyLocal runs its own git with process.env, so the CLI hardens process.env itself.
 export function audit({ cwd, day, baseRef = 'origin/main', verify = verifyLocal, env = hardenedEnv() }) {
-  const git = (...args) => execFileSync('git', args, { cwd, env, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }).trim();
+  // stderr is piped and dropped: git warnings name paths (e.g. CRLF on a new file) and the job log is public.
+  const git = (...args) => execFileSync('git', args, { cwd, env, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024,
+    stdio: ['ignore', 'pipe', 'pipe'] }).trim();
   assert.match(String(day), /^\d{4}-\d{2}-\d{2}$/, 'day required');
   const expected = `claude/obsidian-auto-${day.replaceAll('-', '')}`;
   const branch = git('rev-parse', '--abbrev-ref', 'HEAD');
@@ -63,14 +68,19 @@ export function audit({ cwd, day, baseRef = 'origin/main', verify = verifyLocal,
   const uncommitted = lines(git('diff', '--name-only', '--no-renames', 'HEAD'));
   const untracked = lines(git('ls-files', '--others', '--exclude-standard'));
   const intents = committed.filter(p => /^data\/decision-intents\/[a-z0-9-]+\.json$/.test(p));
-  // Paths outside the one live declaration (bookkeeping as the CI gate counts it).
+  // Paths outside the one live declaration, counted as the CI gate counts them: commits after the
+  // declaration (verifyHistory checks added..head), plus uncommitted and untracked work; declarations,
+  // retirements and the gate's bookkeeping set are not outside.
   let outside = null;
   if (intents.length === 1) {
     const touches = JSON.parse(git('show', `${head}:${intents[0]}`)).touches;
+    const added = lines(git('log', '--format=%H', '--diff-filter=A', `${base}..${head}`, '--', intents[0])).at(-1);
     const allowed = historyBookkeeping(base, git);
-    if (Array.isArray(touches)) {
-      outside = [...new Set([...committed, ...uncommitted, ...untracked])]
-        .filter(p => p !== intents[0] && !touches.includes(p) && !allowed.has(p));
+    if (Array.isArray(touches) && added) {
+      const after = lines(git('diff', '--name-only', '--no-renames', added, head));
+      outside = [...new Set([...after, ...uncommitted, ...untracked])]
+        .filter(p => !p.startsWith('data/decision-intents/') && !p.startsWith('data/decision-rejections/')
+          && !touches.includes(p) && !allowed.has(p));
     }
   }
   const problems = verify({ cwd, baseRef }).problems;
@@ -125,7 +135,9 @@ export function checkWiring(source) {
   // Adding the worktree checks files out: a planted post-checkout hook or fsmonitor must not run.
   assert.match(step, /git -c core\.hooksPath=\/dev\/null -c core\.fsmonitor=false worktree add --detach "\$RUNNER_TEMP\/audit-tools" "\$GITHUB_SHA"/,
     'tools must come from the workflow commit, without the model\'s hooks');
-  assert.match(step, /node "\$RUNNER_TEMP\/audit-tools\/scripts\/autopilot-audit.mjs" --save "\$RUNNER_TEMP\/autopilot-audit" --workspace "\$GITHUB_WORKSPACE"/);
+  // stderr dropped: verifyLocal's git (decision-ci) inherits it, and git warnings can name new files.
+  assert.match(step, /node "\$RUNNER_TEMP\/audit-tools\/scripts\/autopilot-audit.mjs" --save "\$RUNNER_TEMP\/autopilot-audit" --workspace "\$GITHUB_WORKSPACE" 2>\/dev\/null\n/,
+    'the audit must not write git warnings (they can name new files) to the public log');
   assert.doesNotMatch(step, /secrets\./, 'the audit needs no credential');
   const upload = source.split('      - name: Upload the post-model audit\n')[1]?.split('\n      - name:')[0];
   assert(upload, 'audit upload must be wired');
@@ -152,6 +164,8 @@ export function selftest() {
     write('data/autopilot-status.json', '{}\n'); write('autopilot/index.html', 'r\n');
     g('add', '.'); g('commit', '-qm', 'base'); g('update-ref', 'refs/remotes/origin/main', 'HEAD');
     g('checkout', '-qb', 'claude/obsidian-auto-20261015');
+    // Retire-then-redeclare: a rejection record and the declaration itself are never outside.
+    write('data/decision-rejections/old.json', '{}\n'); g('add', '.'); g('commit', '-qm', 'retire');
     write('data/decision-intents/x.json', JSON.stringify({ touches: ['index.html'] }, null, 2));
     g('add', '.'); g('commit', '-qm', 'declare');
     write('index.html', 'b\n'); write('data/autopilot-runs.json', '{"runs":[1]}\n');
@@ -172,18 +186,18 @@ export function selftest() {
     check(!fs.existsSync(marker), 'a model-planted core.fsmonitor ran during the audit');
     check(report.verdict === 'problems' && JSON.stringify(report.codes) === JSON.stringify(['other', 'undeclared_committed', 'untracked_outside']),
       `codes: ${JSON.stringify(report.codes)}`);
-    check(report.on_day_branch === true && report.head_pushed === true && report.commits_ahead === 2 && report.declaration_count === 1, 'branch facts');
-    check(report.counts.committed === 5 && report.counts.uncommitted === 1 && report.counts.untracked === 2, `counts ${JSON.stringify(report.counts)}`);
+    check(report.on_day_branch === true && report.head_pushed === true && report.commits_ahead === 3 && report.declaration_count === 1, 'branch facts');
+    check(report.counts.committed === 6 && report.counts.uncommitted === 1 && report.counts.untracked === 2, `counts ${JSON.stringify(report.counts)}`);
     // index.html is declared; data/autopilot-runs.json and autopilot/index.html are bookkeeping.
     check(report.counts.outside_declaration === 4, `outside ${report.counts.outside_declaration}`);
     check(JSON.stringify(report.paths_on_main.committed) === JSON.stringify(['data/autopilot-runs.json', 'index.html']), 'known committed names');
     check(JSON.stringify(report.paths_on_main.outside_declaration) === JSON.stringify([]), 'new names must not appear as known');
     // The new declaration counts under data/ by name-free count, like every other new path.
-    check(report.new_paths.count === 5 && report.new_paths.by_directory_on_main['assets/img/og'] === 1
-      && report.new_paths.by_directory_on_main.data === 1 && report.new_paths.by_directory_on_main['.'] === 3,
+    check(report.new_paths.count === 6 && report.new_paths.by_directory_on_main['assets/img/og'] === 1
+      && report.new_paths.by_directory_on_main.data === 2 && report.new_paths.by_directory_on_main['.'] === 3,
     `new paths ${JSON.stringify(report.new_paths)}`);
     const text = JSON.stringify(report);
-    for (const leak of ['AKIA0000', 'leak-name', 'brand-new-dir', 'hook.sh', 'something new', 'x.json'])
+    for (const leak of ['AKIA0000', 'leak-name', 'brand-new-dir', 'hook.sh', 'something new', 'x.json', 'old.json'])
       check(!text.includes(leak), `a new name or free text left the runner: ${leak}`);
     // Not on the day branch, and no push.
     g('checkout', '-q', '-b', 'claude/other');
@@ -207,7 +221,8 @@ export function selftest() {
   checkWiring(fs.readFileSync(path.join(ROOT, '.github/workflows/obsidian-autopilot.yml'), 'utf8'));
   const wiring = fs.readFileSync(path.join(ROOT, '.github/workflows/obsidian-autopilot.yml'), 'utf8');
   for (const [from, to, label] of [["        id: audit\n", '', 'id'], ['        continue-on-error: true\n        env:\n          TODAY_DASH', '        env:\n          TODAY_DASH', 'continue-on-error'],
-    ['"$RUNNER_TEMP/audit-tools" "$GITHUB_SHA"', '"$RUNNER_TEMP/audit-tools" HEAD', 'trusted commit']]) {
+    ['"$RUNNER_TEMP/audit-tools" "$GITHUB_SHA"', '"$RUNNER_TEMP/audit-tools" HEAD', 'trusted commit'],
+    ['--workspace "$GITHUB_WORKSPACE" 2>/dev/null', '--workspace "$GITHUB_WORKSPACE"', 'stderr kept']]) {
     assert.throws(() => checkWiring(wiring.replace(from, to)), undefined, `wiring check missed ${label}`);
     passed++;
   }

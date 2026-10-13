@@ -541,7 +541,8 @@ jobs:
       # 終わり、何を変えたのか誰にも言えなかった。**判定には使わない（記録だけ）。**
       # 道具は $GITHUB_SHA の写しから動かす（モデルの作業ツリーのスクリプトを実行しない）。
       # 外へ出すのは理由のコード・件数・main に既にあるパスだけ（scripts/autopilot-audit.mjs）。
-      # チェックポイントが作業ツリーへ fetch する前に読む。
+      # チェックポイントが作業ツリーへ fetch する前に読む。stderr は捨てる（git の警告が新しい
+      # ファイル名を出すことがあり、ジョブログは公開）。結果は段名・成果物・GITHUB_OUTPUT に残る。
       - name: Audit the declaration against the work after the model
         id: audit
         if: >-
@@ -552,7 +553,7 @@ jobs:
           TODAY_DASH: ${{ steps.gate.outputs.today_dash }}
         run: |
           git -c core.hooksPath=/dev/null -c core.fsmonitor=false worktree add --detach "$RUNNER_TEMP/audit-tools" "$GITHUB_SHA"
-          node "$RUNNER_TEMP/audit-tools/scripts/autopilot-audit.mjs" --save "$RUNNER_TEMP/autopilot-audit" --workspace "$GITHUB_WORKSPACE"
+          node "$RUNNER_TEMP/audit-tools/scripts/autopilot-audit.mjs" --save "$RUNNER_TEMP/autopilot-audit" --workspace "$GITHUB_WORKSPACE" 2>/dev/null
 
       # 照合の結果を Actions API の段名から読めるようにする（判定コードの段と同じ理由）。
       - name: "モデル後の照合: ${{ steps.audit.outputs.verdict || 'unavailable' }}"
