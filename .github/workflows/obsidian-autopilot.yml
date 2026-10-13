@@ -178,9 +178,22 @@ jobs:
       # 停止を台帳に書いて残す形にすると、このレーンに main への書き込み権限が
       # 要る — self_repair.must_not の「自分の権限を広げない」に正面から反する。
       # 台帳へ書くのは人かセッション（--contain）で、通常のPR経路を通る。
+      #
+      # 【所有者承認の試運転（1回限り）】オーナーが Settings → Secrets and variables →
+      # Actions → Variables に AUTOPILOT_RECOVERY_ONCE = JST の日付 を入れた日の
+      # **定時の1回目だけ**、封じ込めを越える（docs/obsidian/ACTIONS_RECOVERY_ONE_USE.md）。
+      # 対象の故障行・修理回数・上限が1つでも変わっていれば越えない。変数はこの段にだけ渡す。
       - name: 封じ込め（修理上限に達した経路は着手しない）
+        id: contain
         if: steps.gate.outputs.run == 'true' && steps.estop.outputs.stopped == 'false'
+        env:
+          AUTOPILOT_RECOVERY_ONCE: ${{ vars.AUTOPILOT_RECOVERY_ONCE }}
         run: node scripts/autopilot-selfheal.mjs --contain --dry-run
+
+      # 試運転だったことを Actions API の段名から読めるようにする（判定コードの段と同じ理由）。
+      - name: 所有者承認の試運転（1回限り）
+        if: steps.contain.outputs.recovery == 'actions_once'
+        run: 'true'
 
       - name: 予算ゲート（当月の実費が上限を超えていたら走らない）
         if: steps.gate.outputs.run == 'true'
