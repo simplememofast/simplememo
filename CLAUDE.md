@@ -181,6 +181,16 @@ Decision Monitor の公開経路も #2054 で訳を持った。**ただし 10/05
 あいだ、Monitor の run は毎回3秒で緑に終わっていた。**いまは draft 以外の待ちPRが6時間を
 超えると run が赤になる（`stalledPublication`）。閉じるのは人かセッションで、Monitor は閉じない。
 
+止まっていたあいだは、夜間の公開も、本番の自動巻き戻しの判断も止まっていた（`pendingPublication` で
+return するので、契約の観測ループに入らない）。これはロードマップの B-04（公開キューが1本で、
+/autopilot/ の書き手が複数）で、#1430・#1548 に続く3回目の閉塞。**公開 PR が検査で落ちたら、
+閉じる前に落ちた段を確かめ、日付の検査なら先に main を直す**（直さずに閉じると、作り直した PR も
+同じ段で落ちる）。書き手が複数なので、日次アクチュエータの同期が先に入ると、同じ日の公開 PR が
+運転表の同じ行（自律スコアの合計）でぶつかって dirty になることがある。この形は rebase しても
+同じ行がぶつかるので、閉じて Monitor に main から作り直させる（2026-10-13、#2056 が先に入って
+#2060 を閉じ、Monitor が #2061 を作り直した）。公開の直前に main が進んでいると、Monitor は
+`main advanced` で赤く終わり、次の run がやり直す（同じ日に1回あった）。これは故障ではない。
+
 **`Codex/decision-observe-*` を merge で更新しない。**main を merge すると、マージコミットが
 first-parent 比較で `/en/`・`/en/blog/`・`/blog/fastest-memo-app-benchmark` など
 **無関係ページの `lastmod` まで動かす**（実測: `sitemap-en.xml` が3行）。
