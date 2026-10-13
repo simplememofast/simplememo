@@ -26,7 +26,9 @@ jobs:
   monitor:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Publishing the report also rebuilds its eight generated translations
+    # (about 3 minutes on the runner) before the sitemap; keep headroom.
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:

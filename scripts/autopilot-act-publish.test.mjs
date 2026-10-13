@@ -133,6 +133,20 @@ test('an existing pending branch keeps its path allowlist and main merge', () =>
   assert.equal(callsOf(rejected, 'git', 'checkout').length, 0);
 });
 
+test('a pending branch may carry the generated report translations, and nothing else translated', () => {
+  for (const locale of ['ar', 'es', 'id', 'ko', 'pt-BR', 'tr', 'zh-Hant', 'zh']) {
+    const result = run(prepare, { CLOCK_DAY: '20260917', OPEN_PR: '1447', PENDING_PATH: `${locale}/autopilot/index.html` });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.output, `branch=${branch}\n`);
+  }
+  for (const path of ['es/index.html', 'en/autopilot/index.html', 'fr/autopilot/index.html']) {
+    const rejected = run(prepare, { OPEN_PR: '1447', PENDING_PATH: path });
+    assert.notEqual(rejected.status, 0, path);
+    assert.equal(rejected.output, '');
+    assert.equal(callsOf(rejected, 'git', 'checkout').length, 0);
+  }
+});
+
 for (const clock of ['20260917', '20260918', '20261001']) {
   test(`publishing at ${clock} uses the prepared branch, not the new clock date`, () => {
     const result = run(publish, { CLOCK_DAY: clock });
@@ -206,6 +220,10 @@ test('successful staging keeps the exact existing publication path allowlist', (
     'data/autopilot-runs.json', 'data/autopilot-status.json', 'data/autopilot-cost.json',
     'data/emergency-stop.json', 'data/eligibility-log.json', 'data/autonomy-score-history.json',
     'data/routine-runs.json', 'autopilot/index.html',
+    // /autopilot/ has generated translations since 2026-10-08 (#2031). Without
+    // them every Act PR failed the translation check from 10-09 to 10-13.
+    'ar/autopilot/index.html', 'es/autopilot/index.html', 'id/autopilot/index.html', 'ko/autopilot/index.html',
+    'pt-BR/autopilot/index.html', 'tr/autopilot/index.html', 'zh-Hant/autopilot/index.html', 'zh/autopilot/index.html',
     'sitemap.xml', 'sitemap-ja.xml', 'sitemap-en.xml', 'sitemap-locales.xml',
   ]]);
   assert.equal(callsOf(result, 'git', 'commit').length, 1);
