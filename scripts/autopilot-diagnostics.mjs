@@ -19,6 +19,11 @@ const REASONS = {
 const SUBTYPES = ['success', 'error_max_turns', 'error_max_budget_usd',
   'error_during_execution', 'error_max_structured_output_retries'];
 const CHECKPOINT_REASONS = ['saved', 'no_unpublished_page_changes', 'capture_failed'];
+// The model's own finite statement of why it stopped (prompt step 8). 2026-10-06 ended
+// with subtype=success and no PR, and nothing said why. Free text is never read.
+export const EXIT_CODES = ['shipped_pr', 'no_ship_pr', 'skipped_already_done', 'blocked_unverifiable',
+  'blocked_scope', 'blocked_local_check', 'abandoned_after_declaration', 'tool_denied', 'other'];
+const MAX_EXIT_BYTES = 4096;
 const count = value => Number.isSafeInteger(value) && value >= 0 ? value : null;
 const envCount = value => typeof value === 'string' && /^\d+$/.test(value) ? count(Number(value)) : null;
 const oneOf = (value, values) => values.includes(value) ? value : null;
@@ -47,7 +52,7 @@ export function modelSummary(execution) {
   };
 }
 
-export function receipt(env, execution = null, executionHash = null, readReason = null) {
+export function receipt(env, execution = null, executionHash = null, readReason = null, exit = {}) {
   const model = modelSummary(execution);
   const day = /^\d{4}-\d{2}-\d{2}$/.test(env.TODAY_DASH ?? '') ? env.TODAY_DASH : null;
   const verdict = oneOf(env.OUTPUT_VERDICT, Object.keys(REASONS));
@@ -71,6 +76,7 @@ export function receipt(env, execution = null, executionHash = null, readReason 
     checkpoint_saved: ['true', 'false'].includes(env.CHECKPOINT_SAVED) ? env.CHECKPOINT_SAVED === 'true' : null,
     checkpoint_reason: oneOf(env.CHECKPOINT_REASON, CHECKPOINT_REASONS),
     declared_page_change_count: envCount(env.DECLARED_PAGE_CHANGE_COUNT),
+    model_exit_code: oneOf(exit.code, EXIT_CODES),
     execution_file_sha256: hash(executionHash, 64),
     production_verified: false,
   };
@@ -78,7 +84,32 @@ export function receipt(env, execution = null, executionHash = null, readReason 
   if (readReason) result.observations_unknown.push(oneOf(readReason,
     ['execution_file_missing', 'execution_file_unavailable', 'execution_file_oversized',
       'execution_file_invalid_json', 'execution_file_unexpected_path']) ?? 'execution_file_unavailable');
+  if (exit.reason) result.observations_unknown.push(oneOf(exit.reason,
+    ['exit_report_missing', 'exit_report_unavailable', 'exit_report_oversized', 'exit_report_invalid']) ?? 'exit_report_unavailable');
   return result;
+}
+
+// The model writes this file, so read it like the execution file: one fixed path,
+// no symlink, bounded size, and only the enum survives.
+function readExit(env) {
+  const file = path.join(env.RUNNER_TEMP, 'autopilot-exit.json');
+  let fd;
+  try {
+    if (!fs.lstatSync(file).isFile()) return { reason: 'exit_report_unavailable' };
+    fd = fs.openSync(file, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW | fs.constants.O_NONBLOCK);
+    const stat = fs.fstatSync(fd);
+    if (!stat.isFile()) return { reason: 'exit_report_unavailable' };
+    if (stat.size > MAX_EXIT_BYTES) return { reason: 'exit_report_oversized' };
+    const buffer = Buffer.alloc(MAX_EXIT_BYTES + 1);
+    const length = fs.readSync(fd, buffer, 0, buffer.length, 0);
+    if (length > MAX_EXIT_BYTES) return { reason: 'exit_report_oversized' };
+    let parsed;
+    try { parsed = JSON.parse(buffer.subarray(0, length).toString('utf8')); } catch { return { reason: 'exit_report_invalid' }; }
+    const code = oneOf(parsed?.code, EXIT_CODES);
+    return code ? { code } : { reason: 'exit_report_invalid' };
+  } catch (error) {
+    return { reason: error.code === 'ENOENT' ? 'exit_report_missing' : 'exit_report_unavailable' };
+  } finally { if (fd !== undefined) fs.closeSync(fd); }
 }
 
 function readExecution(env) {
@@ -112,7 +143,7 @@ export function save(output, env = process.env) {
   assert.equal(path.basename(output), 'autopilot-diagnostic');
   assert.equal(fs.realpathSync(path.dirname(output)), fs.realpathSync(env.RUNNER_TEMP));
   const read = readExecution(env);
-  const data = receipt(env, read.execution, read.sha256, read.reason);
+  const data = receipt(env, read.execution, read.sha256, read.reason, readExit(env));
   fs.mkdirSync(output, { mode: 0o700 }); // never reuse a directory or upload its prior contents
   fs.writeFileSync(path.join(output, 'receipt.json'), JSON.stringify(data, null, 2) + '\n', { mode: 0o600, flag: 'wx' });
   return data;
@@ -134,6 +165,9 @@ export function checkWiring(source) {
   assert.match(upload, /path: \$\{\{ runner.temp \}\}\/autopilot-diagnostic\n/);
   assert.match(upload, /retention-days: 7\n/);
   assert.doesNotMatch(source, /show_full_output:\s*['"]?true/);
+  // The prompt must ask for the finite exit code the receipt reads.
+  assert.match(source, /"\$RUNNER_TEMP\/autopilot-exit\.json"/, 'prompt must request the exit code file');
+  for (const code of EXIT_CODES) assert(source.includes(code), `prompt must offer exit code ${code}`);
 }
 
 async function main() {

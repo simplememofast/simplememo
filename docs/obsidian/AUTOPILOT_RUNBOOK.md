@@ -608,27 +608,23 @@ Gate通過後にaptが90分のジョブ上限を食い尽くし、`Claude Code` 
 node scripts/health-intake.mjs      # ops/autopilot-stale と ops/cron-failure を台帳へ
 ```
 
-**⚠ 実行はここでよいが、コミットは §2-1 の宣言より後に回す（2026-09-06 追加）。**
-`decision-ci` の `verifyHistory` は「**宣言ファイルを足したコミットまでに、
-宣言ファイル以外の差分が1つでもあれば落とす**」。2026-09-06、この記帳の
-**`last_seen_jst` の1行**が宣言より前にコミットされていたために、
-その日の全作業が `implementation preceded declaration` で落ちた（PR #969）。
-
-**効くのは「最後の」宣言。**`--retire` で取り下げて宣言し直した日は、
-**やり直す前に積んだコミットも全部「宣言より前」**に数えられる。
-
-手順:
+**⚠ 読むだけにして、日次ブランチにはコミットしない（2026-10-13 改訂）。**
 
 ```
-node scripts/health-intake.mjs                        # 実行して行を読む（レーンFの候補はこれで見える）
-git stash push -- data/autopilot-actions.json         # §2-1 は clean tracked tree を要求する
-                                                      #（--select も --retire も）
-… §2-1 の契約フロー（宣言・取り下げ・再宣言）…
-git stash pop && git add data/autopilot-actions.json  # 最後の宣言を push した後に記帳をコミット
+node scripts/health-intake.mjs --dry-run              # 何が入るかを読む（レーンFの候補はこれで見える）
 ```
 
-**stash を失っても困らない。**`last_seen_jst` は時刻ではなく**日付**なので、
-同じ日に `health-intake.mjs` をもう一度回せば同じ結果になる（冪等）。
+`data/autopilot-actions.json` は**宣言の前にコミットしても後にコミットしても PR が落ちる。**
+前なら `implementation preceded declaration`（2026-09-06、PR #969）、後なら
+`undeclared path: data/autopilot-actions.json`（2026-10-06。宣言の6秒後にこのコミットを
+積んだ時点で、どの形の PR も decision-ci を通らない枝になっていた。10-05 の #1993 にも
+同じパスが入っていた）。以前の手順「宣言の後に stash pop してコミット」は前者だけを避けて
+後者を作っていた。**台帳扱いには足さない** —— この台帳の行は close_check・force_owner を持つので、
+宣言なしの編集を許すとエスカレーションを閉じられる。
+
+**取り込みは Autopilot Act が当日中に行う**（`appendHealthIssueActions`）。誤って書き換えたら
+`git checkout -- data/autopilot-actions.json` で戻す。PR の前には §2-1 の
+`node scripts/decision-ci.mjs --verify-local` がこれも含めて検出する。
 
 **claim コミットは無罪。**空コミットなので差分を持たず、この規則には当たらない（実測）。
 
@@ -810,6 +806,8 @@ node scripts/autopilot-selfheal.mjs
 4. 出力された `data/decision-intents/<id>.json` だけを**別コミットにして先にpush**する。**この時点までに宣言ファイル以外のコミットが1つでもあると `decision-ci` が落ちる**（§2 レーンFの記帳を含む。2026-09-06 に実際に落ちた）。この時点では記事やコードを編集しない。CIがコミットの順序を検査し、事前データから予測・適格性・較正の参照記録を再計算する。参照が無い・古い・後から変更された新規契約は通らない。この配線より前に宣言済みの契約は当時の形式で検証し、過去に参照記録を付け足さない。
 5. 選ばれた候補だけを実装する。契約は変更しない。範囲や予測を変えたければ、この候補を中止して新しいIDで最初から判定する。実装をpushし、`gh pr create` でPR番号を確定する。**マージを待たずに**、§5-4の記帳コマンドで宣言した `run_id`・`lane`・`action` とそのPR番号を持つ行を同じブランチへ追加する。1つの契約に複数の新しい出荷を混ぜない。
 6. 記帳後に `node scripts/decision-monitor.mjs --publish-report` で公開運転表を同期し、続けて `python3 scripts/build_site_translations.py --write` と `python3 scripts/generate_sitemap.py` をこの順に回して、運転台帳・status JSON・`autopilot/index.html`・8言語の生成翻訳（`ar` `es` `id` `ko` `pt-BR` `tr` `zh-Hant` `zh` の `autopilot/index.html`）・sitemap を同じPRへcommit・pushする。/autopilot/ は 2026-10-08（#2031）から生成翻訳を持ち、訳を揃えない PR は SEO Validation の翻訳の検査で落ちる（2026-10-09〜13 の日次アクチュエータの PR がこれで全部止まった。#2052 で修正）。生成翻訳は `autopilot/index.html` と同じく台帳扱いで、価値契約の `touches` に入れなくてよい（`scripts/lib/report-publication.mjs`）。sitemap は台帳扱いではないので、更新日が動いた sitemap（`sitemap.xml`・`sitemap-ja.xml`・`sitemap-locales.xml`）は `touches` に入れる。**この最終HEADに対するpull_request起因のSEO Validationが成功してから自動マージされる。**宣言だけのpushや、PR番号と出荷記録が未確定の途中HEADの検査はマージの根拠にならない。`outcome: shipped` の行はこのPRがマージされてmainへ入った時点で出荷実績になる。未マージのプレビューを実績として報告しない。このコマンドの出力は同期完了だけで、選定には使わない。候補の理由や証拠には、公開してよい運用情報だけを書く。個人データや秘密情報は含めない。
+6-1. **PR を作る前と、作業をやめる前に** `node scripts/decision-ci.mjs --verify-local` を実行する。CI の decision-ci はランナー内では動かない（schedule イベントで枝が main になる）ので、宣言の外のパスはこれまでモデルが終わった後にしか分からなかった（2026-10-05 #1993 は6パス、10-06 は宣言の6秒後に出荷不能）。これは未コミットの変更も含めて、宣言の外のパスを**全部**挙げる。落ちたら PR を作る前に戻す（`git checkout -- <path>` / `git revert`）。宣言は変えられないので、要るパスなら手順2からやり直す（取り下げて宣言し直す）。直せない日は宣言を取り下げ、status/LOG だけの PR にする。
+6-2. **最後の操作として**、`$RUNNER_TEMP/autopilot-exit.json` に `{"code":"<CODE>"}` を書く（語彙はプロンプト手順8）。公開される診断（`scripts/autopilot-diagnostics.mjs`）が読むのはこの語彙だけで、文章は捨てる。10-06 は success で終わって PR が無く、なぜ止まったかを誰も言えなかった。
 7. 事後決済と限定的な静的ページの復旧は Decision Monitor が行う。未来の結果、観測できない費用、欠測日を補完しない。契約なしの過去の出荷を契約に紐づけない。
 
 成熟の基準は決済20件。方向の改善が20件の窓で乏しい場合、次の10回のうち2回を適格候補の下位から選ぶ。成熟前には選択の枠組みを変更しない。R1以上の権限や日次実行回数を自動で拡大する処理は持たない。

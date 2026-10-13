@@ -103,7 +103,12 @@ export function observedPendingTriage(row) {
  */
 export function analyze(runsDoc, matrix, escalationRules = []) {
   const runs = runsDoc.runs;
-  const repaired = new Set(runs.flatMap((r) => r.repair_of || []));
+  // **Only a shipped repair repairs.** A repair_of on a failed or no_artifact row is
+  // an attempt: it counts toward the limit below but cannot clear a failure or the
+  // containment. Same rule as autonomy-score RA and value-contracts. Every repair_of
+  // in the ledger up to 2026-10-13 sits on a shipped row with a PR, so nothing moves.
+  const repaired = new Set(runs.filter((r) => r.outcome === 'shipped' && Number.isInteger(r.pr) && r.pr > 0)
+    .flatMap((r) => r.repair_of || []));
   const failures = runs.filter(repairFailure);
   const unrepaired = failures.filter((r) => !repaired.has(r.run_id));
 
@@ -233,6 +238,19 @@ const SCENARIOS = ledgerScenarios(
   }] });
 
   SCENARIOS.push(
+    ['**出荷していない行の repair_of は修理にならない**（試行には数える）', () => {
+      const failure = { ...doc('no_artifact').runs[0], outcome: 'no_artifact' };
+      const attempt = { run_id: 'ap-y', date_jst: '2026-09-02', route: 'actions', attempted: true,
+        outcome: 'no_artifact', failure_class: 'no_artifact', source: 'test', repair_of: ['ap-x'] };
+      const notRepaired = analyze({ runs: [failure, attempt] }, MATRIX, RULES);
+      assert(notRepaired.targets.some(t => t.run_id === 'ap-x'), '失敗した行の repair_of で故障が消えた');
+      assert(notRepaired.targets.find(t => t.run_id === 'ap-x').repair_attempts_for_class === 1, '失敗した修理を試行に数えていない');
+      const shipped = { ...attempt, run_id: 'ap-z', outcome: 'shipped', failure_class: null, pr: 42 };
+      assert(!analyze({ runs: [failure, shipped] }, MATRIX, RULES).targets.some(t => t.run_id === 'ap-x'),
+        '出荷した修理で故障が消えない');
+      assert(analyze({ runs: [failure, { ...shipped, pr: null }] }, MATRIX, RULES).targets.some(t => t.run_id === 'ap-x'),
+        'PR の無い出荷行で故障が消えた');
+    }],
     ['原因未確定の実行失敗を証拠付きの調査待ちとして保持する', () => {
       const row = { ...doc(null).runs[0], source: 'act-reconcile-session', external_ref: '90001',
         needs_triage: true, failure_reason: '単独診断は判定不能', detected_note: 'GitHub step completed_at',

@@ -11,7 +11,7 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
-import { contractProblems, approvedMetric, METRICS, verifyHistory, selectContract, predictionFeedback, retireIntent } from './value-contracts.mjs';
+import { contractProblems, approvedMetric, METRICS, verifyHistory, historyBookkeeping, selectContract, predictionFeedback, retireIntent } from './value-contracts.mjs';
 import { reportTranslationsAt } from './lib/report-publication.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -26,10 +26,10 @@ export const protectedPaths = ['data/value-metrics.json', 'data/autonomy-score.j
   'growth/lib/company-search.mjs', 'growth/lib/ledger.mjs',
   'scripts/autopilot-budget.mjs', 'scripts/check-credential-probe.mjs',
   'scripts/codex-recovery-permit.py'];
+export const contractExempt = p => ['data/autopilot-runs.json', 'data/autopilot-status.json', 'docs/obsidian/AUTOPILOT_LOG.md'].includes(p) || p.startsWith('data/decision-rejections/');
 export function required(branch, paths, metrics) {
   if (!/^claude\/obsidian-auto-/.test(branch)) return false;
-  const bookkeeping = p => ['data/autopilot-runs.json', 'data/autopilot-status.json', 'docs/obsidian/AUTOPILOT_LOG.md'].includes(p) || p.startsWith('data/decision-rejections/');
-  return METRICS.some(id => approvedMetric(metrics, id)) && paths.some(p => !bookkeeping(p));
+  return METRICS.some(id => approvedMetric(metrics, id)) && paths.some(p => !contractExempt(p));
 }
 const gitAt = cwd => (...a) => execFileSync('git', a, { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }).trim();
 
@@ -76,6 +76,45 @@ function verifySupportRegistration(e,base,head,files,git) {
   assert.equal(git('show',registration+'^:'+intents[0]),git('show',head+':'+intents[0]),'support declaration changed after registration');
   assert.deepEqual(JSON.parse(git('show',registration+':'+registry)).experiments.find(row=>row.id===e.id),e,'support registration changed after implementation');
   git('diff','--quiet',base,registration,'--',...e.change_paths);
+}
+
+/**
+ * The runner cannot reach the real check before a PR exists: `--check` reads a
+ * schedule event whose branch is main and returns. 2026-10-05 (PR #1993) and
+ * 2026-10-06 learned about undeclared paths only after the model had finished —
+ * 10-06's branch was already unshippable 6 seconds after its declaration.
+ * Run the same declaration checks on the local branch, uncommitted work included,
+ * and name every path. CI still owns the verdict; this only reports earlier.
+ */
+export function verifyLocal({ cwd = ROOT, baseRef = 'origin/main' } = {}) {
+  const git = gitAt(cwd);
+  const head = git('rev-parse', 'HEAD');
+  const branch = git('rev-parse', '--abbrev-ref', 'HEAD');
+  const base = git('merge-base', baseRef, head);
+  const committed = git('diff', '--name-only', base, head).split('\n').filter(Boolean);
+  // Tracked edits (staged or not, deletions included) and untracked files, by name only.
+  const pending = [...new Set([...git('diff', '--name-only', 'HEAD').split('\n'),
+    ...git('ls-files', '--others', '--exclude-standard').split('\n')].filter(Boolean))];
+  const touched = [...new Set([...committed, ...pending])];
+  const problems = [];
+  // Same scope as the CI gate: only an autonomous picker branch may not touch its gate.
+  const forbidden = /^claude\/obsidian-auto-/.test(branch)
+    ? touched.filter(p => protectedPaths.includes(p) || p.startsWith('.github/workflows/')) : [];
+  if (forbidden.length) problems.push(`autonomous decision cannot change its gate or policy: ${forbidden.join(', ')}`);
+  const intents = committed.filter(p => /^data\/decision-intents\/[a-z0-9-]+\.json$/.test(p));
+  const uncommittedIntents = pending.filter(p => p.startsWith('data/decision-intents/'));
+  if (uncommittedIntents.length) problems.push(`declaration not committed and pushed first: ${uncommittedIntents.join(', ')}`);
+  if (intents.length > 1) problems.push(`more than one live declaration: ${intents.join(', ')}`);
+  else if (intents.length === 1) {
+    const c = JSON.parse(git('show', `${head}:${intents[0]}`));
+    try { verifyHistory(c, base, head, cwd); } catch (error) { problems.push(error.message); }
+    const allowed = historyBookkeeping(base, git);
+    const outside = pending.filter(p => !uncommittedIntents.includes(p) && (p === intents[0] || (!c.touches.includes(p) && !allowed.has(p))));
+    if (outside.length) problems.push(`uncommitted changes outside the declaration: ${outside.join(', ')}`);
+  } else if (required(branch, touched, JSON.parse(git('show', `${base}:data/value-metrics.json`)))) {
+    problems.push(`a prospective contract is required for: ${touched.filter(p => !contractExempt(p)).join(', ')}`);
+  }
+  return { branch, base, head, problems };
 }
 
 export async function verifyDecision({ branch, head, baseRef, pr = null, cwd = ROOT, requireContract = false }) {
@@ -252,6 +291,21 @@ async function selftest() {
     const pr = { number: 123, base: { ref: 'main', repo: { full_name: REPO } }, head: { ref: branch, sha: head, repo: { full_name: REPO } } };
     assert.equal((await verifyDecision({ ...options, head, pr })).state, 'bound');
     assert.equal((await verifyDecision({ ...options, head })).state, 'awaiting_pr_validation');
+    // Local pre-PR check on the same branch: clean, then the 2026-10-06 shape, then stray work.
+    assert.deepEqual(verifyLocal({ cwd: dir, baseRef }).problems, [], 'a declared, in-scope branch has no local problems');
+    save('data/autopilot-actions.json', { actions: [] }); g('add', '.'); g('commit', '-m', 'health intake after declaration');
+    assert.match(verifyLocal({ cwd: dir, baseRef }).problems.join(' | '), /undeclared path: data\/autopilot-actions\.json/);
+    g('reset', '-q', '--hard', head);
+    fs.writeFileSync(path.join(dir, 'stray.txt'), 'not declared\n');
+    fs.writeFileSync(path.join(dir, 'index.html'), 'uncommitted but declared\n');
+    assert.deepEqual(verifyLocal({ cwd: dir, baseRef }).problems, ['uncommitted changes outside the declaration: stray.txt'],
+      'uncommitted work is checked against touches and bookkeeping');
+    fs.rmSync(path.join(dir, 'stray.txt')); g('checkout', '-q', '--', 'index.html');
+    g('checkout', '-q', '-b', 'claude/obsidian-auto-20260904');
+    fs.writeFileSync(path.join(dir, 'scripts/value-contracts.mjs'), '// edited gate\n');
+    assert.match(verifyLocal({ cwd: dir, baseRef }).problems.join(' | '), /cannot change its gate or policy: scripts\/value-contracts\.mjs/,
+      'an autonomous branch is told before the PR that it cannot edit its gate');
+    g('checkout', '-q', '--', 'scripts/value-contracts.mjs'); g('checkout', '-q', '-');
     for (const change of [{ number: 124 }, { head: { ...pr.head, sha: implemented } }, { head: { ...pr.head, ref: 'other' } },
       { head: { ...pr.head, repo: { full_name: 'other/repo' } } }, { base: { ...pr.base, ref: 'other' } }]) {
       await assert.rejects(verifyDecision({ ...options, head, pr: { ...pr, ...change } }));
@@ -359,6 +413,20 @@ async function selftest() {
 
 async function main() {
   if (process.argv.includes('--selftest')) return selftest();
+  if (process.argv.includes('--verify-local')) {
+    const at = process.argv.indexOf('--base');
+    const result = verifyLocal(at > 0 ? { baseRef: process.argv[at + 1] } : {});
+    console.log(JSON.stringify(result, null, 2));
+    if (result.problems.length) {
+      console.error('decision-ci --verify-local: the PR would fail decision-ci. Before opening it:\n'
+        + '  - undeclared or uncommitted paths: revert them (git checkout -- <path> / git revert). The declaration is immutable;\n'
+        + '    if the path is truly needed, `node scripts/value-contracts.mjs --retire` and re-declare it in touches before implementing.\n'
+        + '  - data/autopilot-actions.json: do not commit it on this branch. Autopilot Act ingests the health issues.\n'
+        + '  - no change can ship today: retire the declaration and open the status/LOG-only PR (Runbook §5).');
+      process.exitCode = 1;
+    }
+    return;
+  }
   if (!process.env.GITHUB_EVENT_PATH) { console.log('decision-ci: local schema tests only; PR history is enforced by CI'); return; }
   const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
   const pr = event.pull_request;
