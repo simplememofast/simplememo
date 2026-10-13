@@ -64,6 +64,12 @@
   "method": "scripts/check-guard-shapes.mjs（コメント・文字列・正規表現を潰し、台帳由来の束縛を伝播させて存在確認の && を拾う）",
   "known": [
     {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "ctx.token",
+      "disposition": "別に検出",
+      "note": "2026-10-13: reconcile-runs が成功回の成果物PRを読むための認証情報の有無（append-cost と同じ前提）。無い回は settle が defer(no_credentials) を返して書かないが、その run は台帳に無いまま残るので ledger_covers_runs が欠落として数え続け、act-ledger-sync は閉じない。「読めない」を「CIで落ちていない」や「出荷した」に読み替えない。自己検査で認証情報なしの回が追記0件・ログに no_credentials を残すことを確認。"
+    },
+    {
       "file": "scripts/gsc-crawled-indexing.mjs",
       "expr": "target.search",
       "disposition": "前提",

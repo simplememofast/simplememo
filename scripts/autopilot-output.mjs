@@ -54,7 +54,7 @@ export async function capture(identity, get, now = new Date()) {
   } catch { return { ...identity, version: 1, ...unknown('開始前のリモート状態を取得できなかった', 'unknown_remote_read') }; }
 }
 
-async function runsAt(get, head) {
+export async function runsAt(get, head) {
   const blob = await get(`/contents/data/autopilot-runs.json?ref=${head}`);
   if (blob === null) return null;
   assert.equal(blob?.type, 'file', 'run ledger is not a file');
