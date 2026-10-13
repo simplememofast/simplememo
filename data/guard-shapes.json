@@ -64,6 +64,12 @@
   "method": "scripts/check-guard-shapes.mjs（コメント・文字列・正規表現を潰し、台帳由来の束縛を伝播させて存在確認の && を拾う）",
   "known": [
     {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "ctx.token",
+      "disposition": "別に検出",
+      "note": "2026-10-13: reconcile-runs が成功回の成果物PRを読むための認証情報の有無（append-cost と同じ前提）。無い回は settle が defer(no_credentials) を返して書かないが、その run は台帳に無いまま残るので ledger_covers_runs が欠落として数え続け、act-ledger-sync は閉じない。「読めない」を「CIで落ちていない」や「出荷した」に読み替えない。自己検査で認証情報なしの回が追記0件・ログに no_credentials を残すことを確認。"
+    },
+    {
       "file": "scripts/gsc-crawled-indexing.mjs",
       "expr": "target.search",
       "disposition": "前提",
@@ -843,6 +849,18 @@
       "expr": "last.routine.observation_state",
       "disposition": "前提",
       "note": "最後の実測に参照不可の写しを入れ子で保存しないための否定条件。直前のID照合・enabledのboolean検査と観測時刻の検査をすべて満たすことをassertで要求する。観測状態がない通常の実測だけを履歴として保持し、現在の参照不可には別途個別GETの404証跡を必須とする。繰り返し観測でも元の履歴時刻を更新しない自己テストあり。"
+    },
+    {
+      "file": "scripts/autopilot-selfheal.mjs",
+      "expr": "r.allowed",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-13: 試運転の許可（actionsRecoveryOnce）の自己テスト。actionsRecoveryOnce は全分岐で allowed を boolean で返す。allowed が欠けた戻り値は、拒否側の検査（!r.allowed && 理由の一致）では理由の不一致で落ち、許可側の検査（r.allowed && 日付・対象の一致）では偽になって落ちる。どちらも「欠けたら通す」にはならない。"
+    },
+    {
+      "file": "scripts/autopilot-selfheal.mjs",
+      "expr": "ancestor.error",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-13: #2062 のマージが HEAD の祖先にあるかの判定。git を起動できない・終了コードが 0 以外・履歴が浅い のどれでも preventionMerged は false になり、許可は prevention_missing で拒否される。照合相手（git の結果）が無いときに許可側へ倒れることは無い。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
@@ -854,7 +872,6 @@
     "growth/scripts/ingest-bigquery.mjs",
     "growth/scripts/seal-daily-gsc.mjs",
     "growth/scripts/search-intent.mjs",
-    "scripts/autopilot-diagnostics.mjs",
     "scripts/autopilot-drill.mjs",
     "scripts/autopilot-gate.mjs",
     "scripts/bing-capture.mjs",
@@ -890,8 +907,7 @@
       "scripts/press-release-next.test.mjs": "Pure fixtures passed to the exported dispatch gate. Does not read live ledger JSON or access PR TIMES. The production module reads the actual ledger separately.",
       "scripts/execution-priorities.test.mjs": "合成の業務棚卸し・評価を prioritize に渡す回帰テスト。実台帳JSONを直接読まない。別モジュールの証拠ファイル存在確認と未達blocked_on判定を通し、期限切れ・物理境界・分母維持・無効参照を検査する。実台帳のCLI検査は execution-priorities.mjs --check で別途行う。",
       "growth/scripts/collect-bing.mjs": "Official Bing API reader through lib/bing-webmaster.mjs; no local ledger reads. Validates runtime and encryption before refresh; tests cover missing credentials, source/date/schema failures, bounded retries and redaction.",
-      "scripts/bing-capture.mjs": "Private capture state is read and validated in lib/company-bing.mjs. This thin CLI has no local ledger binding; module tests reject missing, stale, tampered, concurrent and mismatched attempt evidence.",
-      "scripts/autopilot-diagnostics.mjs": "2026-10-06: 公開判定の正となる台帳を読まない診断投影器。読むのは固定名の一時SDK execution JSONと検査時のworkflowで、readExecutionはJSON.parseをオブジェクト内の式で返すため現走査の束縛追跡には現れない。実行データの未取得・不正・容量超過はnullと固定unknown理由に残し、verdictや権限の判定に使わない。入力本文・任意文字列を除外し、34自己テストで欠損、壊れたJSON、symlink、容量超過、限定出力を確認。scannerや母数上限は変更しない。"
+      "scripts/bing-capture.mjs": "Private capture state is read and validated in lib/company-bing.mjs. This thin CLI has no local ledger binding; module tests reject missing, stale, tampered, concurrent and mismatched attempt evidence."
     },
     "scripts/preflight.mjs … **台帳を読まない。**読むのは `.github/workflows/seo-check.yml` で、そこから実行する検査の一覧を導出する（一覧を手で持つと、CI に検査を足した日に古くなる）。判定を持たない実行器なので、台帳由来の束縛が無いのは設計どおり",
     "\n",
@@ -1372,6 +1388,12 @@
       "expr": "value",
       "disposition": "報告のみ",
       "note": "2026-10-06: receiptのObject.entries(result).filter(([, value]) => value === null)は、既にnullとして保持した未観測項目名をobservations_unknownへ列挙する表示処理。値を0や成功に補完せず、元の出力verdict・exit code・公開判定を変更しない。34自己テストの欠測・不正型・壊れたJSON・モデル検証skip・checkpoint失敗でnullと固定理由の保持を確認。"
+    },
+    {
+      "file": "scripts/autopilot-selfheal.mjs",
+      "expr": "value",
+      "disposition": "前提",
+      "note": "2026-10-13: canonicalJson の型の振り分け（null は object 扱いせず JSON.stringify(null) へ回す）。規則ではなく行の指紋の直列化で、欠けた値も \"null\" として指紋に入るので、行の中身が変われば指紋が変わる（自己テストで1項目の書き換えを拒否することを確認）。"
     }
   ]
 }

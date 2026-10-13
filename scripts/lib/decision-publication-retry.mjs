@@ -6,6 +6,10 @@ const REPO = 'simplememofast/simplememo';
 const SHA = /^[a-f0-9]{40}$/;
 const AGE = 30 * 60 * 1000;
 const LIMIT = 30;
+// Generated publications merge within minutes. One still open after this is
+// blocked (conflict, failed validation, a gate that changed under it), and the
+// monitor cannot settle or publish anything until it is gone.
+export const STALL = 6 * 3600 * 1000;
 
 function eligiblePr(pr, pending) {
   return pr?.number === pending.pr && pr.state === 'open' && pr.draft === false
@@ -80,4 +84,20 @@ export function retryPendingPublication(pending, {request, rerun, stopped, now =
       pr: item.pr, new_permission_requested: false,
       next: 'Inspect the same existing CI run on the next owner tick; active/second attempts prevent another request. Do not broaden credentials.'};
   }
+}
+
+/**
+ * A waiting publication is not a healthy state after STALL. PR #2004 (2026-10-05)
+ * stayed dirty with a failed validation for 8 days while every monitor run
+ * returned waiting_for_publication in 3 seconds and finished green; contract
+ * settlement and the public report stopped with nothing red anywhere.
+ * Drafts are an operator hold and stay quiet. Retirement stays a human or session
+ * decision: the monitor only reports, it never closes or edits the PR.
+ */
+export function stalledPublication(item, pr, now = new Date()) {
+  if (item?.draft || pr?.draft) return null;
+  const opened = Date.parse(pr?.created_at);
+  if (!Number.isFinite(opened) || +now - opened < STALL) return null;
+  return {pr: item.pr, age_hours: Math.floor((+now - opened) / 36e5),
+    mergeable_state: pr.mergeable_state ?? null};
 }

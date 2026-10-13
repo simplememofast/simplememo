@@ -132,8 +132,10 @@ claimがある場合は`claimHasWork`、`claimAgeMinutes`、`claimDeclarations`�
 所有タスク終了とPR/実装なしを再確認してfast-forwardで引き継ぐ。force push・削除は禁止。
 引継ぎ中の競合は最新refを読み直し、無条件に書き戻さない。
 
-実装・health-intake等の台帳更新より先に、候補2件と較正値を読み、Runbook §2-1の
-価値契約を宣言コミットでpushする。不適格を候補名/モデル/route変更で回避しない。
+実装より先に、候補2件と較正値を読み、Runbook §2-1の価値契約を宣言コミットでpushする。
+health-intake の取り込み分（data/autopilot-actions.json）は日次ブランチにコミットしない
+（Autopilot Act が運ぶ。宣言の外のパスになり decision-ci で落ちる）。PR前に
+`node scripts/decision-ci.mjs --verify-local` を通す。不適格を候補名/モデル/route変更で回避しない。
 修理可能な故障があればレーンFを先に評価し、直っている修理を再実装しない。
 記事なら1件まで。ゲート不合格なら理由を記録し、公開のために基準を下げない。
 

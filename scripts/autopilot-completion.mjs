@@ -13,6 +13,10 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = 'simplememofast/simplememo';
 export const NOTIFY_JOB = 'Notify Autopilot Act';
 const BOT = 'github-actions[bot]';
+// GitHub accepts the dispatch inside the notify job but creates the recipient run
+// asynchronously. Observed lags: 0s (10-08), +1s (10-13), +2s (10-06). Requiring
+// sentAt <= end reclassified those unattended detections as session-started.
+export const DISPATCH_LAG_MS = 60_000;
 
 export function primaryJob(jobs) {
   // Adding a post-job must not make its successful dispatch look like a successful model run.
@@ -36,10 +40,11 @@ export function automaticCompletion(current, upstream, jobs) {
     || upstream.status !== 'completed') return false;
   const sentAt = Date.parse(current.created_at);
   const notification = jobs.find(job => job.name === NOTIFY_JOB && job.conclusion === 'success');
-  // The recipient must have been created during this parent's successful dispatch job.
+  // The recipient must have been created by this parent's successful dispatch job:
+  // not before it started, and no later than GitHub's run-creation lag after it ended.
   const start = Date.parse(notification?.started_at), end = Date.parse(notification?.completed_at);
   return Number.isFinite(sentAt) && Number.isFinite(start) && Number.isFinite(end)
-    && start <= sentAt && sentAt <= end && end - start <= 180_000;
+    && start <= sentAt && sentAt <= end + DISPATCH_LAG_MS && end - start <= 180_000;
 }
 
 export async function completionOrigin({ env = process.env, event, get, sleep = ms => new Promise(r => setTimeout(r, ms)) } = {}) {
@@ -160,6 +165,22 @@ function testPendingBranch(act) {
     git('checkout', 'main');
     execFileSync('bash', ['-e', '-c', shell], { cwd, env, stdio: 'pipe' });
     assert.equal(fs.readFileSync(path.join(cwd, 'data/autopilot-runs.json'), 'utf8'), '[1,2]\n');
+    // A generated report translation is ledger output; an editorial page is not.
+    fs.mkdirSync(path.join(cwd, 'ko/autopilot'), { recursive: true });
+    fs.writeFileSync(path.join(cwd, 'ko/autopilot/index.html'), 'report\n');
+    git('add', '.'); git('commit', '-m', 'report translation'); git('push', 'origin', branch);
+    git('checkout', 'main');
+    execFileSync('bash', ['-e', '-c', shell], { cwd, env, stdio: 'pipe' });
+    assert.equal(fs.readFileSync(path.join(cwd, 'ko/autopilot/index.html'), 'utf8'), 'report\n');
+    fs.mkdirSync(path.join(cwd, 'en/autopilot'), { recursive: true });
+    fs.writeFileSync(path.join(cwd, 'en/autopilot/index.html'), 'editorial\n');
+    git('add', '.'); git('commit', '-m', 'editorial page'); git('push', 'origin', branch);
+    git('checkout', 'main');
+    let editorial;
+    try { execFileSync('bash', ['-e', '-c', shell], { cwd, env, stdio: 'pipe' }); } catch (error) { editorial = error; }
+    assert.equal(editorial?.status, 1);
+    assert.match(editorial.stdout.toString(), /Unexpected pending PR path: en\/autopilot\/index\.html/);
+    git('checkout', branch); git('reset', '--hard', 'HEAD~1'); git('push', '--force', 'origin', branch);
     fs.writeFileSync(path.join(cwd, 'scripts/untrusted'), 'must not execute\n');
     git('add', '.'); git('commit', '-m', 'unexpected code'); git('push', 'origin', branch);
     git('checkout', 'main');
@@ -184,8 +205,13 @@ async function selftest() {
   const run = (options = {}) => completionOrigin({ env, event, get: mock(), ...options });
   assert.deepEqual(await run(), { upstream_run_id: '1', automatic: true });
   for (const changed of [{ actor: { login: 'owner' } }, { triggering_actor: { login: 'owner' } },
-    { run_attempt: 2 }, { created_at: '2026-09-05T00:05:00Z' }, { created_at: 'invalid' }]) {
+    { run_attempt: 2 }, { created_at: '2026-09-05T00:05:00Z' }, { created_at: 'invalid' },
+    { created_at: '2026-09-04T23:59:59Z' }, { created_at: '2026-09-05T00:01:16Z' }]) {
     assert.equal((await run({ get: mock({ ...current, ...changed }) })).automatic, false);
+  }
+  // 2026-10-06: Notify ended 02:45:50Z, GitHub created the recipient 02:45:52Z.
+  for (const created_at of ['2026-09-05T00:00:17Z', '2026-09-05T00:01:15Z']) {
+    assert.equal((await run({ get: mock({ ...current, created_at }) })).automatic, true, `creation lag ${created_at}`);
   }
   for (const changed of [{ event: 'workflow_dispatch' }, { run_attempt: 2 }]) {
     assert.equal((await run({ get: mock(current, { ...upstream, ...changed }) })).automatic, false);
