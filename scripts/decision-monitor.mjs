@@ -25,10 +25,18 @@ const api = route => gh('api', `repos/${REPO}/${route}`);
 const shaOK = s => /^[a-f0-9]{40}$/.test(s ?? '');
 const stop = () => { const s = read('data/emergency-stop.json'); return s.stopped || s.agents?.act?.stopped; };
 const ledgerFiles = ['data/value-contracts.json', 'data/decision-recovery.json', 'data/decision-review.json', 'autopilot/index.html'];
+// /autopilot/ has generated translations since 2026-10-08 (#2031). A report page
+// published without them fails the CI translation check, which held this
+// monitor's publication (and every Act PR) from 2026-10-09. They are accepted
+// only beside the Japanese report; the CI check proves they are the generator's
+// exact output, so their content is not trusted here.
+export const reportTranslations = ['ar', 'es', 'id', 'ko', 'pt-BR', 'tr', 'zh-Hant', 'zh']
+  .map(locale => `${locale}/autopilot/index.html`);
 const reportSitemaps = {
   // Both pages derive their publication date from the same operational ledgers.
   'sitemap-ja.xml': ['https://simplememofast.com/', 'https://simplememofast.com/autopilot/'],
-  'sitemap.xml': ['https://simplememofast.com/sitemap-ja.xml'],
+  'sitemap-locales.xml': reportTranslations.map(file => `https://simplememofast.com/${file.replace(/index\.html$/, '')}`),
+  'sitemap.xml': ['https://simplememofast.com/sitemap-ja.xml', 'https://simplememofast.com/sitemap-locales.xml'],
 };
 
 // Accept only generated lastmod replacements for these exact URLs. A generator
@@ -58,10 +66,19 @@ export function reportSitemapChange(file) {
 }
 
 export function synchronizeReportSitemaps(cwd = ROOT) {
+  // Translations first: their content feeds the locale sitemap dates.
+  execFileSync('python3', ['scripts/build_site_translations.py', '--write'], { cwd, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
   execFileSync('python3', ['scripts/generate_sitemap.py'], { cwd, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
   const changed = execFileSync('git', ['diff', '--name-only', 'HEAD'], { cwd, encoding: 'utf8' }).trim().split('\n').filter(Boolean);
-  assert(changed.every(file => ledgerFiles.includes(file) || Object.hasOwn(reportSitemaps, file)),
+  assert(changed.every(file => ledgerFiles.includes(file) || reportTranslations.includes(file) || Object.hasOwn(reportSitemaps, file)),
     'generated report publication changed an unrelated file');
+}
+
+// A translated report page is in scope only as a modification beside the
+// Japanese report in the same publication.
+export function reportTranslationChange(file, files) {
+  return reportTranslations.includes(file?.filename) && file.status === 'modified'
+    && files.some(p => p.filename === 'autopilot/index.html');
 }
 
 export function pendingPublication(request = api) {
@@ -78,7 +95,7 @@ export function pendingPublication(request = api) {
       && pr.head.ref === item.head.ref && shaOK(pr.head.sha), 'pending decision PR changed or targets another repository');
     const files = request(`${route}/files?per_page=100`);
     assert(Array.isArray(files) && files.length > 0 && files.length < 100 && files.length === pr.changed_files
-      && files.every(f => ledgerFiles.includes(f.filename)
+      && files.every(f => ledgerFiles.includes(f.filename) || reportTranslationChange(f, files)
         || (files.some(p => p.filename === 'autopilot/index.html') && reportSitemapChange(f))),
     'pending decision PR has unverified scope');
     const fresh = request(route);
@@ -419,7 +436,7 @@ async function main() {
     const reportChanged = await publishReport();
     if (hash({ ledger, recovery, strategy }) === original && !reportChanged) return;
     if (reportChanged) synchronizeReportSitemaps();
-    publish([...ledgerFiles, ...Object.keys(reportSitemaps)],
+    publish([...ledgerFiles, ...reportTranslations, ...Object.keys(reportSitemaps)],
       observationBranch(head),
       'Record verified decision outcomes and recovery evidence', head);
   }
@@ -505,6 +522,26 @@ function selftest() {
   const generatedFiles = [{ filename: 'autopilot/index.html' }, sitemapChange, indexChange];
   assert.deepEqual(pendingPublication(publicationApi({ detail: { ...publication, changed_files: 3 }, files: generatedFiles })),
     [{ pr: 321, head: publication.head.sha, draft: false }]);
+  // The report's generated translations (2026-10-08 #2031) travel with it, and
+  // only with it: a translation alone, an added file, another translated page
+  // or another locale URL stays out of scope.
+  const localeChange = { ...sitemapChange, filename: 'sitemap-locales.xml',
+    patch: sitemapChange.patch.replace('https://simplememofast.com/autopilot/', 'https://simplememofast.com/es/autopilot/') };
+  const bothIndexes = { ...indexChange, additions: 2, deletions: 2, changes: 4,
+    patch: indexChange.patch + '\n' + indexChange.patch.replace('sitemap-ja.xml', 'sitemap-locales.xml') };
+  const translatedFiles = [{ filename: 'autopilot/index.html' }, { filename: 'es/autopilot/index.html', status: 'modified' },
+    sitemapChange, localeChange, bothIndexes];
+  assert.deepEqual(pendingPublication(publicationApi({ detail: { ...publication, changed_files: 5 }, files: translatedFiles })),
+    [{ pr: 321, head: publication.head.sha, draft: false }]);
+  assert.equal(reportTranslations.length, 8, 'eight generated report translations');
+  for (const bad of [[{ filename: 'es/autopilot/index.html', status: 'modified' }],
+    [{ filename: 'autopilot/index.html' }, { filename: 'es/autopilot/index.html', status: 'added' }],
+    [{ filename: 'autopilot/index.html' }, { filename: 'es/index.html', status: 'modified' }],
+    [{ filename: 'autopilot/index.html' }, { filename: 'en/autopilot/index.html', status: 'modified' }],
+    [{ filename: 'autopilot/index.html' }, { ...localeChange, patch: localeChange.patch.replace('/es/autopilot/', '/es/') }]]) {
+    assert.throws(() => pendingPublication(publicationApi({ detail: { ...publication, changed_files: bad.length }, files: bad })),
+      /unverified scope/, JSON.stringify(bad.map(f => f.filename)));
+  }
   const twoDates = { ...sitemapChange, additions: 2, deletions: 2, changes: 4,
     patch: sitemapChange.patch.replace('/autopilot/', '/') + '\n' + sitemapChange.patch };
   assert.equal(reportSitemapChange(twoDates), true, 'midnight root and report dates must both be accepted');
