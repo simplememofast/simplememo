@@ -62,6 +62,8 @@ import { FAULT_GATE_CODES } from './autopilot-runs.mjs';
 import { completionOrigin, primaryJob, primarySteps } from './autopilot-completion.mjs';
 import { deriveRoutineActions, routineResolved, routineSnapshotDigest, routineIntakeNeeded, routineIntakeDecision } from './lib/routine-actions.mjs';
 import { observeViewport, deriveViewportActions, viewportMeasured } from './lib/viewport-health.mjs';
+import { settleArtifactPr, settlementSelftest } from './lib/artifact-settlement.mjs';
+import { githubReader } from './autopilot-output.mjs';
 import { reconcileObservation } from './routine-observer.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -2322,7 +2324,10 @@ export const HANDLERS = {
    * autopilot-runs.mjs --append を呼ぶ（検証を通す唯一の書き込み経路）。
    */
   async 'reconcile-runs'(ctx, _action, { append = (args) => execFileSync(process.execPath,
-    [path.join(ROOT, 'scripts/autopilot-runs.mjs'), ...args], { cwd: ROOT, encoding: 'utf8' }) } = {}) {
+    [path.join(ROOT, 'scripts/autopilot-runs.mjs'), ...args], { cwd: ROOT, encoding: 'utf8' }),
+    settle = (run) => (ctx.token && ctx.repo
+      ? settleArtifactPr(run, { repo: ctx.repo, get: githubReader(ctx.repo, ctx.token) })
+      : { state: 'defer', reason: 'no_credentials' }) } = {}) {
     if (!ctx.workflowRuns) return { ok: false, changed: 0, log: 'Actions API を読めず同期できない' };
     const known = new Set((ctx.runsDoc?.runs ?? []).map((r) => String(r.external_ref ?? '')));
     const taken = new Set((ctx.runsDoc?.runs ?? []).map((r) => r.run_id));
@@ -2346,10 +2351,49 @@ export const HANDLERS = {
       let runId = `ap-${run.jst_date.replace(/-/g, '')}-actions`;
       if (taken.has(runId)) runId = `${runId}-${run.id}`;
       if (taken.has(runId)) { log.push(`${run.id}: ${runId} が既にある`); continue; }
-      // shipped は PR 番号が要る（validate が落とす）。PRの特定は機械には荷が重いので
-      // **成功した回は書かない**。書かないことで指標が甘くなることは無い
-      //（shipped を落とすと完走率は下がる側に倒れる）。
-      if (v.outcome === 'shipped') { log.push(`${run.id}: 成功回はPR特定が要るため自動追記しない`); continue; }
+      // shipped は PR 番号が要り、出荷の行はPRのマージが運ぶ。**ここで shipped は書かない。**
+      // ただし成果物PRが CI で落ちて出荷できなくなった回は、書かないと台帳から消える
+      // （10-05 の run 37249907984 / #1993 は8日間どこにも載らなかった）。
+      // 確定した回だけ no_artifact として書き、それ以外は保留する（lib/artifact-settlement.mjs）。
+      if (v.outcome === 'shipped') {
+        const settled = await settle(run);
+        if (settled.state !== 'unshippable') {
+          log.push(`${run.id}: 成功回。成果物PRは未確定（${settled.reason}${settled.pr ? ` #${settled.pr}` : ''}）のため追記しない`);
+          continue;
+        }
+        const observation = detectionEvidence(run, ctx.eventName, new Date(), ctx.completion);
+        // PR 側の行の run_id（宣言の契約が使う識別子）を優先する。main で使われていれば既定の形。
+        const own = settled.row.run_id;
+        const day = run.jst_date.replace(/-/g, '');
+        const rowId = typeof own === 'string' && new RegExp(`^ap-${day}-actions(?:-\\d+)?$`).test(own) && !taken.has(own) ? own : runId;
+        const where = settled.step ? `job seo-check の step #${settled.step_number}「${settled.step}」` : 'job seo-check';
+        const closed = settled.reason === 'closed_after_failed_validation';
+        const args = ['--append', '--run-id', rowId, '--date', run.jst_date, '--route', 'actions',
+          '--outcome', 'no_artifact', '--attempted', 'true', '--failure-class', 'no_artifact',
+          '--pr', String(settled.pr), '--external-ref', String(run.id), '--source', observation.source,
+          '--failure-reason', `成果物PR #${settled.pr} は SEO Validation（run ${settled.validation_run_id}）の ${where}で落ち、`
+            + (closed ? 'マージされずに閉じられた。' : '6時間以上そのまま残っている。')
+            + 'モデルの成功と成果物判定 verified は出荷ではない。',
+          '--detected-at', observation.detected_at,
+          '--detected-note', `Actions run ${run.id} を ${ctx.eventName || 'local-session'} で照合。`
+            + (ctx.completion ? `監視起動元run ${ctx.completion.upstream_run_id}、自動起動のAPI検証=${ctx.completion.automatic}。` : '')
+            + `成果物PR #${settled.pr} の最終 head の SEO Validation run ${settled.validation_run_id} を確認。`
+            + `失敗時刻はその ${where}の completed_at。`,
+          '--failed-at', settled.failed_at];
+        for (const [flag, value] of [['--lane', settled.row.lane], ['--action', settled.row.action]]) {
+          if (typeof value === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(value)) args.push(flag, value);
+        }
+        try {
+          const out = append(args);
+          taken.add(rowId);
+          known.add(String(run.id));
+          log.push(`${run.id} -> ${rowId}: 成果物PR #${settled.pr} は出荷できない（${settled.reason}）。${out.trim()}`);
+          changed += 1;
+        } catch (e) {
+          log.push(`${run.id}: 追記に失敗 ${e.stderr?.toString().trim() ?? e.message}`);
+        }
+        continue;
+      }
       const observation = detectionEvidence(run, ctx.eventName, new Date(), ctx.completion);
       const args = ['--append', '--run-id', runId, '--date', run.jst_date, '--route', 'actions',
         '--outcome', v.outcome, '--attempted', String(v.attempted),
@@ -2922,12 +2966,14 @@ function render(sum, applied, today) {
 // ============================================================
 async function selftest() {
   await codexIntakeSelftest();
+  await settlementSelftest();
 
   const fails = [];
   // 件数は数える。**リテラルで書かない** —— 検査を足しても数字が動かないと、
   // 「32項目通った」が事実でなくなる（実際 54 項目あるのに 32 と出ていた）。
   let count = 0;
   const t = (name, cond) => { count += 1; if (!cond) fails.push(name); };
+  t('成果物PRの確定は2つの形だけで、他はすべて保留する（lib/artifact-settlement.mjs の自己検査を通過）', true);
   {
     const { appendRun } = await import('./autopilot-budget.mjs');
     const job = { id: 97262077233, run_id: 32667079679, run_attempt: 1, status: 'completed',
@@ -3337,6 +3383,51 @@ async function selftest() {
     const values = flag => appended.map(args => args[args.indexOf(flag) + 1]);
     t('同日の最初の実行へ基本run_idを割り当てる', JSON.stringify(values('--external-ref')) === JSON.stringify(['123', '124']));
     t('1バッチ内の追記でも同日IDを衝突させない', JSON.stringify(values('--run-id')) === JSON.stringify(['ap-20260904-actions', 'ap-20260904-actions-124']));
+  }
+  {
+    // 成功した回の成果物PRが CI で落ちたまま確定した形（10-05 / #1993）。
+    const shippedRun = { id: 37249907984, status: 'completed', conclusion: 'success', event: 'schedule',
+      created_at: '2026-10-04T22:31:00Z', jst_date: '2026-10-05',
+      steps: [{ number: 3, name: 'Gate', conclusion: 'success' }, { number: 4, name: '判定コード: run', conclusion: 'success' },
+        { number: 12, name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'success' },
+        { number: 13, name: '成果物判定: verified', conclusion: 'success' }] };
+    t('検体: モデル成功・成果物判定 verified は shipped と読む', interpretRun(shippedRun)?.outcome === 'shipped');
+    const settled = { state: 'unshippable', reason: 'validation_failed_settled', pr: 1993, failed_at: '2026-10-05T01:49:11Z',
+      validation_run_id: 900, step: 'Prospective decisions and recovery safety', step_number: 18,
+      row: { run_id: 'ap-20261005-actions-37249907984', lane: 'C', action: 'refresh' } };
+    const reconcile = async (overrides = {}, runsDoc = { runs: [] }) => {
+      const writes = [];
+      const result = await HANDLERS['reconcile-runs']({ workflowRuns: [shippedRun], runsDoc, eventName: 'schedule' }, null,
+        { append: args => { writes.push(args); return 'recorded'; }, settle: async () => ({ ...settled, ...overrides }) });
+      return { writes, result, value: flag => writes[0]?.[writes[0].indexOf(flag) + 1] };
+    };
+    const { writes, value } = await reconcile();
+    t('CIで落ちて確定した成果物PRの回を no_artifact として1行書く', writes.length === 1 && value('--outcome') === 'no_artifact'
+      && value('--failure-class') === 'no_artifact' && value('--attempted') === 'true');
+    t('成果物PRの番号・実行IDを残す', value('--pr') === '1993' && value('--external-ref') === '37249907984');
+    t('故障時刻は検証の失敗ステップの時刻（run の作成時刻・検知時刻で代用しない）', value('--failed-at') === '2026-10-05T01:49:11Z');
+    t('PR側の行の run_id とレーン・行動を引き継ぐ', value('--run-id') === 'ap-20261005-actions-37249907984'
+      && value('--lane') === 'C' && value('--action') === 'refresh');
+    t('検知の根拠に成果物PRと検証 run を書く', value('--detected-note').includes('成果物PR #1993')
+      && value('--detected-note').includes('run 900') && value('--failure-reason').includes('6時間以上'));
+    t('閉じられた回は理由を変える', (await reconcile({ reason: 'closed_after_failed_validation' })).value('--failure-reason').includes('閉じられた'));
+    const taken = await reconcile({}, { runs: [{ run_id: 'ap-20261005-actions-37249907984', external_ref: '1' }] });
+    t('PR側の run_id が main で使われていれば既定の形にする', taken.value('--run-id') === 'ap-20261005-actions');
+    const foreign = await reconcile({ row: { run_id: 'ap-20261006-actions', lane: 'C; rm', action: 'refresh' } });
+    t('別の日の run_id・形の崩れたレーンは引き継がない', foreign.value('--run-id') === 'ap-20261005-actions'
+      && !foreign.writes[0].includes('--lane') && foreign.value('--action') === 'refresh');
+    for (const reason of ['settling', 'merged', 'validating', 'read_failed', 'no_bound_pr']) {
+      const writes = [];
+      const result = await HANDLERS['reconcile-runs']({ workflowRuns: [shippedRun], runsDoc: { runs: [] } }, null,
+        { append: args => { writes.push(args); return 'x'; }, settle: async () => ({ state: 'defer', reason, pr: 1993 }) });
+      t(`未確定の成果物PR（${reason}）では書かない`, writes.length === 0 && result.changed === 0 && result.log.includes(reason));
+    }
+    const writesNoCred = [];
+    const noCred = await HANDLERS['reconcile-runs']({ workflowRuns: [shippedRun], runsDoc: { runs: [] } }, null,
+      { append: args => { writesNoCred.push(args); return 'x'; } });
+    t('認証情報が無ければ成果物PRを読まずに保留する', writesNoCred.length === 0 && noCred.log.includes('no_credentials'));
+    const known = await reconcile({}, { runs: [{ run_id: 'ap-20261005-actions-37249907984', external_ref: '37249907984' }] });
+    t('既に台帳にある実行IDは書き直さない', known.writes.length === 0);
   }
   const matrix = {
     self_repair: {
