@@ -52,6 +52,36 @@ async function failedValidation(get, pr, repo, now) {
     step_number: step && Number.isSafeInteger(step.number) ? step.number : null };
 }
 
+const DAY_MS = 24 * 3600 * 1000;
+const failedStep = (jobs, step, jobName) => Array.isArray(jobs?.jobs) && jobs.jobs.some(j => jobName(String(j?.name))
+  && Array.isArray(j.steps) && j.steps.some(s => s?.conclusion === 'failure' && s.name === step));
+
+/**
+ * A red main fails every PR at the same step (09-16..19 the /autopilot/ date score,
+ * 10-09..13 the generated-translation check). That is not this run's failure, and
+ * recording it would also stop the route (no_artifact is past its repair limit).
+ * Red when main's latest daily validation (within a day) or another PR validated
+ * within 12 hours failed at the same step. At most 5 sibling runs are opened.
+ */
+async function baseRed(get, repo, branch, failure) {
+  const at = time(failure.failed_at);
+  const daily = await get('/actions/workflows/main-daily-validation.yml/runs?branch=main&status=completed&per_page=1');
+  if (!Array.isArray(daily?.workflow_runs)) throw Error('main validation unreadable');
+  const last = daily.workflow_runs[0];
+  if (last && last.conclusion === 'failure' && Math.abs(time(last.updated_at) - at) <= DAY_MS
+    && failedStep(await get(`/actions/runs/${last.id}/attempts/${last.run_attempt}/jobs?per_page=100`), failure.step,
+      name => name.endsWith('seo-check'))) return 'main_daily_validation';
+  const recent = await get('/actions/workflows/seo-check.yml/runs?event=pull_request&status=completed&per_page=30');
+  if (!Array.isArray(recent?.workflow_runs)) throw Error('sibling validations unreadable');
+  const siblings = recent.workflow_runs.filter(r => r?.conclusion === 'failure' && r.head_branch !== branch
+    && r.repository?.full_name === repo && Math.abs(time(r.created_at) - at) <= SETTLE_MS * 2).slice(0, 5);
+  for (const r of siblings) {
+    if (failedStep(await get(`/actions/runs/${r.id}/attempts/${r.run_attempt}/jobs?per_page=100`), failure.step,
+      name => name === 'seo-check')) return 'sibling_pr_validation';
+  }
+  return null;
+}
+
 /**
  * Decide whether a successful daily run's artifact PR can no longer ship.
  * Returns { state: 'unshippable', ... } or { state: 'defer', reason }.
@@ -98,6 +128,10 @@ export async function settleArtifactPr(run, { repo, get, now = Date.now() }) {
     const v = await failedValidation(get, pr, repo, now);
     if (!v.run) return defer(pr.state === 'closed' ? `closed_${v.reason}` : v.reason, { pr: pr.number });
     if (pr.state === 'open' && now - time(v.failed_at) < SETTLE_MS) return defer('settling', { pr: pr.number, failed_at: v.failed_at });
+    // Without the failing step's name a red main cannot be told apart.
+    if (v.step === null) return defer('failure_step_unknown', { pr: pr.number });
+    const red = await baseRed(get, repo, branch, v);
+    if (red) return defer('base_red', { pr: pr.number, evidence: red });
     // Re-read right before deciding: a re-run, a push or a merge may have landed meanwhile.
     const current = await get(`/actions/runs/${v.run.id}`);
     if (!validationRun(current, pr, repo) || current.status !== 'completed' || current.conclusion !== 'failure'
@@ -155,6 +189,14 @@ export async function settlementSelftest() {
         const rows = o.validations ?? [vrun()];
         return { total_count: o.total ?? rows.length, workflow_runs: rows };
       }
+      if (endpoint.startsWith('/actions/workflows/main-daily-validation.yml/runs?')) {
+        return 'daily' in o ? o.daily : { workflow_runs: [{ id: 700, run_attempt: 1, conclusion: 'success', updated_at: '2026-10-04T17:00:00Z' }] };
+      }
+      if (endpoint.startsWith('/actions/workflows/seo-check.yml/runs?event=pull_request&status=completed')) {
+        return 'siblings' in o ? o.siblings : { workflow_runs: [] };
+      }
+      const otherJobs = endpoint.match(/^\/actions\/runs\/(700|8\d\d)\/attempts\/\d+\/jobs/);
+      if (otherJobs) return (o.otherJobs ?? {})[otherJobs[1]] ?? { jobs: [] };
       if (/^\/actions\/runs\/\d+\/attempts\/\d+\/jobs/.test(endpoint)) {
         return o.jobs ?? { jobs: [{ name: 'seo-check', conclusion: 'failure', completed_at: '2026-10-05T01:50:00Z', steps }] };
       }
@@ -227,6 +269,25 @@ export async function settlementSelftest() {
   await deferred({ fresh: pr({ merged: true, state: 'closed' }) }, 'pr_changed');
   await deferred({ ref: { object: { sha: other } } }, 'branch_moved');
   await deferred({ ref: null }, 'branch_moved');
+  // A red main is not this run's failure: main's daily validation or a sibling PR failed at the same step.
+  const step18 = name => ({ jobs: [{ name, conclusion: 'failure',
+    steps: [{ number: 18, name: 'Prospective decisions and recovery safety', conclusion: 'failure', completed_at: '2026-10-05T01:40:00Z' }] }] });
+  const redDaily = { workflow_runs: [{ id: 700, run_attempt: 1, conclusion: 'failure', updated_at: '2026-10-04T17:00:00Z' }] };
+  await deferred({ daily: redDaily, otherJobs: { 700: step18('validation / seo-check') } }, 'base_red');
+  assert.equal((await settle({ daily: redDaily, otherJobs: { 700: { jobs: [{ name: 'validation / seo-check', conclusion: 'failure',
+    steps: [{ name: 'Another step', conclusion: 'failure' }] }] } } })).state, 'unshippable', 'a different failing step on main is not base red');
+  assert.equal((await settle({ daily: { workflow_runs: [{ ...redDaily.workflow_runs[0], updated_at: '2026-10-02T00:00:00Z' }] },
+    otherJobs: { 700: step18('validation / seo-check') } })).state, 'unshippable', 'an old red main does not excuse today');
+  const sibling = over => ({ workflow_runs: [{ id: 801, run_attempt: 1, conclusion: 'failure', head_branch: 'claude/other-fix',
+    repository: { full_name: repo }, created_at: '2026-10-05T03:00:00Z', ...over }] });
+  await deferred({ siblings: sibling(), otherJobs: { 801: step18('seo-check') } }, 'base_red');
+  for (const over of [{ head_branch: branch }, { created_at: '2026-10-06T03:00:00Z' }, { conclusion: 'success' }, { repository: { full_name: 'fork/r' } }]) {
+    assert.equal((await settle({ siblings: sibling(over), otherJobs: { 801: step18('seo-check') } })).state, 'unshippable',
+      `sibling not comparable: ${JSON.stringify(over)}`);
+  }
+  await deferred({ jobs: { jobs: [{ name: 'seo-check', conclusion: 'failure', completed_at: '2026-10-05T01:50:00Z', steps: [] }] } },
+    'failure_step_unknown');
+  for (const broken of [{ daily: null }, { siblings: null }]) await deferred(broken, 'read_failed');
   // Unreadable is never absence.
   for (const fail of ['/pulls?', '/pulls/7', '/contents/', '/actions/workflows/', '/actions/runs/900/attempts', '/git/ref'])
     await deferred({ fail }, 'read_failed');
