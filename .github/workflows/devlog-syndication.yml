@@ -185,6 +185,12 @@ jobs:
       # claude-code-action は実行記録を毎回同じパスに書くので、手直しのステップが執筆の記録を上書きする
       # （2026-09-25 の試験実行で、要約の2行が同じ値になった）。書いた直後に数字だけ抜いておく。
       # 実行記録そのもの（会話の全文）は成果物に入れない。
+      #
+      # 【2026-10-13】**失敗した回だけ、エラー文の先頭300字を残す**（要約・成果物の metrics.txt と、
+      # API で読める注釈 ::warning の両方）。10-08〜10-12 の全回が「0.3〜1秒・費用0・is_error=true」で
+      # 執筆の前に落ちていたが、action は既定でエラー文を隠し、ここも数字しか抜いていなかったので、
+      # 原因（週次の利用上限・認証・モデル指定のどれか）を後から確かめられなかった。
+      # 成功した回は今までどおり数字だけ。会話の全文は今までどおり残さない。
       - name: 執筆の記録（ターン数と費用）
         if: always() && (steps.write.outcome == 'success' || steps.write.outcome == 'failure')
         env:
@@ -193,7 +199,7 @@ jobs:
         run: |
           mkdir -p .syndication
           if [ -n "$EXEC_FILE" ] && [ -f "$EXEC_FILE" ]; then
-            node -e "const d=JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));const r=(Array.isArray(d)?d:[d]).filter(x=>x&&x.type==='result').pop()||{};console.log('- '+process.argv[2]+': turns='+r.num_turns+' cost_usd='+r.total_cost_usd+' is_error='+r.is_error)" "$EXEC_FILE" "$LABEL" >> .syndication/metrics.txt || true
+            node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));const r=(Array.isArray(d)?d:[d]).filter(x=>x&&x.type==='result').pop()||{};const err=r.is_error?String(r.result??'').replace(/\s+/g,' ').trim().slice(0,300):'';fs.appendFileSync('.syndication/metrics.txt','- '+process.argv[2]+': turns='+r.num_turns+' cost_usd='+r.total_cost_usd+' is_error='+r.is_error+(err?' error='+JSON.stringify(err):'')+'\n');if(err)console.log('::warning title=Devlog syndication::'+process.argv[2]+'のステップが失敗した: '+err.replace(/%/g,'%25'))" "$EXEC_FILE" "$LABEL" || true
           else
             echo "- $LABEL: 実行記録なし" >> .syndication/metrics.txt
           fi
@@ -249,7 +255,7 @@ jobs:
         run: |
           mkdir -p .syndication
           if [ -n "$EXEC_FILE" ] && [ -f "$EXEC_FILE" ]; then
-            node -e "const d=JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));const r=(Array.isArray(d)?d:[d]).filter(x=>x&&x.type==='result').pop()||{};console.log('- '+process.argv[2]+': turns='+r.num_turns+' cost_usd='+r.total_cost_usd+' is_error='+r.is_error)" "$EXEC_FILE" "$LABEL" >> .syndication/metrics.txt || true
+            node -e "const fs=require('fs');const d=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));const r=(Array.isArray(d)?d:[d]).filter(x=>x&&x.type==='result').pop()||{};const err=r.is_error?String(r.result??'').replace(/\s+/g,' ').trim().slice(0,300):'';fs.appendFileSync('.syndication/metrics.txt','- '+process.argv[2]+': turns='+r.num_turns+' cost_usd='+r.total_cost_usd+' is_error='+r.is_error+(err?' error='+JSON.stringify(err):'')+'\n');if(err)console.log('::warning title=Devlog syndication::'+process.argv[2]+'のステップが失敗した: '+err.replace(/%/g,'%25'))" "$EXEC_FILE" "$LABEL" || true
           else
             echo "- $LABEL: 実行記録なし" >> .syndication/metrics.txt
           fi
