@@ -12,6 +12,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { contractProblems, approvedMetric, METRICS, verifyHistory, selectContract, predictionFeedback, retireIntent } from './value-contracts.mjs';
+import { reportTranslationsAt } from './lib/report-publication.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = 'simplememofast/simplememo';
@@ -19,6 +20,7 @@ export const protectedPaths = ['data/value-metrics.json', 'data/autonomy-score.j
   'data/value-contracts.json', 'data/decision-recovery.json', 'data/decision-review.json',
   'scripts/value-contracts.mjs', 'scripts/decision-ci.mjs', 'scripts/decision-monitor.mjs', 'scripts/decision-review.mjs', 'scripts/autonomy-score.mjs', 'scripts/autonomy-eligibility.mjs',
   'scripts/lib/decision-origin.mjs', 'scripts/lib/decision-publication-retry.mjs', 'scripts/lib/intervention-observation.mjs', 'scripts/decision-monitor-local.py',
+  'scripts/lib/report-publication.mjs',
   'growth/lib/company-decision.mjs', 'growth/lib/company-proof.mjs', 'growth/lib/company-evaluation.mjs',
   'growth/lib/company-measurement.mjs', 'growth/lib/measurement-support.mjs', 'growth/lib/experiment-coexistence.mjs', 'growth/lib/experiment-overlap.mjs',
   'growth/lib/company-search.mjs', 'growth/lib/ledger.mjs',
@@ -95,7 +97,9 @@ export async function verifyDecision({ branch, head, baseRef, pr = null, cwd = R
       // A failed declaration is retired before selecting its replacement. Its
       // JSON record is bookkeeping, as in required() and verifyHistory(). This
       // does not exempt treatment/support paths or changes to protected gates.
-      const bookkeeping=p=>['growth/experiments/experiments.json','data/autopilot-runs.json','data/autopilot-status.json','autopilot/index.html','docs/obsidian/AUTOPILOT_LOG.md'].includes(p)||p.startsWith('data/decision-intents/')||/^data\/decision-rejections\/[a-z0-9-]+\.json$/.test(p);
+      // The report's generated translations ride with autopilot/index.html (base registry only).
+      const reportTranslations=reportTranslationsAt(()=>git('ls-tree',baseRef,'--','data/i18n/pages.json')?git('show',baseRef+':data/i18n/pages.json'):null);
+      const bookkeeping=p=>['growth/experiments/experiments.json','data/autopilot-runs.json','data/autopilot-status.json','autopilot/index.html','docs/obsidian/AUTOPILOT_LOG.md'].includes(p)||reportTranslations.includes(p)||p.startsWith('data/decision-intents/')||/^data\/decision-rejections\/[a-z0-9-]+\.json$/.test(p);
       assert(files.every(p=>bookkeeping(p)||e.change_paths.includes(p)),'undeclared measurement change path at final head');
       verifySupportingGitDiff(e,base,head,(...a)=>execFileSync('git',a,{cwd,encoding:'utf8',maxBuffer:16*1024*1024}));
     }
