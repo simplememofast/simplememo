@@ -2038,6 +2038,7 @@ export function interpretRun(run) {
   // 消去法ではなく**一意**に決まる。
   if (claude.conclusion === 'skipped') {
     const estop = step('緊急停止');
+    const contain = step('封じ込め');
     const budget = step('予算ゲート');
     const route = step('振り分け');
     const ran = (st) => st != null && st.conclusion !== 'skipped';
@@ -2054,6 +2055,15 @@ export function interpretRun(run) {
     if (estop?.conclusion === 'failure') {
       note = '緊急停止が立っていたため着手しなかった（data/emergency-stop.json）';
       code ??= 'emergency_stop';
+    } else if (contain?.conclusion === 'failure') {
+      // **Gate は通している。**写しは `run` なので `??=` だと「Gate で止まった（run）」になる
+      // —— 2026-09-21〜10-08 の行がその形で残った（10-09・10-10 はセッションが正しく名付けた）。
+      // 決まるのは「封じ込めのステップで止まった」までで、原因ではない。修理上限の
+      // dry-run も、判定そのものの例外も同じ exit 1 になる。原因はログで確かめる。
+      note = '封じ込めのステップで止まった（通常は同じ故障種別の修理が上限に達した状態。'
+        + '判定そのものの例外でも同じ形になるので、原因は run のログで確かめる。'
+        + 'node scripts/autopilot-selfheal.mjs --contain）。解除は実修理の repair_of か、オーナーの判断';
+      code = 'skip_repair_limit';
     } else if (ran(route)) {
       // **ここが 2026-08-25 まで名前を持っていなかった停止。**解除は費用委任の境界を確認する
       // なので、気づかれないと毎日この形で静かに止まり続ける。
@@ -5101,6 +5111,13 @@ async function selftest() {
     t('月次上限は写し無しでも skip_budget',
       interpretRun(skipped(stepsOf(['Gate', 'success'], ['緊急停止の確認', 'success'],
         ['予算ゲート', 'success'], ['振り分け', 'skipped']))).gate_code === 'skip_budget');
+    t('**封じ込めは Gate の写し run を上書きして skip_repair_limit**（10-07・10-08 の誤ラベル）',
+      interpretRun(skipped(stepsOf(['Gate', 'success'], ['判定コード: run', 'success'], ['緊急停止の確認', 'success'],
+        ['封じ込め（修理上限に達した経路は着手しない）', 'failure'], ['予算ゲート', 'skipped'], ['振り分け', 'skipped']))).gate_code === 'skip_repair_limit');
+    t('封じ込めは設計どおりの棄却', verdictFor('skip_repair_limit') === 'declined_by_design');
+    t('封じ込めを通った回は従来どおり（月次上限）',
+      interpretRun(skipped(stepsOf(['Gate', 'success'], ['緊急停止の確認', 'success'],
+        ['封じ込め（修理上限に達した経路は着手しない）', 'success'], ['予算ゲート', 'success'], ['振り分け', 'skipped']))).gate_code === 'skip_budget');
     t('**秘密鍵未設定と当日重複は、写しが無ければ決まらない**（推測しない）',
       interpretRun(skipped(stepsOf(['Gate', 'success'], ['緊急停止の確認', 'skipped'],
         ['予算ゲート', 'skipped'], ['振り分け', 'skipped']))).gate_code === null);
