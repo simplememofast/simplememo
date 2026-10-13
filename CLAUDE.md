@@ -177,8 +177,16 @@ head が `Codex/decision-observe-*` の open PR が**1本でもある**と、`pu
 落ちる。2026-10-09〜13 は日次アクチュエータがこれで毎日落ち（#2039 #2041 #2042 #2048 #2050）、
 運転台帳と運転表が main に入らないまま main の日次検証が赤だった（Act は #2052 で直した）。
 訳はサイトマップの日付の元になるので、訳 → サイトマップの順を崩さない。
-**Decision Monitor の公開経路（`synchronizeReportSitemaps`・`pendingPublication` の範囲）は
-まだ訳を持たない。**2026-10-13 時点で、Monitor は 10/05 の #2004 を待って止まっている。
+**Decision Monitor の公開経路（`synchronizeReportSitemaps`・`pendingPublication` の範囲）も
+同じ8ページを含める（#2054）。**それまでは訳を持たず、しかも 10/05 の公開 PR #2004 が
+別の日付の検査（run ledger）で落ちたまま main と衝突し、Monitor は 10/05〜10/13 のあいだ
+`waiting_for_publication` で戻り続けた。**その間は夜間の公開も、本番の自動巻き戻しの判断も
+止まっていた。**#2004 は 10/13 に閉じた。
+
+**公開 PR が1回でも落ちると、Monitor はまた待ち続ける**（#1430・#1548・#2004 で3回目。
+ロードマップの B-04）。`publicationRetryPlan` が再実行するのは検証に成功した PR だけで、
+落ちた PR は誰かが閉じるまで残る。開いたままの `Codex/decision-observe-*` を見たら、
+まず落ちた段を確かめ、日付の検査なら main を直してから閉じる。
 
 **`Codex/decision-observe-*` を merge で更新しない。**main を merge すると、マージコミットが
 first-parent 比較で `/en/`・`/en/blog/`・`/blog/fastest-memo-app-benchmark` など
