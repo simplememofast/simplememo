@@ -70,6 +70,10 @@
   （理由は `escalation-rules.json` の `trigger` に限定される。自由文の停止は
   解除してよいかの判断ができない）。主系は着手前に `--contain --dry-run` を
   通っているので、**上限に達した経路はそもそも走らない**
+- 例外は**所有者が日付を入れた1回だけ**。GitHub Actions の副系は、オーナーが repository
+  variable `AUTOPILOT_RECOVERY_ONCE` に JST の日付を入れた日の定時の1回目に限り、
+  10-05・10-06 の封じ込めを越える（`docs/obsidian/ACTIONS_RECOVERY_ONE_USE.md`）。
+  **AIはこの変数を作らない・変えない。**越えた回でも 10-05・10-06 の repair_of は書かない
 
 この仕組みの外にある最後の手段は**資格情報の失効**。リポジトリが読めない・
 この判定が壊れている場合でも止まる。
