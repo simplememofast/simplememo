@@ -33,7 +33,7 @@ from xml.etree import ElementTree as ET
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from localization_registry import published_groups, page_url
+from localization_registry import published_groups, page_url, indexed
 from sitemap_lastmod import content_lastmods, git  # noqa: E402
 
 from i18n_config import (  # noqa: E402
@@ -79,6 +79,7 @@ for ja_path, en_path in JA_EN_PAIRS:
 
 
 for group, pages in published_groups():
+    pages = indexed(group, pages)
     alternates = [(locale, absolute_url(page_url(file))) for locale, file in pages.items()]
     default = absolute_url(page_url(pages.get('ja', group['source'])))
     for file in pages.values():

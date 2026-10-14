@@ -248,6 +248,58 @@ class TranslationPipelineTests(unittest.TestCase):
             self.assertIn("from './"+core+"'",app)
             self.assertNotIn('core.123456789abc.js',app)
 
+    def test_japanese_dates_use_each_locales_date_format(self):
+        from site_translation_dates import source_dates, localize_dates, leftover_dates
+        unit = collect('<p>最終更新：<time>2026年10月4日</time>（2025年3月に改定、8月11日に計測。1年で削除）</p>')[0]
+        dates = source_dates(unit)
+        self.assertEqual(dates, [(2026, 10, 4), (2025, 3, None), (None, 8, 11)])
+        cases = {
+            'en': ('2026 years 10 month 4 days (revised 2025 year 3 month, measured 8 month 11 day, deleted in 1 year)',
+                   'October 4, 2026 (revised March 2025, measured August 11, deleted in 1 year)'),
+            'es': ('2026 años 10 mes 4 días; 2025 año 3 mes; 8 mes 11 día',
+                   '4 de octubre de 2026; marzo de 2025; 11 de agosto'),
+            'pt-BR': ('2026 ano 10 mês 04 dia', '4 de outubro de 2026'),
+            'id': ('2026 tahun 10 bulan 4 hari; tanggal 11 bulan 8 tahun 2026', '4 Oktober 2026; tanggal 11 bulan 8 tahun 2026'),
+            'tr': ('2026 yıl 10 ay 4 güncellemesi; 2025 yılı 3 ayında', '4 Ekim 2026 güncellemesi; 2025 yılı Mart ayında'),
+            'ar': ('(نشر على 2026، 10 شهر 4)', '(نشر على 4 أكتوبر 2026)'),
+        }
+        for locale, (literal, expected) in cases.items():
+            with self.subTest(locale=locale):
+                self.assertEqual(localize_dates(literal, dates, locale), expected)
+        # Only the source's own dates change: another year, a duration or a
+        # version number stays as the translation wrote it.
+        self.assertEqual(localize_dates('2024 año 10 mes; 3 meses', dates, 'es'), '2024 año 10 mes; 3 meses')
+        self.assertEqual(localize_dates('2026年10月4日', dates, 'zh-Hans'), '2026年10月4日')
+        self.assertEqual(leftover_dates('Desde 2026 año 9 mes', 'es'), ['2026 año 9 mes'])
+        self.assertEqual(leftover_dates('Desde septiembre de 2026', 'es'), [])
+
+    def test_indonesian_noun_first_dates_are_localized(self):
+        from site_translation_dates import localize_dates
+        self.assertEqual(localize_dates('pada tanggal 13 bulan 7 tahun 2026 merupakan', [(2026, 7, 13)], 'id'),
+                         'pada tanggal 13 Juli 2026 merupakan')
+
+    def test_generated_pages_name_their_machine_translated_original(self):
+        from site_translation_notice import add_machine_translation_note
+        group = {'source': 'blog/example.html', 'sourceLocale': 'ja', 'existing': {'ja': 'blog/example.html'},
+                 'pages': {'ja': 'blog/example.html', 'es': 'es/blog/example.html'}}
+        page = '<html lang="es"><body><main><h1>Título</h1><p>Texto</p></main></body></html>'
+        output = add_machine_translation_note(page, group, 'es')
+        self.assertIn('</h1>\n<p class="machine-translation-note" data-machine-translation-note=""', output)
+        self.assertIn('<a href="/blog/example" hreflang="ja">Leer el original en japonés</a>', output)
+        self.assertEqual(add_machine_translation_note(output, group, 'es'), output, 'the note is added once')
+        self.assertEqual(add_machine_translation_note(page, group, 'ja'), page, 'editorial pages carry no note')
+        english_source = dict(group, source='en/blog/example.html', sourceLocale='en', existing={'en': 'en/blog/example.html'})
+        self.assertIn('hreflang="en">Leer el original en inglés</a>', add_machine_translation_note(page, english_source, 'es'))
+
+    def test_noindex_locales_leave_search_but_keep_the_language_menu(self):
+        from localization_registry import indexed
+        group = {'source': 'legal.html', 'existing': {'ja': 'legal.html'}, 'noindex': ['es'],
+                 'pages': {'ja': 'legal.html', 'es': 'es/legal.html', 'ko': 'ko/legal.html'}}
+        self.assertEqual(indexed(group, group['pages']), {'ja': 'legal.html', 'ko': 'ko/legal.html'})
+        head = '<html><head><meta name="robots" content="max-snippet:-1"><title>t</title></head></html>'
+        self.assertEqual(build.noindex_head(head).count('noindex'), 1)
+        self.assertNotIn('max-snippet', build.noindex_head(head))
+        self.assertIn('<head>\n  <meta name="robots" content="noindex, follow">', build.noindex_head('<html><head><title>t</title></head></html>'))
 
 if __name__ == '__main__':
     unittest.main()

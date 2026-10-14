@@ -29,7 +29,7 @@ from typing import Iterable
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from localization_registry import published_groups, page_url
+from localization_registry import published_groups, page_url, indexed
 
 from i18n_config import (  # noqa: E402
     TOP_CLUSTER,
@@ -117,11 +117,14 @@ def build_plan() -> list[tuple[Path, str, str, list[tuple[str, str]], str | None
 
     by_file = {entry[0]: entry for entry in plan}
     for group, pages in published_groups():
-        alternates = [(locale, absolute_url(page_url(file))) for locale, file in pages.items()]
-        default = absolute_url(page_url(pages.get('ja', group['source'])))
+        listed = indexed(group, pages)
+        alternates = [(locale, absolute_url(page_url(file))) for locale, file in listed.items()]
+        default = absolute_url(page_url(listed.get('ja', group['source'])))
         for locale, file in pages.items():
             path = REPO_ROOT / file
-            by_file[path] = (path, locale, absolute_url(page_url(file)), alternates, default)
+            # A noindex locale keeps its self-canonical but advertises no alternates.
+            by_file[path] = ((path, locale, absolute_url(page_url(file)), alternates, default) if locale in listed
+                             else (path, locale, absolute_url(page_url(file)), [], None))
     return list(by_file.values())
 
 

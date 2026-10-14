@@ -15,11 +15,12 @@ import subprocess
 from pathlib import Path
 from functools import lru_cache
 from urllib.parse import urljoin, urlsplit, urlunsplit
-from localization_registry import ROOT, groups, page_url, localized_fragment
+from localization_registry import ROOT, groups, page_url, localized_fragment, indexed
 from site_translation_units import collect, collect_extra, prepare_source, source_language, examples_for, Parser, all_nodes
 from site_translation_validation import validate, render
 from site_translation_dynamic import bindings, locale_assets, inline_code
 from site_translation_literals import literal_filenames
+from site_translation_dates import source_dates, localize_dates, leftover_dates
 
 SITE = 'https://simplememofast.com'
 CATALOGS = ROOT / 'data/i18n/translations'
@@ -113,6 +114,18 @@ def map_css_urls(value, source, locale, routes):
     return re.sub(r'url\(\s*(["\']?)(.*?)\1\s*\)', replace, value)
 
 
+ROBOTS_META = re.compile(r'<meta\b(?=[^>]*\bname\s*=\s*["\']robots["\'])[^>]*>', re.I)
+
+
+def noindex_head(source):
+    """Keep a registry `noindex` locale out of search; links stay followable."""
+    tag = '<meta name="robots" content="noindex, follow">'
+    if ROBOTS_META.search(source):
+        return ROBOTS_META.sub(tag, source, count=1)
+    head = re.search(r'<head\b[^>]*>', source, re.I)
+    return source[:head.end()] + '\n  ' + tag + source[head.end():]
+
+
 def coverage_errors(root, page_groups, files):
     expected = {file for group in page_groups for file in group['pages'].values()}
     excluded = {'admin', 'docs', 'fixtures', 'scripts', 'tools', 'growth', 'assets', 'screenshots', 'node_modules'}
@@ -148,6 +161,8 @@ def translate_document(group, locale, catalog, routes, script_paths=None, dynami
         if problem:
             errors.append(key + ': ' + problem); continue
         translated = render(unit, entry['text'], attribute=unit.get('kind') == 'attribute', locale=locale)
+        if group['sourceLocale'] == 'ja' and language == 'ja':
+            translated = localize_dates(translated, source_dates(unit), locale)
         if unit.get('kind') == 'json':
             start, end = unit['script']
             payload = payloads.setdefault((start, end), json.loads(source[start:end]))
@@ -254,10 +269,16 @@ def translate_document(group, locale, catalog, routes, script_paths=None, dynami
     # The existing head generator owns canonical and alternate tags. Calling
     # its pure transform keeps subsequent generator runs idempotent.
     from normalize_i18n_head import set_html_lang, build_block, replace_i18n_lines
-    alternates = [(language, SITE + page_url(file)) for language, file in group['pages'].items()]
-    block = build_block(locale, target_canonical, alternates,
-                        SITE + page_url(group['pages'].get('ja', group['source'])))
+    listed = indexed(group, group['pages'])
+    if locale in listed:
+        alternates = [(language, SITE + page_url(file)) for language, file in listed.items()]
+        block = build_block(locale, target_canonical, alternates,
+                            SITE + page_url(listed.get('ja', group['source'])))
+    else:
+        block = build_block(locale, target_canonical, [], None)
     source = replace_i18n_lines(set_html_lang(source, locale), block)
+    if locale not in listed:
+        source = noindex_head(source)
     if locale == 'en':
         from inject_locale_seed import transform as seed_english
         source, _ = seed_english(source)
@@ -270,6 +291,9 @@ def translate_document(group, locale, catalog, routes, script_paths=None, dynami
                 if 'site-languages' in (node.attrs.get('class') or '').split())
     source = source[:menu.start] + language_menu(file, locale,
               {language: page_url(path) for language, path in group['pages'].items()}) + source[menu.stop:]
+    # After link localization, so the note keeps pointing at the original.
+    from site_translation_notice import add_machine_translation_note
+    source = add_machine_translation_note(source, group, locale)
     if uses_runtime:
         runtime = script_paths['runtime']
         head = next(node for node in all_nodes(Parser(source).root) if node.tag == 'head')
@@ -322,6 +346,15 @@ def main():
     if errors:
         print('\n'.join(errors[:20]), file=sys.stderr)
         print(f'{len(errors)} incomplete translations; no HTML written.', file=sys.stderr)
+        return 1
+    # A date the engine rendered word for word ("2026 año 3 mes") must be
+    # corrected in data/i18n/overrides before the page is published again.
+    leftovers = [(file, literal) for group in groups() for locale, file in group['pages'].items()
+                 if locale not in group['existing'] and file in output
+                 for literal in leftover_dates(output[file], locale)]
+    if leftovers:
+        print('\n'.join(f'{file}: word-for-word date {literal!r}' for file, literal in leftovers[:20]), file=sys.stderr)
+        print(f'{len(leftovers)} untranslated dates; no HTML written.', file=sys.stderr)
         return 1
     # Resolve English breadcrumbs against this complete build, including pages
     # not yet written to disk. The older English finalizer uses the same rule.
