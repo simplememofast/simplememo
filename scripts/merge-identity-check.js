@@ -21,6 +21,10 @@ function approvedPrincipal(principal) {
     ['Claude Opus 5', ['noreply@anthropic.com']],
     ['Claude Opus 5.5', ['noreply@anthropic.com']],
     ['Codex', ['noreply@openai.com']],
+    // The daily run's commits (claude-code-action): GitHub's public bot identity,
+    // bound to the github-actions[bot] account id. Owner-approved 2026-10-14; before
+    // this, every unattended artifact PR was refused here after a green validation.
+    ['claude[bot]', ['41898282+claude[bot]@users.noreply.github.com']],
   ]);
   if (known.get(name)?.includes(email)) return true;
 
@@ -93,6 +97,18 @@ function selftest() {
   assert.equal(approvedPrincipal({ name: 'SimpleMemo Developer', email: 'person@simplememofast.com' }), false);
   assert.equal(approvedPrincipal({ name: 'SimpleMemo Developer', email: 'person@users.noreply.github.com' }), false);
   assert.equal(approvedPrincipal({ name: 'Claude Private Person', email: 'noreply@anthropic.com' }), false);
+  // The daily run's exact identity (PR #1993's commits) and nothing near it.
+  const dailyRun = { name: 'claude[bot]', email: '41898282+claude[bot]@users.noreply.github.com' };
+  assert.equal(approvedPrincipal(dailyRun), true);
+  assert.deepEqual(findUnapprovedPrincipals([{ ...good, commit: { ...good.commit, author: dailyRun, committer: dailyRun, message: 'work' } }]), []);
+  for (const near of [{ name: 'claude[bot]', email: '1+claude[bot]@users.noreply.github.com' },
+    { name: 'claude[bot]', email: '41898282+person@users.noreply.github.com' },
+    { name: 'claude[bot]', email: 'person@example.invalid' },
+    { name: 'Claude[bot]', email: '41898282+claude[bot]@users.noreply.github.com' },
+    { name: 'claude[bot] Private Person', email: '41898282+claude[bot]@users.noreply.github.com' },
+    { name: 'Private Person', email: '41898282+claude[bot]@users.noreply.github.com' }]) {
+    assert.equal(approvedPrincipal(near), false, JSON.stringify(near));
+  }
   assert.equal(approvedMergeOwner('simplememofast', { login: 'simplememofast', name: 'SimpleMemo Developer', email: 'simplememo.com@gmail.com' }), true);
   assert.equal(approvedMergeOwner('simplememofast', { login: 'simplememofast', name: 'SimpleMemo Developer (Private Person)', email: 'simplememo.com@gmail.com' }), false);
   assert.equal(completeCommitList(1, [good]), true);
