@@ -108,6 +108,53 @@ def _sentence_case(match, value):
     return (' ' + value) if before[-1:].isalpha() else value
 
 
+_TR_UNITS = ['', 'bir', 'iki', 'üç', 'dört', 'beş', 'altı', 'yedi', 'sekiz', 'dokuz']
+_TR_TENS = ['', 'on', 'yirmi', 'otuz', 'kırk', 'elli', 'altmış', 'yetmiş', 'seksen', 'doksan']
+
+
+def _tr_spoken_end(word):
+    """The last spoken word of a Turkish month name or number (2026 → altı)."""
+    if not word.isdigit():
+        return word.lower()
+    n = int(word)
+    if n % 10:
+        return _TR_UNITS[n % 10]
+    if n % 100:
+        return _TR_TENS[(n // 10) % 10]
+    return 'yüz' if n % 1000 else 'bin'
+
+
+def _tr_suffix(previous, suffix):
+    """Re-harmonize an apostrophe suffix after the word in front of it changed."""
+    word = _tr_spoken_end(previous)
+    vowels = [c for c in word if c in 'aeıioöuü']
+    if not vowels:
+        return suffix
+    last = vowels[-1]
+    two = 'a' if last in 'aıou' else 'e'
+    four = {'a': 'ı', 'ı': 'ı', 'o': 'u', 'u': 'u', 'e': 'i', 'i': 'i', 'ö': 'ü', 'ü': 'ü'}[last]
+    ends_vowel = word[-1] in 'aeıioöuü'
+    hard = word[-1] in 'çfhkpsşt'
+    d = 't' if hard else 'd'
+    m = re.fullmatch(r'[dt][ae](n|ki)?', suffix)
+    if m:  # locative / ablative / -ki
+        return d + two + (m[1] or '')
+    if re.fullmatch(r'y?[ae]', suffix):  # dative
+        return ('y' if ends_vowel else '') + two
+    if re.fullmatch(r'n?[ıiuü]n', suffix):  # genitive
+        return ('n' if ends_vowel else '') + four + 'n'
+    if re.fullmatch(r'y?[ıiuü]', suffix):  # accusative
+        return ('y' if ends_vowel else '') + four
+    return suffix
+
+
+def _tr_harmonize(text):
+    """Fix suffixes such as "13 Eylül'daki" left behind by a localized date."""
+    names = '|'.join(MONTHS['tr'])
+    pattern = r"(?:\b(" + names + r")|(?<![0-9])(\d{1,4}))'([a-zçğıöşü]{1,5})(?![a-zçğıöşü])"
+    return re.sub(pattern, lambda m: (m[1] or m[2]) + "'" + _tr_suffix(m[1] or m[2], m[3]), text)
+
+
 def localize_dates(text, dates, locale):
     """Replace word-for-word renderings of the source dates in rendered text.
 
@@ -150,11 +197,14 @@ def localize_dates(text, dates, locale):
                 rules.append((4, re.compile(lead_m + SEP + r'[Aa]y' + TR_MONTH_SUFFIX + r'(?![a-zçğıöşü])'),
                               lambda match, month=month: f'{MONTHS["tr"][month - 1]} ay{match[1]}'))
             rules.append((4, re.compile(lead_m + SEP + wm + end), _format(locale, None, month, None)))
+    original = text
     for _, pattern, value in sorted(rules, key=lambda rule: rule[0]):
         if callable(value):
             text = pattern.sub(value, text)
         else:
             text = pattern.sub(lambda match, value=value: _sentence_case(match, value), text)
+    if locale == 'tr' and text != original:
+        text = _tr_harmonize(text)
     return text
 
 

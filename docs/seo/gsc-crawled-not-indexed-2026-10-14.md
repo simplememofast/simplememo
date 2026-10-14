@@ -19,9 +19,9 @@
 3. **ただし、機械翻訳ページに品質上の欠陥がサイト全体に広がっていた。** Google の判定を待つ前に、
    次の欠陥をこの回で直した（オーナー判断 2026-10-14:「index のまま直して待つ」「機械翻訳の表示を入れる」）。
    - 日付の直訳（例「2026 año 3 mes 5 día」「2026 year 8 month」）: es/pt-BR/id/tr/ar/en の生成ページで約1,900か所、title/meta にも出ていた → 生成器で各言語の日付書式へ
-   - 「ブレスト」→「乳房／breast／胸」など 9言語の誤訳、「議事録」→「minutos（分）」、fleeting notes →「自由のノート」、ネタ帳 →「物語の本」、CODE →「CÓDIGO」ほか → 126単位を訳し直し（title・h1・meta を優先）
+   - 「ブレスト」→「乳房／breast／胸」など 9言語の誤訳、「議事録」→「minutos（分）」、fleeting notes →「自由のノート」、ネタ帳 →「物語の本」、CODE →「CÓDIGO」、Templater ページの「ceremony（儀式）」「Templateter」ほか → 66単位・計248件を訳し直し（title・h1・meta・パンくずを優先）
    - 機械翻訳であることの表示が0件 → 生成ページの h1 直下に各言語1行の注記と原文リンク
-   - /voices/ の翻訳版が、機械翻訳した引用を「そのまま引用」と書いていた → 翻訳である旨に訂正（8言語）
+   - /voices/ の翻訳版が、機械翻訳した引用を「そのまま引用」と書いていた → 翻訳である旨に訂正（8言語。英語の人手版 /en/voices/ の「verbatim」も同様に訂正）
    - 8ロケールのホームが同じ言語のページへ1本もリンクしていなかった → ナビ・フッターの導線を追加
    - 日本固有の12トピック（特商法表記、日本のアプリ比較、LINE Keep、確定申告、就活 等）×8言語 → 台帳の `noindex` で検索対象外（93ページ。LINE系3トピックはLINE利用圏の zh-Hant を残す）
 4. **残り51件は、すでに正しい状態で Google の再クロール待ち、または想定どおり。** サイト側の追加作業は無い。
@@ -45,7 +45,7 @@ D のロケール別: id 18 / ko 12 / pt-BR 12 / ar 11 / zh-Hant 7 / es 6 / tr 4
 | URL | 見立て | この回の対応 | 次の手 |
 |---|---|---|---|
 | `/vs/memo-post/` | Google が見ているのは 8/05 版（#1784 の事実訂正前） | ロケール版は noindex（日本のアプリ） | **オーナー: URL検査で登録をリクエスト**（訂正済み版が公開中） |
-| `/en/obsidian/plugins/templater/` | #2031 の機械生成。誤訳（ceremony・Templateter・Cursis・全大文字の文・404字の説明） | 誤訳を訂正 | 公開後にURL検査でリクエスト |
+| `/en/obsidian/plugins/templater/` | #2031 の機械生成。誤訳（ceremony・Templateter・Cursis・全大文字の文・404字の説明） | 誤訳を訂正（本文の主要な誤訳を含む約30単位。同じページの8言語も） | 公開後にURL検査でリクエスト |
 | `/blog/best-note-to-self-apps-2026` | #2031 の機械生成JA。既存JAページ（`/blog/email-yourself-app-comparison` 等）と意図が重なる | なし | 10/09〜11/05 の窓（11/08頃）で統合を判定。それまでJA側からリンクを足さない |
 | `/iphone-shortcuts-email-guide/` | 同上（`/note-to-email/` 等と重なる） | なし | 同上 |
 | `/blog/ios26-speechanalyzer-live-mic` | #2031 の機械生成JA。重なりは無い | なし | 次回、JA の `/blog/` 一覧へ掲載（8言語の訳が要る） |
@@ -85,15 +85,27 @@ D のロケール別: id 18 / ko 12 / pt-BR 12 / ar 11 / zh-Hant 7 / es 6 / tr 4
 
 ### 2. 誤訳の訂正（overrides）
 
-`data/i18n/overrides/<locale>.json` に126単位（＋/voices/ 16単位）。同じ内容を
-`data/i18n/translations/<locale>.json` にも反映した（取り込み元の下書きは repo 外のため）。
-すべて `site_translation_validation.validate()`（マーカー・入れ子・未翻訳）を通している。
+`data/i18n/overrides/<locale>.json` に 66単位・計248件（en 32 / zh-Hans 22 / zh-Hant 22 / ko 16 / es 33 / pt-BR 28 / id 30 / ar 35 / tr 30）。
+同じ内容を `data/i18n/translations/<locale>.json` にも反映した（取り込み元の下書きは repo 外のため）。
+すべて `site_translation_validation.validate()`（マーカー・入れ子・未翻訳）と描画を通している。
+訂正の一部は、PR 作成前の反証レビュー（訳文担当）が指摘・起案したもので、指摘のあった
+「es だけ直っていない全部大文字の文」「h1・パンくずに届いていない fleeting notes の訂正」
+「Templater ページの英語以外の誤訳」も同じ回で直した。
 
 - 「ブレスト」を含む9単位を、9言語すべてで訳し直した（用語だけでなく、同じ文の「議事録→minutes」
   「デジタル清書→digital calligraphy」「自由な発想→ideas gratuitas（無料の）」も）。
-- 検索結果に出る title・h1・meta description のうち、fleeting notes（zh/zh-Hant/es/tr）、議事録（pt-BR/id/tr/es/ar）、
-  CODE/PARA（pt-BR/es/id/tr）、ブログネタ（es/pt-BR/id/tr/ar）の誤訳。
-- `/en/obsidian/plugins/templater/` の誤訳一式と、全部大文字の文（templater・compare/anytype の en/es/id）。
+- 検索結果に出る title・h1・meta description・パンくずのうち、fleeting notes、議事録、CODE/PARA、
+  ブログネタ、Zettelkasten の誤訳。
+- `/obsidian/plugins/templater/` の生成版（en と8言語）: 「式が残った→ceremony」「根拠と範囲→Ensis」
+  「Templateter」「展開→deploy」、全部大文字の文、UI の値 None の誤訳。`/obsidian/compare/anytype/` の全部大文字の文。
+- `/voices/` の8言語: 機械翻訳した引用を「そのまま引用」としていた記述。
+- `/autopilot/` の es: 「2026年6月から9月までの4か月」「同じ192タスクを分母に固定」の意味の崩れ。
+
+トルコ語では、日付を月名へ置き換えた後の接尾辞を母音調和に合わせ直す（「13 Eylül'daki」→「13 Eylül'deki」）。
+
+**残っているもの**: 本文の誤訳は、候補の機械的な抽出で「議事録→minutes」143単位、「ネタ」系78、CODE/PARA 83 などが
+まだある（正しく訳されたものを含む概数）。この回は検索結果に出る部分と、明白な意味の誤りを優先した。
+アラビア語・トルコ語・インドネシア語は、母語話者による確認を受けていない。
 
 ### 3. 機械翻訳の注記
 
@@ -133,8 +145,7 @@ AI タグのカードが `/en/ai-tags/` を指していたのを各ロケール�
   「/obsidian/ ハブにガイド一覧」「プラグインのハブから Templater へリンク」は、それぞれの実験の評価後に回す。
 - **意図が重なる生成JAページ8件**は、統合も noindex もリンク追加もしていない。「表示ゼロ＋強い競合ページ」の
   証拠がそろうまで統合しない方針に従い、10/09〜11/05 の窓（11/08頃）で判定する。
-- **機械翻訳の残りの誤訳**: 候補の機械的な抽出では、本文の「議事録→minutes」143単位、「ネタ」系78、CODE/PARA 83 などが
-  まだ残る（正しく訳されているものを含む概数）。この回は検索結果に出る title・h1・meta を優先した。
+- **機械翻訳の残りの誤訳**（§2「残っているもの」）。
 - mp4 への noindex、`/data/benchmark-2026.csv` 等の追加の noindex（JSON 以外の生データは今回の123件に入っていない）。
 
 ## オーナー操作（GSC）

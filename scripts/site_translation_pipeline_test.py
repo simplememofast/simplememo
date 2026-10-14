@@ -273,6 +273,12 @@ class TranslationPipelineTests(unittest.TestCase):
         self.assertEqual(leftover_dates('Desde 2026 año 9 mes', 'es'), ['2026 año 9 mes'])
         self.assertEqual(leftover_dates('Desde septiembre de 2026', 'es'), [])
 
+    def test_turkish_suffixes_follow_the_localized_date(self):
+        from site_translation_dates import localize_dates
+        self.assertEqual(localize_dates("9 ay 13'daki değişiklik", [(None, 9, 13)], 'tr'), "13 Eylül'deki değişiklik")
+        self.assertEqual(localize_dates("2024 yılı 10 ayı 1'te sona erdi", [(2024, 10, 1)], 'tr'), "1 Ekim 2024'te sona erdi")
+        self.assertEqual(localize_dates("2026 yıl 8 ay'den", [(2026, 8, None)], 'tr'), "Ağustos 2026'dan")
+
     def test_indonesian_noun_first_dates_are_localized(self):
         from site_translation_dates import localize_dates
         self.assertEqual(localize_dates('pada tanggal 13 bulan 7 tahun 2026 merupakan', [(2026, 7, 13)], 'id'),
