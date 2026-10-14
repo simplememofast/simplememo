@@ -46,17 +46,58 @@ test('local and Pages preview visits do not load production FAQ analytics', () =
   }
 });
 
-test('every indexable HTML page with an own-app CTA includes tracking and GA4', () => {
+test('every indexable HTML page with an own-app CTA or next-step card includes tracking and GA4', () => {
   const files = execFileSync('git', ['ls-files', '*.html'], { cwd: root, encoding: 'utf8' }).trim().split('\n');
   const missing = [];
   for (const file of files) {
     const html = fs.readFileSync(path.join(root.pathname, file), 'utf8');
     if (/<meta\b[^>]*name=["']robots["'][^>]*noindex/i.test(html)) continue;
-    if (!/href=["']https:\/\/apps\.apple\.com\/[^"']*id6758438948(?:[?\/"'])/i.test(html)) continue;
+    // The tracker also sends next_step_click/next_step_impression for the card.
+    if (!/href=["']https:\/\/apps\.apple\.com\/[^"']*id6758438948(?:[?\/"'])/i.test(html)
+      && !/<a\b[^>]*\bdata-next-step=/i.test(html)) continue;
     if (!/src=["']\/js\/app-store-tracking\.js\?v=/.test(html)) missing.push(`${file}: tracker`);
     if (!/G-EPZVZKCVQG|src=["']\/js\/analytics\.js\?v=/.test(html)) missing.push(`${file}: GA4`);
   }
   assert.deepEqual(missing, []);
+});
+
+// Pages that tell visitors nothing about them is collected. Keys omit the locale
+// directory. They must stay free of analytics: change the promise first.
+const NO_ANALYTICS = {
+  // Open-source browser-local app. Every locale's guide.html says the app
+  // "has no analytics or external scripts".
+  'memo-inbox/index.html': 'Memo Inbox promises no analytics',
+  'memo-inbox/guide.html': 'Memo Inbox promises no analytics',
+  // Says typed notes are not sent. scripts/build-citation-assets.py omits the
+  // analytics bootstrap on purpose (docs/citation-assets.md), and
+  // scripts/verify-citation-assets.cjs rejects any request made while it is used.
+  'resources/obsidian-inbox/index.html': 'the Markdown tool omits analytics by design',
+};
+const LOCALE_DIR = /^(?:ja|en|zh|zh-Hant|ko|es|pt-BR|id|ar|tr)\//;
+
+test('every indexable public page loads GA4 unless it promised visitors no analytics', () => {
+  const robots = fs.readFileSync(new URL('robots.txt', root), 'utf8');
+  const everyone = robots.split(/\n\s*\n/).find(group => /^User-agent:\s*\*\s*$/im.test(group));
+  const disallowed = [...(everyone ?? '').matchAll(/^Disallow:\s*\/(\S*)/gim)].map(match => match[1]);
+  assert.ok(disallowed.length && !disallowed.includes(''), 'robots.txt rules for * not understood');
+  const files = execFileSync('git', ['ls-files', '*.html'], { cwd: root, encoding: 'utf8' }).trim().split('\n');
+  const missing = [], broken = [], exempt = new Set();
+  let tagged = 0;
+  for (const file of files) {
+    if (disallowed.some(prefix => file.startsWith(prefix))) continue;
+    const html = fs.readFileSync(path.join(root.pathname, file), 'utf8');
+    if (/<meta\b(?=[^>]*\bname=["']?robots\b)(?=[^>]*\bcontent=["'][^"']*\bnoindex)[^>]*>/i.test(html)) continue;
+    const key = file.replace(LOCALE_DIR, '');
+    if (Object.hasOwn(NO_ANALYTICS, key)) {
+      exempt.add(key);
+      if (/G-EPZVZKCVQG|googletagmanager\.com|\/js\/analytics\.js|analytics\.ahrefs\.com/.test(html)) broken.push(`${file}: ${NO_ANALYTICS[key]}`);
+    } else if (/G-EPZVZKCVQG|src=["']\/js\/analytics\.js\?v=/.test(html)) tagged++;
+    else missing.push(file);
+  }
+  assert.ok(tagged > 1000, `only ${tagged} pages checked`);
+  assert.deepEqual(missing, []);
+  assert.deepEqual(broken, []);
+  assert.deepEqual(Object.keys(NO_ANALYTICS).filter(key => !exempt.has(key)), [], 'stale exemption');
 });
 
 test('every inline GA4 loader queues production config before deferred loading and blocks previews', () => {
