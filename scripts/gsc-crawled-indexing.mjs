@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Owner's 2026-09-16 and 2026-09-29 GSC samples: serving policy, not Google's indexing verdict.
+// Owner's 2026-09-16, 2026-09-29 and 2026-10-14 GSC samples: serving policy, not Google's indexing verdict.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
@@ -9,15 +9,24 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ORIGIN = "https://simplememofast.com";
 const read = (p) => readFileSync(path.join(ROOT, p), "utf8");
-const olderCases = JSON.parse(read("docs/seo/gsc-crawled-cases-2026-09-16.json")).cases;
-const latestCases = JSON.parse(read("docs/seo/gsc-crawled-cases-2026-09-29.json")).cases;
-assert.equal(olderCases.length, 60);
-assert.equal(latestCases.length, 50);
-const bySource = new Map(olderCases.map(c => [c.from, c]));
-for (const c of latestCases) {
-  const previous = bySource.get(c.from);
-  if (previous) assert.deepEqual(c, previous, `${c.from}: supplied reports disagree`);
-  bySource.set(c.from, c);
+// Each supplied report is kept whole. A URL repeated across reports must keep
+// the same expected serving policy, or the reports disagree.
+const suppliedSamples = [
+  ["docs/seo/gsc-crawled-cases-2026-09-16.json", 60],
+  ["docs/seo/gsc-crawled-cases-2026-09-29.json", 50],
+  // 2026-10-14: all 123 rows of the report updated 2026-10-09. Adds locale
+  // HTML published by #2031 and three video files referenced by watch pages.
+  ["docs/seo/gsc-crawled-cases-2026-10-14.json", 123],
+];
+const bySource = new Map();
+for (const [file, expected] of suppliedSamples) {
+  const sample = JSON.parse(read(file)).cases;
+  assert.equal(sample.length, expected, `${file}: incomplete supplied sample`);
+  for (const c of sample) {
+    const previous = bySource.get(c.from);
+    if (previous) assert.deepEqual(c, previous, `${c.from}: supplied reports disagree`);
+    bySource.set(c.from, c);
+  }
 }
 const cases = [...bySource.values()];
 // Publication coverage is separate from the owner's historical GSC samples.
@@ -109,6 +118,20 @@ function checkHtml(html, urlPath) {
       assert(!noindex(attr(tag, "content")), `${urlPath}: HTML is noindex`);
     }
   }
+}
+
+// Registry `noindex` locales (data/i18n/pages.json) stay readable but out of search.
+function checkNoindexHtml(html, urlPath) {
+  const document = clean(html);
+  const head = document.split(/<\/head\s*>/i)[0];
+  const canonical = [...head.matchAll(/<link\b[^>]*>/gi)]
+    .filter(([tag]) => attr(tag, "rel").toLowerCase().split(/\s+/).includes("canonical"))
+    .map(([tag]) => attr(tag, "href"));
+  assert.deepEqual(canonical, [ORIGIN + urlPath], `${urlPath}: one self-canonical in the real head is required`);
+  assert([...head.matchAll(/<meta\b[^>]*>/gi)].some(([tag]) => /^robots$/i.test(attr(tag, "name")) && noindex(attr(tag, "content"))),
+    `${urlPath}: registry noindex locale lost its robots noindex`);
+  assert(![...head.matchAll(/<link\b[^>]*>/gi)].some(([tag]) => attr(tag, "rel").toLowerCase() === "alternate" && attr(tag, "hreflang")),
+    `${urlPath}: a noindex locale must not advertise hreflang alternates`);
 }
 
 function headTitle(html, urlPath) {
@@ -435,6 +458,8 @@ async function selftest() {
     return { calls, request: async (url, method) => {
       const key = `${method} ${url}`, call = (calls.get(key) || 0) + 1;
       calls.set(key, call);
+      if (cases.some(c => c.kind === "video" && c.from === url)) return new Response(null, { headers: { "Content-Type": "video/mp4" } });
+      if (cases.some(c => c.kind === "noindex-html" && c.from === url)) return new Response(fixtureHtml(url, "Noindex fixture").replace("</head>", '<meta name="robots" content="noindex, follow"></head>'), { headers: { "Content-Type": "text/html" } });
       if (method === "HEAD") return new Response(null, { headers: { "X-Robots-Tag": "noindex" } });
       if (url === "/robots.txt") return new Response("User-agent: *\nAllow: /\n");
       if (url.startsWith("/sitemap-")) return new Response(staleSitemap && call === 1 ? "<urlset></urlset>" : allSitemap);
@@ -486,14 +511,14 @@ async function selftest() {
   assert.equal(expired.calls.size, 0, "Expired propagation budget must perform no requests");
   const baseline = makeRequest(), baselineReports = [];
   const baselineReport = await liveAudit(false, { request: baseline.request, readBytes: () => { throw new Error("PR baseline must not load candidate sources"); }, saveReport: report => baselineReports.push(report), logReport: () => {} });
-  assert.equal(baselineReport.passed, 85);
+  assert.equal(baselineReport.passed, 173);
   assert.equal(baselineReport.publication.skipped, 62);
   assert(baselineReport.ok);
   assert.equal(baselineReports.length, 1);
   for (const target of publication) assert(!baseline.calls.has(`GET ${target.url}`), "PR baseline must not fetch unpublished candidates");
   const deployed = makeRequest(), deployedReports = [];
   const deployedReport = await liveAudit(true, { request: deployed.request, readBytes, wait: async () => {}, saveReport: report => deployedReports.push(report), logReport: () => {} });
-  assert.equal(deployedReport.passed, 85);
+  assert.equal(deployedReport.passed, 173);
   assert.equal(deployedReport.publication.passed, 62);
   assert.deepEqual(deployedReport.publication.cases.at(-2).actualDescriptions, a7Descriptions);
   assert.deepEqual(deployedReport.publication.cases.at(-2).expectedDescriptions, a7Descriptions);
@@ -508,7 +533,7 @@ async function selftest() {
   assert.equal(failureReports.length, 1, "Propagation failure must retain report evidence");
   assert.equal(failureReports[0].publication.failed, 1);
   assert.equal(failureReports[0].publication.cases.find(row => row.url === htmlTarget.url).status, 404);
-  assert.equal(failureReports[0].skipped, 85);
+  assert.equal(failureReports[0].skipped, 173);
   assert(!failureReports[0].ok);
   const sourceFailureReports = [];
   await assert.rejects(liveAudit(true, { request: async () => { throw new Error("Missing sources must fail before HTTP"); }, readBytes: () => { throw new Error("Missing publication source"); }, saveReport: report => sourceFailureReports.push(report), logReport: () => {} }), /Missing publication source/);
@@ -525,7 +550,7 @@ async function selftest() {
 async function sourceAudit() {
   const { loadEdgeMiddleware, edgeResult } = await import("./lib/edge-middleware.mjs");
   const middleware = await loadEdgeMiddleware(ROOT);
-  const sitemap = read("sitemap-ja.xml") + read("sitemap-en.xml"), headers = read("_headers"), robots = read("robots.txt");
+  const sitemap = read("sitemap-ja.xml") + read("sitemap-en.xml") + read("sitemap-locales.xml"), headers = read("_headers"), robots = read("robots.txt");
   const policy = JSON.parse(read("data/publication-policy.json"));
   const publication = publicationTargets();
   const targets = new Set();
@@ -533,7 +558,21 @@ async function sourceAudit() {
     const result = await edgeResult(middleware, ORIGIN + c.from, ORIGIN);
     assert.deepEqual(result, c.kind === "redirect" ? { kind: "redirect", status: 301, to: c.to } : { kind: "pass" }, c.from);
     assert(robotsAllows(robots, c.from), `${c.from}: Google must be able to fetch the redirect/noindex/canonical`);
-    if (c.kind === "data" || c.kind === "asset") {
+    if (c.kind === "video") {
+      // Video files referenced by watch pages stay fetchable and indexable:
+      // Google's video guidelines ask not to noindex or block the video file.
+      // Their place in the crawled-not-indexed report is expected.
+      assert(c.to.startsWith("/assets/video/") && c.to.endsWith(".mp4") && c.from.startsWith(c.to + "?v="), `${c.from}: unexpected video case`);
+      assert(readFileSync(path.join(ROOT, c.to.slice(1))).length > 0, `${c.to}: video file missing`);
+      assert(!noindex(configuredRobots(headers, c.to)), `${c.to}: video file must not be noindex`);
+      const response = await middleware({ request: new Request(ORIGIN + c.from), next: async () => new Response("video bytes", { headers: { "Content-Type": "video/mp4" } }) });
+      assert.equal(response.status, 200, `${c.from}: video response status changed`);
+      assert(!noindex(response.headers.get("x-robots-tag")), `${c.from}: middleware noindexed a video file`);
+      assert(!sitemap.includes(`<loc>${ORIGIN}${c.to}</loc>`), `${c.to}: video file must not be a page sitemap entry`);
+    } else if (c.kind === "noindex-html") {
+      checkNoindexHtml(read(htmlFile(c.to)), c.to);
+      assert(!sitemap.includes(`<loc>${ORIGIN}${c.to}</loc>`), `${c.to}: noindex locale must not be in a sitemap`);
+    } else if (c.kind === "data" || c.kind === "asset") {
       if (c.kind === "data") {
         assert.equal(policy.files[c.from.slice("/data/".length)]?.served_by_site, true, `${c.from}: preserve publication policy`);
         JSON.parse(read(c.from.slice(1)));
@@ -609,7 +648,7 @@ async function sourceAudit() {
   console.log(JSON.stringify({ mode: "source", cases: cases.length, kinds: counts(), publication: { html: publicationPaths.filter(target => target.kind === "html").length, assets: publicationPaths.filter(target => target.kind === "asset").length, cases: publication }, uniqueHtmlTargets: targets.size, inbound: Object.fromEntries([...inbound].map(([p, v]) => [p, v.size])) }, null, 2));
 }
 
-const counts = () => Object.fromEntries(["redirect", "html", "data", "asset"].map(kind => [kind, cases.filter(c => c.kind === kind).length]));
+const counts = () => Object.fromEntries(["redirect", "html", "noindex-html", "data", "asset", "video"].map(kind => [kind, cases.filter(c => c.kind === kind).length]));
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function get(urlPath, method = "GET", deadline = Infinity) {
   // A full audit fetches over 100 distinct URLs. Pace requests and retry an
@@ -723,28 +762,37 @@ async function liveAudit(strict, { request = get, readBytes, wait = pause, now =
       report.publication.cases = report.propagation.publication;
       assert(report.propagation.ready, report.propagation.error || "Production publication or raw-file policy did not become ready within the bounded propagation check");
     }
-    const robotsResponse = await snapshot("/robots.txt"), sitemapJaResponse = await snapshot("/sitemap-ja.xml"), sitemapEnResponse = await snapshot("/sitemap-en.xml");
-    report.controls = [robotsResponse, sitemapJaResponse, sitemapEnResponse].map((response, index) => ({ url: ["/robots.txt", "/sitemap-ja.xml", "/sitemap-en.xml"][index], status: response.status, contentType: response.contentType, observedAt: response.observedAt }));
+    const robotsResponse = await snapshot("/robots.txt"), sitemapJaResponse = await snapshot("/sitemap-ja.xml"), sitemapEnResponse = await snapshot("/sitemap-en.xml"), sitemapLocalesResponse = await snapshot("/sitemap-locales.xml");
+    report.controls = [robotsResponse, sitemapJaResponse, sitemapEnResponse, sitemapLocalesResponse].map((response, index) => ({ url: ["/robots.txt", "/sitemap-ja.xml", "/sitemap-en.xml", "/sitemap-locales.xml"][index], status: response.status, contentType: response.contentType, observedAt: response.observedAt }));
     assert.equal(robotsResponse.status, 200, "Live robots.txt must return 200");
     assert.equal(sitemapJaResponse.status, 200, "Live Japanese sitemap must return 200");
     assert.equal(sitemapEnResponse.status, 200, "Live English sitemap must return 200");
-    const robots = robotsResponse.body, sitemap = sitemapJaResponse.body + sitemapEnResponse.body;
+    assert.equal(sitemapLocalesResponse.status, 200, "Live locale sitemap must return 200");
+    const robots = robotsResponse.body, sitemap = sitemapJaResponse.body + sitemapEnResponse.body + sitemapLocalesResponse.body;
     for (const c of cases) {
       const row = { ...c };
       try {
-        const first = await snapshot(c.from);
+        // A video file is checked by HEAD: its bytes are not part of the policy.
+        const first = await snapshot(c.from, c.kind === "video" ? "HEAD" : "GET");
         row.status = first.status;
         assert.equal(first.status, c.kind === "redirect" ? 301 : 200, `${c.from}: unexpected initial HTTP status`);
         if (c.kind === "redirect") {
           assert(first.location, `${c.from}: missing Location`);
           assert.equal(new URL(first.location, ORIGIN + c.from).href, ORIGIN + c.to, `${c.from}: unexpected redirect target`);
         }
-        const final = await snapshot(c.to);
+        const final = c.kind === "video" ? first : await snapshot(c.to);
         assert.equal(final.status, 200, `${c.to}: final target is not a direct 200`);
         assert(robotsAllows(robots, c.from) && robotsAllows(robots, c.to), `${c.from}: robots.txt prevents Google's verification`);
         row.finalStatus = final.status;
         row.xRobotsTag = final.robots;
-        if (c.kind === "data" || c.kind === "asset") {
+        if (c.kind === "noindex-html") {
+          checkNoindexHtml(final.body, c.to);
+          assert(!sitemap.includes(`<loc>${ORIGIN}${c.to}</loc>`), `${c.to}: noindex locale is in the live sitemap`);
+        } else if (c.kind === "video") {
+          assert(/^video\/mp4(?:\s*;|$)/i.test(final.contentType || ""), `${c.from}: not an MP4 response`);
+          row.noindexObserved = noindex(final.robots);
+          assert(!row.noindexObserved, `${c.from}: live video file is noindex`);
+        } else if (c.kind === "data" || c.kind === "asset") {
           if (c.kind === "data") {
             assert(/application\/json/i.test(final.contentType || ""), `${c.to}: not a JSON response`);
             JSON.parse(final.body);
@@ -788,9 +836,9 @@ async function liveAudit(strict, { request = get, readBytes, wait = pause, now =
   return report;
 }
 
-assert.equal(cases.length, 85, "Both complete supplied samples must remain covered");
-assert.equal(new Set(cases.map(c => c.from)).size, 85, "Duplicate fixture URL");
-assert.deepEqual(counts(), { redirect: 56, html: 15, data: 13, asset: 1 });
+assert.equal(cases.length, 173, "All complete supplied samples must remain covered");
+assert.equal(new Set(cases.map(c => c.from)).size, 173, "Duplicate fixture URL");
+assert.deepEqual(counts(), { redirect: 60, html: 95, "noindex-html": 1, data: 13, asset: 1, video: 3 });
 for (const c of cases) assert(c.from.startsWith("/") && c.to.startsWith("/") && !c.to.includes("?"));
 if (process.argv.includes("--selftest")) await selftest();
 else if (process.argv.includes("--live")) await liveAudit(true);
