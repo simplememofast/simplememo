@@ -16,7 +16,8 @@ CI, and decisions require evidence that can be pointed at.
 ```
 growth/
   data/gsc/<label>/     committed Search Console snapshots (meta + one JSON per dimension)
-  data/appstore/        App Store Connect exports (funnel side; not yet wired)
+  data/appstore/        App Store Connect aggregate shapes (manual ingest-asc) and a drop
+                        zone for the hand-transcribed CPP table — see "Site → install measurement"
   input/                drop zone for raw GSC CSVs — see GSC_OWNER_ACTION.md
   experiments/          experiments.json — the ledger
   reports/              generated weekly reports
@@ -152,11 +153,71 @@ exists for, relocated: a pipeline that stops delivering does not raise its hand,
 it reports smaller numbers, and smaller numbers get explained. `bq-preflight.mjs`
 runs first and `--strict` makes staleness an incident rather than a data point.
 
+## Site → install measurement (as of 2026-10-14)
+
+Store clicks are measured on the pages that load GA4. Installs from the site
+are not yet counted: each source below sees part of the path, and none yields a recurring
+site-attributed number. [site-acquisition-collection.md](../docs/growth/site-acquisition-collection.md)
+describes the private, descriptive view built on these sources.
+
+**Live.**
+
+- Pages that load GA4 send `app_store_click`, `seo_cta_click` and
+  `seo_cta_impression` through `js/app-store-tracking.js`. App Store links carry
+  `pt` and a pooled `ct` (`web_obsidian_v1` / `web_other_v1`; pages under a
+  registered freeze keep their earlier token), and
+  `scripts/tag-cta-placements.js --check` enforces that in CI.
+- The fixed `ga4-funnel` report reads Store-click sessions from the GA4
+  BigQuery export through `.github/workflows/analytics-read.yml`
+  (`workflow_dispatch` only; the output is encrypted and stays private).
+- The iOS repository fetches App Store Connect Analytics Reports daily
+  (`asc-analytics.yml`), including App Downloads Detailed with `Download Type`,
+  `Source Type`, `Source Info` (the referrer) and `Campaign`.
+- From 5.9.16 (iOS PR #669) the app starts the AppsFlyer SDK again unless the
+  device denies or restricts tracking or an earlier in-app acquisition refusal
+  is stored, and it reports a bounded `acquisition_attribution_received` label
+  to the API.
+
+**Wired, but not yet a site-attributed install count.**
+
+- Only the Detailed report has `Source Info` and `Campaign`. Apple thresholds
+  report rows (for example, omitting rows with data from fewer than five users
+  or five unique devices) and applies extra safeguards to Detailed reports
+  ([Apple](https://developer.apple.com/help/app-store-connect-analytics/overview/analytics-reports-api/)).
+  The own-site referrer and `ct` campaign first-download cells can therefore
+  stay empty; empty means unknown, not zero. On iOS, Apple also files taps from
+  Chrome and other non-Safari browsers under that browser as an app referrer,
+  not under the site's web referrer
+  ([Apple](https://developer.apple.com/help/app-store-connect-analytics/acquisition/acquisition/)).
+- An AppsFlyer install counts as site acquisition only when it arrives through
+  the owned-web OneLink pilot link (`owned_web` + `obsidian_bridge_pilot_v1`).
+  No site page carries it ([Draft PR #1047](https://github.com/simplememofast/simplememo/pull/1047)),
+  so installs from the site's plain App Store links are normally reported as
+  Organic, mixed with every other unattributed install.
+- `node scripts/company-os.mjs acquisition-status` lays these sources side by
+  side in private state. A naturally scheduled run of that collection has not
+  been verified yet, so check each source's observed date before reading a
+  value as current.
+- `growth/scripts/ingest-asc.mjs` copies the shape of the iOS-side aggregates
+  into `data/appstore/`: column names, row counts, date ranges and numeric
+  sums, never breakdown values (this repository is public). A `Counts` sum
+  spans every download type and source, updates and redownloads included, so it
+  is neither an install count nor a site-driven one. The script runs by hand
+  against a sibling iOS checkout, and the only committed snapshot is
+  `2026-08-25.json`; the iOS-side fetch itself continues daily. The CI
+  `--check` cannot see the iOS data.
+
 ## Not built yet
 
-- **App Store Connect ingest.** `data/appstore/` is scaffolded but empty. Paid
-  conversion is the North Star metric and it is not yet in this loop, so the
-  weekly report currently stops at clicks.
+- **A recurring, site-attributed install count.** Nothing above produces one
+  automatically.
+- **Website visit-to-install rate.** `website_install_cvr` in
+  `lib/company-acquisition.mjs` is `null` (`not_measurable`) by design: GA4
+  sessions, Apple first downloads and AppsFlyer installs share no common
+  cohort. Do not divide one source's installs by another's sessions.
+- **Paid conversion in this loop.** It is the North Star metric, but the weekly
+  report still stops at search clicks plus hand-transcribed tables (CPP and
+  AI-referred sessions).
 - **Activation correlation.** Which in-app event predicts payment is an open
   question; answering it needs product analytics this repo does not have.
 
