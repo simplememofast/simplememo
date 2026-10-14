@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import {summarizeAscAcquisition,summarizeAscPeriods,summarizeAppsFlyerAcquisition,siteAcquisition,acquisitionMaterial,acquisitionReport,ownedLinkPeriodRate} from './company-acquisition.mjs';
+import {summarizeAscAcquisition,summarizeAscPeriods,summarizeAppsFlyerAcquisition,siteAcquisition,acquisitionMaterial,acquisitionReport,ownedLinkPeriodRate,automationGroup} from './company-acquisition.mjs';
 import {collectAsc,connectionView,currentSiteAcquisition} from './company-data.mjs';
 
 const date='2026-10-03';
@@ -196,4 +196,67 @@ test('pilot ratios reject required metric gaps, unknown partial states and faile
   assert.equal(ownedLinkPeriodRate(connection).value,0);
   delete connection.site_acquisition.by_category.owned_web_pilot;
   assert.equal(ownedLinkPeriodRate(connection).value,null);
+});
+
+// Synthetic counts only; never copy private report values into this public test.
+const ga=(o={})=>({session_channel:'Direct',landing_referrer_status:'missing',landing_scope:'production',landing_path:'/',
+  device_category:'mobile',device_language:'en-us',observed_started_sessions:1,sessions_with_own_app_click_24h:0,
+  sessions_with_any_app_route_click_24h:0,...o});
+const funnel=rows=>({ga4:{status:'CONNECTED',window:{start:date,end:date},reports:[{file:'ga4-funnel.sql',result:rows}]}});
+test('automation fingerprints match only the exact existing-column predicates',()=>{
+  for(const o of [{},{landing_path:'/en/'}])assert.equal(automationGroup(ga(o)),'ci_lighthouse');
+  for(const device_language of ['en-us','en-gb','en-us@posix','en'])
+    assert.equal(automationGroup(ga({landing_path:'/en/obsidian/',device_category:'desktop',device_language})),'bot_like');
+  assert.equal(automationGroup(ga({device_category:'desktop'})),'bot_like'); // desktop / en-us is not Lighthouse mobile
+  for(const o of [{session_channel:'Organic Search'},{session_channel:'Referral'},{landing_referrer_status:'external'},
+    {landing_referrer_status:'missing_landing_page',landing_scope:'missing_landing_page',landing_path:null,device_category:null},
+    {device_language:'ja'},{device_language:'EN-US'},{device_language:'ens'},{device_language:null},{landing_path:'/en/obsidian/sync/'},
+    {device_category:'tablet'},{device_category:'desktop',device_language:'ja'},{device_category:null}])
+    assert.equal(automationGroup(ga(o)),null,JSON.stringify(o));
+});
+test('diagnostic rate excludes CI and bot-like sessions beside an unchanged official rate and quality state',()=>{
+  const rows=[ga({observed_started_sessions:30}),ga({landing_path:'/en/',observed_started_sessions:30}),
+    ga({landing_path:'/en/x/',device_category:'desktop',observed_started_sessions:40}),
+    ga({session_channel:'Organic Search',landing_referrer_status:'external',landing_path:'/obsidian/',device_language:'ja',
+      observed_started_sessions:200,sessions_with_own_app_click_24h:4,sessions_with_any_app_route_click_24h:5}),
+    ga({device_language:'ja',observed_started_sessions:100,sessions_with_own_app_click_24h:3,sessions_with_any_app_route_click_24h:3}),
+    ga({landing_scope:'nonproduction',observed_started_sessions:50}),
+    ga({landing_scope:'missing_landing_page',landing_referrer_status:'missing_landing_page',landing_path:null,device_category:null,observed_started_sessions:10})];
+  const before=structuredClone(rows), s=siteAcquisition(funnel(rows),{status:'quality_blocked'}), d=s.ga4.automation_excluded_diagnostic;
+  assert.deepEqual(rows,before);
+  assert.equal(s.ga4.observed_production_sessions,400);assert.equal(s.ga4.sessions_with_store_click,7);
+  assert.equal(s.ga4.observed_store_click_session_rate,7/400);assert.equal(s.ga4.state,'quality_blocked');
+  assert.equal(s.ga4.missing_landing_sessions,10);assert.equal(s.website_install_cvr.value,null);
+  assert.deepEqual(d.excluded_sessions,{ci_lighthouse:60,bot_like:40});
+  assert.deepEqual(d.excluded_store_click_sessions,{ci_lighthouse:0,bot_like:0});
+  assert.equal(d.sessions_with_store_click,s.ga4.sessions_with_store_click); // no excluded clicks: numerator unchanged
+  assert.equal(d.remaining_sessions,300);assert.equal(d.store_click_session_rate,7/300);
+  assert.equal(d.any_app_route_click_session_rate,8/300);
+  assert.equal(d.replaces_official_rate,false);assert.equal(d.quality_state,'quality_blocked');
+  const text=acquisitionReport(s).join('\n');
+  assert.match(text,/^GA4 \(2026-10-03\.\.2026-10-03 JST\): 7 Store-click sessions \/ 400 observed production sessions; 1\.75%; quality quality_blocked\.$/m);
+  assert.match(text,/^GA4 diagnostic only, not the official rate \(excluding CI Lighthouse 60 and bot-like 40 sessions\): 7 Store-click sessions \/ 300 sessions; 2\.33%;.*Quality quality_blocked still applies\.$/m);
+});
+test('clicks inside an excluded fingerprint lower the diagnostic numerator visibly, never silently',()=>{
+  const s=siteAcquisition(funnel([ga({observed_started_sessions:20,sessions_with_own_app_click_24h:1,sessions_with_any_app_route_click_24h:1}),
+    ga({device_language:'ja',observed_started_sessions:100,sessions_with_own_app_click_24h:5,sessions_with_any_app_route_click_24h:5})]));
+  const d=s.ga4.automation_excluded_diagnostic;
+  assert.equal(s.ga4.sessions_with_store_click,6);assert.equal(d.sessions_with_store_click,5);
+  assert.deepEqual(d.excluded_store_click_sessions,{ci_lighthouse:1,bot_like:0});assert.equal(d.quality_state,'quality_unverified');
+  assert.match(acquisitionReport(s).join('\n'),/Excluded Store-click sessions: CI 1, bot-like 0\./);
+});
+test('the diagnostic is unknown whenever the official GA4 rate is unknown',()=>{
+  const bad=[ga({sessions_with_own_app_click_24h:null}),ga({device_language:'ja'})];
+  for(const c of [funnel(bad),{ga4:{status:'BLOCKED',reports:funnel([ga()]).ga4.reports}},{}]) {
+    const s=siteAcquisition(c), d=s.ga4.automation_excluded_diagnostic;
+    assert.equal(s.ga4.observed_store_click_session_rate,null);assert.equal(d.store_click_session_rate,null);
+    assert.equal(d.remaining_sessions,null);assert.deepEqual(d.excluded_sessions,{ci_lighthouse:null,bot_like:null});
+    assert.match(acquisitionReport(s).join('\n'),/GA4 diagnostic only, not the official rate .*: unknown Store-click sessions \/ unknown sessions; unknown;/);
+  }
+  const all=siteAcquisition(funnel([ga()])).ga4.automation_excluded_diagnostic; // every row excluded
+  assert.equal(all.remaining_sessions,0);assert.equal(all.store_click_session_rate,null);
+  assert.deepEqual(all.excluded_sessions,{ci_lighthouse:1,bot_like:0});
+  const noAny=siteAcquisition(funnel([ga({device_language:'ja',sessions_with_any_app_route_click_24h:undefined})])).ga4;
+  assert.equal(noAny.automation_excluded_diagnostic.store_click_session_rate,0); // optional union stays separately unknown
+  assert.equal(noAny.automation_excluded_diagnostic.any_app_route_click_session_rate,null);
 });
