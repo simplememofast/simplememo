@@ -61,39 +61,65 @@ export async function confirmCronRecovery({ github, owner, repo, issue, now = Da
     const bodies = [issue.body, ...comments.map(c => c.body)];
     const refs = failureRefs(bodies, owner, repo);
     const silences = silenceRefs(bodies, owner, repo, now);
-    if ((!refs.length && !silences.length) || refs.length + silences.length > 50) return unknown('故障の参照が無いか、50件の取得上限を超える');
+    if (!refs.length && !silences.length) return unknown('故障の参照が無い');
+    if (silences.length > 50) return unknown('起動欠落の参照が50件の取得上限を超える');
+    // statusで絞らない。成功後のfailure/cancelled/queuedを読み落とさない。
+    const listScheduled = async (workflow_id, since) => {
+      const runs = await pages(p => github.rest.actions.listWorkflowRuns({ owner, repo, workflow_id,
+        event: 'schedule', created: `>=${since}`, ...p }), data => data?.workflow_runs, { perPage, maxPages });
+      return !runs.length || runs.some(r => !validRun(r, now) || r.workflow_id !== workflow_id) ? null : runs;
+    };
+    // 故障runを1件ずつ引くと、Issueが開いている日数に比例して取得が増える。以前は参照の
+    // 件数そのものを50件で切っていたので、毎日追記されるIssueは全workflowが回復しても
+    // 永久に閉じられなくなった（#2008 は 2026-10-14 時点で34件・1日3〜5件ずつ増えていた）。
+    // workflowごとに定期実行の一覧を1回読み、そこに現れた故障runをまとめて照合する。
+    // 個別に引くのは、まだどの一覧にも現れていないrunだけ。上限はその個別取得に掛ける。
+    const pending = new Set(refs);
     const workflows = new Map();
-    for (const id of refs) {
+    let fetched = 0;
+    for (const id of [...refs].sort((a, b) => a - b)) {
+      if (!pending.has(id)) continue;
+      if (++fetched > 50) return unknown('故障runの個別取得が50件の上限を超える');
       const { data: run } = await github.rest.actions.getWorkflowRun({ owner, repo, run_id: id });
       if (!validRun(run, now) || run.id !== id) return unknown(`故障run ${id} の対象を確認できない`);
-      const entry = workflows.get(run.workflow_id) ?? { since: run.created_at, number: 0, refs: [] };
-      if (Date.parse(run.created_at) < Date.parse(entry.since)) entry.since = run.created_at;
-      entry.number = Math.max(entry.number, run.run_number);
-      entry.refs.push(id);
+      const known = workflows.get(run.workflow_id);
+      // run IDの昇順は作成順と一致するとは限らない。読んだ一覧より前に作られたrunだけを
+      // 一覧を広げて読み直す。一覧の範囲内なのに現れなかったrunは、一覧が不完全とみなす。
+      if (known && Date.parse(run.created_at) >= Date.parse(known.since)) return unknown(`workflow ${run.workflow_id} の一覧が故障runを覆っていない`);
+      if (!known && workflows.size >= 20) return unknown('追跡するworkflowが20件の取得上限を超える');
+      const runs = await listScheduled(run.workflow_id, run.created_at);
+      if (!runs) return unknown(`workflow ${run.workflow_id} の実行一覧が不明`);
+      const entry = { since: run.created_at, runs, refs: [...(known?.refs ?? [])] };
+      for (const r of runs) if (pending.delete(r.id)) entry.refs.push(r.id);
+      if (!entry.refs.includes(id) || entry.refs.some(ref => !runs.some(r => r.id === ref))) {
+        return unknown(`workflow ${run.workflow_id} の一覧が故障runを覆っていない`);
+      }
+      // 個別取得と一覧で同じrunの番号が食い違うなら、どちらかの応答を信用できない。
+      if (runs.find(r => r.id === id).run_number !== run.run_number) return unknown(`故障run ${id} の番号が一覧と食い違う`);
       workflows.set(run.workflow_id, entry);
     }
     for (const silence of silences) {
       const { data: workflow } = await github.rest.actions.getWorkflow({ owner, repo, workflow_id: silence.workflow_id });
       if (workflow?.id !== silence.workflow_id || workflow.path !== silence.workflow_path
         || workflow.state !== 'active') return unknown('起動欠落のworkflowを確認できない');
-      const entry = workflows.get(workflow.id) ?? { since: silence.observed_at, number: 0, refs: [] };
-      if (Date.parse(silence.observed_at) < Date.parse(entry.since)) entry.since = silence.observed_at;
+      let entry = workflows.get(workflow.id);
+      if (!entry) {
+        if (workflows.size >= 20) return unknown('追跡するworkflowが20件の取得上限を超える');
+        const runs = await listScheduled(workflow.id, silence.observed_at);
+        if (!runs) return unknown(`workflow ${workflow.id} の実行一覧が不明`);
+        entry = { since: silence.observed_at, runs, refs: [] };
+        workflows.set(workflow.id, entry);
+      }
       entry.not_before = Math.max(entry.not_before ?? 0, Date.parse(silence.observed_at));
-      workflows.set(workflow.id, entry);
     }
-    if (workflows.size > 20) return unknown('追跡するworkflowが20件の取得上限を超える');
     const evidence = [];
-    for (const [workflow_id, entry] of workflows) {
-      // statusで絞らない。成功後のfailure/cancelled/queuedを読み落とさない。
-      // 全ページを読んでrun_numberで選ぶため、APIの並び順に依存しない。
-      const runs = await pages(p => github.rest.actions.listWorkflowRuns({ owner, repo, workflow_id,
-        event: 'schedule', created: `>=${entry.since}`, ...p }), data => data?.workflow_runs, { perPage, maxPages });
-      if (!runs.length || runs.some(r => !validRun(r, now) || r.workflow_id !== workflow_id)) return unknown(`workflow ${workflow_id} の実行一覧が不明`);
-      if (entry.refs.some(id => !runs.some(r => r.id === id))) return unknown(`workflow ${workflow_id} の一覧が故障runを覆っていない`);
+    for (const [workflow_id, { runs, not_before }] of workflows) {
+      // 全ページを読んでrun_numberで選ぶため、APIの並び順に依存しない。記録した故障runは
+      // すべてこの一覧に含まれている（上で確認済み）ので、最新は必ず故障runより新しい。
       const latest = runs.reduce((a, b) => a.run_number > b.run_number ? a : b);
-      if (latest.run_number < entry.number || latest.status !== 'completed' || latest.conclusion !== 'success'
+      if (latest.status !== 'completed' || latest.conclusion !== 'success'
         || (initialAttemptOnly && latest.run_attempt !== 1)
-        || Date.parse(latest.created_at) < (entry.not_before ?? 0)) {
+        || Date.parse(latest.created_at) < (not_before ?? 0)) {
         return unknown(`workflow ${workflow_id} の最新定期実行 ${latest.id} は成功を確認できない`);
       }
       evidence.push({ workflow_id, run_id: latest.id, run_number: latest.run_number,
@@ -228,6 +254,61 @@ export async function selftest() {
   await test({ original: { ...failed, conclusion: 'success', run_attempt: 2 }, recent: [{ ...failed, conclusion: 'success', run_attempt: 2 }] }, true, '同じrunの成功した再試行を確認できない');
   await test({ original: { ...failed, conclusion: 'success', run_attempt: 2 },
     recent: [{ ...failed, conclusion: 'success', run_attempt: 2 }, run(103, 3)] }, false, '古い成功した再試行で新しい故障を隠した');
+
+  // 2026-10-14: 参照の件数で切ると、毎日追記されるIssueは回復しても閉じられなくなる。
+  // 一覧は created の下限を守る検体で読み、個別取得の回数も数える。
+  const hourly = (workflow_id, base, count, from = '2026-09-01T00:00:00Z') => Array.from({ length: count },
+    (_, i) => run(base + i, i + 1, { workflow_id, created_at: new Date(Date.parse(from) + i * 3600e3).toISOString() }));
+  async function bulk(recentRuns, refIds, single = {}, relisted = list => list) {
+    const fetches = []; const lists = {};
+    const github = { rest: { issues: { listComments: async () => ({ data: [] }) }, actions: {
+      getWorkflowRun: async p => { fetches.push(p.run_id); return { data: single[p.run_id] ?? recentRuns.find(r => r.id === p.run_id) ?? null }; },
+      listWorkflowRuns: async p => {
+        const since = Date.parse(p.created.slice(2));
+        const list = recentRuns.filter(r => r.workflow_id === p.workflow_id && Date.parse(r.created_at) >= since);
+        const shown = (lists[p.workflow_id] = (lists[p.workflow_id] ?? 0) + (p.page === 1)) > 1 ? relisted(list) : list;
+        return { data: { workflow_runs: shown.slice((p.page - 1) * p.per_page, p.page * p.per_page) } };
+      },
+    } } };
+    const result = await confirmCronRecovery({ github, owner: 'o', repo: 'r', now: Date.parse('2026-09-04T00:00:00Z'),
+      issue: { number: 1, body: refIds.map(line).join('\n') } });
+    return { result, fetches };
+  }
+  const sixty = hourly(10, 1000, 60);
+  const sixtyOk = [...sixty, run(1060, 61, { created_at: '2026-09-03T13:00:00Z', conclusion: 'success' })];
+  const many = await bulk(sixtyOk, sixty.map(r => r.id));
+  check(many.result.confirmed === true, '50件を超える故障の参照で、回復したworkflowを閉じられない');
+  check(many.fetches.length === 1, '一覧に現れた故障runまで1件ずつ取得した');
+  check((await bulk([...sixty, run(1060, 61, { created_at: '2026-09-03T13:00:00Z' })], sixty.map(r => r.id))).result.confirmed === false,
+    '50件を超える参照で最新の失敗を見逃した');
+  const thirty = hourly(20, 2000, 30, '2026-09-01T00:30:00Z');
+  const twoOk = [...sixtyOk, ...thirty, run(2030, 31, { workflow_id: 20, created_at: '2026-09-03T14:00:00Z', conclusion: 'success' })];
+  const two = await bulk(twoOk, [...sixty, ...thirty].map(r => r.id));
+  check(two.result.confirmed === true && two.fetches.length === 2, '2つのworkflowの故障をworkflowごとに照合できない');
+  check((await bulk([...sixtyOk, ...thirty], [...sixty, ...thirty].map(r => r.id))).result.confirmed === false,
+    '片方のworkflowの未回復を、もう片方の回復で隠した');
+  // run IDの小さいrunが後に作られていても、先に読んだ一覧の外にある故障を取りこぼさない。
+  const late = run(3000, 2, { workflow_id: 30, created_at: '2026-09-02T00:00:00Z' });
+  const early = run(3001, 1, { workflow_id: 30, created_at: '2026-09-01T00:00:00Z' });
+  const relisted = await bulk([late, early, run(3002, 3, { workflow_id: 30, created_at: '2026-09-03T00:00:00Z', conclusion: 'success' })], [3000, 3001]);
+  check(relisted.result.confirmed === true && relisted.fetches.length === 2, '作成順とID順が逆の故障で一覧を読み直さない');
+  const recovered30 = run(3002, 3, { workflow_id: 30, created_at: '2026-09-03T00:00:00Z', conclusion: 'success' });
+  check((await bulk([late, recovered30, run(3003, 1, { workflow_id: 31, created_at: '2026-09-02T12:00:00Z' })], [3000, 3003]))
+    .result.confirmed === false, '別workflowの未回復の故障を見逃した');
+  check((await bulk([early, recovered30], [3001, 3004], { 3004: run(3004, 2, { workflow_id: 30, created_at: '2026-09-02T00:00:00Z' }) }))
+    .result.confirmed === false, '読んだ一覧の範囲内に現れない故障runを無視して閉じた');
+  check((await bulk([early, recovered30], [3001], { 3001: { ...early, run_number: 9 } })).result.confirmed === false,
+    '個別取得と一覧で番号が食い違うrunを受け入れた');
+  check((await bulk([late, early, recovered30], [3000, 3001], {}, list => list.filter(r => r.id !== 3000))).result.confirmed === false,
+    '読み直した一覧から先に照合した故障runが消えても閉じた');
+  // 一覧に先回りされない故障run（作成順がID順と逆）が続くと、個別取得の上限に当たる
+  const reversed = Array.from({ length: 51 }, (_, i) => run(5000 + i, 51 - i,
+    { workflow_id: 50, created_at: new Date(Date.parse('2026-09-03T00:00:00Z') - i * 3600e3).toISOString() }));
+  const reversedOk = [...reversed, run(5100, 52, { workflow_id: 50, created_at: '2026-09-03T12:00:00Z', conclusion: 'success' })];
+  check((await bulk(reversedOk, reversed.map(r => r.id))).result.confirmed === false, '個別取得の上限を超えても閉じた');
+  check((await bulk(reversedOk, reversed.slice(0, 50).map(r => r.id))).result.confirmed === true, '個別取得が上限内なのに閉じられない');
+  const twentyOne = Array.from({ length: 21 }, (_, i) => run(4000 + i, 1, { workflow_id: 100 + i, conclusion: 'success' }));
+  check((await bulk(twentyOne, twentyOne.map(r => r.id))).result.confirmed === false, '20件を超えるworkflowを追跡した');
 
   const silentAt = '2026-09-02T12:00:00Z';
   const marker = silenceMarker({ workflow_id: 10, workflow_path: '.github/workflows/decision-monitor.yml',
