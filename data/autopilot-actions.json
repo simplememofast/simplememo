@@ -37,7 +37,7 @@
     "                 台帳から言えないため）。ブランチへの白紙委任にすると、以後どんな",
     "                 取り残しを積まれても鳴らない —— 受容が消音になる"
   ],
-  "last_run_jst": "2026-10-13",
+  "last_run_jst": "2026-10-14",
   "actions": [
     {
       "id": "act-asc-privacy-answers",
@@ -459,7 +459,7 @@
     {
       "id": "act-ledger-sync",
       "title": "運転台帳に載っていない Actions run が 1件",
-      "detail": "37249907984（2026-10-05 / success）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
+      "detail": "38494924082（2026-10-14 / failure）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
       "source": "ledger",
       "domain": null,
       "touches": [
@@ -473,13 +473,13 @@
         "params": {}
       },
       "state": "done",
-      "created_jst": "2026-10-05",
-      "last_seen_jst": "2026-10-13",
-      "closed_jst": "2026-10-13",
+      "created_jst": "2026-10-14",
+      "last_seen_jst": "2026-10-14",
+      "closed_jst": "2026-10-14",
       "evidence": "Actions run 30件すべてが台帳にある",
-      "last_run_jst": "2026-10-13",
-      "last_run_log": "37249907984: 成功回はPR特定が要るため自動追記しない\n38340021153 -> ap-20261013-actions: appended ap-20261013-actions (skipped_gate)",
-      "reopened_jst": "2026-10-05"
+      "last_run_jst": "2026-10-14",
+      "last_run_log": "38494924082 -> ap-20261014-actions: appended ap-20261014-actions (skipped_gate)",
+      "reopened_jst": "2026-10-14"
     },
     {
       "id": "act-detect-orphaned-post-merge-commits",
@@ -876,11 +876,11 @@
         }
       },
       "state": "done",
-      "created_jst": "2026-10-13",
-      "last_seen_jst": "2026-10-13",
-      "closed_jst": "2026-10-13",
+      "created_jst": "2026-10-14",
+      "last_seen_jst": "2026-10-14",
+      "closed_jst": "2026-10-14",
       "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は 6回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-10-13",
+      "reopened_jst": "2026-10-14",
       "owner_needed": true,
       "owner_needed_review": {
         "reviewed_jst": "2026-09-04",
@@ -916,11 +916,11 @@
         }
       },
       "state": "done",
-      "created_jst": "2026-10-13",
-      "last_seen_jst": "2026-10-13",
-      "closed_jst": "2026-10-13",
+      "created_jst": "2026-10-14",
+      "last_seen_jst": "2026-10-14",
+      "closed_jst": "2026-10-14",
       "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は 6回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-10-13",
+      "reopened_jst": "2026-10-14",
       "owner_needed": true,
       "owner_needed_review": {
         "reviewed_jst": "2026-09-04",
@@ -982,7 +982,7 @@
     },
     {
       "id": "act-status-stale",
-      "title": "data/autopilot-status.json が 8日前（2026-10-05）のまま",
+      "title": "data/autopilot-status.json が 9日前（2026-10-05）のまま",
       "detail": "日報の唯一のデータ源。当日分でないと「上流が止まった」と報告される（Runbook §5-2）。",
       "source": "status",
       "domain": null,
@@ -1003,7 +1003,7 @@
       },
       "state": "open",
       "created_jst": "2026-10-07",
-      "last_seen_jst": "2026-10-13",
+      "last_seen_jst": "2026-10-14",
       "closed_jst": null,
       "evidence": "scripts/autopilot-act.mjs --status-fresh が exit 1",
       "reopened_jst": "2026-10-07"
@@ -1053,7 +1053,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-09-01",
-      "last_seen_jst": "2026-10-13",
+      "last_seen_jst": "2026-10-14",
       "closed_jst": null,
       "evidence": "**オーナーが決めた（2026-09-03）: 枠を上げる（プラン階層）。**escalation-rules が挙げる3つの手「待つ・枠を上げる・1回あたりの入力量を減らす」のうち、実測で3つ目は落ちた —— 週次上限はアカウント全体で共有される資源で、autopilot の寄与はごく一部。autopilot 側の入力量を削ってもこの上限は空かない。実際の消費は x20 プランに収まるという判断で、追加の課金経路（ANTHROPIC_API_KEY）は使わない（PR #808）。\n\n**「知っていて受け入れている」に移した理由。**依頼していたのは\"人の判断\"で、それは済んだ。一方この行の閉じ条件（`no_failure_since`）は「ccr-0920 が実際に着手して usage_limit が再発しないこと」で、**まだ満たされていない** —— 08-31 以降 ccr-0920 の行が台帳に1つも無い。だから done にはしない。既知の制約として残す。\n\n⚠ **残る弱さ:** 台帳は「主系が当日ロックを先に取ったので副系がスキップした」と「副系が死んでいる」を区別できない。スキップ回は `attempted: false` で行すら残らないことがあり、09-01 の ccr-0920 の起動は 09-01 の主系の行の注記にしか残っていない。**副系が本当に生きているかは、主系が落ちた日にしか分からない。**",
       "owner_needed": true,
@@ -1754,11 +1754,11 @@
         }
       },
       "state": "done",
-      "created_jst": "2026-10-13",
-      "last_seen_jst": "2026-10-13",
-      "closed_jst": "2026-10-13",
+      "created_jst": "2026-10-14",
+      "last_seen_jst": "2026-10-14",
+      "closed_jst": "2026-10-14",
       "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は 6回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-10-13",
+      "reopened_jst": "2026-10-14",
       "owner_needed": false,
       "owner_needed_review": {
         "mode": "human",
@@ -2187,7 +2187,7 @@
       },
       "state": "open",
       "created_jst": "2026-10-13",
-      "last_seen_jst": "2026-10-13",
+      "last_seen_jst": "2026-10-14",
       "closed_jst": null,
       "evidence": "定期タスクの追跡が継続中。未確定は解消ではない",
       "owner_needed": false,
@@ -2582,8 +2582,8 @@
     },
     {
       "id": "act-shipping-outage",
-      "title": "どの経路も 8日連続で出荷していない（2026-10-06〜2026-10-13）",
-      "detail": "台帳に行はあるが、出荷が1件も無い日が続いている（2026-10-06 / 2026-10-07 / 2026-10-08 / 2026-10-09 / 2026-10-10 / 2026-10-11 / 2026-10-12 / 2026-10-13）。\n\n**連続稼働は伸び続ける。**稼働の定義（no_run の行がある日だけ停止）では、失敗した日も「記録がある日」なので連続が切れない。`node scripts/autopilot-runs.mjs` の **連続出荷** と **無介入出荷** が切れているほうを見ること。\n\n**個別の故障行だけを見ていると、この形が見えない。**1日1件ずつ selfheal 行が立つので、台帳の上では「未修理が3件」に見え、「3日出ていない」にはならない。",
+      "title": "どの経路も 9日連続で出荷していない（2026-10-06〜2026-10-14）",
+      "detail": "台帳に行はあるが、出荷が1件も無い日が続いている（2026-10-06 / 2026-10-07 / 2026-10-08 / 2026-10-09 / 2026-10-10 / 2026-10-11 / 2026-10-12 / 2026-10-13 / 2026-10-14）。\n\n**連続稼働は伸び続ける。**稼働の定義（no_run の行がある日だけ停止）では、失敗した日も「記録がある日」なので連続が切れない。`node scripts/autopilot-runs.mjs` の **連続出荷** と **無介入出荷** が切れているほうを見ること。\n\n**個別の故障行だけを見ていると、この形が見えない。**1日1件ずつ selfheal 行が立つので、台帳の上では「未修理が3件」に見え、「3日出ていない」にはならない。",
       "source": "route",
       "domain": null,
       "touches": [
@@ -2600,7 +2600,7 @@
       },
       "state": "open",
       "created_jst": "2026-10-07",
-      "last_seen_jst": "2026-10-13",
+      "last_seen_jst": "2026-10-14",
       "closed_jst": null,
       "evidence": "2026-10-05 以降どの経路も出荷していない",
       "reopened_jst": "2026-10-07"
@@ -2628,8 +2628,8 @@
     },
     {
       "id": "act-route-silent-actions",
-      "title": "actions が 9日ぶん出荷していない（2026-10-05〜2026-10-13・最後の出荷 2026-10-04）",
-      "detail": "この経路の行は立っているが、2026-10-04 より後に出荷が1件も無い（2026-10-05 / 2026-10-06 / 2026-10-07 / 2026-10-08 / 2026-10-09 / 2026-10-10 / 2026-10-11 / 2026-10-12 / 2026-10-13）。\n\n**失敗ではないので、失敗を見る監視には出ない。** cron-health は event=schedule かつ conclusion=failure だけを集計し、autopilot-health は status JSON の日付だけを見る。**別の経路が出荷していれば当日分は更新される**ため、ここが黙っていること自体はどちらにも現れない。\n\n**冗長化の主張がここで未検証になる。**「主系が落ちても副系が出す」は、両方が最近出せていることでしか裏が取れない。片方が出していない日数は、そのまま「切替が試されていない日数」になる（2026-08-29、副系が claim だけ取って死んだ日に主系が10日ぶり以上の沈黙のままだったのが実例）。\n\n**まず Gate のスキップ理由を読む。**当日ロック（claude/obsidian-auto-<日付>）を別経路が取ったのか、本番 status JSON が当日分だったのか、秘密鍵が無いのかで打ち手が変わる。「毎日スキップしている」だけでは原因は決まらない。",
+      "title": "actions が 10日ぶん出荷していない（2026-10-05〜2026-10-14・最後の出荷 2026-10-04）",
+      "detail": "この経路の行は立っているが、2026-10-04 より後に出荷が1件も無い（2026-10-05 / 2026-10-06 / 2026-10-07 / 2026-10-08 / 2026-10-09 / 2026-10-10 / 2026-10-11 / 2026-10-12 / 2026-10-13 / 2026-10-14）。\n\n**失敗ではないので、失敗を見る監視には出ない。** cron-health は event=schedule かつ conclusion=failure だけを集計し、autopilot-health は status JSON の日付だけを見る。**別の経路が出荷していれば当日分は更新される**ため、ここが黙っていること自体はどちらにも現れない。\n\n**冗長化の主張がここで未検証になる。**「主系が落ちても副系が出す」は、両方が最近出せていることでしか裏が取れない。片方が出していない日数は、そのまま「切替が試されていない日数」になる（2026-08-29、副系が claim だけ取って死んだ日に主系が10日ぶり以上の沈黙のままだったのが実例）。\n\n**まず Gate のスキップ理由を読む。**当日ロック（claude/obsidian-auto-<日付>）を別経路が取ったのか、本番 status JSON が当日分だったのか、秘密鍵が無いのかで打ち手が変わる。「毎日スキップしている」だけでは原因は決まらない。",
       "source": "route",
       "domain": null,
       "touches": [
@@ -2647,7 +2647,7 @@
       },
       "state": "open",
       "created_jst": "2026-10-08",
-      "last_seen_jst": "2026-10-13",
+      "last_seen_jst": "2026-10-14",
       "closed_jst": null,
       "evidence": "2026-10-04 以降 actions の出荷は台帳に無い",
       "reopened_jst": "2026-10-08"
@@ -2693,11 +2693,11 @@
         }
       },
       "state": "done",
-      "created_jst": "2026-10-13",
-      "last_seen_jst": "2026-10-13",
-      "closed_jst": "2026-10-13",
+      "created_jst": "2026-10-14",
+      "last_seen_jst": "2026-10-14",
+      "closed_jst": "2026-10-14",
       "evidence": "ap-20260908-ccr-0920-codex-01a07e63-4255-7be2-8623-3ab271db643b より後に ccr-0920 は 1回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-10-13",
+      "reopened_jst": "2026-10-14",
       "owner_needed": false,
       "owner_needed_review": {
         "reviewed_jst": "2026-10-13",
@@ -2899,11 +2899,11 @@
         }
       },
       "state": "done",
-      "created_jst": "2026-10-13",
-      "last_seen_jst": "2026-10-13",
-      "closed_jst": "2026-10-13",
+      "created_jst": "2026-10-14",
+      "last_seen_jst": "2026-10-14",
+      "closed_jst": "2026-10-14",
       "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は 6回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-10-13",
+      "reopened_jst": "2026-10-14",
       "owner_needed": false,
       "owner_needed_review": {
         "reviewed_jst": "2026-10-13",
@@ -2941,11 +2941,11 @@
         }
       },
       "state": "done",
-      "created_jst": "2026-10-13",
-      "last_seen_jst": "2026-10-13",
-      "closed_jst": "2026-10-13",
+      "created_jst": "2026-10-14",
+      "last_seen_jst": "2026-10-14",
+      "closed_jst": "2026-10-14",
       "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は 6回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-10-13",
+      "reopened_jst": "2026-10-14",
       "owner_needed": false,
       "owner_needed_review": {
         "reviewed_jst": "2026-10-13",
@@ -3004,11 +3004,11 @@
         }
       },
       "state": "done",
-      "created_jst": "2026-10-13",
-      "last_seen_jst": "2026-10-13",
-      "closed_jst": "2026-10-13",
+      "created_jst": "2026-10-14",
+      "last_seen_jst": "2026-10-14",
+      "closed_jst": "2026-10-14",
       "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は 6回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-10-13",
+      "reopened_jst": "2026-10-14",
       "owner_needed": false,
       "owner_needed_review": {
         "reviewed_jst": "2026-10-13",
@@ -3068,7 +3068,7 @@
       },
       "state": "open",
       "created_jst": "2026-10-06",
-      "last_seen_jst": "2026-10-13",
+      "last_seen_jst": "2026-10-14",
       "closed_jst": null,
       "evidence": "ap-20261006-actions は未修理のまま（repair_of で名指しされていない）",
       "reopened_jst": "2026-10-06",
@@ -3311,11 +3311,11 @@
         }
       },
       "state": "done",
-      "created_jst": "2026-10-13",
-      "last_seen_jst": "2026-10-13",
-      "closed_jst": "2026-10-13",
+      "created_jst": "2026-10-14",
+      "last_seen_jst": "2026-10-14",
+      "closed_jst": "2026-10-14",
       "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は 6回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-10-13",
+      "reopened_jst": "2026-10-14",
       "owner_needed": false,
       "owner_needed_review": {
         "reviewed_jst": "2026-10-13",
@@ -3434,7 +3434,7 @@
       },
       "state": "open",
       "created_jst": "2026-10-05",
-      "last_seen_jst": "2026-10-13",
+      "last_seen_jst": "2026-10-14",
       "closed_jst": null,
       "evidence": "#1991 がまだ open"
     },
@@ -3455,7 +3455,7 @@
       },
       "state": "open",
       "created_jst": "2026-10-06",
-      "last_seen_jst": "2026-10-13",
+      "last_seen_jst": "2026-10-14",
       "closed_jst": null,
       "evidence": "#2008 がまだ open"
     }
