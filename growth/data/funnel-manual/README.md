@@ -1,8 +1,15 @@
 # growth/data/funnel-manual/ — 月次フルファネルの手動転記
 
 `growth/scripts/full-funnel.mjs` が読む月次の手動値。GSC行はsnapshotから自動で
-埋まるが、GA4とApp Store Connectとアプリ内ファネルはエクスポート経路が無いため、
+埋まるが、GA4とApp Store Connectとアプリ内ファネルは**この表に入る値をこのリポジトリへ運ぶ経路が無い**ため、
 ここに**人が転記**する。ファイル名は `YYYY-MM.json`。
+
+[2026-10-14] 以前は「エクスポート経路が無い」と書いていたが、取得そのものは非公開側で動いている
+（GA4はBigQueryエクスポートを `analytics-read.yml` で読む・`workflow_dispatch` のみ／
+ASCはiOSリポジトリの `asc-analytics.yml` が日次取得／アプリ内ファネルはAPIリポジトリの `analytics:funnel`）。
+どれもここへは書き込まない。**ここが空でも、取得が止まっているとは限らない。**
+`growth/data/appstore/` にある `ingest-asc` の合計は全DL種別（更新・再DLを含む）・全流入元の合算なので、
+`asc_installs` の代わりにしない。
 
 ```json
 {

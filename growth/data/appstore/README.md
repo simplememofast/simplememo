@@ -1,5 +1,16 @@
 # growth/data/appstore/ — App Store Connect の測定面
 
+## [2026-10-14] `YYYY-MM-DD.json` は取得の現況ではない
+
+`2026-08-25.json` は `growth/scripts/ingest-asc.mjs` を手で回したときの**形の写し**
+（列名・行数・日付範囲・数値列の合計）で、コミット済みはこの1件だけ。
+Analytics Reports の取得そのものは iOS リポジトリの `asc-analytics.yml` が
+`data/asc/` へ毎日続けている。**ここが古いことは、取得が止まっている証拠ではない。**
+
+`Counts` の合計は全DL種別（更新・再DLを含む）・全流入元の合算なので、
+**インストール数でも、サイト経由の数でもない。**サイト→インストール計測の現況は
+[growth/README.md](../../README.md) の「Site → install measurement」。
+
 ## [2026-08-22] 前提を1つ訂正した
 
 この README には長らくこう書いてあり、そのためここは空のままだった。
