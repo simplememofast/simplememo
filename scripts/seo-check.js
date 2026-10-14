@@ -2,7 +2,7 @@
 /**
  * SEO Validation Script for simplememofast.com
  * Checks: canonical, hreflang, title, description, noindex, structured data,
- * internal links, orphan pages.
+ * internal links, orphan pages and section-hub → child links (per language).
  *
  * Usage: node scripts/seo-check.js
  * Exit code 0 = all pass, 1 = warnings found, 2 = errors found
@@ -249,6 +249,98 @@ function runSelfTest() {
     ['urlset root also passes', () => sitemapReport({ index: urlXml([target]) }).length === 0],
   ];
   for (const [name, check] of sitemapTests) t(`[SITEMAP] ${name}`, check());
+
+  // [ORPHAN]/[HUB] on an isolated bilingual site. The old orphan check counted
+  // any href="…" in any file, so the hreflang <link>s and the language switcher
+  // between a page's own translations made every page look linked — it reported
+  // 0 orphans on the day GSC listed 53 pages as "Discovered – currently not
+  // indexed" (2026-10-14). Each case below is one of the ways a page looked
+  // linked without being linked.
+  const linkDir = path.join(dir, 'links');
+  const LINK_PAGES = {
+    'index.html': '<a href="/guide/">Guide</a><a href="/solo">Solo</a><a href="/ja/box/">Box</a>',
+    'solo.html': '<a href="/">Top</a>',
+    'guide/index.html': `<a href="/">Top</a><a class="card" href='a'>A</a>`,
+    'guide/a.html': '<a href="/guide/">Guide</a>',
+    'en/index.html': '<a href="/en/guide/">Guide</a><a href="/en/solo">Solo</a><a href="/box/">Box</a>',
+    'en/solo.html': '<a href="/en/">Top</a><a hreflang="ja" href="/solo">日本語</a>',
+    'en/guide/index.html': '<a href="/en/">Top</a><a href="/en/guide/a">A</a>',
+    'en/guide/a.html': '<a href="/en/guide/">Guide</a>',
+    // The memo-inbox shape: box/ is the English page and ja/box/ its Japanese
+    // translation. Only data/i18n/pages.json knows that; the path says both are ja.
+    'box/index.html': '<a href="/en/">Top</a><a href="/ja/box/">日本語</a>',
+    'ja/box/index.html': '<a href="/">Top</a><a href="/box/">English</a>',
+  };
+  const LINK_REGISTRY = {
+    version: 1,
+    pages: [
+      ['index.html', 'en/index.html'], ['solo.html', 'en/solo.html'],
+      ['guide/index.html', 'en/guide/index.html'], ['guide/a.html', 'en/guide/a.html'],
+      ['ja/box/index.html', 'box/index.html'],
+    ].map(([ja, en]) => ({ pages: { ja, en } })),
+  };
+  const linkReport = (over = {}, { sitemap = true } = {}) => {
+    fs.rmSync(linkDir, { recursive: true, force: true });
+    const files = { ...LINK_PAGES, ...over };
+    for (const [file, body] of Object.entries(files)) {
+      fs.mkdirSync(path.dirname(path.join(linkDir, file)), { recursive: true });
+      fs.writeFileSync(path.join(linkDir, file), `<html><body>${body}</body></html>`);
+    }
+    fs.mkdirSync(path.join(linkDir, 'data/i18n'), { recursive: true });
+    fs.writeFileSync(path.join(linkDir, 'data/i18n/pages.json'), JSON.stringify(LINK_REGISTRY));
+    if (sitemap) {
+      const locs = Object.keys(files).map((f) => `${SITE_URL}/${f.replace(/index\.html$/, '').replace(/\.html$/, '')}`);
+      fs.writeFileSync(path.join(linkDir, 'sitemap.xml'), indexXml('pages.xml'));
+      fs.writeFileSync(path.join(linkDir, 'pages.xml'), urlXml(locs));
+    }
+    errors.length = 0;
+    checkOrphanPages(linkDir, { quiet: true });
+    const result = [...errors];
+    errors.length = 0;
+    return result;
+  };
+  const orphan = (r, url) => r.some((e) => e.startsWith('[ORPHAN]') && e.endsWith(`: ${url}`));
+  const hub = (r, parent, child) => r.some((e) => e.startsWith('[HUB]') && e.endsWith(`: ${parent} → ${child}`));
+  const noSolo = '<a href="/guide/">Guide</a><a href="/ja/box/">Box</a>';
+  const linkTests = [
+    // 揃ったサイトが黙らなければ、下の「落ちる」はノイズで通っているかもしれない。
+    ['揃ったサイトは何も言わない', () => linkReport().length === 0],
+    ['hreflang の <link> だけで繋がったページは孤立',
+      () => orphan(linkReport({ 'index.html': noSolo + '<link rel="alternate" hreflang="ja" href="/solo">' }), '/solo')],
+    ['翻訳の言語切替リンク（/en/solo → /solo）だけでは孤立',
+      () => orphan(linkReport({ 'index.html': noSolo }), '/solo')],
+    ['翻訳ではない別言語のページ（/en/ → /solo）からのリンクも数えない',
+      () => orphan(linkReport({ 'index.html': noSolo, 'en/index.html': LINK_PAGES['en/index.html'] + '<a href="/solo">Solo</a>' }), '/solo')],
+    ['言語は台帳で決まる（box/ は英語。日本語のトップからのリンクは数えない）',
+      () => orphan(linkReport({
+        'index.html': LINK_PAGES['index.html'] + '<a href="/box/">Box</a>',
+        'en/index.html': '<a href="/en/guide/">Guide</a><a href="/en/solo">Solo</a>',
+      }), '/box/')],
+    ['HTML コメントの中の <a> は数えない',
+      () => orphan(linkReport({ 'index.html': noSolo + '<!-- <a href="/solo">Solo</a> -->' }), '/solo')],
+    ['<script> と <template> の中の <a> は数えない',
+      () => orphan(linkReport({ 'index.html': noSolo + `<script>s = '<a href="/solo">';</script><template><a href="/solo">Solo</a></template>` }), '/solo')],
+    ['自分自身へのリンクは数えない',
+      () => orphan(linkReport({ 'index.html': noSolo, 'solo.html': '<a href="/">Top</a><a href="/solo">Solo</a>' }), '/solo')],
+    ['同じ言語のリンクなら通る（.html / index.html の形でも同じページ）',
+      () => linkReport({ 'index.html': '<a href="/guide/index.html">Guide</a><a href="solo.html">Solo</a><a href="/ja/box/">Box</a>' }).length === 0],
+    ['親ハブが子を載せていなければ落ちる（ほかのページから繋がっていても）', () => {
+      const r = linkReport({ 'guide/index.html': '<a href="/">Top</a>', 'solo.html': '<a href="/">Top</a><a href="/guide/a">A</a>' });
+      return hub(r, '/guide/', '/guide/a') && !orphan(r, '/guide/a');
+    }],
+    ['英語の親ハブも同じ（/en/guide/ → /en/guide/a）',
+      () => hub(linkReport({ 'en/guide/index.html': '<a href="/en/">Top</a>', 'en/solo.html': '<a href="/en/">Top</a><a href="/en/guide/a">A</a>' }), '/en/guide/', '/en/guide/a')],
+    ['言語ルートは親ハブ扱いしない（/ が /solo を、/en/ が /en/solo を載せなくてよい）',
+      () => linkReport({
+        'index.html': noSolo,
+        'guide/index.html': `<a href="/">Top</a><a class="card" href='a'>A</a><a href="/solo">Solo</a>`,
+        'en/index.html': '<a href="/en/guide/">Guide</a><a href="/box/">Box</a>',
+        'en/guide/index.html': '<a href="/en/">Top</a><a href="/en/guide/a">A</a><a href="/en/solo">Solo</a>',
+      }).length === 0],
+    ['sitemap が読めなければ落ちる（0件は「孤立なし」ではない）',
+      () => linkReport({}, { sitemap: false }).some((e) => e.startsWith('[ORPHAN]') && e.includes('cannot run'))],
+  ];
+  for (const [name, check] of linkTests) t(`[ORPHAN/HUB] ${name}`, check());
 
   fs.rmSync(dir, { recursive: true, force: true });
 

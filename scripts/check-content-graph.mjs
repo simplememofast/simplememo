@@ -3,8 +3,9 @@
 //
 // このファイルは「更新されない記録」になった瞬間に負債へ変わる
 // （OBSIDIAN_INTERNAL_LINK_PLAN.md CIゲート案）。だからJSONの導入と同時に
-// この検査を入れる。守るのは次の6点だけで、内部リンクの网羅性そのものは
-// check-internal-redirects.mjs の仕事（ここでは重複させない）。
+// この検査を入れる。守るのは次の8点だけで、内部リンクの网羅性そのものは
+// check-internal-redirects.mjs の仕事（ここでは重複させない。7・8 が見るのも
+// 台帳が宣言した親子だけ）。
 //
 //   1. URLキーが実在ページを指す（404の台帳化を防ぐ）
 //   2. parent が実在キーで、自分自身でない
@@ -14,6 +15,16 @@
 //      （台帳と週次集計が別の相場観を持つと、キュー判断が静かに割れる）
 //   6. /obsidian/ 配下の全JAページが登録されている（オートパイロットの
 //      担当領域は登録漏れを許さない。それ以外の領域は段階導入のため任意）
+//   7. [CHILD] parent を宣言した子へ、親ページが実際に <a> でリンクしている
+//      （OBSIDIAN_INTERNAL_LINK_PLAN.md §11 Child「ピラーからのみ。全子記事へ」。
+//      コメント・<script>・<template> の中のリンクは数えない）
+//   8. [CHILD-EN] 子と親の両方に英語ページ（data/i18n/pages.json）がディスクに
+//      在るとき、英語の親も英語の子へリンクしている
+//
+// 7・8 は 2026-10-14 に足した。台帳は親を宣言していたのに、/obsidian/ は
+// 宣言した子17本へリンクしていなかった。**宣言だけで、誰も突き合わせて
+// いなかった。**同じ日の GSC「検出 - インデックス未登録」53件の一因で、
+// ハブに載らない子は、サイトマップのほかに Google が辿る道が細くなる。
 //
 // exit 0 = pass / 1 = fail。CIでは SEO Validation の1ステップとして走る。
 
@@ -21,10 +32,16 @@ import { run as runScenarios } from './lib/selftest.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 import { businessRelevance } from '../growth/lib/gsc.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const GRAPH_PATH = path.join(ROOT, 'data', 'content-graph.json');
+const I18N_PATH = path.join(ROOT, 'data', 'i18n', 'pages.json');
+const ORIGIN = 'https://simplememofast.com';
+// リンクの拾い方は seo-check.js の [ORPHAN]/[HUB] と**同じ関数**を使う。
+// 2本の検査が「リンクがある」を別々に定義すると、片方だけ緑になる。
+const { linkedPages, pageKey } = createRequire(import.meta.url)('./lib/seo-site.js');
 
 // URL（正準形）→ 実ファイル。サイトの2流儀（末尾スラッシュ=ディレクトリ /
 // 拡張子なし=フラット.html）は generate_sitemap / gsc.mjs の toPath と同じ前提。
@@ -92,6 +109,63 @@ for (const [url, e] of entries) {
 
 const RELEVANCE_BUCKET = (v) => (v >= 0.9 ? 'high' : v >= 0.5 ? 'medium' : 'low');
 
+/** そのページの HTML。無ければ null（不在そのものは [URL] が報告する）。 */
+function readPageHtml(url) {
+  const f = urlToFile(url);
+  return f !== null && fs.existsSync(f) ? fs.readFileSync(f, 'utf8') : null;
+}
+
+/** data/i18n/pages.json の1ファイル → 正準URL（'en/x/index.html' → '/en/x/'）。 */
+const fileToUrl = (file) => `/${file.replace(/index\.html$/, '').replace(/\.html$/, '')}`;
+
+/**
+ * 宣言した親 → 子のリンクが、親ページに実際にあるか（[CHILD] / [CHILD-EN]）。
+ *
+ * **純関数にしてある**ので、壊して落ちることを確かめられる。差し替えられるのは
+ * 3つ: `readHtml`（URL → HTML か null）、`registry`（data/i18n/pages.json の中身）、
+ * `exists`（validateGraph と同じ）。ディスクを用意せずに判定を試すため。
+ *
+ * 英語側は「子と親の両方に英語ページがあり、どちらもディスクに在る」ときだけ見る。
+ * 英語版がまだ無い子を、英語の親が載せていないのは正しい。
+ */
+export function validateChildLinks(raw, {
+  readHtml = readPageHtml,
+  registry = null,
+  exists = pageExists,
+} = {}) {
+  const errors = [];
+  const reg = registry ?? JSON.parse(fs.readFileSync(I18N_PATH, 'utf8'));
+  const english = new Map();
+  for (const group of reg.pages || []) {
+    const { ja, en } = group.pages || {};
+    if (ja && en) english.set(pageKey(fileToUrl(ja)), fileToUrl(en));
+  }
+  const linkCache = new Map();
+  const linksOf = (url) => {
+    if (!linkCache.has(url)) {
+      const html = readHtml(url);
+      linkCache.set(url, html === null ? null : linkedPages(html, url, ORIGIN));
+    }
+    return linkCache.get(url);
+  };
+
+  for (const [url, e] of Object.entries(raw).filter(([k]) => !k.startsWith('_'))) {
+    if (e.parent === null || e.parent === undefined || e.parent === url) continue;
+    const links = linksOf(e.parent);
+    if (links && !links.has(pageKey(url))) {
+      errors.push(`[CHILD] parent page does not link its child (§11 Child: 全子記事へ): ${e.parent} -> ${url}`);
+    }
+    const enChild = english.get(pageKey(url));
+    const enParent = english.get(pageKey(e.parent));
+    if (!enChild || !enParent || !exists(enChild) || !exists(enParent)) continue;
+    const enLinks = linksOf(enParent);
+    if (enLinks && !enLinks.has(pageKey(enChild))) {
+      errors.push(`[CHILD-EN] English parent does not link its English child (§11 Child): ${enParent} -> ${enChild}`);
+    }
+  }
+  return errors;
+}
+
 // ── 自己テスト（**落ちることを確かめる**） ──────────────────────
 const META = { clusters: ['c'], intents: ['i'], funnels: ['f'] };
 const OK_ENTRY = {
@@ -145,7 +219,61 @@ const SCENARIOS = [
     const r = validateGraph(raw);
     if (r.errors.length) throw new Error(`実データで ${r.errors.length} 件`);
   }],
+  ...childScenarios(),
 ];
+
+// [CHILD] / [CHILD-EN]: 親 /p/ と子 /p/c/ の最小の台帳に、HTML を差し込んで試す。
+function childScenarios() {
+  const graph = { _meta: META, '/p/': { ...OK_ENTRY }, '/p/c/': { ...OK_ENTRY, parent: '/p/' } };
+  const NO_I18N = { pages: [] };
+  const I18N = {
+    pages: [
+      { pages: { ja: 'p/index.html', en: 'en/p/index.html' } },
+      { pages: { ja: 'p/c/index.html', en: 'en/p/c/index.html' } },
+    ],
+  };
+  const pages = (html) => (url) => html[url] ?? null;
+  const LINKED = '<a href="/p/c/">子</a>';
+  const child = (html, opts = {}) => validateChildLinks(graph,
+    { readHtml: pages(html), registry: NO_I18N, exists: alwaysExists, ...opts });
+  const tagged = (errors, tag) => errors.some((e) => e.startsWith(`${tag} `));
+  return [
+    // 通る側が黙らなければ、下の「落ちる」はノイズで通っているかもしれない。
+    ['親が子へリンクしていれば通る（相対リンク・属性の順序・引用符は問わない）', () => {
+      const r = child({ '/p/': `<a class="card" href='c/'>子</a>` });
+      if (r.length) throw new Error(r.join(' / '));
+    }],
+    ['**親が子へリンクしていなければ落ちる**（[CHILD]）', () => {
+      if (!tagged(child({ '/p/': '<a href="/q/">別</a>' }), '[CHILD]')) throw new Error('検出しなかった');
+    }],
+    ['**コメントの中にしか無いリンクは数えない**', () => {
+      if (!tagged(child({ '/p/': `<!-- ${LINKED} -->` }), '[CHILD]')) throw new Error('検出しなかった');
+    }],
+    ['<script> の文字列や hreflang の <link> もリンクではない', () => {
+      const html = `<link rel="alternate" hreflang="ja" href="/p/c/"><script>s = '${LINKED}';</script>`;
+      if (!tagged(child({ '/p/': html }), '[CHILD]')) throw new Error('検出しなかった');
+    }],
+    ['**英語の親が英語の子へリンクしていなければ落ちる**（[CHILD-EN]）', () => {
+      const r = child({ '/p/': LINKED, '/en/p/': '<a href="/en/">Top</a>' }, { registry: I18N });
+      if (!tagged(r, '[CHILD-EN]')) throw new Error('検出しなかった');
+      if (tagged(r, '[CHILD]')) throw new Error('日本語側は揃っているのに [CHILD] が出た');
+    }],
+    ['英語の親子が揃っていれば通る', () => {
+      const r = child({ '/p/': LINKED, '/en/p/': '<a href="/en/p/c/">Child</a>' }, { registry: I18N });
+      if (r.length) throw new Error(r.join(' / '));
+    }],
+    ['英語の子がディスクに無ければ [CHILD-EN] は見ない（英語版がまだ無い子）', () => {
+      const r = child({ '/p/': LINKED, '/en/p/': '<a href="/en/">Top</a>' },
+        { registry: I18N, exists: (u) => u !== '/en/p/c/' });
+      if (r.length) throw new Error(r.join(' / '));
+    }],
+    ['実データで、宣言した親 → 子のリンクが揃っている', () => {
+      const raw = JSON.parse(fs.readFileSync(GRAPH_PATH, 'utf8'));
+      const r = validateChildLinks(raw);
+      if (r.length) throw new Error(`実データで ${r.length} 件: ${r.slice(0, 3).join(' / ')}`);
+    }],
+  ];
+}
 
 // **import されたときに走らせない。**export しているものを import した側が
 // `--check` を持っていると、ここが `process.exit()` を呼んで
@@ -159,6 +287,7 @@ if (process.argv.includes('--selftest')) {
 
 const raw = JSON.parse(fs.readFileSync(GRAPH_PATH, 'utf8'));
 const { errors, entries, keys } = validateGraph(raw);
+errors.push(...validateChildLinks(raw));
 
 // /obsidian/ 配下（JA）は全ページ登録必須 — オートパイロットの担当領域。
 function walkObsidianPages(dir, acc) {
@@ -184,5 +313,5 @@ if (errors.length > 0) {
   for (const e of errors) console.error(`  ${e}`);
   process.exit(1);
 }
-console.log(`content-graph: ${entries.length} entries OK (URL/parent/siblings/nextStep/vocabulary/relevance/coverage)`);
+console.log(`content-graph: ${entries.length} entries OK (URL/parent/siblings/nextStep/vocabulary/relevance/coverage/child links)`);
 }
