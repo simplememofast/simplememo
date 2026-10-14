@@ -452,7 +452,7 @@ async function selftest() {
     assert(publicationResponse(target, responseSnapshot(bytes, "application/octet-stream")).ok);
     assert(!publicationResponse(target, responseSnapshot(Buffer.concat([bytes, Buffer.from("changed")]), "text/plain")).ok);
   }
-  const allSitemap = [...new Set([...cases.map(c => c.to), ...publication.filter(c => c.kind === "html").map(c => c.url)])].map(url => `<loc>${ORIGIN}${url}</loc>`).join("\n");
+  const allSitemap = [...new Set([...cases.filter(c => c.kind !== "noindex-html").map(c => c.to), ...publication.filter(c => c.kind === "html").map(c => c.url)])].map(url => `<loc>${ORIGIN}${url}</loc>`).join("\n");
   const makeRequest = ({ staleTitle = false, staleSitemap = false, staleAsset = false, staleDescriptions = false, staleTechArticleMetadata = false, unavailable = false } = {}) => {
     const calls = new Map();
     return { calls, request: async (url, method) => {
@@ -786,8 +786,12 @@ async function liveAudit(strict, { request = get, readBytes, wait = pause, now =
         row.finalStatus = final.status;
         row.xRobotsTag = final.robots;
         if (c.kind === "noindex-html") {
-          checkNoindexHtml(final.body, c.to);
-          assert(!sitemap.includes(`<loc>${ORIGIN}${c.to}</loc>`), `${c.to}: noindex locale is in the live sitemap`);
+          // Like raw files: the PR baseline sees production before the noindex ships.
+          row.noindexObserved = /<meta\b[^>]*name=["']robots["'][^>]*noindex/i.test(final.body.split(/<\/head\s*>/i)[0]);
+          if (strict) {
+            checkNoindexHtml(final.body, c.to);
+            assert(!sitemap.includes(`<loc>${ORIGIN}${c.to}</loc>`), `${c.to}: noindex locale is in the live sitemap`);
+          }
         } else if (c.kind === "video") {
           assert(/^video\/mp4(?:\s*;|$)/i.test(final.contentType || ""), `${c.from}: not an MP4 response`);
           row.noindexObserved = noindex(final.robots);
