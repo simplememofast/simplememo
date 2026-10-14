@@ -426,6 +426,10 @@ export function checkRecoveryWiring(source) {
     `封じ込めの段に ${ACTIONS_RECOVERY.variable} が渡っていない`);
   const mentions = steps.filter(s => s.includes(ACTIONS_RECOVERY.variable));
   assert(mentions.length === 1, `${ACTIONS_RECOVERY.variable} が封じ込め以外の段にも渡っている`);
+  // 越えた回だとモデルに伝わらないと、Runbook どおり --contain を走らせて自分を止める。
+  const model = steps.filter(s => s.includes('\n        id: claude\n'));
+  assert(model.length === 1 && model[0].includes("TRIAL_RUN=${{ steps.contain.outputs.recovery || 'none' }}"),
+    'モデルの段に試運転の印（TRIAL_RUN）が渡っていない');
   const marker = steps.filter(s => s.includes("steps.contain.outputs.recovery == 'actions_once'"));
   assert(marker.length === 1 && !/封じ込め|Gate|Claude Code|判定コード|緊急停止|予算ゲート|振り分け/.test(marker[0].split('\n')[0]),
     '試運転の印の段が無い、または Act が別の段と取り違える名前になっている');
@@ -525,6 +529,7 @@ export function checkRecoveryWiring(source) {
       throws(source.replace('        id: contain\n', ''), 'id の無い封じ込め');
       throws(source.replace('        id: claude\n', `        id: claude\n        env:\n          X: \${{ vars.${ACTIONS_RECOVERY.variable} }}\n`), 'モデルの段への変数');
       throws(source.replace("steps.contain.outputs.recovery == 'actions_once'", "steps.contain.outputs.recovery == 'x'"), '印の段の無い配線');
+      throws(source.replace("TRIAL_RUN=${{ steps.contain.outputs.recovery || 'none' }}", 'TRIAL_RUN=none'), 'モデルへ試運転の印が渡らない配線');
     }],
   );
 }
