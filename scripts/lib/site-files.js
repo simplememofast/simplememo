@@ -86,4 +86,16 @@ function toUrlPath(rootDir, filePath) {
   return url;
 }
 
-module.exports = { collectHtmlFiles, walkHtmlFiles, toUrlPath };
+/**
+ * One key per page: /x, /x/, /x.html and /x/index.html all name the same document.
+ *
+ * Lives here, not in seo-site.js, because link-deferrals.js needs the same key
+ * and seo-site.js requires link-deferrals.js — keeping it there would make the
+ * two modules require each other. seo-site.js re-exports it unchanged.
+ */
+function pageKey(urlPath) {
+  const p = urlPath.replace(/\/index\.html$/, '/').replace(/\.html$/, '');
+  return p.length > 1 ? p.replace(/\/+$/, '') : p;
+}
+
+module.exports = { collectHtmlFiles, walkHtmlFiles, toUrlPath, pageKey };

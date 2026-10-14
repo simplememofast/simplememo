@@ -3,8 +3,71 @@
  */
 const fs = require('fs');
 const path = require('path');
-const { toUrlPath } = require('./site-files');
 const { getMetaContent } = require('./seo-page');
+const { pageKey } = require('./site-files');
+const { readLinkDeferrals, settleLinkFindings } = require('./link-deferrals');
+
+/**
+ * Language directory → the locale name data/i18n/pages.json registers it under.
+ * zh/ is 'zh-Hans' there, not 'zh': keying on the directory name would make a
+ * link between a registered and an unregistered zh/ page look cross-language.
+ */
+const LOCALE_DIRS = {
+  en: 'en', zh: 'zh-Hans', 'zh-Hant': 'zh-Hant', ko: 'ko', es: 'es',
+  'pt-BR': 'pt-BR', id: 'id', ar: 'ar', tr: 'tr', ja: 'ja',
+};
+
+/** Language of an unregistered page: its first path segment, else Japanese. */
+const localeOfPath = (urlPath) => {
+  const dir = urlPath.split('/')[1];
+  return Object.hasOwn(LOCALE_DIRS, dir) ? LOCALE_DIRS[dir] : 'ja';
+};
+
+/** '/', '/en/', '/zh/', … — the top of a language, not a section hub. */
+const LANGUAGE_ROOTS = new Set(['/', ...Object.keys(LOCALE_DIRS).map((dir) => `/${dir}/`)]);
+
+/**
+ * The hrefs of <a> elements, and nothing else.
+ *
+ * Not <link rel="alternate" hreflang>, not a JSON-LD url, and not an <a> that
+ * exists only inside an HTML comment, a <script> string or an inert
+ * <template> — none of those is a link a reader (or Googlebot's link graph)
+ * gets from the page. Attribute order and quote style do not matter; the
+ * attributes are tokenised so an `href=` inside another attribute's value is
+ * not mistaken for the real one.
+ */
+function anchorHrefs(html) {
+  const src = html.replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<script\b[\s\S]*?<\/script\s*>/gi, ' ')
+    .replace(/<template\b[\s\S]*?<\/template\s*>/gi, ' ');
+  const out = [];
+  for (const tag of src.matchAll(/<a\b((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi)) {
+    for (const a of tag[1].matchAll(/([^\s"'<>/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'<>`]+)))?/g)) {
+      if (a[1].toLowerCase() !== 'href') continue;
+      out.push((a[2] ?? a[3] ?? a[4] ?? '').replace(/&amp;/g, '&').trim());
+      break;
+    }
+  }
+  return out;
+}
+
+/**
+ * Page keys (see pageKey) that the <a> elements of one document point at.
+ * Relative hrefs resolve against the page's own URL; off-site, mailto: and
+ * similar links are dropped; query and fragment are ignored.
+ */
+function linkedPages(html, pageUrlPath, origin) {
+  const out = new Set();
+  for (const href of anchorHrefs(html)) {
+    let url;
+    try { url = new URL(href, origin + pageUrlPath); } catch { continue; }
+    if (url.origin !== origin) continue;
+    let pathname = url.pathname;
+    try { pathname = decodeURIComponent(pathname); } catch { /* keep the encoded form */ }
+    out.add(pageKey(pathname));
+  }
+  return out;
+}
 
 function createSiteChecks({ rootDir: ROOT_DIR, siteUrl: SITE_URL, errors, warnings,
   getAllHtmlFiles, getRelative }) {
@@ -221,43 +284,162 @@ function createSiteChecks({ rootDir: ROOT_DIR, siteUrl: SITE_URL, errors, warnin
     console.log(`  Edge rules: ${retired.size} retired paths, ${gone.size} gone slugs`);
   }
 
-  function checkOrphanPages() {
-    const files = getAllHtmlFiles(ROOT_DIR);
-    const allContent = {};
-    const internalLinks = new Set();
+  /**
+   * Page paths ('/x/', '/x') listed by sitemap.xml and the sitemaps it indexes.
+   * Validation is checkSitemap's job; this only reads, and skips what it cannot.
+   */
+  function sitemapPagePaths(rootDir) {
+    const paths = [];
+    const seen = new Set();
+    // Malformed %-escapes are checkSitemap's to report; here they are skipped, not thrown.
+    const localPath = (url) => {
+      if (!url.startsWith(`${SITE_URL}/`)) return null;
+      try { return decodeURIComponent(url.slice(SITE_URL.length)); } catch { return null; }
+    };
+    const visit = (url) => {
+      const rel = localPath(url);
+      if (seen.has(url) || rel === null) return;
+      seen.add(url);
+      const file = path.join(rootDir, rel);
+      if (!fs.existsSync(file) || !fs.statSync(file).isFile()) return;
+      const xml = fs.readFileSync(file, 'utf8').replace(/<!--[\s\S]*?-->/g, '');
+      const index = /<sitemapindex\b/.test(xml);
+      for (const m of xml.matchAll(/<loc\b[^>]*>\s*([^<\s]+)\s*<\/loc>/g)) {
+        const loc = m[1].replace(/&amp;/g, '&');
+        if (index) { visit(loc); continue; }
+        const page = localPath(loc);
+        if (page !== null) paths.push(page);
+      }
+    };
+    visit(`${SITE_URL}/sitemap.xml`);
+    return paths;
+  }
 
-    // Read all files and extract internal links
-    for (const file of files) {
-      const content = fs.readFileSync(file, 'utf8');
-      allContent[file] = content;
+  /**
+   * Orphans and section hubs, counted the way a crawler discovers a page.
+   *
+   * GSC reported 53 pages as "Discovered – currently not indexed" on
+   * 2026-10-14 — all published 2026-09-19 … 10-08, all 200 + self-canonical.
+   * The old version of this check (a warning) counted any `href="…"` anywhere
+   * in any file, so the <link rel="alternate" hreflang> tags and the
+   * language-switcher links between a page's own translations made every new
+   * page look linked. Run against that day's HEAD it reported 0 orphans; this
+   * version names 39 orphans and 324 missing hub links (15 and 68 of them in
+   * ja/en, the rest in the generated locales).
+   *
+   *   [ORPHAN] an indexable page (listed in the sitemaps) with no <a> link from
+   *            another indexable page of the SAME language outside its own
+   *            translation group. A link from a page Google is not asked to
+   *            index (tiktok/, compose, verify, admin/) does not count.
+   *   [HUB]    when the page's parent directory (/obsidian/ for
+   *            /obsidian/airpods/, /en/blog/ for /en/blog/foo) is itself an
+   *            indexable page and not a language root, that hub links to it.
+   *            docs/obsidian/OBSIDIAN_INTERNAL_LINK_PLAN.md §11: "Child
+   *            ピラーからのみ。全子記事へ".
+   *
+   * Languages and translation groups come from data/i18n/pages.json (it puts
+   * memo-inbox/ in English and ja/memo-inbox/ in Japanese — the path alone
+   * would get both wrong); unregistered pages fall back to their first path
+   * segment, else Japanese. Both rules are errors: a page nothing links to is
+   * a page Google may know about and never crawl.
+   *
+   * Some links the rules demand must not be added yet (a frozen experiment's
+   * hub, pages awaiting a consolidation decision). Those are listed by name,
+   * with a reason and an expiry, in data/link-gate-deferrals.json and settled
+   * by lib/link-deferrals.js — the same module check-content-graph.mjs uses for
+   * [CHILD]. A deferred finding is still printed, as a warning; a lapsed or
+   * unused deferral, or a ledger that cannot be read, is an error.
+   * `deferrals` is injectable so the self-test does not read the real ledger
+   * or the real clock.
+   */
+  function checkOrphanPages(rootDir = ROOT_DIR, { quiet = false, deferrals = null } = {}) {
+    const urls = sitemapPagePaths(rootDir);
+    if (!urls.length) {
+      // 0 pages read is not "no orphans" — it is a check that looked at nothing.
+      errors.push('[ORPHAN] No page URLs could be read from sitemap.xml — the orphan check cannot run');
+      return;
+    }
+    let registry;
+    try {
+      registry = JSON.parse(fs.readFileSync(path.join(rootDir, 'data/i18n/pages.json'), 'utf8'));
+    } catch (e) {
+      errors.push(`[ORPHAN] data/i18n/pages.json is unreadable (${e.message}) — page languages are unknown, so the orphan check cannot run`);
+      return;
+    }
+    const registered = new Map();
+    (registry.pages || []).forEach((entry, i) => {
+      for (const [locale, file] of Object.entries(entry.pages || {})) {
+        registered.set(pageKey(`/${file}`), { lang: locale, group: `#${i}` });
+      }
+    });
 
-      const hrefMatches = content.match(/href="([^"]*?)"/g) || [];
-      for (const match of hrefMatches) {
-        const href = match.replace(/href="/, '').replace(/"$/, '');
-        if (href.startsWith('/') && !href.startsWith('//')) {
-          internalLinks.add(href.split('?')[0].split('#')[0]);
+    const read = (file) => { try { return fs.readFileSync(file, 'utf8'); } catch { return null; } };
+    const pages = new Map();
+    for (const url of urls) {
+      const base = path.join(rootDir, url);
+      // Read straight away rather than exists + stat + read: this runs for ~2,500 pages.
+      const html = url.endsWith('/') ? read(path.join(base, 'index.html'))
+        : read(base + '.html') ?? read(path.join(base, 'index.html'));
+      if (html === null) continue; // checkSitemap reports the missing page
+      const key = pageKey(url);
+      const entry = registered.get(key);
+      pages.set(key, {
+        url,
+        lang: entry ? entry.lang : localeOfPath(key),
+        // An unregistered page is a group of one, so a link to itself never counts.
+        group: entry ? entry.group : key,
+        links: linkedPages(html, url, SITE_URL),
+        sameLanguage: 0,
+        otherInbound: 0,
+      });
+    }
+
+    let counted = 0;
+    for (const source of pages.values()) {
+      for (const to of source.links) {
+        const target = pages.get(to);
+        if (!target) continue;
+        if (target.lang === source.lang && target.group !== source.group) {
+          target.sameLanguage++;
+          counted++;
+        } else {
+          target.otherInbound++;
         }
       }
     }
 
-    // Check each page for incoming links
-    for (const file of files) {
-      const content = allContent[file];
-      if (/content\s*=\s*["'][^"']*noindex/i.test(content)) continue;
-
-      const pageUrl = toUrlPath(ROOT_DIR, file);
-
-      // Skip homepage
-      if (pageUrl === '/') continue;
-
-      // Check if any page links to this one
-      const hasInbound = internalLinks.has(pageUrl) ||
-                         internalLinks.has(pageUrl + '/') ||
-                         internalLinks.has(pageUrl + '.html');
-
-      if (!hasInbound) {
-        warnings.push(`[ORPHAN] No internal links point to: ${pageUrl}`);
+    // Collected first, then settled against the deferral ledger as one batch:
+    // "this deferral matches nothing" can only be decided after every finding is known.
+    const findings = [];
+    for (const [key, page] of pages) {
+      if (!page.sameLanguage) {
+        const others = page.otherInbound
+          ? `only ${page.otherInbound} link(s) from its own translations or other languages`
+          : 'no inbound links at all';
+        findings.push({ rule: 'ORPHAN', page: page.url,
+          message: `[ORPHAN] No same-language (${page.lang}) page links here (${others}): ${page.url}` });
       }
+      const trimmed = page.url.replace(/\/+$/, '');
+      if (!trimmed) continue;
+      const parent = trimmed.slice(0, trimmed.lastIndexOf('/') + 1);
+      if (LANGUAGE_ROOTS.has(parent)) continue;
+      const hub = pages.get(pageKey(parent));
+      if (hub && !hub.links.has(key)) {
+        findings.push({ rule: 'HUB', parent: hub.url, child: page.url,
+          message: `[HUB] Section hub does not link its child page (add it to the hub): ${hub.url} → ${page.url}` });
+      }
+    }
+
+    const settled = settleLinkFindings(findings, {
+      owner: 'seo-check', registry, deferrals: deferrals ?? readLinkDeferrals(rootDir),
+    });
+    errors.push(...settled.errors);
+    warnings.push(...settled.deferred);
+
+    if (!quiet) {
+      const held = Object.entries(settled.counts).map(([id, n]) => `${id} ${n}`).join(', ');
+      console.log(`  Orphans/hubs: ${pages.size} indexable pages, ${counted} same-language links`
+        + (held ? `; ${settled.deferred.length} deferred (${held})` : ''));
     }
   }
 
@@ -312,4 +494,4 @@ function createSiteChecks({ rootDir: ROOT_DIR, siteUrl: SITE_URL, errors, warnin
   return { checkSitemap, checkRobots, checkUrlHygiene, checkEdgeRules, checkOrphanPages, checkLlmsFreshness };
 }
 
-module.exports = { createSiteChecks };
+module.exports = { createSiteChecks, anchorHrefs, linkedPages, pageKey };
