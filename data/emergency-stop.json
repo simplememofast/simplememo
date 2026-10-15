@@ -91,7 +91,7 @@
     "acquisition": {
       "stopped": false,
       "reason": null,
-      "$what": "計測データの日次取得（GitHub Actions の acquisition-daily。GA4 の固定集計 ga4-funnel と AppsFlyer の集計を読み、既存の受け手の公開鍵で暗号化した成果物として残すだけ。モデルは呼ばない）。止めると次の起動から門が着手せず、ローカルの collect --analytics も GA4 の analytics-read.yml を起動しない（Mac の資格情報で読む従来の AppsFlyer 読み取りは止めない。そちらは元の担当の経路に従う）。**GitHub の『Disable workflow』では止めない**（起動欠落の見張り cron-silence に登録してあるので、無効化すると cron-health が毎朝落ちる）。2026-10-15 にオーナーが選択式で Actions への移行を承認"
+      "$what": "計測データの日次取得（GitHub Actions の acquisition-daily。GA4 の固定集計 ga4-funnel と AppsFlyer の集計を読み、既存の受け手の公開鍵で暗号化した成果物として残すだけ。モデルは呼ばない）。止めると次の起動から門が着手せず、ローカルの collect --analytics も GA4 の analytics-read.yml を起動しない。collect の中の Mac の資格情報による AppsFlyer 読み取りも読まない（acquisition_stopped）。**GitHub の『Disable workflow』では止めない**（起動欠落の見張り cron-silence に登録してあるので、無効化すると cron-health が毎朝落ちる）。2026-10-15 にオーナーが選択式で Actions への移行を承認"
     }
   }
 }

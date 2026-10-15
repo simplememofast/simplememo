@@ -51,7 +51,7 @@ export function verifyAppsFlyer(directory) {
 // Inside `collect` (actionsGuard), a missing receipt waits for acquisition-daily.yml while it will
 // read the same end-date (appsflyerActionsGuard). An Actions failure receipt still falls back here.
 export async function collectAppsFlyer({ stateRoot, now = new Date(), apiRepo = path.join(os.homedir(), 'simplememo-api'), run = command,
-  actionsGuard = false, actionsHandoff = null } = {}) {
+  actionsGuard = false, actionsHandoff = null, stopDoc = null } = {}) {
   const data = privateState(path.join(stateRoot, 'data'));
   const window = collectionWindow('appsflyer', now);
   const receipts = privateState(path.join(data, 'collection-receipts'));
@@ -62,7 +62,7 @@ export async function collectAppsFlyer({ stateRoot, now = new Date(), apiRepo = 
     return { ...prior, reused: true };
   }
   if (prior && (prior.attempts >= 3 || prior.failure === 'permission_or_credential')) return prior;
-  const deferred = !prior && actionsGuard ? appsflyerActionsGuard({ end: window.end, handoff: actionsHandoff, now }) : null;
+  const deferred = !prior && actionsGuard ? appsflyerActionsGuard({ end: window.end, handoff: actionsHandoff, now, stopDoc }) : null;
   if (deferred) return { schema_version: 1, source: 'appsflyer', window, status: 'deferred_to_actions_owner', reason: deferred,
     owner: ACQUISITION_WORKFLOW, new_reads: 0 };
   const sha = run('git', ['rev-parse', 'origin/main'], { cwd: apiRepo }).trim();

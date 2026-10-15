@@ -335,10 +335,13 @@ const scheduledToday = (handoff, now) => Number.isFinite(Date.parse(handoff?.lat
  * will actually read: the secret is registered, and today's scheduled run is active or has not
  * happened yet (until the same grace hour), or its artifact awaits admission. key_pending,
  * unknown state, an unverified environment and final Actions verdicts leave the local reader as
- * before. It never reads the emergency-stop ledger: that route stops the workflow, not this reader.
+ * before. The acquisition stop route applies here too (same as ga4ActionsGuard), so tripping it
+ * stops every acquisition read, not only the workflow. Unreadable stop state is not "go".
  * Returns null when the local read may proceed.
  */
-export function appsflyerActionsGuard({ end, handoff = null, now = new Date() }) {
+export function appsflyerActionsGuard({ end, handoff = null, now = new Date(), stopDoc = null }) {
+  try { if (acquisitionStop(stopDoc ?? read(path.join(ROOT, 'data/emergency-stop.json'))).stopped) return 'acquisition_stopped'; }
+  catch { return 'stop_ledger_unreadable'; }
   if (handoff?.appsflyer_key !== 'registered') return null;
   if (handoff.appsflyer_pending_ends?.includes(end)) return 'actions_artifact_pending';
   if (handoff.active_runs?.length) return 'actions_run_active';

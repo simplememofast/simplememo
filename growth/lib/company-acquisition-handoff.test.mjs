@@ -395,14 +395,14 @@ test('padded GA4 envelopes are admitted without the padding; non-space padding i
 test('the local AppsFlyer reader waits for the Actions owner only while that owner will read', async t => {
   const registered = { appsflyer_key: 'registered', active_runs: [], appsflyer_pending_ends: [], latest_schedule_at: null };
   const end = '2026-10-14';
-  assert.equal(appsflyerActionsGuard({ end, handoff: registered, now: NOW }), 'actions_owner_pending_today');
-  assert.equal(appsflyerActionsGuard({ end, handoff: { ...registered, latest_schedule_at: RUN_AT }, now: NOW }), null);
-  assert.equal(appsflyerActionsGuard({ end, handoff: registered, now: new Date('2026-10-15T09:30:00Z') }), null, 'grace passed');
-  assert.equal(appsflyerActionsGuard({ end, handoff: { ...registered, latest_schedule_at: RUN_AT, active_runs: [9] }, now: NOW }), 'actions_run_active');
-  assert.equal(appsflyerActionsGuard({ end, handoff: { ...registered, latest_schedule_at: RUN_AT, appsflyer_pending_ends: [end] }, now: NOW }), 'actions_artifact_pending');
+  assert.equal(appsflyerActionsGuard({ end, stopDoc: GO, handoff: registered, now: NOW }), 'actions_owner_pending_today');
+  assert.equal(appsflyerActionsGuard({ end, stopDoc: GO, handoff: { ...registered, latest_schedule_at: RUN_AT }, now: NOW }), null);
+  assert.equal(appsflyerActionsGuard({ end, stopDoc: GO, handoff: registered, now: new Date('2026-10-15T09:30:00Z') }), null, 'grace passed');
+  assert.equal(appsflyerActionsGuard({ end, stopDoc: GO, handoff: { ...registered, latest_schedule_at: RUN_AT, active_runs: [9] }, now: NOW }), 'actions_run_active');
+  assert.equal(appsflyerActionsGuard({ end, stopDoc: GO, handoff: { ...registered, latest_schedule_at: RUN_AT, appsflyer_pending_ends: [end] }, now: NOW }), 'actions_artifact_pending');
   for (const key of ['key_pending', 'environment_unverified', 'unknown'])
-    assert.equal(appsflyerActionsGuard({ end, handoff: { ...registered, appsflyer_key: key }, now: NOW }), null, key);
-  assert.equal(appsflyerActionsGuard({ end, handoff: null, now: NOW }), null);
+    assert.equal(appsflyerActionsGuard({ end, stopDoc: GO, handoff: { ...registered, appsflyer_key: key }, now: NOW }), null, key);
+  assert.equal(appsflyerActionsGuard({ end, stopDoc: GO, handoff: null, now: NOW }), null);
   // Through collectAppsFlyer: a deferral reads nothing; key_pending and an Actions failure receipt fall back to the local reader.
   let reads = 0;
   const run = (name, args) => {
@@ -415,14 +415,22 @@ test('the local AppsFlyer reader waits for the Actions owner only while that own
     return JSON.stringify({ ok: true, output: dest });
   };
   const root = stateRoot(t);
-  const waited = await collectAppsFlyer({ stateRoot: root, now: NOW, run, actionsGuard: true, actionsHandoff: registered });
+  const waited = await collectAppsFlyer({ stateRoot: root, now: NOW, run, actionsGuard: true, stopDoc: GO, actionsHandoff: registered });
   assert.deepEqual([waited.status, waited.reason, reads], ['deferred_to_actions_owner', 'actions_owner_pending_today', 0]);
   assert.equal(receipt(root, 'appsflyer-2026-10-14.json'), null);
-  const pending = await collectAppsFlyer({ stateRoot: root, now: NOW, run, actionsGuard: true, actionsHandoff: { ...registered, appsflyer_key: 'key_pending' } });
+  const pending = await collectAppsFlyer({ stateRoot: root, now: NOW, run, actionsGuard: true, stopDoc: GO, actionsHandoff: { ...registered, appsflyer_key: 'key_pending' } });
   assert.deepEqual([pending.status, reads], ['verified', 1]);
   const failedRoot = stateRoot(t), failed = github(scheduled({ ga4: null, af: afPayload({ ok: false }), afJob: 'failure' }));
   ingest(failedRoot, failed);
   assert.equal(receipt(failedRoot, 'appsflyer-2026-10-14.json').failure, 'actions_reader_failed');
-  const fallback = await collectAppsFlyer({ stateRoot: failedRoot, now: NOW, run, actionsGuard: true, actionsHandoff: registered });
+  const fallback = await collectAppsFlyer({ stateRoot: failedRoot, now: NOW, run, actionsGuard: true, stopDoc: GO, actionsHandoff: registered });
   assert.deepEqual([fallback.status, reads], ['verified', 2]);
+  // The acquisition stop route stops this reader too; an unreadable ledger is not "go".
+  const stopped = { stopped: false, agents: { acquisition: { stopped: true, reason: 'test' } } };
+  assert.equal(appsflyerActionsGuard({ end, handoff: null, now: NOW, stopDoc: stopped }), 'acquisition_stopped');
+  assert.equal(appsflyerActionsGuard({ end, handoff: null, now: NOW, stopDoc: { stopped: false, agents: {} } }), 'stop_ledger_unreadable');
+  const haltedRoot = stateRoot(t);
+  const halted = await collectAppsFlyer({ stateRoot: haltedRoot, now: NOW, run, actionsGuard: true, stopDoc: stopped, actionsHandoff: null });
+  assert.deepEqual([halted.status, halted.reason, reads], ['deferred_to_actions_owner', 'acquisition_stopped', 2]);
+  assert.equal(receipt(haltedRoot, 'appsflyer-2026-10-14.json'), null);
 });
