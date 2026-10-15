@@ -191,9 +191,11 @@ describes the private, descriptive view built on these sources.
   ([Apple](https://developer.apple.com/help/app-store-connect-analytics/acquisition/acquisition/)).
 - An AppsFlyer install counts as site acquisition only when it arrives through
   the owned-web OneLink pilot link (`owned_web` + `obsidian_bridge_pilot_v1`).
-  No site page carries it ([Draft PR #1047](https://github.com/simplememofast/simplememo/pull/1047)),
-  so installs from the site's plain App Store links are normally reported as
-  Organic, mixed with every other unattributed install.
+  Only the nine Obsidian hub hero buttons carry it
+  ([PR #1047](https://github.com/simplememofast/simplememo/pull/1047),
+  [pilot handoff](ONELINK_PILOT.md)); installs from the site's other plain App
+  Store links are normally reported as Organic, mixed with every other
+  unattributed install.
 - `node scripts/company-os.mjs acquisition-status` lays these sources side by
   side in private state. A naturally scheduled run of that collection has not
   been verified yet, so check each source's observed date before reading a

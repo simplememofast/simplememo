@@ -108,7 +108,7 @@ of chronological causation. Read the quality output first. Version parameters
 for direct events and OneLink are recorded separately in each query artifact.
 
 The collector does not generate links, load AppsFlyer scripts, forward IDs or
-change navigation. No site anchor is switched by this implementation. Existing
+change navigation. Switching a site anchor requires an explicit HTML change. Existing
 Apple hrefs continue working even with opt-in attributes, including a fallback.
 Impression monitoring covers anchors present when the tracker starts; later
 inserted anchors get delegated clicks only. URL replacement before first
@@ -116,14 +116,19 @@ visibility is revalidated; changes after an element's first impression do not
 start a new exposure. Do not apply an asynchronous link rewriter without a new
 exposure lifecycle design and tests.
 
-Start the pilot only after its non-QA link, actual device redirect/first-launch
-receipt, privacy configuration and Apple campaign-series change are verified.
-Annotate the activation date/placement. Before activation, absent OneLink events
+Start the pilot only after its non-QA link, privacy disclosure and Apple
+campaign-series change are verified. On 2026-10-14 the owner waived the
+physical device redirect/first-launch receipt: attribution is judged from
+production data and remains unverified at device level. Annotate the
+activation date/placement. Before activation, absent OneLink events
 or zero SQL columns are not measured zero demand. Synthetic tests cover these
 new fields; live BigQuery validation and the same mature-day conditions remain
 required. GA4's [custom event setup](https://developers.google.com/analytics/devguides/collection/ga4/events)
 and [BigQuery aggregate definitions](https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/aggregate_functions#countif)
 are the underlying collection and counting references.
+
+The first placement, saved link parameters, pre-release evidence, existing
+experiment conflicts and rollback are specified in [the pilot handoff](ONELINK_PILOT.md).
 
 ### Comparing referral channels
 
