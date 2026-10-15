@@ -328,7 +328,10 @@
           <!-- Section 3 -->
           <h2 id="reading-03" data-ce-number="03">SendManagerのコード</h2>
           <p>SendManagerの<code>send()</code>関数は、Outboxパターンのエントリーポイントだ。まずOutboxに保存し、ネットワーク接続がなければキューイングし、接続があれば即座に送信を実行する。</p>
-<pre tabindex="0"><code>func send(message: String, completion: @escaping (SendResult) -&gt; Void) {
+<pre tabindex="0"><code>// 保存完了と送信結果を分ける説明用の簡略API
+@MainActor
+func send(message: String, onSaved: () -&gt; Void,
+          completion: @escaping (SendResult) -&gt; Void) {
     // まずOutboxに保存（クラッシュや圏外で失わないように）
     let outboxMessage: OutboxMessage
     do {
@@ -337,6 +340,9 @@
         DispatchQueue.main.async { completion(.failure(error)) }
         return
     }
+
+    // 同期保存に成功した場合だけ、メインスレッドでUIへ通知する
+    onSaved()
 
     // ネットワーク接続がない場合はキューに入れたことを通知
     guard NetworkMonitor.shared.isConnected else {
@@ -406,14 +412,17 @@
     isSending = true
     sendBarButton.isEnabled = false
 
-    // Animation → UI clear (does NOT wait for network!)
-    performSendAnimation {
-        self.clearTextView()
-        PerformanceLogger.shared.endSendToReset()
-    }
-
-    // Send is async. Does not block UI.
-    SendManager.shared.send(message: message) { [weak self] result in
+    SendManager.shared.send(message: message, onSaved: { [weak self] in
+        // 端末への保存成功後にだけ消す。ネットワーク応答は待たない。
+        self?.performSendAnimation { [weak self] in
+            guard let self = self else { return }
+            // アニメーション中に編集された入力は残す。
+            if self.textView.text == message {
+                self.clearTextView()
+            }
+            PerformanceLogger.shared.endSendToReset()
+        }
+    }) { [weak self] result in
         self?.isSending = false
         self?.updateSendButtonState()
         switch result {
@@ -426,7 +435,7 @@
         }
     }
 }</code></pre>
-          <p><code>performSendAnimation</code>と<code>SendManager.shared.send</code>は完全に独立して実行される。アニメーションは0.25秒で完了し、テキストビューはクリアされる。ネットワーク送信はバックグラウンドで非同期に進行し、UIを一切ブロックしない。</p>
+          <p>この簡略例では、<code>onSaved</code>を端末への保存成功時だけ呼び出し、そこからアニメーションと入力消去を行う。保存に失敗した場合は入力を残す。<code>completion</code>は送信結果やキューへの登録を知らせる別の通知であり、UIクリアはネットワーク応答を待たない。</p>
           <p>Send-to-Resetの目標は<strong>待ちを感じない短さ</strong>。アニメーション込みでも0.25秒。ユーザーは送信ボタンをタップした直後に、次のメモを書き始められる。これがCaptioスタイルのUXだ。</p>
 
           <!-- FAQ -->
