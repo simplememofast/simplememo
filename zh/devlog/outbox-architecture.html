@@ -380,7 +380,10 @@
           <!-- Section 3 -->
           <h2 id="reading-03" data-ce-number="03">SendManager的代码</h2>
           <p>SendManager的<code>send()</code>函数是Outbox模式的入口点。 首先保存在Outbox，没有网络连接就排队，有连接就立即执行发送。</p>
-<pre tabindex="0"><code>func send(message: String, completion: @escaping (SendResult) -&gt; Void) {
+<pre tabindex="0"><code>// 保存完了と送信結果を分ける説明用の簡略API
+@MainActor
+func send(message: String, onSaved: () -&gt; Void,
+          completion: @escaping (SendResult) -&gt; Void) {
     // まずOutboxに保存（クラッシュや圏外で失わないように）
     let outboxMessage: OutboxMessage
     do {
@@ -389,6 +392,9 @@
         DispatchQueue.main.async { completion(.failure(error)) }
         return
     }
+
+    // 同期保存に成功した場合だけ、メインスレッドでUIへ通知する
+    onSaved()
 
     // ネットワーク接続がない場合はキューに入れたことを通知
     guard NetworkMonitor.shared.isConnected else {
@@ -458,14 +464,17 @@
     isSending = true
     sendBarButton.isEnabled = false
 
-    // Animation → UI clear (does NOT wait for network!)
-    performSendAnimation {
-        self.clearTextView()
-        PerformanceLogger.shared.endSendToReset()
-    }
-
-    // Send is async. Does not block UI.
-    SendManager.shared.send(message: message) { [weak self] result in
+    SendManager.shared.send(message: message, onSaved: { [weak self] in
+        // 端末への保存成功後にだけ消す。ネットワーク応答は待たない。
+        self?.performSendAnimation { [weak self] in
+            guard let self = self else { return }
+            // アニメーション中に編集された入力は残す。
+            if self.textView.text == message {
+                self.clearTextView()
+            }
+            PerformanceLogger.shared.endSendToReset()
+        }
+    }) { [weak self] result in
         self?.isSending = false
         self?.updateSendButtonState()
         switch result {
@@ -478,7 +487,7 @@
         }
     }
 }</code></pre>
-          <p><code>performSendAnimation</code>和<code>SendManager.shared.send</code>完全独立执行。 动画在0.25秒内完成，文本视图被清除。 网络发送在后台异步进行，完全不屏蔽UI。</p>
+          <p>在这个简化示例中，只有成功保存到设备后才调用 <code>onSaved</code>，然后播放动画并清空输入。保存失败时保留输入。<code>completion</code> 是另一个通知，用于报告发送结果或已加入队列；清空界面不等待网络响应。</p>
           <p>Send-to-Reset的目标是<strong>感觉不到等待的短</strong>。 包括动画也是0.25秒。 用户在点击发送按钮后，就可以开始写下一个备忘录。 这就是Captio风格的UX。</p>
 
           <!-- FAQ -->

@@ -380,7 +380,10 @@
           <!-- Section 3 -->
           <h2 id="reading-03" data-ce-number="03">SendManager kodu</h2>
           <p>SendManager'ın <code>send()</code> işlevi, Outbox modelinin giriş noktasıdır. İlk olarak, Outbox'ye kaydedin, ağ bağlantısı yoksa sıraya girin ve bir bağlantı varsa hemen iletimi gerçekleştirin.</p>
-<pre tabindex="0"><code>func send(message: String, completion: @escaping (SendResult) -&gt; Void) {
+<pre tabindex="0"><code>// 保存完了と送信結果を分ける説明用の簡略API
+@MainActor
+func send(message: String, onSaved: () -&gt; Void,
+          completion: @escaping (SendResult) -&gt; Void) {
     // まずOutboxに保存（クラッシュや圏外で失わないように）
     let outboxMessage: OutboxMessage
     do {
@@ -389,6 +392,9 @@
         DispatchQueue.main.async { completion(.failure(error)) }
         return
     }
+
+    // 同期保存に成功した場合だけ、メインスレッドでUIへ通知する
+    onSaved()
 
     // ネットワーク接続がない場合はキューに入れたことを通知
     guard NetworkMonitor.shared.isConnected else {
@@ -458,14 +464,17 @@
     isSending = true
     sendBarButton.isEnabled = false
 
-    // Animation → UI clear (does NOT wait for network!)
-    performSendAnimation {
-        self.clearTextView()
-        PerformanceLogger.shared.endSendToReset()
-    }
-
-    // Send is async. Does not block UI.
-    SendManager.shared.send(message: message) { [weak self] result in
+    SendManager.shared.send(message: message, onSaved: { [weak self] in
+        // 端末への保存成功後にだけ消す。ネットワーク応答は待たない。
+        self?.performSendAnimation { [weak self] in
+            guard let self = self else { return }
+            // アニメーション中に編集された入力は残す。
+            if self.textView.text == message {
+                self.clearTextView()
+            }
+            PerformanceLogger.shared.endSendToReset()
+        }
+    }) { [weak self] result in
         self?.isSending = false
         self?.updateSendButtonState()
         switch result {
@@ -478,7 +487,7 @@
         }
     }
 }</code></pre>
-          <p><code>performSendAnimation</code> ve <code>SendManager.shared.send</code> tamamen bağımsız olarak yürütülür. Animasyon 0.25 saniyede tamamlanır ve metin görünümü temizlenir. Ağ iletimi arka planda eşzamansız olarak ilerler ve kullanıcı arayüzünü hiç engellemez.</p>
+          <p>Bu basitleştirilmiş örnekte <code>onSaved</code> yalnızca cihaza kaydetme başarılı olduktan sonra çağrılır; ardından animasyon çalıştırılır ve girilen metin temizlenir. Kaydetme başarısız olursa metin korunur. <code>completion</code>, gönderim sonucunu veya kuyruğa eklenmeyi bildiren ayrı bir bildirimdir; arayüzün temizlenmesi ağ yanıtını beklemez.</p>
           <p>Send-to-Reset'in amacı <strong>bekleyen hissetmeyen kısalık</strong>'dır. Animasyon dahil 0.25 saniye. Gönder düğmesine dokunduktan hemen sonra kullanıcı bir sonraki notu yazmaya başlayabilir. Bu Captio tarzı UX'dir.</p>
 
           <!-- FAQ -->

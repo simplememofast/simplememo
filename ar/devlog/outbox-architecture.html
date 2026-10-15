@@ -380,7 +380,10 @@
           <!-- Section 3 -->
           <h2 id="reading-03" data-ce-number="03">رمز إرسال المدير</h2>
           <p>وظيفة <code>send()</code> ل SendManager هي نقطة الدخول لنمط Outbox. أولا، احفظه في Outbox، وقم بالانتظار بدون اتصال بالشبكة، وأرسله على الفور إذا كان هناك اتصال.</p>
-<pre tabindex="0"><code>func send(message: String, completion: @escaping (SendResult) -&gt; Void) {
+<pre tabindex="0"><code>// 保存完了と送信結果を分ける説明用の簡略API
+@MainActor
+func send(message: String, onSaved: () -&gt; Void,
+          completion: @escaping (SendResult) -&gt; Void) {
     // まずOutboxに保存（クラッシュや圏外で失わないように）
     let outboxMessage: OutboxMessage
     do {
@@ -389,6 +392,9 @@
         DispatchQueue.main.async { completion(.failure(error)) }
         return
     }
+
+    // 同期保存に成功した場合だけ、メインスレッドでUIへ通知する
+    onSaved()
 
     // ネットワーク接続がない場合はキューに入れたことを通知
     guard NetworkMonitor.shared.isConnected else {
@@ -458,14 +464,17 @@
     isSending = true
     sendBarButton.isEnabled = false
 
-    // Animation → UI clear (does NOT wait for network!)
-    performSendAnimation {
-        self.clearTextView()
-        PerformanceLogger.shared.endSendToReset()
-    }
-
-    // Send is async. Does not block UI.
-    SendManager.shared.send(message: message) { [weak self] result in
+    SendManager.shared.send(message: message, onSaved: { [weak self] in
+        // 端末への保存成功後にだけ消す。ネットワーク応答は待たない。
+        self?.performSendAnimation { [weak self] in
+            guard let self = self else { return }
+            // アニメーション中に編集された入力は残す。
+            if self.textView.text == message {
+                self.clearTextView()
+            }
+            PerformanceLogger.shared.endSendToReset()
+        }
+    }) { [weak self] result in
         self?.isSending = false
         self?.updateSendButtonState()
         switch result {
@@ -478,7 +487,7 @@
         }
     }
 }</code></pre>
-          <p>يتم تنفيذ <code>performSendAnimation</code> و<code>SendManager.shared.send</code> بشكل مستقل تماما. تكتمل الرسوم المتحركة في 0.25 ثانية، ويتم مسح عرض النص. يستمر نقل الشبكة بشكل غير متزامن في الخلفية ولا يمنع واجهة المستخدم على الإطلاق.</p>
+          <p>في هذا المثال المبسط، لا يُستدعى <code>onSaved</code> إلا بعد نجاح الحفظ على الجهاز، ثم تبدأ الحركة ويُمسح النص المُدخل. إذا فشل الحفظ، يبقى النص كما هو. أما <code>completion</code> فهو إشعار منفصل بنتيجة الإرسال أو الإضافة إلى قائمة الانتظار؛ ولا ينتظر مسح الواجهة استجابة الشبكة.</p>
           <p>الهدف من الإرسال إلى إعادة الضبط هو <strong>القصر الذي لا يشعر بالانتظار</strong>. 0.25 ثانية بما في ذلك الرسوم المتحركة. مباشرة بعد النقر على زر الإرسال، يمكن للمستخدم البدء في كتابة الملاحظة التالية. هذا هو UX نمط Captio.</p>
 
           <!-- FAQ -->
