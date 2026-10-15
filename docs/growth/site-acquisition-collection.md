@@ -49,15 +49,16 @@ measurement stopped pending a purpose-specific consent flow. iOS PR #669
 (2026-10-08, released as 5.9.16) restored it: the SDK starts unless the device
 denies or restricts tracking or an earlier in-app acquisition refusal is
 stored, and the app reports a bounded `acquisition_attribution_received` label
-to the API. That still does not produce a site-attributed install count. Only
-installs that arrive through the owned-web OneLink pilot link enter the pilot
-group above, and no site page carries that link
-([Draft PR #1047](https://github.com/simplememofast/simplememo/pull/1047),
-[readiness](onelink-pilot-readiness-20260919.md)). Installs from the site's
+to the API. That still does not produce a site-wide attributed install count.
+Only installs that arrive through the owned-web OneLink pilot link enter the
+pilot group above. That link is on the nine Obsidian hub hero buttons from
+the production start recorded in `measurement_changes`
+([PR #1047](https://github.com/simplememofast/simplememo/pull/1047),
+[pilot handoff](../../growth/ONELINK_PILOT.md)). Installs from the site's other
 plain App Store links are normally reported as Organic, mixed with every other
-unattributed install. The Apple collection handoff does not depend on the SDK,
-and the OneLink pilot's existing physical-test and release requirements still
-apply.
+unattributed install. The Apple collection handoff does not depend on the SDK.
+The owner waived the pilot's physical-device test on 2026-10-14, so pilot
+attribution is judged from production data and is unverified at device level.
 
 Validation: `node --test growth/lib/company-acquisition.test.mjs` covers
 missing versus zero, joined dimensions, SDK-independent source classification,

@@ -116,9 +116,11 @@ visibility is revalidated; changes after an element's first impression do not
 start a new exposure. Do not apply an asynchronous link rewriter without a new
 exposure lifecycle design and tests.
 
-Start the pilot only after its non-QA link, actual device redirect/first-launch
-receipt, privacy configuration and Apple campaign-series change are verified.
-Annotate the activation date/placement. Before activation, absent OneLink events
+Start the pilot only after its non-QA link, privacy disclosure and Apple
+campaign-series change are verified. On 2026-10-14 the owner waived the
+physical device redirect/first-launch receipt: attribution is judged from
+production data and remains unverified at device level. Annotate the
+activation date/placement. Before activation, absent OneLink events
 or zero SQL columns are not measured zero demand. Synthetic tests cover these
 new fields; live BigQuery validation and the same mature-day conditions remain
 required. GA4's [custom event setup](https://developers.google.com/analytics/devguides/collection/ga4/events)
