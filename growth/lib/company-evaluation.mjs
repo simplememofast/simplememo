@@ -30,7 +30,7 @@ const CODE=['growth/lib/company-evaluation.mjs','growth/lib/company-decision.mjs
   'growth/lib/company-loop.mjs','growth/lib/company-metrics.mjs','growth/lib/company-measurement.mjs',
   'growth/lib/experiment-evidence.mjs','growth/lib/ledger.mjs','growth/lib/experiment-coexistence.mjs',
   'growth/lib/gsc.mjs','growth/scripts/experiments.mjs','scripts/company-os.mjs',
-  'scripts/autonomy-eligibility.mjs','scripts/lib/company-monthly-budget.mjs','scripts/decision-ci.mjs','scripts/decision-monitor.mjs',
+  'scripts/autonomy-eligibility.mjs','scripts/lib/company-monthly-budget.mjs','scripts/decision-ci.mjs','scripts/decision-monitor.mjs','scripts/lib/report-publication.mjs',
   'growth/lib/company-origin.mjs','scripts/codex-routine-observer.py',
   'scripts/codex-autopilot-preflight.mjs','scripts/autopilot-gate.mjs','scripts/codex-recovery-permit.py',
   'docs/codex-autopilot-execution.md','docs/obsidian/AUTOPILOT_RUNBOOK.md','docs/autonomy/OPERATING_RUNBOOK.md','CLAUDE.md'];

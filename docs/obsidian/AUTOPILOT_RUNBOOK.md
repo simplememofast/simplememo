@@ -70,6 +70,12 @@
   （理由は `escalation-rules.json` の `trigger` に限定される。自由文の停止は
   解除してよいかの判断ができない）。主系は着手前に `--contain --dry-run` を
   通っているので、**上限に達した経路はそもそも走らない**
+- 例外は**所有者が日付を入れた1回だけ**。GitHub Actions の副系は、オーナーが repository
+  variable `AUTOPILOT_RECOVERY_ONCE` に JST の日付を入れた日の定時の1回目に限り、
+  10-05・10-06 の封じ込めを越える（`docs/obsidian/ACTIONS_RECOVERY_ONE_USE.md`）。
+  **AIはこの変数を作らない・変えない。**越えた回でも 10-05・10-06 の repair_of は書かない。
+  越えた回のモデルは `--contain` を実行しない（プロンプト手順0-2の TRIAL_RUN=actions_once）。
+  モデルの環境には許可の値が渡らないので、`--contain --dry-run` の exit 1 を止まる理由にしない
 
 この仕組みの外にある最後の手段は**資格情報の失効**。リポジトリが読めない・
 この判定が壊れている場合でも止まる。
@@ -602,33 +608,27 @@ Gate通過後にaptが90分のジョブ上限を食い尽くし、`Claude Code` 
 
 ### レーンF（自己修復）— **A〜Eより先に、毎回これを見る**
 
-**まず監視Issueを台帳へ取り込む（2026-08-26追加・毎回必須）。**
+**まず監視Issueを読む（2026-08-26追加・毎回必須。2026-10-13 から読むだけ）。**
 
 ```
-node scripts/health-intake.mjs      # ops/autopilot-stale と ops/cron-failure を台帳へ
+node scripts/health-intake.mjs --dry-run   # ops/autopilot-stale と ops/cron-failure の行を読む（台帳には書かない）
 ```
 
-**⚠ 実行はここでよいが、コミットは §2-1 の宣言より後に回す（2026-09-06 追加）。**
-`decision-ci` の `verifyHistory` は「**宣言ファイルを足したコミットまでに、
-宣言ファイル以外の差分が1つでもあれば落とす**」。2026-09-06、この記帳の
-**`last_seen_jst` の1行**が宣言より前にコミットされていたために、
-その日の全作業が `implementation preceded declaration` で落ちた（PR #969）。
+**⚠ 日次ブランチにはコミットしない（2026-10-13 改訂）。**
 
-**効くのは「最後の」宣言。**`--retire` で取り下げて宣言し直した日は、
-**やり直す前に積んだコミットも全部「宣言より前」**に数えられる。
+`data/autopilot-actions.json` は**宣言の前にコミットしても後にコミットしても PR が落ちる。**
+前なら `implementation preceded declaration`（2026-09-06、PR #969）、後なら
+`undeclared path: data/autopilot-actions.json`（2026-10-06。宣言の6秒後にこのコミットを
+積んだ時点で、どの形の PR も decision-ci を通らない枝になっていた。10-05 の #1993 にも
+同じパスが入っていた）。以前の手順「宣言の後に stash pop してコミット」は前者だけを避けて
+後者を作っていた。**台帳扱いには足さない** —— この台帳の行は close_check・force_owner を持つので、
+宣言なしの編集を許すとエスカレーションを閉じられる。
 
-手順:
-
-```
-node scripts/health-intake.mjs                        # 実行して行を読む（レーンFの候補はこれで見える）
-git stash push -- data/autopilot-actions.json         # §2-1 は clean tracked tree を要求する
-                                                      #（--select も --retire も）
-… §2-1 の契約フロー（宣言・取り下げ・再宣言）…
-git stash pop && git add data/autopilot-actions.json  # 最後の宣言を push した後に記帳をコミット
-```
-
-**stash を失っても困らない。**`last_seen_jst` は時刻ではなく**日付**なので、
-同じ日に `health-intake.mjs` をもう一度回せば同じ結果になる（冪等）。
+**取り込みは Autopilot Act が当日中に行う**（`appendHealthIssueActions`）。誤って書き換えたら
+`--select` の前に `git checkout -- data/autopilot-actions.json` で戻す（`--select` も `--retire` も
+clean tracked tree を要求する）。PR の前には §2-1 の `node scripts/decision-ci.mjs --verify-local` が
+これも含めて検出する。**§7-1 の依頼を積む日だけは別**で、そのときは宣言の `touches` に
+`data/autopilot-actions.json` を入れる（その日は取り込み分を一緒にコミットしてよい）。
 
 **claim コミットは無罪。**空コミットなので差分を持たず、この規則には当たらない（実測）。
 
@@ -809,7 +809,13 @@ node scripts/autopilot-selfheal.mjs
 3. `node scripts/value-contracts.mjs --select /tmp/decision-candidates.json` を実行する。境界・可逆性・証拠・予算・反復の5基準と、承認済み指標・実測baseline・比較基準が通った候補だけが選択対象になる。探索が指示された回も同じ条件を通す。0件なら施策を実装せず、理由を記録する。
 4. 出力された `data/decision-intents/<id>.json` だけを**別コミットにして先にpush**する。**この時点までに宣言ファイル以外のコミットが1つでもあると `decision-ci` が落ちる**（§2 レーンFの記帳を含む。2026-09-06 に実際に落ちた）。この時点では記事やコードを編集しない。CIがコミットの順序を検査し、事前データから予測・適格性・較正の参照記録を再計算する。参照が無い・古い・後から変更された新規契約は通らない。この配線より前に宣言済みの契約は当時の形式で検証し、過去に参照記録を付け足さない。
 5. 選ばれた候補だけを実装する。契約は変更しない。範囲や予測を変えたければ、この候補を中止して新しいIDで最初から判定する。実装をpushし、`gh pr create` でPR番号を確定する。**マージを待たずに**、§5-4の記帳コマンドで宣言した `run_id`・`lane`・`action` とそのPR番号を持つ行を同じブランチへ追加する。1つの契約に複数の新しい出荷を混ぜない。
-6. 記帳後に `node scripts/decision-monitor.mjs --publish-report` で公開運転表を同期し、続けて `python3 scripts/build_site_translations.py --write` と `python3 scripts/generate_sitemap.py` をこの順に回して、運転台帳・status JSON・`autopilot/index.html`・8言語の生成翻訳（`ar` `es` `id` `ko` `pt-BR` `tr` `zh-Hant` `zh` の `autopilot/index.html`）・sitemap を同じPRへcommit・pushする。/autopilot/ は 2026-10-08（#2031）から生成翻訳を持ち、訳を揃えない PR は SEO Validation の翻訳の検査で落ちる（2026-10-09〜13 の日次アクチュエータの PR がこれで全部止まった。#2052 で修正）。**この最終HEADに対するpull_request起因のSEO Validationが成功してから自動マージされる。**宣言だけのpushや、PR番号と出荷記録が未確定の途中HEADの検査はマージの根拠にならない。`outcome: shipped` の行はこのPRがマージされてmainへ入った時点で出荷実績になる。未マージのプレビューを実績として報告しない。このコマンドの出力は同期完了だけで、選定には使わない。候補の理由や証拠には、公開してよい運用情報だけを書く。個人データや秘密情報は含めない。
+6. 記帳後に `node scripts/decision-monitor.mjs --publish-report` で公開運転表を同期し、続けて `python3 scripts/build_site_translations.py --write` と `python3 scripts/generate_sitemap.py` をこの順に回して、運転台帳・status JSON・`autopilot/index.html`・8言語の生成翻訳（`ar` `es` `id` `ko` `pt-BR` `tr` `zh-Hant` `zh` の `autopilot/index.html`）・sitemap を同じPRへcommit・pushする。/autopilot/ は 2026-10-08（#2031）から生成翻訳を持ち、訳を揃えない PR は SEO Validation の翻訳の検査で落ちる（2026-10-09〜13 の日次アクチュエータの PR がこれで全部止まった。#2052 で修正）。生成翻訳は `autopilot/index.html` と同じく台帳扱いで、価値契約の `touches` に入れなくてよい（`scripts/lib/report-publication.mjs`）。sitemap は台帳扱いではないので、更新日が動いた sitemap（`sitemap.xml`・`sitemap-ja.xml`・`sitemap-locales.xml`）は `touches` に入れる。**この最終HEADに対するpull_request起因のSEO Validationが成功してから自動マージされる。**宣言だけのpushや、PR番号と出荷記録が未確定の途中HEADの検査はマージの根拠にならない。`outcome: shipped` の行はこのPRがマージされてmainへ入った時点で出荷実績になる。未マージのプレビューを実績として報告しない。このコマンドの出力は同期完了だけで、選定には使わない。候補の理由や証拠には、公開してよい運用情報だけを書く。個人データや秘密情報は含めない。
+6-1. **PR を作る前と、作業をやめる前に** `node scripts/decision-ci.mjs --verify-local` を実行する。CI の decision-ci はランナー内では動かない（schedule イベントで枝が main になる）ので、宣言の外のパスはこれまでモデルが終わった後にしか分からなかった（2026-10-05 #1993 は6パス、10-06 は宣言の6秒後に出荷不能）。これは未コミットの変更も含めて、宣言の外のパスを挙げる。落ちたら PR を作る前に直す:
+   - **宣言の外の未コミットの変更** … `git checkout -- <path>`（未追跡ファイルは削除する）
+   - **宣言の外のコミット** … `git revert <commit>` で戻す（force push はしない）
+   - **そのパスが本当に要る** … 宣言は変えられない。**効くのは「最後の」宣言**で、`--retire` で取り下げて宣言し直すと、やり直す前に積んだコミットは全部「宣言より前」に数えられ `implementation preceded declaration` で落ちる。だから順番は (1) 宣言後の実装コミットを全部 `git revert` して正味ゼロに戻す → (2) `node scripts/value-contracts.mjs --retire` → (3) 必要なパスを `touches` に入れた新しい宣言を別コミットで push → (4) 実装をやり直す（`git cherry-pick` 可）
+   - **今日は出せない** … 宣言を取り下げ、status/LOG だけの PR にする（運転台帳と公開運転表は触らない。記帳は Act が行う）
+6-2. **最後の操作として**、`$RUNNER_TEMP/autopilot-exit.json` に `{"code":"<CODE>"}` を書く（語彙はプロンプト手順8）。公開される診断（`scripts/autopilot-diagnostics.mjs`）が読むのはこの語彙だけで、文章は捨てる。10-06 は success で終わって PR が無く、なぜ止まったかを誰も言えなかった。
 7. 事後決済と限定的な静的ページの復旧は Decision Monitor が行う。未来の結果、観測できない費用、欠測日を補完しない。契約なしの過去の出荷を契約に紐づけない。
 
 成熟の基準は決済20件。方向の改善が20件の窓で乏しい場合、次の10回のうち2回を適格候補の下位から選ぶ。成熟前には選択の枠組みを変更しない。R1以上の権限や日次実行回数を自動で拡大する処理は持たない。
@@ -1412,7 +1418,10 @@ ENセグメント1.76%で期待0.56クリック、最も甘いサイト全体カ
 **件数が増えるほど読まれる確率が下がるリスト**は、報告ではなく堆積である。
 
 積む先は `data/autopilot-actions.json`。書き方は
-`node scripts/autopilot-act.mjs --check` が検証する。
+`node scripts/autopilot-act.mjs --check` が検証する。**日次ブランチで積む日は、宣言の `touches` に
+`data/autopilot-actions.json` を入れる**（このファイルは台帳扱いではない。宣言なしでコミットすると
+PR が `undeclared path` で落ちる。2026-10-06 の形）。宣言しない日は台帳に書かず、status JSON の
+`reason` に書いて Act とセッションに渡す。
 
 - **閉じ条件（`close_check`）の無い行は書けない。** 検査で落ちる。
   「いつ消えるか」を決められない依頼は、消えない依頼になる

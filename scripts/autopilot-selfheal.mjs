@@ -39,6 +39,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -103,7 +104,13 @@ export function observedPendingTriage(row) {
  */
 export function analyze(runsDoc, matrix, escalationRules = []) {
   const runs = runsDoc.runs;
-  const repaired = new Set(runs.flatMap((r) => r.repair_of || []));
+  // **Only a shipped repair repairs.** A repair_of on a failed or no_artifact row is
+  // an attempt: it counts toward the limit below but cannot clear a failure or the
+  // containment. Stricter than autonomy-score RA and value-contracts (shipped only):
+  // here the shipped row must also carry its PR number, as autopilot-runs requires.
+  // Every repair_of in the ledger up to 2026-10-13 sits on such a row, so nothing moves.
+  const repaired = new Set(runs.filter((r) => r.outcome === 'shipped' && Number.isInteger(r.pr) && r.pr > 0)
+    .flatMap((r) => r.repair_of || []));
   const failures = runs.filter(repairFailure);
   const unrepaired = failures.filter((r) => !repaired.has(r.run_id));
 
@@ -164,6 +171,88 @@ export function ownerRequest(target, actionsDoc) {
   const action = matches[0];
   const state = ['open', 'done', 'acknowledged'].includes(action.state) ? action.state : 'unknown';
   return { id, state, needs_attention: !['done', 'acknowledged'].includes(state), evidence: action.evidence ?? null };
+}
+
+/**
+ * 所有者が承認した、Actions 副系の**1回限りの試運転**（2026-10-13 オーナー判断）。
+ *
+ * 10-05・10-06 の no_artifact で修理上限に達し、10-07 から封じ込めで止まっている。
+ * 10-06 の直接原因は確定できず（#2062）、修理としては記録していない。止めたままでは
+ * PR 前の照合（--verify-local）や終了理由の記録が効くかを確かめる手段が無いので、
+ * **オーナーが日付を1つ入れた日の定時 run だけ**封じ込めを越えさせる。
+ *
+ * 承認は repository variable（AUTOPILOT_RECOVERY_ONCE = JST の日付）で受ける。
+ * Claude Code のセッションはこの変数を読めも書けもしない（プロキシが 403 を返す。
+ * 2026-10-13 実測）。ただし所有者の資格情報を共有する別のエージェントまでは
+ * 技術的に排除できない —— 09-30 の主系の許可（NATIVE_RECOVERY_ONE_USE.md）と同じ限界。
+ *
+ * **越えさせるのは封じ込めだけ。**緊急停止・予算・Gate の当日重複・宣言の検査はそのまま効く。
+ * 台帳の故障行・修理回数・上限は書き換えない。試運転の結果は通常の行として残り、
+ * 出荷しても 10-05・10-06 は修理済みにならない（repair_of を書くかは別の判断）。
+ * 対象・回数・行の中身が1つでも変わったら（新しい故障を含む）、許可は効かない。
+ */
+export const ACTIONS_RECOVERY = Object.freeze({
+  variable: 'AUTOPILOT_RECOVERY_ONCE',
+  workflow_ref: 'simplememofast/simplememo/.github/workflows/obsidian-autopilot.yml@refs/heads/main',
+  // PR #2062（PR 前の照合・終了理由の記録）のマージ。これより前のコードでは試さない。
+  prevention_sha: 'a35323d7b1723c066a835b0cd024eb1019de99ed',
+  limit: 3,
+  attempts: 5,
+  targets: Object.freeze({
+    'ap-20261005-actions-37249907984': '0905a2f74774556ca976dcbb371c315bf53a865f1fddc33a88de391f0d80520f',
+    'ap-20261006-actions': 'd97bdfee43b807e2dc3a49736d7f545e4c653f3c42b84a1b2c43cb09a2083bbf',
+  }),
+});
+
+/** キーを並べ替えた JSON。行の指紋を、キーの順番に依存させない。 */
+export function canonicalJson(value) {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
+  if (value !== null && typeof value === 'object') {
+    return `{${Object.keys(value).sort().map(k => `${JSON.stringify(k)}:${canonicalJson(value[k])}`).join(',')}}`;
+  }
+  return JSON.stringify(value);
+}
+export const rowDigest = row => createHash('sha256').update(canonicalJson(row)).digest('hex');
+
+/**
+ * 封じ込めを1回だけ越えてよいか。**どれか1つでも満たさなければ越えない。**
+ * 理由は型付きのコードだけを返す（変数の値や行の中身をログへ出さない）。
+ */
+export function actionsRecoveryOnce({ analysis, problems, rows, stop, env, now, preventionMerged }) {
+  const refuse = reason => ({ allowed: false, reason });
+  const raw = env[ACTIONS_RECOVERY.variable];
+  if (typeof raw !== 'string' || raw.trim() === '') return refuse('not_requested');
+  const date = raw.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return refuse('invalid_date');
+  if (date !== new Date(now.getTime() + 9 * 3600e3).toISOString().slice(0, 10)) return refuse('not_today');
+  // 定時の1回目だけ。手動起動（AIのセッションも起動できる）と再実行は越えない。
+  // 変数は全ワークフローから読めるので、動いているのが日次実行のワークフロー自身であることも見る。
+  if (env.GITHUB_ACTIONS !== 'true' || env.GITHUB_EVENT_NAME !== 'schedule' || env.GITHUB_RUN_ATTEMPT !== '1'
+    || env.GITHUB_REPOSITORY !== 'simplememofast/simplememo' || env.GITHUB_REF !== 'refs/heads/main'
+    || env.GITHUB_WORKFLOW_REF !== ACTIONS_RECOVERY.workflow_ref) {
+    return refuse('not_scheduled_first_attempt');
+  }
+  if (stop?.stopped !== false || stop?.agents?.actions?.stopped !== false) return refuse('explicit_stop');
+  if (!Array.isArray(problems) || problems.length !== 0 || analysis.limit !== ACTIONS_RECOVERY.limit) {
+    return refuse('policy_or_ledger_changed');
+  }
+  // 未修理のうち人に渡すだけの行（usage_limit など）は残ってよい。修理対象が出たら越えない。
+  if (analysis.lane_f_required !== false) return refuse('repair_pending');
+  const pinned = Object.keys(ACTIONS_RECOVERY.targets).sort();
+  const escalated = analysis.escalate.map(t => t.run_id).sort();
+  if (escalated.length !== pinned.length || escalated.some((id, i) => id !== pinned[i])) return refuse('containment_changed');
+  for (const t of analysis.escalate) {
+    if (t.route !== 'actions' || t.failure_class !== 'no_artifact' || t.repair_attempts_for_class !== ACTIONS_RECOVERY.attempts) {
+      return refuse('containment_changed');
+    }
+  }
+  if (!Array.isArray(rows)) return refuse('target_row_changed');
+  for (const id of pinned) {
+    const matches = rows.filter(r => r?.run_id === id);
+    if (matches.length !== 1 || rowDigest(matches[0]) !== ACTIONS_RECOVERY.targets[id]) return refuse('target_row_changed');
+  }
+  if (preventionMerged !== true) return refuse('prevention_missing');
+  return { allowed: true, reason: 'owner_one_actions_run', date, targets: pinned };
 }
 
 /** 権限表と台帳の整合。self_repair の境界が壊れていないかを見る。 */
@@ -233,6 +322,19 @@ const SCENARIOS = ledgerScenarios(
   }] });
 
   SCENARIOS.push(
+    ['**出荷していない行の repair_of は修理にならない**（試行には数える）', () => {
+      const failure = { ...doc('no_artifact').runs[0], outcome: 'no_artifact' };
+      const attempt = { run_id: 'ap-y', date_jst: '2026-09-02', route: 'actions', attempted: true,
+        outcome: 'no_artifact', failure_class: 'no_artifact', source: 'test', repair_of: ['ap-x'] };
+      const notRepaired = analyze({ runs: [failure, attempt] }, MATRIX, RULES);
+      assert(notRepaired.targets.some(t => t.run_id === 'ap-x'), '失敗した行の repair_of で故障が消えた');
+      assert(notRepaired.targets.find(t => t.run_id === 'ap-x').repair_attempts_for_class === 1, '失敗した修理を試行に数えていない');
+      const shipped = { ...attempt, run_id: 'ap-z', outcome: 'shipped', failure_class: null, pr: 42 };
+      assert(!analyze({ runs: [failure, shipped] }, MATRIX, RULES).targets.some(t => t.run_id === 'ap-x'),
+        '出荷した修理で故障が消えない');
+      assert(analyze({ runs: [failure, { ...shipped, pr: null }] }, MATRIX, RULES).targets.some(t => t.run_id === 'ap-x'),
+        'PR の無い出荷行で故障が消えた');
+    }],
     ['原因未確定の実行失敗を証拠付きの調査待ちとして保持する', () => {
       const row = { ...doc(null).runs[0], source: 'act-reconcile-session', external_ref: '90001',
         needs_triage: true, failure_reason: '単独診断は判定不能', detected_note: 'GitHub step completed_at',
@@ -256,7 +358,7 @@ const SCENARIOS = ledgerScenarios(
       }
       const prior = [1, 2, 3].flatMap(i => [
         { ...row, run_id: `unknown-${i}` },
-        { run_id: `repair-${i}`, outcome: 'shipped', repair_of: [`unknown-${i}`] },
+        { run_id: `repair-${i}`, outcome: 'shipped', pr: 900 + i, repair_of: [`unknown-${i}`] },
       ]);
       const limited = analyze({ runs: [...prior, row] }, MATRIX, RULES);
       assert(limited.targets[0].escalate && limited.targets[0].repair_attempts_for_class === 3
@@ -310,6 +412,128 @@ const SCENARIOS = ledgerScenarios(
   );
 }
 
+/**
+ * 試運転の許可がワークフローで実際に配線されていること。変数を渡すのは封じ込めの段だけ。
+ * 配線が外れると許可は黙って効かなくなり、逆に他の段へ渡ると意図しない所で読まれる。
+ */
+export function checkRecoveryWiring(source) {
+  // コメント行は数えない（段の説明に変数名を書くのは配線ではない）。
+  const steps = source.split('\n').filter(l => !/^\s*#/.test(l)).join('\n').split(/\n(?=      - name: )/);
+  const contain = steps.filter(s => s.includes('node scripts/autopilot-selfheal.mjs --contain --dry-run'));
+  assert(contain.length === 1, '封じ込めの段が1つではない');
+  assert(/\n        id: contain\n/.test(contain[0]), '封じ込めの段に id: contain が無い（試運転の印が読めない）');
+  assert(contain[0].includes(`${ACTIONS_RECOVERY.variable}: \${{ vars.${ACTIONS_RECOVERY.variable} }}`),
+    `封じ込めの段に ${ACTIONS_RECOVERY.variable} が渡っていない`);
+  const mentions = steps.filter(s => s.includes(ACTIONS_RECOVERY.variable));
+  assert(mentions.length === 1, `${ACTIONS_RECOVERY.variable} が封じ込め以外の段にも渡っている`);
+  // 越えた回だとモデルに伝わらないと、Runbook どおり --contain を走らせて自分を止める。
+  const model = steps.filter(s => s.includes('\n        id: claude\n'));
+  assert(model.length === 1 && model[0].includes("TRIAL_RUN=${{ steps.contain.outputs.recovery || 'none' }}"),
+    'モデルの段に試運転の印（TRIAL_RUN）が渡っていない');
+  const marker = steps.filter(s => s.includes("steps.contain.outputs.recovery == 'actions_once'"));
+  assert(marker.length === 1 && !/封じ込め|Gate|Claude Code|判定コード|緊急停止|予算ゲート|振り分け/.test(marker[0].split('\n')[0]),
+    '試運転の印の段が無い、または Act が別の段と取り違える名前になっている');
+}
+
+{
+  // 許可を出した時点の台帳（#2063 のマージ）。後から本物の故障が増えても、この固定入力は変わらない。
+  const PINNED_LEDGER = '9d67f58c5e1291d32b4649ad1b063be0e5699ade';
+  const NOW = new Date('2026-10-14T22:45:00Z'); // JST 10-15 07:45（定時 07:30 の配信遅れ）
+  const ENV = { AUTOPILOT_RECOVERY_ONCE: '2026-10-15', GITHUB_ACTIONS: 'true', GITHUB_EVENT_NAME: 'schedule',
+    GITHUB_RUN_ATTEMPT: '1', GITHUB_REPOSITORY: 'simplememofast/simplememo', GITHUB_REF: 'refs/heads/main',
+    GITHUB_WORKFLOW_REF: 'simplememofast/simplememo/.github/workflows/obsidian-autopilot.yml@refs/heads/main' };
+  const STOP = { stopped: false, agents: { actions: { stopped: false } } };
+  const fixture = () => {
+    const shown = spawnSync('git', ['show', `${PINNED_LEDGER}:data/autopilot-runs.json`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 });
+    assert(!shown.error && shown.status === 0, `固定した台帳 ${PINNED_LEDGER.slice(0, 9)} を読めない（履歴が浅い）`);
+    const rows = JSON.parse(shown.stdout).runs;
+    const matrix = JSON.parse(fs.readFileSync(MATRIX_PATH, 'utf8'));
+    const rules = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/escalation-rules.json'), 'utf8')).rules;
+    return { analysis: analyze({ runs: rows }, matrix, rules), problems: [], rows, stop: STOP, env: ENV, now: NOW,
+      preventionMerged: true };
+  };
+  const refused = (input, reason) => {
+    const r = actionsRecoveryOnce(input);
+    assert(!r.allowed && r.reason === reason, `${reason} で止めるべき所を ${r.allowed ? '通した' : r.reason} で返した`);
+  };
+  SCENARIOS.push(
+    ['試運転の許可: 固定した台帳・定時の1回目・当日の日付なら封じ込めを1回だけ越える', () => {
+      const r = actionsRecoveryOnce(fixture());
+      assert(r.allowed && r.date === '2026-10-15' && r.targets.length === 2, `正しい条件で越えない: ${r.reason}`);
+      // 越えるのは JST の当日だけ。UTC の日付で判定すると 09:00 JST 前に1日ずれる。
+      refused({ ...fixture(), now: new Date('2026-10-14T14:59:00Z') }, 'not_today');
+      assert(actionsRecoveryOnce({ ...fixture(), now: new Date('2026-10-14T15:00:00Z') }).allowed, 'JST 0時ちょうどを当日と読まない');
+      refused({ ...fixture(), now: new Date('2026-10-15T15:00:00Z') }, 'not_today');
+    }],
+    ['試運転の許可: 日付が無い・形が違う値では越えない', () => {
+      for (const value of [undefined, '', '  ']) refused({ ...fixture(), env: { ...ENV, AUTOPILOT_RECOVERY_ONCE: value } }, 'not_requested');
+      for (const value of ['2026/10/15', '20261015', '2026-10-15T07:30', 'true', '2026-10-15,2026-10-16']) {
+        refused({ ...fixture(), env: { ...ENV, AUTOPILOT_RECOVERY_ONCE: value } }, 'invalid_date');
+      }
+    }],
+    ['試運転の許可: 手動起動・再実行・別の参照では越えない（AI も手動起動できる）', () => {
+      for (const change of [{ GITHUB_EVENT_NAME: 'workflow_dispatch' }, { GITHUB_EVENT_NAME: 'repository_dispatch' },
+        { GITHUB_RUN_ATTEMPT: '2' }, { GITHUB_ACTIONS: undefined }, { GITHUB_REPOSITORY: 'someone/simplememo' },
+        { GITHUB_REF: 'refs/heads/claude/x' }, { GITHUB_WORKFLOW_REF: undefined },
+        { GITHUB_WORKFLOW_REF: 'simplememofast/simplememo/.github/workflows/other.yml@refs/heads/main' },
+        { GITHUB_WORKFLOW_REF: 'simplememofast/simplememo/.github/workflows/obsidian-autopilot.yml@refs/heads/claude/x' }]) {
+        refused({ ...fixture(), env: { ...ENV, ...change } }, 'not_scheduled_first_attempt');
+      }
+    }],
+    ['試運転の許可: 明示の停止・台帳の不整合・上限の変更・修理待ちがあれば越えない', () => {
+      for (const stop of [{ stopped: true, agents: { actions: { stopped: false } } },
+        { stopped: false, agents: { actions: { stopped: true } } }, { stopped: false, agents: {} }, null]) {
+        refused({ ...fixture(), stop }, 'explicit_stop');
+      }
+      refused({ ...fixture(), problems: ['x'] }, 'policy_or_ledger_changed');
+      refused({ ...fixture(), problems: undefined }, 'policy_or_ledger_changed');
+      const f = fixture();
+      refused({ ...f, analysis: { ...f.analysis, limit: 4 } }, 'policy_or_ledger_changed');
+      refused({ ...f, analysis: { ...f.analysis, lane_f_required: true } }, 'repair_pending');
+    }],
+    ['試運転の許可: 対象・回数・種別・行の中身が1つでも変われば越えない（新しい故障を含む）', () => {
+      const f = fixture();
+      const [first, second] = f.analysis.escalate;
+      refused({ ...f, analysis: { ...f.analysis, escalate: [first] } }, 'containment_changed');
+      refused({ ...f, analysis: { ...f.analysis, escalate: [first, second, { ...second, run_id: 'ap-20261015-actions' }] } }, 'containment_changed');
+      for (const change of [{ repair_attempts_for_class: 6 }, { failure_class: 'unknown' }, { route: 'ccr-0920' }]) {
+        refused({ ...f, analysis: { ...f.analysis, escalate: [first, { ...second, ...change }] } }, 'containment_changed');
+      }
+      const edited = f.rows.map(r => r.run_id === 'ap-20261006-actions' ? { ...r, failure_reason: '書き換え' } : r);
+      refused({ ...f, rows: edited }, 'target_row_changed');
+      const doubled = [...f.rows, f.rows.find(r => r.run_id === 'ap-20261005-actions-37249907984')];
+      refused({ ...f, rows: doubled }, 'target_row_changed');
+      refused({ ...f, rows: null }, 'target_row_changed');
+      refused({ ...f, preventionMerged: false }, 'prevention_missing');
+      // 新しい no_artifact が1件増えると、封じ込めの対象が3件になって越えない。
+      const later = { run_id: 'ap-20261015-actions', date_jst: '2026-10-15', route: 'actions', attempted: true,
+        outcome: 'no_artifact', failure_class: 'no_artifact', source: 'test' };
+      const grown = analyze({ runs: [...f.rows, later] }, JSON.parse(fs.readFileSync(MATRIX_PATH, 'utf8')),
+        JSON.parse(fs.readFileSync(path.join(ROOT, 'data/escalation-rules.json'), 'utf8')).rules);
+      refused({ ...f, analysis: grown, rows: [...f.rows, later] }, 'containment_changed');
+    }],
+    ['試運転の許可: 行の指紋はキーの順番に依存しない', () => {
+      const row = fixture().rows.find(r => r.run_id === 'ap-20261006-actions');
+      const reversed = Object.fromEntries(Object.entries(row).reverse());
+      assert(rowDigest(reversed) === ACTIONS_RECOVERY.targets['ap-20261006-actions'], 'キーの順番で指紋が変わった');
+    }],
+    ['試運転の許可: ワークフローの配線（変数は封じ込めの段だけ・印の段は Act と取り違えない名前）', () => {
+      const source = fs.readFileSync(path.join(ROOT, '.github/workflows/obsidian-autopilot.yml'), 'utf8');
+      checkRecoveryWiring(source);
+      const throws = (mutated, label) => {
+        let threw = false;
+        try { checkRecoveryWiring(mutated); } catch { threw = true; }
+        assert(threw, `${label} を通した`);
+      };
+      throws(source.replace(`${ACTIONS_RECOVERY.variable}: \${{ vars.${ACTIONS_RECOVERY.variable} }}`, ''), '変数の外れた封じ込め');
+      throws(source.replace('        id: contain\n', ''), 'id の無い封じ込め');
+      throws(source.replace('        id: claude\n', `        id: claude\n        env:\n          X: \${{ vars.${ACTIONS_RECOVERY.variable} }}\n`), 'モデルの段への変数');
+      throws(source.replace("steps.contain.outputs.recovery == 'actions_once'", "steps.contain.outputs.recovery == 'x'"), '印の段の無い配線');
+      throws(source.replace("TRIAL_RUN=${{ steps.contain.outputs.recovery || 'none' }}", 'TRIAL_RUN=none'), 'モデルへ試運転の印が渡らない配線');
+    }],
+  );
+}
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
@@ -354,6 +578,26 @@ if (isMain) {
         console.log(`所有者承認の主系1回限り: ${recovery.thread_id} (permit ${recovery.permit_sha256})`);
         console.log('元の故障・修理回数・明示停止は保持。予算・共有claim・通常preflightの確認が必要。');
         process.exit(0);
+      }
+    }
+    // 所有者が日付を入れた日の定時 run だけ（ACTIONS_RECOVERY）。ワークフローの dry-run にだけ効き、
+    // セッションの --contain（停止を書き込む側）は今までどおり。
+    if (dry) {
+      const ancestor = spawnSync('git', ['merge-base', '--is-ancestor', ACTIONS_RECOVERY.prevention_sha, 'HEAD'],
+        { cwd: ROOT, timeout: 15000 });
+      const recovery = actionsRecoveryOnce({ analysis: a, problems, rows: runsDoc.runs, stop: stopDoc,
+        env: process.env, now: new Date(), preventionMerged: !ancestor.error && ancestor.status === 0 });
+      if (recovery.allowed) {
+        console.log(`所有者承認の試運転（1回限り）: ${recovery.date} の定時 run。対象 ${recovery.targets.join(', ')}`);
+        console.log('封じ込めだけを越える。故障行・修理回数・上限・緊急停止・予算・宣言の検査はそのまま。');
+        console.log('結果は通常の行として残る。出荷しても 10-05・10-06 は修理済みにならない。');
+        if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, 'recovery=actions_once\n');
+        process.exit(0);
+      }
+      if (recovery.reason !== 'not_requested') {
+        // 値そのものは出さない。理由は型付きのコードだけ。
+        console.log(`::warning title=試運転の許可は効かなかった::${ACTIONS_RECOVERY.variable} は設定されているが、`
+          + `条件を満たさない（${recovery.reason}）。封じ込めを続ける。`);
       }
     }
     if (dry) {
@@ -430,6 +674,10 @@ if (isMain) {
     process.exit(1);
   }
   if (process.argv.includes('--check')) {
+    // CI が走らせるのは --check だけ。試運転の許可を拒否する検体（と既存の境界の検体）をここでも回す。
+    // 回さないと、許可の条件を1つ外す変更が SEO Validation を緑のまま通る（レビューで再現）。
+    if (run(SCENARIOS) !== 0) process.exit(1);
+    checkRecoveryWiring(fs.readFileSync(path.join(ROOT, '.github/workflows/obsidian-autopilot.yml'), 'utf8'));
     const tests = spawnSync('python3', [path.join(ROOT, 'scripts/codex-recovery-permit.py'), '--selftest'],
       { stdio: 'inherit', timeout: 90000 });
     if (tests.error || tests.status !== 0) process.exit(1);

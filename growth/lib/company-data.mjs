@@ -295,36 +295,40 @@ export function connectionView({ stateRoot, now = new Date(), readThread } = {})
     apple_search_ads: appleAdsConnection(optional('apple-ads-configuration.json'), now) };
 }
 
-export async function collectData({ stateRoot, now = new Date(), analytics = false, operations, makeConnections=connectionView } = {}) {
+export async function collectData({ stateRoot, now, clock = () => new Date(), analytics = false, operations, makeConnections=connectionView } = {}) {
   const release = acquireLock(stateRoot, 'data-collection.lock');
   if (!release) return { status: 'busy' };
   try {
     privateState(path.join(stateRoot, 'data/collection-receipts'));
+    const startedAt = now ?? clock();
     const receipts = [], failures = [];
     // Source failures never prevent the other independent readers from running.
     for (const [source, operation] of operations ?? [
-      ['native_resource_usage', () => collectNativeResources({ stateRoot, now })],
-      ['gsc_daily_handoff', () => collectDailyGsc({ stateRoot, now })],
-      ['bing_search_api', () => collectBingHandoff({ stateRoot, now })],
-      ['appsflyer', () => collectAppsFlyer({ stateRoot, now })],
-      ['asc', () => collectAsc({ stateRoot, now })],
-      ...(analytics ? [['ga4-funnel', () => collectAnalytics({ stateRoot, now })]] : []),
+      ['native_resource_usage', () => collectNativeResources({ stateRoot, now: startedAt })],
+      ['gsc_daily_handoff', () => collectDailyGsc({ stateRoot, now: startedAt })],
+      ['bing_search_api', () => collectBingHandoff({ stateRoot, now: startedAt })],
+      ['appsflyer', () => collectAppsFlyer({ stateRoot, now: startedAt })],
+      ['asc', () => collectAsc({ stateRoot, now: startedAt })],
+      ...(analytics ? [['ga4-funnel', () => collectAnalytics({ stateRoot, now: startedAt })]] : []),
     ]) {
       try { receipts.push({ source, receipt: await operation() }); }
       catch { failures.push({ source, reason: 'reader_unavailable_or_validation_failed', action: 'inspect private reader receipt; do not broaden credentials' }); }
     }
+    // New receipts may be verified while readers run. Evaluate them at completion,
+    // retaining an explicitly supplied as-of time for deterministic historical reads.
+    const observedAt = now ?? clock();
     let connections;
-    try {connections = makeConnections({ stateRoot, now });}
-    catch {failures.push({source:'connection_view',reason:'view_unavailable; independent reader receipts retained'});connections={status:'PARTIAL',updated_at:now.toISOString(),view_failure:true};}
+    try {connections = makeConnections({ stateRoot, now: observedAt });}
+    catch {failures.push({source:'connection_view',reason:'view_unavailable; independent reader receipts retained'});connections={status:'PARTIAL',updated_at:observedAt.toISOString(),view_failure:true};}
     atomicJson(path.join(stateRoot, 'data/connections.json'), connections);
     let ctaMeasurement = null;
     {
       try {
-        ctaMeasurement = retainCtaMeasurement({ stateRoot, now, connection: connections.ga4 ?? null });
+        ctaMeasurement = retainCtaMeasurement({ stateRoot, now: observedAt, connection: connections.ga4 ?? null });
         if (ctaMeasurement.status === 'unavailable') failures.push({ source: 'cta_measurement', reason: ctaMeasurement.failures[0] });
       } catch { failures.push({ source: 'cta_measurement', reason: 'private_retention_failed' }); }
     }
-    const receipt = { schema_version: 1, observed_at: now.toISOString(), native_origin:nativeOrigin(), receipts, failures,
+    const receipt = { schema_version: 1, observed_at: observedAt.toISOString(), native_origin:nativeOrigin(), receipts, failures,
       measurements: { cta: ctaMeasurement },
       status: failures.length || receipts.some(r => ['failed', 'stale', 'unavailable', 'dispatched', 'dispatch_uncertain'].includes(r.receipt.status)) ? 'partial' : 'verified',
       query_policy: 'GSC reuses existing daily/weekly collector. GA4 is opt-in for the single native owner, max one fixed query run per mature end-date, no remote retry.' };

@@ -205,6 +205,44 @@ test('The existing collection retains CTA evidence and isolates invalid measurem
   assert.equal(latest.eligible_for_prospective_baseline,false);assert.equal(latest.artifact,null);
 });
 
+test('Collection accepts a receipt verified during its readers without re-querying or retiming source evidence',async t=>{
+  const {collectData}=await import('./company-data.mjs');
+  const f=fixture(t), start=new Date('2026-09-14T11:00:00Z'), finish=new Date('2026-09-14T11:00:02Z');
+  let clockTime=start, calls=0, viewTime;
+  const result=await collectData({stateRoot:f.stateRoot,clock:()=>clockTime,
+    operations:[['ga4-funnel',async()=>{
+      calls++;await Promise.resolve();
+      f.receipt.verified_at='2026-09-14T11:00:01Z';f.flush();clockTime=finish;
+      return {...f.receipt};
+    }]],
+    makeConnections:({now})=>{
+      viewTime=now;
+      return JSON.parse(fs.readFileSync(path.join(f.stateRoot,'data/connections.json')));
+    }});
+  assert.equal(result.status,'verified');assert.equal(calls,1);
+  assert.equal(viewTime.toISOString(),finish.toISOString());
+  assert.equal(result.observed_at,finish.toISOString());
+  assert.equal(result.measurements.cta.status,'observed');
+  const retained=JSON.parse(fs.readFileSync(result.measurements.cta.artifact));
+  assert.equal(retained.source.observed_at,f.report.observed_at);
+  assert.equal(result.receipts[0].receipt.request_tag,'retained-original-request');
+  assert.equal(result.receipts[0].receipt.verified_at,'2026-09-14T11:00:01Z');
+});
+
+for (const fixedAsOf of [false,true]) test(`Collection preserves ${fixedAsOf?'explicit as-of':'future receipt'} rejection`,async t=>{
+  const {collectData}=await import('./company-data.mjs');
+  const f=fixture(t), finish=new Date('2026-09-14T11:00:02Z');
+  const result=await collectData({stateRoot:f.stateRoot,...(fixedAsOf?{now}:{}),clock:()=>finish,
+    operations:[['ga4-funnel',()=>{
+      f.receipt.verified_at=fixedAsOf?'2026-09-14T11:00:01Z':'2026-09-14T11:00:03Z';f.flush();
+      return {...f.receipt};
+    }]],makeConnections:()=>JSON.parse(fs.readFileSync(path.join(f.stateRoot,'data/connections.json')))});
+  assert.equal(result.status,'partial');
+  assert.equal(result.measurements.cta.status,'unavailable');
+  assert.equal(result.measurements.cta.total,null);
+  assert.equal(result.failures[0].reason,'source_time_invalid_or_stale');
+});
+
 test('A source-specific diagnosis stops repeated selection, retains quality blocks and reopens on changed or corrupt evidence',async t=>{
   const {opportunities}=await import('./company-loop.mjs');
   const f=fixture(t);f.report.queries[0].result.rows[0].events_without_session_key=1;f.flush();
