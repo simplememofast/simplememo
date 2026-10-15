@@ -180,6 +180,28 @@ function automationExcluded(production, valid, quality) {
     scope: 'Diagnostic only. Same production rows as observed_store_click_session_rate minus approximate CI Lighthouse (Direct, no referrer, / or /en/, mobile, en-us) and bot-like (Direct, no referrer, desktop, en-*) fingerprints. Never replaces the official rate, the Organic CTA measurement or an experiment value.' };
 }
 
+// OneLink pilot readout (owner decision 2026-10-15; growth/ONELINK_PILOT.md 指標の定義).
+// Existing ga4-funnel columns only. The official rates above stay unchanged.
+const PILOT_HUBS = new Set(['/obsidian/', ...['ar','es','id','ko','pt-BR','tr','zh','zh-Hant'].map(l => `/${l}/obsidian/`)]);
+
+function obsidianHubPilot(production, valid, quality) {
+  const total = (rows, key) => rows.length ? sum(rows, key) : 0;
+  const hub = production.filter(r => PILOT_HUBS.has(r.landing_path));
+  const sessions = total(hub,'observed_started_sessions'), routed = total(hub,'sessions_with_any_app_route_click_24h');
+  const landOk = valid && validCount(sessions) && validCount(routed) && routed <= sessions;
+  // Same-session observations: a click without a recorded impression is shown, not counted as exposed.
+  const seen = total(production,'sessions_with_onelink_impression'), clicked = total(production,'sessions_with_onelink_click_24h');
+  const unseen = total(production,'onelink_clicked_without_recorded_impression');
+  const heroOk = valid && [seen, clicked, unseen].every(validCount) && unseen <= clicked && clicked - unseen <= seen;
+  return { definition_version: 'obsidian-hub-onelink-pilot-v1', replaces_official_rate: false, quality_state: quality,
+    hub_landing_sessions: landOk ? sessions : null, hub_landing_sessions_reaching_store: landOk ? routed : null,
+    hub_landing_store_session_rate: landOk && sessions > 0 ? routed / sessions : null,
+    onelink_impression_sessions: heroOk ? seen : null, onelink_click_sessions: heroOk ? clicked : null,
+    onelink_clicked_without_recorded_impression: heroOk ? unseen : null,
+    onelink_impression_click_session_rate: heroOk && seen > 0 ? (clicked - unseen) / seen : null,
+    scope: 'Primary: production sessions landing on the nine pilot hubs that reached the store within 24h by any app route (direct Apple + OneLink, deduplicated). Auxiliary: OneLink pilot impression sessions that clicked, all landings, QA excluded. Not installs, not per-language, and never replaces the official rate.' };
+}
+
 export function siteAcquisition(connections = {}, cta = null) {
   const ga = connections.ga4, asc = connections.app_store_connect, af = connections.appsflyer;
   const rows = ga?.reports?.find(r => r.file === 'ga4-funnel.sql')?.result;
@@ -198,6 +220,7 @@ export function siteAcquisition(connections = {}, cta = null) {
       sessions_with_any_app_route_click: anyValid ? anyClicks : null,
       observed_any_app_route_click_session_rate: anyValid && sessions > 0 ? anyClicks / sessions : null,
       automation_excluded_diagnostic: automationExcluded(production, gaValid, gaState),
+      obsidian_hub_pilot: obsidianHubPilot(production, ga?.status === 'CONNECTED', gaState),
       missing_landing_sessions: rows ? (rows.some(r=>r.landing_scope==='missing_landing_page')
         ? sum(rows.filter(r=>r.landing_scope==='missing_landing_page'),'observed_started_sessions') : 0) : null,
       source: ga?.evidence ?? null,
@@ -229,11 +252,12 @@ export function acquisitionReport(a) {
   const rate = a.ga4?.observed_store_click_session_rate;
   const anyRate = a.ga4?.observed_any_app_route_click_session_rate;
   const linkRate = a.appsflyer?.owned_link_period_rate;
-  const d = a.ga4?.automation_excluded_diagnostic, pct = v => Number.isFinite(v) ? (v*100).toFixed(2)+'%' : 'unknown';
+  const d = a.ga4?.automation_excluded_diagnostic, h = a.ga4?.obsidian_hub_pilot, pct = v => Number.isFinite(v) ? (v*100).toFixed(2)+'%' : 'unknown';
   const lines = ['', '## Website acquisition', '',
     `GA4 (${a.ga4?.window?.start ?? '?'}..${a.ga4?.window?.end ?? '?'} JST): ${number(a.ga4?.sessions_with_store_click)} Store-click sessions / ${number(a.ga4?.observed_production_sessions)} observed production sessions; ${Number.isFinite(rate) ? (rate*100).toFixed(2)+'%' : 'unknown'}; quality ${a.ga4?.state}.`,
     `GA4 all app routes (deduplicated): ${number(a.ga4?.sessions_with_any_app_route_click)} click sessions; ${Number.isFinite(anyRate) ? (anyRate*100).toFixed(2)+'%' : 'unknown'}. Direct Store and OneLink sessions are not added together.`,
     `GA4 diagnostic only, not the official rate (excluding CI Lighthouse ${number(d?.excluded_sessions?.ci_lighthouse)} and bot-like ${number(d?.excluded_sessions?.bot_like)} sessions): ${number(d?.sessions_with_store_click)} Store-click sessions / ${number(d?.remaining_sessions)} sessions; ${pct(d?.store_click_session_rate)}; all app routes ${pct(d?.any_app_route_click_session_rate)}. Excluded Store-click sessions: CI ${number(d?.excluded_store_click_sessions?.ci_lighthouse)}, bot-like ${number(d?.excluded_store_click_sessions?.bot_like)}. Quality ${d?.quality_state ?? 'unavailable'} still applies.`,
+    `GA4 Obsidian hub OneLink pilot, beside the official rate: ${number(h?.hub_landing_sessions_reaching_store)} of ${number(h?.hub_landing_sessions)} sessions landing on the nine hubs reached the store (any route, deduplicated); ${pct(h?.hub_landing_store_session_rate)}. OneLink hero: ${number(h?.onelink_click_sessions)} click sessions (${number(h?.onelink_clicked_without_recorded_impression)} without a recorded impression) / ${number(h?.onelink_impression_sessions)} impression sessions; ${pct(h?.onelink_impression_click_session_rate)}. Quality ${h?.quality_state ?? 'unavailable'} still applies.`,
     `Apple collection: ${a.apple?.state ?? 'not_collected'}.`];
   for (const [key,r] of Object.entries(a.apple?.reports ?? {})) {
     lines.push(`- ${key} (${r.window?.min ?? '?'}..${r.window?.max ?? '?'} UTC): own-site first downloads ${number(r.own_site_first_time_downloads?.observed_count)}; ${r.own_site_first_time_downloads?.state ?? r.state}.`);

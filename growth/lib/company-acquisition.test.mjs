@@ -260,3 +260,37 @@ test('the diagnostic is unknown whenever the official GA4 rate is unknown',()=>{
   assert.equal(noAny.automation_excluded_diagnostic.store_click_session_rate,0); // optional union stays separately unknown
   assert.equal(noAny.automation_excluded_diagnostic.any_app_route_click_session_rate,null);
 });
+
+test('Obsidian hub pilot readout uses the nine hub landings and pilot OneLink columns only',()=>{
+  const hub=(path,o={})=>ga({session_channel:'Organic Search',landing_referrer_status:'external',landing_path:path,device_language:'ja',
+    sessions_with_onelink_impression:0,sessions_with_onelink_click_24h:0,onelink_clicked_without_recorded_impression:0,...o});
+  const rows=[hub('/obsidian/',{observed_started_sessions:40,sessions_with_own_app_click_24h:1,sessions_with_any_app_route_click_24h:3,
+      sessions_with_onelink_impression:30,sessions_with_onelink_click_24h:2,onelink_clicked_without_recorded_impression:0}),
+    hub('/ko/obsidian/',{observed_started_sessions:10,sessions_with_any_app_route_click_24h:1,sessions_with_onelink_impression:8,
+      sessions_with_onelink_click_24h:1,onelink_clicked_without_recorded_impression:1}),
+    hub('/en/obsidian/',{observed_started_sessions:50,sessions_with_own_app_click_24h:4,sessions_with_any_app_route_click_24h:4}),
+    hub('/obsidian/sync/',{observed_started_sessions:20,sessions_with_onelink_impression:2}),
+    hub('/obsidian/',{landing_scope:'nonproduction',observed_started_sessions:99,sessions_with_any_app_route_click_24h:9})];
+  const s=siteAcquisition(funnel(rows),{status:'quality_blocked'}), h=s.ga4.obsidian_hub_pilot;
+  assert.equal(s.ga4.observed_production_sessions,120);assert.equal(s.ga4.sessions_with_store_click,5);
+  assert.equal(h.hub_landing_sessions,50);assert.equal(h.hub_landing_sessions_reaching_store,4);
+  assert.equal(h.hub_landing_store_session_rate,4/50);
+  assert.equal(h.onelink_impression_sessions,40);assert.equal(h.onelink_click_sessions,3);
+  assert.equal(h.onelink_clicked_without_recorded_impression,1);assert.equal(h.onelink_impression_click_session_rate,2/40);
+  assert.equal(h.replaces_official_rate,false);assert.equal(h.quality_state,'quality_blocked');
+  assert.match(acquisitionReport(s).join('\n'),/^GA4 Obsidian hub OneLink pilot, beside the official rate: 4 of 50 sessions landing on the nine hubs reached the store .*8\.00%\. OneLink hero: 3 click sessions \(1 without a recorded impression\) \/ 40 impression sessions; 5\.00%\. Quality quality_blocked still applies\.$/m);
+});
+test('Obsidian hub pilot readout stays unknown instead of zero when its inputs are missing',()=>{
+  const old=siteAcquisition(funnel([ga({landing_path:'/obsidian/',device_language:'ja',observed_started_sessions:5})])).ga4.obsidian_hub_pilot;
+  assert.equal(old.hub_landing_store_session_rate,0);assert.equal(old.onelink_impression_click_session_rate,null); // pre-OneLink rows lack the columns
+  const none=siteAcquisition(funnel([ga({device_language:'ja',sessions_with_onelink_impression:0,sessions_with_onelink_click_24h:0,
+    onelink_clicked_without_recorded_impression:0})])).ga4.obsidian_hub_pilot;
+  assert.equal(none.hub_landing_sessions,0);assert.equal(none.hub_landing_store_session_rate,null);assert.equal(none.onelink_impression_click_session_rate,null);
+  for(const c of [{ga4:{status:'BLOCKED',reports:funnel([ga()]).ga4.reports}},{}]) {
+    const h=siteAcquisition(c).ga4.obsidian_hub_pilot;
+    assert.equal(h.hub_landing_sessions,null);assert.equal(h.onelink_impression_sessions,null);
+  }
+  const bad=siteAcquisition(funnel([ga({landing_path:'/obsidian/',sessions_with_any_app_route_click_24h:2,observed_started_sessions:1,
+    sessions_with_onelink_impression:1,sessions_with_onelink_click_24h:1,onelink_clicked_without_recorded_impression:2})])).ga4.obsidian_hub_pilot;
+  assert.equal(bad.hub_landing_store_session_rate,null);assert.equal(bad.onelink_impression_click_session_rate,null);
+});
