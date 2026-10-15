@@ -1412,6 +1412,9 @@ jobs:
         run: node --test growth/lib/company.test.mjs growth/lib/company-connection-evidence.test.mjs growth/lib/company-goal-followup.test.mjs
       - name: Website acquisition source attribution
         run: node --test growth/lib/company-acquisition.test.mjs
+      # acquisition-daily.yml の契約（鍵の隣で走るコードのハッシュ固定・権限・出力の形）と、Mac 側の取り込み。
+      - name: Scheduled acquisition collection contract and ingest
+        run: node --test growth/lib/acquisition-handoff.test.mjs growth/lib/company-acquisition-handoff.test.mjs
       - name: Bing source boundaries and retry handling
         run: node --test growth/lib/bing-webmaster.test.mjs growth/lib/company-bing.test.mjs
       - name: Test GA4 funnel SQL with synthetic events

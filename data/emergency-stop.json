@@ -87,6 +87,11 @@
       "stopped": false,
       "reason": null,
       "$what": "開発記録の外部ブログ配信（GitHub Actions の devlog-syndication。dev.to・はてなブログ2つ（simplememofast.hatenablog.com と「メモの設計図」simplememofast.hatenadiary.jp）・ライブドアブログ（captio.livedoor.blog）へ公式APIで投稿。後ろの2つは 2026-10-03 にオーナーが選択式で名指しして追加）。止めると次の枠から全媒体とも着手しない。投稿済みの記事は消えないので、取り下げは各サービスの管理画面で人が行う"
+    },
+    "acquisition": {
+      "stopped": false,
+      "reason": null,
+      "$what": "計測データの日次取得（GitHub Actions の acquisition-daily。GA4 の固定集計 ga4-funnel と AppsFlyer の集計を読み、既存の受け手の公開鍵で暗号化した成果物として残すだけ。モデルは呼ばない）。止めると次の起動から門が着手せず、ローカルの collect --analytics も GA4 の analytics-read.yml を起動しない。collect の中の Mac の資格情報による AppsFlyer 読み取りも読まない（acquisition_stopped）。**GitHub の『Disable workflow』では止めない**（起動欠落の見張り cron-silence に登録してあるので、無効化すると cron-health が毎朝落ちる）。2026-10-15 にオーナーが選択式で Actions への移行を承認"
     }
   }
 }

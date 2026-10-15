@@ -4,6 +4,9 @@ export const SCHEDULE_EXPECTATIONS = Object.freeze([
   Object.freeze({ path: '.github/workflows/decision-monitor.yml', max_silence_minutes: 180 }),
   // Daily schedule: one 24-hour interval plus four hours for delayed starts.
   Object.freeze({ path: '.github/workflows/main-daily-validation.yml', max_silence_minutes: 1680 }),
+  // Daily acquisition collection. Appended last: selftest probes index 1 as the daily case.
+  // Stop it through data/emergency-stop.json agents.acquisition, not "Disable workflow".
+  Object.freeze({ path: '.github/workflows/acquisition-daily.yml', max_silence_minutes: 1680 }),
 ]);
 
 const integer = x => Number.isSafeInteger(x) && x > 0;
@@ -152,7 +155,7 @@ export async function selftest() {
   }
   const markers = absent.map(row => silenceMarker(row ?? {}, 'o', 'r', 'workflow_dispatch'));
   const marker = markers[0];
-  check(silenceRefs(markers, 'o', 'r', now).length === 2, '日次と短周期の起動欠落を同時に追跡できない');
+  check(silenceRefs(markers, 'o', 'r', now).length === SCHEDULE_EXPECTATIONS.length, '日次と短周期の起動欠落を同時に追跡できない');
   check(silenceRefs([marker], 'o', 'r', now)[0]?.workflow_id === 30, '起動欠落の追跡参照が失われた');
   check(silenceRefs(['a link\n' + marker], 'o', 'r', now)[0]?.observed_via === 'workflow_dispatch', '手動観測の出所が失われた');
   const repeated = silenceRefs([marker.replace('12:00:00', '11:00:00'), ...Array(60).fill(marker)], 'o', 'r', now);

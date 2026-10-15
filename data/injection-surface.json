@@ -119,6 +119,18 @@
         "投稿後に公開ページを取りに行き、自社リンクの rel と meta robots を実測する"
       ],
       "residual_risk": "**判断そのものは汚染されうる。**過去記事の本文に指示めいた文が入っていた場合、それに従った記事を書く可能性は残る。2026-10-03 の追加で入口が増えた —— 旧ローカルタスクが書いた「メモの設計図」とライブドアの既存記事（開示も事実の検査も無かった）の書き出しも文脈に入る。数字や禁止表現を含まない誤誘導（主張の歪め）は機械検査では落ちない。緊急停止（agents.syndication）と公開記事の人による確認が最後の歯止め"
+    },
+    {
+      "id": "appsflyer-aggregate",
+      "what": "AppsFlyer の集計レポート（Partners by date の CSV）。2026-10-15 から GitHub Actions の acquisition-daily.yml が読み、暗号化した成果物として残し、Mac の取り込み（company-os acquisition-ingest）が復号する。媒体名（Media Source）・キャンペーン名・代理店名の文字列は、リンクを作った第三者や広告ネットワークが決められる",
+      "trust": "partial",
+      "mitigations": [
+        "CSV は**データとして集計するだけ**で、モデルにもシェルにも渡さない。媒体名・キャンペーン名は growth/lib/company-acquisition.mjs summarizeAppsFlyerAcquisition で**閉じた分類（qa / owned_web_pilot / organic_unspecified / unattributed / other_attributed）へ畳んでから**表示に入る。生の文字列は表示に出さない",
+        "読み取り器（simplememo-api の scripts/appsflyer_aggregate.py とバイト一致の写し）が列・日付範囲・数値・重複行を検査し、応答にトークンが含まれていたら捨てる。読み取り器・封のスクリプト・暗号化モジュールの sha256 はワークフローに直書きして鍵を置く前に照合する",
+        "ワークフローのログとジョブサマリには状態語しか出さない。CSV は受け手の公開鍵（指紋を固定）で暗号化してから成果物にする。取り込み側は実行の出所（リポジトリ・ワークフロー・ブランチ・event・run・試行・コミット）と CSV のハッシュを照合してから受け取る",
+        "run: に ${{ github.event.* }} を展開しない。入力は workflow_dispatch の選択肢（dry-run / export）だけで、env 経由で門のスクリプトが検査する"
+      ],
+      "residual_risk": "分類に使う媒体名・キャンペーン名の**値そのもの**は第三者が決められる。いまの分類は完全一致の比較なので、似せた名前は other_attributed に落ちるだけだが、将来この文字列をモデルへ渡す（要約・提案に使う）経路を足すなら、そこは trust: none として別に扱う。CSV の平文は1ジョブのあいだ GitHub のランナー（メモリと 0700 の一時ディレクトリ）に存在する"
     }
   ]
 }

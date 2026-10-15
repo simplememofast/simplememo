@@ -192,10 +192,21 @@ export async function collect(options, { api = bq, now = new Date() } = {}) {
   return out;
 }
 
+// Artifact sizes are public in a public repository. acquisition-daily.yml sets
+// ANALYTICS_PAD_BUCKET so the envelope grows in coarse buckets instead of tracking
+// result rows. Spaces only; the ingest drops the field. Unset elsewhere: unchanged.
+export function padToBucket(report, bucket) {
+  if (!Number.isSafeInteger(bucket) || bucket < 4096 || bucket > 16 * 1024 * 1024) throw new Error('Invalid padding bucket');
+  const size = Buffer.byteLength(JSON.stringify({ ...report, padding: '' }), 'utf8');
+  return { ...report, padding: ' '.repeat((bucket - (size % bucket)) % bucket) };
+}
+
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const publicPem = Buffer.from(process.env.ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64 || '', 'base64').toString('utf8');
     recipientKey(publicPem); // Validate before authenticating or querying.
+    const bucket = (process.env.ANALYTICS_PAD_BUCKET ?? '') === '' ? 0 : Number(process.env.ANALYTICS_PAD_BUCKET);
+    if (bucket !== 0) padToBucket({}, bucket); // Same: an invalid bucket fails before any query.
     const options = {
       report: process.env.ANALYTICS_REPORT || 'preflight', execution: process.env.ANALYTICS_EXECUTION || 'dry-run',
       start: process.env.ANALYTICS_START_DATE || '', end: process.env.ANALYTICS_END_DATE || '',
@@ -204,7 +215,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     const output = process.env.ANALYTICS_ENCRYPTED_OUTPUT;
     if (!output) throw new Error('Encrypted output path is required');
     const report = await collect(options);
-    const envelope = seal(report, publicPem);
+    const envelope = seal(bucket ? padToBucket(report, bucket) : report, publicPem);
     fs.mkdirSync(path.dirname(output), { recursive: true, mode: 0o700 });
     fs.writeFileSync(output, JSON.stringify(envelope) + '\n', { flag: 'wx', mode: 0o600 });
     console.log(`Analytics report encrypted. status=${report.status}`);

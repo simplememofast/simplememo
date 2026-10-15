@@ -1,6 +1,6 @@
 # Website acquisition collection
 
-The existing `company-os collect --analytics` operation now admits the Apple
+The `company-os collect` operation (and `acquisition-ingest`) now admits the Apple
 producer's `App Downloads Standard` and `App Downloads Detailed` aggregates
 from the same pinned iOS commit as its status and revenue outputs. Weekly and
 monthly Detailed reports use the producer’s exact instance manifest and retain
@@ -35,11 +35,18 @@ in the private Company state directory, never in site assets.
   the pilot count. This does not imply whole-site coverage or working SDKs.
 
 The same view appears in `growth-status` and existing daily/weekly/monthly
-private reviews. No new recurring owner is required. A fresh API read alone
-does not create a business-change notification. The normal collection owner
-refreshes these inputs on its existing cadence. As of 2026-10-14 a naturally
-scheduled run of that refresh has not been verified, so read each source's
-observed date before treating a value as current.
+private reviews. A fresh API read alone does not create a business-change
+notification. As of 2026-10-14 a naturally scheduled run of the local refresh
+had not been verified, so on 2026-10-15 the owner approved one new recurring
+owner: `.github/workflows/acquisition-daily.yml` reads GA4 `ga4-funnel` and the
+AppsFlyer aggregate on a daily GitHub Actions schedule and keeps only encrypted
+artifacts. They reach this view only when `collect` or `acquisition-ingest`
+runs on the Mac (no new local timer). `acquisition-status` shows that owner as
+`collection_owner`, including `appsflyer_key: key_pending` until the owner
+registers the AppsFlyer environment secret. Apple outputs still come from the
+iOS producer. Read each source's observed date before treating a value as
+current. Details: `docs/autonomy/OPERATING_RUNBOOK.md` (Scheduled acquisition
+collection).
 
 Apple dates are UTC and refer to the provider's actual observed rows, which
 may span more than one day. Missing/hidden cells are `null`, even if another

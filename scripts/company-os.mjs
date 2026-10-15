@@ -3,7 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { DEFAULT_STATE, observe, auditObservation, persistRun } from '../growth/lib/company-loop.mjs';
 import { compareMetrics } from '../growth/lib/company-metrics.mjs';
-import { collectData,currentSiteAcquisition } from '../growth/lib/company-data.mjs';
+import { collectData,collectAsc,currentSiteAcquisition } from '../growth/lib/company-data.mjs';
+import { collectAcquisitionHandoff,acquisitionHandoffStatus } from '../growth/lib/company-acquisition-handoff.mjs';
 import { compactGrowth, saveReview } from '../growth/lib/company-review.mjs';
 import { finishIntegration, finishExistingRun, bindExistingRun } from '../growth/lib/company-proof.mjs';
 import { followUp } from '../growth/lib/company-followup.mjs';
@@ -95,8 +96,15 @@ if(command==='record-apple-ads-observation') {
   result = await finish({ stateRoot, id: option('run'), evidenceFile });
 } else if (command === 'collect') {
   result = await collectData({ stateRoot, analytics: args.includes('--analytics') });
+} else if (command === 'acquisition-ingest') {
+  // On-demand ingest of acquisition-daily.yml artifacts (GitHub reads only, no dispatch).
+  result = await collectData({ stateRoot, operations: [
+    ['acquisition_actions_handoff', () => collectAcquisitionHandoff({ stateRoot })],
+    ['asc', () => collectAsc({ stateRoot })],
+  ] });
+  result = { ...result, collection_owner: acquisitionHandoffStatus({ stateRoot }) };
 } else if (command === 'acquisition-status') {
-  result=currentSiteAcquisition({stateRoot});
+  result={...currentSiteAcquisition({stateRoot}),collection_owner:acquisitionHandoffStatus({stateRoot})};
 } else if (['run', 'autonomy-lift', 'growth-autopilot'].includes(command)) {
   result = persistRun({ stateRoot, cadence: option('cadence', 'daily'), origin: option('origin', 'manual') });
 } else {

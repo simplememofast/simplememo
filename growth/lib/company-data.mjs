@@ -17,6 +17,8 @@ import { retainCtaMeasurement, companyCtaMeasurement } from './company-cta-measu
 import { collectBingHandoff } from './company-bing.mjs';
 import { collectNativeResources } from './company-resource-usage.mjs';
 import { summarizeAscAcquisition, summarizeAscPeriods, summarizeAppsFlyerAcquisition, siteAcquisition } from './company-acquisition.mjs';
+import { collectAcquisitionHandoff, ga4ActionsGuard, appsflyerActionsGuard } from './company-acquisition-handoff.mjs';
+import { ACQUISITION_WORKFLOW } from './acquisition-handoff.mjs';
 
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -46,7 +48,10 @@ export function verifyAppsFlyer(directory) {
   return result;
 }
 
-export async function collectAppsFlyer({ stateRoot, now = new Date(), apiRepo = path.join(os.homedir(), 'simplememo-api'), run = command } = {}) {
+// Inside `collect` (actionsGuard), a missing receipt waits for acquisition-daily.yml while it will
+// read the same end-date (appsflyerActionsGuard). An Actions failure receipt still falls back here.
+export async function collectAppsFlyer({ stateRoot, now = new Date(), apiRepo = path.join(os.homedir(), 'simplememo-api'), run = command,
+  actionsGuard = false, actionsHandoff = null, stopDoc = null } = {}) {
   const data = privateState(path.join(stateRoot, 'data'));
   const window = collectionWindow('appsflyer', now);
   const receipts = privateState(path.join(data, 'collection-receipts'));
@@ -57,6 +62,9 @@ export async function collectAppsFlyer({ stateRoot, now = new Date(), apiRepo = 
     return { ...prior, reused: true };
   }
   if (prior && (prior.attempts >= 3 || prior.failure === 'permission_or_credential')) return prior;
+  const deferred = !prior && actionsGuard ? appsflyerActionsGuard({ end: window.end, handoff: actionsHandoff, now, stopDoc }) : null;
+  if (deferred) return { schema_version: 1, source: 'appsflyer', window, status: 'deferred_to_actions_owner', reason: deferred,
+    owner: ACQUISITION_WORKFLOW, new_reads: 0 };
   const sha = run('git', ['rev-parse', 'origin/main'], { cwd: apiRepo }).trim();
   const source = run('git', ['show', sha + ':scripts/appsflyer_aggregate.py'], { cwd: apiRepo });
   const cache = privateState(path.join(data, 'reader-cache'));
@@ -164,7 +172,11 @@ export function collectAsc({ stateRoot, iosRepo = path.join(os.homedir(), 'simpl
 
 // Dispatch is recorded BEFORE the side effect. An uncertain result is looked up
 // by the same UUID, never blindly dispatched again. A later tick resumes it.
-export function collectAnalytics({ stateRoot, report = 'ga4-funnel', now = new Date(), run = command } = {}) {
+// GA4 ga4-funnel is owned by acquisition-daily.yml; a new legacy dispatch is a
+// fallback only when ga4ActionsGuard allows it (route not stopped, no Actions artifact
+// for this end-date, no active run, today's scheduled run already finished or its
+// grace passed). An existing receipt is never re-queried.
+export function collectAnalytics({ stateRoot, report = 'ga4-funnel', now = new Date(), run = command, actionsHandoff = null, stopDoc = null } = {}) {
   if (!['ga4-funnel', 'gsc'].includes(report)) throw new Error('Only approved fixed reports');
   let window = collectionWindow(report, now);
   const receipts = privateState(path.join(stateRoot, 'data/collection-receipts'));
@@ -182,6 +194,9 @@ export function collectAnalytics({ stateRoot, report = 'ga4-funnel', now = new D
   const keys = path.join(os.homedir(), '.local/share/simplememo-analytics/keys');
   const args = ['--repo', 'simplememofast/simplememo'];
   if (!receipt) {
+    const deferred = report === 'ga4-funnel' ? ga4ActionsGuard({ end: window.end, handoff: actionsHandoff, run, now, stopDoc }) : null;
+    if (deferred) return { schema_version: 1, source: report, window, status: 'deferred_to_actions_owner', reason: deferred,
+      owner: ACQUISITION_WORKFLOW, new_dispatches: 0 };
     const publicKey = fs.readFileSync(path.join(keys, 'recipient-public.pem'));
     receipt = { schema_version: 1, source: report, window, request_tag: crypto.randomUUID(),
       requested_at: now.toISOString(), status: 'dispatch_uncertain',
@@ -295,6 +310,24 @@ export function connectionView({ stateRoot, now = new Date(), readThread } = {})
     apple_search_ads: appleAdsConnection(optional('apple-ads-configuration.json'), now) };
 }
 
+// Default `collect` order. The Actions handoff runs first, so a verified scheduled
+// result is reused before any local AppsFlyer read or GA4 fallback dispatch is
+// considered, and both guards see what the handoff saw. Readers are injectable for tests.
+export function collectionOperations({ stateRoot, now, analytics = false, readers = {} }) {
+  const r = { collectAcquisitionHandoff, collectNativeResources, collectDailyGsc, collectBingHandoff,
+    collectAppsFlyer, collectAsc, collectAnalytics, ...readers };
+  let actionsHandoff = null;
+  return [
+    ['acquisition_actions_handoff', () => (actionsHandoff = r.collectAcquisitionHandoff({ stateRoot, now }))],
+    ['native_resource_usage', () => r.collectNativeResources({ stateRoot, now })],
+    ['gsc_daily_handoff', () => r.collectDailyGsc({ stateRoot, now })],
+    ['bing_search_api', () => r.collectBingHandoff({ stateRoot, now })],
+    ['appsflyer', () => r.collectAppsFlyer({ stateRoot, now, actionsGuard: true, actionsHandoff })],
+    ['asc', () => r.collectAsc({ stateRoot, now })],
+    ...(analytics ? [['ga4-funnel', () => r.collectAnalytics({ stateRoot, now, actionsHandoff })]] : []),
+  ];
+}
+
 export async function collectData({ stateRoot, now, clock = () => new Date(), analytics = false, operations, makeConnections=connectionView } = {}) {
   const release = acquireLock(stateRoot, 'data-collection.lock');
   if (!release) return { status: 'busy' };
@@ -303,14 +336,7 @@ export async function collectData({ stateRoot, now, clock = () => new Date(), an
     const startedAt = now ?? clock();
     const receipts = [], failures = [];
     // Source failures never prevent the other independent readers from running.
-    for (const [source, operation] of operations ?? [
-      ['native_resource_usage', () => collectNativeResources({ stateRoot, now: startedAt })],
-      ['gsc_daily_handoff', () => collectDailyGsc({ stateRoot, now: startedAt })],
-      ['bing_search_api', () => collectBingHandoff({ stateRoot, now: startedAt })],
-      ['appsflyer', () => collectAppsFlyer({ stateRoot, now: startedAt })],
-      ['asc', () => collectAsc({ stateRoot, now: startedAt })],
-      ...(analytics ? [['ga4-funnel', () => collectAnalytics({ stateRoot, now: startedAt })]] : []),
-    ]) {
+    for (const [source, operation] of operations ?? collectionOperations({ stateRoot, now: startedAt, analytics })) {
       try { receipts.push({ source, receipt: await operation() }); }
       catch { failures.push({ source, reason: 'reader_unavailable_or_validation_failed', action: 'inspect private reader receipt; do not broaden credentials' }); }
     }
@@ -330,8 +356,8 @@ export async function collectData({ stateRoot, now, clock = () => new Date(), an
     }
     const receipt = { schema_version: 1, observed_at: observedAt.toISOString(), native_origin:nativeOrigin(), receipts, failures,
       measurements: { cta: ctaMeasurement },
-      status: failures.length || receipts.some(r => ['failed', 'stale', 'unavailable', 'dispatched', 'dispatch_uncertain'].includes(r.receipt.status)) ? 'partial' : 'verified',
-      query_policy: 'GSC reuses existing daily/weekly collector. GA4 is opt-in for the single native owner, max one fixed query run per mature end-date, no remote retry.' };
+      status: failures.length || receipts.some(r => ['failed', 'stale', 'unavailable', 'alert', 'dispatched', 'dispatch_uncertain', 'deferred_to_actions_owner'].includes(r.receipt.status)) ? 'partial' : 'verified',
+      query_policy: `GSC reuses existing daily/weekly collector. GA4 ga4-funnel and the AppsFlyer aggregate are owned by ${ACQUISITION_WORKFLOW} (scheduled, encrypted artifacts, ingested on demand). Local GA4 dispatch is a guarded fallback (route not stopped, no Actions artifact or receipt for that end-date, no active run, today's scheduled run finished or its grace passed); max one fixed query run per mature end-date, no remote retry. The local AppsFlyer reader runs only without a receipt and, while the Actions environment secret is registered, only after today's scheduled run (or its grace) with no active run or artifact awaiting admission; an Actions failure receipt falls back to it.` };
     atomicJson(path.join(stateRoot, 'data/latest-collection.json'), receipt);
     const events=privateState(path.join(stateRoot,'data/collection-events'));
     atomicJson(path.join(events,crypto.randomUUID()+'.json'),receipt);
