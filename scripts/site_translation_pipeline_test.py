@@ -273,6 +273,20 @@ class TranslationPipelineTests(unittest.TestCase):
         self.assertEqual(leftover_dates('Desde 2026 año 9 mes', 'es'), ['2026 año 9 mes'])
         self.assertEqual(leftover_dates('Desde septiembre de 2026', 'es'), [])
 
+    def test_links_that_name_their_language_are_not_localized(self):
+        source = ('<html lang="ja"><head><title>説明</title></head><body><details class="site-languages"><summary>JA</summary></details>'
+                  '<main><h1>説明</h1><p><a href="/en/source" lang="en">English report</a> <a href="/source">この記事</a></p></main></body></html>')
+        group = {'source': 'source.html', 'sourceLocale': 'ja', 'existing': {'ja': 'source.html', 'en': 'en/source.html'},
+                 'pages': {'ja': 'source.html', 'en': 'en/source.html', 'ko': 'ko/source.html'}}
+        units = collect(source) + collect_extra(source)
+        catalog = {'ja:' + u['id']: {'source': u['text'], 'text': re.sub(r'[\u3040-\u30ff\u3400-\u9fff]+', '설명', u['text'])} for u in units}
+        routes = {'/source': group, '/en/source': group, '/ko/source': group}
+        with patch.object(build, 'units_for', return_value=(source, units)), patch('sync_shared_chrome.transform', side_effect=lambda s, f: s), patch('sync_page_design.transform', side_effect=lambda s, f: s):
+            output = build.translate_document(group, 'ko', catalog, routes)
+        self.assertIn('href="/en/source"', output, 'a link labelled as English keeps pointing at the English page')
+        self.assertNotIn('<a href="/ko/source" lang="en"', output)
+        self.assertIn('href="/ko/source"', output, 'an ordinary same-language link is still localized')
+
     def test_turkish_suffixes_follow_the_localized_date(self):
         from site_translation_dates import localize_dates
         self.assertEqual(localize_dates("9 ay 13'daki değişiklik", [(None, 9, 13)], 'tr'), "13 Eylül'deki değişiklik")

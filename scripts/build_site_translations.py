@@ -229,11 +229,32 @@ def translate_document(group, locale, catalog, routes, script_paths=None, dynami
         if key == 'src' and script_paths and urlsplit(mapped).path.endswith('.js') and urlsplit(mapped).path in script_paths:
             mapped = script_paths[urlsplit(mapped).path]
         return key + '=' + quote + html.escape(mapped, quote=True) + quote
+    own_url = page_url(group['pages'][locale])
+    def keep_link(node, raw):
+        # A link that names its own language ("English report", lang="en")
+        # is a deliberate cross-language link: localizing it would make the
+        # label false, and on the target language's own page a self-link.
+        if node.tag != 'a':
+            return False
+        declared = re.search(r'\b(?:hreflang|lang)\s*=\s*["\']([^"\']+)', raw)
+        if declared and declared[1] != group['sourceLocale']:
+            return True
+        href = re.search(r'\bhref\s*=\s*["\']([^"\']+)', raw)
+        if not href:
+            return False
+        original = urlsplit(urljoin(SITE + '/' + group['source'], html.unescape(href[1])))
+        target = routes.get(original.path) if original.netloc == 'simplememofast.com' else None
+        if not target:
+            return False
+        same_language = page_url(target['pages'][group['sourceLocale']]) in (original.path, original.path + '/')
+        return not same_language and page_url(target['pages'][locale]) == own_url
     references = []
     for node in all_nodes(Parser(source).root):
         if node.tag.startswith('#'):
             continue
         raw = source[node.start:node.inner]
+        if keep_link(node, raw):
+            continue
         updated = re.sub(r'\b(href|src|srcset|imagesrcset|action|poster|style)=("|\')(.*?)\2', reference, raw, flags=re.S)
         if node.tag == 'meta':
             property_name = (node.attrs.get('property') or node.attrs.get('name') or '').lower()
