@@ -23,6 +23,7 @@ on:
       - 'data/publication-policy.json'
       - 'docs/seo/gsc-crawled-cases-2026-09-16.json'
       - 'docs/seo/gsc-crawled-cases-2026-09-29.json'
+      - 'docs/seo/gsc-crawled-cases-2026-10-14.json'
       - '.github/workflows/gsc-indexing.yml'
   pull_request:
     branches: [main]
@@ -40,6 +41,7 @@ on:
       - 'data/publication-policy.json'
       - 'docs/seo/gsc-crawled-cases-2026-09-16.json'
       - 'docs/seo/gsc-crawled-cases-2026-09-29.json'
+      - 'docs/seo/gsc-crawled-cases-2026-10-14.json'
       - '.github/workflows/gsc-indexing.yml'
 
 permissions:
@@ -66,7 +68,7 @@ jobs:
           node-version: '20'
       - name: Public asset rate-limit regressions (controlled requests, no HTTP)
         run: node --test scripts/full-public-assets-rate-limit.test.mjs
-      - name: Both GSC samples (85 unique URLs), metadata, crawl permission and inbound links
+      - name: All GSC samples (173 unique URLs), metadata, crawl permission and inbound links
         run: node scripts/gsc-crawled-indexing.mjs
       - name: Record production baseline without claiming candidate deployment
         if: github.event_name != 'workflow_run' && github.ref != 'refs/heads/main'

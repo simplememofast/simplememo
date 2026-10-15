@@ -31,6 +31,10 @@ def groups():
             seen.add(file)
         if any(group['pages'].get(locale) != file for locale, file in group['existing'].items()):
             raise ValueError('An existing translation must keep its published route')
+        hidden = group.get('noindex', [])
+        if (not isinstance(hidden, list) or not set(hidden) <= set(data['locales'])
+                or set(hidden) & set(group['existing'])):
+            raise ValueError('noindex may list only generated locales: ' + group['source'])
         for anchors in group.get('anchors', {}).values():
             if set(anchors) != set(LOCALES) or any(not isinstance(value, str) or not value or '#' in value for value in anchors.values()):
                 raise ValueError('Named anchor correspondence must cover all ten locales')
@@ -43,6 +47,17 @@ def published_groups():
                  if (ROOT / file).is_file()}
         if pages:
             yield group, pages
+
+
+def indexed(group, pages):
+    """Pages that take part in search: hreflang, x-default and sitemaps.
+
+    A locale listed in the group's `noindex` stays readable from the language
+    menu but is excluded from search, so it must not be advertised as an
+    alternate either. Editorial (`existing`) routes are never listed.
+    """
+    hidden = set(group.get('noindex', ()))
+    return {locale: file for locale, file in pages.items() if locale not in hidden}
 
 
 @lru_cache(maxsize=1)
