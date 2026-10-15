@@ -11,6 +11,8 @@ name: Cron Health
 # - Main Daily Validationは登録から28時間の猶予後、直近28時間に定期起動が無い場合も追跡する
 #   日次24時間周期に遅延猶予4時間を加える。既定ブランチのscheduleだけを起動の証拠にする
 #   手動・マージ後の実行を定期起動の証拠にしない。新規検知は毎朝1回のまま
+# - Acquisition Daily（2026-10-15〜）も同じ28時間。止めるときは data/emergency-stop.json の経路
+#   acquisition を立てる。GitHub で無効化すると起動欠落の観測そのものが落ちる
 # - 「回復」の判定: Issueに記録した全workflowの最新 scheduled run が成功したこと
 #   24hは新規検知の窓。古い故障はIssue本文・追記から追跡を継続する。
 # - Issueは label `ops/cron-failure` の open 1件に集約する（毎回コメントで追記）

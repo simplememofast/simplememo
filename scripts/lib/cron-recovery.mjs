@@ -8,7 +8,7 @@
 
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { silenceRefs, silenceMarker, selftest as silenceSelftest } from './cron-silence.mjs';
+import { SCHEDULE_EXPECTATIONS, silenceRefs, silenceMarker, selftest as silenceSelftest } from './cron-silence.mjs';
 
 const integer = x => Number.isSafeInteger(x) && x > 0;
 const unknown = why => ({ confirmed: false, why, evidence: [] });
@@ -368,10 +368,10 @@ export async function selftest() {
       });
       const readRuns = f.github.rest.actions.listWorkflowRuns;
       f.github.rest.repos = { get: async () => ({ data: { default_branch: 'main' } }) };
-      const livenessWorkflows = [
-        { id: 30, name: 'Decision Monitor', path: '.github/workflows/decision-monitor.yml' },
-        { id: 31, name: 'Main Daily Validation', path: '.github/workflows/main-daily-validation.yml' },
-      ];
+      // Every registered schedule, in registration order (ids 30, 31, …), so adding one cannot
+      // fall through to a fabricated workflow. Index 1 stays the daily main-daily-validation case.
+      const livenessWorkflows = SCHEDULE_EXPECTATIONS.map((policy, index) => ({ id: 30 + index,
+        name: policy.path.split('/').at(-1), path: policy.path }));
       f.github.rest.actions.getWorkflow = async p => ({ data: { ...(livenessWorkflows.find(w => w.id === p.workflow_id
         || w.path.split('/').at(-1) === p.workflow_id) ?? { ...livenessWorkflows[0], id: p.workflow_id }),
         state: 'active', created_at: '2026-08-01T00:00:00Z' } });

@@ -4,6 +4,8 @@ This is the on-demand path from a local Codex task to BigQuery, using the existi
 `GCP_SERVICE_ACCOUNT_JSON` secret in GitHub Actions. No Google key is copied to
 the Mac. The workflow does not modify datasets, IAM, the site or repository data.
 It has no schedule and does not replace the existing SEO Daily workflow.
+The daily `ga4-funnel` collection is a separate scheduled workflow; see
+[Scheduled acquisition collection](#scheduled-acquisition-collection-acquisition-dailyyml).
 
 ## Available reports
 
@@ -253,6 +255,94 @@ AES-256-GCM authenticated ciphertext, with a random per-report key wrapped using
 RSA-OAEP-SHA256 to the recipient's public key. No plaintext report is written on
 the runner. Decryption rejects a wrong key or modified ciphertext, and the local
 helper refuses destinations inside Git checkouts or existing output files.
+
+## Scheduled acquisition collection (acquisition-daily.yml)
+
+Owner-approved on 2026-10-15 to replace a local daily automation that never ran
+on schedule. `.github/workflows/acquisition-daily.yml` runs at 06:23 JST
+(nominal; daily cron is delivered hours late) and on manual dispatch
+(`mode: dry-run` by default: GA4 validates without billed bytes, AppsFlyer is
+not called). It does not change `analytics-read.yml`, which keeps no schedule.
+Every action in the workflow is pinned by commit SHA.
+
+- **Gate** (no secrets): `growth/scripts/acquisition-gate.mjs` reads
+  `data/emergency-stop.json` (global stop and route `acquisition`; a missing
+  route fails the run), computes windows with `collectionWindow` (GA4 7 days
+  ending five JST days ago; AppsFlyer 28 days ending yesterday JST) and skips
+  an end-date whose artifact already exists. There is no AI-budget admission:
+  the workflow calls no model.
+- **GA4**: the same `export-analytics.mjs` fixed report and caps, with
+  `GCP_SERVICE_ACCOUNT_JSON` only in that step, on `main` and the first run
+  attempt only (no remote retry). `ANALYTICS_PAD_BUCKET` pads the plaintext to
+  2 MiB buckets; unset (as in `analytics-read.yml`) nothing changes. Artifact
+  `acquisition-ga4-funnel-<end>`.
+- **AppsFlyer**: the token is `APPSFLYER_AGGREGATE_API_TOKEN`, a secret of the
+  `acquisition-appsflyer` environment that only the owner registers; never a
+  repository secret. GitHub documents only per-workflow scrubbing for
+  repository secrets, so one could reach the gate and GA4 jobs (unpinned
+  `main` code); environment secrets reach only jobs that reference the
+  environment, and only the `appsflyer` job does (`deployment: false`). The
+  environment admits the `main` branch only, and the job reads that policy
+  back and fails before the token step if it is anything else. Until the
+  secret exists the job rests as `key_pending` and succeeds.
+  `growth/vendor/appsflyer_aggregate.py` is a byte-identical copy of the
+  reviewed `simplememo-api` reader. Its sha256, the seal script's and
+  `analytics-envelope.mjs`'s are written in the workflow and checked with
+  `sha256sum -c` before the token exists. The secret is written to the
+  reader's 0600 file in its own step, the reader runs with `python3 -I` and
+  its stdout goes to a private file, the token file is removed right after the
+  read, and only then does `seal-acquisition-appsflyer.mjs` pack the reader's
+  own `result.json` and CSV with provenance
+  (`credential_origin: github_actions_secret`), padded to 64 KiB buckets.
+  Artifact `acquisition-appsflyer-<end>`.
+- **What the pins do and do not do**: any change to code that runs next to the
+  token also changes this workflow file. They do not stop the change. The
+  unattended primary path (`GH_PAT`, `GITHUB_TOKEN`) cannot push workflows, but
+  secondary CCR sessions (unattended) and attended sessions can change the
+  workflow, its pins and the reader in one PR, which auto-merges once SEO
+  Validation passes. AI-authored, auto-merged code can therefore run next to
+  the token.
+- Both artifacts contain only an envelope for the existing recipient
+  (`vars.ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64`), whose SPKI fingerprint is
+  pinned in the workflow and the seal script. Retention is 14 days. Logs and
+  job summaries carry status words only, never counts, rates or rows.
+- **Stop** with `data/emergency-stop.json` agents `acquisition`, not GitHub's
+  "Disable workflow": the workflow is in `scripts/lib/cron-silence.mjs`, so
+  disabling it breaks cron-health's silence check.
+
+Ingest locally, on demand, with `node scripts/company-os.mjs acquisition-ingest`
+(also the first step of `collect`). A local private key that is unreadable or
+does not match the pinned recipient admits and records nothing (the next
+ingest retries). It reads every main run inside the retention window page by
+page, takes the job inventory from the first attempt (credentialed jobs never
+run on a re-run), verifies run identity, exact artifact names, the recipient,
+window, run ID, attempt and commit, the CSV hash and the reader hash (pinned
+and equal to `simplememo-api` `origin/main`), and writes the existing receipt
+shapes without overwriting any existing receipt. Failed remote runs are
+recorded once; nothing is dispatched or retried. Integrity verdicts,
+`pins_mismatch`, `environment_unverified` and a repository-level copy of the token (names-only
+secret listing) set the ingest status to `alert`. If the reviewed reader
+changes in `simplememo-api`, AppsFlyer ingest stops with `reader_divergence`
+until a reviewed PR re-vendors the file and updates its pin in the workflow
+and `growth/lib/acquisition-handoff.mjs` together.
+`company-os collect --analytics` never dispatches `analytics-read.yml` for a
+`ga4-funnel` end-date with an Actions artifact or receipt, while the
+`acquisition` route is stopped, while a run is active, before today's
+scheduled run has finished (until 18:00 JST), or when that state cannot be
+read. While the environment secret is registered, the local AppsFlyer reader
+in `collect` likewise waits for today's scheduled run (until 18:00 JST), an
+active run or an artifact awaiting admission; with `key_pending`, or after an
+Actions failure receipt, it reads as before.
+
+Ingest within 8 days keeps the latest GA4 observation admissible for the CTA
+measurement; artifacts expire after 14 days. AppsFlyer aggregate rows
+(date/agency/media source/campaign) transit a GitHub-hosted runner for the
+length of one job: in memory and, because the reader writes its CSV to disk,
+in a 0700 runner temp directory that the job removes. GA4 aggregates already
+transit runners in memory. Artifact sizes are public in this repository, so
+both plaintexts are padded to fixed buckets and the envelope size moves only
+when the content crosses a bucket. AppsFlyer-side processing (same API,
+report, token) is unchanged.
 
 ## Evidence and interpretation
 

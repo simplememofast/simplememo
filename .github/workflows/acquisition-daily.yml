@@ -1,0 +1,285 @@
+# 計測データの日次取得（GA4 の固定集計 ga4-funnel と AppsFlyer の集計）。
+#
+# 【なぜここに置くか — 2026-10-15・オーナーが選択式で承認】
+# Mac 上のローカル定期タスク（Codex の simplememo-4）は予約どおりに一度も動かず、取得スクリプト自体も
+# 固定していた作業ツリーが消えて動かない状態だった。devlog-syndication.yml と同じく、
+# **Mac が眠っていても、外から結果が読める経路に移す。**
+#   - 結果は既存の受け手の公開鍵（vars.ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64）で暗号化した成果物だけ
+#     （保存14日）。ログとジョブサマリには状態語しか出さない（件数・率・CSV の行は出さない）。
+#     成果物の大きさは公開されるので、平文を AppsFlyer は 64KiB・GA4 は 2MiB 単位に詰め、行数を大きさから読ませない
+#   - Mac 側は必要なときに `node scripts/company-os.mjs acquisition-ingest` で取り込む（新しいローカルの定期処理は作らない）
+#   - 失敗は cron-health が Issue にし、28時間起動が無ければ起動欠落として追跡する（scripts/lib/cron-silence.mjs）
+#
+# 【止め方】data/emergency-stop.json の全体停止か経路 "acquisition" を true にする（門が着手前に止める）。
+# **GitHub の「Disable workflow」で止めない。**cron-silence に登録してあるので、無効化すると
+# cron-health の起動欠落の観測が「有効な定期実行の対象を確認できない」で毎朝落ちる。
+# 門は経路 "actions"（主系オートパイロット）には結び付けない。主系を止めても測定は止まらない。
+#
+# 【月次のAIトークン予算の門を通さない理由】このワークフローはモデルを呼ばない。旧ローカルタスクが
+# 予算の門を持っていたのは、有料の Codex セッションの中で動いていたから。AI の予算切れや主系の停止で
+# 測定が暗くなると、止まった理由が測定と無関係になる。
+#
+# 【鍵の隣で走るコードは、このファイルにハッシュで固定する】
+# AppsFlyer のトークンは環境 acquisition-appsflyer の secret（値はオーナーだけが登録する。AI は読まない・入力しない）。
+#   - リポジトリの secret にしない。GitHub の文書が保証するのは「ワークフローで参照されない secret はメモリから消す」
+#     という**ワークフロー単位**の扱いだけで、同じファイルの gate / ga4 ジョブ（固定していない main のコード）にも
+#     値が届きうる。環境の secret は「その環境を参照するジョブにだけ渡る」と文書にあり、参照するのは appsflyer ジョブだけ
+#   - 環境の配備ブランチは main だけ（オーナーが設定する）。他のブランチに push したワークフローは、この環境の
+#     secret を受け取れない。設定が外れていないかは、鍵を置く前に毎回 API で照合し、外れていれば鍵を置かずに落ちる
+# appsflyer ジョブで鍵がファイルにある間に動くのは、下の pins で sha256 を照合した読み取り器（simplememo-api の
+# scripts/appsflyer_aggregate.py とバイト一致の写し）だけ。平文の集計を扱う封のスクリプトとその依存も同じく固定し、
+# ジョブの action も SHA で固定する。受け手の公開鍵も指紋（SPKI DER の sha256）で固定し、リポジトリ変数を
+# 差し替えても別の鍵へは暗号化しない。鍵の有無は真偽だけを env で見る（if: に secrets は書けない）。
+# 登録までは key_pending で休み、失敗にしない。
+# **固定が保証するのは「鍵の隣で走るのはこのファイルに書いたハッシュのコードだけ」と「それを変える差分には必ず
+# このファイルが出る」の2点で、変更そのものは止めない。**主系（GH_PAT・GITHUB_TOKEN）は workflow を push
+# できない（data/authority-matrix.json self_repair.unattended_cannot_push）。しかし無人の副系 CCR セッションと
+# 人のいるセッションは push でき、このファイル（pins を含む）と読み取り器を同じ PR で変えられる。その PR は
+# SEO Validation を通れば自動でマージされる。つまり AI が書いて自動でマージされたコードが鍵の隣で走りうる。
+#
+# 【1終了日1回・遠隔の再試行なし】門は同じ終了日の成果物が既にあれば取得しない。資格情報を使うジョブは
+# 1回目の試行（run_attempt 1）だけで走る（再実行しても取得し直さない。取り込みは1回目の成果物を読む）。
+# ローカルの `collect --analytics` も、ここに成果物か受領記録がある終了日・経路が止まっている間・実行中・
+# 当日の定期実行が終わる前（18時 JST まで）・状態が読めないときは analytics-read.yml を起動しない
+# （growth/lib/company-acquisition-handoff.mjs ga4ActionsGuard）。ローカルの AppsFlyer 読み取りも、secret が
+# 登録済みの間は当日の定期実行（18時 JST まで）・実行中・取り込み待ちの成果物を待つ（appsflyerActionsGuard。
+# key_pending の間と Actions の失敗の後は従来どおり Mac が読む）。
+#
+# 【時刻】06:23 JST は公称。日次 cron は数時間遅れて届く（CLAUDE.md）。遅れても JST の日付をまたぐには
+# 17時間以上かかり、取り込み側は窓を観測時刻から計算し直して照合する。
+
+name: Acquisition Daily
+
+on:
+  schedule:
+    - cron: '23 21 * * *' # 06:23 JST
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'dry-run は GA4 を検証だけ（課金なし）・AppsFlyer は呼ばない。export は定期実行と同じ'
+        type: choice
+        options: [dry-run, export]
+        default: dry-run
+
+permissions: {}
+
+concurrency:
+  group: acquisition-daily
+  cancel-in-progress: false
+
+env:
+  # analytics 受け手の公開鍵の指紋（秘密ではない）。growth/lib/acquisition-handoff.mjs と封のスクリプトと同じ値。
+  RECIPIENT_SPKI_SHA256: c77d213e039ca5fa0d6797e87d59d974756f2462aeca0186dbfbf3773308f992
+
+jobs:
+  gate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      run: ${{ steps.gate.outputs.run }}
+      ga4: ${{ steps.gate.outputs.ga4 }}
+      ga4_execution: ${{ steps.gate.outputs.ga4_execution }}
+      ga4_start: ${{ steps.gate.outputs.ga4_start }}
+      ga4_end: ${{ steps.gate.outputs.ga4_end }}
+      ga4_artifact: ${{ steps.gate.outputs.ga4_artifact }}
+      appsflyer: ${{ steps.gate.outputs.appsflyer }}
+      af_start: ${{ steps.gate.outputs.af_start }}
+      af_end: ${{ steps.gate.outputs.af_end }}
+      af_artifact: ${{ steps.gate.outputs.af_artifact }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      # 秘密を持たないジョブ。緊急停止（全体と経路 acquisition。経路が無ければ落ちる）・窓・既存の成果物だけを見る。
+      - name: Gate (emergency stop, window, one collection per end-date)
+        id: gate
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          ACQUISITION_MODE: ${{ github.event_name == 'schedule' && 'export' || inputs.mode }}
+        run: node growth/scripts/acquisition-gate.mjs
+
+  ga4:
+    needs: gate
+    # Google の資格情報は main の検証済みコードと1回目の試行でだけ使う（analytics-read.yml と同じ読み取り器）。
+    if: github.ref == 'refs/heads/main' && needs.gate.outputs.ga4 == 'true' && github.run_attempt == '1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - name: Recipient public key matches the pinned fingerprint
+        env:
+          ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64: ${{ vars.ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64 }}
+        run: |
+          set -euo pipefail
+          dir="$(mktemp -d)"
+          printf '%s' "$ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64" | base64 -d | openssl pkey -pubin -outform DER > "$dir/recipient.der"
+          printf '%s  recipient.der\n' "$RECIPIENT_SPKI_SHA256" > "$dir/recipient.sha256"
+          (cd "$dir" && sha256sum --check --strict recipient.sha256)
+          rm -rf "$dir"
+      - name: Read fixed ga4-funnel and encrypt the result
+        id: export
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
+          ANALYTICS_REPORT: ga4-funnel
+          ANALYTICS_EXECUTION: ${{ needs.gate.outputs.ga4_execution }}
+          ANALYTICS_START_DATE: ${{ needs.gate.outputs.ga4_start }}
+          ANALYTICS_END_DATE: ${{ needs.gate.outputs.ga4_end }}
+          ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64: ${{ vars.ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64 }}
+          ANALYTICS_ENCRYPTED_OUTPUT: ${{ runner.temp }}/acquisition-ga4/analytics.enc.json
+          # 成果物の大きさは公開される。平文を 2MiB 単位に詰め、大きさから結果の行数を読ませない（伸びしろを持たせた単位）。
+          ANALYTICS_PAD_BUCKET: '2097152'
+        run: node growth/scripts/export-analytics.mjs
+      - name: Retain encrypted report (including diagnostic failures)
+        if: always() && steps.export.outcome != 'skipped'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ${{ needs.gate.outputs.ga4_artifact }}
+          path: ${{ runner.temp }}/acquisition-ga4/analytics.enc.json
+          if-no-files-found: error
+          retention-days: 14
+
+  appsflyer:
+    needs: gate
+    if: github.ref == 'refs/heads/main' && needs.gate.outputs.appsflyer == 'true' && github.run_attempt == '1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # トークンはこの環境の secret。環境を参照するのはこのジョブだけ。deployment: false で配備の記録は作らない。
+    environment:
+      name: acquisition-appsflyer
+      deployment: false
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      # 値は渡さない。真偽だけを出力にする。
+      - name: AppsFlyer key present (boolean only)
+        id: key
+        env:
+          HAS_KEY: ${{ secrets.APPSFLYER_AGGREGATE_API_TOKEN != '' }}
+        run: echo "has_key=$HAS_KEY" >> "$GITHUB_OUTPUT"
+      # この名前は取り込み側（acquisition-handoff.mjs KEY_PENDING_STEP）が読む。変えるときは両方を同時に。
+      - name: AppsFlyer key pending (rest, not fail)
+        if: steps.key.outputs.has_key != 'true'
+        run: echo "::notice title=AppsFlyer::status=key_pending. The owner has not registered APPSFLYER_AGGREGATE_API_TOKEN yet; AppsFlyer rests and this run stays green."
+      # このジョブの action は SHA で固定する（鍵と同じジョブで動くため）。
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        if: steps.key.outputs.has_key == 'true'
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        if: steps.key.outputs.has_key == 'true'
+        with:
+          node-version: '24'
+      # 鍵を置く前に照合する。ここまでにリポジトリのコードは1行も走っていない。名前は取り込み側（PINS_STEP）が読む。
+      - name: Pinned code and recipient (before the token exists)
+        if: steps.key.outputs.has_key == 'true'
+        env:
+          ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64: ${{ vars.ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64 }}
+        run: |
+          set -euo pipefail
+          sha256sum --check --strict - <<'PINS'
+          6c56e5071b5fc573317abb5a80d74788882e8cd5b80ad1edf0d6e069c5201f2a  growth/vendor/appsflyer_aggregate.py
+          993ac602a85c04d22f650c64f49509114babcbc0430177b863b6b6fd33811772  growth/scripts/seal-acquisition-appsflyer.mjs
+          2741406d58d32b9b09ef67768c8a9e67a81b6767c0f772c19695fe1727095e6b  growth/lib/analytics-envelope.mjs
+          PINS
+          dir="$(mktemp -d)"
+          printf '%s' "$ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64" | base64 -d | openssl pkey -pubin -outform DER > "$dir/recipient.der"
+          printf '%s  recipient.der\n' "$RECIPIENT_SPKI_SHA256" > "$dir/recipient.sha256"
+          (cd "$dir" && sha256sum --check --strict recipient.sha256)
+          rm -rf "$dir"
+      # 環境の配備ブランチが main だけかを、鍵を置く前に照合する。読めない・外れているときは鍵を置かずに落ちる。
+      # 名前は取り込み側（ENVIRONMENT_STEP）が読む。
+      - name: Environment admits main only (before the token exists)
+        if: steps.key.outputs.has_key == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          base="repos/$GITHUB_REPOSITORY/environments/acquisition-appsflyer"
+          policy="$(gh api "$base" --jq '.deployment_branch_policy | "\(.protected_branches) \(.custom_branch_policies)"')" || policy=unreadable
+          rules="$(gh api "$base/deployment-branch-policies?per_page=100" --jq '[.branch_policies[] | "\(.type // "branch"):\(.name)"] | sort | join(",")')" || rules=unreadable
+          if [ "$policy" != "false true" ] || [ "$rules" != "branch:main" ]; then
+            echo "::error title=AppsFlyer::status=environment_unverified"
+            exit 1
+          fi
+          echo "status=environment_main_only"
+      # 読み取り器はトークンを env でも引数でもなく 0600 のファイルからだけ読む（appsflyer_aggregate.py read_token）。
+      - name: Materialize the token (value only in this step)
+        if: steps.key.outputs.has_key == 'true'
+        env:
+          APPSFLYER_AGGREGATE_API_TOKEN: ${{ secrets.APPSFLYER_AGGREGATE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$HOME/.config/appsflyer/simplememo"
+          chmod 700 "$HOME/.config/appsflyer" "$HOME/.config/appsflyer/simplememo"
+          printf '%s' "$APPSFLYER_AGGREGATE_API_TOKEN" > "$HOME/.config/appsflyer/simplememo/aggregate-api.token"
+          echo "status=token_materialized"
+      # 標準出力（行数とハッシュを含む）はログに出さず、非公開の一時ファイルへ。-I でスクリプトの隣のファイルを import させない。
+      - name: Read the aggregate with the pinned reader
+        id: read
+        if: steps.key.outputs.has_key == 'true'
+        env:
+          AF_START: ${{ needs.gate.outputs.af_start }}
+          AF_END: ${{ needs.gate.outputs.af_end }}
+        run: |
+          set -uo pipefail
+          umask 077
+          meta="$RUNNER_TEMP/acquisition-appsflyer-meta"
+          mkdir -p "$meta"
+          rc=0
+          python3 -I growth/vendor/appsflyer_aggregate.py --from "$AF_START" --to "$AF_END" \
+            --output-root "$RUNNER_TEMP/acquisition-appsflyer-read" > "$meta/stdout.json" 2> "$meta/stderr.txt" || rc=$?
+          echo "reader_exit=$rc" >> "$GITHUB_OUTPUT"
+          echo "status=reader_finished exit=$rc"
+      - name: Remove the token file (always, right after the read)
+        if: always() && steps.key.outputs.has_key == 'true'
+        run: |
+          rm -f "$HOME/.config/appsflyer/simplememo/aggregate-api.token"
+          test ! -e "$HOME/.config/appsflyer/simplememo/aggregate-api.token"
+      # トークンを消した後にだけ走る（前のステップがすべて成功したときだけ）。
+      - name: Seal the reader output for the pinned recipient
+        id: seal
+        if: steps.key.outputs.has_key == 'true'
+        env:
+          ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64: ${{ vars.ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64 }}
+          AF_START: ${{ needs.gate.outputs.af_start }}
+          AF_END: ${{ needs.gate.outputs.af_end }}
+          READER_EXIT: ${{ steps.read.outputs.reader_exit }}
+        run: >-
+          node growth/scripts/seal-acquisition-appsflyer.mjs
+          "$RUNNER_TEMP/acquisition-appsflyer-meta" "$RUNNER_TEMP/acquisition-appsflyer-read"
+          "$RUNNER_TEMP/acquisition-appsflyer-out/appsflyer.enc.json"
+      - name: Retain only the encrypted output
+        if: steps.seal.outcome == 'success'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ${{ needs.gate.outputs.af_artifact }}
+          path: ${{ runner.temp }}/acquisition-appsflyer-out/appsflyer.enc.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Remove the token and plaintext
+        if: always()
+        run: >-
+          rm -rf "$HOME/.config/appsflyer/simplememo/aggregate-api.token" "$RUNNER_TEMP/acquisition-appsflyer-meta"
+          "$RUNNER_TEMP/acquisition-appsflyer-read" "$RUNNER_TEMP/acquisition-appsflyer-out"
+      # 読み取りの失敗は封をして残したうえで赤にする（cron-health が拾う）。理由の符号は暗号化した成果物の中だけ。
+      - name: Reader outcome
+        if: steps.seal.outcome == 'success' && steps.seal.outputs.reader_ok != 'true'
+        run: |
+          echo "::error title=AppsFlyer::status=reader_failed"
+          exit 1
