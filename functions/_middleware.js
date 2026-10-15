@@ -107,6 +107,7 @@ const UNSERVED_DATA = new Set([
   "ingest-recovery.json",
   "injection-surface.json",
   "kpi-definitions.json",
+  "link-gate-deferrals.json",
   "model-eval-set.json",
   "model-routing.json",
   "monitoring-coverage.json",

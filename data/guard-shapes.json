@@ -1394,6 +1394,12 @@
       "expr": "value",
       "disposition": "前提",
       "note": "2026-10-13: canonicalJson の型の振り分け（null は object 扱いせず JSON.stringify(null) へ回す）。規則ではなく行の指紋の直列化で、欠けた値も \"null\" として指紋に入るので、行の中身が変われば指紋が変わる（自己テストで1項目の書き換えを拒否することを確認）。"
+    },
+    {
+      "file": "scripts/check-content-graph.mjs",
+      "expr": "html",
+      "disposition": "別の規則が落とす",
+      "note": "2026-10-14: validateChildLinks の linksOf。親ページの HTML が読めないとき null を返し、その親の [CHILD] を見ない。null になるのは親の URL がディスクに無いときだけで、その場合は同じ実行の validateGraph が [URL]（キーにページが無い・80行）か [PARENT]（親がキーでない・84行）で必ず落とす。**親が無いことを「子へリンクしている」と読む経路は無い。**[CHILD-EN] 側は exists() で英語の親子の実在を先に確かめ、無ければ対象外（英語版がまだ無い子）として明示的に飛ばす。"
     }
   ]
 }

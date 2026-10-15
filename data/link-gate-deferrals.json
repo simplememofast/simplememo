@@ -1,0 +1,104 @@
+{
+  "$comment": [
+    "リンクゲート（[HUB]/[ORPHAN] = scripts/seo-check.js、[CHILD]/[CHILD-EN] = scripts/check-content-graph.mjs）の**期限つき保留**。解釈は scripts/lib/link-deferrals.js の1本で、2本の検査が同じものを使う。",
+    "",
+    "【なぜ在るか】2026-10-14 にこの4規則を error にした日、要求されたリンクの一部は**今は足してはいけない**ものだった。凍結中の実験が持つハブ（日本語のハブを変えると、そこから生成される8言語のハブも変わる）と、#2031 で生成した日本語ページ7本の統合判定待ち。規則を消す・警告へ戻す・件数の上限で通す、のどれもせず、**名指しで・理由と期限をつけて**ここに書く。",
+    "",
+    "【範囲】page と、同じ翻訳グループ（data/i18n/pages.json）の**生成された翻訳**（グループの existing に無い言語）。手で書いている翻訳（例: /en/obsidian/）には効かない。kind \"hub\" は [HUB] のハブ・[CHILD]/[CHILD-EN] の親として、kind \"page\" は [HUB] の子・[ORPHAN] のページとして当たる。",
+    "",
+    "【失効】until（Asia/Tokyo の暦日・当日を含む）を過ぎるか、experiments に書いた実験が**すべて**閉じる（status が running/frozen 以外になる）と失効する。失効した保留は何も外さず、[DEFERRAL] <id> has lapsed が error として出る。リンクを足すか、新しい根拠で更新する。",
+    "",
+    "【外したものも黙らせない】効いている保留に当たった指摘は、保留の id・期限・理由つきの警告（seo-check の WARNINGS / content-graph の deferred 行）として毎回出る。",
+    "",
+    "【未使用は error】rules に書いた規則が、その規則を持つ検査で1件も当たらなければ [DEFERRAL] <id> rule <R> matches nothing。リンクを足したら、その行（か規則）をここから消す —— 残った行は、次に同じ場所が壊れたとき黙って外してしまう。",
+    "",
+    "【読めない台帳は何も外さない】このファイルが無い・壊れている・知らない実験・暦に無い日付・知らない kind/rule/キー・id の重複は、全部の指摘を error のまま出し、[DEFERRAL] で理由を足す。",
+    "",
+    "【項目】id（kebab-case・一意）/ kind（hub|page）/ page（日本語か翻訳元のページの URL パス）/ rules（HUB・ORPHAN・CHILD・CHILD-EN の部分集合。kind hub は HUB/CHILD/CHILD-EN、page は HUB/ORPHAN）/ experiments（実験 id。無ければ []）/ until / reason（決定の出どころつき）/ added。キーはすべて必須で、これ以外のキーは書き間違いとして落ちる。",
+    "",
+    "【2026-10-14 の実測】seo-check の 253件（[HUB] 234・[ORPHAN] 19）と content-graph の [CHILD] 23件は、すべて下の10行のどれかに当たり、当たらない指摘も当たらない行も無い。/obsidian/sync/ の [CHILD] 2件（→ /obsidian/backup/・/obsidian/troubleshooting/sync-conflict/）も同じ実験 internal-link-2026-09-02-003 の凍結による（実験の対象6ページに /obsidian/sync/ が入っている）。",
+    "【2026-10-15】internal-link-2026-09-02-003 を measurement_failed で閉じた（基準値を記録された定義で復元できない）ので、/obsidian/plugins/・/obsidian/sync/ の保留2行を消し、待たせていたリンクを足した。/obsidian/ は video-2026-08-11-five-clips の評価日 2026-11-14 まで保留を延ばした。"
+  ],
+  "deferrals": [
+    {
+      "id": "obsidian-hub-experiment-freeze",
+      "kind": "hub",
+      "page": "/obsidian/",
+      "rules": ["HUB", "CHILD"],
+      "experiments": ["video-2026-08-11-five-clips"],
+      "until": "2026-11-14",
+      "reason": "凍結中の実験 video-2026-08-11-five-clips の対象ページ。評価日は 2026-11-14（同じ長さの変更後の窓が 11-11 に閉じ、確定遅れ3日）。評価が記録されるまでハブを変えない（日本語のハブを変えると生成8言語のハブも変わる）。internal-link-2026-09-02-003 は 2026-10-15 に measurement_failed で閉じた。出典: growth/experiments/experiments.json",
+      "added": "2026-10-14"
+    },
+    {
+      "id": "consolidation-hold-best-note-to-self-apps-2026",
+      "kind": "page",
+      "page": "/blog/best-note-to-self-apps-2026",
+      "rules": ["HUB", "ORPHAN"],
+      "experiments": [],
+      "until": "2026-11-08",
+      "reason": "#2031 で生成した日本語ページ。既存の日本語ページと意図が重なり、10/09〜11/05 の GSC 窓（11/08頃）で統合を判定するまで日本語のハブ・日本語ページからリンクを足さない。出典: docs/seo/gsc-crawled-not-indexed-2026-10-14.md",
+      "added": "2026-10-14"
+    },
+    {
+      "id": "consolidation-hold-captio-shutdown-alternatives",
+      "kind": "page",
+      "page": "/blog/captio-shutdown-alternatives",
+      "rules": ["HUB"],
+      "experiments": [],
+      "until": "2026-11-08",
+      "reason": "#2031 で生成した日本語ページ。既存の日本語ページと意図が重なり、10/09〜11/05 の GSC 窓（11/08頃）で統合を判定するまで日本語のハブ・日本語ページからリンクを足さない。出典: docs/seo/gsc-crawled-not-indexed-2026-10-14.md",
+      "added": "2026-10-14"
+    },
+    {
+      "id": "consolidation-hold-fastest-note-app-iphone-2026",
+      "kind": "page",
+      "page": "/blog/fastest-note-app-iphone-2026",
+      "rules": ["HUB"],
+      "experiments": [],
+      "until": "2026-11-08",
+      "reason": "#2031 で生成した日本語ページ。既存の日本語ページと意図が重なり、10/09〜11/05 の GSC 窓（11/08頃）で統合を判定するまで日本語のハブ・日本語ページからリンクを足さない。出典: docs/seo/gsc-crawled-not-indexed-2026-10-14.md",
+      "added": "2026-10-14"
+    },
+    {
+      "id": "consolidation-hold-how-to-email-yourself-note-iphone",
+      "kind": "page",
+      "page": "/blog/how-to-email-yourself-note-iphone",
+      "rules": ["HUB"],
+      "experiments": [],
+      "until": "2026-11-08",
+      "reason": "#2031 で生成した日本語ページ。既存の日本語ページと意図が重なり、10/09〜11/05 の GSC 窓（11/08頃）で統合を判定するまで日本語のハブ・日本語ページからリンクを足さない。出典: docs/seo/gsc-crawled-not-indexed-2026-10-14.md",
+      "added": "2026-10-14"
+    },
+    {
+      "id": "consolidation-hold-inbox-zero-workflow-tips-2026",
+      "kind": "page",
+      "page": "/blog/inbox-zero-workflow-tips-2026",
+      "rules": ["HUB", "ORPHAN"],
+      "experiments": [],
+      "until": "2026-11-08",
+      "reason": "#2031 で生成した日本語ページ。既存の日本語ページと意図が重なり、10/09〜11/05 の GSC 窓（11/08頃）で統合を判定するまで日本語のハブ・日本語ページからリンクを足さない。出典: docs/seo/gsc-crawled-not-indexed-2026-10-14.md",
+      "added": "2026-10-14"
+    },
+    {
+      "id": "consolidation-hold-offline-first-comparison",
+      "kind": "page",
+      "page": "/blog/offline-first-comparison",
+      "rules": ["HUB"],
+      "experiments": [],
+      "until": "2026-11-08",
+      "reason": "#2031 で生成した日本語ページ。既存の日本語ページと意図が重なり、10/09〜11/05 の GSC 窓（11/08頃）で統合を判定するまで日本語のハブ・日本語ページからリンクを足さない。出典: docs/seo/gsc-crawled-not-indexed-2026-10-14.md",
+      "added": "2026-10-14"
+    },
+    {
+      "id": "consolidation-hold-iphone-shortcuts-email-guide",
+      "kind": "page",
+      "page": "/iphone-shortcuts-email-guide/",
+      "rules": ["ORPHAN"],
+      "experiments": [],
+      "until": "2026-11-08",
+      "reason": "#2031 で生成した日本語ページ（/note-to-email/ 等と意図が重なる）。10/09〜11/05 の GSC 窓（11/08頃）で統合を判定するまで日本語ページからリンクを足さない。出典: docs/seo/gsc-crawled-not-indexed-2026-10-14.md",
+      "added": "2026-10-14"
+    }
+  ]
+}

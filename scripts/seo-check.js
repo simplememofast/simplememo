@@ -2,7 +2,7 @@
 /**
  * SEO Validation Script for simplememofast.com
  * Checks: canonical, hreflang, title, description, noindex, structured data,
- * internal links, orphan pages.
+ * internal links, orphan pages and section-hub → child links (per language).
  *
  * Usage: node scripts/seo-check.js
  * Exit code 0 = all pass, 1 = warnings found, 2 = errors found
@@ -13,6 +13,7 @@ const path = require('path');
 const { collectHtmlFiles, toUrlPath } = require('./lib/site-files');
 const { getMetaContent, validatePage } = require('./lib/seo-page');
 const { createSiteChecks } = require('./lib/seo-site');
+const { readLinkDeferrals, todayTokyo } = require('./lib/link-deferrals');
 
 const SITE_URL = 'https://simplememofast.com';
 const ROOT_DIR = path.resolve(__dirname, '..');
@@ -249,6 +250,266 @@ function runSelfTest() {
     ['urlset root also passes', () => sitemapReport({ index: urlXml([target]) }).length === 0],
   ];
   for (const [name, check] of sitemapTests) t(`[SITEMAP] ${name}`, check());
+
+  // [ORPHAN]/[HUB] on an isolated bilingual site. The old orphan check counted
+  // any href="…" in any file, so the hreflang <link>s and the language switcher
+  // between a page's own translations made every page look linked — it reported
+  // 0 orphans on the day GSC listed 53 pages as "Discovered – currently not
+  // indexed" (2026-10-14). Each case below is one of the ways a page looked
+  // linked without being linked.
+  const linkDir = path.join(dir, 'links');
+  const LINK_PAGES = {
+    'index.html': '<a href="/guide/">Guide</a><a href="/solo">Solo</a><a href="/ja/box/">Box</a>',
+    'solo.html': '<a href="/">Top</a>',
+    'guide/index.html': `<a href="/">Top</a><a class="card" href='a'>A</a>`,
+    'guide/a.html': '<a href="/guide/">Guide</a>',
+    'en/index.html': '<a href="/en/guide/">Guide</a><a href="/en/solo">Solo</a><a href="/box/">Box</a>',
+    'en/solo.html': '<a href="/en/">Top</a><a hreflang="ja" href="/solo">日本語</a>',
+    'en/guide/index.html': '<a href="/en/">Top</a><a href="/en/guide/a">A</a>',
+    'en/guide/a.html': '<a href="/en/guide/">Guide</a>',
+    // The memo-inbox shape: box/ is the English page and ja/box/ its Japanese
+    // translation. Only data/i18n/pages.json knows that; the path says both are ja.
+    'box/index.html': '<a href="/en/">Top</a><a href="/ja/box/">日本語</a>',
+    'ja/box/index.html': '<a href="/">Top</a><a href="/box/">English</a>',
+  };
+  const LINK_REGISTRY = {
+    version: 1,
+    pages: [
+      ['index.html', 'en/index.html'], ['solo.html', 'en/solo.html'],
+      ['guide/index.html', 'en/guide/index.html'], ['guide/a.html', 'en/guide/a.html'],
+      ['ja/box/index.html', 'box/index.html'],
+    ].map(([ja, en]) => ({ pages: { ja, en } })),
+  };
+  // 保留台帳（data/link-gate-deferrals.json）は差し込む —— 実物の台帳も実物の
+  // 時計も読まない。空の台帳なら、保留が無かった頃と同じ判定になる。
+  const TODAY = '2026-10-14';
+  const NO_DEFERRALS = { ledger: { deferrals: [] }, experiments: [], today: TODAY };
+  /**
+   * 合成サイトを書いて checkOrphanPages を1回走らせる。`deferrals` は差し込む形か、
+   * 書いたサイトを受け取る関数（ディスクから読む経路を試すとき）。`raw` は HTML 以外のファイル。
+   */
+  const linkRun = (over = {}, {
+    sitemap = true, base = LINK_PAGES, registry = LINK_REGISTRY, deferrals = NO_DEFERRALS, raw = {},
+  } = {}) => {
+    fs.rmSync(linkDir, { recursive: true, force: true });
+    const files = { ...base, ...over };
+    for (const [file, body] of Object.entries(files)) {
+      fs.mkdirSync(path.dirname(path.join(linkDir, file)), { recursive: true });
+      fs.writeFileSync(path.join(linkDir, file), `<html><body>${body}</body></html>`);
+    }
+    for (const [file, text] of Object.entries(raw)) {
+      fs.mkdirSync(path.dirname(path.join(linkDir, file)), { recursive: true });
+      fs.writeFileSync(path.join(linkDir, file), text);
+    }
+    fs.mkdirSync(path.join(linkDir, 'data/i18n'), { recursive: true });
+    fs.writeFileSync(path.join(linkDir, 'data/i18n/pages.json'), JSON.stringify(registry));
+    if (sitemap) {
+      const locs = Object.keys(files).map((f) => `${SITE_URL}/${f.replace(/index\.html$/, '').replace(/\.html$/, '')}`);
+      fs.writeFileSync(path.join(linkDir, 'sitemap.xml'), indexXml('pages.xml'));
+      fs.writeFileSync(path.join(linkDir, 'pages.xml'), urlXml(locs));
+    }
+    errors.length = 0;
+    warnings.length = 0;
+    checkOrphanPages(linkDir, { quiet: true, deferrals: typeof deferrals === 'function' ? deferrals(linkDir) : deferrals });
+    const result = { errors: [...errors], warnings: [...warnings] };
+    errors.length = 0;
+    warnings.length = 0;
+    return result;
+  };
+  const linkReport = (over, opts) => linkRun(over, opts).errors;
+  const orphan = (r, url) => r.some((e) => e.startsWith('[ORPHAN]') && e.endsWith(`: ${url}`));
+  const hub = (r, parent, child) => r.some((e) => e.startsWith('[HUB]') && e.endsWith(`: ${parent} → ${child}`));
+  const noSolo = '<a href="/guide/">Guide</a><a href="/ja/box/">Box</a>';
+  const linkTests = [
+    // 揃ったサイトが黙らなければ、下の「落ちる」はノイズで通っているかもしれない。
+    ['揃ったサイトは何も言わない', () => linkReport().length === 0],
+    ['hreflang の <link> だけで繋がったページは孤立',
+      () => orphan(linkReport({ 'index.html': noSolo + '<link rel="alternate" hreflang="ja" href="/solo">' }), '/solo')],
+    ['翻訳の言語切替リンク（/en/solo → /solo）だけでは孤立',
+      () => orphan(linkReport({ 'index.html': noSolo }), '/solo')],
+    ['翻訳ではない別言語のページ（/en/ → /solo）からのリンクも数えない',
+      () => orphan(linkReport({ 'index.html': noSolo, 'en/index.html': LINK_PAGES['en/index.html'] + '<a href="/solo">Solo</a>' }), '/solo')],
+    ['言語は台帳で決まる（box/ は英語。日本語のトップからのリンクは数えない）',
+      () => orphan(linkReport({
+        'index.html': LINK_PAGES['index.html'] + '<a href="/box/">Box</a>',
+        'en/index.html': '<a href="/en/guide/">Guide</a><a href="/en/solo">Solo</a>',
+      }), '/box/')],
+    ['HTML コメントの中の <a> は数えない',
+      () => orphan(linkReport({ 'index.html': noSolo + '<!-- <a href="/solo">Solo</a> -->' }), '/solo')],
+    ['<script> と <template> の中の <a> は数えない',
+      () => orphan(linkReport({ 'index.html': noSolo + `<script>s = '<a href="/solo">';</script><template><a href="/solo">Solo</a></template>` }), '/solo')],
+    ['自分自身へのリンクは数えない',
+      () => orphan(linkReport({ 'index.html': noSolo, 'solo.html': '<a href="/">Top</a><a href="/solo">Solo</a>' }), '/solo')],
+    ['同じ言語のリンクなら通る（.html / index.html の形でも同じページ）',
+      () => linkReport({ 'index.html': '<a href="/guide/index.html">Guide</a><a href="solo.html">Solo</a><a href="/ja/box/">Box</a>' }).length === 0],
+    ['親ハブが子を載せていなければ落ちる（ほかのページから繋がっていても）', () => {
+      const r = linkReport({ 'guide/index.html': '<a href="/">Top</a>', 'solo.html': '<a href="/">Top</a><a href="/guide/a">A</a>' });
+      return hub(r, '/guide/', '/guide/a') && !orphan(r, '/guide/a');
+    }],
+    ['英語の親ハブも同じ（/en/guide/ → /en/guide/a）',
+      () => hub(linkReport({ 'en/guide/index.html': '<a href="/en/">Top</a>', 'en/solo.html': '<a href="/en/">Top</a><a href="/en/guide/a">A</a>' }), '/en/guide/', '/en/guide/a')],
+    ['言語ルートは親ハブ扱いしない（/ が /solo を、/en/ が /en/solo を載せなくてよい）',
+      () => linkReport({
+        'index.html': noSolo,
+        'guide/index.html': `<a href="/">Top</a><a class="card" href='a'>A</a><a href="/solo">Solo</a>`,
+        'en/index.html': '<a href="/en/guide/">Guide</a><a href="/box/">Box</a>',
+        'en/guide/index.html': '<a href="/en/">Top</a><a href="/en/guide/a">A</a><a href="/en/solo">Solo</a>',
+      }).length === 0],
+    ['sitemap が読めなければ落ちる（0件は「孤立なし」ではない）',
+      () => linkReport({}, { sitemap: false }).some((e) => e.startsWith('[ORPHAN]') && e.includes('cannot run'))],
+  ];
+  for (const [name, check] of linkTests) t(`[ORPHAN/HUB] ${name}`, check());
+
+  // 保留（data/link-gate-deferrals.json / lib/link-deferrals.js）。
+  //
+  // 2026-10-14 の実データの形を3言語に縮めた合成サイト: 日本語が元のハブ /hub/
+  // （英語は手で書き、韓国語は日本語から生成 —— /obsidian/ の形）と、英語が元で
+  // 日本語・韓国語が生成の held（#2031 の統合保留ページの形）。**外れてよいのは
+  // 生成された側だけ**で、手で書く英語ページは保留の外に残ることを毎回見る。
+  const LANG_DIRS = ['', 'en/', 'ko/'];
+  const DEFER_PAGES = Object.fromEntries(LANG_DIRS.flatMap((d) => [
+    [`${d}index.html`, `<a href="/${d}hub/">Hub</a>`],
+    [`${d}hub/index.html`, `<a href="/${d}">Top</a><a href="kid">Kid</a><a href="held">Held</a>`],
+    [`${d}hub/kid.html`, `<a href="/${d}hub/">Hub</a>`],
+    [`${d}hub/held.html`, `<a href="/${d}hub/">Hub</a>`],
+  ]));
+  const DEFER_REGISTRY = {
+    version: 1,
+    pages: [
+      ...['index.html', 'hub/index.html', 'hub/kid.html'].map((ja) => ({
+        source: ja, sourceLocale: 'ja', existing: { ja, en: `en/${ja}` },
+        pages: { ja, en: `en/${ja}`, ko: `ko/${ja}` },
+      })),
+      { source: 'en/hub/held.html', sourceLocale: 'en', existing: { en: 'en/hub/held.html' },
+        pages: { ja: 'hub/held.html', en: 'en/hub/held.html', ko: 'ko/hub/held.html' } },
+    ],
+  };
+  /** ハブが kid を載せない（kid はトップから繋がっているので孤立はしない）。言語を選べる。 */
+  const noKid = (dirs = LANG_DIRS) => Object.fromEntries(dirs.flatMap((d) => [
+    [`${d}index.html`, `<a href="/${d}hub/">Hub</a><a href="/${d}hub/kid">Kid</a>`],
+    [`${d}hub/index.html`, `<a href="/${d}">Top</a><a href="held">Held</a>`],
+  ]));
+  /** ハブが held を載せず、ほかの同じ言語のページも載せない（[HUB] と [ORPHAN] の両方）。 */
+  const noHeld = (dirs = LANG_DIRS) => Object.fromEntries(dirs.map((d) =>
+    [`${d}hub/index.html`, `<a href="/${d}">Top</a><a href="kid">Kid</a>`]));
+  const EXPERIMENTS = [
+    { id: 'exp-open', status: 'running' }, { id: 'exp-frozen', status: 'frozen' },
+    { id: 'exp-done', status: 'evaluated' }, { id: 'exp-cancelled', status: 'cancelled' },
+  ];
+  const hubHold = {
+    id: 'hub-hold', kind: 'hub', page: '/hub/', rules: ['HUB'], experiments: ['exp-open'],
+    until: '2026-11-08', reason: '凍結中の検体', added: TODAY,
+  };
+  const pageHold = {
+    id: 'held-hold', kind: 'page', page: '/hub/held', rules: ['HUB', 'ORPHAN'], experiments: [],
+    until: '2026-11-08', reason: '統合待ちの検体', added: TODAY,
+  };
+  const holds = (...deferrals) => ({ ledger: { deferrals }, experiments: EXPERIMENTS, today: TODAY });
+  const deferRun = (over, deferrals, opts = {}) =>
+    linkRun(over, { base: DEFER_PAGES, registry: DEFER_REGISTRY, deferrals, ...opts });
+  /** 警告に、その指摘が保留の id・期限・理由つきで出ているか。 */
+  const deferredAs = (r, tail, d) => r.warnings.some((w) => w.startsWith('[DEFERRED] ')
+    && w.includes(`${tail} — deferral ${d.id} until ${d.until}: ${d.reason}`));
+  const deferral = (r, needle) => r.errors.some((e) => e.startsWith('[DEFERRAL] ') && e.includes(needle));
+  const allHubErrors = (r) => LANG_DIRS.every((d) => hub(r.errors, `/${d}hub/`, `/${d}hub/kid`));
+  const deferralTests = [
+    // 下の「外れる」「外れない」の前提。揃っていれば何も言わず、壊せば3言語とも error。
+    ['合成サイトは揃っていれば何も言わない', () => {
+      const r = deferRun({}, holds());
+      return r.errors.length === 0 && r.warnings.length === 0;
+    }],
+    ['保留が無ければ、ハブの漏れは3言語とも error', () => {
+      const r = deferRun(noKid(), holds());
+      return r.errors.length === 3 && allHubErrors(r);
+    }],
+    ['**ハブの保留は日本語のハブと生成された翻訳（ko）だけを警告へ下ろし、手で書く英語のハブは落とす**', () => {
+      const r = deferRun(noKid(), holds(hubHold));
+      return r.errors.length === 1 && hub(r.errors, '/en/hub/', '/en/hub/kid')
+        && r.warnings.length === 2
+        && deferredAs(r, ': /hub/ → /hub/kid', hubHold) && deferredAs(r, ': /ko/hub/ → /ko/hub/kid', hubHold);
+    }],
+    ['**ページの保留は [HUB] の子と [ORPHAN] を警告へ下ろす（生成された日本語・韓国語）。翻訳元の英語は落とす**', () => {
+      const r = deferRun(noHeld(), holds(pageHold));
+      return r.errors.length === 2
+        && hub(r.errors, '/en/hub/', '/en/hub/held') && orphan(r.errors, '/en/hub/held')
+        && r.warnings.length === 4
+        && deferredAs(r, ': /hub/ → /hub/held', pageHold) && deferredAs(r, ': /hub/held', pageHold)
+        && deferredAs(r, ': /ko/hub/ → /ko/hub/held', pageHold) && deferredAs(r, ': /ko/hub/held', pageHold);
+    }],
+    ['**期限を過ぎた保留は何も外さず、[DEFERRAL] has lapsed を1件だけ足す**', () => {
+      const r = deferRun(noKid(), holds({ ...hubHold, added: '2026-10-01', until: '2026-10-13' }));
+      const lapsed = r.errors.filter((e) => e.startsWith('[DEFERRAL] hub-hold has lapsed (until 2026-10-13 has passed'));
+      return allHubErrors(r) && lapsed.length === 1 && r.errors.length === 4 && r.warnings.length === 0;
+    }],
+    ['期限の当日はまだ効いている（Asia/Tokyo の暦日・当日を含む）', () => {
+      const r = deferRun(noKid(), holds({ ...hubHold, until: TODAY }));
+      return r.errors.length === 1 && r.warnings.length === 2;
+    }],
+    ['todayTokyo は UTC 15:00 で日付が変わる（CI のランナーは UTC）', () =>
+      todayTokyo(new Date('2026-11-08T14:59:59Z')) === '2026-11-08'
+        && todayTokyo(new Date('2026-11-08T15:00:00Z')) === '2026-11-09'],
+    ['**名指しした実験がすべて閉じたら、期限前でも失効**', () => {
+      const r = deferRun(noKid(), holds({ ...hubHold, experiments: ['exp-done', 'exp-cancelled'] }));
+      return allHubErrors(r) && deferral(r, 'hub-hold has lapsed (every experiment it waits on is closed: exp-done=evaluated, exp-cancelled=cancelled)')
+        && r.warnings.length === 0;
+    }],
+    ['実験が1つでも開いていれば効く（running も frozen も開いている）', () =>
+      ['exp-open', 'exp-frozen'].every((open) => {
+        const r = deferRun(noKid(), holds({ ...hubHold, experiments: ['exp-done', open] }));
+        return r.errors.length === 1 && r.warnings.length === 2;
+      })],
+    ['**1件も当たらない保留は落ちる**（リンクを足したら台帳から消す）', () => {
+      const r = deferRun({}, holds(hubHold));
+      return r.errors.length === 1 && deferral(r, 'hub-hold rule HUB matches nothing — remove it');
+    }],
+    ['規則ごとに見る（[HUB] しか出ていない held の保留は、ORPHAN が未使用で落ちる）', () => {
+      // 日本語のハブだけが held を載せず、日本語のトップは載せている → [HUB] だけが出る
+      const r = deferRun({ ...noHeld(['']), 'index.html': '<a href="/hub/">Hub</a><a href="/hub/held">Held</a>' },
+        holds(pageHold));
+      return r.errors.length === 1 && deferral(r, 'held-hold rule ORPHAN matches nothing — remove it')
+        && r.warnings.length === 1 && deferredAs(r, ': /hub/ → /hub/held', pageHold);
+    }],
+    ['content-graph の規則（CHILD）だけの保留は、seo-check では当たり外れを数えない', () => {
+      const r = deferRun({}, holds({ ...hubHold, rules: ['CHILD'] }));
+      return r.errors.length === 0 && r.warnings.length === 0;
+    }],
+    ['**知らない実験を名指しした台帳は何も外さない**', () => {
+      const r = deferRun(noKid(), holds({ ...hubHold, experiments: ['exp-typo'] }));
+      return allHubErrors(r) && deferral(r, 'unknown experiment "exp-typo"') && r.warnings.length === 0;
+    }],
+    ...[
+      ['キーの綴り違い（deferals）', { ledger: { deferals: [hubHold] }, experiments: EXPERIMENTS, today: TODAY }],
+      ['台帳が null', { ledger: null, experiments: EXPERIMENTS, today: TODAY }],
+      ['実験台帳が読めない', { ledger: { deferrals: [hubHold] }, experiments: undefined, today: TODAY }],
+      ['暦に無い until', holds({ ...hubHold, until: '2026-11-31' })],
+      ['知らない kind', holds({ ...hubHold, kind: 'hubs' })],
+      ['知らない rule', holds({ ...hubHold, rules: ['HUBS'] })],
+      ['kind に意味の無い rule（hub の ORPHAN）', holds({ ...hubHold, rules: ['HUB', 'ORPHAN'] })],
+      ['id の重複', holds(hubHold, { ...pageHold, id: 'hub-hold' })],
+      ['理由が空', holds({ ...hubHold, reason: ' ' })],
+      ['知らないキー（untill）', holds({ ...hubHold, untill: '2026-11-08' })],
+      ['experiments が無い', holds({ ...hubHold, experiments: undefined })],
+      ['today が日付でない', { ...holds(hubHold), today: '2026-10-14T00:00' }],
+    ].map(([what, input]) => [`**壊れた台帳は何も外さない** — ${what}`, () => {
+      const r = deferRun(noKid(), input);
+      return allHubErrors(r) && r.errors.some((e) => e.startsWith('[DEFERRAL] ')) && r.warnings.length === 0;
+    }]),
+    ['**台帳ファイルが無ければ落ちる**（コミットしてある台帳が無いのは「保留なし」ではない）', () => {
+      const r = deferRun(noKid(), (site) => readLinkDeferrals(site, { today: TODAY }),
+        { raw: { 'growth/experiments/experiments.json': JSON.stringify({ experiments: EXPERIMENTS }) } });
+      return allHubErrors(r) && deferral(r, 'data/link-gate-deferrals.json is unreadable') && r.warnings.length === 0;
+    }],
+    ['ディスクの台帳も差し込みと同じに読む', () => {
+      const r = deferRun(noKid(), (site) => readLinkDeferrals(site, { today: TODAY }), {
+        raw: {
+          'growth/experiments/experiments.json': JSON.stringify({ experiments: EXPERIMENTS }),
+          'data/link-gate-deferrals.json': JSON.stringify({ deferrals: [hubHold] }),
+        },
+      });
+      return r.errors.length === 1 && r.warnings.length === 2;
+    }],
+  ];
+  for (const [name, check] of deferralTests) t(`[DEFERRAL] ${name}`, check());
 
   fs.rmSync(dir, { recursive: true, force: true });
 
