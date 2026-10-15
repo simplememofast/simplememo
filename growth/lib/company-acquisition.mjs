@@ -148,6 +148,38 @@ export function ownedLinkPeriodRate(connection) {
     scope: 'AppsFlyer report-period attributed installs / reported link clicks, limited to the reserved pilot. Attribution delay can produce a ratio above 100%. Not all website visits, not all installations, and not a visitor-cohort CVR.' };
 }
 
+// Diagnostic only (owner decision 2026-10-14; measurement_changes 2026-09-16).
+// Approximate fingerprints over existing ga4-funnel dimensions, so the SQL, the
+// official rate, CTA quality gates and experiment decisions stay unchanged.
+// Both groups can contain people: excluded clicks stay visible, never dropped.
+const AUTOMATION_GROUPS = {
+  // pagespeed-audit: Lighthouse mobile emulation loads production / and /en/.
+  ci_lighthouse: r => ['/', '/en/'].includes(r.landing_path) && r.device_category === 'mobile' && r.device_language === 'en-us',
+  // No-referrer desktop English Direct; mostly UA-rotating crawlers.
+  bot_like: r => r.device_category === 'desktop' && /^en(?:-|$)/.test(r.device_language ?? ''),
+};
+export const automationGroup = r => r?.session_channel === 'Direct' && r.landing_referrer_status === 'missing'
+  ? Object.keys(AUTOMATION_GROUPS).find(k => AUTOMATION_GROUPS[k](r)) ?? null : null;
+
+function automationExcluded(production, valid, quality) {
+  // sum() keeps "no rows" unknown; inside a valid report an empty group is 0.
+  const total = (rows, key) => rows.length ? sum(rows, key) : 0;
+  const kept = production.filter(r => !automationGroup(r));
+  const sessions = total(kept,'observed_started_sessions'), clicks = total(kept,'sessions_with_own_app_click_24h');
+  const anyClicks = total(kept,'sessions_with_any_app_route_click_24h');
+  const ok = valid && validCount(sessions) && validCount(clicks) && clicks <= sessions;
+  const anyOk = ok && validCount(anyClicks) && anyClicks <= sessions;
+  const by = key => Object.fromEntries(Object.keys(AUTOMATION_GROUPS).map(k =>
+    [k, ok ? total(production.filter(r => automationGroup(r) === k), key) : null]));
+  return { definition_version: 'ga4-automation-excluded-diagnostic-v1', replaces_official_rate: false, quality_state: quality,
+    excluded_sessions: by('observed_started_sessions'), excluded_store_click_sessions: by('sessions_with_own_app_click_24h'),
+    remaining_sessions: ok ? sessions : null, sessions_with_store_click: ok ? clicks : null,
+    store_click_session_rate: ok && sessions > 0 ? clicks / sessions : null,
+    sessions_with_any_app_route_click: anyOk ? anyClicks : null,
+    any_app_route_click_session_rate: anyOk && sessions > 0 ? anyClicks / sessions : null,
+    scope: 'Diagnostic only. Same production rows as observed_store_click_session_rate minus approximate CI Lighthouse (Direct, no referrer, / or /en/, mobile, en-us) and bot-like (Direct, no referrer, desktop, en-*) fingerprints. Never replaces the official rate, the Organic CTA measurement or an experiment value.' };
+}
+
 export function siteAcquisition(connections = {}, cta = null) {
   const ga = connections.ga4, asc = connections.app_store_connect, af = connections.appsflyer;
   const rows = ga?.reports?.find(r => r.file === 'ga4-funnel.sql')?.result;
@@ -156,14 +188,16 @@ export function siteAcquisition(connections = {}, cta = null) {
   const anyClicks = sum(production,'sessions_with_any_app_route_click_24h');
   const anyValid = ga?.status === 'CONNECTED' && validCount(sessions) && validCount(anyClicks) && anyClicks <= sessions;
   const gaValid = ga?.status === 'CONNECTED' && validCount(sessions) && validCount(clicks) && clicks <= sessions;
+  const gaState = gaValid ? (cta?.status ?? 'quality_unverified') : 'unavailable';
   return { schema_version: 1,
-    ga4: { state: gaValid ? (cta?.status ?? 'quality_unverified') : 'unavailable',
+    ga4: { state: gaState,
       window: ga?.window ?? null, timezone: 'Asia/Tokyo',
       observed_production_sessions: gaValid ? sessions : null,
       sessions_with_store_click: gaValid ? clicks : null,
       observed_store_click_session_rate: gaValid && sessions > 0 ? clicks / sessions : null,
       sessions_with_any_app_route_click: anyValid ? anyClicks : null,
       observed_any_app_route_click_session_rate: anyValid && sessions > 0 ? anyClicks / sessions : null,
+      automation_excluded_diagnostic: automationExcluded(production, gaValid, gaState),
       missing_landing_sessions: rows ? (rows.some(r=>r.landing_scope==='missing_landing_page')
         ? sum(rows.filter(r=>r.landing_scope==='missing_landing_page'),'observed_started_sessions') : 0) : null,
       source: ga?.evidence ?? null,
@@ -195,9 +229,11 @@ export function acquisitionReport(a) {
   const rate = a.ga4?.observed_store_click_session_rate;
   const anyRate = a.ga4?.observed_any_app_route_click_session_rate;
   const linkRate = a.appsflyer?.owned_link_period_rate;
+  const d = a.ga4?.automation_excluded_diagnostic, pct = v => Number.isFinite(v) ? (v*100).toFixed(2)+'%' : 'unknown';
   const lines = ['', '## Website acquisition', '',
     `GA4 (${a.ga4?.window?.start ?? '?'}..${a.ga4?.window?.end ?? '?'} JST): ${number(a.ga4?.sessions_with_store_click)} Store-click sessions / ${number(a.ga4?.observed_production_sessions)} observed production sessions; ${Number.isFinite(rate) ? (rate*100).toFixed(2)+'%' : 'unknown'}; quality ${a.ga4?.state}.`,
     `GA4 all app routes (deduplicated): ${number(a.ga4?.sessions_with_any_app_route_click)} click sessions; ${Number.isFinite(anyRate) ? (anyRate*100).toFixed(2)+'%' : 'unknown'}. Direct Store and OneLink sessions are not added together.`,
+    `GA4 diagnostic only, not the official rate (excluding CI Lighthouse ${number(d?.excluded_sessions?.ci_lighthouse)} and bot-like ${number(d?.excluded_sessions?.bot_like)} sessions): ${number(d?.sessions_with_store_click)} Store-click sessions / ${number(d?.remaining_sessions)} sessions; ${pct(d?.store_click_session_rate)}; all app routes ${pct(d?.any_app_route_click_session_rate)}. Excluded Store-click sessions: CI ${number(d?.excluded_store_click_sessions?.ci_lighthouse)}, bot-like ${number(d?.excluded_store_click_sessions?.bot_like)}. Quality ${d?.quality_state ?? 'unavailable'} still applies.`,
     `Apple collection: ${a.apple?.state ?? 'not_collected'}.`];
   for (const [key,r] of Object.entries(a.apple?.reports ?? {})) {
     lines.push(`- ${key} (${r.window?.min ?? '?'}..${r.window?.max ?? '?'} UTC): own-site first downloads ${number(r.own_site_first_time_downloads?.observed_count)}; ${r.own_site_first_time_downloads?.state ?? r.state}.`);

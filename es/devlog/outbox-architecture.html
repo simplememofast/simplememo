@@ -380,7 +380,10 @@
           <!-- Section 3 -->
           <h2 id="reading-03" data-ce-number="03">Código de SendManager</h2>
           <p>La función <code>send()</code> de SendManager es el punto de entrada del patrón de Outbox. Primero, guárdelo en la Outbox, cola sin una conexión de red y envíelo inmediatamente si hay una conexión.</p>
-<pre tabindex="0"><code>func send(message: String, completion: @escaping (SendResult) -&gt; Void) {
+<pre tabindex="0"><code>// 保存完了と送信結果を分ける説明用の簡略API
+@MainActor
+func send(message: String, onSaved: () -&gt; Void,
+          completion: @escaping (SendResult) -&gt; Void) {
     // まずOutboxに保存（クラッシュや圏外で失わないように）
     let outboxMessage: OutboxMessage
     do {
@@ -389,6 +392,9 @@
         DispatchQueue.main.async { completion(.failure(error)) }
         return
     }
+
+    // 同期保存に成功した場合だけ、メインスレッドでUIへ通知する
+    onSaved()
 
     // ネットワーク接続がない場合はキューに入れたことを通知
     guard NetworkMonitor.shared.isConnected else {
@@ -458,14 +464,17 @@
     isSending = true
     sendBarButton.isEnabled = false
 
-    // Animation → UI clear (does NOT wait for network!)
-    performSendAnimation {
-        self.clearTextView()
-        PerformanceLogger.shared.endSendToReset()
-    }
-
-    // Send is async. Does not block UI.
-    SendManager.shared.send(message: message) { [weak self] result in
+    SendManager.shared.send(message: message, onSaved: { [weak self] in
+        // 端末への保存成功後にだけ消す。ネットワーク応答は待たない。
+        self?.performSendAnimation { [weak self] in
+            guard let self = self else { return }
+            // アニメーション中に編集された入力は残す。
+            if self.textView.text == message {
+                self.clearTextView()
+            }
+            PerformanceLogger.shared.endSendToReset()
+        }
+    }) { [weak self] result in
         self?.isSending = false
         self?.updateSendButtonState()
         switch result {
@@ -478,7 +487,7 @@
         }
     }
 }</code></pre>
-          <p><code>performSendAnimation</code> y <code>SendManager.shared.send</code> se ejecutan de forma completamente independiente. La animación se completa en 0.25 segundos, y la vista de texto se borra. La transmisión de red procede de forma asíncrona en segundo plano y no bloquea la interfaz de usuario en absoluto.</p>
+          <p>En este ejemplo simplificado, <code>onSaved</code> se llama solo después de guardar correctamente en el dispositivo; a partir de ese momento se ejecuta la animación y se borra el texto introducido. Si falla el guardado, el texto se conserva. <code>completion</code> es una notificación independiente del resultado del envío o de la incorporación a la cola; el borrado de la interfaz no espera una respuesta de la red.</p>
           <p>El objetivo de Send-to-Reset es <strong>la falta que no se siente esperando</strong>. 0.25 segundos incluyendo animación. Inmediatamente después de tocar el botón de enviar, el usuario puede comenzar a escribir la siguiente nota. Este es el estilo Captio UX.</p>
 
           <!-- FAQ -->
