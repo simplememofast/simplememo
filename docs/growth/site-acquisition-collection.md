@@ -14,6 +14,12 @@ in the private Company state directory, never in site assets.
 - GA4 observed production landing sessions, sessions with a direct Store click
   within 24 hours, their weighted click-session rate and missing landing count.
   The original source period and quality block remain explicit.
+- Beside it, a diagnostic-only `automation_excluded_diagnostic` repeats the
+  same rows without two approximate fingerprints: CI Lighthouse (Direct, no
+  referrer, landing `/` or `/en/`, mobile, `en-us`; see `measurement_changes`
+  2026-09-16) and bot-like (Direct, no referrer, desktop, `en-*`). Excluded
+  click sessions stay visible. It never replaces the GA4 rate, the Organic CTA
+  measurement or an experiment value, and the same quality state applies.
 - Apple first-time downloads for the own-site referrer and the two existing
   `web_obsidian_v1` / `web_other_v1` campaigns. Only the joined download-type /
   referrer / campaign rows qualify. Updates, restores and redownloads cannot
