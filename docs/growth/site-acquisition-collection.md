@@ -20,6 +20,12 @@ in the private Company state directory, never in site assets.
   2026-09-16) and bot-like (Direct, no referrer, desktop, `en-*`). Excluded
   click sessions stay visible. It never replaces the GA4 rate, the Organic CTA
   measurement or an experiment value, and the same quality state applies.
+- `obsidian_hub_pilot` reads the OneLink pilot (growth/ONELINK_PILOT.md) from
+  the same rows: production sessions landing on the nine pilot hubs that reach
+  the store by any route within 24 hours (direct Apple and OneLink, deduplicated),
+  and OneLink pilot impression sessions that click (QA excluded; clicks without
+  a recorded impression are shown, not counted as exposed). It sits beside the
+  official rate and does not replace it.
 - Apple first-time downloads for the own-site referrer and the two existing
   `web_obsidian_v1` / `web_other_v1` campaigns. Only the joined download-type /
   referrer / campaign rows qualify. Updates, restores and redownloads cannot
