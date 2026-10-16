@@ -21,8 +21,8 @@ in the private Company state directory, never in site assets.
   click sessions stay visible. It never replaces the GA4 rate, the Organic CTA
   measurement or an experiment value, and the same quality state applies.
 - `obsidian_hub_pilot` reads the OneLink pilot (growth/ONELINK_PILOT.md) from
-  the same rows: production sessions landing on the nine pilot hubs that reach
-  the store by any route within 24 hours (direct Apple and OneLink, deduplicated),
+  the same rows: production sessions landing on the nine pilot hubs with a
+  Store-link click within 24 hours (direct Apple and OneLink, deduplicated),
   and OneLink pilot impression sessions that click (QA excluded; clicks without
   a recorded impression are shown, not counted as exposed). It sits beside the
   official rate and does not replace it.
@@ -61,6 +61,145 @@ Website visit-to-install CVR stays unavailable until a common attributable
 cohort exists. GA4's click-session rate is useful as a descriptive web metric;
 it is not install CVR. Dividing Apple or AppsFlyer downloads by GA4 sessions
 would mix attribution, timezone, consent and population coverage.
+
+## Agreed pilot scope and supplementary website observations
+
+Retained AppsFlyer reports are bound to their verified collection receipt on
+both display and reuse: the receipt's CSV SHA-256 and valid inclusive dates
+must match the retained CSV/result pair and its `from`/`to` parameters. A
+self-consistent replacement pair is insufficient. Missing or mismatched
+receipt metadata blocks the observation; it does not trigger a replacement
+query or turn a failed receipt into a success.
+
+The owner-approved completion scope remains the nine hero placements and
+three metrics defined in [ONELINK_PILOT.md](../../growth/ONELINK_PILOT.md):
+the GA4 landing-session to Store-link-click rate, AppsFlyer attributed pilot
+`Installs`, and the AppsFlyer report-period `Installs` / OneLink `Clicks` ratio.
+The last is a formal observation only when the existing 28-day report and
+zero-missing-date conditions hold; earlier post-start observations remain
+diagnostic. The existing source and quality requirements still apply.
+
+The additional site-wide PV and observed browser visitor totals are supporting
+web observations. A matched website-to-install cohort, coverage of all site
+routes, or a common GA4/AppsFlyer window is not an added completion requirement
+for the pilot. No new collection purpose, identifier, consent flow or route
+rollout is authorized by this reporting change.
+
+Store-link clicks do not prove arrival at the App Store. AppsFlyer `Installs`,
+API first-launch observations and Apple first-time downloads remain distinct
+source metrics; none is a payment or a count of verified new people. Revenue
+and purchase metrics keep their own sources and observation periods.
+
+### Optional whole-site install readiness
+
+`website_install_cvr` now retains its existing `value: null` and
+`state: not_measurable`, and exposes the evidence needed to answer the wider
+website-to-install question. This is consumed by the existing
+`currentSiteAcquisition` / `acquisition-status` and `acquisitionReport` paths;
+it adds no collection, identifier, SDK, consent change or publication.
+
+- **Denominators:** PV means page-view events, including repeated views.
+  Visitors means distinct observed browser identifiers. Sessions means the fixed
+  funnel's observed production landing sessions; one visitor can start several
+  sessions. The extended fixed export supplies site-wide identified page-view
+  counts and distinct observed browser identifiers for the inclusive JST event
+  dates. These are not verified people or the 24-hour session-start cohort.
+  Missing totals in older exports stay `null`; sessions are never renamed to
+  either unit. Every denominator keeps its source window and quality state.
+- **Numerator:** the existing AppsFlyer `Installs` field for exactly `owned_web`
+  / `obsidian_bridge_pilot_v1` is a reported pilot count, not a verified count
+  of new people, Apple first downloads, or the API's first-launch observations.
+  A present zero is retained; absent rows, failed receipts and unknown fields
+  never become zero. Reinstall semantics and internal-use exclusion still
+  require evidence. QA and Organic remain separate.
+- **Coverage:** nine hub hero placements share one link, so the install count
+  has no page/language breakdown. Other direct Apple links, QR, Smart App
+  Banner and the independent English hub hero are outside this pilot's
+  attribution. Consent, ATT denial/restriction and prior in-app refusal limit
+  app collection; GA4 and AppsFlyer do not observe identical populations.
+- **Periods:** both report windows are explicitly inclusive JST dates. Their
+  equality is reported, but even equal calendar windows do not establish a
+  common cohort. The GA4 session's 24-hour click follow-up, five-calendar-day
+  export maturity and AppsFlyer's 28-day report requirement are three separate
+  rules. None establishes the account's click-attribution lookback, which
+  remains `null` / `account_setting_unverified`. Delayed attribution can cross
+  a window boundary.
+- **Readiness:** use the retained report dates, not the current date or a
+  successful workflow name. Production started at 2026-10-15 11:31 JST; the
+  first complete day is October 16. A GA4 window containing that complete day
+  can first be collected October 21, and seven complete post-start days can
+  first be collected October 27. These are earliest collection dates, not
+  proof of receipt, successful attribution or experiment eligibility. Earlier,
+  partial-launch-day and mixed pre/post windows are labeled explicitly.
+
+`blockers` applies only to the optional whole-site visit-to-install CVR, as
+recorded by `blockers_scope` and `pilot_completion_gate: false`. These gaps do
+not withhold the three pilot observations or change their completion contract.
+`pilot_readiness` describes source-window coverage, not a pass/fail decision
+for the pilot. `estimated_value` remains `null`: the current
+aggregates cannot support a site-wide conversion estimate. Do not multiply
+the GA4 click rate by the AppsFlyer period ratio or divide the pilot installs
+by GA4 sessions to manufacture one. Those operations combine different
+coverage, denominators, consent populations and attribution periods.
+
+Keep the existing collection and status paths; do not create a second
+collector. Run a collection command only within its authorized operational
+scope: `collect` / `acquisition-ingest` also consumes the Apple/iOS producer,
+and a runner's `--status` option is not necessarily read-only. If the approved
+recipient key is unavailable, leave encrypted artifacts unadmitted and report
+that condition. Do not copy or create a key to make this metric ready.
+After admission, keep the three existing observations separate: visit-to-store
+click rate, attributed pilot installs, and installs/link-clicks period ratio.
+The PV/visitor totals added here describe the existing GA4 observations; they
+are not a denominator for the pilot install count. Broader route coverage or
+common-cohort linkage needs a separate measurement/privacy decision.
+
+Validation remains `node --test growth/lib/company-acquisition.test.mjs`.
+The new cases cover the denominator units, zero versus absence, source failures,
+unmatched periods even with equal dates, partial launch days, calendar maturity,
+unverified lookback, scope limits and the rendered private report.
+
+### Visit denominator implementation (requires live validation before release)
+
+The existing `ga4-funnel.sql` SELECT now adds `site_window_page_views` and
+`site_window_observed_visitors`, using only the existing `identified` CTE,
+production hostname and page-view event dates within the requested JST window.
+The second count deduplicates existing `user_pseudo_id` over the entire window;
+it must not be calculated by adding per-page, language or daily users. Events
+without existing user/session keys remain excluded and visible in the attached
+quality report. Internal use and bots are not proven excluded.
+
+Both whole-window totals repeat on each grouped funnel row to preserve existing
+session groups and metrics. `websiteVisitTotals` requires all repeated totals
+to agree, reads them once and rejects missing, invalid or conflicting values.
+An empty report is unknown; an explicit consistent zero stays zero. The prior
+exact query hash remains admitted for its unchanged CTA metric, while its absent
+visit totals stay unknown. No raw browser identifier is added to the output.
+
+This changes denominator aggregation, not web-to-app attribution. It does not
+add a query, table, event, SDK, identifier, provider request or schedule; the
+existing dry-run, byte caps, quality and maturity gates remain. No live SQL
+execution or publication is implied by the source change. Validate the SQL
+behavior suite and the existing dry-run/export path before release.
+
+### Any future whole-site cohort metric needs a separate decision
+
+The current aggregate reports cannot identify which observed site visitors
+subsequently started the app for the first time. This change chooses no new
+attribution duration or visitor-to-app linkage. If a broader cohort metric is
+requested later, agree its population, qualifying routes, definition of a new
+installation, attribution duration, exclusions and data maturity before
+implementation. The account's click lookback and the report period must remain
+separate. Unresolved identity, consent and cross-device cases remain unknown.
+
+Do not relabel the nine-placement campaign as site-wide or replace its links
+to satisfy this diagnostic. Preserve the pilot and QA series and record the
+actual start of any separately approved rollout. Do not automatically add
+cross-product identifiers, raw-data access, fingerprinting or app changes.
+Continue reporting web visits, Store-link clicks, AppsFlyer pilot `Installs`,
+API first-launch observations, Apple downloads and payments separately. The
+agreed AppsFlyer installs/clicks period ratio is not the fraction of those web
+visitors who installed and is not an exact visitor-cohort CVR.
 
 AppsFlyer report access and app SDK collection are separate. When this handoff
 was implemented (2026-10-06), the reviewed iOS main kept acquisition

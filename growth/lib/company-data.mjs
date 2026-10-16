@@ -41,10 +41,22 @@ export function collectionWindow(source, now = new Date()) {
   return { start, end };
 }
 
-export function verifyAppsFlyer(directory) {
+const validReportDay = day => typeof day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(day)
+  && Number.isFinite(Date.parse(day)) && new Date(day).toISOString().slice(0, 10) === day;
+
+export function verifyAppsFlyer(directory, receipt) {
   const result = read(path.join(directory, 'result.json'));
   const bytes = fs.readFileSync(path.join(directory, 'report.csv'));
   if (!result.ok || result.http_status !== 200 || result.quality?.sha256 !== hash(bytes) || result.quality.row_cap_hit) throw new Error('AppsFlyer output verification failed');
+  // A self-consistent replacement CSV/result pair is not proof of the report
+  // originally admitted by this receipt. Bind retained reads to that evidence.
+  if (receipt) {
+    const { start, end } = receipt.window ?? {};
+    if (!validReportDay(start) || !validReportDay(end) || start > end
+      || receipt.sha256 !== result.quality.sha256
+      || result.parameters?.from !== start || result.parameters?.to !== end)
+      throw new Error('AppsFlyer receipt does not match retained report');
+  }
   return result;
 }
 
@@ -58,7 +70,7 @@ export async function collectAppsFlyer({ stateRoot, now = new Date(), apiRepo = 
   const file = path.join(receipts, 'appsflyer-' + window.end + '.json');
   const prior = fs.existsSync(file) ? read(file) : null;
   if (prior?.status === 'verified') {
-    verifyAppsFlyer(prior.output);
+    verifyAppsFlyer(prior.output, prior);
     return { ...prior, reused: true };
   }
   if (prior && (prior.attempts >= 3 || prior.failure === 'permission_or_credential')) return prior;
@@ -256,7 +268,8 @@ export function connectionView({ stateRoot, now = new Date(), readThread } = {})
   af.scheduled_consumer_verified=af.scheduled_consumer_evidence.state==='verified';
   if (af.evidence) {
     try {
-      const result = verifyAppsFlyer(af.evidence); af.quality = result.quality; af.population = result.population;
+      const result = verifyAppsFlyer(af.evidence, af.collection?.status === 'verified' ? af.collection : undefined);
+      af.quality = result.quality; af.population = result.population;
       af.site_acquisition = summarizeAppsFlyerAcquisition(fs.readFileSync(path.join(af.evidence,'report.csv'),'utf8'));
       // Quality gaps can downgrade a verified retrieval, never rehabilitate a
       // failed receipt just because an older readable CSV is still retained.
