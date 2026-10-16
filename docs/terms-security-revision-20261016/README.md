@@ -1,6 +1,6 @@
 # 第7条の改定予定案 — 公開・施行前レビュー
 
-状態: **段階公開用draft / 第7条案は未施行**。2026-10-16は調査・作業日であり、施行日ではない。
+状態: **段階公開対象 / 第7条案は未施行**。2026-10-16は調査・作業日であり、施行日ではない。
 
 承認された日本語5項と対応する英訳を、[article-7.patch](article-7.patch) に実装した。
 今回のWeb反映は、10言語の利用規約ページ冒頭の案内と、末尾の独立した「未施行の日英案」の欄である。現在の第1〜12条、最終更新日、既存告知は保持する。
@@ -69,9 +69,9 @@
 
 ## 公開経路と保留方法
 
-`README.md` と `.github/workflows/auto-merge.yml` により、**mainへのmerge/pushがCloudflare Pagesの本番公開につながる**。`claude/` のPRはSEO Validation成功後に自動merge対象となるが、draftは除外される。このレビュー中はdraftを維持する。公開する場合も、第7条の正式施行ではなく上記の段階公開であることを明確にする。
+`README.md` と `.github/workflows/auto-merge.yml` により、**mainへのmerge/pushがCloudflare Pagesの本番公開につながる**。`claude/` のPRはSEO Validation成功後に自動merge対象となるが、draftは除外される。レビュー中はdraftを維持し、段階公開承認に基づき通常Web CIと差分を確認してからReadyへ移す。自動mergeは最終headのPR検証成功時に限る。公開は、第7条の正式施行ではなく上記の段階公開である。
 
-レビューコミットには `[CF-Pages-Skip] [skip ci]` を付け、レビュー中のPages preview deployと自動CI起動を抑止する。これは[Cloudflare公式のビルド省略機能](https://developers.cloudflare.com/pages/configuration/git-integration/github-integration/#skipping-a-build-via-a-commit-message)と[GitHub公式のCI省略機能](https://docs.github.com/actions/managing-workflow-runs/skipping-workflow-runs)を用いる。検査成功や公開完了を意味しない。実装の局所検証は下記のとおりローカルで行う。merge前に必要な通常Web CIを実施する。段階公開について既に得られた承認を取り直す理由にはしない。
+初期レビューコミットには `[CF-Pages-Skip] [skip ci]` を付け、レビュー中のPages preview deployと自動CI起動を抑止した。公開検証用コミットは `[skip ci]` を外して通常Web CIを起動し、`[CF-Pages-Skip]` はレビュー用previewの抑止にのみ用いる。正規の自動mergeコミットにはこれらの抑止語を含めない。これは[Cloudflare公式のビルド省略機能](https://developers.cloudflare.com/pages/configuration/git-integration/github-integration/#skipping-a-build-via-a-commit-message)と[GitHub公式のCI省略機能](https://docs.github.com/actions/managing-workflow-runs/skipping-workflow-runs)を用いる。検査成功や公開完了を意味しない。実装の局所検証は下記のとおりローカルで行う。merge前に必要な通常Web CIを実施する。段階公開について既に得られた承認を取り直す理由にはしない。
 
 `docs/` は `functions/_middleware.js` がサイト非配信にするパス。**repo自体はpublicなので、draft PRとこの資料はGitHubから読める。非公開資料ではない。** 今回公開対象なのは10言語の規約HTMLに追加した案内と独立した案の欄である。
 
@@ -87,10 +87,10 @@ git diff --check
 
 `verify.py` はPython標準ライブラリと既存gitだけを使用し、一時ディレクトリのHTMLへpatchを適用する。承認済み日本語5項の完全一致、10言語すべてに掲載する日英案とpatchの一致、HTML/JSON-LD構造、既存アンカー保持を検証する。追加した案内・改定案欄を除いたHTMLは、10言語すべてが基点mainとバイト単位で一致し、第3条・告知・更新日・第10条も保持する。
 
-追加確認: 他8言語の出力は既存の `translate_document` と翻訳カタログからの再生成結果に完全一致。共有ナビゲーションのself-test 12件、ページデザインのself-test 7件が成功。通常のWeb CI全体とブラウザ実表示はまだ確認していない。
+追加確認: 他8言語の出力は既存の `translate_document` と翻訳カタログからの再生成結果に完全一致。共有ナビゲーションのself-test 12件、ページデザインのself-test 7件が成功。ユーザーのMacのChromeで日英の案内リンクから案が展開し、未施行表示・日英全文が読めることも確認した。通常Web CIの結果はPRの最終headに紐づくチェックで確認する。
 
 改定案の親 `div` に `data-nosnippet` を設定し、Google検索で未施行案本文を抜粋対象から外す。[対応要素の公式仕様](https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag#data-nosnippet-attr)に従い、`details` 自体には置かない。
 
 サイトマップは、既存の `sitemap_lastmod.content_lastmods` を完全なGit履歴に対して使用し、案内を追加した10ページの候補更新日だけを同期する。この技術的な更新日は、規約の施行日ではない。
 
-Appleアプリのテスト・修正・提出、Claude Code起動、新規インストール、新認証・grant、支出は実施しない。ブラウザ操作も行わない。
+Appleアプリのテスト・修正・提出、Claude Code起動、新規インストール、新認証・grant、支出は実施しない。実表示検証にはユーザーのMacのChromeのみを使用する。
