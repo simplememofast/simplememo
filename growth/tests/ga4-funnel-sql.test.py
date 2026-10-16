@@ -97,8 +97,9 @@ def run(events, sql_file=SQL):
         con.create_function("fixture_host", host, ["VARCHAR"], "VARCHAR", null_handling="special")
         con.execute("CREATE MACRO NET.HOST(value) AS fixture_host(value)")
         con.execute("CREATE TABLE fixture_events (" + ", ".join(f"{k} {v}" for k, v in COLUMNS.items()) + ")")
-        con.executemany("INSERT INTO fixture_events VALUES (" + ",".join("?" for _ in COLUMNS) + ")",
-                        [[row.get(k) for k in COLUMNS] for row in events])
+        if events:
+            con.executemany("INSERT INTO fixture_events VALUES (" + ",".join("?" for _ in COLUMNS) + ")",
+                            [[row.get(k) for k in COLUMNS] for row in events])
         params = {"start_date": datetime.date(2026, 9, 6), "end_date": datetime.date(2026, 9, 6),
                   "measurement_version": "2026-09-05", "bridge_measurement_version": "2026-09-07"}
         result = con.execute(query, {k: v for k, v in params.items() if "$" + k in query})
@@ -109,6 +110,81 @@ def run(events, sql_file=SQL):
 
 
 class FunnelTests(unittest.TestCase):
+    def test_site_totals_deduplicate_visitors_across_sessions_pages_and_group_rows(self):
+        rows = run(visit("same") + [event("same", "page_view", 3)] +
+                   visit("same", session_id=2, attributed_source="google", attributed_medium="organic") +
+                   visit("other", page_location="https://www.simplememofast.com/en/"))
+        self.assertGreater(len(rows), 1)
+        self.assertTrue(all(r["site_window_page_views"] == 4 for r in rows))
+        self.assertTrue(all(r["site_window_observed_visitors"] == 2 for r in rows))
+        self.assertEqual(sum(r["observed_started_sessions"] for r in rows), 3)
+        self.assertNotIn("user_pseudo_id", rows[0])
+
+    def test_site_totals_use_page_event_jst_dates_and_existing_identified_production_scope(self):
+        rows = run(visit("inside") +
+                   [event("following", "page_view", 86_400_000_000),
+                    event("prior", "page_view", -10 * 3600_000_000),
+                    event("preview", "page_view", 2, page_location="https://preview.example.test/"),
+                    event("no-session", "page_view", 2, session_id=None),
+                    event("", "page_view", 2),
+                    event("without-start", "page_view", 2)])
+        self.assertEqual(rows[0]["site_window_page_views"], 2)
+        self.assertEqual(rows[0]["site_window_observed_visitors"], 2)
+        self.assertEqual(rows[0]["observed_started_sessions"], 1)
+
+    def test_site_totals_keep_explicit_zero_without_relabeling_nonproduction_sessions(self):
+        row = run(visit("preview", page_location="https://preview.example.test/"))[0]
+        self.assertEqual(row["landing_scope"], "nonproduction")
+        self.assertEqual(row["site_window_page_views"], 0)
+        self.assertEqual(row["site_window_observed_visitors"], 0)
+
+    def test_site_totals_obey_exact_jst_midnights_not_utc_midnights(self):
+        # START is 09:00 JST. The reporting day is [START - 9h, START + 15h).
+        start = -9 * 3600_000_000
+        end = 15 * 3600_000_000
+        row = run(visit("anchor") +
+                  [event("before", "page_view", start - 1),
+                   event("first", "page_view", start),
+                   event("last", "page_view", end - 1),
+                   event("after", "page_view", end)])[0]
+        self.assertEqual(row["site_window_page_views"], 3)
+        self.assertEqual(row["site_window_observed_visitors"], 3)
+        self.assertEqual(row["observed_started_sessions"], 1)
+
+    def test_following_day_click_stays_in_session_cohort_but_views_stay_out_of_site_totals(self):
+        started = 14 * 3600_000_000  # 23:00 JST on the reporting day.
+        following = 16 * 3600_000_000  # 01:00 JST, still within the session's 24h.
+        row = run([event("late", "session_start", started),
+                   event("late", "page_view", started + 1),
+                   event("late", "page_view", following),
+                   click("late", following + 1)])[0]
+        self.assertEqual(row["site_window_page_views"], 1)
+        self.assertEqual(row["site_window_observed_visitors"], 1)
+        self.assertEqual(row["observed_started_sessions"], 1)
+        self.assertEqual(row["sessions_with_own_app_click_24h"], 1)
+
+    def test_missing_session_cohort_does_not_fabricate_zero_visit_totals(self):
+        for events in [[], [event("without-start", "page_view")], visit(None)]:
+            with self.subTest(events=events):
+                self.assertEqual(run(events), [])
+
+    def test_funnel_scan_keeps_next_day_followup_but_excludes_other_streams_and_apps(self):
+        tree = sqlglot.parse_one(SQL.read_text(), read="bigquery")
+        predicate = tree.args["with_"].expressions[0].this.args["where"].this.sql(dialect="duckdb")
+        con = duckdb.connect(":memory:")
+        try:
+            con.execute("CREATE TABLE fixture (_TABLE_SUFFIX VARCHAR, stream_id VARCHAR, platform VARCHAR)")
+            con.executemany("INSERT INTO fixture VALUES (?, ?, ?)", [
+                (day, "13605182969", "WEB") for day in
+                ["20260905", "20260906", "20260907", "20260908", "intraday_20260906"]
+            ] + [("20260906", "other", "WEB"), ("20260906", "13605182969", "IOS")])
+            query = "SELECT _TABLE_SUFFIX FROM fixture WHERE " + predicate + " ORDER BY _TABLE_SUFFIX"
+            params = {"start_date": datetime.date(2026, 9, 6), "end_date": datetime.date(2026, 9, 6)}
+            self.assertEqual([row[0] for row in con.execute(query, params).fetchall()],
+                             ["20260906", "20260907"])
+        finally:
+            con.close()
+
     def test_quality_scan_uses_the_requested_boundary_and_excludes_intraday_other_streams_and_apps(self):
         tree = sqlglot.parse_one(SQL.with_name("ga4-quality.sql").read_text(), read="bigquery")
         predicate = tree.args["with_"].expressions[0].this.args["where"].this.sql(dialect="duckdb")

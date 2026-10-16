@@ -28,16 +28,21 @@
       "name": "既存SQL定義: ga4-funnel.sql",
       "formula": "監視契約: source_fileの既存SQL原本とchecksum/source_sha256が一致し、定義変更は理由付きversion/history更新を要する。query実行や新しいKPI測定値ではない。",
       "source_file": "growth/sql/analytics/ga4-funnel.sql",
-      "checksum": "e2f9e89b268e00cb",
-      "source_sha256": "e2f9e89b268e00cb2371bf9f57b8f3e9f11b55e1139c8edadacfa8a7b5f1277f",
-      "version": 1,
-      "changed_at": "2026-10-01",
+      "checksum": "ad2da652e32277c8",
+      "source_sha256": "ad2da652e32277c82b67e999332fde221c566ca86b522f76920ba0c13d485123",
+      "version": 2,
+      "changed_at": "2026-10-16",
       "why_it_matters": "既存SQLの定義/由来を凍結する。測定時の元SQL hash admission・元分母・quality gateを置き換えない。",
       "history": [
         {
           "version": 1,
           "at": "2026-10-01",
           "why": "初回登録。現在の既存SQL原本だけを監視する契約。過去の測定・実行・新KPIの宣言ではない。"
+        },
+        {
+          "version": 2,
+          "at": "2026-10-16",
+          "why": "Add supplementary whole-window production PV and distinct observed browser counts from existing identified GA4 events within inclusive JST event dates. Existing nine-placement pilot metrics, session denominators, 24-hour click follow-up and attribution definitions are unchanged. Whole-site install CVR remains unavailable; no query was executed."
         }
       ]
     },

@@ -266,7 +266,7 @@ test('funnel always includes quality output and keeps the standard event denomin
   assert.ok(api.calls.every(q => q.params.bridge_measurement_version === '2026-09-07'));
   assert.match(result.interpretation, /QA is excluded/);
 });
-test('CTA-page diagnosis is prospective, explicit-only and retains unchanged quality/funnel queries', async () => {
+test('CTA-page diagnosis is prospective, explicit-only and uses the pinned quality/funnel definitions', async () => {
   const options = { report: 'ga4-cta-pages', execution: 'export', start: '2026-10-01', end: '2026-10-07' };
   const mature = new Date('2026-10-12T01:30:00Z');
   for (const change of [{ start: '2026-09-30' }, { end: '2026-10-08' }]) {
@@ -285,7 +285,8 @@ test('CTA-page diagnosis is prospective, explicit-only and retains unchanged qua
   assert.equal(api.calls.length, 6);
   assert.deepEqual(result.queries.map((q) => q.file), ['ga4-quality.sql', 'ga4-funnel.sql', 'ga4-cta-pages.sql']);
   assert.equal(result.queries[0].sql_sha256, '8aa794cefda068076a099f6e6e6d1be7a85cbf96201066dcdf8220c447a49763');
-  assert.equal(result.queries[1].sql_sha256, 'e2f9e89b268e00cb2371bf9f57b8f3e9f11b55e1139c8edadacfa8a7b5f1277f');
+  // Funnel v2 adds supplementary visit totals; the existing pilot session/click definitions remain unchanged.
+  assert.equal(result.queries[1].sql_sha256, 'ad2da652e32277c82b67e999332fde221c566ca86b522f76920ba0c13d485123');
   const manifest = JSON.parse(api.calls.at(-1).params.cta_page_manifest_json);
   assert.deepEqual(manifest, result.cta_page_manifest.pages);
   assert.equal(api.calls[0].params.scan_end_date, '2026-10-08');

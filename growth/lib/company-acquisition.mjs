@@ -1,5 +1,7 @@
 // Private, descriptive acquisition reporting. No cross-provider user join.
 import { parseDelimited } from './csv.mjs';
+import { websiteInstallReadiness } from './website-install-readiness.mjs';
+import { websiteVisitTotals } from './website-visit-totals.mjs';
 
 const TOKENS = ['web_obsidian_v1', 'web_other_v1'];
 // These columns describe other measures in the existing aggregate reader. Their
@@ -199,7 +201,7 @@ function obsidianHubPilot(production, valid, quality) {
     onelink_impression_sessions: heroOk ? seen : null, onelink_click_sessions: heroOk ? clicked : null,
     onelink_clicked_without_recorded_impression: heroOk ? unseen : null,
     onelink_impression_click_session_rate: heroOk && seen > 0 ? (clicked - unseen) / seen : null,
-    scope: 'Primary: production sessions landing on the nine pilot hubs that reached the store within 24h by any app route (direct Apple + OneLink, deduplicated). Auxiliary: OneLink pilot impression sessions that clicked, all landings, QA excluded. Not installs, not per-language, and never replaces the official rate.' };
+    scope: 'Primary: production sessions landing on the nine pilot hubs with a recorded Store-link click within 24h by any app route (direct Apple + OneLink, deduplicated). Auxiliary: OneLink pilot impression sessions that clicked, all landings, QA excluded. Clicks do not prove Store arrival or installs; not per-language, and never replaces the official rate.' };
 }
 
 export function siteAcquisition(connections = {}, cta = null) {
@@ -211,10 +213,11 @@ export function siteAcquisition(connections = {}, cta = null) {
   const anyValid = ga?.status === 'CONNECTED' && validCount(sessions) && validCount(anyClicks) && anyClicks <= sessions;
   const gaValid = ga?.status === 'CONNECTED' && validCount(sessions) && validCount(clicks) && clicks <= sessions;
   const gaState = gaValid ? (cta?.status ?? 'quality_unverified') : 'unavailable';
-  return { schema_version: 1,
+  const acquisition = { schema_version: 1,
     ga4: { state: gaState,
       window: ga?.window ?? null, timezone: 'Asia/Tokyo',
       observed_production_sessions: gaValid ? sessions : null,
+      website_visits: websiteVisitTotals(rows, ga?.status === 'CONNECTED'),
       sessions_with_store_click: gaValid ? clicks : null,
       observed_store_click_session_rate: gaValid && sessions > 0 ? clicks / sessions : null,
       sessions_with_any_app_route_click: anyValid ? anyClicks : null,
@@ -233,8 +236,9 @@ export function siteAcquisition(connections = {}, cta = null) {
       completeness: af?.status==='CONNECTED' ? 'reported_rows_only' : 'partial_or_unavailable',
       owned_link_period_rate: ownedLinkPeriodRate(af),
       source: af?.evidence ?? null },
-    website_install_cvr: { value: null, state: 'not_measurable',
-      reason: 'No verified common web-to-install cohort. GA4 clicks, Apple first downloads and AppsFlyer installs have different coverage and attribution.' } };
+  };
+  acquisition.website_install_cvr = websiteInstallReadiness(acquisition);
+  return acquisition;
 }
 
 // A repeat read of identical values is quiet. New counts, periods, missing cells
@@ -257,7 +261,7 @@ export function acquisitionReport(a) {
     `GA4 (${a.ga4?.window?.start ?? '?'}..${a.ga4?.window?.end ?? '?'} JST): ${number(a.ga4?.sessions_with_store_click)} Store-click sessions / ${number(a.ga4?.observed_production_sessions)} observed production sessions; ${Number.isFinite(rate) ? (rate*100).toFixed(2)+'%' : 'unknown'}; quality ${a.ga4?.state}.`,
     `GA4 all app routes (deduplicated): ${number(a.ga4?.sessions_with_any_app_route_click)} click sessions; ${Number.isFinite(anyRate) ? (anyRate*100).toFixed(2)+'%' : 'unknown'}. Direct Store and OneLink sessions are not added together.`,
     `GA4 diagnostic only, not the official rate (excluding CI Lighthouse ${number(d?.excluded_sessions?.ci_lighthouse)} and bot-like ${number(d?.excluded_sessions?.bot_like)} sessions): ${number(d?.sessions_with_store_click)} Store-click sessions / ${number(d?.remaining_sessions)} sessions; ${pct(d?.store_click_session_rate)}; all app routes ${pct(d?.any_app_route_click_session_rate)}. Excluded Store-click sessions: CI ${number(d?.excluded_store_click_sessions?.ci_lighthouse)}, bot-like ${number(d?.excluded_store_click_sessions?.bot_like)}. Quality ${d?.quality_state ?? 'unavailable'} still applies.`,
-    `GA4 Obsidian hub OneLink pilot, beside the official rate: ${number(h?.hub_landing_sessions_reaching_store)} of ${number(h?.hub_landing_sessions)} sessions landing on the nine hubs reached the store (any route, deduplicated); ${pct(h?.hub_landing_store_session_rate)}. OneLink hero: ${number(h?.onelink_click_sessions)} click sessions (${number(h?.onelink_clicked_without_recorded_impression)} without a recorded impression) / ${number(h?.onelink_impression_sessions)} impression sessions; ${pct(h?.onelink_impression_click_session_rate)}. Quality ${h?.quality_state ?? 'unavailable'} still applies.`,
+    `GA4 Obsidian hub OneLink pilot, beside the official rate: ${number(h?.hub_landing_sessions_reaching_store)} of ${number(h?.hub_landing_sessions)} sessions landing on the nine hubs recorded a Store-link click (any route, deduplicated); ${pct(h?.hub_landing_store_session_rate)}. OneLink hero: ${number(h?.onelink_click_sessions)} click sessions (${number(h?.onelink_clicked_without_recorded_impression)} without a recorded impression) / ${number(h?.onelink_impression_sessions)} impression sessions; ${pct(h?.onelink_impression_click_session_rate)}. Quality ${h?.quality_state ?? 'unavailable'} still applies.`,
     `Apple collection: ${a.apple?.state ?? 'not_collected'}.`];
   for (const [key,r] of Object.entries(a.apple?.reports ?? {})) {
     lines.push(`- ${key} (${r.window?.min ?? '?'}..${r.window?.max ?? '?'} UTC): own-site first downloads ${number(r.own_site_first_time_downloads?.observed_count)}; ${r.own_site_first_time_downloads?.state ?? r.state}.`);
@@ -266,5 +270,13 @@ export function acquisitionReport(a) {
   lines.push(`AppsFlyer (${a.appsflyer?.window?.start ?? a.appsflyer?.window?.from ?? "?"}..${a.appsflyer?.window?.end ?? a.appsflyer?.window?.to ?? "?"} JST): ${a.appsflyer?.connection_state}; ${a.appsflyer?.own_site_state ?? a.appsflyer?.state}; observed own-site pilot installs ${number(a.appsflyer?.own_site_installs)}. Missing dates: ${(a.appsflyer?.missing_dates??[]).join(', ') || 'see source quality'}. Missing metric columns: ${(a.appsflyer?.missing_metric_columns??[]).join(', ') || 'see source quality'}. Organic and QA are separate.`,
     `AppsFlyer pilot (${a.appsflyer?.window?.start ?? a.appsflyer?.window?.from ?? "?"}..${a.appsflyer?.window?.end ?? a.appsflyer?.window?.to ?? "?"} JST) report-period installs / link clicks: ${number(linkRate?.installs)} / ${number(linkRate?.clicks)}; ${Number.isFinite(linkRate?.value) ? (linkRate.value*100).toFixed(2)+'%' : 'unknown'} (${linkRate?.state ?? 'unavailable'}). This is not a matched visitor-cohort CVR.`,
     'Website visit-to-install CVR: unavailable. Missing Apple cells are not zero; do not combine report populations or divide Apple/AppsFlyer downloads by GA4 sessions.');
+  const w = a.website_install_cvr;
+  if (w?.definition_version === 'website-install-readiness-v1') {
+    lines.push(`Website denominators: page views ${number(w.denominators.page_views.value)}; unique visitors ${number(w.denominators.unique_visitors.value)}; ${number(w.denominators.sessions.value)} observed sessions (diagnostic, quality ${w.denominators.sessions.quality_state}). Visitors are observed browser identifiers, not verified people. These units are not interchangeable.`,
+      `Install coverage: ${number(w.numerator.observed_pilot_installs)} reported pilot installs across nine shared-link hero placements; whole-site new installs unknown. Other Apple links, QR and Smart App Banner are outside this attribution. No page-level install breakdown.`,
+      `Optional whole-site CVR evidence gaps: ${w.blockers.join(', ')}. These do not add completion gates to the nine-placement, three-metric pilot. No supported cross-source estimate; internal use and reinstalls remain unverified. Consent/iOS coverage differs.`,
+      `Periods: same calendar window ${w.period_alignment.same_calendar_window ?? 'unknown'}; no matched cohort. AppsFlyer click-attribution lookback unknown (not its 28-day report window).`,
+      `Pilot source-window coverage: GA4 ${w.pilot_readiness.ga4.state}; AppsFlyer ${w.pilot_readiness.appsflyer.state}. Earliest GA4 window with a complete pilot day: ${w.pilot_readiness.first_ga4_window_with_complete_pilot_day_available_on} JST; seven post-start days: ${w.pilot_readiness.first_ga4_seven_day_post_start_window_available_on} JST. These dates do not prove collection or attribution.`);
+  }
   return lines;
 }

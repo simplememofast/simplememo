@@ -10,6 +10,12 @@
 -- All daily tables through end + 1 must be present and pass query 01/02.
 -- Do NOT filter page_view/session_start on measurement_version: those standard
 -- events do not carry the CTA parameter, and non-clickers are the denominator.
+-- Site visit totals use page-view event dates in the requested JST window,
+-- existing identified events only, and distinct browser IDs across the site.
+-- They are not people, installs, or the session cohort's 24h follow-up views.
+-- These two totals repeat on each grouped row; consumers must never sum them.
+-- Without a started-session group there is no output row: consumers must keep
+-- the totals unavailable, not infer zero. Query/coverage gates still apply.
 -- Session attribution uses cross_channel_campaign only, never first-user or
 -- event-scoped UTM fallbacks. Referrer is a separate landing-page observation.
 WITH extracted AS (
@@ -50,6 +56,13 @@ WITH extracted AS (
       LOWER(NET.HOST(TRIM(page_referrer))), NULL) AS referrer_host
   FROM extracted
   WHERE NULLIF(user_pseudo_id, '') IS NOT NULL AND session_id IS NOT NULL
+), site_visit_totals AS (
+  SELECT
+    COUNT(*) AS site_window_page_views,
+    COUNT(DISTINCT user_pseudo_id) AS site_window_observed_visitors
+  FROM identified
+  WHERE event_name = 'page_view' AND production_event
+    AND DATE(TIMESTAMP_MICROS(event_timestamp), 'Asia/Tokyo') BETWEEN @start_date AND @end_date
 ), starts AS (
   SELECT stream_id, user_pseudo_id, session_id, MIN(event_timestamp) AS started_at
   FROM identified
@@ -139,6 +152,8 @@ SELECT
   landing.path AS landing_path,
   landing.device_category AS device_category,
   landing.device_language AS device_language,
+  MAX(site_visit_totals.site_window_page_views) AS site_window_page_views,
+  MAX(site_visit_totals.site_window_observed_visitors) AS site_window_observed_visitors,
   COUNT(*) AS observed_started_sessions,
   -- Mutually exclusive diagnostic counts, not new grouping dimensions. The
   -- scan is bounded; absence here does not prove missing client instrumentation.
@@ -159,6 +174,7 @@ SELECT
   SAFE_DIVIDE(COUNTIF(clicked_own_app), COUNT(*)) AS own_app_click_session_rate_24h,
   SAFE_DIVIDE(COUNTIF(clicked_own_app AND saw_cta), COUNTIF(saw_cta)) AS clicked_among_cta_exposed_sessions
 FROM classified
+CROSS JOIN site_visit_totals
 -- Keep missing/conflicting channels and nonproduction as visible QA rows.
 -- The SEO scorecard uses only session_channel='Organic Search' AND
 -- landing_scope='production', after the missing-data review.

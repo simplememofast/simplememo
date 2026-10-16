@@ -10,6 +10,15 @@ const now = new Date('2026-09-14T11:00:00Z');
 const hash = b => createHash('sha256').update(b).digest('hex');
 const write = (f, v) => fs.writeFileSync(f, JSON.stringify(v, null, 2) + '\n', {mode: 0o600});
 
+test('the exact pre-visit-total query remains eligible for its unchanged CTA metric',t=>{
+  const f=fixture(t);
+  f.report.queries[1].sql_sha256='e2f9e89b268e00cb2371bf9f57b8f3e9f11b55e1139c8edadacfa8a7b5f1277f';
+  f.flush();
+  const result=companyCtaMeasurement(f.options);
+  assert.equal(result.status,'observed');assert.equal(result.total.denominator,100);
+  assert.equal(result.total.numerator,5);
+});
+
 function fixture(t) {
   const stateRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'company-cta-')); fs.chmodSync(stateRoot, 0o700);
   t.after(() => fs.rmSync(stateRoot, {recursive:true, force:true}));

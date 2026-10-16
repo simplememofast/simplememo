@@ -5,7 +5,9 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {summarizeAscAcquisition,summarizeAscPeriods,summarizeAppsFlyerAcquisition,siteAcquisition,acquisitionMaterial,acquisitionReport,ownedLinkPeriodRate,automationGroup} from './company-acquisition.mjs';
-import {collectAsc,connectionView,currentSiteAcquisition} from './company-data.mjs';
+import {collectAsc,collectAppsFlyer,connectionView,currentSiteAcquisition} from './company-data.mjs';
+import {pilotWindowCoverage,websiteInstallReadiness} from './website-install-readiness.mjs';
+import {websiteVisitTotals} from './website-visit-totals.mjs';
 
 const date='2026-10-03';
 const row=(extra={})=>({date,download_type:'First-time download',source_type:'Web referrer',referrer_group:'自社サイト',campaign_group:'web_obsidian_v1',counts:4,...extra});
@@ -151,8 +153,10 @@ test('verified pilot counts survive optional metric gaps without upgrading the w
   const csv=header+'2026-10-01,None,owned_web,obsidian_bridge_pilot_v1,3,10\n'+
     '2026-10-01,None,seo_aio_qa,obsidian_bridge_qa_20260907,90,100\n';
   const missing=['Sessions','Loyal Users','Total Revenue','Total Cost','Impressions','af_purchase (Event counter)'];
-  const result={ok:true,http_status:200,quality:{sha256:crypto.createHash('sha256').update(csv).digest('hex'),
+  const result={ok:true,http_status:200,parameters:{from:receipt.window.start,to:receipt.window.end},
+    quality:{sha256:crypto.createHash('sha256').update(csv).digest('hex'),
     row_cap_hit:false,missing_dates:[],missing_metric_columns:missing}};
+  receipt.sha256=result.quality.sha256;
   fs.writeFileSync(receiptFile,JSON.stringify(receipt));
   fs.writeFileSync(path.join(output,'report.csv'),csv);
   const writeResult=()=>fs.writeFileSync(path.join(output,'result.json'),JSON.stringify(result));writeResult();
@@ -278,7 +282,7 @@ test('Obsidian hub pilot readout uses the nine hub landings and pilot OneLink co
   assert.equal(h.onelink_impression_sessions,40);assert.equal(h.onelink_click_sessions,3);
   assert.equal(h.onelink_clicked_without_recorded_impression,1);assert.equal(h.onelink_impression_click_session_rate,2/40);
   assert.equal(h.replaces_official_rate,false);assert.equal(h.quality_state,'quality_blocked');
-  assert.match(acquisitionReport(s).join('\n'),/^GA4 Obsidian hub OneLink pilot, beside the official rate: 4 of 50 sessions landing on the nine hubs reached the store .*8\.00%\. OneLink hero: 3 click sessions \(1 without a recorded impression\) \/ 40 impression sessions; 5\.00%\. Quality quality_blocked still applies\.$/m);
+  assert.match(acquisitionReport(s).join('\n'),/^GA4 Obsidian hub OneLink pilot, beside the official rate: 4 of 50 sessions landing on the nine hubs recorded a Store-link click .*8\.00%\. OneLink hero: 3 click sessions \(1 without a recorded impression\) \/ 40 impression sessions; 5\.00%\. Quality quality_blocked still applies\.$/m);
 });
 test('Obsidian hub pilot readout stays unknown instead of zero when its inputs are missing',()=>{
   const old=siteAcquisition(funnel([ga({landing_path:'/obsidian/',device_language:'ja',observed_started_sessions:5})])).ga4.obsidian_hub_pilot;
@@ -293,4 +297,263 @@ test('Obsidian hub pilot readout stays unknown instead of zero when its inputs a
   const bad=siteAcquisition(funnel([ga({landing_path:'/obsidian/',sessions_with_any_app_route_click_24h:2,observed_started_sessions:1,
     sessions_with_onelink_impression:1,sessions_with_onelink_click_24h:1,onelink_clicked_without_recorded_impression:2})])).ga4.obsidian_hub_pilot;
   assert.equal(bad.hub_landing_store_session_rate,null);assert.equal(bad.onelink_impression_click_session_rate,null);
+});
+
+const cvrConnections = (installs=3) => ({
+  ga4: {status:'CONNECTED',window:{start:'2026-10-16',end:'2026-10-22'},
+    reports:[{file:'ga4-funnel.sql',result:[{landing_scope:'production',landing_path:'/obsidian/',
+      observed_started_sessions:100,sessions_with_own_app_click_24h:10,
+      sessions_with_any_app_route_click_24h:15,sessions_with_onelink_impression:80,
+      sessions_with_onelink_click_24h:8,onelink_clicked_without_recorded_impression:0}]}]},
+  appsflyer:{status:'CONNECTED',collection:{status:'verified'},window:{start:'2026-09-25',end:'2026-10-22'},
+    quality:{missing_dates:[],missing_metric_columns:[],row_cap_hit:false},
+    site_acquisition:summarizeAppsFlyerAcquisition(header+`2026-10-16,None,owned_web,obsidian_bridge_pilot_v1,${installs},8\n`)},
+});
+
+test('CVR contract distinguishes PV, visitors, sessions and attributed installs',()=>{
+  const a=siteAcquisition(cvrConnections(),{status:'observed'}), w=a.website_install_cvr;
+  assert.equal(w.denominators.page_views.value,null);
+  assert.equal(w.denominators.unique_visitors.value,null);
+  assert.equal(w.denominators.sessions.value,100);
+  assert.equal(w.numerator.observed_pilot_installs,3);
+  assert.equal(w.numerator.whole_site_new_installs,null);
+  assert.equal(w.value,null);assert.equal(w.estimated_value,null);
+  assert.equal(w.state,'not_measurable');
+  assert.equal(a.ga4.observed_any_app_route_click_session_rate,.15);
+  assert.equal(a.appsflyer.owned_link_period_rate.value,3/8);
+  assert.equal(w.period_alignment.same_calendar_window,false);
+  assert.ok(w.blockers.includes('source_windows_differ'));
+});
+
+test('equal mature periods still cannot turn two providers into a visitor cohort',()=>{
+  const c=cvrConnections();c.appsflyer.window={...c.ga4.window};
+  const w=siteAcquisition(c,{status:'observed'}).website_install_cvr;
+  assert.equal(w.period_alignment.same_calendar_window,true);
+  assert.equal(w.period_alignment.matched_cohort,false);
+  assert.equal(w.value,null);assert.equal(w.estimated_value,null);
+  assert.ok(w.blockers.includes('no_common_attributable_cohort'));
+  assert.equal(w.blockers.includes('source_windows_differ'),false);
+  assert.equal(w.pilot_readiness.ga4.state,'complete_post_start_days');
+});
+
+test('whole-site evidence gaps do not withhold the three existing pilot observations',()=>{
+  const a=siteAcquisition(cvrConnections(),{status:'observed'}),w=a.website_install_cvr;
+  assert.equal(w.scope,'supplementary_whole_site_diagnostic');
+  assert.equal(w.blockers_scope,'whole_site_visit_to_install_cvr_only');
+  assert.equal(w.pilot_completion_gate,false);
+  assert.ok(w.blockers.includes('no_common_attributable_cohort'));
+  assert.equal(a.ga4.obsidian_hub_pilot.hub_landing_store_session_rate,.15);
+  assert.equal(a.appsflyer.own_site_installs,3);
+  assert.equal(a.appsflyer.owned_link_period_rate.value,3/8);
+  assert.match(a.ga4.obsidian_hub_pilot.scope,/Clicks do not prove Store arrival or installs/);
+  assert.match(acquisitionReport(a).join('\n'),/do not add completion gates to the nine-placement, three-metric pilot/);
+});
+
+test('missing pilot rows stay unknown; an explicit zero remains a reported zero',()=>{
+  const zero=siteAcquisition(cvrConnections(0),{status:'observed'}).website_install_cvr;
+  assert.equal(zero.numerator.observed_pilot_installs,0);assert.equal(zero.value,null);
+  const c=cvrConnections();c.appsflyer.site_acquisition=summarizeAppsFlyerAcquisition(header+'2026-10-16,None,Organic,None,9,8\n');
+  const missing=siteAcquisition(c).website_install_cvr;
+  assert.equal(missing.numerator.observed_pilot_installs,null);
+  assert.equal(missing.numerator.state,'not_observed');
+  assert.ok(missing.blockers.includes('attributed_pilot_installs_unavailable'));
+});
+
+test('failed or unavailable source states do not expose retained counts as current',()=>{
+  const c=cvrConnections();c.ga4.status='BLOCKED';c.appsflyer.status='BLOCKED';
+  const w=siteAcquisition(c).website_install_cvr;
+  assert.equal(w.denominators.sessions.value,null);assert.equal(w.numerator.observed_pilot_installs,null);
+  const empty=siteAcquisition().website_install_cvr;
+  assert.equal(empty.period_alignment.same_calendar_window,null);
+  assert.equal(empty.denominators.sessions.value,null);
+  assert.equal(empty.numerator.observed_pilot_installs,null);
+});
+
+test('source quality remains visible without replacing it with an attractive rate',()=>{
+  const c=cvrConnections();c.appsflyer.status='PARTIAL';c.appsflyer.quality.missing_dates=['2026-10-17'];
+  const a=siteAcquisition(c,{status:'quality_blocked'}), w=a.website_install_cvr;
+  assert.equal(w.denominators.sessions.value,100);
+  assert.equal(w.denominators.sessions.quality_state,'quality_blocked');
+  assert.deepEqual(w.numerator.missing_dates,['2026-10-17']);
+  assert.ok(w.blockers.includes('ga4_quality_not_cleared'));
+  assert.ok(w.blockers.includes('appsflyer_report_not_complete'));
+  assert.equal(a.appsflyer.owned_link_period_rate.value,null);
+});
+
+test('October 16 scheduled artifacts are pre-pilot GA4 and partial-launch AppsFlyer',()=>{
+  const c=cvrConnections();
+  c.ga4.window={start:'2026-10-05',end:'2026-10-11'};
+  c.appsflyer.window={start:'2026-09-18',end:'2026-10-15'};
+  const w=siteAcquisition(c).website_install_cvr;
+  assert.equal(w.pilot_readiness.ga4.state,'before_pilot');
+  assert.equal(w.pilot_readiness.appsflyer.state,'launch_partial_day_only');
+  assert.equal(w.pilot_readiness.appsflyer.complete_post_start_days,0);
+  assert.ok(w.blockers.includes('no_complete_post_start_ga4_day'));
+  assert.ok(w.blockers.includes('no_complete_post_start_appsflyer_day'));
+  assert.ok(w.blockers.includes('includes_partial_launch_day'));
+  assert.equal(w.value,null);
+});
+
+test('readiness dates preserve five calendar days of GA4 maturity and seven full days',()=>{
+  const r=siteAcquisition().website_install_cvr.pilot_readiness;
+  assert.equal(r.production_started_at,'2026-10-15T11:31:00+09:00');
+  assert.equal(r.first_complete_day,'2026-10-16');
+  assert.equal(r.first_ga4_window_with_complete_pilot_day_available_on,'2026-10-21');
+  assert.equal(r.first_ga4_seven_day_post_start_window_available_on,'2026-10-27');
+  assert.equal(r.dates_are_earliest_collection_dates_not_verified_data,true);
+  const mixed=pilotWindowCoverage({start:'2026-10-10',end:'2026-10-16'});
+  assert.equal(mixed.complete_post_start_days,1);assert.equal(mixed.state,'mixed_pre_and_post_start');
+  const complete=pilotWindowCoverage({start:'2026-10-16',end:'2026-10-22'});
+  assert.equal(complete.days,7);assert.equal(complete.complete_post_start_days,7);
+  assert.equal(complete.includes_launch_day,false);
+});
+
+test('invalid or conflicting report periods cannot establish readiness',()=>{
+  for(const window of [null,{}, {start:'2026-02-30',end:'2026-10-16'},
+    {start:'2026-10-17',end:'2026-10-16'}, {start:'2026-10-16T00:00:00Z',end:'2026-10-22'},
+    {start:'2026-10-16',from:'2026-10-15',end:'2026-10-22'},
+    {start:'2026-10-16',end:'2026-10-22',to:'2026-10-23'}]) {
+    const w=pilotWindowCoverage(window);assert.equal(w.state,'window_unavailable');assert.equal(w.complete_post_start_days,null);
+  }
+  assert.equal(pilotWindowCoverage({from:'2026-10-16',to:'2026-10-22'}).days,7);
+});
+
+test('pilot coverage and account attribution lookback remain separate from report length',()=>{
+  const w=siteAcquisition(cvrConnections()).website_install_cvr;
+  assert.equal(w.coverage.site_wide,false);assert.equal(w.coverage.pilot_hero_placements,9);
+  assert.equal(w.coverage.per_page_installs_available,false);
+  for(const route of ['other_direct_apple_links','qr','smart_app_banner'])assert.ok(w.coverage.excluded_from_pilot.includes(route));
+  assert.equal(w.period_alignment.appsflyer_collection_window_days,28);
+  assert.equal(w.period_alignment.attribution_lookback_days,null);
+  assert.equal(w.period_alignment.ga4_maturity_days,5);assert.equal(w.period_alignment.ga4_click_followup_hours,24);
+  for(const reason of ['internal_user_exclusion_unverified','reinstall_exclusion_unverified','attribution_lookback_unverified'])
+    assert.ok(w.blockers.includes(reason));
+});
+
+test('readiness does not import private evidence paths or turn invalid counts into observations',()=>{
+  const w=websiteInstallReadiness({ga4:{observed_production_sessions:1.5,source:'/private/example'},
+    appsflyer:{connection_state:'CONNECTED',own_site_installs:-1,source:'/private/example'}});
+  assert.equal(w.denominators.sessions.value,null);assert.equal(w.numerator.observed_pilot_installs,null);
+  assert.equal(JSON.stringify(w).includes('/private/example'),false);
+});
+
+test('status report explains denominator units, limits and maturity without claiming CVR',()=>{
+  const report=acquisitionReport(siteAcquisition(cvrConnections(),{status:'observed'})).join('\n');
+  assert.match(report,/page views unknown; unique visitors unknown; 100 observed sessions/);
+  assert.match(report,/whole-site new installs unknown/);
+  assert.match(report,/No page-level install breakdown/);
+  assert.match(report,/lookback unknown \(not its 28-day report window\)/);
+  assert.match(report,/2026-10-21 JST; seven post-start days: 2026-10-27 JST/);
+  assert.match(report,/Website visit-to-install CVR: unavailable/);
+});
+
+test('site visit totals are read once across grouped rows, never summed',()=>{
+  const rows=[{site_window_page_views:'10',site_window_observed_visitors:'2'},
+    {site_window_page_views:10,site_window_observed_visitors:2}];
+  const v=websiteVisitTotals(rows,true);
+  assert.equal(v.page_views,10);assert.equal(v.observed_visitors,2);
+  assert.equal(v.state,'observed_diagnostic');
+});
+
+test('legacy, empty and failed visit reports remain unknown while explicit zeros survive',()=>{
+  for(const [rows,connected] of [[[],true],[[{}],true],[[{site_window_page_views:0,site_window_observed_visitors:0}],false]]) {
+    const v=websiteVisitTotals(rows,connected);assert.equal(v.page_views,null);assert.equal(v.observed_visitors,null);
+  }
+  const zero=websiteVisitTotals([{site_window_page_views:0,site_window_observed_visitors:0}],true);
+  assert.equal(zero.page_views,0);assert.equal(zero.observed_visitors,0);
+});
+
+test('partial, invalid and conflicting visit totals fail without manufacturing visitors',()=>{
+  const good={site_window_page_views:10,site_window_observed_visitors:2};
+  for(const bad of [{}, {...good,site_window_page_views:11}, {...good,site_window_observed_visitors:3},
+    {...good,site_window_observed_visitors:11}, {...good,site_window_observed_visitors:0},
+    {...good,site_window_page_views:-1}, {...good,site_window_page_views:1.5},
+    {...good,site_window_page_views:Number.MAX_SAFE_INTEGER+1}, {...good,site_window_page_views:''},
+    {...good,site_window_page_views:null}]) {
+    const v=websiteVisitTotals([good,bad],true);assert.equal(v.state,'unavailable');assert.equal(v.page_views,null);
+  }
+});
+
+test('the existing acquisition report consumes visit totals without inventing install conversion',()=>{
+  const c=cvrConnections();c.ga4.reports[0].result[0].site_window_page_views=150;
+  c.ga4.reports[0].result[0].site_window_observed_visitors=80;
+  const a=siteAcquisition(c,{status:'observed'}),w=a.website_install_cvr;
+  assert.equal(w.denominators.page_views.value,150);assert.equal(w.denominators.unique_visitors.value,80);
+  assert.equal(w.denominators.sessions.value,100);assert.equal(w.value,null);assert.equal(w.estimated_value,null);
+  assert.match(acquisitionReport(a).join('\n'),/page views 150; unique visitors 80/);
+  assert.match(w.denominators.unique_visitors.definition,/browser identifiers/);
+  c.ga4.status='BLOCKED';assert.equal(siteAcquisition(c).website_install_cvr.denominators.page_views.value,null);
+});
+
+// Artificial aggregate rows only. No credentials, provider calls or real reports.
+function appsflyerReceiptFixture(t) {
+  const stateRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'appsflyer-receipt-'));
+  t.after(() => fs.rmSync(stateRoot, {recursive: true, force: true}));
+  const output = path.join(stateRoot, 'data/report');
+  const receipts = path.join(stateRoot, 'data/collection-receipts');
+  fs.mkdirSync(output, {recursive: true, mode: 0o700});
+  fs.mkdirSync(receipts, {recursive: true, mode: 0o700});
+  const csv = 'Date,Agency/PMD (af_prt),Media Source (pid),Campaign (c),Installs,Clicks\n'
+    + '2026-10-01,None,owned_web,obsidian_bridge_pilot_v1,3,10\n';
+  const sha256 = crypto.createHash('sha256').update(csv).digest('hex');
+  const receipt = {source: 'appsflyer', status: 'verified', output, sha256,
+    window: {start: '2026-09-04', end: '2026-10-01'}};
+  const result = {ok: true, http_status: 200, parameters: {from: receipt.window.start, to: receipt.window.end},
+    quality: {sha256, row_cap_hit: false, missing_dates: [], missing_metric_columns: []}};
+  fs.writeFileSync(path.join(output, 'report.csv'), csv);
+  const save = () => {
+    fs.writeFileSync(path.join(output, 'result.json'), JSON.stringify(result));
+    fs.writeFileSync(path.join(receipts, 'appsflyer-2026-10-01.json'), JSON.stringify(receipt));
+  };
+  save();
+  return {stateRoot, receipt, result, save};
+}
+
+test('matching retained report preserves the admitted period ratio and reuses without a provider call', async t => {
+  const f = appsflyerReceiptFixture(t);
+  const view = connectionView({stateRoot: f.stateRoot});
+  assert.equal(view.appsflyer.status, 'CONNECTED');
+  assert.equal(siteAcquisition(view).appsflyer.owned_link_period_rate.value, .3);
+  const reused = await collectAppsFlyer({stateRoot: f.stateRoot, now: new Date('2026-10-02T00:00:00Z'),
+    run: () => assert.fail('Existing receipt must not trigger a provider or git command')});
+  assert.equal(reused.reused, true);
+});
+
+const invalidReceipts = [
+  ['different receipt hash', f => {f.receipt.sha256 = '0'.repeat(64);}],
+  ['missing receipt hash', f => {delete f.receipt.sha256;}],
+  ['report from a different period', f => {f.result.parameters.from = '2026-09-05';}],
+  ['report ends on a different day', f => {f.result.parameters.to = '2026-09-30';}],
+  ['missing report parameters', f => {delete f.result.parameters;}],
+  ['missing receipt window', f => {delete f.receipt.window;}],
+  ['missing receipt start', f => {delete f.receipt.window.start;}],
+  ['missing receipt end', f => {delete f.receipt.window.end;}],
+  ['matching impossible dates', f => {
+    f.receipt.window = {start: '2026-02-30', end: '2026-02-30'};
+    f.result.parameters = {from: '2026-02-30', to: '2026-02-30'};
+  }],
+  ['matching noncanonical dates', f => {
+    f.receipt.window.start = '2026-9-04'; f.result.parameters.from = '2026-9-04';
+  }],
+  ['matching reversed period', f => {
+    f.receipt.window.start = '2026-10-02'; f.result.parameters.from = '2026-10-02';
+  }],
+];
+for (const [name, corrupt] of invalidReceipts) {
+  test(`retained report fails closed for ${name}`, t => {
+    const f = appsflyerReceiptFixture(t); corrupt(f); f.save();
+    const view = connectionView({stateRoot: f.stateRoot});
+    assert.equal(view.appsflyer.status, 'BLOCKED');
+    assert.equal(view.appsflyer.reason, 'retained_aggregate_integrity_failed');
+    assert.equal(view.appsflyer.site_acquisition, undefined);
+    const rate = siteAcquisition(view).appsflyer.owned_link_period_rate;
+    assert.equal(rate.value, null);
+    assert.equal(rate.installs, null);
+  });
+}
+
+test('collector cannot reuse a self-consistent report whose receipt hash no longer matches', async t => {
+  const f = appsflyerReceiptFixture(t); f.receipt.sha256 = '0'.repeat(64); f.save();
+  await assert.rejects(collectAppsFlyer({stateRoot: f.stateRoot, now: new Date('2026-10-02T00:00:00Z'),
+    run: () => assert.fail('Integrity failure must not trigger fallback collection')}), /receipt/);
 });

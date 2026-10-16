@@ -19,6 +19,8 @@ const COUNTS = ['observed_started_sessions', 'sessions_with_own_app_click_24h', 
 // Exact pre-diagnostic query, preserved in tests/fixtures/ga4-funnel-v1.sql.
 // This finite compatibility entry does not admit arbitrary historical queries.
 const LEGACY_FUNNEL_SHA256 = 'a528c1054d236b9bd4a5fdc2d043ae82e282d9c6323213cbb92eeaff4347b71b';
+// Exact main query before additive site visit totals; its CTA definitions match.
+const PRE_VISIT_TOTALS_SHA256 = 'e2f9e89b268e00cb2371bf9f57b8f3e9f11b55e1139c8edadacfa8a7b5f1277f';
 const LANDING_DIAGNOSTICS = ['missing_landing_no_timed_page_view_in_scan',
   'missing_landing_page_view_before_start_only', 'missing_landing_page_view_after_window_only',
   'missing_landing_page_view_both_sides'];
@@ -86,7 +88,7 @@ export function companyCtaMeasurement({ stateRoot, root = ROOT, now = new Date()
       requireThat(matches.length === 1, 'query_set_invalid');
       const q = matches[0];
       requireThat(q.sql_sha256 === hash(fs.readFileSync(path.join(root, 'growth/sql/analytics', file)))
-        || (file === 'ga4-funnel.sql' && q.sql_sha256 === LEGACY_FUNNEL_SHA256), 'query_definition_changed');
+        || (file === 'ga4-funnel.sql' && [LEGACY_FUNNEL_SHA256, PRE_VISIT_TOTALS_SHA256].includes(q.sql_sha256)), 'query_definition_changed');
       const params = { start_date: window.start, end_date: window.end,
         ...(file === 'ga4-quality.sql' ? { scan_end_date: endPlusOne } : {}),
         measurement_version: '2026-09-05', bridge_measurement_version: '2026-09-07' };
