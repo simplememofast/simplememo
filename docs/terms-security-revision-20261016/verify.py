@@ -2,7 +2,9 @@
 """Validate the proposed patch without modifying the current Web terms."""
 
 from hashlib import sha256
+from html.parser import HTMLParser
 from pathlib import Path
+import json
 import re
 import subprocess
 import tempfile
@@ -11,6 +13,16 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[2]
 PATCH = Path(__file__).with_name("article-7.patch").resolve()
+BASE_COMMIT = "f1de6301221c7660f37da4ae985fc49599aa61ce"
+LOCALES = ["", "en", "ar", "es", "id", "ko", "pt-BR", "tr", "zh", "zh-Hant"]
+NOTICE = re.compile(
+    r"(?m)^      <!-- BEGIN proposed-section-7-notice -->\n.*?"
+    r"^      <!-- END proposed-section-7-notice -->\n", re.S,
+)
+COPY = re.compile(
+    r"(?m)^    <!-- BEGIN proposed-section-7-copy -->\n.*?"
+    r"^    <!-- END proposed-section-7-copy -->\n", re.S,
+)
 BASE_HASHES = {
     "terms.html": "39a68b08ae7a0570d0e48dc603b51f0be5813db9f688a7ed871f31ca94676275",
     "en/terms.html": "f88bdada323c1787043fe0710b2e8ea04a6254645d1484f8518f1e00bb94513a",
@@ -38,6 +50,40 @@ def split_section(text):
     return text[:match.start()], match.group(), text[match.end():]
 
 
+class PageParser(HTMLParser):
+    VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
+
+    def __init__(self):
+        super().__init__()
+        self.stack, self.ids, self.canonicals, self.robots = [], [], [], []
+        self.json_script = False
+        self.json_text = []
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if "id" in attrs:
+            self.ids.append(attrs["id"])
+        if tag == "link" and attrs.get("rel") == "canonical":
+            self.canonicals.append(attrs["href"])
+        if tag == "meta" and attrs.get("name") == "robots":
+            self.robots.append(attrs["content"])
+        if tag == "script" and attrs.get("type") == "application/ld+json":
+            self.json_script = True
+            self.json_text = []
+        if tag not in self.VOID:
+            self.stack.append(tag)
+
+    def handle_endtag(self, tag):
+        assert self.stack and self.stack.pop() == tag, f"Unbalanced HTML: {tag}"
+        if tag == "script" and self.json_script:
+            json.loads("".join(self.json_text))
+            self.json_script = False
+
+    def handle_data(self, data):
+        if self.json_script:
+            self.json_text.append(data)
+
+
 def main():
     patch = PATCH.read_text(encoding="utf-8")
     assert re.findall(r"(?m)^--- a/(.+)$", patch) == list(BASE_HASHES)
@@ -48,9 +94,33 @@ def main():
     )
     originals = {path: (ROOT / path).read_bytes() for path in BASE_HASHES}
     for path, original in originals.items():
-        assert sha256(original).hexdigest() == BASE_HASHES[path], (
-            f"{path}: current source changed; review against the latest terms"
+        without_notice, count = NOTICE.subn("", original.decode("utf-8"))
+        without_proposal, copies = COPY.subn("", without_notice)
+        assert count == copies == 1
+        assert sha256(without_proposal.encode()).hexdigest() == BASE_HASHES[path], (
+            f"{path}: current terms changed outside the pending notice"
         )
+
+    for locale in LOCALES:
+        path = f"{locale}/terms.html" if locale else "terms.html"
+        text = (ROOT / path).read_text(encoding="utf-8")
+        baseline = subprocess.check_output(
+            ["git", "show", f"{BASE_COMMIT}:{path}"], cwd=ROOT,
+        ).decode("utf-8")
+        stripped, count = NOTICE.subn("", text)
+        stripped, copies = COPY.subn("", stripped)
+        assert count == copies == 1 and stripped == baseline, f"{path}: changed current terms"
+        notice = NOTICE.search(text).group()
+        assert '#proposed-section-7-ja' in notice
+        assert '#proposed-section-7-en' in notice
+        copy = COPY.search(text).group()
+        assert '<div class="container" data-nosnippet="">' in copy
+        assert 'id="proposed-section-7" translate="no"' in copy
+        assert 'lang="ja"' in copy and 'lang="en"' in copy
+        parser = PageParser()
+        parser.feed(text)
+        assert not parser.stack and len(parser.ids) == len(set(parser.ids))
+        print(f"PASS {path}: additions separated; all existing text and dates preserved")
 
     with tempfile.TemporaryDirectory(prefix="simplememo-terms-review-") as tmp:
         candidate = Path(tmp)
@@ -85,13 +155,29 @@ def main():
                 assert "negligence other than gross negligence" in items[3].text
                 assert "harm to life or bodily injury" in items[3].text
                 assert "Consumer Contract Act of Japan" in items[4].text
+            language = "ja" if path == "terms.html" else "en"
+            for locale in LOCALES:
+                proposal_path = f"{locale}/terms.html" if locale else "terms.html"
+                proposal = COPY.search((ROOT / proposal_path).read_text(encoding="utf-8")).group()
+                proposed_section = re.search(
+                    r'<section [^>]*data-proposed-terms="section-7-' + language + r'"[^>]*>(.*?)</section>',
+                    proposal, re.S,
+                ).group(1)
+                proposed_tree = ET.fromstring("<section>" + proposed_section + "</section>")
+                assert [item.text for item in proposed_tree.findall("ol/li")] == [
+                    item.text for item in items
+                ], f"{proposal_path}: {language} differs from the reviewed patch"
+                assert '<time ' not in proposal, "Proposal must not invent an effective date"
+                assert "改定案・未施行・施行日未定" in proposal
+                assert "Proposal — not in effect; effective date not set" in proposal
+            print(f"PASS {language} proposal: exact reviewed text on all ten locales")
             print(f"PASS {path}: five paragraphs, valid section HTML, anchors preserved")
             print(f"PASS {path}: all content outside Section 7 byte-identical")
 
     for path, original in originals.items():
         assert (ROOT / path).read_bytes() == original
     print("PASS approved Japanese text matches exactly; English safeguards present")
-    print("PASS patch applies cleanly; current Web terms remain unchanged")
+    print("PASS patch applies cleanly; current clauses remain unchanged; notices are separate")
 
 
 if __name__ == "__main__":
