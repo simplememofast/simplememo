@@ -350,7 +350,9 @@ def finalize(root: Path = ROOT, *, apply: bool = False) -> list[str]:
         # Only pages whose language toggle has actually been removed.
         if re.search(r'<script[^>]+src=["\'][^"\']*/js/lang\.js', text):
             continue
-        out = finish_markup(text, root, english=english).replace("AI Ataka", "AI ATAKA")
+        # Identity is editorial content: author bylines and legal names have
+        # different roles and must not be normalized across the whole document.
+        out = finish_markup(text, root, english=english)
         if english:
             out = finish_text_labels(out)
             out = finish_faq(out, SITE + url)
