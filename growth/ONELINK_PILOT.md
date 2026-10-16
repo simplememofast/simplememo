@@ -163,9 +163,11 @@ HTML内では `&` を `&amp;` とする。通常のPR・SEO Validation・Git経�
 
 ## 別枠の全サイト導線draft（2026-10-16）
 
-後続の本人依頼により、既存テンプレートを用いた導線拡張の実装・ローカル検証・draft PRを
-別枠で準備する。[範囲と公開条件](../docs/growth/sitewide-onelink-rollout.md)を参照。
-まだ公開せず、拡張の `rollout_start` は `null`。上記9heroのURL・属性と3指標の完了条件は維持する。
+後続の本人依頼により、既存テンプレートを用いた導線拡張を別枠で準備した。
+最新の本人指示では通常CI→merge→deployが承認済み。この版ではまだ実施・公開確認が完了して
+いないため、拡張の `rollout_start` は `null` を維持する。
+[範囲と公開条件](../docs/growth/sitewide-onelink-rollout.md)を参照。
+上記9heroのURL・属性と3指標の完了条件は維持する。
 新campaignは `owned_web` / `website_bridge_v1` とし、pilotやQAへ合算しない。
 既存pilot短縮URLへ `c` を追加しても保存済みcampaignを上書きできないため、
 拡張には別の長URLを用いる。管理画面設定やリンク生成APIは変更しない。
@@ -173,14 +175,24 @@ HTML内では `&` を `&amp;` とする。通常のPR・SEO Validation・Git経�
 既存trackerを読み込むページの安全な静的Apple anchorだけが変換候補となる。
 JavaScript無効時や未対応URLは元の直接リンクを保つ。QR・ネイティブSmart App Banner・
 compose/verifyのutilityは今回未対応であり、「全サイトの全導線が帰属済み」としない。
-10月16日08:58 UTCのオフラインinventoryでは2,449ページがopt-in済みで、
-2,429ページの7,440個の直接Apple anchorが変換候補。未知query10件・fragment2件と、
-trackerのないutilityの22件は直接リンクを維持する。独立英語hubの5anchorは別campaignの対象。
+10月16日11:15 UTCのオフラインinventoryでは2,449ページがopt-in済みで、
+2,429ページの7,452個の直接Apple anchorが変換候補。固定公開URLの
+`?see-all=reviews` 10件と `#information` 2件も元の遷移先を保持して対象に含めた。
+それ以外のquery/fragmentの組合せを一般許可したわけではない。
+trackerのないutilityの22件は直接リンクを維持する。sitemap内では2,326ページの
+7,163件が候補。独立英語hubの5anchorは別campaignの対象。
+評価したtrackerのSHA-256は `6005bb5bc073f0565619cc71bd12fc73a8b5b1e9d81c50c3a1f86acbd62975f2`。
 変換するパスと `ct` / `pt` / `mt` / `ppid` は確認済みの公開値だけを列挙して許可する。
 新しい値・パスは再レビューとallowlist・inventory更新が必要で、形式だけ合う値は転送しない。
 これはローカルpredicateの結果であり、本番配備やユーザーの到達率ではない。
-長URLの実遷移、CPP/storefront、既存利用者の動作、
-帰属と拡張範囲に対するプライバシー説明は未確認。実機QAやApple/iOS作業は再開しない。
+プライバシー説明は10言語で、同じページの別リンクならOneLinkを回避できるという案内を
+削除した。代替としてApp Storeで直接検索する案内を維持する。
+長URLの実遷移、レビュー/情報欄への到達、CPP/storefront、既存利用者の動作、帰属、
+アプリ側の同意/ATT動作は未確認。実機QAやApple/iOS作業は再開しない。
+QR246配置/46画像は生成・decode依存が不足し新installも対象外。native banner2,530宣言の
+tapはDOM観測できず、utilityへのtracker追加も対象外である。
+最終revisionの通常CI成功とmerge/deploy・配信内容の確認後に実開始を記録する。
+旧draftのCI skip指定を、現段階の通常CI未実行の代わりにはしない。
 
 9hubの主指標は、必要な新列が揃う場合だけ、直接Apple・pilot・sitewideをsession内で
 重複排除した拡張unionを使い、定義versionとsource columnを明記する。

@@ -63,11 +63,20 @@
   // Exact public values reviewed from the site's source, not merely valid URL
   // syntax: an arbitrary ct token or numeric pt could itself identify a visitor.
   // New static campaigns/product pages require an explicit allowlist review.
-  // Unknown, repeated, malformed or fragment values exclude the entire link;
+  // Outside the exact reference exceptions below, unknown, repeated, malformed
+  // or fragment values exclude the entire link;
   // never forward the page URL, referrer, tokens or arbitrary link parameters.
   function sitewideStoreUrl(a) {
     var url = ownStoreUrl(a);
     if (!url) return { reason: "unsupported-url" };
+    // These two exact public reference destinations are already authored on
+    // the site. Preserve their purpose in both nested redirect URLs without
+    // accepting arbitrary review parameters, fragments or new combinations.
+    var publicReferences = [
+      "https://apps.apple.com/jp/app/id6758438948?see-all=reviews",
+      "https://apps.apple.com/jp/app/id6758438948#information"
+    ];
+    if (publicReferences.indexOf(url.href) !== -1) return { url: url };
     if (url.hash) return { reason: "unsupported-fragment" };
     // Preserve the three declared public paths plus the canonical app-ID path.
     // Do not forward arbitrary path segments even on the owned Store listing.

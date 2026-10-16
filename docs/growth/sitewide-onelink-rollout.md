@@ -1,8 +1,9 @@
 # Site-wide OneLink draft: scope and release boundary
 
-This is a reviewable website implementation draft, authorized separately from
-the nine-placement pilot on 2026-10-16. It is not a production rollout.
-`rollout_start: null`; the release gate remains closed. The original pilot's
+This is a reviewable website implementation candidate, authorized separately from
+the nine-placement pilot on 2026-10-16. The owner has now authorized normal CI,
+merge and deployment. At this revision those steps have not yet been completed
+or verified, so `rollout_start: null` remains the recorded state. The original pilot's
 three-metric completion contract in [ONELINK_PILOT.md](../../growth/ONELINK_PILOT.md)
 is unchanged. Wider route coverage is not proof of website-to-install CVR.
 
@@ -47,8 +48,12 @@ values, and four Store paths (three declared source paths plus the canonical
 app-ID path). New campaign/provider/CPP values or Store paths require explicit
 allowlist review and an updated inventory before conversion. This prevents an
 arbitrary token or numeric value from being forwarded merely because it fits
-a pattern. Unknown keys or values, duplicate parameters, credentials, fragments
-and unsupported destinations stay on their original direct route. JavaScript
+a pattern. Two exact authored reference URLs are also allowed:
+`https://apps.apple.com/jp/app/id6758438948?see-all=reviews` and
+`https://apps.apple.com/jp/app/id6758438948#information`. Both nested redirect
+parameters retain the full original reference destination. Other combinations,
+unknown keys or values, duplicate parameters, credentials, fragments and
+unsupported destinations stay on their original direct route. JavaScript
 disabled or an unavailable tracker also leaves the original HTML href in place.
 This is a direct-link fallback before conversion, not an automatic fallback if
 a converted OneLink later fails. The pilot and QA shortlinks are never converted.
@@ -58,10 +63,10 @@ scope. They must not forward arbitrary URL query values, referrers or new
 identifiers into analytics. The candidate does not add a collector, app SDK,
 consent flow or account setting.
 
-The local inventory at 2026-10-16 08:58 UTC evaluates the draft tracker against
+The local inventory at 2026-10-16 11:15 UTC evaluates the candidate tracker against
 detached anchor mocks. It visits no links and dispatches no analytics events.
 Its source base is `0ef15885743153a1d902d34b951e0b537634dd51`; the evaluated tracker
-SHA-256 is `9447c5a48d38707c4b99ca9c4a28a16c9ce3439b2b8052e784f85fe6e32c4e2f`.
+SHA-256 is `6005bb5bc073f0565619cc71bd12fc73a8b5b1e9d81c50c3a1f86acbd62975f2`.
 This is local conversion eligibility, not successful redirection or traffic
 coverage. The source scan is not an atomic snapshot.
 
@@ -71,24 +76,31 @@ coverage. The source scan is not an atomic snapshot.
 | Sitemap pages | 2,387 | A different population from HTML files |
 | Opted-in pages already loading the tracker | 2,449 | All evaluated locally against the tracker |
 | Direct own-app Apple anchors in source | 7,474 | Original hrefs remain in HTML |
-| Locally eligible anchors / containing pages | 7,440 / 2,429 | Runtime conversion predicate accepted these anchors |
-| Unsupported query / fragment anchors | 10 / 2 | Stay on the direct route |
+| Locally eligible anchors / containing pages | 7,452 / 2,429 | Runtime conversion predicate accepted these anchors |
+| Exact reviewed query / fragment references | 10 / 2 | Included in the eligible total; destination preserved in nested URLs |
 | Compose/verify utility pages / direct anchors | 20 / 22 | Excluded; no tracker introduced on these sensitive utilities |
-| Sitemap direct anchors / locally eligible anchors | 7,163 / 7,151 | Eligible anchors are on 2,326 pages; not an additional total |
+| Sitemap direct anchors / locally eligible anchors | 7,163 / 7,163 | Eligible anchors are on 2,326 pages; not an additional total |
 | Existing pilot hero anchors | 9 | Exact source URL/attribute contract preserved |
 | Independent English Obsidian hub anchors | 5 | All eligible for the separate sitewide campaign; outside the nine-hero pilot |
 | QR placements / containing pages / distinct image assets | 246 / 236 / 46 | Unchanged and unsupported in this draft |
 | Native Smart App Banner placements | 2,530 | Unchanged; native Safari taps are outside DOM click observation |
 
-The required QR encoder/decoder dependencies are unavailable locally, and new
-installation is outside this work's authorization. QR destinations have not
-been rewritten or verified. Do not count an image placement as a tracked QR
+The required QR encoder/decoder dependencies (`qrcode@1.5.4`, `jsqr@1.4.0`) are
+unavailable locally, and new installation is outside this work's authorization.
+QR destinations have not been rewritten or decoded. Routing a QR through OneLink
+would require asset regeneration and independent decode verification; scanning
+an image on another device would still not emit a DOM click on the source page.
+Native Safari banner taps are outside this DOM mechanism, while the 22 utility
+anchors lack the tracker and adding tracking there remains outside scope.
+Do not count an image placement as a tracked QR
 scan. Placements include declared hidden/responsive duplicates and do not
 measure user exposure. The inventory command is
 `node scripts/site-route-inventory.mjs --summary-only`; it reads public source
 files and evaluates the tracker locally, without browser or provider access.
 Re-run the inventory after tracker or HTML changes before relying on these
-counts. The 7,440 eligible anchors are not a completed-rollout claim.
+counts. The 7,452 eligible anchors are not a completed-rollout claim. The retained
+handoff evidence for this revision is `final-revision/route-inventory.json` and
+its summary; the earlier 7,440-anchor inventory predates the reference exceptions.
 
 ## Aggregate compatibility and comparability
 
@@ -170,10 +182,13 @@ behavior; this draft does not create or edit a CPP.
 [CPP reference](https://support.appsflyer.com/hc/en-us/articles/4406217556625-Redirect-users-to-custom-app-store-product-pages).
 
 Expanding the number of OneLink routes expands where the existing third-party
-click handling applies. Reusing existing code and adding no identifiers does
-not establish that the current privacy disclosure covers the wider scope or
-that app-side consent behavior has been verified. Disclosure adequacy and the
-unresolved consent/ATT limitations must be reviewed before any release.
+click handling applies. The ten language privacy pages retain direct App Store
+search as an alternative and no longer
+suggest that another link on the same page avoids OneLink: all eligible links
+on opted-in pages are candidates for conversion. This is a source disclosure
+update, not evidence that app-side consent or ATT behavior has been verified.
+Review the final disclosure and keep unresolved consent/ATT limitations visible
+in the release evidence.
 This draft does not resume the waived pilot device tests or any Apple/iOS work.
 
 ## Review and release
@@ -184,12 +199,14 @@ parser/report tests. Preserve the nine original hero hrefs/attributes and
 demonstrate that the separate campaign cannot enter their series. These checks
 establish code behavior, not live OneLink routing or attributed installs.
 
-The delivery target is a draft PR with `[skip ci] [cf-pages-skip]` on the commit
-used for upload, to request suppression of CI and Cloudflare preview. Those
-markers and draft status are precautions, not evidence that remote jobs did
-not run; verify the actual PR/job state. No merge, Ready transition, production
-publish, preview navigation, collection dispatch, account configuration or
-Apple/iOS test is authorized by this document. Return the scope, exclusions,
-test results and unresolved external behavior to the owner for release review.
-Record an actual rollout start only after a separately authorized deployment
-and readback. Until then `rollout_start` remains `null`.
+The latest owner instruction authorizes normal CI followed by merge and
+deployment. Earlier draft-only `[skip ci] [cf-pages-skip]` precautions describe
+the previous preparation stage; they do not replace the required production
+checks or justify leaving CI unrun. Obtain successful required checks for the
+final revision, verify the actual merge/deployment result and read back the
+served revision and route scope. Local tests and a PR state alone do not prove
+deployment or successful provider attribution. Until those operations are
+completed and verified, report them as pending and keep `rollout_start: null`.
+Record the actual start time and deployed SHA after deployment readback.
+Collection dispatch, account changes, new installations and Apple/iOS work
+remain outside this release task; the waived device tests are not resumed.

@@ -228,18 +228,30 @@ the added handoff; existing provider collectors and historical files remain.
 
 The reporting-only authorization above is distinct from the later website
 route draft in [sitewide-onelink-rollout.md](sitewide-onelink-rollout.md).
-That draft reuses the existing OneLink template for the separate
-`owned_web` / `website_bridge_v1` campaign. It has no production start:
+That candidate reuses the existing OneLink template for the separate
+`owned_web` / `website_bridge_v1` campaign. The latest owner instruction
+authorizes normal CI, merge and deployment; those operations and the deployed
+readback are not yet complete for this revision. It has no recorded production start:
 `rollout_start: null`. The nine original pilot links and their three-metric
 completion contract remain unchanged. QR, native Smart App Banner taps,
-compose/verify utilities and unsupported URL forms are explicit coverage gaps.
-The 2026-10-16 08:58 UTC offline inventory finds 7,440 eligible direct anchors
-on 2,429 pages, within 2,449 opted-in tracker pages. Twelve unsupported URLs
-and 22 anchors without the tracker remain direct. This is local source and
+compose/verify utilities and unsupported URL forms are explicit coverage limits.
+The 2026-10-16 11:15 UTC offline inventory finds 7,452 eligible direct anchors
+on 2,429 pages, within 2,449 opted-in tracker pages. That includes the ten
+exact public review-query URLs and two exact public information-fragment URLs;
+other combinations remain excluded. Only the 22 utility anchors without the
+tracker remain direct in this source population. Within the sitemap population,
+all 7,163 direct anchors on 2,326 pages are locally eligible. This is local source and
 predicate evidence; it is not deployed coverage or successful attribution.
+The evaluated tracker SHA-256 is
+`6005bb5bc073f0565619cc71bd12fc73a8b5b1e9d81c50c3a1f86acbd62975f2`.
 The conversion accepts only the exact reviewed public path and `ct`/`pt`/`mt`/
 `ppid` allowlists. A new path or value requires review and inventory refresh;
-syntactically valid but unlisted tokens stay direct.
+syntactically valid but unlisted tokens stay direct. The QR encoder/decoder
+dependencies are unavailable and new installation remains outside scope, so
+246 QR placements across 236 pages and 46 assets are unchanged. A QR scan on
+another device is not a source-page DOM click. The 2,530 native Safari banner
+declarations likewise do not measure native banner exposure or taps. Adding a
+tracker to the 20 compose/verify utility pages remains outside scope.
 
 New GA4 sitewide fields are separate from the legacy pilot fields. An expanded
 all-route session union counts direct Apple, pilot and sitewide intent without
@@ -275,6 +287,11 @@ The runtime's intended destination preservation through `af_ios_url` and
 allowlist, storefront/CPP behavior, installed-user behavior and attribution
 remain unverified. AppsFlyer does not record desktop clicks when `af_web_dp`
 is present, so those web intents cannot be reconciled one-for-one with its
-click totals. Local tests establish parser and event behavior only. The draft
-does not resume device tests, change app consent, publish links, or satisfy the
-separate review needed for release and wider privacy disclosure.
+click totals. Local tests establish parser and event behavior only. The ten
+language privacy pages retain direct App Store search as an alternative and
+remove the claim that a different link on
+the same page avoids OneLink. App consent/ATT behavior remains unverified and
+device tests are not resumed. Complete normal CI on the final revision and
+verify merge, deployment and served content before recording the actual rollout
+start. Earlier draft-only CI skip precautions do not replace those checks.
+The reporting change itself dispatches no collection or account configuration.

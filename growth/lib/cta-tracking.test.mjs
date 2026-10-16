@@ -311,3 +311,50 @@ test('all reviewed public campaign, provider and product-page values remain rout
   sitewideBrowser(links);
   assert.ok(links.every(link => link.getAttribute('data-sitewide-app-route-status') === 'converted'));
 });
+
+test('the two exact public reference URLs retain nested destinations with fixed event URLs', () => {
+  for (const original of [
+    'https://apps.apple.com/jp/app/id6758438948?see-all=reviews',
+    'https://apps.apple.com/jp/app/id6758438948#information',
+  ]) {
+    const own = element(original, { 'data-cta-placement': 'reference' });
+    const b = sitewideBrowser([own]);
+    assert.equal(own.getAttribute('data-sitewide-app-route-status'), 'converted');
+    const route = new URL(own.getAttribute('href'));
+    assert.equal(route.hash, '');
+    assert.equal(route.searchParams.get('af_ios_url'), original);
+    assert.equal(route.searchParams.get('af_web_dp'), original);
+    assert.equal(route.searchParams.has('af_ios_store_cpp'), false);
+    assert.deepEqual([...route.searchParams.keys()], ['pid', 'c', 'af_ios_url', 'af_web_dp']);
+    b.show(own, 1); b.click(own);
+    assert.deepEqual(b.events().map(e => e[1]), ['web_to_app_impression', 'web_to_app_click']);
+    assert.ok(b.events().every(e => e[2].link_url === sitewideUrl
+      && e[2].bridge_scope === 'sitewide' && e[2].placement === 'reference'));
+    assert.ok(!JSON.stringify(b.events()).includes('see-all'));
+    assert.ok(!JSON.stringify(b.events()).includes('#information'));
+  }
+});
+
+test('reference exceptions reject missing values, arbitrary fragments and undeclared combinations', () => {
+  const invalid = [
+    'https://apps.apple.com/jp/app/id6758438948?see-all=',
+    'https://apps.apple.com/jp/app/id6758438948?see-all=visitor123',
+    'https://apps.apple.com/jp/app/id6758438948?see-all=reviews&see-all=reviews',
+    'https://apps.apple.com/jp/app/id6758438948?see-all=reviews&email=private@example.test',
+    'https://apps.apple.com/jp/app/id6758438948?see-all=reviews&ct=web_other_v1',
+    'https://apps.apple.com/jp/app/id6758438948?see-all=reviews#information',
+    'https://apps.apple.com/jp/app/id6758438948?ct=web_other_v1#information',
+    'https://apps.apple.com/jp/app/id6758438948#information-private',
+    'https://apps.apple.com/jp/app/id6758438948#email=private@example.test',
+    'https://apps.apple.com/us/app/id6758438948?see-all=reviews',
+    'https://apps.apple.com/us/app/id6758438948#information',
+  ];
+  const links = invalid.map(href => element(href));
+  const b = sitewideBrowser(links);
+  links.forEach((own, index) => {
+    b.click(own);
+    assert.equal(own.getAttribute('href'), invalid[index]);
+    assert.ok(own.getAttribute('data-sitewide-app-route-status').startsWith('unsupported-'));
+  });
+  assert.ok(!b.events().some(e => e[1].startsWith('web_to_app')));
+});
