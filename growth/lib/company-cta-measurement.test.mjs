@@ -1,4 +1,8 @@
 import test from 'node:test';
+// Existing Company CI entry imports this suite; keep new pure Web coverage wired
+// without adding a workflow, install or collection operation.
+import './company-acquisition-sitewide.test.mjs';
+import './company-cta-sitewide.test.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -42,7 +46,10 @@ function fixture(t) {
     location:'asia-northeast1',start:'2026-09-06',end:'2026-09-09',run_id:'123',source_sha:'a'.repeat(40),
     observed_at:'2026-09-14T01:00:00Z', coverage:[6,7,8,9,10].map(d=>({day:`2026-09-${String(d).padStart(2,'0')}`,present:true})),
     queries:['ga4-quality.sql','ga4-funnel.sql'].map(file=>({file,
-      sql_sha256:hash(fs.readFileSync(path.join(ROOT,'growth/sql/analytics',file))),
+      // Freeze the historical direct/pilot contract for these regression cases.
+      // Current sitewide query admission/relationships are tested separately.
+      sql_sha256:file==='ga4-quality.sql' ? '8aa794cefda068076a099f6e6e6d1be7a85cbf96201066dcdf8220c447a49763'
+        : 'ad2da652e32277c82b67e999332fde221c566ca86b522f76920ba0c13d485123',
       params:{start_date:'2026-09-06',end_date:'2026-09-09',...(file==='ga4-quality.sql'?{scan_end_date:'2026-09-10'}:{}),
         measurement_version:'2026-09-05',bridge_measurement_version:'2026-09-07'},
       result:{jobId:'query-'+file,location:'asia-northeast1',statementType:'SELECT',

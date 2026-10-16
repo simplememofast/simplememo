@@ -56,12 +56,15 @@ SELECT
   COUNTIF(event_name IN ('web_to_app_click', 'web_to_app_impression') AND
     (measurement_version IS NULL OR measurement_version != @bridge_measurement_version)) AS onelink_version_missing_or_other,
   COUNTIF(event_name IN ('web_to_app_click', 'web_to_app_impression') AND NOT IFNULL(
-    link_route = 'onelink' AND REGEXP_CONTAINS(link_url,
-      r'^https://simplememofast\.onelink\.me/it5q/[A-Za-z0-9]{8}$'), FALSE)) AS onelink_target_invalid_or_missing,
+    link_route = 'onelink' AND (
+      (bridge_scope IN ('qa', 'pilot') AND REGEXP_CONTAINS(link_url,
+        r'^https://simplememofast\.onelink\.me/it5q/[A-Za-z0-9]{8}$'))
+      OR (bridge_scope = 'sitewide'
+        AND link_url = 'https://simplememofast.onelink.me/it5q?pid=owned_web&c=website_bridge_v1')), FALSE)) AS onelink_target_invalid_or_missing,
   COUNTIF(event_name IN ('web_to_app_click', 'web_to_app_impression') AND
     (NULLIF(placement, '') IS NULL OR placement = '(untagged)'
      OR NULLIF(cluster, '') IS NULL OR cluster = '(untagged)'
-     OR NULLIF(variant, '') IS NULL OR NOT IFNULL(bridge_scope IN ('qa', 'pilot'), FALSE))) AS onelink_dimensions_incomplete,
+     OR NULLIF(variant, '') IS NULL OR NOT IFNULL(bridge_scope IN ('qa', 'pilot', 'sitewide'), FALSE))) AS onelink_dimensions_incomplete,
   COUNTIF(event_name IN ('web_to_app_click', 'web_to_app_impression') AND
     link_url = 'https://simplememofast.onelink.me/it5q/4x0jfkpw'
     AND NOT IFNULL(bridge_scope = 'qa', FALSE)) AS onelink_qa_scope_mismatch

@@ -223,3 +223,58 @@ missing versus zero, joined dimensions, SDK-independent source classification,
 corrupt input, retention and weighted rates. The existing Company regression
 suite covers collection locks and bounded retries. Revert the change to stop
 the added handoff; existing provider collectors and historical files remain.
+
+## Separately authorized sitewide route draft (2026-10-16)
+
+The reporting-only authorization above is distinct from the later website
+route draft in [sitewide-onelink-rollout.md](sitewide-onelink-rollout.md).
+That draft reuses the existing OneLink template for the separate
+`owned_web` / `website_bridge_v1` campaign. It has no production start:
+`rollout_start: null`. The nine original pilot links and their three-metric
+completion contract remain unchanged. QR, native Smart App Banner taps,
+compose/verify utilities and unsupported URL forms are explicit coverage gaps.
+The 2026-10-16 08:58 UTC offline inventory finds 7,440 eligible direct anchors
+on 2,429 pages, within 2,449 opted-in tracker pages. Twelve unsupported URLs
+and 22 anchors without the tracker remain direct. This is local source and
+predicate evidence; it is not deployed coverage or successful attribution.
+The conversion accepts only the exact reviewed public path and `ct`/`pt`/`mt`/
+`ppid` allowlists. A new path or value requires review and inventory refresh;
+syntactically valid but unlisted tokens stay direct.
+
+New GA4 sitewide fields are separate from the legacy pilot fields. An expanded
+all-route session union counts direct Apple, pilot and sitewide intent without
+double counting. The nine-hub primary observation uses it only when the required
+new columns are complete, and identifies its definition version and source
+column. Older receipt schemas retain their legacy interpretation; missing
+fields are not zero. The pilot impression/click auxiliary stays pilot-only.
+Converting direct routes mechanically reduces the legacy direct-only
+`app_store_click` rate. Retaining that field preserves historical interpretation;
+it does not make a pre/post comparison equivalent or prove improvement or
+decline. New sitewide series need their actual rollout boundary recorded.
+
+AppsFlyer gains a separate closed classification for `website_bridge_v1`;
+the original pilot, QA, Organic and unattributed groups keep their meanings.
+Existing receipt, period, zero-missing-date and quality rules still apply.
+The candidate adds no provider request, collector or schedule. It does not
+restart collection, consume an Apple/iOS producer or change a daily report.
+The existing `acquisitionReport` format is preserved. Supplementary sitewide
+display belongs to the separate `sitewideAcquisitionReport` export and is not
+wired into the existing daily/weekly/monthly consumers. The structured
+acquisition result gains the new measurement fields and the versioned nine-hub
+primary readout; the public daily report generator and schedules are unchanged.
+`acquisitionMaterial` preserves the legacy notification projection so the
+new standalone fields do not create a changed-receipt notification. Fixtures
+derived from the baseline verify matching fingerprints and continued detection
+of changes to existing metrics. Structured private review JSON may contain the
+new fields without adopting the separate text renderer.
+Missing or unverified results stay distinct from observed zero. Website
+visit-to-install CVR and its estimate remain `null`.
+
+The runtime's intended destination preservation through `af_ios_url` and
+`af_web_dp` is not evidence of successful routing. The template's current
+allowlist, storefront/CPP behavior, installed-user behavior and attribution
+remain unverified. AppsFlyer does not record desktop clicks when `af_web_dp`
+is present, so those web intents cannot be reconciled one-for-one with its
+click totals. Local tests establish parser and event behavior only. The draft
+does not resume device tests, change app consent, publish links, or satisfy the
+separate review needed for release and wider privacy disclosure.

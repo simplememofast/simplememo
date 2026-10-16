@@ -160,3 +160,36 @@ https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e1303231
 
 HTML内では `&` を `&amp;` とする。通常のPR・SEO Validation・Git経由の本番反映を使い、
 復旧時刻・本番SHAを同じ計測変更履歴に残す。過去のQA/pilot記録は削除しない。
+
+## 別枠の全サイト導線draft（2026-10-16）
+
+後続の本人依頼により、既存テンプレートを用いた導線拡張の実装・ローカル検証・draft PRを
+別枠で準備する。[範囲と公開条件](../docs/growth/sitewide-onelink-rollout.md)を参照。
+まだ公開せず、拡張の `rollout_start` は `null`。上記9heroのURL・属性と3指標の完了条件は維持する。
+新campaignは `owned_web` / `website_bridge_v1` とし、pilotやQAへ合算しない。
+既存pilot短縮URLへ `c` を追加しても保存済みcampaignを上書きできないため、
+拡張には別の長URLを用いる。管理画面設定やリンク生成APIは変更しない。
+
+既存trackerを読み込むページの安全な静的Apple anchorだけが変換候補となる。
+JavaScript無効時や未対応URLは元の直接リンクを保つ。QR・ネイティブSmart App Banner・
+compose/verifyのutilityは今回未対応であり、「全サイトの全導線が帰属済み」としない。
+10月16日08:58 UTCのオフラインinventoryでは2,449ページがopt-in済みで、
+2,429ページの7,440個の直接Apple anchorが変換候補。未知query10件・fragment2件と、
+trackerのないutilityの22件は直接リンクを維持する。独立英語hubの5anchorは別campaignの対象。
+変換するパスと `ct` / `pt` / `mt` / `ppid` は確認済みの公開値だけを列挙して許可する。
+新しい値・パスは再レビューとallowlist・inventory更新が必要で、形式だけ合う値は転送しない。
+これはローカルpredicateの結果であり、本番配備やユーザーの到達率ではない。
+長URLの実遷移、CPP/storefront、既存利用者の動作、
+帰属と拡張範囲に対するプライバシー説明は未確認。実機QAやApple/iOS作業は再開しない。
+
+9hubの主指標は、必要な新列が揃う場合だけ、直接Apple・pilot・sitewideをsession内で
+重複排除した拡張unionを使い、定義versionとsource columnを明記する。
+旧receiptは旧定義のまま読む。9heroの表示→クリック補助値はpilotだけを維持する。
+非heroの直接Apple導線も変わり得るため、旧direct-only率は機械的に減り得る。
+旧列の保持を、切替前後の同条件比較や改善・悪化の証明と扱わない。
+公開時には実際の開始時刻と対象を別系列の境界として記録し、併発影響も残す。
+共通cohortのない訪問→install CVRは引き続き算出せず、Organicの再配分もしない。
+日次レポートの既存形式は維持し、新しい補助表示は独立した `sitewideAcquisitionReport` に分ける。
+既存の日報・週報・月報への自動接続、公開日報生成器やscheduleの変更は行わない。
+通知比較にも旧定義へのprojectionを用い、新しい補助fieldの追加だけで同じreceiptを
+更新扱いにしない。基準commitから得たfixtureでfingerprintの同値を検証する。

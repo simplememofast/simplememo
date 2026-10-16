@@ -474,5 +474,17 @@ class LandingDiagnosticTests(unittest.TestCase):
         self.assertEqual(by_status["observed_page_view_24h"]["observed_started_sessions"], 1)
 
 
+def load_tests(loader, tests, pattern):
+    # The existing CI command already runs this file. Load the isolated sitewide
+    # behavior suite as well, without changing workflows or installing anything.
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "sitewide_sql_tests", Path(__file__).with_name("ga4-sitewide-sql.test.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    tests.addTests(loader.loadTestsFromTestCase(module.SitewideSqlTests))
+    return tests
+
+
 if __name__ == "__main__":
     unittest.main()
