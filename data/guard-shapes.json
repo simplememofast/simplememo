@@ -878,6 +878,7 @@
     "scripts/check-asc-landed.mjs",
     "scripts/ci-health.mjs",
     "scripts/ci-health.test.mjs",
+    "scripts/enable-sitewide-app-routes.test.mjs",
     "scripts/execution-priorities.test.mjs",
     "scripts/property-tests.mjs",
     "scripts/qr-routing.test.mjs",
@@ -907,7 +908,8 @@
       "scripts/press-release-next.test.mjs": "Pure fixtures passed to the exported dispatch gate. Does not read live ledger JSON or access PR TIMES. The production module reads the actual ledger separately.",
       "scripts/execution-priorities.test.mjs": "合成の業務棚卸し・評価を prioritize に渡す回帰テスト。実台帳JSONを直接読まない。別モジュールの証拠ファイル存在確認と未達blocked_on判定を通し、期限切れ・物理境界・分母維持・無効参照を検査する。実台帳のCLI検査は execution-priorities.mjs --check で別途行う。",
       "growth/scripts/collect-bing.mjs": "Official Bing API reader through lib/bing-webmaster.mjs; no local ledger reads. Validates runtime and encryption before refresh; tests cover missing credentials, source/date/schema failures, bounded retries and redaction.",
-      "scripts/bing-capture.mjs": "Private capture state is read and validated in lib/company-bing.mjs. This thin CLI has no local ledger binding; module tests reject missing, stale, tampered, concurrent and mismatched attempt evidence."
+      "scripts/bing-capture.mjs": "Private capture state is read and validated in lib/company-bing.mjs. This thin CLI has no local ledger binding; module tests reject missing, stale, tampered, concurrent and mismatched attempt evidence.",
+      "scripts/enable-sitewide-app-routes.test.mjs": "合成HTMLと一時ディレクトリ内のfixtureだけを使うopt-in更新回帰テスト。実台帳JSONは読まない。直接readFileSyncするのは自作HTMLであり、import先のupdaterも同じ一時rootのHTMLとtracker fixtureを読む。既存trackerだけの変更、dry-run不変、対象外ページ保持、冪等性を検査するため、台帳由来の束縛が無いのは設計どおり。"
     },
     "scripts/preflight.mjs … **台帳を読まない。**読むのは `.github/workflows/seo-check.yml` で、そこから実行する検査の一覧を導出する（一覧を手で持つと、CI に検査を足した日に古くなる）。判定を持たない実行器なので、台帳由来の束縛が無いのは設計どおり",
     "\n",
@@ -1400,6 +1402,12 @@
       "expr": "html",
       "disposition": "別の規則が落とす",
       "note": "2026-10-14: validateChildLinks の linksOf。親ページの HTML が読めないとき null を返し、その親の [CHILD] を見ない。null になるのは親の URL がディスクに無いときだけで、その場合は同じ実行の validateGraph が [URL]（キーにページが無い・80行）か [PARENT]（親がキーでない・84行）で必ず落とす。**親が無いことを「子へリンクしている」と読む経路は無い。**[CHILD-EN] 側は exists() で英語の親子の実在を先に確かめ、無ければ対象外（英語版がまだ無い子）として明示的に飛ばす。"
+    },
+    {
+      "file": "scripts/site-route-inventory.mjs",
+      "expr": "trackerSource",
+      "disposition": "報告のみ",
+      "note": "2026-10-17: buildRouteInventoryの任意trackerSourceがnullのとき、(1) VM用scriptを作らず、(2) tracker_source_sha256をnullで報告する2箇所。原本が無い場合はevaluateRoutesが各対象へunevaluated_tracker_source_missingを記録し、offline_predicate_evaluatedはfalseのまま、convertedを作らない。live_verified/browser_executed/network_access/events_dispatchedもfalseを保持する。欠測を実行成功・公開確認・traffic coverageへ読み替える判定ではない。既存site-route-inventory.test.mjsのmissing source検体と追加の単発読取確認で未評価status、hash null、評価ページ0、適格変換0を確認。scanner、既存guard、検査上限や計測metadataを変えず、既存2分岐の読取記録を追加する。"
     }
   ]
 }

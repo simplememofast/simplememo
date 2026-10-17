@@ -276,7 +276,7 @@ def main(ja_rel: str, en_rel: str) -> None:
     html_out = finish_markup(html_out, REPO, english=True)
     html_out = finish_text_labels(html_out)
     html_out = finish_faq(html_out, abs_en)
-    html_out = finish_breadcrumbs(html_out, REPO).replace("AI Ataka", "AI ATAKA")
+    html_out = finish_breadcrumbs(html_out, REPO)
     html_out = finish_schema_names(html_out, REPO)
     html_out = finish_product_schema(html_out, en_rel)
 

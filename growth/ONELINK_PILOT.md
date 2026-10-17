@@ -160,3 +160,61 @@ https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e1303231
 
 HTML内では `&` を `&amp;` とする。通常のPR・SEO Validation・Git経由の本番反映を使い、
 復旧時刻・本番SHAを同じ計測変更履歴に残す。過去のQA/pilot記録は削除しない。
+
+## 別枠の全サイト導線draft（2026-10-16）
+
+後続の本人依頼により、既存テンプレートを用いた導線拡張を別枠で準備した。
+最新の本人指示では通常CI→merge→deployが承認済み。この版ではまだ実施・公開確認が完了して
+いないため、拡張の `rollout_start` は `null` を維持する。
+[範囲と公開条件](../docs/growth/sitewide-onelink-rollout.md)を参照。
+上記9heroのURL・属性と3指標の完了条件は維持する。
+新campaignは `owned_web` / `website_bridge_v1` とし、pilotやQAへ合算しない。
+既存pilot短縮URLへ `c` を追加しても保存済みcampaignを上書きできないため、
+拡張には別の長URLを用いる。管理画面設定やリンク生成APIは変更しない。
+
+10月17日の実HTTP確認では、OneLink経由でアプリには到達した一方、直接URLと比べて
+Appleの `ct` / `pt` と `?see-all=reviews` が失われた。このため既存の遷移目的と
+Appleキャンペーン情報を守るよう、サイト側の変換範囲を縮小する。
+裸のUS URL2形式はJPへ転送され直接URLと不一致だった。裸のJP URLは直接URLと同じ
+最終URLにHTTP200で到達した。これはそのHTTP試験の結果であり、端末上の動作や
+collector受領の証明ではない。管理画面・redirect allowlistの変更、別encodingやproxyによる迂回は行わない。
+
+既存trackerのある2,429ページ・7,452個の直接Apple anchorは、引き続きGAの
+クリック意図計測対象である。`ct` / `pt` 付き7,185件、固定review query10件、
+固定information fragment2件、残るUS storefrontの41件は、元のhrefを直接維持する。
+この計7,238件は既存の `seo_cta_impression` / `app_store_click` / `seo_cta_click`
+で計測し、OneLinkの `web_to_app_*` に数えない。残る裸のJP URL214件だけが
+209ページで別campaignのpredicateに適合する。9hero pilotのURL・属性・計測scopeは変えない。
+修正後inventoryのtracker SHA-256は
+`4d5f67122ea19faf5047076ffc141df0f003ab7f78cb4d6fca3b68c1e8c41aee`。
+sitemap内では7,163件中206件・201ページが変換対象である。旧7,452件全面変換の
+inventoryを公開対象件数として再利用しない。
+
+変換には既存の公開値allowlistを引き続き適用し、`ct` / `pt`、参照先、JP以外の
+storefrontを直接維持する。新しい値・パスは再レビューとinventory更新が必要。
+JavaScript無効時や未対応URLも元の直接リンクを保つ。GAの直接クリック計測が残っても、
+AppsFlyerで同じクリックやinstallが新campaignへ帰属するとは限らない。
+サイト全体のクリック意図計測と、新campaignの限定された帰属範囲を分けて報告する。
+
+trackerなしutilityの22件、QR、native Smart App Banner、TikTokのiOS自動遷移は
+今回のanchor計測外。utilityへのtracker追加、QR再生成、実機QA、Apple/iOS操作は行わない。
+10言語のprivacyはApp Storeで直接検索する代替を維持する。同じページの別リンクという
+だけでOneLinkを回避できるとは一般化しない。アプリ側同意/ATT、実際のcollector受領、
+既存利用者の端末上の動作は未確認である。
+
+最終revisionの通常CI成功、merge/deploy、配信されたruntimeと遷移範囲の確認後に
+実開始を記録する。配信確認とGA4/AppsFlyerのイベント受領確認は分ける。
+dataLayerへの投入やHTTP到達だけをイベント受領と呼ばない。この時点では公開確認と
+イベント受領はpendingである。旧draftのCI skip指定を通常CIの代わりにしない。
+
+9hubの主指標は、必要な新列が揃う場合だけ、直接Apple・pilot・sitewideをsession内で
+重複排除した拡張unionを使い、定義versionとsource columnを明記する。
+旧receiptは旧定義のまま読む。9heroの表示→クリック補助値はpilotだけを維持する。
+非heroの直接Apple導線も変わり得るため、旧direct-only率は機械的に減り得る。
+旧列の保持を、切替前後の同条件比較や改善・悪化の証明と扱わない。
+公開時には実際の開始時刻と対象を別系列の境界として記録し、併発影響も残す。
+共通cohortのない訪問→install CVRは引き続き算出せず、Organicの再配分もしない。
+日次レポートの既存形式は維持し、新しい補助表示は独立した `sitewideAcquisitionReport` に分ける。
+既存の日報・週報・月報への自動接続、公開日報生成器やscheduleの変更は行わない。
+通知比較にも旧定義へのprojectionを用い、新しい補助fieldの追加だけで同じreceiptを
+更新扱いにしない。基準commitから得たfixtureでfingerprintの同値を検証する。

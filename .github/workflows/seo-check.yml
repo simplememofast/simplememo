@@ -32,6 +32,25 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Routine CI scope regression
+        run: node --test scripts/routine-ci-scope.test.mjs
+
+      - name: Determine required routine observation checks
+        id: routine_scope
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { routineCiScope } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/lib/routine-ci-scope.mjs`);
+            const scope = routineCiScope({ eventName: context.eventName, event: context.payload });
+            core.setOutput('required', String(scope.required));
+            await core.summary.addHeading('Routine observation scope')
+              .addRaw(scope.mode !== 'pull-request'
+                ? 'Operational health runs in the independent routine-health job. Its failure remains visible and does not stop site tests.\n'
+                : scope.required
+                  ? 'This PR changes routine operations. Both current observation checks are required for publication.\n'
+                  : 'This PR does not change routine operations. Observation health is not assessed by this PR and is not a site publication gate. See the main/daily routine-health job; this is not a healthy observation.\n')
+              .addCodeBlock(JSON.stringify(scope, null, 2), 'json').write();
+
       - name: Auto-merge identity guard regression
         run: node scripts/merge-identity-check.js --selftest
 
@@ -696,27 +715,24 @@ jobs:
           node scripts/check-rollout-gate-pin.mjs --selftest
           node scripts/check-rollout-gate-pin.mjs --check
 
-      # 【副系が走ったかを外から確かめる】
-      # 主系（Actions）は run を全部列挙できるので記録が完結するが、副系は
-      # **セッションが自分で書いたときだけ**行が残る（autopilot-runs.json の
-      # source:session）。**書かずに死んだ回はどこにも現れない。**
-      #
-      # 台帳の⑩は「ログが外部から読めない。構造的に不可」と書いていたが、
-      # **走ったかどうかは読める** —— Routines API の last_run。
-      # 2026-08-28 に初めて読んだら、その場で4件見つかった
-      # （副系A/Bが2日以上停止・週次2本が4日前から失敗のまま）。
-      #
-      # list_triggers はCIから叩けないので、セッションが写しを置きCIが検査する。
-      # **だから写しの鮮度そのものを検査する** —— 古い写しを緑にすると
-      # 「読めているつもり」で止まる。
-      - name: Routine runs (副系が止まっていないか)
+      # Regression tests remain mandatory for every site and operations PR.
+      # Live observation freshness is a publication gate only for operations
+      # changes; main/daily health remains an independent, genuinely failing job.
+      # See docs/routine-ci-scope.md for scope and local-preflight limitations.
+      - name: Routine observation regression tests
         run: |
           node scripts/check-routine-runs.mjs --selftest
-          node scripts/check-routine-runs.mjs --check
           node scripts/routine-observer.mjs --selftest
           python3 scripts/routine-observer-local.py --selftest
           python3 scripts/codex-routine-observer.py --selftest
-          python3 scripts/codex-routine-observer.py --check
+
+      - name: Required Claude routine observation
+        if: github.event_name == 'pull_request' && steps.routine_scope.outputs.required == 'true'
+        run: node scripts/check-routine-runs.mjs --check
+
+      - name: Required Codex routine observation
+        if: always() && github.event_name == 'pull_request' && steps.routine_scope.outputs.required == 'true'
+        run: python3 scripts/codex-routine-observer.py --check
 
       # 【週次が黙って消える形を止めた】
       # seo-daily.yml の週次段は `[ "$(date -u +%u)" = "1" ]`（UTC月曜）だけで
@@ -1473,3 +1489,40 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: node scripts/indexnow-notify.js --since 1
         continue-on-error: true
+
+  # Existing main pushes and Main Daily Validation's reusable call monitor the
+  # public snapshots without reading private stores, changing data, or adding a
+  # schedule. Keep this job independent so stale operations cannot skip site tests.
+  routine-health:
+    if: always() && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Claude observation health
+        id: claude_health
+        if: always() && github.event_name != 'pull_request'
+        run: node scripts/check-routine-runs.mjs --check
+      - name: Codex observation health
+        id: codex_health
+        if: always() && github.event_name != 'pull_request'
+        run: python3 scripts/codex-routine-observer.py --check
+      - name: Record actual observation health outcomes
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          CLAUDE_OUTCOME: ${{ steps.claude_health.outcome }}
+          CODEX_OUTCOME: ${{ steps.codex_health.outcome }}
+        with:
+          script: |
+            await core.summary.addHeading('Routine observation health')
+              .addTable([
+                [{ data: 'Source', header: true }, { data: 'Actual checker outcome', header: true }],
+                ['Claude snapshot', process.env.CLAUDE_OUTCOME || 'not run'],
+                ['Codex snapshot', process.env.CODEX_OUTCOME || 'not run'],
+              ]).addRaw('\nFailure remains a failed job/workflow. See checker output for the actual diagnostic; failure is not automatically classified as staleness. No observation was collected or refreshed.\n').write();

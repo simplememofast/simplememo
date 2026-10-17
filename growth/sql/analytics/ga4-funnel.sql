@@ -6,6 +6,8 @@
 -- @bridge_measurement_version STRING ('2026-09-07') for opt-in OneLink intent.
 -- Direct and pilot route columns overlap; the combined column is their union.
 -- QA OneLink clicks have a separate column and never enter that union.
+-- Sitewide is a separate fixed campaign. Legacy direct/pilot columns retain
+-- their definitions; the expanded union adds sitewide and deduplicates all three.
 -- Start >= 2026-09-06 and >= first complete export day. End <= today JST - 5.
 -- All daily tables through end + 1 must be present and pass query 01/02.
 -- Do NOT filter page_view/session_start on measurement_version: those standard
@@ -47,6 +49,9 @@ WITH extracted AS (
     REGEXP_CONTAINS(LOWER(NET.HOST(page_location)), r'^(www\.)?simplememofast\.com$') AS production_event,
     IFNULL(measurement_version = @bridge_measurement_version AND link_route = 'onelink'
       AND REGEXP_CONTAINS(link_url, r'^https://simplememofast\.onelink\.me/it5q/[A-Za-z0-9]{8}$'), FALSE) AS valid_onelink,
+    IFNULL(measurement_version = @bridge_measurement_version AND link_route = 'onelink'
+      AND bridge_scope = 'sitewide'
+      AND link_url = 'https://simplememofast.onelink.me/it5q?pid=owned_web&c=website_bridge_v1', FALSE) AS valid_sitewide_onelink,
     -- Keep source/medium together: independent MAX/COALESCE values can invent
     -- a pair that never occurred. Missing events do not conflict with a pair.
     IF(attributed_source IS NULL AND attributed_medium IS NULL, NULL,
@@ -114,7 +119,9 @@ WITH extracted AS (
     COUNTIF(event_name = 'web_to_app_click' AND production_event AND valid_onelink
       AND bridge_scope = 'pilot' AND link_url != 'https://simplememofast.onelink.me/it5q/4x0jfkpw') > 0 AS clicked_onelink,
     COUNTIF(event_name = 'web_to_app_click' AND production_event AND valid_onelink
-      AND (bridge_scope = 'qa' OR link_url = 'https://simplememofast.onelink.me/it5q/4x0jfkpw')) > 0 AS clicked_onelink_qa
+      AND (bridge_scope = 'qa' OR link_url = 'https://simplememofast.onelink.me/it5q/4x0jfkpw')) > 0 AS clicked_onelink_qa,
+    COUNTIF(event_name = 'web_to_app_impression' AND production_event AND valid_sitewide_onelink) > 0 AS saw_sitewide_onelink,
+    COUNTIF(event_name = 'web_to_app_click' AND production_event AND valid_sitewide_onelink) > 0 AS clicked_sitewide_onelink
   FROM windowed
   GROUP BY stream_id, user_pseudo_id, session_id
 ), classified AS (
@@ -171,6 +178,11 @@ SELECT
   COUNTIF(clicked_onelink_qa) AS sessions_with_onelink_qa_click_24h,
   COUNTIF(clicked_own_app AND clicked_onelink) AS sessions_with_both_app_routes_24h,
   COUNTIF(clicked_own_app OR clicked_onelink) AS sessions_with_any_app_route_click_24h,
+  COUNTIF(saw_sitewide_onelink) AS sessions_with_sitewide_onelink_impression,
+  COUNTIF(clicked_sitewide_onelink) AS sessions_with_sitewide_onelink_click_24h,
+  COUNTIF(clicked_sitewide_onelink AND NOT saw_sitewide_onelink) AS sitewide_onelink_clicked_without_recorded_impression,
+  COUNTIF((clicked_own_app OR clicked_onelink) AND clicked_sitewide_onelink) AS sessions_with_legacy_and_sitewide_routes_24h,
+  COUNTIF(clicked_own_app OR clicked_onelink OR clicked_sitewide_onelink) AS sessions_with_expanded_app_route_click_24h,
   SAFE_DIVIDE(COUNTIF(clicked_own_app), COUNT(*)) AS own_app_click_session_rate_24h,
   SAFE_DIVIDE(COUNTIF(clicked_own_app AND saw_cta), COUNTIF(saw_cta)) AS clicked_among_cta_exposed_sessions
 FROM classified

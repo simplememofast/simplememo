@@ -48,6 +48,9 @@ function ga4Payload({ id = 501, head = HEAD, observedAt = RUN_AT, status = 'comp
     sessions_with_cta_impression: 10, clicked_without_recorded_impression: 0, sessions_with_onelink_impression: 0,
     sessions_with_onelink_click_24h: 0, onelink_clicked_without_recorded_impression: 0, sessions_with_onelink_qa_click_24h: 0,
     sessions_with_both_app_routes_24h: 0, sessions_with_any_app_route_click_24h: 1, missing_landing_no_timed_page_view_in_scan: 0,
+    sessions_with_sitewide_onelink_impression: 0, sessions_with_sitewide_onelink_click_24h: 0,
+    sitewide_onelink_clicked_without_recorded_impression: 0, sessions_with_legacy_and_sitewide_routes_24h: 0,
+    sessions_with_expanded_app_route_click_24h: 1,
     missing_landing_page_view_before_start_only: 0, missing_landing_page_view_after_window_only: 0, missing_landing_page_view_both_sides: 0,
     own_app_click_session_rate_24h: 0.1 };
   return { schema_version: 1, report: 'ga4-funnel', execution: 'export', status, project: 'yurika-simplememo', location: 'asia-northeast1',

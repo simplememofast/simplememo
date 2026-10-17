@@ -108,6 +108,7 @@ export function summarizeAppsFlyerAcquisition(csv) {
     const source = r['Media Source (pid)'], campaign = r['Campaign (c)'];
     const category = source === 'seo_aio_qa' || campaign === 'obsidian_bridge_qa_20260907' ? 'qa'
       : source === 'owned_web' && campaign === 'obsidian_bridge_pilot_v1' ? 'owned_web_pilot'
+      : source === 'owned_web' && campaign === 'website_bridge_v1' ? 'owned_web_sitewide'
       : source === 'Organic' ? 'organic_unspecified'
       : ['', 'None', 'N/A'].includes(source) ? 'unattributed' : 'other_attributed';
     if (!groups.has(category)) groups.set(category, []);
@@ -118,13 +119,23 @@ export function summarizeAppsFlyerAcquisition(csv) {
     { installs: sum(rows,'installs'), clicks: sum(rows,'clicks'), rows: rows.length }])),
     own_site_installs: groups.has('owned_web_pilot') ? sum(groups.get('owned_web_pilot'),'installs') : null,
     own_site_state: groups.has('owned_web_pilot') ? 'pilot_rows_only' : 'no_attributed_site_rows',
+    sitewide_link_installs: groups.has('owned_web_sitewide') ? sum(groups.get('owned_web_sitewide'),'installs') : null,
+    sitewide_link_state: groups.has('owned_web_sitewide') ? 'sitewide_campaign_rows_only' : 'no_attributed_sitewide_rows',
     install_cvr: null,
     limitation: 'Organic is not website SEO. QA never counts as production acquisition. The known pilot does not cover the whole site. API receipt proves report retrieval, not current SDK collection or a verified web-to-install journey.' };
 }
 
 // A report-period ratio from one provider, never a matched visitor/install CVR.
 export function ownedLinkPeriodRate(connection) {
-  const group = connection?.site_acquisition?.by_category?.owned_web_pilot;
+  return campaignPeriodRate(connection, 'owned_web_pilot', 'obsidian_bridge_pilot_v1', 'the reserved pilot');
+}
+
+export function sitewideLinkPeriodRate(connection) {
+  return campaignPeriodRate(connection, 'owned_web_sitewide', 'website_bridge_v1', 'the separate sitewide link campaign');
+}
+
+function campaignPeriodRate(connection, category, campaign, label) {
+  const group = connection?.site_acquisition?.by_category?.[category];
   const installs = group?.installs ?? null, clicks = group?.clicks ?? null;
   const quality = connection?.quality;
   const missing = quality?.missing_metric_columns;
@@ -145,9 +156,9 @@ export function ownedLinkPeriodRate(connection) {
     clicks: connection?.status === 'BLOCKED' ? null : clicks,
     missing_required_metric_columns: missingRequired,
     missing_optional_metric_columns: missingOptional,
-    media_source: 'owned_web', campaign: 'obsidian_bridge_pilot_v1',
+    media_source: 'owned_web', campaign,
     matched_cohort: false,
-    scope: 'AppsFlyer report-period attributed installs / reported link clicks, limited to the reserved pilot. Attribution delay can produce a ratio above 100%. Not all website visits, not all installations, and not a visitor-cohort CVR.' };
+    scope: `AppsFlyer report-period attributed installs / reported link clicks, limited to ${label}. Attribution delay can produce a ratio above 100%. Not all website visits, not all installations, and not a visitor-cohort CVR.` };
 }
 
 // Diagnostic only (owner decision 2026-10-14; measurement_changes 2026-09-16).
@@ -185,23 +196,72 @@ function automationExcluded(production, valid, quality) {
 // OneLink pilot readout (owner decision 2026-10-15; growth/ONELINK_PILOT.md 指標の定義).
 // Existing ga4-funnel columns only. The official rates above stay unchanged.
 const PILOT_HUBS = new Set(['/obsidian/', ...['ar','es','id','ko','pt-BR','tr','zh','zh-Hant'].map(l => `/${l}/obsidian/`)]);
+const LEGACY_PILOT_SCOPE = 'Primary: production sessions landing on the nine pilot hubs with a recorded Store-link click within 24h by any app route (direct Apple + OneLink, deduplicated). Auxiliary: OneLink pilot impression sessions that clicked, all landings, QA excluded. Clicks do not prove Store arrival or installs; not per-language, and never replaces the official rate.';
+
+const SITEWIDE_COUNTS = ['sessions_with_sitewide_onelink_impression', 'sessions_with_sitewide_onelink_click_24h',
+  'sitewide_onelink_clicked_without_recorded_impression', 'sessions_with_legacy_and_sitewide_routes_24h',
+  'sessions_with_expanded_app_route_click_24h'];
+
+// Never turn an older receipt or partial schema into a zero sitewide count.
+// The overlap comes from SQL's same-session union, not a cross-source estimate.
+function sitewideColumns(production) {
+  const present = production.some(r => SITEWIDE_COUNTS.some(k => Object.hasOwn(r, k)));
+  if (!present) return { state: 'legacy_query_without_sitewide_columns', valid: false };
+  const valid = production.every(r => {
+    const n = r.observed_started_sessions, legacy = r.sessions_with_any_app_route_click_24h;
+    const [seen, clicked, unseen, overlap, expanded] = SITEWIDE_COUNTS.map(k => r[k]);
+    return [n, legacy, seen, clicked, unseen, overlap, expanded].every(validCount)
+      && [legacy, seen, clicked, unseen, overlap, expanded].every(v => v <= n)
+      && unseen <= clicked && clicked - unseen <= seen && overlap <= Math.min(legacy, clicked)
+      && expanded === legacy + clicked - overlap;
+  });
+  return { state: valid ? 'observed_diagnostic' : 'invalid_or_mixed_sitewide_columns', valid };
+}
+
+function sitewideRoutes(production, valid, quality) {
+  const schema = sitewideColumns(production), admitted = valid && schema.valid;
+  const total = key => admitted ? sum(production, key) : null;
+  const sessions = total('observed_started_sessions'), seen = total(SITEWIDE_COUNTS[0]);
+  const clicked = total(SITEWIDE_COUNTS[1]), unseen = total(SITEWIDE_COUNTS[2]), expanded = total(SITEWIDE_COUNTS[4]);
+  return { definition_version: 'sitewide-onelink-v1', state: valid ? schema.state : 'unavailable', quality_state: quality,
+    observed_production_sessions: sessions,
+    onelink_impression_sessions: seen, onelink_click_sessions: clicked,
+    onelink_clicked_without_recorded_impression: unseen,
+    onelink_impression_click_session_rate: seen > 0 ? (clicked - unseen) / seen : null,
+    sessions_with_expanded_app_route_click: expanded,
+    expanded_app_route_click_session_rate: sessions > 0 ? expanded / sessions : null,
+    media_source: 'owned_web', campaign: 'website_bridge_v1',
+    source_column: SITEWIDE_COUNTS[4], replaces_official_rate: false,
+    scope: 'Observed production landing sessions, any channel, same session within 24h. Expanded union: direct Apple + reserved pilot + sitewide OneLink, deduplicated. Sitewide impressions/clicks exclude pilot and QA. QR scans on another device and native Smart App Banner taps are not page events. Clicks do not prove Store arrival, installation or first launch.' };
+}
 
 function obsidianHubPilot(production, valid, quality) {
   const total = (rows, key) => rows.length ? sum(rows, key) : 0;
   const hub = production.filter(r => PILOT_HUBS.has(r.landing_path));
-  const sessions = total(hub,'observed_started_sessions'), routed = total(hub,'sessions_with_any_app_route_click_24h');
-  const landOk = valid && validCount(sessions) && validCount(routed) && routed <= sessions;
+  const schema = sitewideColumns(production);
+  const legacy = schema.state === 'legacy_query_without_sitewide_columns';
+  const routeColumn = legacy ? 'sessions_with_any_app_route_click_24h' : 'sessions_with_expanded_app_route_click_24h';
+  const sessions = total(hub,'observed_started_sessions'), routed = total(hub,routeColumn);
+  const landOk = valid && (legacy || schema.valid) && validCount(sessions) && validCount(routed) && routed <= sessions;
+  const legacyRouted = total(hub, 'sessions_with_any_app_route_click_24h');
+  const legacyOk = valid && validCount(sessions) && validCount(legacyRouted) && legacyRouted <= sessions;
   // Same-session observations: a click without a recorded impression is shown, not counted as exposed.
   const seen = total(production,'sessions_with_onelink_impression'), clicked = total(production,'sessions_with_onelink_click_24h');
   const unseen = total(production,'onelink_clicked_without_recorded_impression');
   const heroOk = valid && [seen, clicked, unseen].every(validCount) && unseen <= clicked && clicked - unseen <= seen;
-  return { definition_version: 'obsidian-hub-onelink-pilot-v1', replaces_official_rate: false, quality_state: quality,
+  return { definition_version: legacy ? 'obsidian-hub-onelink-pilot-v1' : 'obsidian-hub-onelink-pilot-v2',
+    primary_source_column: routeColumn, primary_source_scope: legacy ? 'legacy_direct_plus_pilot' : 'expanded_direct_plus_pilot_plus_sitewide',
+    primary_schema_state: schema.state, auxiliary_definition_version: 'obsidian-pilot-hero-v1',
+    legacy_primary: { hub_landing_sessions: legacyOk ? sessions : null,
+      hub_landing_sessions_reaching_store: legacyOk ? legacyRouted : null,
+      hub_landing_store_session_rate: legacyOk && sessions > 0 ? legacyRouted / sessions : null },
+    replaces_official_rate: false, quality_state: quality,
     hub_landing_sessions: landOk ? sessions : null, hub_landing_sessions_reaching_store: landOk ? routed : null,
     hub_landing_store_session_rate: landOk && sessions > 0 ? routed / sessions : null,
     onelink_impression_sessions: heroOk ? seen : null, onelink_click_sessions: heroOk ? clicked : null,
     onelink_clicked_without_recorded_impression: heroOk ? unseen : null,
     onelink_impression_click_session_rate: heroOk && seen > 0 ? (clicked - unseen) / seen : null,
-    scope: 'Primary: production sessions landing on the nine pilot hubs with a recorded Store-link click within 24h by any app route (direct Apple + OneLink, deduplicated). Auxiliary: OneLink pilot impression sessions that clicked, all landings, QA excluded. Clicks do not prove Store arrival or installs; not per-language, and never replaces the official rate.' };
+    scope: legacy ? LEGACY_PILOT_SCOPE : 'Primary: production sessions landing on the same nine pilot hubs with a recorded Store-link click within 24h by any app route, deduplicated. New receipts use the expanded direct + pilot + sitewide union; old receipts retain direct + pilot with explicit source scope. Auxiliary: unchanged OneLink pilot impression sessions that clicked, all landings, QA excluded. Clicks do not prove Store arrival or installs; not per-language, and never replaces the official rate.' };
 }
 
 export function siteAcquisition(connections = {}, cta = null) {
@@ -224,6 +284,7 @@ export function siteAcquisition(connections = {}, cta = null) {
       observed_any_app_route_click_session_rate: anyValid && sessions > 0 ? anyClicks / sessions : null,
       automation_excluded_diagnostic: automationExcluded(production, gaValid, gaState),
       obsidian_hub_pilot: obsidianHubPilot(production, ga?.status === 'CONNECTED', gaState),
+      sitewide_routes: sitewideRoutes(production, ga?.status === 'CONNECTED', gaState),
       missing_landing_sessions: rows ? (rows.some(r=>r.landing_scope==='missing_landing_page')
         ? sum(rows.filter(r=>r.landing_scope==='missing_landing_page'),'observed_started_sessions') : 0) : null,
       source: ga?.evidence ?? null,
@@ -235,6 +296,7 @@ export function siteAcquisition(connections = {}, cta = null) {
       missing_metric_columns: af?.quality?.missing_metric_columns ?? null,
       completeness: af?.status==='CONNECTED' ? 'reported_rows_only' : 'partial_or_unavailable',
       owned_link_period_rate: ownedLinkPeriodRate(af),
+      sitewide_link_period_rate: sitewideLinkPeriodRate(af),
       source: af?.evidence ?? null },
   };
   acquisition.website_install_cvr = websiteInstallReadiness(acquisition);
@@ -248,6 +310,35 @@ export function acquisitionMaterial(a) {
   delete copy.ga4.source; delete copy.appsflyer.source;
   for(const key of ['commit','collected_at','observed_at','artifacts'])delete copy.apple[key];
   for(const report of Object.values(copy.apple.reports??{}))delete report.observed_at;
+  // Preserve the existing daily/weekly notification contract. New standalone
+  // observations must not create a notification for an unchanged old receipt.
+  delete copy.ga4.sitewide_routes;
+  const h = copy.ga4.obsidian_hub_pilot;
+  if (h) {
+    if (h.legacy_primary) Object.assign(h, h.legacy_primary);
+    for (const key of ['primary_source_column', 'primary_source_scope', 'primary_schema_state',
+      'auxiliary_definition_version', 'legacy_primary']) delete h[key];
+    h.definition_version = 'obsidian-hub-onelink-pilot-v1'; h.scope = LEGACY_PILOT_SCOPE;
+  }
+  for (const key of ['sitewide_link_installs', 'sitewide_link_state', 'sitewide_link_period_rate']) delete copy.appsflyer[key];
+  if (copy.appsflyer.by_category) {
+    const groups = new Map();
+    for (const [category, values] of Object.entries(copy.appsflyer.by_category)) {
+      // Before this addition, these exact source rows belonged to other_attributed.
+      const key = category === 'owned_web_sitewide' ? 'other_attributed' : category;
+      const prior = groups.get(key);
+      groups.set(key, prior ? { installs: sum([prior, values], 'installs'),
+        clicks: sum([prior, values], 'clicks'), rows: prior.rows + values.rows } : values);
+    }
+    copy.appsflyer.by_category = Object.fromEntries(groups);
+  }
+  const readiness = copy.website_install_cvr;
+  if (readiness) {
+    for (const key of ['observed_sitewide_link_installs', 'sitewide_state', 'sitewide_definition']) delete readiness.numerator[key];
+    for (const key of ['sitewide_campaign', 'sitewide_web_observation_state', 'sitewide_campaign_observation_state',
+      'outside_sitewide_web_event_coverage', 'route_coverage_complete']) delete readiness.coverage[key];
+    delete readiness.sitewide_alternatives;
+  }
   return copy;
 }
 
@@ -279,4 +370,36 @@ export function acquisitionReport(a) {
       `Pilot source-window coverage: GA4 ${w.pilot_readiness.ga4.state}; AppsFlyer ${w.pilot_readiness.appsflyer.state}. Earliest GA4 window with a complete pilot day: ${w.pilot_readiness.first_ga4_window_with_complete_pilot_day_available_on} JST; seven post-start days: ${w.pilot_readiness.first_ga4_seven_day_post_start_window_available_on} JST. These dates do not prove collection or attribution.`);
   }
   return lines;
+}
+
+// Standalone private renderer. Existing daily/weekly report formatting and
+// scheduling do not call this function; adoption needs its own reviewed scope.
+export function sitewideAcquisitionReport(a) {
+  const number = n => Number.isFinite(n) ? String(n) : 'unknown';
+  const pct = n => Number.isFinite(n) ? (n * 100).toFixed(2) + '%' : 'unknown';
+  const impressionReadout = source => {
+    const count = key => validCount(source?.[key]) ? source[key] : null;
+    const clicks = count('onelink_click_sessions'), seen = count('onelink_impression_sessions');
+    const unseen = count('onelink_clicked_without_recorded_impression');
+    const valid = [clicks, seen, unseen].every(validCount) && unseen <= clicks && clicks - unseen <= seen;
+    const exposed = valid ? clicks - unseen : null, reportedRate = source?.onelink_impression_click_session_rate;
+    const rate = valid && seen > 0 && Number.isFinite(reportedRate)
+      && Math.abs(reportedRate - exposed / seen) < 1e-12 ? reportedRate : null;
+    return `${number(exposed)} click sessions with a recorded impression / ${number(seen)} impression sessions; ${pct(rate)}. Total click sessions ${number(clicks)}; without a recorded impression ${number(unseen)}.`;
+  };
+  const ga = a.ga4 ?? {}, sw = ga.sitewide_routes, h = ga.obsidian_hub_pilot;
+  const af = a.appsflyer ?? {}, pilot = af.owned_link_period_rate, sitewide = af.sitewide_link_period_rate;
+  const w = a.website_install_cvr;
+  return [
+    '# Sitewide link observations (private, separate from the daily report)', '',
+    `GA4 window: ${ga.window?.start ?? '?'}..${ga.window?.end ?? '?'} JST; quality ${ga.state ?? 'unavailable'}.`,
+    `Web units: ${number(ga.website_visits?.page_views)} page views, ${number(ga.website_visits?.observed_visitors)} distinct observed browsers and ${number(ga.observed_production_sessions)} observed production landing sessions. These are different populations and units; browsers are not verified people.`,
+    `Sitewide OneLink: ${impressionReadout(sw)} Expanded direct + pilot + sitewide union: ${number(sw?.sessions_with_expanded_app_route_click)} / ${number(sw?.observed_production_sessions)} sessions; ${pct(sw?.expanded_app_route_click_session_rate)} (${sw?.state ?? 'unavailable'}). Clicks are within 24h of session start, not Store arrivals.`,
+    `Nine-hub primary: ${number(h?.hub_landing_sessions_reaching_store)} / ${number(h?.hub_landing_sessions)} sessions; ${pct(h?.hub_landing_store_session_rate)}. Source scope ${h?.primary_source_scope ?? 'unavailable'} (${h?.definition_version ?? 'unavailable'}). Unchanged pilot-only hero auxiliary: ${impressionReadout(h)}`,
+    `Legacy direct-only and direct + pilot union definitions remain available. Redirecting direct links to sitewide OneLink can mechanically reduce the direct-only metric. Do not compare it with pre-sitewide experiment baselines or substitute the expanded diagnostic as a baseline.`,
+    `AppsFlyer window: ${af.window?.start ?? af.window?.from ?? '?'}..${af.window?.end ?? af.window?.to ?? '?'} JST; ${af.connection_state ?? 'unavailable'}. Reserved pilot: ${number(pilot?.installs)} reported installs / ${number(pilot?.clicks)} clicks; ${pct(pilot?.value)} (${pilot?.state ?? 'unavailable'}). Separate owned_web / website_bridge_v1 campaign: ${number(sitewide?.installs)} reported installs / ${number(sitewide?.clicks)} clicks; ${pct(sitewide?.value)} (${sitewide?.state ?? 'unavailable'}). Each is a same-provider report-period ratio, not a matched visitor cohort.`,
+    'Coverage: JavaScript-mediated eligible links use the sitewide campaign; original nine pilot hero links retain their pilot campaign. Native Smart App Banner taps, cross-device QR scans and JavaScript-disabled direct fallbacks are outside page-event coverage. A routed QR can yield a campaign attribution without a source-page session match. Source-declared route counts do not prove live delivery or traffic coverage.',
+    'Organic stays unattributed to the site. Missing campaign rows or missing metrics stay unknown; explicit zero remains zero. AppsFlyer Installs are not verified first installs, API first-launch events, Apple first downloads or purchases. Internal-user/reinstall exclusions and attribution lookback remain unverified; consent coverage and observation windows differ.',
+    `Whole-site visit-to-install CVR: unavailable; estimate unavailable; matched cohort false. Evidence gaps: ${(w?.blockers ?? ['no_common_attributable_cohort']).join(', ')}. Sitewide rollout does not resolve these gaps.`,
+  ];
 }

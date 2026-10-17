@@ -161,6 +161,15 @@
       ],
       "why": "Preserve shared navigation and footer branding across static pages; citation page generation uses the same transformer.",
       "deterministic_why": "Reads only tracked HTML and content-hashed local CSS/JS. No network, clock or credentials."
+    },
+    {
+      "cmd": "scripts/enable-sitewide-app-routes.mjs --write",
+      "writes": [
+        "*.html",
+        "**/*.html"
+      ],
+      "why": "Keep existing tracker consumers opted in with the current tracker hash. CI must exercise the writer and reject stale generated HTML.",
+      "deterministic_why": "Reads only local HTML and js/app-store-tracking.js. Updates existing tracker script attributes using the content hash; no network, clock, credentials or external state."
     }
   ],
   "never_run": [

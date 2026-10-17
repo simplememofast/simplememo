@@ -28,9 +28,9 @@
       "name": "既存SQL定義: ga4-funnel.sql",
       "formula": "監視契約: source_fileの既存SQL原本とchecksum/source_sha256が一致し、定義変更は理由付きversion/history更新を要する。query実行や新しいKPI測定値ではない。",
       "source_file": "growth/sql/analytics/ga4-funnel.sql",
-      "checksum": "ad2da652e32277c8",
-      "source_sha256": "ad2da652e32277c82b67e999332fde221c566ca86b522f76920ba0c13d485123",
-      "version": 2,
+      "checksum": "52eca55d0970f2f7",
+      "source_sha256": "52eca55d0970f2f747bf959467eec7d771494766c0efba8c493c8bc0acce435a",
+      "version": 3,
       "changed_at": "2026-10-16",
       "why_it_matters": "既存SQLの定義/由来を凍結する。測定時の元SQL hash admission・元分母・quality gateを置き換えない。",
       "history": [
@@ -43,6 +43,11 @@
           "version": 2,
           "at": "2026-10-16",
           "why": "Add supplementary whole-window production PV and distinct observed browser counts from existing identified GA4 events within inclusive JST event dates. Existing nine-placement pilot metrics, session denominators, 24-hour click follow-up and attribution definitions are unchanged. Whole-site install CVR remains unavailable; no query was executed."
+        },
+        {
+          "version": 3,
+          "at": "2026-10-16",
+          "why": "Add isolated sitewide OneLink session counts and an expanded deduplicated direct/pilot/sitewide union. Preserve every legacy direct/pilot/QA count and the existing observed session/PV/browser populations; no remote query executed or new identifiers collected."
         }
       ]
     },
@@ -90,16 +95,21 @@
       "name": "既存SQL定義: ga4-quality.sql",
       "formula": "監視契約: source_fileの既存SQL原本とchecksum/source_sha256が一致し、定義変更は理由付きversion/history更新を要する。query実行や新しいKPI測定値ではない。",
       "source_file": "growth/sql/analytics/ga4-quality.sql",
-      "checksum": "8aa794cefda06807",
-      "source_sha256": "8aa794cefda068076a099f6e6e6d1be7a85cbf96201066dcdf8220c447a49763",
-      "version": 1,
-      "changed_at": "2026-10-01",
+      "checksum": "7f6afe338b239437",
+      "source_sha256": "7f6afe338b239437e5c1e5e12c5422e107af31bd118a8db56baa6ec925e213ec",
+      "version": 2,
+      "changed_at": "2026-10-16",
       "why_it_matters": "既存SQLの定義/由来を凍結する。測定時の元SQL hash admission・元分母・quality gateを置き換えない。",
       "history": [
         {
           "version": 1,
           "at": "2026-10-01",
           "why": "初回登録。現在の既存SQL原本だけを監視する契約。過去の測定・実行・新KPIの宣言ではない。"
+        },
+        {
+          "version": 2,
+          "at": "2026-10-16",
+          "why": "Recognize only the fixed website_bridge_v1 long URL when bridge_scope=sitewide, alongside existing QA/pilot short links. Cross-scope target mismatches remain visible and existing receipt/quality gates are preserved; no remote query executed."
         }
       ]
     },

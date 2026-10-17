@@ -42,6 +42,8 @@ export function websiteInstallReadiness(acquisition = {}) {
   const sessions = ga.state === 'unavailable' ? null : count(ga.observed_production_sessions);
   const installs = ['CONNECTED', 'PARTIAL'].includes(af.connection_state)
     ? count(af.own_site_installs) : null;
+  const sitewideInstalls = ['CONNECTED', 'PARTIAL'].includes(af.connection_state)
+    ? count(af.sitewide_link_installs) : null;
   const blockers = ['no_common_attributable_cohort', 'partial_site_route_coverage',
     'attribution_lookback_unverified', 'internal_user_exclusion_unverified', 'reinstall_exclusion_unverified'];
   if (sessions === null) blockers.push('session_denominator_unavailable');
@@ -75,11 +77,19 @@ export function websiteInstallReadiness(acquisition = {}) {
         window: gaWindow, timezone: 'Asia/Tokyo', quality_state: ga.state ?? 'unavailable' },
     },
     numerator: { whole_site_new_installs: null, observed_pilot_installs: installs,
+      observed_sitewide_link_installs: sitewideInstalls,
+      sitewide_state: sitewideInstalls === null ? 'not_observed' : 'reported_sitewide_campaign_rows',
+      sitewide_definition: 'Separate AppsFlyer aggregate Installs for owned_web / website_bridge_v1. Not complete website installs, verified first installs or API first launches. Never add Organic or QA.',
       state: installs === null ? 'not_observed' : 'reported_pilot_rows',
       definition: 'AppsFlyer aggregate Installs for owned_web / obsidian_bridge_pilot_v1. Not Apple first downloads, D1 first-launch observations, verified new people, or purchases.',
       window: afWindow, timezone: 'Asia/Tokyo', connection_state: af.connection_state ?? 'unavailable',
       missing_dates: af.missing_dates ?? null, missing_metric_columns: af.missing_metric_columns ?? null },
     coverage: { site_wide: false, pilot_hero_placements: 9, per_page_installs_available: false,
+      sitewide_campaign: 'website_bridge_v1',
+      sitewide_web_observation_state: ga.sitewide_routes?.state ?? 'unavailable',
+      sitewide_campaign_observation_state: sitewideInstalls === null ? 'not_observed' : 'reported_rows_only',
+      outside_sitewide_web_event_coverage: ['cross_device_qr_scans', 'native_smart_app_banner_taps', 'javascript_disabled_routes'],
+      route_coverage_complete: false,
       excluded_from_pilot: ['other_direct_apple_links', 'qr', 'smart_app_banner', 'english_obsidian_hero'],
       qa: 'separate_campaign_not_production', organic: 'not_identifiable_as_website',
       internal_users: 'not_verified_excluded', reinstalls: 'not_verified_excluded',
@@ -97,6 +107,7 @@ export function websiteInstallReadiness(acquisition = {}) {
       ga4: gaWindow, appsflyer: afWindow },
     alternatives: ['ga4.observed_any_app_route_click_session_rate', 'ga4.obsidian_hub_pilot',
       'appsflyer.own_site_installs', 'appsflyer.owned_link_period_rate'],
+    sitewide_alternatives: ['ga4.sitewide_routes', 'appsflyer.sitewide_link_period_rate'],
     next_steps: ['Read the three agreed nine-placement pilot metrics with their original source, observation window and quality evidence.',
       'Use PV and observed browser visitors as supplementary web observations; they do not change the pilot completion criteria.',
       'For a separately approved whole-site cohort metric, agree route coverage, attribution lookback, new-install semantics and exclusions before implementation.',

@@ -33,6 +33,14 @@
   if (window.__simpleMemoStoreTracking) return;
   window.__simpleMemoStoreTracking = true;
 
+  // The existing script tag must opt in. Pages without this tracker (including
+  // token-bearing app handoff pages) never gain routing or measurement here.
+  var sitewideEnabled = document.currentScript
+    && document.currentScript.getAttribute("data-sitewide-app-routes") === "true";
+  var SITEWIDE_URL = "https://simplememofast.onelink.me/it5q?pid=owned_web&c=website_bridge_v1";
+  var sitewideLinks = typeof WeakMap === "function" ? new WeakMap() : null;
+  if (!sitewideLinks) sitewideEnabled = false;
+
   var SELECTOR = 'a[href*="apps.apple.com"],a[data-app-route="onelink"]';
 
   function push() {
@@ -46,8 +54,79 @@
     try {
       var url = new URL(a.getAttribute("href") || "", location.href);
       return url.protocol === "https:" && url.hostname === "apps.apple.com"
-        && /\/id6758438948(?:\/|$)/.test(url.pathname) ? url : null;
+        && !url.username && !url.password && !url.port
+        && /^https:\/\/apps\.apple\.com\//i.test(a.getAttribute("href") || "")
+        && /\/id6758438948\/?$/.test(url.pathname) ? url : null;
     } catch (err) { return null; }
+  }
+
+  // Exact public values reviewed from the site's source, not merely valid URL
+  // syntax: an arbitrary ct token or numeric pt could itself identify a visitor.
+  // New static campaigns/product pages require an explicit allowlist review.
+  // Reference links and Apple attribution tokens keep their direct destination:
+  // the provider's live redirect does not retain those values. Unknown,
+  // repeated, malformed or fragment values also exclude the entire link;
+  // never forward the page URL, referrer, tokens or arbitrary link parameters.
+  function sitewideStoreUrl(a) {
+    var url = ownStoreUrl(a);
+    if (!url) return { reason: "unsupported-url" };
+    // Preserve review/information navigation itself, not just a nested URL.
+    // Direct links still emit the existing GA click and impression events.
+    var publicReferences = [
+      "https://apps.apple.com/jp/app/id6758438948?see-all=reviews",
+      "https://apps.apple.com/jp/app/id6758438948#information"
+    ];
+    if (publicReferences.indexOf(url.href) !== -1) return { reason: "unsupported-reference" };
+    if (url.hash) return { reason: "unsupported-fragment" };
+    // Preserve the three declared public paths plus the canonical app-ID path.
+    // Do not forward arbitrary path segments even on the owned Store listing.
+    var paths = ["/app/id6758438948", "/jp/app/id6758438948", "/us/app/id6758438948",
+      "/us/app/simple-memo-obsidian-voice/id6758438948"];
+    if (paths.indexOf(url.pathname) === -1) return { reason: "unsupported-path" };
+    var allowed = {
+      ct: ["en__bottom", "en__mid", "en__nav", "jp__bottom", "jp__mid", "jp__nav",
+        "web_obsidian_v1", "web_other_v1"],
+      pt: ["128498560"],
+      mt: ["8"],
+      ppid: ["0253a7f9-3c1a-4294-95bc-e6d800af5733", "0dee88d1-7fcb-4ed8-b5cc-2b8ffa05f8ed",
+        "1408d7a4-3249-4c87-a079-e13032312579", "3d126d78-2267-4a6c-a860-c69707ab90a5",
+        "43019675-348f-489a-914f-065c753a2b1e", "45b35116-b5b3-4b97-9256-0c97289681b6",
+        "4b75e642-3dd9-425c-8ff7-9db0cc859eb6", "65666dba-3ce5-43bd-830e-da97de8eaf11"]
+    };
+    var seen = Object.create(null);
+    var invalid = false;
+    url.searchParams.forEach(function (value, key) {
+      if (!Object.prototype.hasOwnProperty.call(allowed, key) || seen[key]
+          || allowed[key].indexOf(value) === -1) invalid = true;
+      seen[key] = true;
+    });
+    if (invalid) return { reason: "unsupported-parameters" };
+    if (seen.ct || seen.pt) return { reason: "unsupported-apple-attribution" };
+    // Only the Japanese storefront has matching direct/provider destinations
+    // in release verification. Keep other storefronts and geo-selected paths.
+    if (url.pathname !== "/jp/app/id6758438948") return { reason: "unsupported-storefront" };
+    return { url: url };
+  }
+
+  function enableSitewideRoute(a) {
+    if (!sitewideEnabled) return;
+    // Existing pilot/QA opt-ins, including their direct fallback, stay intact.
+    if (a.getAttribute("data-app-route") === "onelink") return;
+    var store = sitewideStoreUrl(a);
+    if (!store.url) {
+      a.setAttribute("data-sitewide-app-route-status", store.reason);
+      return;
+    }
+    var route = new URL(SITEWIDE_URL);
+    route.searchParams.set("af_ios_url", store.url.href);
+    route.searchParams.set("af_web_dp", store.url.href);
+    var productPage = store.url.searchParams.get("ppid");
+    if (productPage) route.searchParams.set("af_ios_store_cpp", productPage);
+    a.setAttribute("href", route.href);
+    a.setAttribute("data-app-route", "onelink");
+    a.setAttribute("data-app-traffic", "sitewide");
+    a.setAttribute("data-sitewide-app-route-status", "converted");
+    sitewideLinks.set(a, route.href);
   }
 
   function dims(a) {
@@ -63,10 +142,21 @@
   }
 
   // Explicit opt-in only. Keep OneLink intent separate from a direct Store tap.
-  // No URL generation, redirect, identifier forwarding or navigation changes.
+  // The sitewide branch only accepts a URL generated and retained above; the
+  // original short-link pilot/QA branch and event payload remain unchanged.
   function bridgeDims(a) {
     if (a.getAttribute("data-app-route") !== "onelink") return null;
     var scope = a.getAttribute("data-app-traffic");
+    if (scope === "sitewide") {
+      if (!sitewideEnabled || sitewideLinks.get(a) !== a.getAttribute("href")) return null;
+      var sitewide = dims(a);
+      delete sitewide.ct;
+      sitewide.measurement_version = "2026-09-07";
+      sitewide.link_route = "onelink";
+      sitewide.bridge_scope = "sitewide";
+      sitewide.link_url = SITEWIDE_URL;
+      return sitewide;
+    }
     if (scope !== "qa" && scope !== "pilot") return null;
     try {
       var url = new URL(a.getAttribute("href") || "", location.href);
@@ -89,6 +179,7 @@
     var a = (t && t.closest) ? t.closest(SELECTOR) : null;
     if (!a) return;
     try {
+      enableSitewideRoute(a);
       var bridge = bridgeDims(a);
       if (bridge) { push("event", "web_to_app_click", bridge); return; }
       if (!ownStoreUrl(a)) return;
@@ -137,15 +228,17 @@
   // One impression per CTA per pageview, fired when at least half of it has
   // actually been on screen. Anything looser counts CTAs the reader scrolled
   // past too fast to see, which inflates the denominator it exists to provide.
+  var observer = null;
   if (typeof IntersectionObserver === "function") {
     var seen = typeof WeakSet === "function" ? new WeakSet() : null;
-    var observer = new IntersectionObserver(function (entries) {
+    observer = new IntersectionObserver(function (entries) {
       for (var i = 0; i < entries.length; i++) {
         var entry = entries[i];
         if (!entry.isIntersecting || entry.intersectionRatio < 0.5) continue;
         var a = entry.target;
         // Recheck at visibility time: href may have changed since observe().
         var isNext = a.hasAttribute("data-next-step");
+        if (!isNext) enableSitewideRoute(a);
         var bridge = isNext ? null : bridgeDims(a);
         if (!isNext && !bridge && !ownStoreUrl(a)) { observer.unobserve(a); continue; }
         if (seen) {
@@ -160,16 +253,23 @@
       }
     }, { threshold: 0.5 });
 
-    var start = function () {
-      var links = document.querySelectorAll(SELECTOR + "," + NEXT_SELECTOR);
-      for (var i = 0; i < links.length; i++) {
-        if (links[i].hasAttribute("data-next-step") || ownStoreUrl(links[i]) || bridgeDims(links[i])) observer.observe(links[i]);
+  }
+
+  // Routing does not depend on IntersectionObserver. Dynamic anchors are also
+  // checked by the delegated click handler; impressions retain the existing
+  // initial-DOM-only contract rather than inventing unseen impressions.
+  var start = function () {
+    var links = document.querySelectorAll(SELECTOR + "," + NEXT_SELECTOR);
+    for (var i = 0; i < links.length; i++) {
+      if (!links[i].hasAttribute("data-next-step")) enableSitewideRoute(links[i]);
+      if (observer && (links[i].hasAttribute("data-next-step") || ownStoreUrl(links[i]) || bridgeDims(links[i]))) {
+        observer.observe(links[i]);
       }
-    };
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", start, { once: true });
-    } else {
-      start();
     }
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", start, { once: true });
+  } else {
+    start();
   }
 })();

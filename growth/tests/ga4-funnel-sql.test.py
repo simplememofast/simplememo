@@ -260,7 +260,10 @@ class FunnelTests(unittest.TestCase):
                    dict(good, link_url="https://simplememofast.onelink.me/it5q/4x0jfkpw")]
         row = run([good] + invalid, sql)[0]
         self.assertEqual(row["recorded_events"], 6)
-        self.assertEqual(row["onelink_target_invalid_or_missing"], 1)
+        # A recognized target requires its matching scope. Missing scope is
+        # both an invalid target/scope pair and an incomplete dimension; these
+        # quality counters intentionally overlap rather than partition events.
+        self.assertEqual(row["onelink_target_invalid_or_missing"], 2)
         self.assertEqual(row["onelink_version_missing_or_other"], 1)
         self.assertEqual(row["onelink_dimensions_incomplete"], 2)
         self.assertEqual(row["onelink_qa_scope_mismatch"], 1)
@@ -472,6 +475,18 @@ class LandingDiagnosticTests(unittest.TestCase):
         by_status = {r["page_view_status"]: r for r in rows}
         self.assertEqual(by_status["missing_page_view_24h"]["observed_started_sessions"], 1)
         self.assertEqual(by_status["observed_page_view_24h"]["observed_started_sessions"], 1)
+
+
+def load_tests(loader, tests, pattern):
+    # The existing CI command already runs this file. Load the isolated sitewide
+    # behavior suite as well, without changing workflows or installing anything.
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "sitewide_sql_tests", Path(__file__).with_name("ga4-sitewide-sql.test.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    tests.addTests(loader.loadTestsFromTestCase(module.SitewideSqlTests))
+    return tests
 
 
 if __name__ == "__main__":

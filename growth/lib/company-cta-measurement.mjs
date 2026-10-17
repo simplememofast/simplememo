@@ -21,6 +21,30 @@ const COUNTS = ['observed_started_sessions', 'sessions_with_own_app_click_24h', 
 const LEGACY_FUNNEL_SHA256 = 'a528c1054d236b9bd4a5fdc2d043ae82e282d9c6323213cbb92eeaff4347b71b';
 // Exact main query before additive site visit totals; its CTA definitions match.
 const PRE_VISIT_TOTALS_SHA256 = 'e2f9e89b268e00cb2371bf9f57b8f3e9f11b55e1139c8edadacfa8a7b5f1277f';
+// Exact v2 funnel and pre-sitewide quality query; existing direct CTA contract
+// is unchanged. Do not replace these finite entries with wildcard admission.
+const PRE_SITEWIDE_FUNNEL_SHA256 = 'ad2da652e32277c82b67e999332fde221c566ca86b522f76920ba0c13d485123';
+const PRE_SITEWIDE_QUALITY_SHA256 = '8aa794cefda068076a099f6e6e6d1be7a85cbf96201066dcdf8220c447a49763';
+const SITEWIDE_COUNTS = ['sessions_with_sitewide_onelink_impression', 'sessions_with_sitewide_onelink_click_24h',
+  'sitewide_onelink_clicked_without_recorded_impression', 'sessions_with_legacy_and_sitewide_routes_24h',
+  'sessions_with_expanded_app_route_click_24h'];
+// A comparison-review freeze, NOT a deployment date. Historical query hashes
+// admit source definitions only; they cannot certify unchanged routing in later
+// windows. Update this fixed policy only after a separate rollout-scope review.
+const SITEWIDE_BASELINE_REVIEW = Object.freeze({
+  definition_version: 'sitewide-baseline-review-freeze-v1',
+  comparison_review_started_on: '2026-10-16', timezone: 'Asia/Tokyo',
+  click_followup_hours: 24, rollout_start: null,
+});
+
+function sitewideBaselineReview(window, hasSitewideRoutes) {
+  const followupEnd = nextDay(window.end);
+  const overlapsReview = followupEnd >= SITEWIDE_BASELINE_REVIEW.comparison_review_started_on;
+  return { ...SITEWIDE_BASELINE_REVIEW, window_followup_end: followupEnd,
+    window_overlaps_review_freeze: overlapsReview,
+    restriction: overlapsReview ? 'followup_overlaps_sitewide_comparison_review_freeze'
+      : hasSitewideRoutes ? 'sitewide_rollout_requires_separately_scoped_baseline' : null };
+}
 const LANDING_DIAGNOSTICS = ['missing_landing_no_timed_page_view_in_scan',
   'missing_landing_page_view_before_start_only', 'missing_landing_page_view_after_window_only',
   'missing_landing_page_view_both_sides'];
@@ -88,7 +112,8 @@ export function companyCtaMeasurement({ stateRoot, root = ROOT, now = new Date()
       requireThat(matches.length === 1, 'query_set_invalid');
       const q = matches[0];
       requireThat(q.sql_sha256 === hash(fs.readFileSync(path.join(root, 'growth/sql/analytics', file)))
-        || (file === 'ga4-funnel.sql' && [LEGACY_FUNNEL_SHA256, PRE_VISIT_TOTALS_SHA256].includes(q.sql_sha256)), 'query_definition_changed');
+        || (file === 'ga4-funnel.sql' && [LEGACY_FUNNEL_SHA256, PRE_VISIT_TOTALS_SHA256, PRE_SITEWIDE_FUNNEL_SHA256].includes(q.sql_sha256))
+        || (file === 'ga4-quality.sql' && q.sql_sha256 === PRE_SITEWIDE_QUALITY_SHA256), 'query_definition_changed');
       const params = { start_date: window.start, end_date: window.end,
         ...(file === 'ga4-quality.sql' ? { scan_end_date: endPlusOne } : {}),
         measurement_version: '2026-09-05', bridge_measurement_version: '2026-09-07' };
@@ -101,6 +126,7 @@ export function companyCtaMeasurement({ stateRoot, root = ROOT, now = new Date()
     const quality = query('ga4-quality.sql'), funnel = query('ga4-funnel.sql');
     const funnelSha = report.queries.find(q => q.file === 'ga4-funnel.sql').sql_sha256;
     const hasLandingDiagnostics = funnelSha !== LEGACY_FUNNEL_SHA256;
+    const hasSitewideRoutes = ![LEGACY_FUNNEL_SHA256, PRE_VISIT_TOTALS_SHA256, PRE_SITEWIDE_FUNNEL_SHA256].includes(funnelSha);
     const qualityKeys = new Set(), issues = [];
     for (const row of quality) {
       const day = String(row.event_date).replace(/^(\d{4})(\d{2})(\d{2})$/, '$1-$2-$3');
@@ -136,6 +162,13 @@ export function companyCtaMeasurement({ stateRoot, root = ROOT, now = new Date()
         && direct - count(row.clicked_without_recorded_impression) <= count(row.sessions_with_cta_impression), 'funnel_relationship_invalid');
       requireThat(n > 0 && Number.isFinite(row.own_app_click_session_rate_24h)
         && Math.abs(row.own_app_click_session_rate_24h - direct / n) < 1e-12, 'funnel_rate_invalid');
+      if (hasSitewideRoutes) {
+        const [seen, clicked, unseen, overlap, expanded] = SITEWIDE_COUNTS.map(k => count(row[k]));
+        const legacy = count(row.sessions_with_any_app_route_click_24h);
+        requireThat([seen, clicked, unseen, overlap, expanded].every(v => v <= n)
+          && unseen <= clicked && clicked - unseen <= seen && overlap <= Math.min(legacy, clicked)
+          && expanded === legacy + clicked - overlap, 'sitewide_funnel_relationship_invalid');
+      }
       if (hasLandingDiagnostics) {
         const partition = LANDING_DIAGNOSTICS.map(k => count(row[k]));
         requireThat(partition.every(v => v <= n)
@@ -149,6 +182,7 @@ export function companyCtaMeasurement({ stateRoot, root = ROOT, now = new Date()
     const ambiguous = funnel.filter(r => r.landing_scope !== 'nonproduction'
       && (r.landing_scope !== 'production' || !r.session_channel || r.session_channel.startsWith('(')));
     const blocked = blockingIssues.length > 0 || missingCohort || ambiguous.length > 0;
+    const baselineReview = sitewideBaselineReview(window, hasSitewideRoutes);
     const measurement = group => {
       const denominator = sum(group, 'observed_started_sessions'), numerator = sum(group, 'sessions_with_own_app_click_24h');
       return { numerator, denominator, value: denominator ? numerator / denominator : null,
@@ -161,7 +195,22 @@ export function companyCtaMeasurement({ stateRoot, root = ROOT, now = new Date()
       if (!grouped.has(key)) grouped.set(key, []); grouped.get(key).push(row);
     }
     const result = { schema_version: 1, status: blocked ? 'quality_blocked' : rows.length ? 'observed' : 'no_matching_cohort',
-      eligible_for_prospective_baseline: !blocked && rows.length > 0, source, period: window,
+      // Moving direct links into OneLink mechanically changes this direct-only
+      // numerator. Keep the observation, but never reuse pre-rollout baselines.
+      // Zero sitewide events, and legacy collectors that cannot observe them,
+      // cannot prove unchanged routing. Include the 24h following-day outcome
+      // when applying the review freeze, independently of source SQL version.
+      eligible_for_prospective_baseline: !blocked && rows.length > 0 && baselineReview.restriction === null, source, period: window,
+      // An unchanged historical receipt must retain its exact output structure:
+      // compact CTA observations are also part of existing notification material.
+      ...(baselineReview.restriction === null ? {} : { route_scope: {
+        state: hasSitewideRoutes ? 'sitewide_routing_definition' : 'legacy_direct_and_pilot_definition',
+        source_sql_sha256: funnelSha, direct_only_metric_unchanged: true,
+        comparable_to_pre_sitewide_baseline: baselineReview.restriction === null ? null : false,
+        baseline_restriction: baselineReview.restriction,
+        baseline_review: baselineReview,
+        observed_sitewide_click_sessions: hasSitewideRoutes ? sum(funnel.filter(r => r.landing_scope === 'production'), 'sessions_with_sitewide_onelink_click_24h') : null,
+        scope: 'The official numerator remains direct Apple clicks only. Sitewide routing can reduce it without a behavioral change. Expanded route counts are a separate diagnostic, not a replacement experiment baseline.' } }),
       metric: 'own_app_click_session_rate_24h', definition_version: 'company-cta-cohort-v1', definition: DEFINITION,
       unit: 'ratio', time_zone: 'Asia/Tokyo', lag_days: 5, session_channel: 'Organic Search',
       total: rows.length ? measurement(rows) : null,

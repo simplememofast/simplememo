@@ -111,7 +111,7 @@ def build_node(lang: str) -> str:
         "author": {
             "@type": "Person",
             "@id": f"{SITE_URL}/about/#person",
-            "name": "AI ATAKA",
+            "name": "SimpleMemo Developer",
             "url": f"{SITE_URL}/about/",
         },
     }

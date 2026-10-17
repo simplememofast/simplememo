@@ -223,3 +223,94 @@ missing versus zero, joined dimensions, SDK-independent source classification,
 corrupt input, retention and weighted rates. The existing Company regression
 suite covers collection locks and bounded retries. Revert the change to stop
 the added handoff; existing provider collectors and historical files remain.
+
+## Separately authorized sitewide route draft (2026-10-16)
+
+The reporting-only authorization above is distinct from the later website
+route draft in [sitewide-onelink-rollout.md](sitewide-onelink-rollout.md).
+That candidate reuses the existing OneLink template for the separate
+`owned_web` / `website_bridge_v1` campaign. The latest owner instruction
+authorizes normal CI, merge and deployment; those operations and the deployed
+readback are not yet complete for this revision. It has no recorded production start:
+`rollout_start: null`. The nine original pilot links and their three-metric
+completion contract remain unchanged. QR, native Smart App Banner taps,
+compose/verify utilities and unsupported URL forms are explicit coverage limits.
+The revised source keeps click-intent measurement for the 7,452 own-app anchors
+on 2,429 existing tracker pages, but no longer routes all of them through
+OneLink. Direct hrefs are retained for 7,185 links with `ct`/`pt`, ten exact
+review queries, two exact information fragments and 41 remaining bare US Store
+links. These 7,238 anchors keep the existing GA direct events. The remaining
+214 bare JP Store links on 209 pages pass the separate OneLink predicate.
+The nine original pilot hero links remain unchanged and separate. The refreshed
+offline inventory evaluates tracker SHA-256
+`4d5f67122ea19faf5047076ffc141df0f003ab7f78cb4d6fca3b68c1e8c41aee`.
+Within the sitemap, 206 of 7,163 anchors convert, on 201 pages. The previous
+7,452-conversion inventory is superseded.
+
+Desktop HTTP checks on 2026-10-17 reached the app through OneLink but lost
+`ct`/`pt` and the review query compared with direct URLs. The two bare US URL
+forms also redirected to JP; the bare JP URL matched its direct final URL
+with HTTP 200. The revised site
+preserves those destinations by keeping them direct, and also keeps non-JP
+storefronts direct. It does not change the provider's redirect allowlist or
+try to bypass it. Unknown paths/values, unsupported fragments and repeated
+parameters remain excluded from conversion. Current new-campaign candidates
+are bare JP URLs; broader AppsFlyer attribution is deliberately limited to
+protect existing destinations and Apple campaign measurement.
+
+QR assets, native Safari banner taps, tracker-free utility anchors and TikTok
+iOS automatic redirects remain outside this anchor path. The 22 utility
+anchors on 20 pages retain direct URLs without adding tracking. A cross-device
+QR scan is not a source-page DOM click. The source classification is not
+proof of deployed coverage, GA4 receipt or successful attribution.
+
+New GA4 sitewide fields are separate from the legacy pilot fields. An expanded
+all-route session union counts direct Apple, pilot and sitewide intent without
+double counting. The nine-hub primary observation uses it only when the required
+new columns are complete, and identifies its definition version and source
+column. Older receipt schemas retain their legacy interpretation; missing
+fields are not zero. The pilot impression/click auxiliary stays pilot-only.
+Converting direct routes mechanically reduces the legacy direct-only
+`app_store_click` rate. Retaining that field preserves historical interpretation;
+it does not make a pre/post comparison equivalent or prove improvement or
+decline. New sitewide series need their actual rollout boundary recorded.
+
+AppsFlyer gains a separate closed classification for `website_bridge_v1`;
+the original pilot, QA, Organic and unattributed groups keep their meanings.
+Existing receipt, period, zero-missing-date and quality rules still apply.
+The candidate adds no provider request, collector or schedule. It does not
+restart collection, consume an Apple/iOS producer or change a daily report.
+The existing `acquisitionReport` format is preserved. Supplementary sitewide
+display belongs to the separate `sitewideAcquisitionReport` export and is not
+wired into the existing daily/weekly/monthly consumers. The structured
+acquisition result gains the new measurement fields and the versioned nine-hub
+primary readout; the public daily report generator and schedules are unchanged.
+`acquisitionMaterial` preserves the legacy notification projection so the
+new standalone fields do not create a changed-receipt notification. Fixtures
+derived from the baseline verify matching fingerprints and continued detection
+of changes to existing metrics. Structured private review JSON may contain the
+new fields without adopting the separate text renderer.
+Missing or unverified results stay distinct from observed zero. Website
+visit-to-install CVR and its estimate remain `null`.
+
+Retained direct links keep `seo_cta_impression`, `app_store_click` and
+`seo_cta_click`; converted links use the separate sitewide `web_to_app_*`
+events. Keep those route populations separate. Preserving a direct click in
+GA4 does not make it an AppsFlyer campaign-attributed install. The reduced
+new-campaign scope does not change the nine-placement pilot completion contract
+or establish whole-site install coverage.
+
+For converted links, `af_ios_url` / `af_web_dp` construction is not proof of
+successful forwarding, installed-user behavior or attribution. AppsFlyer does
+not record desktop clicks when `af_web_dp` is present, so those web intents
+cannot be reconciled one-for-one with its click totals. The privacy pages keep
+direct App Store search as an alternative; app consent/ATT behavior and actual
+collector delivery remain unverified. Device tests are not resumed.
+
+Complete normal CI on the final revision and verify merge, deployment and the
+served runtime/route scope before recording the actual rollout start. Report
+GA4/AppsFlyer event receipt separately: a successful page or redirect, or a
+local dataLayer entry, is not collector receipt. At this revision served
+verification and event receipt remain pending. Earlier CI skip precautions do
+not replace the required checks. The reporting change dispatches no collection
+or account configuration.

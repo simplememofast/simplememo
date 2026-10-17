@@ -284,9 +284,9 @@ test('CTA-page diagnosis is prospective, explicit-only and uses the pinned quali
   assert.equal(result.total_bytes_billed, 30_000_000);
   assert.equal(api.calls.length, 6);
   assert.deepEqual(result.queries.map((q) => q.file), ['ga4-quality.sql', 'ga4-funnel.sql', 'ga4-cta-pages.sql']);
-  assert.equal(result.queries[0].sql_sha256, '8aa794cefda068076a099f6e6e6d1be7a85cbf96201066dcdf8220c447a49763');
-  // Funnel v2 adds supplementary visit totals; the existing pilot session/click definitions remain unchanged.
-  assert.equal(result.queries[1].sql_sha256, 'ad2da652e32277c82b67e999332fde221c566ca86b522f76920ba0c13d485123');
+  assert.equal(result.queries[0].sql_sha256, '7f6afe338b239437e5c1e5e12c5422e107af31bd118a8db56baa6ec925e213ec');
+  // Funnel v3 adds separate sitewide counts; existing pilot/direct/QA and visit totals remain unchanged.
+  assert.equal(result.queries[1].sql_sha256, '52eca55d0970f2f747bf959467eec7d771494766c0efba8c493c8bc0acce435a');
   const manifest = JSON.parse(api.calls.at(-1).params.cta_page_manifest_json);
   assert.deepEqual(manifest, result.cta_page_manifest.pages);
   assert.equal(api.calls[0].params.scan_end_date, '2026-10-08');

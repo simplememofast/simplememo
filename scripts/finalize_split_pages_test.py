@@ -102,6 +102,20 @@ class SplitPageRegressionTests(unittest.TestCase):
         self.assertIn('href="/en/guides/"', page.read_text())
         self.assertEqual(finalize(self.root), [])
 
+    def test_author_display_preserves_legal_identity_and_unscoped_source_text(self):
+        page = self.root / 'en/legal.html'
+        source = '<h1>Legal notice</h1><p>Responsible person: AI ATAKA</p>' + \
+            '<p>Quoted example: AI Ataka</p>' + \
+            '<script type="application/ld+json">' + json.dumps({
+                '@type': 'WebPage', 'author': {
+                    '@type': 'Person', 'name': 'SimpleMemo Developer',
+                    '@id': 'https://simplememofast.com/about/#person',
+                },
+            }) + '</script>'
+        page.write_text(source)
+        self.assertEqual(finalize(self.root, apply=True), [])
+        self.assertEqual(page.read_text(), source)
+
     def test_accessibility_labels_are_english_without_rewriting_examples(self):
         src = '<nav aria-label="記事内の目次"></nav><img alt="Obsidianのグラフビュー。3つのノートと1本のリンクが表示されている">' \
               '<!-- aria-label="記事内の目次" --><script>const label = \'記事内の目次\';</script>'
@@ -152,7 +166,9 @@ class SplitPageRegressionTests(unittest.TestCase):
         ja = json.loads(next(JSONLD_RE.finditer(build_node('ja')))[1])
         en = json.loads(next(JSONLD_RE.finditer(build_node('en')))[1])
         self.assertEqual(en['@id'], ja['@id'])
-        self.assertEqual(en['author']['name'], 'AI ATAKA')
+        self.assertEqual(en['author']['name'], 'SimpleMemo Developer')
+        self.assertEqual(ja['author']['name'], 'SimpleMemo Developer')
+        self.assertEqual(en['author']['@id'], ja['author']['@id'])
         self.assertEqual(en['name'], C['appNameEn'])
         self.assertIn('/us/', en['downloadUrl'])
         self.assertIn('/jp/', ja['downloadUrl'])
