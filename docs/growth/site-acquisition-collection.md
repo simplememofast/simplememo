@@ -235,23 +235,34 @@ readback are not yet complete for this revision. It has no recorded production s
 `rollout_start: null`. The nine original pilot links and their three-metric
 completion contract remain unchanged. QR, native Smart App Banner taps,
 compose/verify utilities and unsupported URL forms are explicit coverage limits.
-The 2026-10-16 11:15 UTC offline inventory finds 7,452 eligible direct anchors
-on 2,429 pages, within 2,449 opted-in tracker pages. That includes the ten
-exact public review-query URLs and two exact public information-fragment URLs;
-other combinations remain excluded. Only the 22 utility anchors without the
-tracker remain direct in this source population. Within the sitemap population,
-all 7,163 direct anchors on 2,326 pages are locally eligible. This is local source and
-predicate evidence; it is not deployed coverage or successful attribution.
-The evaluated tracker SHA-256 is
-`6005bb5bc073f0565619cc71bd12fc73a8b5b1e9d81c50c3a1f86acbd62975f2`.
-The conversion accepts only the exact reviewed public path and `ct`/`pt`/`mt`/
-`ppid` allowlists. A new path or value requires review and inventory refresh;
-syntactically valid but unlisted tokens stay direct. The QR encoder/decoder
-dependencies are unavailable and new installation remains outside scope, so
-246 QR placements across 236 pages and 46 assets are unchanged. A QR scan on
-another device is not a source-page DOM click. The 2,530 native Safari banner
-declarations likewise do not measure native banner exposure or taps. Adding a
-tracker to the 20 compose/verify utility pages remains outside scope.
+The revised source keeps click-intent measurement for the 7,452 own-app anchors
+on 2,429 existing tracker pages, but no longer routes all of them through
+OneLink. Direct hrefs are retained for 7,185 links with `ct`/`pt`, ten exact
+review queries, two exact information fragments and 41 remaining bare US Store
+links. These 7,238 anchors keep the existing GA direct events. The remaining
+214 bare JP Store links on 209 pages pass the separate OneLink predicate.
+The nine original pilot hero links remain unchanged and separate. The refreshed
+offline inventory evaluates tracker SHA-256
+`4d5f67122ea19faf5047076ffc141df0f003ab7f78cb4d6fca3b68c1e8c41aee`.
+Within the sitemap, 206 of 7,163 anchors convert, on 201 pages. The previous
+7,452-conversion inventory is superseded.
+
+Desktop HTTP checks on 2026-10-17 reached the app through OneLink but lost
+`ct`/`pt` and the review query compared with direct URLs. The two bare US URL
+forms also redirected to JP; the bare JP URL matched its direct final URL
+with HTTP 200. The revised site
+preserves those destinations by keeping them direct, and also keeps non-JP
+storefronts direct. It does not change the provider's redirect allowlist or
+try to bypass it. Unknown paths/values, unsupported fragments and repeated
+parameters remain excluded from conversion. Current new-campaign candidates
+are bare JP URLs; broader AppsFlyer attribution is deliberately limited to
+protect existing destinations and Apple campaign measurement.
+
+QR assets, native Safari banner taps, tracker-free utility anchors and TikTok
+iOS automatic redirects remain outside this anchor path. The 22 utility
+anchors on 20 pages retain direct URLs without adding tracking. A cross-device
+QR scan is not a source-page DOM click. The source classification is not
+proof of deployed coverage, GA4 receipt or successful attribution.
 
 New GA4 sitewide fields are separate from the legacy pilot fields. An expanded
 all-route session union counts direct Apple, pilot and sitewide intent without
@@ -282,16 +293,24 @@ new fields without adopting the separate text renderer.
 Missing or unverified results stay distinct from observed zero. Website
 visit-to-install CVR and its estimate remain `null`.
 
-The runtime's intended destination preservation through `af_ios_url` and
-`af_web_dp` is not evidence of successful routing. The template's current
-allowlist, storefront/CPP behavior, installed-user behavior and attribution
-remain unverified. AppsFlyer does not record desktop clicks when `af_web_dp`
-is present, so those web intents cannot be reconciled one-for-one with its
-click totals. Local tests establish parser and event behavior only. The ten
-language privacy pages retain direct App Store search as an alternative and
-remove the claim that a different link on
-the same page avoids OneLink. App consent/ATT behavior remains unverified and
-device tests are not resumed. Complete normal CI on the final revision and
-verify merge, deployment and served content before recording the actual rollout
-start. Earlier draft-only CI skip precautions do not replace those checks.
-The reporting change itself dispatches no collection or account configuration.
+Retained direct links keep `seo_cta_impression`, `app_store_click` and
+`seo_cta_click`; converted links use the separate sitewide `web_to_app_*`
+events. Keep those route populations separate. Preserving a direct click in
+GA4 does not make it an AppsFlyer campaign-attributed install. The reduced
+new-campaign scope does not change the nine-placement pilot completion contract
+or establish whole-site install coverage.
+
+For converted links, `af_ios_url` / `af_web_dp` construction is not proof of
+successful forwarding, installed-user behavior or attribution. AppsFlyer does
+not record desktop clicks when `af_web_dp` is present, so those web intents
+cannot be reconciled one-for-one with its click totals. The privacy pages keep
+direct App Store search as an alternative; app consent/ATT behavior and actual
+collector delivery remain unverified. Device tests are not resumed.
+
+Complete normal CI on the final revision and verify merge, deployment and the
+served runtime/route scope before recording the actual rollout start. Report
+GA4/AppsFlyer event receipt separately: a successful page or redirect, or a
+local dataLayer entry, is not collector receipt. At this revision served
+verification and event receipt remain pending. Earlier CI skip precautions do
+not replace the required checks. The reporting change dispatches no collection
+or account configuration.

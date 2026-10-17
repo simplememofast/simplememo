@@ -132,8 +132,8 @@
     "同じファイルに未コミットの本来の変更が乗っていないかを先に見ること。**",
     "【2026-09-05 更新】端末側へ置換された3本を、旧タスクの停止・置換名と新タスクのID/cron/有効状態で照合し登録。旧3本の停止前のfindingはintentional_stops.previous_findingに保存し、復旧成功に数えない。PENDINGは故障ではなく結果未確定として追跡し、同じ実行の終了まで閉じない。"
   ],
-  "observed_at": "2026-10-13T13:14:16.552Z",
-  "observed_by": "session via mcp list_triggers",
+  "observed_at": "2026-10-17T11:09:47.330854+00:00",
+  "observed_by": "session via standard Claude CLI RemoteTrigger(list/get)",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
   "$max_snapshot_age_days": "これより古い写しでは検査を通さない。**読めているつもりを緑にしない**",
@@ -146,7 +146,7 @@
       "found_at": "2026-09-05",
       "why": "全件一覧に存在せず、個別GETも404。現在の実行結果は不明。登録と最後の実測、既存の異常履歴を保持し、未解消として追跡する。停止・削除・復旧成功とは判定しない。",
       "observation": {
-        "observed_at": "2026-10-13T13:14:16.552Z",
+        "observed_at": "2026-10-17T11:09:47.330854+00:00",
         "enabled": null,
         "last_run_status": null,
         "last_run_fired_at": null,
@@ -536,30 +536,78 @@
     {
       "id": "trig_013uV3Pk3SZH8QJS6PxSg9Bw",
       "name": "【停止・ローカル版へ移行 09-05】x-engagement 夜19:30 v4.1-device（19:35 の run が自ら dev:no と報告・投稿0）",
-      "cron_expression": "30 10 * * *",
+      "enabled": null,
+      "cron_expression": null,
       "run_once_at": null,
-      "enabled": false,
-      "bound_session": false,
-      "next_run_at": "2026-09-06T10:34:38.030652858Z",
-      "last_fired_at": "2026-09-05T10:35:45.595327Z",
-      "last_run_status": "SUCCEEDED",
-      "last_run_fired_at": "2026-09-05T10:35:45.582040954Z",
-      "last_run_finished_at": "2026-09-05T10:59:08.552542Z",
-      "last_run_session_id": "cse_017mXdfL64H762ZJMNcucRgy"
-    },
-    {
-      "id": "trig_0146oEExJXb2GRXt6ES2nw7o",
-      "name": "【停止・ローカル版へ移行 09-05】obsidian-community v5.1-device（Reddit・承認署名が付かずクラウド実行のまま・投稿0）",
-      "cron_expression": "31 2,11 * * *",
-      "run_once_at": null,
-      "enabled": false,
-      "bound_session": false,
-      "next_run_at": "2026-09-05T11:31:00Z",
+      "next_run_at": null,
       "last_fired_at": null,
       "last_run_status": null,
       "last_run_fired_at": null,
       "last_run_finished_at": null,
-      "last_run_session_id": null
+      "last_run_session_id": null,
+      "observation_state": "unavailable",
+      "source_observation": {
+        "id": "trig_013uV3Pk3SZH8QJS6PxSg9Bw",
+        "method": "GET",
+        "endpoint": "/v1/code/triggers/trig_013uV3Pk3SZH8QJS6PxSg9Bw",
+        "http_status": 404,
+        "observed_at": "2026-10-17T11:09:47.330854+00:00"
+      },
+      "last_verified": {
+        "observed_at": "2026-10-13T13:14:16.552Z",
+        "routine": {
+          "id": "trig_013uV3Pk3SZH8QJS6PxSg9Bw",
+          "name": "【停止・ローカル版へ移行 09-05】x-engagement 夜19:30 v4.1-device（19:35 の run が自ら dev:no と報告・投稿0）",
+          "cron_expression": "30 10 * * *",
+          "run_once_at": null,
+          "enabled": false,
+          "bound_session": false,
+          "next_run_at": "2026-09-06T10:34:38.030652858Z",
+          "last_fired_at": "2026-09-05T10:35:45.595327Z",
+          "last_run_status": "SUCCEEDED",
+          "last_run_fired_at": "2026-09-05T10:35:45.582040954Z",
+          "last_run_finished_at": "2026-09-05T10:59:08.552542Z",
+          "last_run_session_id": "cse_017mXdfL64H762ZJMNcucRgy"
+        }
+      }
+    },
+    {
+      "id": "trig_0146oEExJXb2GRXt6ES2nw7o",
+      "name": "【停止・ローカル版へ移行 09-05】obsidian-community v5.1-device（Reddit・承認署名が付かずクラウド実行のまま・投稿0）",
+      "enabled": null,
+      "cron_expression": null,
+      "run_once_at": null,
+      "next_run_at": null,
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null,
+      "last_run_session_id": null,
+      "observation_state": "unavailable",
+      "source_observation": {
+        "id": "trig_0146oEExJXb2GRXt6ES2nw7o",
+        "method": "GET",
+        "endpoint": "/v1/code/triggers/trig_0146oEExJXb2GRXt6ES2nw7o",
+        "http_status": 404,
+        "observed_at": "2026-10-17T11:09:47.330854+00:00"
+      },
+      "last_verified": {
+        "observed_at": "2026-10-13T13:14:16.552Z",
+        "routine": {
+          "id": "trig_0146oEExJXb2GRXt6ES2nw7o",
+          "name": "【停止・ローカル版へ移行 09-05】obsidian-community v5.1-device（Reddit・承認署名が付かずクラウド実行のまま・投稿0）",
+          "cron_expression": "31 2,11 * * *",
+          "run_once_at": null,
+          "enabled": false,
+          "bound_session": false,
+          "next_run_at": "2026-09-05T11:31:00Z",
+          "last_fired_at": null,
+          "last_run_status": null,
+          "last_run_fired_at": null,
+          "last_run_finished_at": null,
+          "last_run_session_id": null
+        }
+      }
     },
     {
       "id": "trig_018EyeYcJiVLFQeAHArMpGtM",
@@ -579,7 +627,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_018EyeYcJiVLFQeAHArMpGtM",
         "http_status": 404,
-        "observed_at": "2026-10-13T13:14:14.901Z"
+        "observed_at": "2026-10-17T11:09:47.330854+00:00"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -602,30 +650,78 @@
     {
       "id": "trig_01DmNiVHB7jo42bNVJL1wnBo",
       "name": "【停止・ローカル版へ移行 09-05】x-engagement 昼12:30 v4.1-device（承認署名が付かずクラウド実行のまま dev:no・投稿0）",
-      "cron_expression": "30 3 * * *",
+      "enabled": null,
+      "cron_expression": null,
       "run_once_at": null,
-      "enabled": false,
-      "bound_session": false,
-      "next_run_at": "2026-09-06T03:30:36.964912742Z",
-      "last_fired_at": "2026-09-05T05:32:36.648842Z",
-      "last_run_status": "SUCCEEDED",
-      "last_run_fired_at": "2026-09-05T05:32:36.629932818Z",
-      "last_run_finished_at": "2026-09-05T09:51:47.580007Z",
-      "last_run_session_id": "cse_01MUS3CPNZ8P76dMuJCZb4f5"
+      "next_run_at": null,
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null,
+      "last_run_session_id": null,
+      "observation_state": "unavailable",
+      "source_observation": {
+        "id": "trig_01DmNiVHB7jo42bNVJL1wnBo",
+        "method": "GET",
+        "endpoint": "/v1/code/triggers/trig_01DmNiVHB7jo42bNVJL1wnBo",
+        "http_status": 404,
+        "observed_at": "2026-10-17T11:09:47.330854+00:00"
+      },
+      "last_verified": {
+        "observed_at": "2026-10-13T13:14:16.552Z",
+        "routine": {
+          "id": "trig_01DmNiVHB7jo42bNVJL1wnBo",
+          "name": "【停止・ローカル版へ移行 09-05】x-engagement 昼12:30 v4.1-device（承認署名が付かずクラウド実行のまま dev:no・投稿0）",
+          "cron_expression": "30 3 * * *",
+          "run_once_at": null,
+          "enabled": false,
+          "bound_session": false,
+          "next_run_at": "2026-09-06T03:30:36.964912742Z",
+          "last_fired_at": "2026-09-05T05:32:36.648842Z",
+          "last_run_status": "SUCCEEDED",
+          "last_run_fired_at": "2026-09-05T05:32:36.629932818Z",
+          "last_run_finished_at": "2026-09-05T09:51:47.580007Z",
+          "last_run_session_id": "cse_01MUS3CPNZ8P76dMuJCZb4f5"
+        }
+      }
     },
     {
       "id": "trig_01ESF9AHax6buS9X1pdFv657",
       "name": "Obsidianオートパイロット再試行 v5（09:20＋12:20 JST・ccr-0920・未公開と実行中を区別）",
-      "cron_expression": "20 0,3 * * *",
+      "enabled": null,
+      "cron_expression": null,
       "run_once_at": null,
-      "enabled": false,
-      "bound_session": false,
-      "next_run_at": "2026-09-07T00:20:00Z",
-      "last_fired_at": "2026-09-06T03:20:56.853767Z",
-      "last_run_status": "SUCCEEDED",
-      "last_run_fired_at": "2026-09-06T03:20:56.844733578Z",
-      "last_run_finished_at": "2026-09-06T03:22:19.300179Z",
-      "last_run_session_id": "cse_0125DcueHzhgn4nRVYMaLtK4"
+      "next_run_at": null,
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null,
+      "last_run_session_id": null,
+      "observation_state": "unavailable",
+      "source_observation": {
+        "id": "trig_01ESF9AHax6buS9X1pdFv657",
+        "method": "GET",
+        "endpoint": "/v1/code/triggers/trig_01ESF9AHax6buS9X1pdFv657",
+        "http_status": 404,
+        "observed_at": "2026-10-17T11:09:47.330854+00:00"
+      },
+      "last_verified": {
+        "observed_at": "2026-10-13T13:14:16.552Z",
+        "routine": {
+          "id": "trig_01ESF9AHax6buS9X1pdFv657",
+          "name": "Obsidianオートパイロット再試行 v5（09:20＋12:20 JST・ccr-0920・未公開と実行中を区別）",
+          "cron_expression": "20 0,3 * * *",
+          "run_once_at": null,
+          "enabled": false,
+          "bound_session": false,
+          "next_run_at": "2026-09-07T00:20:00Z",
+          "last_fired_at": "2026-09-06T03:20:56.853767Z",
+          "last_run_status": "SUCCEEDED",
+          "last_run_fired_at": "2026-09-06T03:20:56.844733578Z",
+          "last_run_finished_at": "2026-09-06T03:22:19.300179Z",
+          "last_run_session_id": "cse_0125DcueHzhgn4nRVYMaLtK4"
+        }
+      }
     },
     {
       "id": "trig_01GphcHzTuH1A1JUGq8dYkWa",
@@ -645,7 +741,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01GphcHzTuH1A1JUGq8dYkWa",
         "http_status": 404,
-        "observed_at": "2026-10-13T13:14:15.197Z"
+        "observed_at": "2026-10-17T11:09:47.330854+00:00"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -668,16 +764,40 @@
     {
       "id": "trig_01Mnp2Bi5UCXVHaZ2XJmELmt",
       "name": "【停止 09-05 15:30 JST・v5.1-device に同時刻で置換】obsidian-community v4.1（Reddit・クラウド単独は reddit.com に届かず 08-04 以降投稿0）",
-      "cron_expression": "31 2,11 * * *",
+      "enabled": null,
+      "cron_expression": null,
       "run_once_at": null,
-      "enabled": false,
-      "bound_session": false,
-      "next_run_at": "2026-09-05T11:31:00Z",
-      "last_fired_at": "2026-09-05T02:31:55.495459Z",
-      "last_run_status": "FAILED",
-      "last_run_fired_at": "2026-09-05T02:31:55.483723663Z",
-      "last_run_finished_at": "2026-09-05T02:32:01.721717Z",
-      "last_run_session_id": "cse_01Le2RXrWQJP6asVodZZ5nzY"
+      "next_run_at": null,
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null,
+      "last_run_session_id": null,
+      "observation_state": "unavailable",
+      "source_observation": {
+        "id": "trig_01Mnp2Bi5UCXVHaZ2XJmELmt",
+        "method": "GET",
+        "endpoint": "/v1/code/triggers/trig_01Mnp2Bi5UCXVHaZ2XJmELmt",
+        "http_status": 404,
+        "observed_at": "2026-10-17T11:09:47.330854+00:00"
+      },
+      "last_verified": {
+        "observed_at": "2026-10-13T13:14:16.552Z",
+        "routine": {
+          "id": "trig_01Mnp2Bi5UCXVHaZ2XJmELmt",
+          "name": "【停止 09-05 15:30 JST・v5.1-device に同時刻で置換】obsidian-community v4.1（Reddit・クラウド単独は reddit.com に届かず 08-04 以降投稿0）",
+          "cron_expression": "31 2,11 * * *",
+          "run_once_at": null,
+          "enabled": false,
+          "bound_session": false,
+          "next_run_at": "2026-09-05T11:31:00Z",
+          "last_fired_at": "2026-09-05T02:31:55.495459Z",
+          "last_run_status": "FAILED",
+          "last_run_fired_at": "2026-09-05T02:31:55.483723663Z",
+          "last_run_finished_at": "2026-09-05T02:32:01.721717Z",
+          "last_run_session_id": "cse_01Le2RXrWQJP6asVodZZ5nzY"
+        }
+      }
     },
     {
       "id": "trig_01N1SWZdPwKTot2SbT71UV2U",
@@ -697,7 +817,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01N1SWZdPwKTot2SbT71UV2U",
         "http_status": 404,
-        "observed_at": "2026-10-13T13:14:15.519Z"
+        "observed_at": "2026-10-17T11:09:47.330854+00:00"
       },
       "last_verified": {
         "observed_at": "2026-10-06T07:44:56.773Z",
@@ -721,44 +841,116 @@
     {
       "id": "trig_01QSHPhXs9J4mnJo2eiZoSoP",
       "name": "SEO Weekly: SERP & AI visibility check",
-      "cron_expression": "0 0 * * 2",
+      "enabled": null,
+      "cron_expression": null,
       "run_once_at": null,
-      "enabled": false,
-      "bound_session": false,
-      "next_run_at": "2026-09-08T00:01:21.733119813Z",
-      "last_fired_at": "2026-09-02T00:17:26.980924Z",
-      "last_run_status": "SUCCEEDED",
-      "last_run_fired_at": "2026-09-02T00:17:26.955371186Z",
-      "last_run_finished_at": "2026-09-02T00:23:44.195911Z",
-      "last_run_session_id": "cse_01Pr3mKHC8sK4GzbWdLj3nHE"
+      "next_run_at": null,
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null,
+      "last_run_session_id": null,
+      "observation_state": "unavailable",
+      "source_observation": {
+        "id": "trig_01QSHPhXs9J4mnJo2eiZoSoP",
+        "method": "GET",
+        "endpoint": "/v1/code/triggers/trig_01QSHPhXs9J4mnJo2eiZoSoP",
+        "http_status": 404,
+        "observed_at": "2026-10-17T11:09:47.330854+00:00"
+      },
+      "last_verified": {
+        "observed_at": "2026-10-13T13:14:16.552Z",
+        "routine": {
+          "id": "trig_01QSHPhXs9J4mnJo2eiZoSoP",
+          "name": "SEO Weekly: SERP & AI visibility check",
+          "cron_expression": "0 0 * * 2",
+          "run_once_at": null,
+          "enabled": false,
+          "bound_session": false,
+          "next_run_at": "2026-09-08T00:01:21.733119813Z",
+          "last_fired_at": "2026-09-02T00:17:26.980924Z",
+          "last_run_status": "SUCCEEDED",
+          "last_run_fired_at": "2026-09-02T00:17:26.955371186Z",
+          "last_run_finished_at": "2026-09-02T00:23:44.195911Z",
+          "last_run_session_id": "cse_01Pr3mKHC8sK4GzbWdLj3nHE"
+        }
+      }
     },
     {
       "id": "trig_01QZb1NYgNfpSuot97dZZJpD",
       "name": "SimpleMemo 週次 BigQuery退避＋有効期限監視（クラウド／ブラウザ分はMacのローカルタスク）",
-      "cron_expression": "45 23 * * 1",
+      "enabled": null,
+      "cron_expression": null,
       "run_once_at": null,
-      "enabled": false,
-      "bound_session": false,
-      "next_run_at": "2026-09-07T23:45:00Z",
-      "last_fired_at": "2026-08-31T23:45:53.263504Z",
-      "last_run_status": "SUCCEEDED",
-      "last_run_fired_at": "2026-08-31T23:45:53.238315717Z",
-      "last_run_finished_at": "2026-08-31T23:55:21.353732Z",
-      "last_run_session_id": "cse_01G7W4hXatgFYKztZ48UtbCf"
+      "next_run_at": null,
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null,
+      "last_run_session_id": null,
+      "observation_state": "unavailable",
+      "source_observation": {
+        "id": "trig_01QZb1NYgNfpSuot97dZZJpD",
+        "method": "GET",
+        "endpoint": "/v1/code/triggers/trig_01QZb1NYgNfpSuot97dZZJpD",
+        "http_status": 404,
+        "observed_at": "2026-10-17T11:09:47.330854+00:00"
+      },
+      "last_verified": {
+        "observed_at": "2026-10-13T13:14:16.552Z",
+        "routine": {
+          "id": "trig_01QZb1NYgNfpSuot97dZZJpD",
+          "name": "SimpleMemo 週次 BigQuery退避＋有効期限監視（クラウド／ブラウザ分はMacのローカルタスク）",
+          "cron_expression": "45 23 * * 1",
+          "run_once_at": null,
+          "enabled": false,
+          "bound_session": false,
+          "next_run_at": "2026-09-07T23:45:00Z",
+          "last_fired_at": "2026-08-31T23:45:53.263504Z",
+          "last_run_status": "SUCCEEDED",
+          "last_run_fired_at": "2026-08-31T23:45:53.238315717Z",
+          "last_run_finished_at": "2026-08-31T23:55:21.353732Z",
+          "last_run_session_id": "cse_01G7W4hXatgFYKztZ48UtbCf"
+        }
+      }
     },
     {
       "id": "trig_01RC44fYy1D5TGryJ36ixCU1",
       "name": "【停止 2026-08-28・意図的】Obsidianオートパイロット副系B v3（08:30 JST・ccr-0830）— 副系Aと同じ判断。戻すときはAから先に",
-      "cron_expression": "30 23 * * *",
+      "enabled": null,
+      "cron_expression": null,
       "run_once_at": null,
-      "enabled": false,
-      "bound_session": false,
-      "next_run_at": "2026-08-26T23:34:35.884207136Z",
-      "last_fired_at": "2026-08-25T23:35:00.466217Z",
-      "last_run_status": "SUCCEEDED",
-      "last_run_fired_at": "2026-08-25T23:35:00.444572157Z",
-      "last_run_finished_at": "2026-08-25T23:35:54.069791Z",
-      "last_run_session_id": "cse_01LXn35y3cR44oyoXUpixAjX"
+      "next_run_at": null,
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null,
+      "last_run_session_id": null,
+      "observation_state": "unavailable",
+      "source_observation": {
+        "id": "trig_01RC44fYy1D5TGryJ36ixCU1",
+        "method": "GET",
+        "endpoint": "/v1/code/triggers/trig_01RC44fYy1D5TGryJ36ixCU1",
+        "http_status": 404,
+        "observed_at": "2026-10-17T11:09:47.330854+00:00"
+      },
+      "last_verified": {
+        "observed_at": "2026-10-13T13:14:16.552Z",
+        "routine": {
+          "id": "trig_01RC44fYy1D5TGryJ36ixCU1",
+          "name": "【停止 2026-08-28・意図的】Obsidianオートパイロット副系B v3（08:30 JST・ccr-0830）— 副系Aと同じ判断。戻すときはAから先に",
+          "cron_expression": "30 23 * * *",
+          "run_once_at": null,
+          "enabled": false,
+          "bound_session": false,
+          "next_run_at": "2026-08-26T23:34:35.884207136Z",
+          "last_fired_at": "2026-08-25T23:35:00.466217Z",
+          "last_run_status": "SUCCEEDED",
+          "last_run_fired_at": "2026-08-25T23:35:00.444572157Z",
+          "last_run_finished_at": "2026-08-25T23:35:54.069791Z",
+          "last_run_session_id": "cse_01LXn35y3cR44oyoXUpixAjX"
+        }
+      }
     },
     {
       "id": "trig_01RcUDUaFDf86KffssLRsQdw",
@@ -778,7 +970,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01RcUDUaFDf86KffssLRsQdw",
         "http_status": 404,
-        "observed_at": "2026-10-13T13:14:15.800Z"
+        "observed_at": "2026-10-17T11:09:47.330854+00:00"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -816,7 +1008,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01TixKQ5Sovfjfn8rRVQCrYf",
         "http_status": 404,
-        "observed_at": "2026-10-13T13:14:16.054Z"
+        "observed_at": "2026-10-17T11:09:47.330854+00:00"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -839,16 +1031,40 @@
     {
       "id": "trig_01TRBdBgSA9646FS4LDQgJdt",
       "name": "【停止 2026-08-28・意図的】Obsidianオートパイロット副系A v3（07:30 JST・ccr-0730）— 主系+再試行で空白日ゼロ／週次利用上限に実際に当たっているため有料の副系は戻さない",
-      "cron_expression": "30 22 * * *",
+      "enabled": null,
+      "cron_expression": null,
       "run_once_at": null,
-      "enabled": false,
-      "bound_session": false,
-      "next_run_at": "2026-08-26T22:32:49.956479164Z",
-      "last_fired_at": "2026-08-25T22:33:17.873785Z",
-      "last_run_status": "SUCCEEDED",
-      "last_run_fired_at": "2026-08-25T22:33:17.840682217Z",
-      "last_run_finished_at": "2026-08-25T22:34:24.794429Z",
-      "last_run_session_id": "cse_011DqvJGSckbTeyJxs4WuTTp"
+      "next_run_at": null,
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null,
+      "last_run_session_id": null,
+      "observation_state": "unavailable",
+      "source_observation": {
+        "id": "trig_01TRBdBgSA9646FS4LDQgJdt",
+        "method": "GET",
+        "endpoint": "/v1/code/triggers/trig_01TRBdBgSA9646FS4LDQgJdt",
+        "http_status": 404,
+        "observed_at": "2026-10-17T11:09:47.330854+00:00"
+      },
+      "last_verified": {
+        "observed_at": "2026-10-13T13:14:16.552Z",
+        "routine": {
+          "id": "trig_01TRBdBgSA9646FS4LDQgJdt",
+          "name": "【停止 2026-08-28・意図的】Obsidianオートパイロット副系A v3（07:30 JST・ccr-0730）— 主系+再試行で空白日ゼロ／週次利用上限に実際に当たっているため有料の副系は戻さない",
+          "cron_expression": "30 22 * * *",
+          "run_once_at": null,
+          "enabled": false,
+          "bound_session": false,
+          "next_run_at": "2026-08-26T22:32:49.956479164Z",
+          "last_fired_at": "2026-08-25T22:33:17.873785Z",
+          "last_run_status": "SUCCEEDED",
+          "last_run_fired_at": "2026-08-25T22:33:17.840682217Z",
+          "last_run_finished_at": "2026-08-25T22:34:24.794429Z",
+          "last_run_session_id": "cse_011DqvJGSckbTeyJxs4WuTTp"
+        }
+      }
     },
     {
       "id": "trig_01VuJravpvATQPBuAigHCZJi",
@@ -868,7 +1084,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01VuJravpvATQPBuAigHCZJi",
         "http_status": 404,
-        "observed_at": "2026-10-13T13:14:16.304Z"
+        "observed_at": "2026-10-17T11:09:47.330854+00:00"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -906,7 +1122,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01XUeM9mCTkoqdWhUMac6jD1",
         "http_status": 404,
-        "observed_at": "2026-10-13T13:14:16.552Z"
+        "observed_at": "2026-10-17T11:09:47.330854+00:00"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -932,16 +1148,17 @@
     "observer": "routine-observer",
     "method": "GET",
     "endpoint": "/v1/code/triggers",
-    "include_last_run": true,
+    "include_last_run": false,
     "pages": 1,
     "has_more": false,
     "scope": "registered_simplememo_routines",
-    "total_records": 86,
-    "unregistered_current_count": 14,
-    "ended_records": 63,
-    "unavailable_registered_count": 7,
+    "total_records": 0,
+    "unregistered_current_count": 0,
+    "ended_records": 0,
+    "unavailable_registered_count": 16,
     "ended_since_previous": [],
-    "note": "全ページを読み、登録済みのSimpleMemoタスクだけを同期。未登録タスクは件数のみ記録。登録タスクが一覧になく個別GETも404の場合、現状は参照不可と明示し、最後の実測を履歴に保持する。意図的停止以外は未解消として追跡する。削除・成功・現在の停止を断定せず、予定や停止の判断を変更しない。"
+    "note": "全ページを読み、登録済みのSimpleMemoタスクだけを同期。未登録タスクは件数のみ記録。登録タスクが一覧になく個別GETも404の場合、現状は参照不可と明示し、最後の実測を履歴に保持する。意図的停止以外は未解消として追跡する。削除・成功・現在の停止を断定せず、予定や停止の判断を変更しない。 2026-10-17: 標準CLIの一覧はHTTP200・data=[]・has_more=false。登録済み16IDの個別GETはすべて404。現在の接続からの参照不能だけを観測し、全停止や削除、実行成功とは解釈しない。listではinclude_last_runを指定できないためfalseと明記（返却レコードは0）。認証情報の抽出・モデル実行・Routine変更なし。 個別GETのobserved_atは16件の読み取りバッチが完了した時刻で、各要求の応答時刻を個別採取した値ではない。",
+    "transport": "Installed Claude CLI RemoteTrigger(list/get), standard in-process authentication"
   },
   "closed_findings": [
     {

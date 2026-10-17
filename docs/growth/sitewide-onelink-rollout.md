@@ -28,79 +28,85 @@ template domain and ID. This needs neither a new shortlink nor a link-creation
 API call. The public `pid` and `c` values classify the campaign; no visitor or
 device identifier is added. See
 [short and long URL construction](https://support.appsflyer.com/hc/en-us/articles/360017132597-Understand-OneLink-short-vs-long-URLs).
-The syntax is documented; this account's redirect and attribution behavior
-has not been verified for the candidate.
+The long-URL syntax alone does not prove destination preservation. Desktop
+HTTP checks on 2026-10-17 reached the app but dropped Apple `ct`/`pt` and the
+review query compared with the original direct URLs. The revised website
+keeps those destinations direct; no provider settings are changed.
 
 ## Candidate website behavior
 
 The existing tracker opts in only where its script tag has
-`data-sitewide-app-routes="true"`. On approved production HTML it converts only
-eligible own-app Apple anchors to the separate long URL at runtime. It retains
-the original static destination, including allowed `ct`, `pt`, `mt` and `ppid`
-values, in encoded `af_ios_url` and `af_web_dp` parameters. It does not substitute
-the pilot's campaign or CPP for other routes' destinations. When an eligible
-destination already has a `ppid`, the candidate also retains it in the dedicated
-`af_ios_store_cpp` parameter.
+`data-sitewide-app-routes="true"`. On production pages, it retains the existing
+GA click-intent measurement for all supported own-app anchors while limiting
+new OneLink conversion to allowlisted Japanese Store destinations without
+Apple attribution parameters or reference destinations.
 
-Eligibility uses exact reviewed public values, not just syntactically valid
-tokens: eight existing `ct` values, one `pt`, `mt=8`, eight existing `ppid`
-values, and four Store paths (three declared source paths plus the canonical
-app-ID path). New campaign/provider/CPP values or Store paths require explicit
-allowlist review and an updated inventory before conversion. This prevents an
-arbitrary token or numeric value from being forwarded merely because it fits
-a pattern. Two exact authored reference URLs are also allowed:
-`https://apps.apple.com/jp/app/id6758438948?see-all=reviews` and
-`https://apps.apple.com/jp/app/id6758438948#information`. Both nested redirect
-parameters retain the full original reference destination. Other combinations,
-unknown keys or values, duplicate parameters, credentials, fragments and
-unsupported destinations stay on their original direct route. JavaScript
-disabled or an unavailable tracker also leaves the original HTML href in place.
-This is a direct-link fallback before conversion, not an automatic fallback if
-a converted OneLink later fails. The pilot and QA shortlinks are never converted.
+The following links keep their original direct href, including every query
+value and fragment:
 
-The web events use the existing bounded dimensions and a separate `sitewide`
-scope. They must not forward arbitrary URL query values, referrers or new
-identifiers into analytics. The candidate does not add a collector, app SDK,
-consent flow or account setting.
+- Destinations containing `ct` or `pt`, preserving existing Apple campaign and
+  provider attribution rather than relying on unverified OneLink forwarding.
+- The exact authored review and information URLs:
+  `https://apps.apple.com/jp/app/id6758438948?see-all=reviews` and
+  `https://apps.apple.com/jp/app/id6758438948#information`.
+- Non-Japanese Store paths, preserving the requested storefront.
+- Unknown or repeated parameters, unsupported paths/fragments, credentials
+  and other URLs rejected by the existing allowlist.
 
-The local inventory at 2026-10-16 11:15 UTC evaluates the candidate tracker against
-detached anchor mocks. It visits no links and dispatches no analytics events.
-Its source base is `0ef15885743153a1d902d34b951e0b537634dd51`; the evaluated tracker
-SHA-256 is `6005bb5bc073f0565619cc71bd12fc73a8b5b1e9d81c50c3a1f86acbd62975f2`.
-This is local conversion eligibility, not successful redirection or traffic
-coverage. The source scan is not an atomic snapshot.
+Allowlist validation remains in place. Only the reviewed `/jp/app/id6758438948`
+path can enter the separate `owned_web / website_bridge_v1` campaign, and it
+must have neither `ct` nor `pt`. An allowed destination is encoded into
+`af_ios_url` and `af_web_dp`; an allowed `ppid`, if present, is also placed in
+`af_ios_store_cpp`. URL construction does not guarantee the provider preserves
+those values. The current source's remaining candidates are bare JP app URLs.
+New paths or values require review and a refreshed inventory.
 
-| Inventory item | Count | Treatment in this draft |
+Retained direct links keep `seo_cta_impression`, `app_store_click` and
+`seo_cta_click`. Converted links use `web_to_app_impression` and
+`web_to_app_click` with the separate `sitewide` scope. A retained direct link
+must not be counted as a OneLink click. The original nine pilot links and QA
+routes keep their hrefs, attributes and event scope.
+
+All static HTML hrefs remain available when JavaScript or the tracker is
+unavailable. This is a direct fallback before conversion, not an automatic
+fallback after a OneLink failure. No collector, app SDK, consent flow, provider
+account setting or identifier is added. GA events retain the existing payload
+contracts; no new arbitrary page query, referrer or cross-product identifier
+is forwarded by the sitewide event path.
+
+The 2026-10-17 offline inventory applies the revised tracker, SHA-256
+`4d5f67122ea19faf5047076ffc141df0f003ab7f78cb4d6fca3b68c1e8c41aee`,
+to detached anchor mocks. These source counts do not establish delivery,
+visibility, traffic coverage or receipt of an event by GA4 or AppsFlyer.
+
+| Source population | Count | Treatment in this candidate |
 |---|---:|---|
-| Public-source HTML files | 2,530 | Inventory population; not deployed-page or visitor coverage |
-| Sitemap pages | 2,387 | A different population from HTML files |
-| Opted-in pages already loading the tracker | 2,449 | All evaluated locally against the tracker |
-| Direct own-app Apple anchors in source | 7,474 | Original hrefs remain in HTML |
-| Locally eligible anchors / containing pages | 7,452 / 2,429 | Runtime conversion predicate accepted these anchors |
-| Exact reviewed query / fragment references | 10 / 2 | Included in the eligible total; destination preserved in nested URLs |
-| Compose/verify utility pages / direct anchors | 20 / 22 | Excluded; no tracker introduced on these sensitive utilities |
-| Sitemap direct anchors / locally eligible anchors | 7,163 / 7,163 | Eligible anchors are on 2,326 pages; not an additional total |
-| Existing pilot hero anchors | 9 | Exact source URL/attribute contract preserved |
-| Independent English Obsidian hub anchors | 5 | All eligible for the separate sitewide campaign; outside the nine-hero pilot |
-| QR placements / containing pages / distinct image assets | 246 / 236 / 46 | Unchanged and unsupported in this draft |
-| Native Smart App Banner placements | 2,530 | Unchanged; native Safari taps are outside DOM click observation |
+| Existing tracker consumers | 2,449 pages | Existing opt-in and tracker only |
+| Direct own-app anchors on those pages | 7,452 on 2,429 pages | Click intent remains covered by the existing direct or separate sitewide event path |
+| Anchors containing Apple `ct` or `pt` | 7,185 | Direct href and existing GA direct events retained |
+| Exact review / information references | 10 / 2 | Direct reference destination and existing GA direct events retained |
+| Remaining bare US Store anchors | 41 | Direct storefront and existing GA direct events retained |
+| Remaining bare JP Store anchors | 214 on 209 pages | Accepted by the separate OneLink conversion predicate |
+| Sitemap direct anchors / converted anchors | 7,163 / 206 on 201 pages | Separate sitemap population; other sitemap anchors stay direct |
+| Total direct anchors retained on tracker pages | 7,238 | Outside the new OneLink campaign's attribution scope |
+| Existing pilot hero anchors | 9 | Pilot contract unchanged; separate from the 7,452 direct-source anchors |
+| Tracker-free utility anchors | 22 on 20 pages | Direct and outside this tracker; no tracker added |
 
-The required QR encoder/decoder dependencies (`qrcode@1.5.4`, `jsqr@1.4.0`) are
-unavailable locally, and new installation is outside this work's authorization.
-QR destinations have not been rewritten or decoded. Routing a QR through OneLink
-would require asset regeneration and independent decode verification; scanning
-an image on another device would still not emit a DOM click on the source page.
-Native Safari banner taps are outside this DOM mechanism, while the 22 utility
-anchors lack the tracker and adding tracking there remains outside scope.
-Do not count an image placement as a tracked QR
-scan. Placements include declared hidden/responsive duplicates and do not
-measure user exposure. The inventory command is
-`node scripts/site-route-inventory.mjs --summary-only`; it reads public source
-files and evaluates the tracker locally, without browser or provider access.
-Re-run the inventory after tracker or HTML changes before relying on these
-counts. The 7,452 eligible anchors are not a completed-rollout claim. The retained
-handoff evidence for this revision is `final-revision/route-inventory.json` and
-its summary; the earlier 7,440-anchor inventory predates the reference exceptions.
+The nine pilot placements plus the reduced new campaign do not provide
+whole-site AppsFlyer attribution. GA click intent on a direct link remains a
+web observation and does not become an AppsFlyer attributed install.
+
+QR images, native Safari Smart App Banners, tracker-free compose/verify utilities
+and TikTok iOS automatic redirects remain outside this anchor expansion. QR
+assets are unchanged. Native banner taps and scans on another device do not
+emit a DOM click on the source page. Placements include hidden/responsive
+source duplicates and do not measure user exposure.
+
+Use `node scripts/site-route-inventory.mjs --summary-only` for final offline
+predicate evidence. It reads public source files and runs the tracker against
+detached anchor mocks without provider access or event delivery. The earlier
+7,452-conversion inventory predates the direct-retention fix and must not be
+used as the final rollout scope.
 
 ## Aggregate compatibility and comparability
 
@@ -164,11 +170,16 @@ exclusion gaps remain visible. Organic is not reassigned to website or SEO.
 ## Unverified external behavior and privacy
 
 Long URLs reuse the template, not the shortlink's saved per-link settings.
-The pilot's saved CPP and existing-user Store behavior therefore cannot be
-assumed for the candidate. `af_ios_url` can express a destination, but the
-account redirect allowlist also covers Apple Store domains. This account's
-allowlist, actual redirect, storefront, CPP, query preservation, installed-app
-behavior and AppsFlyer attribution remain unverified. See
+Desktop HTTP checks on 2026-10-17 showed own-app arrival while dropping
+`ct`/`pt` and `see-all=reviews`; the tested CPP ID survived. Both bare US URL
+forms redirected to the JP storefront, unlike their direct URLs. The bare JP
+URL reached the same final URL as the direct route with HTTP 200. These
+observations are limited to those requests and do not establish installed-device
+behavior or event receipt.
+The revised site retains Apple attribution parameters, reference destinations
+and non-JP storefronts by leaving their original hrefs direct. Provider
+allowlist settings are unchanged. No alternate encoding or proxy redirect is
+used to bypass them. Final candidate routing still needs verification. See
 [redirect parameters](https://support.appsflyer.com/hc/en-us/articles/207447163-About-link-structure-and-parameters)
 and [redirect allowlist](https://support.appsflyer.com/hc/en-us/articles/25068636064529-Set-up-your-domain-redirect-allowlist).
 
@@ -181,15 +192,14 @@ CPP, but it alone does not preserve Apple `ct`/`pt` or prove existing-user
 behavior; this draft does not create or edit a CPP.
 [CPP reference](https://support.appsflyer.com/hc/en-us/articles/4406217556625-Redirect-users-to-custom-app-store-product-pages).
 
-Expanding the number of OneLink routes expands where the existing third-party
-click handling applies. The ten language privacy pages retain direct App Store
-search as an alternative and no longer
-suggest that another link on the same page avoids OneLink: all eligible links
-on opted-in pages are candidates for conversion. This is a source disclosure
-update, not evidence that app-side consent or ATT behavior has been verified.
-Review the final disclosure and keep unresolved consent/ATT limitations visible
-in the release evidence.
-This draft does not resume the waived pilot device tests or any Apple/iOS work.
+The ten language privacy pages retain direct App Store search as an
+alternative. The revised candidate also preserves the direct links described
+above, but the presence of another link on the page is not a general promise
+that it avoids OneLink. The tracker does not itself suppress rewriting or
+queue insertion in response to consent-denied queues, GA-disable, GPC or DNT;
+actual collector delivery under those signals remains unverified. No app-side
+consent or ATT behavior is certified by this website change. The waived pilot
+device tests and Apple/iOS work are not resumed.
 
 ## Review and release
 
@@ -204,7 +214,8 @@ deployment. Earlier draft-only `[skip ci] [cf-pages-skip]` precautions describe
 the previous preparation stage; they do not replace the required production
 checks or justify leaving CI unrun. Obtain successful required checks for the
 final revision, verify the actual merge/deployment result and read back the
-served revision and route scope. Local tests and a PR state alone do not prove
+served revision and route scope, then report collector event receipt separately.
+A dataLayer entry alone is not a GA4 or AppsFlyer receipt. Local tests and a PR state alone do not prove
 deployment or successful provider attribution. Until those operations are
 completed and verified, report them as pending and keep `rollout_start: null`.
 Record the actual start time and deployed SHA after deployment readback.

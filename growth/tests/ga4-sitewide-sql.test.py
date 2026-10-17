@@ -68,6 +68,32 @@ class SitewideSqlTests(unittest.TestCase):
                          row["sessions_with_sitewide_onelink_click_24h"] -
                          row["sessions_with_legacy_and_sitewide_routes_24h"])
 
+    def test_preserved_apple_destinations_remain_in_legacy_counts_only(self):
+        urls = [
+            "https://apps.apple.com/jp/app/id6758438948?ct=web_obsidian_v1",
+            "https://apps.apple.com/jp/app/id6758438948?pt=128498560",
+            "https://apps.apple.com/jp/app/id6758438948?pt=128498560&ct=web_obsidian_v1&mt=8&ppid=0253a7f9-3c1a-4294-95bc-e6d800af5733",
+            "https://apps.apple.com/jp/app/id6758438948?see-all=reviews",
+            "https://apps.apple.com/jp/app/id6758438948#information",
+            "https://apps.apple.com/us/app/id6758438948",
+            "https://apps.apple.com/app/id6758438948",
+        ]
+        events = []
+        for index, url in enumerate(urls):
+            user = f"preserved-{index}"
+            events += fixture.visit(user)
+            for kind in ["seo_cta_impression", "app_store_click", "seo_cta_click"]:
+                events.append(fixture.event(user, kind, 2,
+                    measurement_version="2026-09-05", link_url=url))
+        row = fixture.run(events)[0]
+        self.assertEqual(row["sessions_with_own_app_click_24h"], len(urls))
+        self.assertEqual(row["sessions_with_any_app_route_click_24h"], len(urls))
+        self.assertEqual(row["sessions_with_expanded_app_route_click_24h"], len(urls))
+        self.assertEqual(row["sessions_with_onelink_click_24h"], 0)
+        self.assertEqual(row["sessions_with_sitewide_onelink_click_24h"], 0)
+        self.assertEqual(row["sessions_with_sitewide_onelink_impression"], 0)
+        self.assertEqual(row["sessions_with_legacy_and_sitewide_routes_24h"], 0)
+
     def test_qa_and_pilot_short_links_never_enter_sitewide_counts(self):
         cases = [
             ("qa", QA_URL, 1, 0),

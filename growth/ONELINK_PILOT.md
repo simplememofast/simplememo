@@ -172,27 +172,40 @@ HTML内では `&` を `&amp;` とする。通常のPR・SEO Validation・Git経�
 既存pilot短縮URLへ `c` を追加しても保存済みcampaignを上書きできないため、
 拡張には別の長URLを用いる。管理画面設定やリンク生成APIは変更しない。
 
-既存trackerを読み込むページの安全な静的Apple anchorだけが変換候補となる。
-JavaScript無効時や未対応URLは元の直接リンクを保つ。QR・ネイティブSmart App Banner・
-compose/verifyのutilityは今回未対応であり、「全サイトの全導線が帰属済み」としない。
-10月16日11:15 UTCのオフラインinventoryでは2,449ページがopt-in済みで、
-2,429ページの7,452個の直接Apple anchorが変換候補。固定公開URLの
-`?see-all=reviews` 10件と `#information` 2件も元の遷移先を保持して対象に含めた。
-それ以外のquery/fragmentの組合せを一般許可したわけではない。
-trackerのないutilityの22件は直接リンクを維持する。sitemap内では2,326ページの
-7,163件が候補。独立英語hubの5anchorは別campaignの対象。
-評価したtrackerのSHA-256は `6005bb5bc073f0565619cc71bd12fc73a8b5b1e9d81c50c3a1f86acbd62975f2`。
-変換するパスと `ct` / `pt` / `mt` / `ppid` は確認済みの公開値だけを列挙して許可する。
-新しい値・パスは再レビューとallowlist・inventory更新が必要で、形式だけ合う値は転送しない。
-これはローカルpredicateの結果であり、本番配備やユーザーの到達率ではない。
-プライバシー説明は10言語で、同じページの別リンクならOneLinkを回避できるという案内を
-削除した。代替としてApp Storeで直接検索する案内を維持する。
-長URLの実遷移、レビュー/情報欄への到達、CPP/storefront、既存利用者の動作、帰属、
-アプリ側の同意/ATT動作は未確認。実機QAやApple/iOS作業は再開しない。
-QR246配置/46画像は生成・decode依存が不足し新installも対象外。native banner2,530宣言の
-tapはDOM観測できず、utilityへのtracker追加も対象外である。
-最終revisionの通常CI成功とmerge/deploy・配信内容の確認後に実開始を記録する。
-旧draftのCI skip指定を、現段階の通常CI未実行の代わりにはしない。
+10月17日の実HTTP確認では、OneLink経由でアプリには到達した一方、直接URLと比べて
+Appleの `ct` / `pt` と `?see-all=reviews` が失われた。このため既存の遷移目的と
+Appleキャンペーン情報を守るよう、サイト側の変換範囲を縮小する。
+裸のUS URL2形式はJPへ転送され直接URLと不一致だった。裸のJP URLは直接URLと同じ
+最終URLにHTTP200で到達した。これはそのHTTP試験の結果であり、端末上の動作や
+collector受領の証明ではない。管理画面・redirect allowlistの変更、別encodingやproxyによる迂回は行わない。
+
+既存trackerのある2,429ページ・7,452個の直接Apple anchorは、引き続きGAの
+クリック意図計測対象である。`ct` / `pt` 付き7,185件、固定review query10件、
+固定information fragment2件、残るUS storefrontの41件は、元のhrefを直接維持する。
+この計7,238件は既存の `seo_cta_impression` / `app_store_click` / `seo_cta_click`
+で計測し、OneLinkの `web_to_app_*` に数えない。残る裸のJP URL214件だけが
+209ページで別campaignのpredicateに適合する。9hero pilotのURL・属性・計測scopeは変えない。
+修正後inventoryのtracker SHA-256は
+`4d5f67122ea19faf5047076ffc141df0f003ab7f78cb4d6fca3b68c1e8c41aee`。
+sitemap内では7,163件中206件・201ページが変換対象である。旧7,452件全面変換の
+inventoryを公開対象件数として再利用しない。
+
+変換には既存の公開値allowlistを引き続き適用し、`ct` / `pt`、参照先、JP以外の
+storefrontを直接維持する。新しい値・パスは再レビューとinventory更新が必要。
+JavaScript無効時や未対応URLも元の直接リンクを保つ。GAの直接クリック計測が残っても、
+AppsFlyerで同じクリックやinstallが新campaignへ帰属するとは限らない。
+サイト全体のクリック意図計測と、新campaignの限定された帰属範囲を分けて報告する。
+
+trackerなしutilityの22件、QR、native Smart App Banner、TikTokのiOS自動遷移は
+今回のanchor計測外。utilityへのtracker追加、QR再生成、実機QA、Apple/iOS操作は行わない。
+10言語のprivacyはApp Storeで直接検索する代替を維持する。同じページの別リンクという
+だけでOneLinkを回避できるとは一般化しない。アプリ側同意/ATT、実際のcollector受領、
+既存利用者の端末上の動作は未確認である。
+
+最終revisionの通常CI成功、merge/deploy、配信されたruntimeと遷移範囲の確認後に
+実開始を記録する。配信確認とGA4/AppsFlyerのイベント受領確認は分ける。
+dataLayerへの投入やHTTP到達だけをイベント受領と呼ばない。この時点では公開確認と
+イベント受領はpendingである。旧draftのCI skip指定を通常CIの代わりにしない。
 
 9hubの主指標は、必要な新列が揃う場合だけ、直接Apple・pilot・sitewideをsession内で
 重複排除した拡張unionを使い、定義versionとsource columnを明記する。

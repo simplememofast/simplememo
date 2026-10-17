@@ -151,8 +151,8 @@ test('a direct Apple fallback retains the original events and OneLink is inert o
 const sitewideUrl = 'https://simplememofast.onelink.me/it5q?pid=owned_web&c=website_bridge_v1';
 const sitewideBrowser = (links, options = {}) => browser(links, 'simplememofast.com', { sitewide: true, ...options });
 
-test('sitewide route preserves safe public store parameters and sends one separate fixed-payload event', () => {
-  const original = 'https://apps.apple.com/jp/app/id6758438948?pt=128498560&ct=web_obsidian_v1&mt=8&ppid=0253a7f9-3c1a-4294-95bc-e6d800af5733';
+test('verified Japanese store route sends one separate fixed-payload event', () => {
+  const original = 'https://apps.apple.com/jp/app/id6758438948';
   const own = element(original, { 'data-cta-placement': 'footer', 'data-cta-cluster': 'obsidian' });
   const b = sitewideBrowser([own]);
   const href = own.getAttribute('href');
@@ -162,7 +162,7 @@ test('sitewide route preserves safe public store parameters and sends one separa
   assert.equal(route.searchParams.get('c'), 'website_bridge_v1');
   assert.equal(route.searchParams.get('af_ios_url'), original);
   assert.equal(route.searchParams.get('af_web_dp'), original);
-  assert.equal(route.searchParams.get('af_ios_store_cpp'), '0253a7f9-3c1a-4294-95bc-e6d800af5733');
+  assert.equal(route.searchParams.has('af_ios_store_cpp'), false);
   assert.equal(own.getAttribute('data-sitewide-app-route-status'), 'converted');
   b.run(); b.show(own, 0.49); b.show(own, 0.5); b.show(own, 1); b.click(own);
   assert.deepEqual(b.events().map(e => e[1]), ['web_to_app_impression', 'web_to_app_click']);
@@ -173,14 +173,51 @@ test('sitewide route preserves safe public store parameters and sends one separa
     assert.equal(e[2].measurement_version, '2026-09-07');
     assert.equal(e[2].placement, 'footer');
     assert.ok(!Object.hasOwn(e[2], 'ct'));
-    assert.ok(!JSON.stringify(e).includes('128498560'));
-    assert.ok(!JSON.stringify(e).includes('0253a7f9'));
   }
   assert.equal(own.getAttribute('href'), href);
 });
 
+test('Apple campaign and provider parameters preserve exact navigation and legacy events', () => {
+  for (const query of ['ct=web_obsidian_v1', 'pt=128498560',
+    'pt=128498560&ct=web_obsidian_v1&mt=8&ppid=0253a7f9-3c1a-4294-95bc-e6d800af5733']) {
+    const original = 'https://apps.apple.com/jp/app/id6758438948?' + query;
+    const own = element(original, { 'data-cta-placement': 'footer', 'data-cta-cluster': 'obsidian' });
+    const b = sitewideBrowser([own]);
+    b.run(); b.show(own, 0.49); b.show(own, 0.5); b.show(own, 1); b.click(own);
+    assert.equal(own.getAttribute('href'), original);
+    assert.equal(own.getAttribute('data-sitewide-app-route-status'), 'unsupported-apple-attribution');
+    assert.equal(own.getAttribute('data-app-route'), null);
+    assert.equal(own.getAttribute('data-app-traffic'), null);
+    assert.deepEqual(b.events().map(e => e[1]), ['seo_cta_impression', 'app_store_click', 'seo_cta_click']);
+    for (const e of b.events()) {
+      assert.equal(e[2].ct, new URL(original).searchParams.get('ct') || '(none)');
+      assert.equal(e[2].measurement_version, '2026-09-05');
+      assert.equal(e[2].placement, 'footer');
+      assert.ok(!Object.hasOwn(e[2], 'bridge_scope'));
+      assert.ok(!Object.hasOwn(e[2], 'link_route'));
+      if (e[1] !== 'seo_cta_impression') assert.equal(e[2].link_url, original);
+    }
+  }
+});
+
+test('a reviewed Japanese custom product page retains its explicit destination without campaign parameters', () => {
+  const ppid = '0253a7f9-3c1a-4294-95bc-e6d800af5733';
+  const original = 'https://apps.apple.com/jp/app/id6758438948?mt=8&ppid=' + ppid;
+  const own = element(original);
+  const b = sitewideBrowser([own]);
+  const route = new URL(own.getAttribute('href'));
+  assert.equal(own.getAttribute('data-sitewide-app-route-status'), 'converted');
+  assert.equal(route.searchParams.get('af_ios_url'), original);
+  assert.equal(route.searchParams.get('af_web_dp'), original);
+  assert.equal(route.searchParams.get('af_ios_store_cpp'), ppid);
+  b.click(own);
+  assert.equal(b.events()[0][1], 'web_to_app_click');
+  assert.equal(b.events()[0][2].link_url, sitewideUrl);
+  assert.ok(!JSON.stringify(b.events()).includes(ppid));
+});
+
 test('sitewide opt-in and production host are both required; no observer still routes links', () => {
-  const original = 'https://apps.apple.com/app/id6758438948?ct=jp__nav';
+  const original = 'https://apps.apple.com/jp/app/id6758438948';
   for (const host of ['simplememofast.com', 'localhost', 'preview.simplememo.pages.dev']) {
     const own = element(original);
     const b = browser([own], host, { sitewide: host !== 'simplememofast.com' });
@@ -197,7 +234,7 @@ test('sitewide opt-in and production host are both required; no observer still r
 
 test('sitewide routing handles dynamic links on click without creating synthetic impressions', () => {
   const b = sitewideBrowser([]);
-  const own = element('https://apps.apple.com/us/app/id6758438948?ct=en__mid');
+  const own = element('https://apps.apple.com/jp/app/id6758438948');
   b.click(own); b.click(own);
   assert.equal(own.getAttribute('data-sitewide-app-route-status'), 'converted');
   assert.deepEqual(b.events().map(e => e[1]), ['web_to_app_click', 'web_to_app_click']);
@@ -253,10 +290,10 @@ test('unsupported store routes retain navigation and never become sitewide event
 });
 
 test('sitewide never forwards document identifiers and refuses mutated or forged long URLs', () => {
-  const own = element('https://apps.apple.com/app/id6758438948?ct=web_other_v1');
+  const own = element('https://apps.apple.com/jp/app/id6758438948');
   const b = sitewideBrowser([own]);
   b.context.location.href += '?email=private@example.test#auth-secret';
-  const dynamic = element('https://apps.apple.com/app/id6758438948?ct=web_other_v1');
+  const dynamic = element('https://apps.apple.com/jp/app/id6758438948');
   b.click(dynamic);
   assert.ok(!dynamic.getAttribute('href').includes('private'));
   assert.ok(!dynamic.getAttribute('href').includes('auth-secret'));
@@ -297,7 +334,7 @@ test('grammatically valid unknown identifiers are not forwarded to the sitewide 
   assert.ok(!b.events().some(e => e[1].startsWith('web_to_app')));
 });
 
-test('all reviewed public campaign, provider and product-page values remain routable', () => {
+test('reviewed Apple attribution values remain direct while reviewed Japanese CPP values are routable', () => {
   const values = {
     ct: ['en__bottom', 'en__mid', 'en__nav', 'jp__bottom', 'jp__mid', 'jp__nav', 'web_obsidian_v1', 'web_other_v1'],
     pt: ['128498560'], mt: ['8'],
@@ -306,32 +343,62 @@ test('all reviewed public campaign, provider and product-page values remain rout
       '43019675-348f-489a-914f-065c753a2b1e', '45b35116-b5b3-4b97-9256-0c97289681b6',
       '4b75e642-3dd9-425c-8ff7-9db0cc859eb6', '65666dba-3ce5-43bd-830e-da97de8eaf11'],
   };
-  const links = Object.entries(values).flatMap(([key, values]) => values.map(value =>
-    element(`https://apps.apple.com/us/app/id6758438948?${key}=${value}`)));
-  sitewideBrowser(links);
-  assert.ok(links.every(link => link.getAttribute('data-sitewide-app-route-status') === 'converted'));
+  for (const [key, entries] of Object.entries(values)) for (const value of entries) {
+    const original = `https://apps.apple.com/jp/app/id6758438948?${key}=${value}`;
+    const link = element(original);
+    sitewideBrowser([link]);
+    const preserved = key === 'ct' || key === 'pt';
+    assert.equal(link.getAttribute('data-sitewide-app-route-status'),
+      preserved ? 'unsupported-apple-attribution' : 'converted');
+    if (preserved) assert.equal(link.getAttribute('href'), original);
+  }
 });
 
-test('the two exact public reference URLs retain nested destinations with fixed event URLs', () => {
+test('unverified default and US storefronts retain their exact destination and legacy measurement', () => {
+  for (const path of ['/app/id6758438948', '/us/app/id6758438948',
+    '/us/app/simple-memo-obsidian-voice/id6758438948']) {
+    const original = 'https://apps.apple.com' + path;
+    const link = element(original);
+    const b = sitewideBrowser([link]);
+    b.show(link, 1); b.click(link);
+    assert.equal(link.getAttribute('href'), original);
+    assert.equal(link.getAttribute('data-sitewide-app-route-status'), 'unsupported-storefront');
+    assert.deepEqual(b.events().map(e => e[1]), ['seo_cta_impression', 'app_store_click', 'seo_cta_click']);
+    assert.equal(b.events()[1][2].link_url, original);
+  }
+});
+
+test('dynamically added preserved links use direct clicks without synthetic impressions', () => {
+  for (const original of ['https://apps.apple.com/jp/app/id6758438948?ct=jp__nav',
+    'https://apps.apple.com/jp/app/id6758438948?see-all=reviews',
+    'https://apps.apple.com/jp/app/id6758438948#information',
+    'https://apps.apple.com/us/app/id6758438948']) {
+    const b = sitewideBrowser([]);
+    const own = element(original);
+    b.click(own); b.click(own);
+    assert.equal(own.getAttribute('href'), original);
+    assert.deepEqual(b.events().map(e => e[1]),
+      ['app_store_click', 'seo_cta_click', 'app_store_click', 'seo_cta_click']);
+    assert.equal(b.observed.length, 0);
+  }
+});
+
+test('the two exact public reference URLs preserve direct navigation and legacy events', () => {
   for (const original of [
     'https://apps.apple.com/jp/app/id6758438948?see-all=reviews',
     'https://apps.apple.com/jp/app/id6758438948#information',
   ]) {
     const own = element(original, { 'data-cta-placement': 'reference' });
     const b = sitewideBrowser([own]);
-    assert.equal(own.getAttribute('data-sitewide-app-route-status'), 'converted');
-    const route = new URL(own.getAttribute('href'));
-    assert.equal(route.hash, '');
-    assert.equal(route.searchParams.get('af_ios_url'), original);
-    assert.equal(route.searchParams.get('af_web_dp'), original);
-    assert.equal(route.searchParams.has('af_ios_store_cpp'), false);
-    assert.deepEqual([...route.searchParams.keys()], ['pid', 'c', 'af_ios_url', 'af_web_dp']);
-    b.show(own, 1); b.click(own);
-    assert.deepEqual(b.events().map(e => e[1]), ['web_to_app_impression', 'web_to_app_click']);
-    assert.ok(b.events().every(e => e[2].link_url === sitewideUrl
-      && e[2].bridge_scope === 'sitewide' && e[2].placement === 'reference'));
-    assert.ok(!JSON.stringify(b.events()).includes('see-all'));
-    assert.ok(!JSON.stringify(b.events()).includes('#information'));
+    assert.equal(own.getAttribute('data-sitewide-app-route-status'), 'unsupported-reference');
+    b.show(own, 0.49); b.show(own, 0.5); b.show(own, 1); b.click(own);
+    assert.equal(own.getAttribute('href'), original);
+    assert.equal(own.getAttribute('data-app-route'), null);
+    assert.deepEqual(b.events().map(e => e[1]), ['seo_cta_impression', 'app_store_click', 'seo_cta_click']);
+    assert.ok(b.events().every(e => e[2].measurement_version === '2026-09-05'
+      && e[2].placement === 'reference' && !Object.hasOwn(e[2], 'bridge_scope')));
+    for (const e of b.events().filter(e => e[1] !== 'seo_cta_impression'))
+      assert.equal(e[2].link_url, original);
   }
 });
 

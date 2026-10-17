@@ -63,20 +63,20 @@
   // Exact public values reviewed from the site's source, not merely valid URL
   // syntax: an arbitrary ct token or numeric pt could itself identify a visitor.
   // New static campaigns/product pages require an explicit allowlist review.
-  // Outside the exact reference exceptions below, unknown, repeated, malformed
-  // or fragment values exclude the entire link;
+  // Reference links and Apple attribution tokens keep their direct destination:
+  // the provider's live redirect does not retain those values. Unknown,
+  // repeated, malformed or fragment values also exclude the entire link;
   // never forward the page URL, referrer, tokens or arbitrary link parameters.
   function sitewideStoreUrl(a) {
     var url = ownStoreUrl(a);
     if (!url) return { reason: "unsupported-url" };
-    // These two exact public reference destinations are already authored on
-    // the site. Preserve their purpose in both nested redirect URLs without
-    // accepting arbitrary review parameters, fragments or new combinations.
+    // Preserve review/information navigation itself, not just a nested URL.
+    // Direct links still emit the existing GA click and impression events.
     var publicReferences = [
       "https://apps.apple.com/jp/app/id6758438948?see-all=reviews",
       "https://apps.apple.com/jp/app/id6758438948#information"
     ];
-    if (publicReferences.indexOf(url.href) !== -1) return { url: url };
+    if (publicReferences.indexOf(url.href) !== -1) return { reason: "unsupported-reference" };
     if (url.hash) return { reason: "unsupported-fragment" };
     // Preserve the three declared public paths plus the canonical app-ID path.
     // Do not forward arbitrary path segments even on the owned Store listing.
@@ -101,6 +101,10 @@
       seen[key] = true;
     });
     if (invalid) return { reason: "unsupported-parameters" };
+    if (seen.ct || seen.pt) return { reason: "unsupported-apple-attribution" };
+    // Only the Japanese storefront has matching direct/provider destinations
+    // in release verification. Keep other storefronts and geo-selected paths.
+    if (url.pathname !== "/jp/app/id6758438948") return { reason: "unsupported-storefront" };
     return { url: url };
   }
 

@@ -100,12 +100,17 @@ test('offline evaluation uses the actual tracker predicate without mistaking sou
   const html = optInTracker + anchor(apple + '?ct=web_other_v1&pt=128498560&mt=8')
     + anchor(apple + '?unknown=example') + anchor(apple + '?ct=web_other_v1&ct=web_other_v1')
     + anchor(apple + '#section') + anchor(apple.replace('https:', 'http:'))
+    + anchor(apple) + anchor(apple.replace('/jp/', '/us/'))
+    + anchor(apple + '?see-all=reviews') + anchor(apple + '#information')
     + anchor(pilot, 'data-app-route="onelink" data-app-traffic="pilot"');
   const result = buildRouteInventory({ pages: [{ file: 'index.html', html }], trackerSource });
-  assert.equal(result.public_source.routes.direct_apple.placements, 5);
+  assert.equal(result.public_source.routes.direct_apple.placements, 9);
   assert.equal(result.public_source.sitewide_runtime.eligible_direct_placements, 1);
   assert.deepEqual(result.public_source.sitewide_runtime.direct_placement_statuses,
-    { converted: 1, 'unsupported-parameters': 2, 'unsupported-fragment': 1, 'unsupported-url': 1 });
+    { 'unsupported-apple-attribution': 1, 'unsupported-parameters': 2,
+      'unsupported-fragment': 1, 'unsupported-url': 1, converted: 1,
+      'unsupported-storefront': 1, 'unsupported-reference': 2 });
+  assert.equal(result.public_source.sitewide_runtime.eligible_direct_pages, 1);
   assert.equal(result.public_source.sitewide_runtime.opt_in_pages, 1);
   assert.equal(result.public_source.sitewide_runtime.offline_predicate_evaluated_pages, 1);
   assert.equal(result.pages[0].placements.find(p => p.route === 'onelink_pilot').offline_route_status,
