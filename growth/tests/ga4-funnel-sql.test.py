@@ -260,7 +260,10 @@ class FunnelTests(unittest.TestCase):
                    dict(good, link_url="https://simplememofast.onelink.me/it5q/4x0jfkpw")]
         row = run([good] + invalid, sql)[0]
         self.assertEqual(row["recorded_events"], 6)
-        self.assertEqual(row["onelink_target_invalid_or_missing"], 1)
+        # A recognized target requires its matching scope. Missing scope is
+        # both an invalid target/scope pair and an incomplete dimension; these
+        # quality counters intentionally overlap rather than partition events.
+        self.assertEqual(row["onelink_target_invalid_or_missing"], 2)
         self.assertEqual(row["onelink_version_missing_or_other"], 1)
         self.assertEqual(row["onelink_dimensions_incomplete"], 2)
         self.assertEqual(row["onelink_qa_scope_mismatch"], 1)

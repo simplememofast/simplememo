@@ -198,6 +198,8 @@ class SitewideSqlTests(unittest.TestCase):
             ("sitewide", QA_URL, 0, 1, 1),
             (None, SITEWIDE_URL, 0, 1, 0),
             ("other", SITEWIDE_URL, 0, 1, 0),
+            (None, PILOT_URL, 0, 1, 0),
+            ("other", PILOT_URL, 0, 1, 0),
             ("sitewide", SITEWIDE_URL + "&extra=discard", 0, 1, 0),
         ]
         for scope, url, accepted, invalid, qa_mismatch in cases:
@@ -207,6 +209,12 @@ class SitewideSqlTests(unittest.TestCase):
                 funnel = fixture.run(fixture.visit("a") + events)[0]
                 self.assertEqual(funnel["sessions_with_sitewide_onelink_click_24h"], accepted)
                 self.assertEqual(funnel["sessions_with_sitewide_onelink_impression"], accepted)
+                # A syntactically valid pilot URL cannot enter either route
+                # cohort when its scope is absent or unknown.
+                self.assertEqual(funnel["sessions_with_onelink_click_24h"],
+                                 int(scope == "pilot" and url == PILOT_URL))
+                self.assertEqual(funnel["sessions_with_onelink_impression"],
+                                 int(scope == "pilot" and url == PILOT_URL))
                 for row in fixture.run(events, quality):
                     self.assertEqual(row["recorded_events"], 1)
                     self.assertEqual(row["onelink_target_invalid_or_missing"], invalid)
