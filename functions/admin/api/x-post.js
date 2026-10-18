@@ -13,13 +13,17 @@
 //     "in_reply_to_tweet_id": "返信する場合の対象ツイート ID (任意)"
 //   }
 
-import { buildOAuth1Header, safeJson, json, credKeysFor, firstMissing, USER_AGENT } from './_shared.js';
+import { buildOAuth1Header, safeJson, json, credKeysFor, firstMissing, USER_AGENT, isJsonRequest } from './_shared.js';
 
 export async function onRequest(context) {
   const { request, env } = context;
 
   if (request.method !== 'POST') {
     return json({ error: 'POST only' }, 405);
+  }
+
+  if (!isJsonRequest(request)) {
+    return json({ error: 'Content-Type: application/json で送ってください' }, 415);
   }
 
   let body;

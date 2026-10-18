@@ -96,6 +96,17 @@ export function rateLimitOf(res) {
   };
 }
 
+// ---- リクエスト検査 ----
+//
+// CSRF 対策 (CWE-352)。request.json() は Content-Type を見ずに本文を JSON として
+// 読むので、他サイトの <form enctype="text/plain"> が JSON に見える本文を送り
+// 込めてしまう。他サイトのページが application/json を送るには CORS プリフライト
+// が要り、このサイトはそれを許可しない。だから本文を読む前にこれを要求する。
+export function isJsonRequest(request) {
+  const type = (request.headers.get('Content-Type') || '').split(';')[0].trim().toLowerCase();
+  return type === 'application/json';
+}
+
 // ---- レスポンスヘルパ ----
 
 export async function safeJson(res) {

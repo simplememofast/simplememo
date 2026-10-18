@@ -2,8 +2,9 @@
 //
 // Identity allowlist is configured in the Cloudflare Zero Trust dashboard
 // (Access → Applications), not here. This middleware deliberately has no
-// allowlist of its own; its only job is to refuse any request that did not
-// come through Access and to strip caching from authenticated responses.
+// allowlist of its own; its jobs are to refuse any request that did not
+// come through Access, to refuse cross-site state-changing requests (see the
+// CSRF gate below), and to strip caching from authenticated responses.
 //
 // Why presence of a `Cf-Access-*` header is enough:
 // Cloudflare strips client-supplied `Cf-*` request headers before they reach
@@ -44,6 +45,44 @@ function deny(message, status, debugHeaders) {
   return new Response(message, { status, headers });
 }
 
+// CSRF gate (CWE-352).
+//
+// Once Access has let a browser in, the only credential is the ambient
+// CF_Authorization cookie, which the browser may also attach to a POST that a
+// third-party page triggers — e.g. an auto-submitted
+// `<form enctype="text/plain">` whose body happens to parse as JSON. Every
+// state-changing endpoint under /admin/api/ is POST-only, so any method other
+// than GET/HEAD has to show it came from this origin:
+//
+//   - `Sec-Fetch-Site`, when present, must be `same-origin`;
+//   - `Origin`, when present, must equal this request's own origin (`null`,
+//     sent after a cross-origin redirect or from a sandboxed frame, fails);
+//   - a request carrying neither header (curl or a service-token workflow, but
+//     also a browser too old to send them) must have an `application/json`
+//     body. A cross-site page can only send that type after a CORS preflight,
+//     and the preflight itself carries `Origin`, so it fails the rule above.
+//
+// Current browsers send both headers on every same-origin fetch() POST, so the
+// admin UI keeps working.
+const SAFE_METHODS = new Set(["GET", "HEAD"]);
+
+function mediaType(request) {
+  return (request.headers.get("Content-Type") || "").split(";")[0].trim().toLowerCase();
+}
+
+// Returns why the request must be refused, or null when it may proceed.
+function crossSiteRefusal(request) {
+  if (SAFE_METHODS.has(request.method)) return null;
+  const site = request.headers.get("Sec-Fetch-Site");
+  const origin = request.headers.get("Origin");
+  if (site !== null && site !== "same-origin") return "sec-fetch-site";
+  if (origin !== null && origin !== new URL(request.url).origin) return "origin";
+  if (site === null && origin === null && mediaType(request) !== "application/json") {
+    return "no-origin-non-json";
+  }
+  return null;
+}
+
 export async function onRequest(context) {
   const { request } = context;
 
@@ -63,6 +102,18 @@ export async function onRequest(context) {
       "configured correctly for /admin/*.\n",
       403,
       dbg,
+    );
+  }
+
+  const refusal = crossSiteRefusal(request);
+  if (refusal) {
+    return deny(
+      "Forbidden.\n\n" +
+      "State-changing requests to /admin/* must come from this site's own " +
+      "pages. Scripts without an Origin header must send a JSON body " +
+      "(Content-Type: application/json).\n",
+      403,
+      `csrf=${refusal}`,
     );
   }
 

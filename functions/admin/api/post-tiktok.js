@@ -2,14 +2,21 @@
  * POST /admin/api/post-tiktok
  * Creates a TikTok post via Postiz API, scheduled 1 min from now.
  *
- * Body JSON: { images: [{id, path}], caption: string, title?: string }
+ * Body JSON (Content-Type: application/json):
+ *   { images: [{id, path}], caption: string, title?: string }
  * Requires POSTIZ_API_KEY and POSTIZ_TIKTOK_ID env vars in Cloudflare Pages.
  */
+import { isJsonRequest } from "./_shared.js";
+
 export async function onRequestPost(context) {
   const apiKey = context.env.POSTIZ_API_KEY;
   const integrationId = context.env.POSTIZ_TIKTOK_ID;
   if (!apiKey || !integrationId) {
     return Response.json({ error: "POSTIZ_API_KEY or POSTIZ_TIKTOK_ID not configured" }, { status: 500 });
+  }
+
+  if (!isJsonRequest(context.request)) {
+    return Response.json({ error: "Content-Type must be application/json" }, { status: 415 });
   }
 
   const { images, caption, title } = await context.request.json();

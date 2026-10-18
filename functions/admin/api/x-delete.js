@@ -2,9 +2,10 @@
 //
 // 使い方:
 //   POST /admin/api/x-delete
+//   Content-Type: application/json
 //   Body: { "id": "<tweet_id>" }
 
-import { buildOAuth1Header, json, credKeysFor, firstMissing, USER_AGENT } from './_shared.js';
+import { buildOAuth1Header, json, credKeysFor, firstMissing, USER_AGENT, isJsonRequest } from './_shared.js';
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -15,6 +16,10 @@ export async function onRequest(context) {
 
   const missing = firstMissing(env, credKeysFor('ja'));
   if (missing) return json({ error: missing + ' 未設定' }, 400);
+
+  if (!isJsonRequest(request)) {
+    return json({ error: 'Content-Type: application/json で送ってください' }, 415);
+  }
 
   let body;
   try {
