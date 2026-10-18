@@ -3,7 +3,8 @@
 // Identity allowlist is configured in the Cloudflare Zero Trust dashboard
 // (Access → Applications), not here. This middleware deliberately has no
 // allowlist of its own; its only job is to refuse any request that did not
-// come through Access and to strip caching from authenticated responses.
+// come through Access, to refuse cross-origin state-changing requests (CSRF,
+// see isCrossOrigin) and to strip caching from authenticated responses.
 //
 // Why presence of a `Cf-Access-*` header is enough:
 // Cloudflare strips client-supplied `Cf-*` request headers before they reach
@@ -44,6 +45,22 @@ function deny(message, status, debugHeaders) {
   return new Response(message, { status, headers });
 }
 
+// True when the browser itself reports that another origin made the request.
+// Current browsers attach `Origin` to every request whose method is not
+// GET/HEAD (as "null" when privacy rules hide the real value) and
+// `Sec-Fetch-Site` to every HTTPS request; a web page can neither forge nor
+// remove either. Clients that are not browsers (e.g. curl in the
+// x-post-*-scheduled workflows) send neither and cannot be used for CSRF, so
+// a missing header is not treated as cross-origin — the same rule as
+// functions/api/survey.js. Comparing against the request's OWN origin keeps
+// *.pages.dev preview deployments working.
+function isCrossOrigin(request) {
+  const origin = request.headers.get("Origin");
+  if (origin !== null && origin !== new URL(request.url).origin) return true;
+  const site = request.headers.get("Sec-Fetch-Site");
+  return site !== null && site !== "same-origin" && site !== "none";
+}
+
 export async function onRequest(context) {
   const { request } = context;
 
@@ -63,6 +80,21 @@ export async function onRequest(context) {
       "configured correctly for /admin/*.\n",
       403,
       dbg,
+    );
+  }
+
+  // CSRF: Access treats the CF_Authorization cookie as proof of login, and
+  // the browser attaches that cookie to requests other sites make it send
+  // too (an auto-submitted form, fetch with mode "no-cors"). Access then
+  // injects the headers checked above, so they prove who is logged in, not
+  // that the admin meant to send this request. Every method other than
+  // GET/HEAD is treated as state-changing (x-post, x-delete, post-tiktok and
+  // upload all act on POST), so such requests must come from this origin.
+  if (request.method !== "GET" && request.method !== "HEAD" && isCrossOrigin(request)) {
+    return deny(
+      "Forbidden.\n\n" +
+      "Cross-origin requests that can change state are refused.\n",
+      403,
     );
   }
 

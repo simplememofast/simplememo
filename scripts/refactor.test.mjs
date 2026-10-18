@@ -22,6 +22,7 @@ const sharedURL = moduleURL(read('functions/admin/api/_shared.js'));
 const { safeJson, json, credKeysFor, firstMissing } = await import(sharedURL);
 const { onRequest: deleteTweet } = await import(moduleURL(
   read('functions/admin/api/x-delete.js').replace("'./_shared.js'", JSON.stringify(sharedURL))));
+const { onRequest: adminGate } = await import(moduleURL(read('functions/admin/_middleware.js')));
 
 test('workflow extraction preserves inline/block order and deduplicates commands', () => {
   const yaml = `
@@ -286,6 +287,46 @@ test('delete endpoint validates credentials before parsing or attempting a netwo
     assert.equal(response.status, 400);
     assert.deepEqual(await response.json(), { error: key + ' 未設定' });
     env[key] = 'fixture';
+  }
+});
+
+test('admin gate refuses cross-origin state-changing requests and keeps same-origin, non-browser and GET traffic', async () => {
+  const send = async (method, headers) => {
+    let reached = false;
+    const response = await adminGate({
+      request: new Request('https://simplememofast.com/admin/api/x-post', {
+        method,
+        headers: { 'Cf-Access-Jwt-Assertion': 'fixture', ...headers },
+        body: method === 'GET' || method === 'HEAD' ? undefined : '{"text":"x","account":"ja","x":"="}',
+      }),
+      next: async () => { reached = true; return new Response('handler'); },
+    });
+    return { status: response.status, reached };
+  };
+  const refused = [
+    ['POST', { Origin: 'https://attacker.example', 'Sec-Fetch-Site': 'cross-site' }],
+    ['POST', { Origin: 'https://attacker.example' }],
+    ['POST', { Origin: 'null' }],
+    ['POST', { Origin: 'https://api.simplememofast.com', 'Sec-Fetch-Site': 'same-site' }],
+    ['POST', { Origin: 'http://simplememofast.com' }],
+    ['POST', { 'Sec-Fetch-Site': 'cross-site' }],
+    ['POST', { Origin: 'https://simplememofast.com', 'Sec-Fetch-Site': 'cross-site' }],
+    ['DELETE', { Origin: 'https://attacker.example' }],
+  ];
+  for (const [method, headers] of refused) {
+    assert.deepEqual(await send(method, headers), { status: 403, reached: false }, JSON.stringify([method, headers]));
+  }
+  const allowed = [
+    // The admin UI's own fetch() calls.
+    ['POST', { Origin: 'https://simplememofast.com', 'Sec-Fetch-Site': 'same-origin' }],
+    // Non-browser callers such as curl in the x-post-*-scheduled workflows.
+    ['POST', {}],
+    // Following a link to an admin page from elsewhere.
+    ['GET', { Origin: 'https://attacker.example', 'Sec-Fetch-Site': 'cross-site' }],
+    ['HEAD', { 'Sec-Fetch-Site': 'cross-site' }],
+  ];
+  for (const [method, headers] of allowed) {
+    assert.deepEqual(await send(method, headers), { status: 200, reached: true }, JSON.stringify([method, headers]));
   }
 });
 
