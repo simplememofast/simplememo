@@ -53,7 +53,15 @@ git() {
 gh() {
   record gh "$@"
   case "$1 $2" in
-    'pr list') if [ "$LIST_EXIT" != 0 ]; then return "$LIST_EXIT"; fi; printf '%s\n' "$OPEN_PR" ;;
+    # Like real gh, --head matches the branch name in every repository, forks included.
+    'pr list') if [ "$LIST_EXIT" != 0 ]; then return "$LIST_EXIT"; fi; printf '%s\n' $OPEN_PR $FORK_PR ;;
+    # Like GitHub REST, head=<owner>:<branch> only returns PRs from that owner's repository.
+    'api --method')
+      if [ "$LIST_EXIT" != 0 ]; then return "$LIST_EXIT"; fi
+      case "$*" in
+        "api --method GET repos/$GITHUB_REPOSITORY/pulls -f state=open -f head=$GITHUB_REPOSITORY_OWNER:"*" --jq .[].number") printf '%s\n' "$OPEN_PR" ;;
+        *) printf 'unexpected gh api request\n' >&2; return 94 ;;
+      esac ;;
     'pr create') return 0 ;;
     *) printf 'unexpected gh command\n' >&2; return 91 ;;
   esac
@@ -92,7 +100,8 @@ function run(script, overrides = {}) {
         PATH: bin, HOME: dir, RUNNER_TEMP: dir,
         CALL_LOG: log, GITHUB_OUTPUT: output,
         PREPARED_BRANCH: branch, CHECKED_OUT_BRANCH: branch,
-        CLOCK_DAY: '20260918', CLOCK_DATE: '2026-09-18', HAS_CHANGES: '1', OPEN_PR: '',
+        CLOCK_DAY: '20260918', CLOCK_DATE: '2026-09-18', HAS_CHANGES: '1', OPEN_PR: '', FORK_PR: '',
+        GITHUB_REPOSITORY: 'o/r', GITHUB_REPOSITORY_OWNER: 'o',
         LIST_EXIT: '0', COMMIT_EXIT: '0', PUSH_EXIT: '0', STATUS_EXIT: '0', ADD_EXIT: '0',
         CHECKOUT_EXIT: '0', SYMBOLIC_EXIT: '0', DETACHED: '0', PENDING_PATH: '',
         ...overrides,
@@ -104,6 +113,7 @@ function run(script, overrides = {}) {
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 }
 const callsOf = (result, command, subcommand) => result.calls.filter(parts => parts[0] === command && parts[1] === subcommand);
+const ghCalls = result => result.calls.filter(parts => parts[0] === 'gh');
 function noWrites(result) {
   assert.equal(callsOf(result, 'git', 'add').length, 0);
   assert.equal(callsOf(result, 'git', 'commit').length, 0);
@@ -188,7 +198,7 @@ test('a clean working tree remains a no-op', () => {
   const result = run(publish, { HAS_CHANGES: '0' });
   assert.equal(result.status, 0, result.stderr);
   noWrites(result);
-  assert.equal(callsOf(result, 'gh', 'pr').length, 0);
+  assert.equal(ghCalls(result).length, 0);
 });
 
 for (const hasChanges of ['0', '1']) {
@@ -198,7 +208,7 @@ for (const hasChanges of ['0', '1']) {
     assert.equal(callsOf(result, 'git', 'status').length, 1);
     assert.ok(!result.stdout.includes('変更なし'), 'unknown status is not a clean tree');
     noWrites(result);
-    assert.equal(callsOf(result, 'gh', 'pr').length, 0);
+    assert.equal(ghCalls(result).length, 0);
   });
 }
 
@@ -209,7 +219,7 @@ test('a staging failure stays visible and prevents commit, push and PR lookup', 
   assert.equal(callsOf(result, 'git', 'add').length, 1);
   assert.equal(callsOf(result, 'git', 'commit').length, 0);
   assert.equal(callsOf(result, 'git', 'push').length, 0);
-  assert.equal(callsOf(result, 'gh', 'pr').length, 0);
+  assert.equal(ghCalls(result).length, 0);
 });
 
 test('successful staging keeps the exact existing publication path allowlist', () => {
@@ -236,6 +246,30 @@ test('an existing open PR is not duplicated after midnight', () => {
   assert.equal(callsOf(result, 'gh', 'pr').filter(parts => parts[2] === 'create').length, 0);
 });
 
+// Anyone can fork and open a PR from claude/autopilot-act-<date>. It must not be
+// read as the pending ledger PR (failed fetch, or no PR created for the day).
+test('a fork PR with the predictable branch name is not taken as the ledger PR', () => {
+  const prepared = run(prepare, { CLOCK_DAY: '20260917', FORK_PR: '666' });
+  assert.equal(prepared.status, 0, prepared.stderr);
+  assert.equal(prepared.output, `branch=${branch}\n`);
+  assert.equal(callsOf(prepared, 'git', 'fetch').length, 0);
+  assert.deepEqual(callsOf(prepared, 'git', 'checkout'), [['git', 'checkout', '-B', branch]]);
+  const published = run(publish, { FORK_PR: '666' });
+  assert.equal(published.status, 0, published.stderr);
+  assert.equal(callsOf(published, 'gh', 'pr').filter(parts => parts[2] === 'create').length, 1);
+  const own = run(prepare, { CLOCK_DAY: '20260917', OPEN_PR: '1447', FORK_PR: '666', PENDING_PATH: 'autopilot/index.html' });
+  assert.equal(own.status, 0, own.stderr);
+  assert.deepEqual(callsOf(own, 'git', 'checkout')[0], ['git', 'checkout', '-B', branch, 'FETCH_HEAD']);
+});
+
+test('both PR lookups are scoped to this repository owner and the prepared branch', () => {
+  const lookup = ['gh', 'api', '--method', 'GET', 'repos/o/r/pulls', '-f', 'state=open', '-f', `head=o:${branch}`, '--jq', '.[].number'];
+  assert.deepEqual(ghCalls(run(prepare, { CLOCK_DAY: '20260917' })), [lookup]);
+  const published = run(publish, { CLOCK_DAY: '20260918', OPEN_PR: '1447' });
+  assert.equal(published.status, 0, published.stderr);
+  assert.deepEqual(ghCalls(published), [lookup]);
+});
+
 test('a failed PR lookup remains a failure, not an empty successful lookup', () => {
   const result = run(publish, { LIST_EXIT: '19' });
   assert.equal(result.status, 19, result.stderr);
@@ -246,7 +280,7 @@ for (const [failure, code] of [['COMMIT_EXIT', 17], ['PUSH_EXIT', 18]]) {
   test(`${failure} prevents a later PR mutation`, () => {
     const result = run(publish, { [failure]: String(code) });
     assert.equal(result.status, code);
-    assert.equal(callsOf(result, 'gh', 'pr').length, 0);
+    assert.equal(ghCalls(result).length, 0);
     if (failure === 'COMMIT_EXIT') assert.equal(callsOf(result, 'git', 'push').length, 0);
   });
 }

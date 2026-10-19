@@ -189,7 +189,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
         run: |
           DAY="claude/autopilot-act-$(TZ=Asia/Tokyo date +%Y%m%d)"
-          OPEN="$(gh pr list --head "$DAY" --state open --json number --jq '.[].number')"
+          # Own PRs only. `gh pr list --head` matches the branch name in any fork, so
+          # anyone could open claude/autopilot-act-<date> and stall the ledger sync.
+          # REST head=<owner>:<branch> is filtered server-side to this owner's branch.
+          OPEN="$(gh api --method GET "repos/$GITHUB_REPOSITORY/pulls" -f state=open -f "head=$GITHUB_REPOSITORY_OWNER:$DAY" --jq '.[].number')"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if [ -n "$OPEN" ]; then
@@ -336,7 +339,8 @@ jobs:
           # **必要なときに限って届かない。**緑のまま何も出ないという、この運用が
           # 繰り返し踏んできた形そのもの。
           # A failed lookup is unknown, not proof that no PR exists.
-          OPEN="$(gh pr list --head "$DAY" --state open --json number --jq '.[].number')"
+          # Same owner-scoped lookup as the preparation step: a fork PR is not ours.
+          OPEN="$(gh api --method GET "repos/$GITHUB_REPOSITORY/pulls" -f state=open -f "head=$GITHUB_REPOSITORY_OWNER:$DAY" --jq '.[].number')"
           if [ -z "$OPEN" ]; then
             gh pr create --base main --head "$DAY" \
               --title "日次アクチュエータの同期（$(TZ=Asia/Tokyo date +%Y-%m-%d)）" \
