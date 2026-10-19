@@ -15,6 +15,14 @@ import { generateSet, composeSlide } from "./compose-slides.js";
 const app = express();
 const PORT = 3456;
 
+// Only answer requests addressed to this machine's loopback name, so a
+// DNS-rebinding page (whose Host is its own domain) cannot reach the API.
+const ALLOWED_HOSTS = new Set([`localhost:${PORT}`, `127.0.0.1:${PORT}`, `[::1]:${PORT}`]);
+app.use((req, res, next) => {
+  if (!ALLOWED_HOSTS.has(String(req.headers.host || "").toLowerCase())) return res.status(403).send("Forbidden");
+  next();
+});
+
 app.use(express.json());
 
 // Serve admin UI
@@ -26,6 +34,14 @@ app.use("/slides", express.static(path.join(import.meta.dirname, "out")));
 // Latest generation state
 let latestDir = null;
 let latestPlan = null;
+
+// Join `rel` onto `root` (same semantics as path.join) and return the result
+// only if it stays strictly inside `root`; null for non-strings and escapes.
+function joinInside(root, rel) {
+  if (typeof rel !== "string") return null;
+  const joined = path.join(root, rel);
+  return joined.startsWith(root + path.sep) ? joined : null;
+}
 
 // ── Generate 6 slides ───────────────────────────────────────────
 app.post("/api/generate", async (req, res) => {
@@ -73,9 +89,10 @@ app.post("/api/generate", async (req, res) => {
 app.post("/api/regenerate", async (req, res) => {
   try {
     const { dir, index, variant = "A", brand = false } = req.body || {};
-    if (index < 0 || index > 5) return res.status(400).json({ ok: false, error: "index must be 0-5" });
+    if (!Number.isInteger(index) || index < 0 || index > 5) return res.status(400).json({ ok: false, error: "index must be 0-5" });
 
-    const outDir = path.join(import.meta.dirname, "out", dir);
+    const outDir = joinInside(path.join(import.meta.dirname, "out"), dir);
+    if (!outDir) return res.status(400).json({ ok: false, error: "invalid dir" });
     if (!fs.existsSync(outDir)) return res.status(404).json({ ok: false, error: "dir not found" });
 
     // Re-read plan
@@ -84,7 +101,8 @@ app.post("/api/regenerate", async (req, res) => {
     const slide = plan.slides[index];
 
     const bgDir = path.join(import.meta.dirname, "backgrounds", "master");
-    const bgFile = path.join(bgDir, slide.background);
+    const bgFile = joinInside(bgDir, slide.background);
+    if (!bgFile) throw new Error("slide_plan.json background is outside backgrounds/master");
 
     // Regenerate with new random layout/position (keep same crop for consistency, or randomize)
     const LAYOUTS = ["poster_dark", "caption_subtle", "caption_light"];
@@ -112,13 +130,17 @@ app.post("/api/regenerate", async (req, res) => {
     });
   } catch (e) {
     console.error("[regenerate] error:", e);
-    res.status(500).json({ ok: false, error: e.message });
+    res.status(500).json({ ok: false, error: "regenerate failed" });
   }
 });
 
 // ── ZIP download ────────────────────────────────────────────────
 app.get("/api/zip/:dir", (req, res) => {
-  const outDir = path.join(import.meta.dirname, "out", req.params.dir);
+  // :dir is URL-decoded ("..%2F" -> "../"), so refuse anything that leaves
+  // tools/out before touching the filesystem; same 404 as a missing dir.
+  const outRoot = path.join(import.meta.dirname, "out");
+  const outDir = path.join(outRoot, req.params.dir);
+  if (!outDir.startsWith(outRoot + path.sep)) return res.status(404).send("Not found");
   if (!fs.existsSync(outDir)) return res.status(404).send("Not found");
 
   res.setHeader("Content-Type", "application/zip");
@@ -139,7 +161,13 @@ app.get("/api/zip/:dir", (req, res) => {
 });
 
 // ── Start ───────────────────────────────────────────────────────
-app.listen(PORT, () => {
+// Loopback only (IPv4 + IPv6), never the LAN interfaces.
+app.listen(PORT, "127.0.0.1", () => {
   console.log(`\n  TikTok Slide Builder`);
   console.log(`  http://localhost:${PORT}/admin/\n`);
+});
+app.listen(PORT, "::1").on("error", (e) => {
+  // No IPv6 loopback on this host: the 127.0.0.1 listener is enough.
+  if (e.code === "EADDRNOTAVAIL" || e.code === "EAFNOSUPPORT") return;
+  throw e;
 });
