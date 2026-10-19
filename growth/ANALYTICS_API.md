@@ -321,7 +321,18 @@ and equal to `simplememo-api` `origin/main`), and writes the existing receipt
 shapes without overwriting any existing receipt. Failed remote runs are
 recorded once; nothing is dispatched or retried. Integrity verdicts,
 `pins_mismatch`, `environment_unverified` and a repository-level copy of the token (names-only
-secret listing) set the ingest status to `alert`. If the reviewed reader
+secret listing) set the ingest status to `alert`. So does a scheduled run that
+left a source without data (`scheduled_collection_lost`, with run ID, source and
+verdict: `job_failed_without_artifact`, `artifact_missing`, `artifact_expired`,
+or `gate_<conclusion>` when the gate did not succeed), until a later scheduled
+run delivers that source (admitted, already admitted, an existing receipt
+retained, or `key_pending` for AppsFlyer). Manual runs, dry runs and a gate that
+decided not to collect (stop, end-date already collected) never alert, and a
+manual export does not clear a scheduled loss. No scheduled run created within
+the cron-silence limit for this workflow (`scripts/lib/cron-silence.mjs`, 1680
+minutes, counted from the newest scheduled run GitHub created) sets
+`scheduled_run_silent` until the next one appears. These labels change no
+guard, fallback or receipt. If the reviewed reader
 changes in `simplememo-api`, AppsFlyer ingest stops with `reader_divergence`
 until a reviewed PR re-vendors the file and updates its pin in the workflow
 and `growth/lib/acquisition-handoff.mjs` together.

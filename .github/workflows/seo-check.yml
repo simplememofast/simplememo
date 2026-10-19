@@ -310,6 +310,16 @@ jobs:
       - name: CPP ppid wiring matches data/cpp-map.json
         run: node scripts/apply-cpp-ppid.js --check
 
+      # OneLink pilot（#1047）の冒頭ボタン9個を、実際のチェックアウトで固定する。
+      # 上の2つが見るのは apps.apple.com のリンクだけで、#2100 の site-route-inventory は
+      # CI では見本しか読まない。翻訳の再生成や手直しで hero が直接Appleへ戻っても、pilot の
+      # 短縮URLが別のページ・スクリプト・転送へ写っても、QAの短縮URLが公開物に出ても、
+      # どこも赤くならなかった（どれも pilot の campaign が数えるものを黙って変える）。
+      # 戻すときは hero と同じPRで growth/onelink-pilot.json の state を rolled_back にする
+      # （growth/ONELINK_PILOT.md「不具合時の戻し方」）。計測スクリプトのタグや文言は見ない。
+      - name: OneLink pilot hero anchors match growth/onelink-pilot.json
+        run: node --test growth/lib/onelink-pilot.test.mjs
+
       # 163 pages are still dual-DOM (both languages at one URL, toggled by
       # js/lang.js, defaulting to ja). No page under /en/ loads lang.js, so
       # without this seed an English reader following any link into one of

@@ -158,8 +158,33 @@ A24・R7・D35は実開始後の獲得条件と成熟期間を揃えて読む。
 https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&pt=128498560&ct=web_obsidian_v1&mt=8
 ```
 
-HTML内では `&` を `&amp;` とする。通常のPR・SEO Validation・Git経由の本番反映を使い、
+HTML内では `&` を `&amp;` とする。**同じPRで [`growth/onelink-pilot.json`](onelink-pilot.json) の
+`state` を `active` から `rolled_back` に変える。**これを忘れると下の見張りがSEO Validationで落ちる
+（9ページの冒頭ボタンが pilot でない）。逆に `state` だけ倒してリンクが残っていても落ちる。
+通常のPR・SEO Validation・Git経由の本番反映を使い、
 復旧時刻・本番SHAを同じ計測変更履歴に残す。過去のQA/pilot記録は削除しない。
+`state` は見張りのスイッチで、開始・復旧の記録ではない（記録は従来どおり `measurement_changes` と
+`growth/data/annotations.json`）。
+
+## CIの見張り（2026-10-19追加）
+
+SEO Validation の「OneLink pilot hero anchors match growth/onelink-pilot.json」
+（`node --test growth/lib/onelink-pilot.test.mjs`）が、[`growth/onelink-pilot.json`](onelink-pilot.json)
+と実際のチェックアウトを突き合わせる。公開後、これを機械で確かめる所が無かった
+（`tag-cta-placements.js` は apps.apple.com のリンクだけを見て、#2100 の `site-route-inventory` は
+CIでは見本しか読まない）。
+
+- `state: active` の間: 9ページそれぞれに、hrefがちょうどpilot短縮URLの `<a>` が1個だけあり、
+  上の表の計測属性5つを同じ値で1回ずつ持ち、class に `lpr-btn-primary` を含む。
+  pilotの短縮コードはそのページのほかの場所にも、ほかのサイトのファイルにも無い。
+- `state: rolled_back` の間: pilotの短縮コードはサイトのどこにも無い。
+- どちらの間も、QAの短縮コードはサイトのファイルに無い（例外は分類に使う
+  `js/app-store-tracking.js` だけで、HTMLは例外にできない）。
+- サイトのファイル = `functions/_middleware.js` が404を返すもの（`INTERNAL_PREFIXES`・`/CLAUDE.md`・
+  配信しない `data/*.json`）を除いた全ファイル。`_redirects`・`functions/`・`admin/`・`assets/`・`js/` を含む。
+  画像の中身（QR）は読まない。
+- 計測スクリプトの `<script>` タグ・aria-label・文言・配置は見ない。9ページの範囲を変えるときは、
+  先に範囲を決めて、このファイルと `measurement_changes` を揃える（テストが両者の一致を見る）。
 
 ## 別枠の全サイト導線draft（2026-10-16）
 

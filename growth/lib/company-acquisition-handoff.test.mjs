@@ -7,10 +7,12 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { seal } from './analytics-envelope.mjs';
-import { collectAcquisitionHandoff, acquisitionHandoffStatus, ga4ActionsGuard, appsflyerActionsGuard } from './company-acquisition-handoff.mjs';
+import { collectAcquisitionHandoff, acquisitionHandoffStatus, ga4ActionsGuard, appsflyerActionsGuard, ALERT_STATES, SCHEDULE_LOSS_STATES,
+  SCHEDULE_SILENCE_MINUTES } from './company-acquisition-handoff.mjs';
 import { collectionWindow, collectAnalytics, collectAppsFlyer, collectData, collectionOperations, connectionView, verifyAppsFlyer } from './company-data.mjs';
 import { companyCtaMeasurement } from './company-cta-measurement.mjs';
 import * as H from './acquisition-handoff.mjs';
+import { SCHEDULE_EXPECTATIONS } from '../../scripts/lib/cron-silence.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const READER_SOURCE = fs.readFileSync(path.join(ROOT, H.APPSFLYER_READER_PATH), 'utf8');
@@ -230,6 +232,9 @@ test('a failed remote query or read is recorded once as failed and never retried
   const h = ingest(noArtifact, lost);
   assert.deepEqual([h.latest.ga4, h.latest.appsflyer], ['job_failed_without_artifact', 'job_failed_without_artifact']);
   assert.equal(JSON.parse(fs.readFileSync(path.join(noArtifact, 'data/acquisition-actions/runs/501-1.json'))).final, true);
+  // A sealed failure is a delivered result (recorded, falls back locally); a scheduled run without any artifact is a loss.
+  assert.equal(first.status, 'verified');
+  assert.equal(h.status, 'alert'); assert.deepEqual(h.alerts.map(a => [a.source, a.verdict]), [['ga4', 'job_failed_without_artifact'], ['appsflyer', 'job_failed_without_artifact']]);
 });
 
 test('key_pending is surfaced in ingest and status output, and survives a later skipped job', t => {
@@ -436,4 +441,159 @@ test('the local AppsFlyer reader waits for the Actions owner only while that own
   const halted = await collectAppsFlyer({ stateRoot: haltedRoot, now: NOW, run, actionsGuard: true, stopDoc: stopped, actionsHandoff: null });
   assert.deepEqual([halted.status, halted.reason, reads], ['deferred_to_actions_owner', 'acquisition_stopped', 2]);
   assert.equal(receipt(haltedRoot, 'appsflyer-2026-10-14.json'), null);
+});
+
+// Scheduled-run health. The previous day's run started late (08:40 JST), as observed since 2026-10-15.
+const LOST_AT = '2026-10-13T23:40:00Z';
+const LATER_AT = '2026-10-15T01:00:00Z';
+// A run that left nothing to admit: no artifact, or only the expired ones named. gate null: no jobs at all
+// (startup failure, or cancelled before the gate).
+function lostRun({ id = 500, createdAt = LOST_AT, event = 'schedule', gate = 'success', ga4 = 'failure', appsflyer = 'failure', artifacts = [] } = {}) {
+  const r = remote({ id, event, createdAt, conclusion: 'failure' });
+  return { runs: [r], jobs: { [id]: gate === null ? [] : [job('gate', gate, r), job('ga4', ga4, r), job('appsflyer', appsflyer, r)] },
+    artifacts: { [id]: artifacts.map(name => artifact(r, name, { expired: true })) }, envelopes: {} };
+}
+const merge = (...parts) => ({ runs: parts.flatMap(p => p.runs), jobs: Object.assign({}, ...parts.map(p => p.jobs)),
+  artifacts: Object.assign({}, ...parts.map(p => p.artifacts)), envelopes: Object.assign({}, ...parts.map(p => p.envelopes)) });
+const lostAlerts = (id, verdicts, createdAt = LOST_AT) => Object.entries(verdicts)
+  .map(([source, verdict]) => ({ run_id: id, created_at: createdAt, source, state: 'scheduled_collection_lost', verdict }));
+const LOST = /^A scheduled acquisition-daily run left a source without data/;
+
+test('a scheduled run that lost a source alerts, and nothing the readers use changes', async t => {
+  const cases = [
+    ['job failed without artifact', {}, { ga4: 'job_failed_without_artifact', appsflyer: 'job_failed_without_artifact' }],
+    ['job finished without artifact', { ga4: 'success', appsflyer: 'success' }, { ga4: 'artifact_missing', appsflyer: 'artifact_missing' }],
+    ['artifact expired before admission', { ga4: 'success', appsflyer: 'success',
+      artifacts: ['acquisition-ga4-funnel-2026-10-09', 'acquisition-appsflyer-2026-10-13'] }, { ga4: 'artifact_expired', appsflyer: 'artifact_expired' }],
+    ['gate failed', { gate: 'failure', ga4: 'skipped', appsflyer: 'skipped' }, { ga4: 'gate_failure', appsflyer: 'gate_failure' }],
+    ['no jobs', { gate: null }, { ga4: 'gate_absent', appsflyer: 'gate_absent' }],
+    ['one source only', { ga4: 'success', appsflyer: 'skipped', artifacts: [] }, { ga4: 'artifact_missing' }],
+  ];
+  for (const [label, options, verdicts] of cases) {
+    const root = stateRoot(t), gh = github(lostRun(options)), h = ingest(root, gh);
+    assert.equal(h.status, 'alert', label);
+    assert.deepEqual(h.alerts, lostAlerts(500, verdicts), label);
+    const status = acquisitionHandoffStatus({ stateRoot: root });
+    assert.deepEqual(status.alert_states, ['scheduled_collection_lost'], label); assert.match(status.action, LOST, label);
+    for (const state of Object.values(verdicts).filter(v => !v.startsWith('gate_'))) assert(SCHEDULE_LOSS_STATES.includes(state), state);
+    // The verdict is derived, never written into the immutable run record; the next ingest reuses the record byte for byte.
+    const recordFile = path.join(root, 'data/acquisition-actions/runs/500-1.json'), record = fs.readFileSync(recordFile);
+    assert.equal(JSON.parse(record).final, true); assert(!('alerts' in JSON.parse(record)), label);
+    assert.equal(ingest(root, gh).status, 'alert', label); assert.deepEqual(fs.readFileSync(recordFile), record, label);
+    assert.deepEqual(fs.readdirSync(path.join(root, 'data/collection-receipts')), [], `${label}: no receipt`);
+    assert.equal(gh.calls.dispatches, 0, label);
+    // Both guards read neither status nor alerts: the same handoff relabelled verified gives the same answers.
+    const relabelled = { ...h, status: 'verified', alerts: [] };
+    for (const now of [NOW, new Date('2026-10-15T09:30:00Z')]) {
+      for (const end of ['2026-10-10', '2026-10-14']) {
+        assert.equal(appsflyerActionsGuard({ end, stopDoc: GO, handoff: h, now }), appsflyerActionsGuard({ end, stopDoc: GO, handoff: relabelled, now }), label);
+        assert.equal(ga4ActionsGuard({ end, stopDoc: GO, handoff: h, now, run: github(lostRun(options)).run }),
+          ga4ActionsGuard({ end, stopDoc: GO, handoff: relabelled, now, run: github(lostRun(options)).run }), label);
+      }
+    }
+  }
+  // After a lost AppsFlyer job the local reader still reads, as before (18:30 JST, the scheduled run's grace passed).
+  let reads = 0;
+  const run = (name, args) => {
+    if (name === 'git') return args[0] === 'rev-parse' ? 'a'.repeat(40) : '# existing reviewed reader';
+    assert.equal(name, 'python3'); reads++;
+    const dest = path.join(args.at(-1), 'run-' + reads); fs.mkdirSync(dest, { mode: 0o700 });
+    fs.writeFileSync(path.join(dest, 'report.csv'), CSV);
+    fs.writeFileSync(path.join(dest, 'result.json'), JSON.stringify({ ok: true, http_status: 200,
+      parameters: { from: args[2], to: args[4] }, quality: { sha256: sha(CSV), row_cap_hit: false } }));
+    return JSON.stringify({ ok: true, output: dest });
+  };
+  const root = stateRoot(t), h = ingest(root, github(lostRun()));
+  const local = await collectAppsFlyer({ stateRoot: root, now: new Date('2026-10-15T09:30:00Z'), run, actionsGuard: true, stopDoc: GO, actionsHandoff: h });
+  assert.deepEqual([local.status, reads, h.appsflyer_key], ['verified', 1, 'unknown']);
+});
+
+test('manual runs, dry runs and a gate that decided not to collect never alert', t => {
+  // Emergency stop and "end-date already collected" look the same to the ingest: the gate succeeded and skipped the job.
+  const decided = lostRun({ id: 501, createdAt: RUN_AT, ga4: 'skipped', appsflyer: 'skipped' });
+  let h = ingest(stateRoot(t), github(decided));
+  assert.deepEqual([h.status, h.latest.ga4, h.latest.appsflyer, h.alerts], ['verified', 'not_run', 'not_run', []]);
+  const manual = merge(scheduled(), lostRun({ id: 502, createdAt: LATER_AT, event: 'workflow_dispatch' }),
+    lostRun({ id: 503, createdAt: LATER_AT, event: 'workflow_dispatch', gate: 'failure', ga4: 'skipped', appsflyer: 'skipped' }));
+  h = ingest(stateRoot(t), github(manual));
+  assert.deepEqual([h.status, h.latest.run_id, h.latest.ga4, h.alerts, h.latest_schedule_at], ['verified', 503, 'not_run', [], RUN_AT]);
+  const dry = lostRun({ id: 504, createdAt: LATER_AT, event: 'workflow_dispatch', ga4: 'success', appsflyer: 'skipped' });
+  dry.artifacts[504] = [artifact(dry.runs[0], 'acquisition-ga4-dryrun-504')];
+  h = ingest(stateRoot(t), github(merge(scheduled(), dry)));
+  assert.deepEqual([h.status, h.latest.ga4, h.alerts], ['verified', 'dry_run', []]);
+});
+
+test('a lost source clears only when a later scheduled run delivers it', t => {
+  const cleared = ingest(stateRoot(t), github(merge(lostRun(), scheduled())));
+  assert.deepEqual([cleared.status, cleared.alerts], ['verified', []]);
+  // Per source: GA4 came back, AppsFlyer failed again; both AppsFlyer losses stay listed.
+  const partly = ingest(stateRoot(t), github(merge(lostRun(), scheduled({ af: null, afJob: 'failure' }))));
+  assert.deepEqual(partly.alerts, [...lostAlerts(500, { appsflyer: 'job_failed_without_artifact' }),
+    ...lostAlerts(501, { appsflyer: 'job_failed_without_artifact' }, RUN_AT)]);
+  // A stopped (or already-collected) scheduled run and a manual export run do not clear it.
+  const stopped = ingest(stateRoot(t), github(merge(lostRun(), lostRun({ id: 501, createdAt: RUN_AT, ga4: 'skipped', appsflyer: 'skipped' }))));
+  assert.deepEqual(stopped.alerts, lostAlerts(500, { ga4: 'job_failed_without_artifact', appsflyer: 'job_failed_without_artifact' }));
+  const manual = scheduled({ r: remote({ event: 'workflow_dispatch' }), af: afPayload({ event: 'workflow_dispatch' }) });
+  const byHand = ingest(stateRoot(t), github(merge(lostRun(), manual)));
+  assert.deepEqual([byHand.latest.ga4, byHand.latest.appsflyer, byHand.status], ['admitted', 'admitted', 'alert']);
+  assert.equal(byHand.alerts.length, 2);
+  // A delivery before the loss does not clear it.
+  const after = ingest(stateRoot(t), github(merge(scheduled(), lostRun({ id: 502, createdAt: LATER_AT }))));
+  assert.deepEqual(after.alerts, lostAlerts(502, { ga4: 'job_failed_without_artifact', appsflyer: 'job_failed_without_artifact' }, LATER_AT));
+  // A receipt that already existed for the end-date counts as delivered, and so does key_pending for AppsFlyer
+  // (the local reader owns AppsFlyer again until the secret is registered).
+  const kept = stateRoot(t), dir = path.join(kept, 'data/collection-receipts'); fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+  for (const name of ['ga4-funnel-2026-10-10.json', 'appsflyer-2026-10-14.json']) fs.writeFileSync(path.join(dir, name), JSON.stringify({ status: 'verified' }));
+  const retained = ingest(kept, github(merge(lostRun(), scheduled())));
+  assert.deepEqual([retained.latest.ga4, retained.latest.appsflyer, retained.status], ['existing_receipt_retained', 'existing_receipt_retained', 'verified']);
+  const pending = merge(lostRun(), scheduled({ af: null }));
+  pending.jobs[501][2] = job('appsflyer', 'success', pending.runs[1], [{ name: H.KEY_PENDING_STEP, status: 'completed', conclusion: 'success' }]);
+  const rested = ingest(stateRoot(t), github(pending));
+  assert.deepEqual([rested.latest.appsflyer, rested.appsflyer_key, rested.status, rested.alerts], ['key_pending', 'key_pending', 'verified', []]);
+  // Integrity alerts keep their own action text and their own lifetime; the loss is listed beside them.
+  const tampered = merge(lostRun(), scheduled({ af: afPayload({ mutate: p => { p.provenance.event = 'workflow_dispatch'; } }) }));
+  const both = stateRoot(t), b = ingest(both, github(tampered));
+  assert.deepEqual(b.alerts, [{ run_id: 501, source: 'appsflyer', state: 'provenance_mismatch' }, ...lostAlerts(500, { appsflyer: 'job_failed_without_artifact' })]);
+  const status = acquisitionHandoffStatus({ stateRoot: both });
+  assert.deepEqual(status.alert_states, ['provenance_mismatch', 'scheduled_collection_lost']); assert.match(status.action, /integrity of an Actions artifact/);
+  assert(ALERT_STATES.includes('provenance_mismatch'));
+});
+
+test('no scheduled run within the cron-silence limit alerts, and the next scheduled run clears it', t => {
+  assert.equal(SCHEDULE_SILENCE_MINUTES, SCHEDULE_EXPECTATIONS.find(e => e.path === H.ACQUISITION_WORKFLOW).max_silence_minutes);
+  assert.equal(SCHEDULE_SILENCE_MINUTES, 1680);
+  const at = (base, minutes, seconds = 0) => new Date(Date.parse(base) + minutes * 60000 + seconds * 1000);
+  const limit = at(RUN_AT, SCHEDULE_SILENCE_MINUTES);
+  assert.equal(ingest(stateRoot(t), github(scheduled()), { now: limit }).status, 'verified', 'exactly at the limit is alive');
+  const late = stateRoot(t), silent = ingest(late, github(scheduled()), { now: at(RUN_AT, SCHEDULE_SILENCE_MINUTES, 1) });
+  assert.equal(silent.status, 'alert');
+  assert.deepEqual(silent.alerts, [{ source: 'schedule', state: 'scheduled_run_silent', latest_schedule_at: RUN_AT, max_silence_minutes: 1680 }]);
+  const status = acquisitionHandoffStatus({ stateRoot: late });
+  assert.deepEqual(status.alert_states, ['scheduled_run_silent']); assert.match(status.action, /^No scheduled acquisition-daily run was created within 1680 minutes/);
+  // The next scheduled run clears it as soon as GitHub creates it, before it finishes.
+  const next = remote({ id: 502, status: 'queued', conclusion: null, createdAt: at(RUN_AT, SCHEDULE_SILENCE_MINUTES).toISOString() });
+  const resumed = ingest(late, github({ ...scheduled(), runs: [...scheduled().runs, next] }), { now: at(RUN_AT, SCHEDULE_SILENCE_MINUTES, 1) });
+  assert.deepEqual([resumed.status, resumed.active_runs, resumed.alerts], ['verified', [502], []]);
+  // No scheduled run in the listing, or only manual runs: silent. An unreadable listing is unavailable, not silent.
+  const none = ingest(stateRoot(t), github({}));
+  assert.deepEqual([none.status, none.alerts], ['alert', [{ source: 'schedule', state: 'scheduled_run_silent', latest_schedule_at: null, max_silence_minutes: 1680 }]]);
+  const manualOnly = ingest(stateRoot(t), github(scheduled({ r: remote({ event: 'workflow_dispatch' }), af: afPayload({ event: 'workflow_dispatch' }) })));
+  assert.deepEqual([manualOnly.status, manualOnly.alerts.map(a => a.state)], ['alert', ['scheduled_run_silent']]);
+  const unreadable = ingest(stateRoot(t), github({ ...scheduled(), failList: true }));
+  assert.deepEqual([unreadable.status, unreadable.alerts], ['unavailable', []]);
+  // Observed start times (UTC created_at, nominal cron 21:23): about two hours late every day stays well inside.
+  for (const [previous, now] of [['2026-10-15T23:42:21Z', '2026-10-16T23:39:49Z'], ['2026-10-16T23:39:50Z', '2026-10-17T23:11:55Z'],
+    ['2026-10-17T23:11:56Z', '2026-10-18T23:20:43Z']]) {
+    const h = ingest(stateRoot(t), github(lostRun({ id: 600, createdAt: previous, ga4: 'skipped', appsflyer: 'skipped' })), { now: new Date(now) });
+    assert.equal(h.status, 'verified', `${previous} → ${now}`);
+  }
+  // Only a start more than four hours later than the previous day's reaches the limit.
+  const previous = lostRun({ id: 600, createdAt: '2026-10-17T23:11:56Z', ga4: 'skipped', appsflyer: 'skipped' });
+  assert.equal(ingest(stateRoot(t), github(previous), { now: new Date('2026-10-19T03:11:56Z') }).status, 'verified');
+  assert.equal(ingest(stateRoot(t), github(previous), { now: new Date('2026-10-19T03:11:57Z') }).alerts[0].state, 'scheduled_run_silent');
+  // A loss and a silence together: the loss action comes first, both states are listed.
+  const quiet = stateRoot(t);
+  ingest(quiet, github(lostRun()), { now: at(LOST_AT, SCHEDULE_SILENCE_MINUTES, 1) });
+  const q = acquisitionHandoffStatus({ stateRoot: quiet });
+  assert.deepEqual(q.alert_states, ['scheduled_collection_lost', 'scheduled_run_silent']); assert.match(q.action, LOST);
 });

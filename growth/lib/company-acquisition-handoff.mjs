@@ -14,6 +14,7 @@ import { ACQUISITION_REPO, ACQUISITION_WORKFLOW, ACQUISITION_WORKFLOW_REF, RETEN
   APPSFLYER_CREDENTIAL_ORIGIN, APPSFLYER_SECRET, APPSFLYER_ENVIRONMENT, COLLECTION_ATTEMPT, RECIPIENT_SPKI_SHA256,
   GA4_ARTIFACT, GA4_DRYRUN_ARTIFACT, APPSFLYER_ARTIFACT, GA4_ENVELOPE, APPSFLYER_ENVELOPE,
   ENVELOPE_LIMIT, ga4ArtifactName, acceptedRun, validDay, acquisitionStop } from './acquisition-handoff.mjs';
+import { SCHEDULE_EXPECTATIONS } from '../../scripts/lib/cron-silence.mjs';
 
 const DAY = 86400000;
 const CAP_BYTES = 2 * 1024 ** 3;
@@ -31,9 +32,32 @@ const command = (name, args, options = {}) => execFileSync(name, args, {
 class Final extends Error {}       // Recorded once; never retried.
 const final = state => { throw new Final(state); };
 // Final states that mean the artifact or the setup is not what the workflow promises. They keep
-// the ingest out of 'verified' while the run stays inside the retention window.
+// the ingest out of 'verified' while the run stays inside the retention window, even after later successes.
 export const ALERT_STATES = Object.freeze(['envelope_invalid', 'envelope_files_unexpected', 'provenance_mismatch',
   'reader_divergence', 'duplicate_artifacts', 'artifact_size_invalid', 'pins_mismatch', 'environment_unverified']);
+// Final states that leave a scheduled run without data for a source: the job failed or finished without an
+// artifact, or the artifact expired before the first ingest saw it. A scheduled run whose gate did not succeed
+// also lost both sources (verdict gate_<conclusion>). Unlike ALERT_STATES these alert only until a later
+// scheduled run delivers that source (SCHEDULE_DELIVERED_STATES; key_pending hands AppsFlyer back to the local
+// reader). Manual runs, dry runs and a gate that decided not to collect (stop, end-date already collected) never alert.
+export const SCHEDULE_LOSS_STATES = Object.freeze(['job_failed_without_artifact', 'artifact_missing', 'artifact_expired']);
+export const SCHEDULE_DELIVERED_STATES = Object.freeze(['admitted', 'already_admitted', 'existing_receipt_retained', 'key_pending']);
+// Liveness uses cron-health's limit for this workflow (one day plus four hours for delayed starts), measured from
+// the newest scheduled run GitHub created, queued and in-progress runs included. Actual starts drift about two
+// hours after the nominal 21:23 UTC, so only a change in that delay of over four hours from one day to the next
+// reaches it, and cron-silence would report the same gap.
+export const SCHEDULE_SILENCE_MINUTES = SCHEDULE_EXPECTATIONS.find(e => e.path === ACQUISITION_WORKFLOW)?.max_silence_minutes ?? null;
+
+/** Derived on every ingest from the retained run records; the records themselves stay as first written. */
+function scheduleLosses(records) {
+  const scheduled = records.filter(r => r.event === 'schedule');
+  const delivered = Object.fromEntries(['ga4', 'appsflyer']
+    .map(source => [source, scheduled.findLastIndex(r => SCHEDULE_DELIVERED_STATES.includes(r[source].state))]));
+  const verdict = (r, source) => SCHEDULE_LOSS_STATES.includes(r[source].state) ? r[source].state
+    : r[source].state === 'not_run' && r.jobs?.gate !== 'success' ? `gate_${r.jobs?.gate ?? 'absent'}` : null;
+  return scheduled.flatMap((r, i) => ['ga4', 'appsflyer'].filter(source => i > delivered[source] && verdict(r, source))
+    .map(source => ({ run_id: r.run_id, created_at: r.created_at, source, state: 'scheduled_collection_lost', verdict: verdict(r, source) })));
+}
 
 /** Never replaces an existing receipt, whatever its status or origin. */
 function createOnce(file, value) {
@@ -285,8 +309,14 @@ export function collectAcquisitionHandoff({ stateRoot, now = new Date(), run = c
   const ran = records.filter(r => !['not_run', 'dry_run', 'job_failed_without_artifact', 'artifact_missing', 'ingest_error']
     .includes(r.appsflyer.state)).at(-1);
   const scope = secretScope(json);
+  const latestSchedule = accepted.filter(r => r.event === 'schedule').map(r => r.created_at).sort().at(-1) ?? null;
+  // Exactly at the limit still counts as alive (same boundary as cron-silence). No scheduled run in the
+  // listing at all is silence too; an unreadable listing is 'unavailable', not silence.
+  const silent = runs !== null && !(Date.parse(latestSchedule) >= now.getTime() - SCHEDULE_SILENCE_MINUTES * 60000);
   const alerts = [...records.flatMap(r => ['ga4', 'appsflyer'].filter(k => ALERT_STATES.includes(r[k].state))
     .map(source => ({ run_id: r.run_id, source, state: r[source].state }))),
+    ...scheduleLosses(records),
+    ...(silent ? [{ source: 'schedule', state: 'scheduled_run_silent', latest_schedule_at: latestSchedule, max_silence_minutes: SCHEDULE_SILENCE_MINUTES }] : []),
     ...(scope === 'repository_secret_present' ? [{ source: 'appsflyer', state: 'repository_secret_present' }] : [])];
   const health = { schema_version: 1, source: 'acquisition_actions_handoff', workflow: ACQUISITION_WORKFLOW,
     status: runs === null ? 'unavailable' : alerts.length ? 'alert' : failures.length ? 'unavailable' : 'verified', observed_at: now.toISOString(),
@@ -294,7 +324,7 @@ export function collectAcquisitionHandoff({ stateRoot, now = new Date(), run = c
     ga4_artifact_ends: [...new Set(records.map(r => r.ga4_artifact_end).filter(Boolean))].sort(),
     // Artifacts seen but not yet admitted (retryable). Final verdicts leave the local reader free to fall back.
     appsflyer_pending_ends: [...new Set(records.filter(r => r.appsflyer.retry).map(r => r.appsflyer_artifact_end).filter(Boolean))].sort(),
-    latest_schedule_at: accepted.filter(r => r.event === 'schedule').map(r => r.created_at).sort().at(-1) ?? null,
+    latest_schedule_at: latestSchedule,
     latest: newest && { run_id: newest.run_id, event: newest.event, created_at: newest.created_at,
       ga4: newest.ga4.state, appsflyer: newest.appsflyer.state },
     appsflyer_key: !ran ? 'unknown' : ['key_pending', 'environment_unverified'].includes(ran.appsflyer.state) ? ran.appsflyer.state : 'registered',
@@ -309,14 +339,25 @@ const ACTIONS = {
   environment_unverified: `Limit the ${APPSFLYER_ENVIRONMENT} environment's deployment branches to main only; the token is not used until then.`,
   key_pending: `Owner registers ${APPSFLYER_SECRET} as a secret of the ${APPSFLYER_ENVIRONMENT} environment (never a repository secret); the job rests until then.`,
   alert: 'Inspect health.json alerts (integrity of an Actions artifact or setup); the local readers stay available.',
+  scheduled_collection_lost: 'A scheduled acquisition-daily run left a source without data (health.json alerts: run_id, source, verdict); inspect that run. The local readers fall back as before. Clears when a later scheduled run delivers that source.',
+  scheduled_run_silent: `No scheduled acquisition-daily run was created within ${SCHEDULE_SILENCE_MINUTES} minutes (the cron-silence limit); check that the workflow is enabled and read the cron-health silence issue. Stop it only through data/emergency-stop.json. Clears when the next scheduled run appears.`,
 };
+
+// Integrity first: those alerts outlive later successes; a lost or silent schedule clears by itself.
+function alertAction(alerts) {
+  const states = new Set(alerts.map(a => a.state));
+  if (alerts.some(a => ALERT_STATES.includes(a.state))) return ACTIONS.alert;
+  if (states.has('scheduled_collection_lost')) return ACTIONS.scheduled_collection_lost;
+  if (states.has('scheduled_run_silent')) return ACTIONS.scheduled_run_silent;
+  return ACTIONS.alert;
+}
 
 /** Stable, non-numeric view for status commands. */
 export function acquisitionHandoffStatus({ stateRoot }) {
   try {
     const h = read(path.join(stateRoot, 'data/acquisition-actions/health.json'));
     const action = h.appsflyer_secret_scope === 'repository_secret_present' ? ACTIONS.repository_secret_present
-      : ACTIONS[h.appsflyer_key] ?? (h.status === 'alert' ? ACTIONS.alert : null);
+      : ACTIONS[h.appsflyer_key] ?? (h.status === 'alert' ? alertAction(h.alerts ?? []) : null);
     return { workflow: ACQUISITION_WORKFLOW, ingest_status: h.status, ingested_at: h.observed_at,
       ga4: h.latest?.ga4 ?? 'no_completed_run', appsflyer: h.latest?.appsflyer ?? 'no_completed_run', appsflyer_key: h.appsflyer_key,
       appsflyer_secret_scope: h.appsflyer_secret_scope ?? 'unknown', alert_states: [...new Set((h.alerts ?? []).map(a => a.state))].sort(),

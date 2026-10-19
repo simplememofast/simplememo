@@ -1,0 +1,49 @@
+{
+  "$comment": [
+    "OneLink pilot（#1047、2026-10-15 11:31 JST 公開）の冒頭ボタン9個を CI で固定するための正（スイッチ）。",
+    "SEO Validation の「OneLink pilot hero anchors match growth/onelink-pilot.json」（node --test growth/lib/onelink-pilot.test.mjs）が、これと実際のチェックアウトを突き合わせる。",
+    "",
+    "state が active の間: pages の各ページに、href がちょうど short_url の <a> が1個だけあり、anchor.attributes をすべて同じ値で1回ずつ持ち、class に anchor.class_token を含む。pilot の短縮コードはそのページのほかの場所（コメント・本文・スクリプトを含む）にも、ほかのサイトのファイルにも無い。",
+    "state が rolled_back の間: pilot の短縮コードはサイトのファイルのどこにも無い。",
+    "qa_short_url の短縮コードは、どちらの状態でもサイトのファイルに置かない（QAと本番のクリックを混ぜない）。例外は qa_classifier_files に理由つきで書いた非HTMLのファイルだけ。",
+    "",
+    "**戻すときは、heroのhrefを戻すのと同じPRで state を rolled_back にする**（growth/ONELINK_PILOT.md「不具合時の戻し方」）。",
+    "リンクだけ戻す・state だけ倒す、のどちらもCIで落ちる。無い・壊れた・知らない state のファイルを「戻した」とは読まない。",
+    "このファイルは開始・復旧の記録ではない。本番反映の時刻と本番SHAは従来どおり measurement_changes と growth/data/annotations.json に残す。",
+    "",
+    "サイトのファイル = functions/_middleware.js が 404 を返すもの（INTERNAL_PREFIXES・/CLAUDE.md・data/publication-policy.json で配信しない data/*.json）を除いた全ファイル。",
+    "_redirects・_headers・functions/ と admin/・assets/・js/ も含む（転送やスクリプトで pilot のリンクを配っても同じことになる）。.well-known 以外のドット始まりと node_modules、画像・動画・フォントなどの非テキストは読まない（QRの中身は復号しない）。",
+    "読むのは <a> の開始タグの属性と2つの短縮コードの出現だけ。計測スクリプトの <script> タグ・aria-label・文言・配置は見ない（見た目や版の変更で計測の見張りを落とさない）。",
+    "",
+    "pages は measurement_changes の版 measurement_change の scope と一致させる（テストが照合する）。",
+    "言語を足すと生成翻訳が pilot のリンクを引き継ぎ、ここで落ちる。範囲を決めてから、このファイルと measurement_changes を揃える。"
+  ],
+  "state": "active",
+  "measurement_change": "onelink-obsidian-hub-hero-pilot-v1-2026-10-15",
+  "short_url": "https://simplememofast.onelink.me/it5q/l250gib4",
+  "qa_short_url": "https://simplememofast.onelink.me/it5q/4x0jfkpw",
+  "pages": [
+    "obsidian/index.html",
+    "ar/obsidian/index.html",
+    "es/obsidian/index.html",
+    "id/obsidian/index.html",
+    "ko/obsidian/index.html",
+    "pt-BR/obsidian/index.html",
+    "tr/obsidian/index.html",
+    "zh/obsidian/index.html",
+    "zh-Hant/obsidian/index.html"
+  ],
+  "anchor": {
+    "class_token": "lpr-btn-primary",
+    "attributes": {
+      "data-cta-variant": "onelink_v1",
+      "data-app-route": "onelink",
+      "data-app-traffic": "pilot",
+      "data-cta-cluster": "obsidian",
+      "data-cta-placement": "hero"
+    }
+  },
+  "qa_classifier_files": {
+    "js/app-store-tracking.js": "QAの短縮パスと比べて bridge_scope を qa に固定するための分類だけ（リンクとして配らない）。pilot の誤ったラベルでQAが本番に混ざるのを防ぐ側の記述。"
+  }
+}
