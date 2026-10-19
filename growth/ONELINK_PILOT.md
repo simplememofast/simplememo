@@ -171,8 +171,8 @@ HTML内では `&` を `&amp;` とする。**同じPRで [`growth/onelink-pilot.j
 SEO Validation の「OneLink pilot hero anchors match growth/onelink-pilot.json」
 （`node --test growth/lib/onelink-pilot.test.mjs`）が、[`growth/onelink-pilot.json`](onelink-pilot.json)
 と実際のチェックアウトを突き合わせる。公開後、これを機械で確かめる所が無かった
-（`tag-cta-placements.js` は apps.apple.com のリンクだけを見て、#2100 の `site-route-inventory` は
-CIでは見本しか読まない）。
+（`tag-cta-placements.js` と `apply-cpp-ppid.js` は直接Appleのリンクだけを見て、#2100 の
+`site-route-inventory` はCIでは見本しか読まない）。
 
 - `state: active` の間: 9ページそれぞれに、hrefがちょうどpilot短縮URLの `<a>` が1個だけあり、
   上の表の計測属性5つを同じ値で1回ずつ持ち、class に `lpr-btn-primary` を含む。
@@ -183,8 +183,8 @@ CIでは見本しか読まない）。
 - サイトのファイル = `functions/_middleware.js` が404を返すもの（`INTERNAL_PREFIXES`・`/CLAUDE.md`・
   配信しない `data/*.json`）を除いた全ファイル。`_redirects`・`functions/`・`admin/`・`assets/`・`js/` を含む。
   画像の中身（QR）は読まない。
-- 計測スクリプトの `<script>` タグ・aria-label・文言・配置は見ない。9ページの範囲を変えるときは、
-  先に範囲を決めて、このファイルと `measurement_changes` を揃える（テストが両者の一致を見る）。
+- 計測スクリプトの `<script>` タグ・aria-label・文言・ページ内の位置は見ない。9ページの範囲を変えるときは、
+  先に範囲を決めて、`growth/onelink-pilot.json` と `measurement_changes` を揃える（テストが両者の一致を見る）。
 
 ## 別枠の全サイト導線draft（2026-10-16）
 

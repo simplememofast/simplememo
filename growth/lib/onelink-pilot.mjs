@@ -1,6 +1,6 @@
 // OneLink pilot guard (#1047, live 2026-10-15 11:31 JST). The pilot's AppsFlyer campaign is meant to count the
 // nine hub hero anchors and nothing else. Before this guard nothing in CI read the real checkout:
-// tag-cta-placements.js looks only at apps.apple.com links, and scripts/site-route-inventory.mjs (#2100) runs in
+// tag-cta-placements.js and apply-cpp-ppid.js look only at direct App Store links, and scripts/site-route-inventory.mjs (#2100) runs in
 // CI on fixtures only, skips admin/ and assets/, ignores the short code outside an exact anchor href, never looks
 // at the QA link and requires the tracker <script> tag. A hero reverted by a regenerated translation, or the short
 // link copied to another page, script or redirect, would pass and quietly change what the campaign counts.
