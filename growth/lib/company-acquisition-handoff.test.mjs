@@ -336,6 +336,61 @@ test('collect --analytics ingests first and never dispatches analytics-read for 
   assert.equal(ga4ActionsGuard({ end: '2026-10-10', run: late.run, now: new Date('2026-10-15T08:59:59Z'), stopDoc: GO }), 'actions_owner_pending_today');
 });
 
+test('a legacy analytics-read run is admitted only as a main-branch dispatch of this repository, never by its public title alone', t => {
+  homeWithKey(t);
+  fs.writeFileSync(path.join(process.env.HOME, '.local/share/simplememo-analytics/keys/recipient-private.pem'), KEYS.privateKey, { mode: 0o600 });
+  const root = stateRoot(t), receipts = path.join(root, 'data/collection-receipts');
+  fs.mkdirSync(receipts, { recursive: true, mode: 0o700 });
+  const w = collectionWindow('ga4-funnel', NOW), id = 777, title = 'Analytics API legacy-request';
+  const file = path.join(receipts, `ga4-funnel-${w.end}.json`);
+  const pending = JSON.stringify({ schema_version: 1, source: 'ga4-funnel', window: w, request_tag: 'legacy-request', status: 'dispatched', cap_bytes: 2 * 1024 ** 3 });
+  fs.writeFileSync(file, pending);
+  // A forged run controls its title, its envelope (sealed to the public key) and every field inside it.
+  const payload = { report: 'ga4-funnel', start: w.start, end: w.end, run_id: String(id), source_sha: HEAD, status: 'complete', total_bytes_billed: 1 };
+  const legacy = ({ detail = {}, listing = [{ databaseId: id, displayTitle: title, status: 'completed', conclusion: 'success', headSha: HEAD }] } = {}) => {
+    const calls = { lists: [], api: [], downloads: 0 };
+    const run = (cmd, args) => {
+      assert.equal(cmd, 'gh');
+      if (args[0] === 'run' && args[1] === 'list') { calls.lists.push(args); return JSON.stringify(listing); }
+      if (args[0] === 'api') {
+        calls.api.push(args[1]);
+        return JSON.stringify({ id, display_title: title, event: 'workflow_dispatch', head_branch: 'main', head_sha: HEAD,
+          path: '.github/workflows/analytics-read.yml', status: 'completed', conclusion: 'success',
+          repository: { full_name: 'simplememofast/simplememo' }, head_repository: { full_name: 'simplememofast/simplememo' }, ...detail });
+      }
+      if (args[0] === 'run' && args[1] === 'download') {
+        calls.downloads++;
+        fs.writeFileSync(path.join(args[args.indexOf('--dir') + 1], 'analytics.enc.json'), JSON.stringify(seal(payload, KEYS.publicKey)));
+        return '';
+      }
+      return assert.fail('unexpected gh ' + args.join(' '));
+    };
+    return { run, calls };
+  };
+  const forged = [{ head_repository: { full_name: 'attacker/simplememo' } }, { repository: { full_name: 'attacker/simplememo' } },
+    { event: 'pull_request' }, { event: 'pull_request_target' }, { head_branch: 'feature' }, { path: '.github/workflows/other.yml' },
+    { head_sha: 'b'.repeat(40) }, { id: id + 1 }, { display_title: 'Analytics API other-request' }];
+  for (const detail of forged) {
+    const gh = legacy({ detail });
+    const result = collectAnalytics({ stateRoot: root, now: NOW, run: gh.run });
+    assert.equal(result.lookup_state, 'unexpected_run_identity_requires_diagnosis', JSON.stringify(detail));
+    assert.equal(result.status, 'dispatched'); assert.equal(gh.calls.downloads, 0);
+    assert.equal(fs.readFileSync(file, 'utf8'), pending, 'a rejected run is not recorded against the receipt');
+  }
+  // A listed id that is not a positive integer is never put into an API path.
+  const odd = legacy({ listing: [{ databaseId: '777/../../x', displayTitle: title, status: 'completed', conclusion: 'success', headSha: HEAD }] });
+  assert.equal(collectAnalytics({ stateRoot: root, now: NOW, run: odd.run }).lookup_state, 'unexpected_run_identity_requires_diagnosis');
+  assert.deepEqual([odd.calls.api.length, odd.calls.downloads], [0, 0]);
+  assert.equal(fs.existsSync(path.join(root, `data/analytics-${id}`)), false);
+  // Positive control: the listing asks GitHub for main-branch dispatches only, and the real run is admitted.
+  const gh = legacy();
+  const verified = collectAnalytics({ stateRoot: root, now: NOW, run: gh.run });
+  const list = gh.calls.lists[0];
+  assert.equal(list[list.indexOf('--branch') + 1], 'main'); assert.equal(list[list.indexOf('--event') + 1], 'workflow_dispatch');
+  assert.deepEqual(gh.calls.api, [`repos/simplememofast/simplememo/actions/runs/${id}`]);
+  assert.equal(verified.status, 'verified'); assert.equal(verified.run_id, id); assert.equal(verified.source_commit, HEAD); assert.equal(gh.calls.downloads, 1);
+});
+
 test('an unreadable or foreign local private key is retried by the next ingest, never recorded as a verdict', t => {
   const root = stateRoot(t), gh = github(scheduled());
   for (const key of [path.join(root, 'missing.pem'), path.join(root, 'other.pem')]) {
