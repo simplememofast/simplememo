@@ -62,6 +62,9 @@ permissions:
 
 jobs:
   post:
+    # Owner retired the Pages SNS administration feature on 2026-10-20.
+    # Block workflow_dispatch as well as any future accidental schedule.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:

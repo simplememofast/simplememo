@@ -1,3 +1,4 @@
+import './admin-retirement.test.mjs';
 // Exercise the real publishing shell with synthetic, network-isolated commands.
 import './autopilot-act-publish.test.mjs';
 import './lib/refactor-behavior.test.mjs';
