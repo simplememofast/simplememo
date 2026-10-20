@@ -1,3 +1,7 @@
+> **Retirement decision — 2026-10-20:** The owner no longer uses the Pages SNS administration feature. The retirement change makes `/admin` resources and APIs return HTTP 410 without checking credentials or calling downstream handlers, and disables the three related posting workflow jobs, including manual dispatch. The historical setup instructions below are retained for audit; do not use them to re-enable this feature.
+>
+> **Release and cleanup:** Keep PR #2110 Draft while the retirement replacement is reviewed. Maintain Access protection on the custom-domain admin path, the production pages.dev admin path, and all deployment/preview hostnames. Before declaring cleanup complete, revoke the old X credentials at their issuer after checking other consumers, remove the retired Pages credentials from Production (Preview must remain free of production secrets), and handle any historical Postiz credential and GitHub Actions copy. Deleting current settings does not erase secrets from immutable old deployments; issuer revocation and continued Access containment are required. Credential changes and irreversible secret removal follow the existing owner handoff/approval procedure. Do not restart the stopped social posting workflows.
+
 # Cloudflare 環境変数セットアップ手順
 
 この管理画面から X API を叩くためには、X Developer Portal で取得した認証情報を Cloudflare Pages の環境変数（Secret）として登録する必要があります。**ソースコードや GitHub にキーを書いてはいけません。**
