@@ -215,32 +215,56 @@ def observe(work, invoke=command, account=None, refresh=refresh_with_claude, now
                   env={**os.environ, 'CLAUDE_CODE_OAUTH_TOKEN': token})
 
 
-def branch_prs():
-    """Open PRs from this repository's BRANCH, any base, split into (owned, foreign).
+# The owner account's own open PRs from a branch of this name, in any repository.
+# Only that account's PRs are in this list, so nobody else can add to it.
+OWNED_PRS_QUERY = ('query($login: String!, $branch: String!) { user(login: $login) { '
+                   'pullRequests(headRefName: $branch, states: OPEN, first: 100) { '
+                   'totalCount pageInfo { hasNextPage } nodes { number isDraft headRefOid headRefName '
+                   'author { login } repository { nameWithOwner } headRepository { nameWithOwner } } } } }')
+
+
+def owned_prs():
+    """Open PRs the owner account opened from this repository's BRANCH, any base.
 
     The repository is public: anyone can open a PR from a fork branch of the same
     name, or from this repository's own branch. Only PRs the owner account opened
     are the observer's; anyone else's must not stand in for them or stop the observer.
+    The owner's PRs are listed directly, not picked out of the branch's PRs, so
+    however many PRs others open, they cannot crowd the owner's out of the answer.
     """
-    # --paginate only reveals whether a second page exists. Pages are numbered, so a
-    # PR closed between two requests shifts the owner's PR onto a page already read.
-    pages = json.loads(command([GH, 'api', '--method', 'GET', 'repos/' + REPO + '/pulls', '-f', 'state=open',
-                                '-f', 'head=' + OWNER + ':' + BRANCH, '-f', 'per_page=100', '--paginate', '--slurp']))
-    if type(pages) is not list or any(type(page) is not list for page in pages):
+    reply = json.loads(command([GH, 'api', 'graphql', '-f', 'query=' + OWNED_PRS_QUERY,
+                                '-f', 'login=' + OWNER, '-f', 'branch=' + BRANCH]))
+    listing = reply.get('data') if type(reply) is dict and not reply.get('errors') else None
+    for key in ['user', 'pullRequests']:
+        listing = listing.get(key) if type(listing) is dict else None
+    if (type(listing) is not dict or type(listing.get('pageInfo')) is not dict
+            or type(listing.get('totalCount')) is not int or type(listing.get('nodes')) is not list
+            or any(type(pr) is not dict for pr in listing['nodes'])):
         raise RuntimeError('Unexpected observation PR listing')
-    # Decide only from one complete response; a full page may not be the whole list.
-    if len(pages) != 1 or len(pages[0]) >= 100:
+    # Decide only from the owner's complete list; an unseen PR could be the pending one.
+    if listing['pageInfo'].get('hasNextPage') is not False or listing['totalCount'] != len(listing['nodes']):
         raise RuntimeError('Observation PR needs operator attention')
-    owned, foreign = [], []
-    for pr in (pr for page in pages for pr in page):
-        if type(pr) is not dict:
-            raise RuntimeError('Unexpected observation PR listing')
-        head = pr.get('head') or {}
-        # GitHub already filters by head; do not rely on that alone.
-        if head.get('ref') != BRANCH or (head.get('repo') or {}).get('full_name') != REPO:
-            continue
-        (owned if (pr.get('user') or {}).get('login') == OWNER else foreign).append(pr)
-    return owned, foreign
+    # GitHub already filters by author and head name; do not rely on that alone.
+    return [pr for pr in listing['nodes']
+            if pr.get('headRefName') == BRANCH and (pr.get('author') or {}).get('login') == OWNER
+            and (pr.get('repository') or {}).get('nameWithOwner') == REPO
+            and (pr.get('headRepository') or {}).get('nameWithOwner') == REPO]
+
+
+def others_prs_into_main():
+    """Open PRs other accounts opened from this repository's BRANCH into main.
+
+    GitHub allows one open PR per head and base, so this list has at most one.
+    """
+    listed = json.loads(command([GH, 'api', '--method', 'GET', 'repos/' + REPO + '/pulls', '-f', 'state=open',
+                                 '-f', 'head=' + OWNER + ':' + BRANCH, '-f', 'base=main', '-f', 'per_page=100']))
+    if type(listed) is not list or any(type(pr) is not dict for pr in listed):
+        raise RuntimeError('Unexpected observation PR listing')
+    # GitHub already filters by head and base; do not rely on that alone.
+    return [pr for pr in listed
+            if (pr.get('head') or {}).get('ref') == BRANCH
+            and ((pr.get('head') or {}).get('repo') or {}).get('full_name') == REPO
+            and (pr.get('base') or {}).get('ref') == 'main' and (pr.get('user') or {}).get('login') != OWNER]
 
 
 def run_once(probe=False):
@@ -256,8 +280,8 @@ def run_once(probe=False):
         if git(['remote', 'get-url', 'origin'], checkout) != REMOTE:
             raise RuntimeError('Unexpected observation repository')
         git(['fetch', '--prune', 'origin'], checkout)
-        prs = branch_prs()[0]
-        if len(prs) > 1 or (prs and prs[0]['draft']):
+        prs = owned_prs()
+        if len(prs) > 1 or (prs and prs[0]['isDraft']):
             raise RuntimeError('Observation PR needs operator attention')
         remote_ref = 'refs/remotes/origin/' + BRANCH
         remote_sha = git(['for-each-ref', '--format=%(objectname)', remote_ref], checkout)
@@ -265,7 +289,7 @@ def run_once(probe=False):
             raise RuntimeError('Unexpected observation branch identity')
         start = 'origin/main'
         if prs:
-            if prs[0]['head']['sha'] != remote_sha:
+            if prs[0]['headRefOid'] != remote_sha:
                 raise RuntimeError('Observation branch changed during inspection')
             check_paths(git(['diff', '--name-only', 'origin/main...' + remote_sha], checkout).splitlines())
             start = remote_sha
@@ -309,7 +333,7 @@ def run_once(probe=False):
                     # GitHub allows one open PR per head and base, so a PR someone else
                     # opened from this branch into main would block ours, and auto-merge
                     # never merges it. Close only that one, just before creating ours.
-                    blocking = [pr for pr in branch_prs()[1] if (pr.get('base') or {}).get('ref') == 'main']
+                    blocking = others_prs_into_main()
                     if any(type(pr.get('number')) is not int or pr['number'] < 1 for pr in blocking):
                         raise RuntimeError('Unexpected observation PR identity')
                     for pr in blocking:
@@ -509,8 +533,9 @@ class ReaderRuntimeTests(unittest.TestCase):
                 return ''
             def fake_command(args, **kwargs):
                 calls.append(args)
-                if args[:4] == [GH, 'api', '--method', 'GET']:
-                    return '[[]]'
+                if args[:3] == [GH, 'api', 'graphql']:
+                    return json.dumps({'data': {'user': {'pullRequests': {
+                        'totalCount': 0, 'pageInfo': {'hasNextPage': False}, 'nodes': []}}}})
                 return '{}'
             with patch.dict(globals(), {'CACHE': cache, 'git': fake_git, 'command': fake_command,
                                          'observe': lambda work: '{"written":false}'}):
@@ -554,13 +579,33 @@ class PublicationPrTests(unittest.TestCase):
     sha = 'a' * 40
     created = 'https://github.com/' + REPO + '/pull/900'
 
-    def pr(self, number, login=OWNER, repo=REPO, base='main', draft=False, sha=None):
-        return {'number': number, 'draft': draft, 'user': {'login': login}, 'base': {'ref': base},
-                'head': {'ref': BRANCH, 'sha': sha or self.sha, 'repo': {'full_name': repo} if repo else None}}
+    def pr(self, number, login=OWNER, repo=REPO, base='main', draft=False, sha=None, base_repo=REPO):
+        # An open PR on GitHub: repo is its head repository; base_repo and base are its target.
+        return {'number': number, 'login': login, 'repo': repo, 'base': base, 'draft': draft,
+                'sha': sha or self.sha, 'base_repo': base_repo}
 
-    def publish(self, listed, pages=None, branch_paths=''):
+    def node(self, pr):
+        # The PR as GraphQL returns it.
+        return {'number': pr['number'], 'isDraft': pr['draft'], 'headRefOid': pr['sha'], 'headRefName': BRANCH,
+                'author': {'login': pr['login']} if pr['login'] else None,
+                'repository': {'nameWithOwner': pr['base_repo']},
+                'headRepository': {'nameWithOwner': pr['repo']} if pr['repo'] else None}
+
+    def rest(self, pr):
+        # The PR as the REST pulls list returns it.
+        return {'number': pr['number'], 'draft': pr['draft'], 'user': {'login': pr['login']} if pr['login'] else None,
+                'base': {'ref': pr['base']},
+                'head': {'ref': BRANCH, 'sha': pr['sha'], 'repo': {'full_name': pr['repo']} if pr['repo'] else None}}
+
+    def owner_reply(self, nodes, total=None, more=False):
+        return {'data': {'user': {'pullRequests': {'totalCount': len(nodes) if total is None else total,
+                                                    'pageInfo': {'hasNextPage': more}, 'nodes': nodes}}}}
+
+    def publish(self, listed, owner_reply=..., main_reply=..., branch_paths=''):
+        # GitHub answers both listings from the open PRs in listed, unless a raw reply is given.
         from unittest.mock import patch
         calls = []
+        listed = listed or []
         with tempfile.TemporaryDirectory(prefix='observer-publication-test-') as tmp:
             cache = Path(tmp) / 'cache'; (cache / 'repository').mkdir(parents=True)
             ledger = {'observed_at': '2026-10-01T00:00:00Z', 'routines': [], 'open_findings': [], 'intentional_stops': []}
@@ -581,9 +626,17 @@ class PublicationPrTests(unittest.TestCase):
                 return '{"written":true}'
             def fake_command(args, **kwargs):
                 calls.append(args)
+                if args[:3] == [GH, 'api', 'graphql']:
+                    # Like GitHub's user(login).pullRequests: that account's PRs only, from any repository.
+                    if owner_reply is ...:
+                        return json.dumps(self.owner_reply([self.node(pr) for pr in listed if pr['login'] == OWNER]))
+                    return json.dumps(owner_reply)
                 if args[:4] == [GH, 'api', '--method', 'GET']:
-                    # gh api --paginate --slurp returns one JSON array per page.
-                    return json.dumps([listed] if pages is None else pages)
+                    # Like GitHub's pulls list of this repository with head=simplememofast:<branch> and base=main.
+                    if main_reply is ...:
+                        return json.dumps([self.rest(pr) for pr in listed if pr['base_repo'] == REPO
+                                           and pr['base'] == 'main' and (pr['repo'] or '').split('/')[0] == OWNER])
+                    return json.dumps(main_reply)
                 if args[:3] == [GH, 'pr', 'create']:
                     return self.created
                 return '{}'
@@ -600,33 +653,64 @@ class PublicationPrTests(unittest.TestCase):
     def created_pr(self, calls):
         return [args for args in calls if args[:3] == [GH, 'pr', 'create']]
 
+    def owner_listings(self, calls):
+        return [args for args in calls if args[:3] == [GH, 'api', 'graphql']]
+
+    def main_listings(self, calls):
+        return [args for args in calls if args[:4] == [GH, 'api', '--method', 'GET']]
+
+    def writes(self, calls):
+        return [args for args in calls if args[:2] in (['git', 'push'], ['git', 'worktree'])
+                or args[:4] == [GH, 'api', '--method', 'PATCH'] or args[:3] == [GH, 'pr', 'create']]
+
     def reused(self, number):
         return 'https://github.com/' + REPO + '/pull/' + str(number)
 
-    def test_listing_is_limited_to_this_repository_branch_and_reads_every_page(self):
+    def test_owners_prs_are_listed_directly_and_others_only_into_main(self):
+        self.assertRegex(OWNED_PRS_QUERY, r'^query\(\$login: String!, \$branch: String!\) \{ user\(login: \$login\) '
+                                          r'\{ pullRequests\(headRefName: \$branch, states: OPEN, first: 100\) \{ ')
         result, calls = self.publish([])
-        listings = [args for args in calls if args[:4] == [GH, 'api', '--method', 'GET']]
-        self.assertEqual(len(listings), 2, 'Listed once to inspect and again right before creating')
-        for args in listings:
-            self.assertEqual(args, [GH, 'api', '--method', 'GET', 'repos/simplememofast/simplememo/pulls',
-                                    '-f', 'state=open', '-f', 'head=simplememofast:Codex/routine-observations',
-                                    '-f', 'per_page=100', '--paginate', '--slurp'])
         self.assertEqual(result['pr'], self.created)
+        self.assertEqual(self.owner_listings(calls), [[GH, 'api', 'graphql', '-f', 'query=' + OWNED_PRS_QUERY,
+                                                       '-f', 'login=simplememofast', '-f', 'branch=Codex/routine-observations']])
+        self.assertEqual(self.main_listings(calls), [[GH, 'api', '--method', 'GET', 'repos/simplememofast/simplememo/pulls',
+                                                      '-f', 'state=open', '-f', 'head=simplememofast:Codex/routine-observations',
+                                                      '-f', 'base=main', '-f', 'per_page=100']])
+        # The owner's list decides before anything is written; the main list is read right before creating.
+        self.assertLess(calls.index(self.owner_listings(calls)[0]), calls.index(self.writes(calls)[0]))
+        self.assertLess(calls.index(self.main_listings(calls)[0]), calls.index(self.created_pr(calls)[0]))
 
-    def test_fork_prs_with_the_same_branch_name_are_ignored(self):
-        forks = [self.pr(5, login='outsider', repo='outsider/simplememo'),
-                 self.pr(6, login='outsider', repo='outsider/simplememo', draft=True, sha='b' * 40),
-                 self.pr(7, login='outsider', repo=None), self.pr(8, repo='simplememofast/other'),
-                 self.pr(9, login='outsider', repo='outsider/simplememo', base='claude/x')]
-        for listed in [forks] + [[fork] for fork in forks]:
+    def test_fork_prs_and_the_owners_prs_elsewhere_are_ignored(self):
+        others = [self.pr(5, login='outsider', repo='outsider/simplememo'),
+                  self.pr(6, login='outsider', repo='outsider/simplememo', draft=True, sha='b' * 40),
+                  self.pr(7, login='outsider', repo=None), self.pr(8, repo='simplememofast/other'),
+                  self.pr(9, login='outsider', repo='outsider/simplememo', base='claude/x'),
+                  # The owner's own PR from a branch of the same name in another repository.
+                  self.pr(10, repo='simplememofast/simplememo-api', base_repo='simplememofast/simplememo-api',
+                          draft=True, sha='b' * 40)]
+        for listed in [others] + [[other] for other in others]:
             result, calls = self.publish(listed)
             self.assertIsInstance(result, dict, listed)
             self.assertEqual((result['state'], result['pr']), ('published', self.created))
             self.assertEqual(self.closed(calls), [], 'A fork PR cannot block ours and is not ours to close')
 
+    def test_github_filters_are_not_relied_on_alone(self):
+        stray = [self.pr(40, login='outsider'), self.pr(41, login='outsider', repo='outsider/simplememo'),
+                 self.pr(42, base_repo='simplememofast/simplememo-api'), self.pr(43, repo='simplememofast/other'),
+                 self.pr(44, login=None, repo=None)]
+        nodes = [self.node(pr) for pr in stray] + [{**self.node(self.pr(45)), 'headRefName': 'codex/routine-observations'}]
+        rest = [self.rest(pr) for pr in [self.pr(46, login='outsider', repo='outsider/simplememo'),
+                                         self.pr(47, login='outsider', base='claude/x'),
+                                         self.pr(48, login='outsider', repo=None), self.pr(49)]]
+        rest.append({**self.rest(self.pr(50, login='outsider')), 'head': {'ref': 'other', 'sha': self.sha,
+                                                                          'repo': {'full_name': REPO}}})
+        result, calls = self.publish(None, owner_reply=self.owner_reply(nodes), main_reply=rest)
+        self.assertEqual((result['state'], result['pr']), ('published', self.created))
+        self.assertEqual(self.closed(calls), [])
+
     def test_prs_others_open_from_this_branch_into_main_cannot_block_or_stand_in(self):
         for pr in [self.pr(11, login='outsider'), self.pr(12, login='outsider', draft=True),
-                   self.pr(13, login='simplememofast-fake'), {**self.pr(14), 'user': None},
+                   self.pr(13, login='simplememofast-fake'), self.pr(14, login=None),
                    self.pr(15, login='outsider', sha='b' * 40)]:
             result, calls = self.publish([pr])
             self.assertIsInstance(result, dict, pr)
@@ -650,11 +734,61 @@ class PublicationPrTests(unittest.TestCase):
             self.assertIsInstance(result, RuntimeError)
             self.assertEqual((self.closed(calls), self.created_pr(calls)), ([], []))
 
-    def test_unexpected_listing_stops_before_any_write(self):
-        for pages in [{}, [{}], [[1]], [[self.pr(30)], None], [['x']]]:
-            result, calls = self.publish(None, pages=pages)
-            self.assertIsInstance(result, RuntimeError, pages)
+    def test_unexpected_main_listing_stops_before_closing_or_creating(self):
+        for reply in [{}, None, 'x', [1], [None], [[]], [self.rest(self.pr(11, login='outsider')), 'x']]:
+            result, calls = self.publish([], main_reply=reply)
+            self.assertIsInstance(result, RuntimeError, reply)
             self.assertEqual((self.closed(calls), self.created_pr(calls)), ([], []))
+
+    def test_unreadable_owner_listing_stops_before_any_write(self):
+        own = self.node(self.pr(30))
+        listing = self.owner_reply([own])['data']['user']['pullRequests']
+        def reply(**fields):
+            return {'data': {'user': {'pullRequests': {**listing, **fields}}}}
+        for bad in [None, [], {}, 'x', {'data': None}, {'data': {'user': None}}, {'data': {'user': {'pullRequests': None}}},
+                    {**self.owner_reply([own]), 'errors': [{'type': 'NOT_FOUND'}]},
+                    reply(nodes=None), reply(nodes={}), reply(nodes=[own, None]), reply(nodes=[1]),
+                    reply(totalCount='1'), reply(totalCount=None), reply(totalCount=True),
+                    reply(pageInfo=None), reply(pageInfo=[])]:
+            result, calls = self.publish(None, owner_reply=bad)
+            self.assertIsInstance(result, RuntimeError, bad)
+            self.assertEqual((self.writes(calls), self.main_listings(calls)), ([], []), bad)
+
+    def test_incomplete_owner_listing_fails_closed(self):
+        own = self.node(self.pr(30, base='claude/y'))
+        for bad in [self.owner_reply([], total=1), self.owner_reply([own], total=2), self.owner_reply([own], total=0),
+                    self.owner_reply([], more=True), self.owner_reply([own], more=True),
+                    self.owner_reply([own], more=None), self.owner_reply([own], more=0),
+                    {'data': {'user': {'pullRequests': {'totalCount': 1, 'pageInfo': {}, 'nodes': [own]}}}}]:
+            result, calls = self.publish(None, owner_reply=bad)
+            self.assertIsInstance(result, RuntimeError, bad)
+            self.assertEqual(str(result), 'Observation PR needs operator attention')
+            self.assertEqual(len(self.owner_listings(calls)), 1)
+            self.assertEqual((self.writes(calls), self.main_listings(calls)), ([], []), bad)
+        # A complete list is decided however long it is.
+        elsewhere = [self.node(self.pr(200 + i, repo='simplememofast/r' + str(i), base_repo='simplememofast/r' + str(i)))
+                     for i in range(100)]
+        result, calls = self.publish(None, owner_reply=self.owner_reply(elsewhere))
+        self.assertEqual((result['state'], result['pr']), ('published', self.created))
+
+    def test_any_number_of_others_prs_cannot_stop_or_hide_the_owners_pr(self):
+        # Far more than one page of other people's PRs, from this repository's branch and from forks.
+        crowd = ([self.pr(100 + i, login='outsider', base='claude/b' + str(i)) for i in range(150)]
+                 + [self.pr(300 + i, login='outsider' + str(i), repo='outsider' + str(i) + '/simplememo') for i in range(150)])
+        result, calls = self.publish(crowd + [self.pr(99, login='outsider')])
+        self.assertEqual((result['state'], result['pr']), ('published', self.created))
+        self.assertEqual(self.closed(calls), ['repos/' + REPO + '/pulls/99'])
+        for base in ['main', 'claude/y']:
+            for listed in [crowd + [self.pr(30, base=base)], [self.pr(30, base=base)] + crowd]:
+                result, calls = self.publish(listed)
+                self.assertEqual((result['state'], result['pr']), ('published', self.reused(30)))
+                self.assertEqual((self.closed(calls), self.created_pr(calls)), ([], []))
+            # The owner's own PRs are still guarded as before.
+            for listed in [crowd + [self.pr(30, base=base, draft=True)], crowd + [self.pr(30, base=base), self.pr(33, base='claude/z')],
+                           crowd + [self.pr(30, base=base, sha='c' * 40)]]:
+                result, calls = self.publish(listed)
+                self.assertIsInstance(result, RuntimeError)
+                self.assertEqual((self.writes(calls), self.main_listings(calls)), ([], []))
 
     def test_own_pr_into_any_base_is_still_reused_and_guarded(self):
         others = [self.pr(31, login='outsider', base='claude/x'), self.pr(32, login='outsider', repo='outsider/simplememo')]
@@ -668,44 +802,14 @@ class PublicationPrTests(unittest.TestCase):
                            [self.pr(30, base=base, sha='c' * 40)]]:
                 result, calls = self.publish(listed)
                 self.assertIsInstance(result, RuntimeError, listed)
-                self.assertEqual((self.closed(calls), self.created_pr(calls)), ([], []))
+                self.assertEqual(str(result), 'Observation PR needs operator attention'
+                                 if len(listed) > 1 or listed[0]['draft'] else 'Observation branch changed during inspection')
+                self.assertEqual(self.writes(calls), [])
             result, calls = self.publish([self.pr(30, base=base)], branch_paths=LEDGER + '\n.github/workflows/x.yml')
             self.assertIsInstance(result, RuntimeError)
-            self.assertEqual((self.closed(calls), self.created_pr(calls)), ([], []))
+            self.assertEqual(self.writes(calls), [])
         # An outsider's PR into main does not stop or replace the owner's PR elsewhere.
         result, calls = self.publish([self.pr(34, login='outsider'), self.pr(30, base='claude/y')])
-        self.assertEqual((result['state'], result['pr']), ('published', self.reused(30)))
-        self.assertEqual((self.closed(calls), self.created_pr(calls)), ([], []))
-
-    def crowd(self, count):
-        return [self.pr(100 + i, login='outsider', base='claude/b' + str(i)) for i in range(count)]
-
-    def stops_before_any_write(self, pages):
-        result, calls = self.publish(None, pages=pages)
-        self.assertIsInstance(result, RuntimeError, pages)
-        self.assertEqual(str(result), 'Observation PR needs operator attention')
-        self.assertEqual([args for args in calls if args[:2] in (['git', 'push'], ['git', 'worktree'])
-                          or args[:4] == [GH, 'api', '--method', 'PATCH'] or args[:3] == [GH, 'pr', 'create']], [])
-        self.assertEqual(len([args for args in calls if args[:4] == [GH, 'api', '--method', 'GET']]), 1)
-
-    def test_more_than_one_page_stops_before_any_write_with_own_pr_on_page_2(self):
-        # Pages can shift between requests, so a later page cannot be trusted to hold it.
-        for own in [self.pr(30, base='claude/y', draft=True), self.pr(30, base='claude/y'), self.pr(30)]:
-            self.stops_before_any_write([self.crowd(100), [own]])
-            self.stops_before_any_write([self.crowd(100), [self.pr(200, login='outsider'), own]])
-
-    def test_more_than_one_page_stops_before_any_write_without_own_pr(self):
-        # The shifted view of the case above: the owner's PR slid onto page 1 after it was read.
-        for pages in [[self.crowd(100), []], [self.crowd(100), [self.pr(200, login='outsider')]],
-                      [self.crowd(99), self.crowd(2)], [[], []]]:
-            self.stops_before_any_write(pages)
-
-    def test_only_one_page_short_of_full_is_decided(self):
-        for pages in [[], [self.crowd(100)], [self.crowd(99) + [self.pr(30, base='claude/y', draft=True)]]]:
-            self.stops_before_any_write(pages)
-        result, calls = self.publish(self.crowd(99))
-        self.assertEqual((result['state'], result['pr'], self.closed(calls)), ('published', self.created, []))
-        result, calls = self.publish(self.crowd(98) + [self.pr(30, base='claude/y')])
         self.assertEqual((result['state'], result['pr']), ('published', self.reused(30)))
         self.assertEqual((self.closed(calls), self.created_pr(calls)), ([], []))
 
