@@ -11,15 +11,17 @@ import fs from "node:fs";
 import path from "node:path";
 import archiver from "archiver";
 import { generateSet, composeSlide } from "./compose-slides.js";
+import { isLocalRequest, resolveOutDir } from "./server-guard.js";
 
 const app = express();
 const PORT = 3456;
 
 // Only answer requests addressed to this machine's loopback name, so a
-// DNS-rebinding page (whose Host is its own domain) cannot reach the API.
-const ALLOWED_HOSTS = new Set([`localhost:${PORT}`, `127.0.0.1:${PORT}`, `[::1]:${PORT}`]);
+// DNS-rebinding page (whose Host is its own domain) cannot reach the API,
+// and whose Origin, if sent, is this server's own, so a cross-site page
+// cannot POST to it (see server-guard.js).
 app.use((req, res, next) => {
-  if (!ALLOWED_HOSTS.has(String(req.headers.host || "").toLowerCase())) return res.status(403).send("Forbidden");
+  if (!isLocalRequest(req.headers, PORT)) return res.status(403).send("Forbidden");
   next();
 });
 
@@ -91,7 +93,7 @@ app.post("/api/regenerate", async (req, res) => {
     const { dir, index, variant = "A", brand = false } = req.body || {};
     if (!Number.isInteger(index) || index < 0 || index > 5) return res.status(400).json({ ok: false, error: "index must be 0-5" });
 
-    const outDir = joinInside(path.join(import.meta.dirname, "out"), dir);
+    const outDir = resolveOutDir(path.join(import.meta.dirname, "out"), dir);
     if (!outDir) return res.status(400).json({ ok: false, error: "invalid dir" });
     if (!fs.existsSync(outDir)) return res.status(404).json({ ok: false, error: "dir not found" });
 
@@ -136,11 +138,11 @@ app.post("/api/regenerate", async (req, res) => {
 
 // ── ZIP download ────────────────────────────────────────────────
 app.get("/api/zip/:dir", (req, res) => {
-  // :dir is URL-decoded ("..%2F" -> "../"), so refuse anything that leaves
-  // tools/out before touching the filesystem; same 404 as a missing dir.
-  const outRoot = path.join(import.meta.dirname, "out");
-  const outDir = path.join(outRoot, req.params.dir);
-  if (!outDir.startsWith(outRoot + path.sep)) return res.status(404).send("Not found");
+  // :dir is URL-decoded ("..%2F" -> "../"), so accept only a plain directory
+  // name directly under tools/out before touching the filesystem; same 404
+  // as a missing dir.
+  const outDir = resolveOutDir(path.join(import.meta.dirname, "out"), req.params.dir);
+  if (!outDir) return res.status(404).send("Not found");
   if (!fs.existsSync(outDir)) return res.status(404).send("Not found");
 
   res.setHeader("Content-Type", "application/zip");
