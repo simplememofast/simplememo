@@ -22,6 +22,8 @@ import time
 import unittest
 
 REPO = 'simplememofast/simplememo'
+# The only PR opener auto-merge.yml accepts; the observer publishes as this account.
+OWNER = REPO.split('/', 1)[0]
 REMOTE = 'https://github.com/' + REPO + '.git'
 BRANCH = 'Codex/routine-observations'
 LEDGER = 'data/routine-runs.json'
@@ -213,6 +215,34 @@ def observe(work, invoke=command, account=None, refresh=refresh_with_claude, now
                   env={**os.environ, 'CLAUDE_CODE_OAUTH_TOKEN': token})
 
 
+def branch_prs():
+    """Open PRs from this repository's BRANCH, any base, split into (owned, foreign).
+
+    The repository is public: anyone can open a PR from a fork branch of the same
+    name, or from this repository's own branch. Only PRs the owner account opened
+    are the observer's; anyone else's must not stand in for them or stop the observer.
+    """
+    # --paginate only reveals whether a second page exists. Pages are numbered, so a
+    # PR closed between two requests shifts the owner's PR onto a page already read.
+    pages = json.loads(command([GH, 'api', '--method', 'GET', 'repos/' + REPO + '/pulls', '-f', 'state=open',
+                                '-f', 'head=' + OWNER + ':' + BRANCH, '-f', 'per_page=100', '--paginate', '--slurp']))
+    if type(pages) is not list or any(type(page) is not list for page in pages):
+        raise RuntimeError('Unexpected observation PR listing')
+    # Decide only from one complete response; a full page may not be the whole list.
+    if len(pages) != 1 or len(pages[0]) >= 100:
+        raise RuntimeError('Observation PR needs operator attention')
+    owned, foreign = [], []
+    for pr in (pr for page in pages for pr in page):
+        if type(pr) is not dict:
+            raise RuntimeError('Unexpected observation PR listing')
+        head = pr.get('head') or {}
+        # GitHub already filters by head; do not rely on that alone.
+        if head.get('ref') != BRANCH or (head.get('repo') or {}).get('full_name') != REPO:
+            continue
+        (owned if (pr.get('user') or {}).get('login') == OWNER else foreign).append(pr)
+    return owned, foreign
+
+
 def run_once(probe=False):
     CACHE.mkdir(parents=True, exist_ok=True, mode=0o700)
     with (CACHE / 'observer.lock').open('a') as lock:
@@ -226,9 +256,8 @@ def run_once(probe=False):
         if git(['remote', 'get-url', 'origin'], checkout) != REMOTE:
             raise RuntimeError('Unexpected observation repository')
         git(['fetch', '--prune', 'origin'], checkout)
-        prs = json.loads(command([GH, 'pr', 'list', '--repo', REPO, '--head', BRANCH, '--state', 'open',
-                                  '--json', 'number,headRefOid,isDraft']))
-        if len(prs) > 1 or (prs and prs[0]['isDraft']):
+        prs = branch_prs()[0]
+        if len(prs) > 1 or (prs and prs[0]['draft']):
             raise RuntimeError('Observation PR needs operator attention')
         remote_ref = 'refs/remotes/origin/' + BRANCH
         remote_sha = git(['for-each-ref', '--format=%(objectname)', remote_ref], checkout)
@@ -236,7 +265,7 @@ def run_once(probe=False):
             raise RuntimeError('Unexpected observation branch identity')
         start = 'origin/main'
         if prs:
-            if prs[0]['headRefOid'] != remote_sha:
+            if prs[0]['head']['sha'] != remote_sha:
                 raise RuntimeError('Observation branch changed during inspection')
             check_paths(git(['diff', '--name-only', 'origin/main...' + remote_sha], checkout).splitlines())
             start = remote_sha
@@ -277,6 +306,15 @@ def run_once(probe=False):
                                     'モデル呼出・予定変更・認証変更はありません。意図的な停止を保持し、'
                                     'SUCCEEDEDを出荷・投稿・依頼達成とは数えません。\n\n'
                                     '観測時刻: ' + after['observed_at'] + '\n')
+                    # GitHub allows one open PR per head and base, so a PR someone else
+                    # opened from this branch into main would block ours, and auto-merge
+                    # never merges it. Close only that one, just before creating ours.
+                    blocking = [pr for pr in branch_prs()[1] if (pr.get('base') or {}).get('ref') == 'main']
+                    if any(type(pr.get('number')) is not int or pr['number'] < 1 for pr in blocking):
+                        raise RuntimeError('Unexpected observation PR identity')
+                    for pr in blocking:
+                        command([GH, 'api', '--method', 'PATCH', 'repos/' + REPO + '/pulls/' + str(pr['number']),
+                                 '-f', 'state=closed'])
                     url = command([GH, 'pr', 'create', '--repo', REPO, '--base', 'main', '--head', BRANCH,
                                    '--title', '定期タスクの実行状態を同期', '--body-file', str(body)])
                 return {'state': 'published', 'published_to_git': True, 'pr': url, **summary}
@@ -471,8 +509,8 @@ class ReaderRuntimeTests(unittest.TestCase):
                 return ''
             def fake_command(args, **kwargs):
                 calls.append(args)
-                if args[:3] == [GH, 'pr', 'list']:
-                    return '[]'
+                if args[:4] == [GH, 'api', '--method', 'GET']:
+                    return '[[]]'
                 return '{}'
             with patch.dict(globals(), {'CACHE': cache, 'git': fake_git, 'command': fake_command,
                                          'observe': lambda work: '{"written":false}'}):
@@ -510,6 +548,166 @@ class ReaderRuntimeTests(unittest.TestCase):
             self.assertEqual(config['StartInterval'], 3600)
             self.assertIs(config['RunAtLoad'], True)
             self.assertEqual(config['Label'], LABEL)
+
+
+class PublicationPrTests(unittest.TestCase):
+    sha = 'a' * 40
+    created = 'https://github.com/' + REPO + '/pull/900'
+
+    def pr(self, number, login=OWNER, repo=REPO, base='main', draft=False, sha=None):
+        return {'number': number, 'draft': draft, 'user': {'login': login}, 'base': {'ref': base},
+                'head': {'ref': BRANCH, 'sha': sha or self.sha, 'repo': {'full_name': repo} if repo else None}}
+
+    def publish(self, listed, pages=None, branch_paths=''):
+        from unittest.mock import patch
+        calls = []
+        with tempfile.TemporaryDirectory(prefix='observer-publication-test-') as tmp:
+            cache = Path(tmp) / 'cache'; (cache / 'repository').mkdir(parents=True)
+            ledger = {'observed_at': '2026-10-01T00:00:00Z', 'routines': [], 'open_findings': [], 'intentional_stops': []}
+            def fake_git(args, cwd):
+                calls.append(['git'] + args)
+                if args[:3] == ['remote', 'get-url', 'origin']:
+                    return REMOTE
+                if args[0] == 'for-each-ref':
+                    return self.sha
+                if args[:3] == ['diff', '--name-only', 'origin/main...' + self.sha]:
+                    return branch_paths
+                if args[:2] == ['worktree', 'add']:
+                    work = Path(args[-2]); (work / LEDGER).parent.mkdir(parents=True)
+                    (work / LEDGER).write_text(json.dumps(ledger))
+                return ''
+            def fake_observe(work):
+                (work / LEDGER).write_text(json.dumps({**ledger, 'observed_at': '2026-10-02T00:00:00Z'}))
+                return '{"written":true}'
+            def fake_command(args, **kwargs):
+                calls.append(args)
+                if args[:4] == [GH, 'api', '--method', 'GET']:
+                    # gh api --paginate --slurp returns one JSON array per page.
+                    return json.dumps([listed] if pages is None else pages)
+                if args[:3] == [GH, 'pr', 'create']:
+                    return self.created
+                return '{}'
+            with patch.dict(globals(), {'CACHE': cache, 'git': fake_git, 'command': fake_command,
+                                         'observe': fake_observe}):
+                try:
+                    return run_once(), calls
+                except RuntimeError as error:
+                    return error, calls
+
+    def closed(self, calls):
+        return [args[4] for args in calls if args[:4] == [GH, 'api', '--method', 'PATCH']]
+
+    def created_pr(self, calls):
+        return [args for args in calls if args[:3] == [GH, 'pr', 'create']]
+
+    def reused(self, number):
+        return 'https://github.com/' + REPO + '/pull/' + str(number)
+
+    def test_listing_is_limited_to_this_repository_branch_and_reads_every_page(self):
+        result, calls = self.publish([])
+        listings = [args for args in calls if args[:4] == [GH, 'api', '--method', 'GET']]
+        self.assertEqual(len(listings), 2, 'Listed once to inspect and again right before creating')
+        for args in listings:
+            self.assertEqual(args, [GH, 'api', '--method', 'GET', 'repos/simplememofast/simplememo/pulls',
+                                    '-f', 'state=open', '-f', 'head=simplememofast:Codex/routine-observations',
+                                    '-f', 'per_page=100', '--paginate', '--slurp'])
+        self.assertEqual(result['pr'], self.created)
+
+    def test_fork_prs_with_the_same_branch_name_are_ignored(self):
+        forks = [self.pr(5, login='outsider', repo='outsider/simplememo'),
+                 self.pr(6, login='outsider', repo='outsider/simplememo', draft=True, sha='b' * 40),
+                 self.pr(7, login='outsider', repo=None), self.pr(8, repo='simplememofast/other'),
+                 self.pr(9, login='outsider', repo='outsider/simplememo', base='claude/x')]
+        for listed in [forks] + [[fork] for fork in forks]:
+            result, calls = self.publish(listed)
+            self.assertIsInstance(result, dict, listed)
+            self.assertEqual((result['state'], result['pr']), ('published', self.created))
+            self.assertEqual(self.closed(calls), [], 'A fork PR cannot block ours and is not ours to close')
+
+    def test_prs_others_open_from_this_branch_into_main_cannot_block_or_stand_in(self):
+        for pr in [self.pr(11, login='outsider'), self.pr(12, login='outsider', draft=True),
+                   self.pr(13, login='simplememofast-fake'), {**self.pr(14), 'user': None},
+                   self.pr(15, login='outsider', sha='b' * 40)]:
+            result, calls = self.publish([pr])
+            self.assertIsInstance(result, dict, pr)
+            self.assertEqual((result['state'], result['pr']), ('published', self.created))
+            self.assertEqual(self.closed(calls), ['repos/' + REPO + '/pulls/' + str(pr['number'])])
+            closing = calls.index([GH, 'api', '--method', 'PATCH', 'repos/' + REPO + '/pulls/' + str(pr['number']),
+                                   '-f', 'state=closed'])
+            self.assertLess(closing, calls.index(self.created_pr(calls)[0]))
+
+    def test_others_prs_into_other_bases_are_left_alone(self):
+        for listed in [[self.pr(21, login='outsider', base='claude/x')],
+                       [self.pr(21, login='outsider', base='claude/x'), self.pr(22, login='outsider', base='claude/y', draft=True)]]:
+            result, calls = self.publish(listed)
+            self.assertEqual((result['state'], result['pr']), ('published', self.created))
+            self.assertEqual(self.closed(calls), [])
+
+    def test_unexpected_pr_identity_is_not_closed(self):
+        for number in ['15', 0, -1, True, None]:
+            listed = [self.pr(16, login='outsider', base='claude/x'), {**self.pr(15, login='outsider'), 'number': number}]
+            result, calls = self.publish(listed)
+            self.assertIsInstance(result, RuntimeError)
+            self.assertEqual((self.closed(calls), self.created_pr(calls)), ([], []))
+
+    def test_unexpected_listing_stops_before_any_write(self):
+        for pages in [{}, [{}], [[1]], [[self.pr(30)], None], [['x']]]:
+            result, calls = self.publish(None, pages=pages)
+            self.assertIsInstance(result, RuntimeError, pages)
+            self.assertEqual((self.closed(calls), self.created_pr(calls)), ([], []))
+
+    def test_own_pr_into_any_base_is_still_reused_and_guarded(self):
+        others = [self.pr(31, login='outsider', base='claude/x'), self.pr(32, login='outsider', repo='outsider/simplememo')]
+        for base in ['main', 'claude/y']:
+            for listed in [[self.pr(30, base=base)], [self.pr(30, base=base)] + others]:
+                result, calls = self.publish(listed)
+                self.assertEqual((result['state'], result['pr']), ('published', self.reused(30)))
+                self.assertEqual((self.closed(calls), self.created_pr(calls)), ([], []))
+            for listed in [[self.pr(30, base=base, draft=True)], [self.pr(30, base=base), self.pr(33)],
+                           [self.pr(30, base=base), self.pr(33, base='claude/z')],
+                           [self.pr(30, base=base, sha='c' * 40)]]:
+                result, calls = self.publish(listed)
+                self.assertIsInstance(result, RuntimeError, listed)
+                self.assertEqual((self.closed(calls), self.created_pr(calls)), ([], []))
+            result, calls = self.publish([self.pr(30, base=base)], branch_paths=LEDGER + '\n.github/workflows/x.yml')
+            self.assertIsInstance(result, RuntimeError)
+            self.assertEqual((self.closed(calls), self.created_pr(calls)), ([], []))
+        # An outsider's PR into main does not stop or replace the owner's PR elsewhere.
+        result, calls = self.publish([self.pr(34, login='outsider'), self.pr(30, base='claude/y')])
+        self.assertEqual((result['state'], result['pr']), ('published', self.reused(30)))
+        self.assertEqual((self.closed(calls), self.created_pr(calls)), ([], []))
+
+    def crowd(self, count):
+        return [self.pr(100 + i, login='outsider', base='claude/b' + str(i)) for i in range(count)]
+
+    def stops_before_any_write(self, pages):
+        result, calls = self.publish(None, pages=pages)
+        self.assertIsInstance(result, RuntimeError, pages)
+        self.assertEqual(str(result), 'Observation PR needs operator attention')
+        self.assertEqual([args for args in calls if args[:2] in (['git', 'push'], ['git', 'worktree'])
+                          or args[:4] == [GH, 'api', '--method', 'PATCH'] or args[:3] == [GH, 'pr', 'create']], [])
+        self.assertEqual(len([args for args in calls if args[:4] == [GH, 'api', '--method', 'GET']]), 1)
+
+    def test_more_than_one_page_stops_before_any_write_with_own_pr_on_page_2(self):
+        # Pages can shift between requests, so a later page cannot be trusted to hold it.
+        for own in [self.pr(30, base='claude/y', draft=True), self.pr(30, base='claude/y'), self.pr(30)]:
+            self.stops_before_any_write([self.crowd(100), [own]])
+            self.stops_before_any_write([self.crowd(100), [self.pr(200, login='outsider'), own]])
+
+    def test_more_than_one_page_stops_before_any_write_without_own_pr(self):
+        # The shifted view of the case above: the owner's PR slid onto page 1 after it was read.
+        for pages in [[self.crowd(100), []], [self.crowd(100), [self.pr(200, login='outsider')]],
+                      [self.crowd(99), self.crowd(2)], [[], []]]:
+            self.stops_before_any_write(pages)
+
+    def test_only_one_page_short_of_full_is_decided(self):
+        for pages in [[], [self.crowd(100)], [self.crowd(99) + [self.pr(30, base='claude/y', draft=True)]]]:
+            self.stops_before_any_write(pages)
+        result, calls = self.publish(self.crowd(99))
+        self.assertEqual((result['state'], result['pr'], self.closed(calls)), ('published', self.created, []))
+        result, calls = self.publish(self.crowd(98) + [self.pr(30, base='claude/y')])
+        self.assertEqual((result['state'], result['pr']), ('published', self.reused(30)))
+        self.assertEqual((self.closed(calls), self.created_pr(calls)), ([], []))
 
 
 if __name__ == '__main__':
