@@ -1,7 +1,7 @@
 /**
  * Cron HealthのIssueを閉じる前に、記録した故障の復旧を確認する。
  * 24hの新規検知窓から消えたことは復旧ではない。
- * Issue本文・追記の失敗一覧にある同一リポジトリのrunだけを読み、
+ * Issue本文と、この監視自身（github-actions[bot]）の追記にある失敗一覧から同一リポジトリのrunだけを読み、
  * 対象workflowの最新run（run_number順）がcompleted/successなら閉じられる。
  * API失敗・不完全な一覧・対象不明は未確認。ここではIssueを書き換えない。
  */
@@ -12,6 +12,11 @@ import { SCHEDULE_EXPECTATIONS, silenceRefs, silenceMarker, selftest as silenceS
 
 const integer = x => Number.isSafeInteger(x) && x > 0;
 const unknown = why => ({ confirmed: false, why, evidence: [] });
+// 公開リポジトリのIssueには誰でも追記できる。追跡の記録（失敗run・起動欠落の隠しマーカー）として
+// 読むのは cron-health.yml が GITHUB_TOKEN で書いた追記だけ。`[bot]` 付きのloginはGitHub Appにしか
+// 取れないので第三者は名乗れない。他人の追記は、追跡対象にも「未確認」の理由にもしない。
+const MONITOR_LOGIN = 'github-actions[bot]';
+const monitorComment = c => c.user?.login === MONITOR_LOGIN && c.user.type === 'Bot';
 
 export function failureRefs(bodies, owner, repo) {
   const refs = new Set();
@@ -57,8 +62,11 @@ export async function confirmCronRecovery({ github, owner, repo, issue, now = Da
   try {
     const comments = await pages(p => github.rest.issues.listComments({ owner, repo, issue_number: issue.number, ...p }),
       data => data, { perPage, maxPages });
-    if (comments.some(c => typeof c?.body !== 'string')) return unknown('Issueの追記を読み取れない');
-    const bodies = [issue.body, ...comments.map(c => c.body)];
+    // 作者を読めない追記は、監視自身の記録を黙って捨てうるので未確認にする（null は削除済みの作者）。
+    if (comments.some(c => typeof c?.body !== 'string' || (c.user !== null && typeof c.user?.login !== 'string'))) {
+      return unknown('Issueの追記を読み取れない');
+    }
+    const bodies = [issue.body, ...comments.filter(monitorComment).map(c => c.body)];
     const refs = failureRefs(bodies, owner, repo);
     const silences = silenceRefs(bodies, owner, repo, now);
     if (!refs.length && !silences.length) return unknown('故障の参照が無い');
@@ -198,6 +206,9 @@ export async function selftest() {
     }
   }
   const line = id => `  - 2026/9/1 7:00:00 JST — https://github.com/o/r/actions/runs/${id}`;
+  const by = user => body => ({ body, user });
+  const monitor = by({ login: MONITOR_LOGIN, type: 'Bot' });
+  const outsider = by({ login: 'someone', type: 'User' });
   const run = (id, number, extra = {}) => ({ id, run_number: number, workflow_id: 10, event: 'schedule',
     created_at: '2026-09-01T00:00:00Z', status: 'completed', conclusion: 'failure', run_attempt: 1, ...extra });
   const failed = run(101, 1); const recovered = run(102, 2, { conclusion: 'success', created_at: '2026-09-02T00:00:00Z' });
@@ -242,15 +253,26 @@ export async function selftest() {
   await test({ body: '故障の参照不明' }, false, '追跡対象不明で閉じた');
   await test({ body: line(101).replace('/o/r/', '/other/r/') }, false, '別リポジトリの参照で閉じた');
   check(failureRefs([line(101), line(101), '_[cron-health.yml](https://github.com/o/r/actions/runs/999)_'], 'o', 'r').join(',') === '101', '重複または監視自身のURLを故障に数えた');
-  const paged = await test({ body: '', comments: [{ body: 'comment' }, { body: line(101) }], perPage: 1 }, true, '2ページ目の追記や実行を読めない');
+  const paged = await test({ body: '', comments: [monitor('comment'), monitor(line(101))], perPage: 1 }, true, '2ページ目の追記や実行を読めない');
   check(paged.reads.some(p => p.page === 2 && p.workflow_id === 10), '実行一覧の2ページ目を読まない');
   check(paged.reads.filter(p => p.workflow_id).every(p => !('status' in p)), '最新実行をstatusで絞り込んだ');
   await test({ perPage: 1, maxPages: 1 }, false, '実行一覧のページ上限を正常扱いした');
   await test({ original: { ...failed, conclusion: 'success', run_attempt: 2 },
     recent: [{ ...failed, conclusion: 'success', run_attempt: 2 }], perPage: 1, maxPages: 1 }, false, '成功が見えていても未完の一覧では閉じない');
-  await test({ comments: [{ body: line(101) }], perPage: 1, maxPages: 1 }, false, '追記のページ上限を正常扱いした');
+  await test({ comments: [monitor(line(101))], perPage: 1, maxPages: 1 }, false, '追記のページ上限を正常扱いした');
   await test({ comments: [{}] }, false, '不正な追記を無視して閉じた');
-  await test({ body: line(101), comments: [{ body: line(201) }], recent: [failed, recovered, run(201, 1, { workflow_id: 20 })] }, false, '追記で増えた別workflowの故障を忘れた');
+  await test({ comments: [{ body: line(101) }] }, false, '作者を読めない追記を無視して閉じた');
+  await test({ body: line(101), comments: [monitor(line(201))], recent: [failed, recovered, run(201, 1, { workflow_id: 20 })] }, false, '追記で増えた別workflowの故障を忘れた');
+  await test({ comments: [monitor('<!-- cron-silence {"owner":"x"} -->')] }, false, '監視自身の不正な起動欠落の記録を無視して閉じた');
+  // 第三者の追記（隠しHTMLコメントを含む）は、閉鎖を止める理由にも追跡対象にもならない。
+  await test({ comments: [outsider('+1\n<!-- cron-silence {"owner":"x"} -->')] }, true, '第三者の隠し起動欠落マーカーで閉鎖を止めた');
+  await test({ comments: [outsider(`+1\n<!--\n${line(201)}\n-->`)], recent: [failed, recovered, run(201, 1, { workflow_id: 20 })] },
+    true, '第三者の追記にある故障runを追跡した');
+  for (const user of [{ login: MONITOR_LOGIN, type: 'User' }, { login: 'github-actions', type: 'User' },
+    { login: 'github-actions', type: 'Bot' }, { login: 'other[bot]', type: 'Bot' }, null]) {
+    await test({ comments: [by(user)(`<!-- cron-silence {"owner":"x"} -->\n${line(201)}`)],
+      recent: [failed, recovered, run(201, 1, { workflow_id: 20 })] }, true, `監視以外の作者（${user?.login ?? 'null'}）の追記を記録として読んだ`);
+  }
   await test({ original: { ...failed, conclusion: 'success', run_attempt: 2 }, recent: [{ ...failed, conclusion: 'success', run_attempt: 2 }] }, true, '同じrunの成功した再試行を確認できない');
   await test({ original: { ...failed, conclusion: 'success', run_attempt: 2 },
     recent: [{ ...failed, conclusion: 'success', run_attempt: 2 }, run(103, 3)] }, false, '古い成功した再試行で新しい故障を隠した');
@@ -321,9 +343,9 @@ export async function selftest() {
   await test({ body: marker, recent: [{ ...resumed, event: 'workflow_dispatch' }] }, false, '手動実行で定期起動の欠落を閉じた');
   await test({ body: marker, recent: [{ ...resumed, status: 'queued', conclusion: null }] }, false, '起動再開だけで回復にした');
   await test({ body: marker, recent: [resumed, run(105, 5)] }, false, '再開後の最新失敗を無視した');
-  await test({ body: line(101), comments: [{ body: marker }], recent: [failed, recovered] }, false, '追記の起動欠落を無視した');
-  await test({ body: line(101), comments: [{ body: marker }], recent: [failed, recovered, resumed] }, true, '既存故障と起動欠落の両方の回復を確認できない');
-  await test({ body: marker, comments: [{ body: marker.replace(silentAt, '2026-09-03T12:00:00Z') }], recent: [resumed] }, false, '新しい起動欠落を古い成功で閉じた');
+  await test({ body: line(101), comments: [monitor(marker)], recent: [failed, recovered] }, false, '追記の起動欠落を無視した');
+  await test({ body: line(101), comments: [monitor(marker)], recent: [failed, recovered, resumed] }, true, '既存故障と起動欠落の両方の回復を確認できない');
+  await test({ body: marker, comments: [monitor(marker.replace(silentAt, '2026-09-03T12:00:00Z'))], recent: [resumed] }, false, '新しい起動欠落を古い成功で閉じた');
   const wrongBinding = fixture({ body: marker, recent: [resumed] });
   wrongBinding.github.rest.actions.getWorkflow = async () => ({ data: { id: 999, path: '.github/workflows/decision-monitor.yml', state: 'active' } });
   check(!(await confirmCronRecovery(wrongBinding.args)).confirmed, '異なるworkflowの起動を回復にした');
@@ -351,6 +373,8 @@ export async function selftest() {
   }
   const source = workflow.split('          script: |\n')[1]?.split('\n').map(s => s.replace(/^            /, '')).join('\n');
   check(Boolean(source?.includes('confirmCronRecovery')), 'workflowから復旧確認が切断されている');
+  // MONITOR_LOGIN は github-script の既定トークン（GITHUB_TOKEN）の名義。差し替えると監視自身の追記を読まなくなる。
+  check(!/^\s*github-token:/m.test(workflow), 'cron-health.ymlのトークンを差し替えた（追記の作者がMONITOR_LOGINと一致しない）');
   if (source) {
     const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
     const execute = new AsyncFunction('github', 'core', 'context', 'process', 'Date', source);
@@ -398,6 +422,9 @@ export async function selftest() {
     const successful = await workflowCase({});
     check(!successful.error && successful.writes.filter(w => w.kind === 'update' && w.state === 'closed').length === 1
       && successful.writes.some(w => w.body?.includes('/actions/runs/102 (completed/success)')), '実workflowが成功の証拠と閉鎖を接続していない');
+    const outsiderMarker = await workflowCase({ comments: [outsider('+1\n<!-- cron-silence {"owner":"x"} -->')] }, { eventName: 'workflow_run' });
+    check(!outsiderMarker.error && outsiderMarker.writes.some(w => w.kind === 'update' && w.state === 'closed'),
+      '実workflowが第三者の隠しコメントで回復済みのIssueを閉じない');
     const unavailable = await workflowCase({ failRead: 'comments' });
     check(!unavailable.error && !unavailable.writes.some(w => w.kind === 'update'), '実workflowが取得失敗で閉じた');
     const healthy = await workflowCase({}, { open: false });
@@ -433,7 +460,7 @@ export async function selftest() {
     for (const options of [{ recent: [failed] }, { failRead: 'comments' },
       { recent: [failed, recovered, run(103, 3, { status: 'in_progress', conclusion: null })] },
       ...[2, null, undefined].map(run_attempt => ({ recent: [failed, { ...recovered, run_attempt }] })),
-      { comments: [{ body: line(201) }], recent: [failed, recovered, run(201, 1, { workflow_id: 20 }),
+      { comments: [monitor(line(201))], recent: [failed, recovered, run(201, 1, { workflow_id: 20 }),
         run(202, 2, { workflow_id: 20, conclusion: 'success', run_attempt: 2 })] }]) {
       const result = await workflowCase(options, { eventName: 'workflow_run' });
       check(!result.error && result.writes.length === 0, '起動を根拠に失敗・読取不能・新しい未終了実行を無視して閉じた');
