@@ -153,6 +153,29 @@ export function resumeRecovery(previous, pr, { contractId, targetSha }) {
   return { ...record, revert_pr: pr.number };
 }
 
+// The account that opens this monitor's revert PRs: decision-monitor.yml runs
+// --apply only with GH_PAT (never GITHUB_TOKEN, so never github-actions[bot]),
+// and auto-merge.yml, the only automated merge, merges only PRs this account
+// opened. A revert PR from any other opener could never complete the rollback.
+const RECOVERY_OPENER = 'simplememofast';
+
+// A fork can open a PR from a branch with the recovery branch's exact name, and
+// `gh pr list --head` matches that name alone and returns only its newest 30.
+// Anyone can also open a PR from this repository's own branch, into any base.
+// The checkpoint is trusted only from this repository's branch, into main, in a
+// PR the monitor's account opened: the lookup is scoped to this owner's branch
+// by GitHub, and every other PR it returns is ignored, never read as a checkpoint.
+export function recoveryPullRequest(branch, request = api) {
+  const owner = REPO.split('/')[0];
+  const listed = request(`pulls?state=all&head=${encodeURIComponent(`${owner}:${branch}`)}&per_page=100`);
+  assert(Array.isArray(listed) && listed.length < 100, 'recovery PR inventory is incomplete');
+  const pr = listed.find(p => p?.head?.ref === branch && p.head.repo?.full_name === REPO
+    && p.base?.ref === 'main' && p.user?.login === RECOVERY_OPENER);
+  if (!pr) return undefined;
+  assert(['open', 'closed'].includes(pr.state), 'recovery PR state unknown');
+  return { number: pr.number, body: pr.body, state: pr.state === 'open' ? 'OPEN' : pr.merged_at ? 'MERGED' : 'CLOSED' };
+}
+
 export function verifyRollback(incident, revertHead, paths, cwd = ROOT) {
   const command = (...args) => execFileSync('git', args, { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }).trim();
   assert(shaOK(incident.execution_head) && shaOK(incident.target_sha) && shaOK(revertHead), 'rollback commits required');
@@ -393,7 +416,7 @@ async function main() {
     // the separate ledger PR could be saved, recover that checkpoint first,
     // even when the rollback has already merged and probes are healthy again.
     if (incident?.state === 'observing' && !incident.revert_pr) {
-      const existing = gh('pr', 'list', '--repo', REPO, '--head', recoveryBranch, '--state', 'all', '--json', 'number,state,body')[0];
+      const existing = recoveryPullRequest(recoveryBranch);
       if (existing) {
         Object.assign(incident, resumeRecovery(incident, existing, { contractId: c.id, targetSha: merge }));
         Object.assign(incident, recoveryAttribution(incident, origin));
@@ -664,6 +687,42 @@ function selftest() {
     { confirmed_at: observed.detected_at }, { before: { failed: true, probes: [{ path: 'other.html', known: true, healthy: false }] } }]) {
     assert.throws(() => resumeRecovery(observed, { ...recoveryPR, body: recoveryCheckpoint(observed, { ...pending, ...change }) }, binding));
   }
+  // The body above is public-ledger data anyone can recompute, so where the PR
+  // comes from and who opened it decide trust. Only the monitor's own recovery
+  // PR, from this repository's branch into main, is read.
+  const revertBranch = `Codex/decision-revert-${p.mergeSha.slice(0, 12)}`;
+  const listedPR = (number, repo, change = {}) => ({ number, state: 'closed', merged_at: '2026-09-04T01:10:00Z', body: checkpoint,
+    user: { login: 'simplememofast' }, base: { ref: 'main' }, head: { ref: revertBranch, repo: repo && { full_name: repo } }, ...change });
+  const lookup = rows => route => {
+    const url = new URL(route, 'https://api.github.test/');
+    assert.equal(url.pathname, '/pulls');
+    assert.deepEqual(Object.fromEntries(url.searchParams), { state: 'all', head: `simplememofast:${revertBranch}`, per_page: '100' });
+    return rows;
+  };
+  const forkPRs = Array.from({ length: 40 }, (_, i) => listedPR(500 + i, 'attacker/simplememo', { state: 'open', merged_at: null }));
+  assert.equal(recoveryPullRequest(revertBranch, lookup([...forkPRs, listedPR(499, null)])), undefined, 'a fork PR is never the recovery PR');
+  assert.deepEqual(recoveryPullRequest(revertBranch, lookup([...forkPRs, listedPR(123, REPO)])), { number: 123, state: 'MERGED', body: checkpoint });
+  assert.deepEqual(resumeRecovery(structuredClone(observed), recoveryPullRequest(revertBranch, lookup([listedPR(123, REPO)])), binding),
+    { ...pending, revert_pr: 123 });
+  // A PR from this repository's own branch that the monitor did not open, or
+  // that targets another base, is ignored the same way: it can neither stand in
+  // for the recovery PR nor, once closed, make the monitor halt as if an
+  // operator had closed the real one.
+  const foreignOpen = [listedPR(130, REPO, { state: 'open', merged_at: null, user: { login: 'attacker' } }),
+    listedPR(129, REPO, { user: { login: 'github-actions[bot]' } }), listedPR(128, REPO, { user: null }),
+    listedPR(127, REPO, { base: { ref: 'claude/other' } }), listedPR(126, REPO, { base: null })];
+  assert.equal(recoveryPullRequest(revertBranch, lookup(foreignOpen)), undefined, 'only a PR the monitor account opened into main is the recovery PR');
+  assert.deepEqual(recoveryPullRequest(revertBranch, lookup([...foreignOpen, listedPR(123, REPO)])), { number: 123, state: 'MERGED', body: checkpoint });
+  const foreignClosed = listedPR(131, REPO, { merged_at: null, user: { login: 'attacker' } });
+  assert.deepEqual(resumeRecovery(structuredClone(observed), recoveryPullRequest(revertBranch, lookup([foreignClosed, listedPR(123, REPO)])), binding),
+    { ...pending, revert_pr: 123 }, 'a closed foreign PR cannot halt recovery');
+  assert.equal(recoveryPullRequest(revertBranch, lookup([listedPR(124, REPO, { state: 'open', merged_at: null }), listedPR(123, REPO)])).number, 124, 'newest own PR first, as before');
+  assert.equal(recoveryPullRequest(revertBranch, lookup([listedPR(123, REPO, { state: 'open', merged_at: null })])).state, 'OPEN');
+  assert.throws(() => resumeRecovery(observed, recoveryPullRequest(revertBranch, lookup([listedPR(123, REPO, { merged_at: null })])), binding), /closed by an operator/);
+  assert.equal(recoveryPullRequest(revertBranch, lookup([listedPR(123, REPO, { head: { ref: 'Codex/other', repo: { full_name: REPO } } })])), undefined);
+  assert.equal(recoveryPullRequest(revertBranch, lookup([])), undefined);
+  for (const rows of [null, {}, Array(100).fill(listedPR(123, REPO))]) assert.throws(() => recoveryPullRequest(revertBranch, lookup(rows)), /recovery PR inventory/);
+  assert.throws(() => recoveryPullRequest(revertBranch, lookup([listedPR(123, REPO, { state: undefined })])), /state unknown/);
   const humanObservation = { ...observed, trigger: 'workflow_dispatch', human_interventions: 1 };
   const humanPending = pendingRecovery(humanObservation, { head: p.headSha, probes: p.probes, now: p.now, trigger: 'schedule' });
   assert.equal(humanPending.human_interventions, 1);
