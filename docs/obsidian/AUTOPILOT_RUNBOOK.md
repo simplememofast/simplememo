@@ -464,16 +464,20 @@ node scripts/autopilot-selfheal.mjs   # 未修理の故障があればレーンF
 
 **① BigQuery一括エクスポート（一次・自動）**
 
-主系（Actions）ではモデル起動前の `scripts/autopilot-data.mjs` が既存の資格情報で
+主系（Actions）ではモデルを動かさない collect ジョブが `scripts/autopilot-data.mjs --digest` で
 取得・鮮度・欠損を検査する。`AUTOPILOT_DATA_REPORT` が設定されていれば、まず
 そのJSONを読む。`bq_checked`・`newest_data_date`・`observed_days` を今回の実測として
 statusへ記録する。`partial` は取得成功だが28日未満なので、28日窓との比較に使わない。
 `ready` のときは `GROWTH_GSC_DIR` に検査済みの一時スナップショットが設定済みで、
 `growth/scripts/analyze.mjs` などはそのまま最新データを読む。再認証や再取得は不要。
+**当日分の検索語はダイジェスト**（2026-10-20・監査 F6）: NFKC・制御文字の除去・80字まで・
+URL/メール/コード/タグを含む行は除外・期待クリック3以上の上位だけ・各行に `untrusted: true`。
+クラスタ・会話型・カニバリの表は残った行だけを数えるので、全行のクラスタ集計と除外の件数は
+当日の `meta.json` の `digest` を見る。
 一時スナップショットを公開リポジトリへコピー・コミットしない。
-`unavailable` は取得失敗であり、データなし・0件ではない。失敗段階を記録し、
-既存の手動スナップショットか独立したレーンの根拠を使う。
-資格情報は取得ステップ内だけにあり、モデルへは渡さない。
+`unavailable` は取得失敗（ダイジェストが届かない・検査に通らない日を含む）であり、データなし・0件ではない。
+失敗段階を記録し、既存の手動スナップショットか独立したレーンの根拠を使う。
+GCP の資格情報は collect ジョブの取得の段だけにあり、モデルのジョブには無い。
 
 `AUTOPILOT_DATA_REPORT` が無い副系・ローカル経路では、従来どおり以下で取得する。
 

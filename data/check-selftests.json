@@ -276,8 +276,8 @@
     {
       "script": "scripts/autopilot-data.mjs",
       "state": "demonstrated",
-      "at": "2026-09-05",
-      "broke": "実際のワークフローからGCP資格情報の接続を外す変異で --check が非0終了。欠損日・重複日・古い/未来の観測・別プロパティ・取得失敗・タイムアウト・秘密情報混入を自己テストで拒否。取得失敗時は0件や取得成功にしない。"
+      "at": "2026-10-20",
+      "broke": "実際のワークフローからGCP資格情報の接続を外す変異で --check が非0終了。欠損日・重複日・古い/未来の観測・別プロパティ・取得失敗・タイムアウト・秘密情報混入を自己テストで拒否。取得失敗時は0件や取得成功にしない。\n2026-10-20（監査 F6・collect ジョブとダイジェスト）: 隔離した写しで壊し、--selftest か --check が非0終了することを観測した9通り —— (1) URL の規則を外す (2) ノイズフロア（期待クリック3）を外す (3) モデル側の当て直し（行ごとの一致）を外す (4) untrusted の印を外す (5) 80字の上限を200字にする (6) 不可視文字を残す (7) 生のスナップショットを消さない (8) 実際の obsidian-autopilot.yml でモデルのジョブに GCP の鍵を足す（--check） (9) モデルのジョブの needs: collect を外す（--check）。元の実装は全件成功。自己テストは敵対的な検索語（全角URL・メール・コード・タグ・制御文字・81字）を含む検体で、成果物のディレクトリに生の検索語が出ないこと、改変したダイジェスト（行の追加・制御文字・印の削除・規則の変更・余分なファイル・symlink・報告の改変）をモデルのジョブが unavailable にすること、growth/scripts/analyze.mjs がダイジェストをそのまま読めることを確かめる。実データ（growth/data/gsc の28日窓5本）でダイジェストが不動点になることは手元で確認した（CIの検体には使わない）。"
     },
     {
       "script": "scripts/autopilot-diagnostics.mjs",
@@ -301,7 +301,7 @@
       "script": "scripts/autopilot-publish.mjs",
       "state": "demonstrated",
       "at": "2026-10-20",
-      "broke": "隔離した写しで6通り壊し、node --test scripts/autopilot-publish.test.mjs（本物のgit・ローカルのbareリポジトリ・通信なし）か --selftest が落ちることを実測。(1) コミット名義の照合を外す → 未承認の著者・共著者・committer を拒否する検体が落ちる。(2) .github を拒否リストから外す → ワークフロー追加と「足して消した」コミットの検体が落ちる。(3) push に --force を足す → 非fast-forwardの更新を拒否する検体が落ちる。(4) publish段の名前とActの読む語の衝突検査を外す → --selftest の改名変異が落ちる。(5) 記帳時の scripts/ の差し替えで先に消すのをやめる → 仕込んだ scripts/json.py が信頼側の実行中に残り記帳の検体が落ちる。(6) 緊急停止の再確認を外す → 停止中に公開する検体が落ちる。元実装は全件成功。--check は実際の obsidian-autopilot.yml を読み、モデルのジョブに GH_PAT・書き込み権限・id-token が無いこと、publish が $GITHUB_SHA の道具だけを実行すること、GH_PAT が3段にしか無いことを確かめる。翻訳・sitemap の再生成（実スクリプト）は単体テストでは置き換えており、本番の1回で確認する。"
+      "broke": "隔離した写しで6通り壊し、node --test scripts/autopilot-publish.test.mjs（本物のgit・ローカルのbareリポジトリ・通信なし）か --selftest が落ちることを実測。(1) コミット名義の照合を外す → 未承認の著者・共著者・committer を拒否する検体が落ちる。(2) .github を拒否リストから外す → ワークフロー追加と「足して消した」コミットの検体が落ちる。(3) push に --force を足す → 非fast-forwardの更新を拒否する検体が落ちる。(4) publish段の名前とActの読む語の衝突検査を外す → --selftest の改名変異が落ちる。(5) 記帳時の scripts/ の差し替えで先に消すのをやめる → 仕込んだ scripts/json.py が信頼側の実行中に残り記帳の検体が落ちる。(6) 緊急停止の再確認を外す → 停止中に公開する検体が落ちる。元実装は全件成功。--check は実際の obsidian-autopilot.yml を読み、モデルのジョブに GH_PAT・書き込み権限・id-token が無いこと、publish が $GITHUB_SHA の道具だけを実行すること、GH_PAT が3段にしか無いことを確かめる。翻訳・sitemap の再生成（実スクリプト）は単体テストでは置き換えており、本番の1回で確認する。\n2026-10-20（監査 F6・collect ジョブ）: collect の段名と Act の読む語の衝突検査を外す変異で --selftest が非0終了。実際の obsidian-autopilot.yml でモデルのジョブに GCP の鍵を足す・collect の段名を「緊急停止の確認」にする変異で --check が非0終了。"
     },
     {
       "script": "scripts/autopilot-runs.mjs",
@@ -313,7 +313,7 @@
       "script": "scripts/autopilot-selfheal.mjs",
       "state": "demonstrated",
       "at": "2026-09-05",
-      "broke": "repair_of が存在しない故障を指す 1通りで落ちることを観測\n2026-09-05: 原因未確定の失敗を証拠付きの調査待ちとして許す経路を追加。旧来の一律拒否へ戻す・検知証拠を要求しない・未分類を未修理一覧から隠す3変異で自己検査が失敗。隔離した実Gitのappend CLIで記録した同一検体は修正前check=1、修正後check=0。元の失敗・調査待ち・unknown修理上限3回を保持。検体を本番台帳へ書いていない。"
+      "broke": "repair_of が存在しない故障を指す 1通りで落ちることを観測\n2026-09-05: 原因未確定の失敗を証拠付きの調査待ちとして許す経路を追加。旧来の一律拒否へ戻す・検知証拠を要求しない・未分類を未修理一覧から隠す3変異で自己検査が失敗。隔離した実Gitのappend CLIで記録した同一検体は修正前check=1、修正後check=0。元の失敗・調査待ち・unknown修理上限3回を保持。検体を本番台帳へ書いていない。\n2026-10-20（監査 F6・collect ジョブ）: collect ジョブの封じ込めの確認（試運転の値を受け、id: contain を使わない）を検める assert を外す変異で、試運転の配線の自己検査が「変数の外れた封じ込め を通した」で失敗することを観測。"
     },
     {
       "script": "scripts/build_site_translations.py",

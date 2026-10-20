@@ -25,7 +25,7 @@
         "記事に引用するときは一次情報のURLを併記し、**取得日を書く**",
         "**Actions主系（obsidian-autopilot.yml）では、読んだセッションに書き込みの資格情報が無い**（2026-10-20）。GH_PAT・書き込み可能なトークン・id-token をモデルのジョブ全体から外し、checkout も資格情報を残さない。push・PR作成・記帳は、モデルを動かさない publish ジョブが $GITHUB_SHA の scripts/autopilot-publish.mjs で引き渡しを検証してから行う（.github/**・秘密ファイル・symlink/gitlink・巨大ファイル・未承認の名義を拒否、force push なし）。配線は node scripts/autopilot-publish.mjs --check がCIで固定する"
       ],
-      "residual_risk": "**セッションの判断そのものは汚染されうる。**『この手順に従え』と書かれたページを読んだときに従わない保証は、モデルの側にしか無い。Actions主系でも、汚染されたセッションが書いたページ・スクリプトの変更やPR本文は publish の拒否リストに当たらない限り公開され、SEO Validation が通れば auto-merge される（人の承認を挟む変更は後続）。モデルのランナーには CLAUDE_CODE_OAUTH_TOKEN と GCP の鍵が残る。Mac Codex 経路はこの分離の対象外"
+      "residual_risk": "**セッションの判断そのものは汚染されうる。**『この手順に従え』と書かれたページを読んだときに従わない保証は、モデルの側にしか無い。Actions主系でも、汚染されたセッションが書いたページ・スクリプトの変更やPR本文は publish の拒否リストに当たらない限り公開され、SEO Validation が通れば auto-merge される（人の承認を挟む変更は後続）。モデルのランナーには CLAUDE_CODE_OAUTH_TOKEN が残る（GCP の鍵は 2026-10-20 にモデルを動かさない collect ジョブへ移した）。Mac Codex 経路はこの分離の対象外"
     },
     {
       "id": "github-issue-comment",
@@ -43,10 +43,10 @@
       "what": "Google Search Console / BigQuery のクエリ文字列",
       "trust": "partial",
       "mitigations": [
-        "検索クエリは**データとして集計するだけ**で、プロンプトへ素通しにしない",
+        "**Actions主系（obsidian-autopilot.yml）では、モデルのジョブに生の検索語も GCP の鍵も無い**（2026-10-20・監査 F6）。取得はモデルを動かさない collect ジョブ（$GITHUB_SHA の scripts/autopilot-data.mjs --digest）が行い、モデルへは当日分のダイジェストだけを渡す: NFKC・制御/不可視文字の除去・80字まで・URL/メール/コード/タグを含む行は除外・期待クリック3以上の上位だけ（検索語200行・検索語×ページ400行まで）・各行に untrusted: true。モデルのジョブはモデルより前に同じ規則を当て直し、何も変わらないときだけ GROWTH_GSC_DIR に置く。配線は node scripts/autopilot-data.mjs --check がCIで固定する",
         "重複・欠損は check-data-quality.mjs が見る"
       ],
-      "residual_risk": "クエリ文字列を記事の見出しに使う経路では、**第三者が検索して作った語**が入りうる"
+      "residual_risk": "クエリ文字列を記事の見出しに使う経路では、**第三者が検索して作った語**が入りうる。ダイジェストの規則は形だけを見るので、80字以内でURLもコードも含まない自然文の指示は通る（ノイズフロアは表示を集めれば越えられる）。コミット済みのスナップショット growth/data/gsc/ は生の検索語のままで、どのセッションも読める。当日のダイジェストは1日だけ公開の成果物になる。Mac Codex・CCR 経路はこの分離の対象外"
     },
     {
       "id": "asc-reports",
