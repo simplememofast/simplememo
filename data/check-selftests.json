@@ -702,8 +702,8 @@
     {
       "script": "scripts/decision-monitor-local.py",
       "state": "demonstrated",
-      "at": "2026-09-05",
-      "broke": "隔離コピーでlive handle無視、実行入口のadmission切断、緊急停止無視、native起動フラグ欠落、job全件照合削除、receipt checksum照合削除の6変異が自己検査を非0終了させた。入口切断は停止中に先の処理へ到達したことを検出。既知の実行中runは古くても待ち、実monitor stepの完了時刻を使い、観測不能時は実行しない。検体の実行・手動probeを無人実績として加点しない。"
+      "at": "2026-10-20",
+      "broke": "[2026-10-20 退役・墓標化（F7）] 旧ランナー（2026-09-05 の6変異）は退役したので、墓標の自己検査に対して取り直した。隔離コピーで10変異を実行し、10本すべてが --selftest を exit 1 にした（無変更のコピーは exit 0）: ①`import subprocess` を戻す（構造検査）②--install を exit 0 にする（拒否検査）③--install が組み込み open でファイルを書く ④--install が pathlib でファイルを書く（③④は副作用検査。import の禁止に掛からない書き方も実行時に止まり、ファイルは作られなかった）⑤gh の credential helper の文字列を足す ⑥launchctl の文字列を足す（⑤⑥は構造検査）⑦--uninstall フラグを足す（引数検査）⑧--once が子プロセスを起動し `except Exception` で握りつぶす（BaseException の検出で実行時に落ち、`__import__` で構造検査も落ちる）⑨構造検査の走査を常に空を返す形にする（検出器の自己検査で落ちる）⑩テストクラスを TestCase でなくして0件にする（「0件で OK」を成功と呼ばない件数下限で落ちる）。"
     },
     {
       "script": "scripts/decision-monitor.mjs",

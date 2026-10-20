@@ -100,7 +100,7 @@
 | # | 前回の記述 | 実際【確定】 | この版での扱い |
 |---|---|---|---|
 | 1 | L4 は人間。お金の境界は渡さない | 09-05〜13 に包括委任が重なり、AI が月次予算・全社予算・EP 判定・推論の置き場所・NSM 定義・App Review 提出を決めて実行した | **L4 の担い手が変わることをモデル化する**（RL12・L4-31） |
-| 2 | 主系は GitHub Actions 上の Claude。単一障害点は週次枠 | 09-07 に主系は Mac 上の Codex へ移った（#1055）。Monitor には 09-06 に Mac の launchd タイマーが補完として加わった（#971。GitHub の定時起動も維持）。**Mac 1台・Codex 利用枠・観測できない実費**が新しい単一障害点になった | Ph2（B-01〜B-04） |
+| 2 | 主系は GitHub Actions 上の Claude。単一障害点は週次枠 | 09-07 に主系は Mac 上の Codex へ移った（#1055）。Monitor には 09-06 に Mac の launchd タイマーが補完として加わった（#971。GitHub の定時起動も維持）。**Mac 1台・Codex 利用枠・観測できない実費**が新しい単一障害点になった。[2026-10-20] Monitor の launchd タイマーは退役（F7）。Mac 側に残る定時処理は routine-observer と Codex 予約。 | Ph2（B-01〜B-04） |
 | 3 | UMR は基盤修理を潰せば 21〜23 | 介入の主因はオーナーが起動したセッション（窓内出荷の52%。10件は依頼の記録つき） | 自律と依頼の2列（M-05）。**依頼を控えさせない**（RL29） |
 | 4 | 門は fail-closed で、壊れていない | **門を重ねると出荷が細る。**原因の違う no_artifact を3回修理したあと（成果物照合のバグ #1051・Obsidian.app 不在 #1237・計測の排他 #1470）、計測の排他の正しい拒否（09-20）を4回目と数えて封じ込め → 主系が 09-21〜24 に停止 | 門ごとの通過率（B-13）。門を緩めるのは AI ではない |
 | 5 | 週5.7出荷がすべて契約を持つ | 決済済み 8/21 | S\* の漏斗で段ごとに見る（§2-3） |
@@ -527,7 +527,7 @@ v1 の式には「高さ」の項が無い。L3 が永久に発火しなくて�
 
 | ID | 単一障害点・盲点 | 手当て | 担い手 |
 |---|---|---|---|
-| B-01 | **Mac 1台**（Codex `obsidian` 06:00 JST、Monitor の launchd）。09-17 の Codex 回は台帳に行が無い。09-08 の枠切れは検知まで 122.7h | Mac 側の仕事が 07:00 JST までに heartbeat を残す。欠けていれば GH 側の health が警報を出し、GH 副系がその日を引き取る（T-14 が前提）。**GH を「冗長系」として使うか「予備の入口」に留めるかは Company OS の定め（`AUTOMATION_CONSOLIDATION.md`：「GitHub dispatch is a fallback entry, not a second daily agent」）と衝突するので L4-33** | AI（PR） |
+| B-01 | **Mac 1台**（Codex `obsidian` 06:00 JST、Monitor の launchd）。09-17 の Codex 回は台帳に行が無い。09-08 の枠切れは検知まで 122.7h。[2026-10-20] Monitor の launchd タイマーは退役（F7）。Mac 側に残る定時処理は routine-observer と Codex 予約。 | Mac 側の仕事が 07:00 JST までに heartbeat を残す。欠けていれば GH 側の health が警報を出し、GH 副系がその日を引き取る（T-14 が前提）。**GH を「冗長系」として使うか「予備の入口」に留めるかは Company OS の定め（`AUTOMATION_CONSOLIDATION.md`：「GitHub dispatch is a fallback entry, not a second daily agent」）と衝突するので L4-33** | AI（PR） |
 | B-02 | **Codex の利用枠**（定期着手10回のうち4回が枠切れ。3回は当日最初の 06:00 スロット、1回（09-08）は 06:00 の回が走った後の 09:20 補完スロット） | ①着手の前に枠を確かめる（確かめられないなら着手を遅らせる）②枠で落ちたら当日ブランチの claim を解放し、GH 副系（Claude）が同じ朝に着手する。**RA のために利用枠切れへ repair_of を書かない**（RL18）。重い対話作業の時間帯を分けるかは L4-32 | AI／L4-32 |
 | B-03 | GitHub cron の遅延（1h41m〜2h27m、5回の観測） | health の判定窓と claim の期限を実測の遅延に合わせる | AI |
 | B-04 | **公開キューが1本**（#1430・#1548 で2回閉塞）。`/autopilot/` の書き手が少なくとも4つ（Monitor・アクチュエータ・運転 run 自身（Runbook の記帳手順の `--publish-report`）・人の束） | 書き手を1つ（Monitor）にする。T-18 を恒常化する | AI |
