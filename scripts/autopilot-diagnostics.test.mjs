@@ -4,7 +4,7 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { modelSummary, receipt, save, checkWiring, EXIT_CODES, AUDIT_VERDICTS } from './autopilot-diagnostics.mjs';
+import { modelSummary, receipt, save, checkWiring, summarize, fromSummary, EXIT_CODES, AUDIT_VERDICTS } from './autopilot-diagnostics.mjs';
 import { VERDICTS } from './autopilot-audit.mjs';
 import { interpretRun } from './autopilot-act.mjs';
 
@@ -67,8 +67,10 @@ export async function selftest() {
   const workflow = fs.readFileSync(path.join(root, '.github/workflows/obsidian-autopilot.yml'), 'utf8');
   test('workflow keeps both failure paths, trusted source, bounded upload and privacy', () => checkWiring(workflow));
   for (const [from, to] of [
-    ["steps.claude.outcome == 'success' || steps.claude.outcome == 'failure'", "steps.claude.outcome == 'success'"],
+    ["needs.autopilot.outputs.model_outcome == 'success' || needs.autopilot.outputs.model_outcome == 'failure'", "needs.autopilot.outputs.model_outcome == 'success'"],
     ['diagnostic-tools" "$GITHUB_SHA"', 'diagnostic-tools" "HEAD"'],
+    ['autopilot-diagnostics.mjs" --summarize', 'autopilot-diagnostics.mjs" --save'],
+    ['EXEC_SUMMARY: ${{ needs.autopilot.outputs.exec_summary }}', 'EXEC_FILE: ${{ needs.autopilot.outputs.exec_summary }}'],
     ['path: ${{ runner.temp }}/autopilot-diagnostic', 'path: ${{ runner.temp }}'],
     ["steps.diagnostics.outputs.saved == 'true'", 'true'],
     ["steps.diagnostics.outputs.saved == 'true'\n        continue-on-error: true", "steps.diagnostics.outputs.saved == 'true'"],
@@ -190,6 +192,28 @@ export async function selftest() {
       assert.notEqual(withoutOther, workflow, 'fixture removes the "other" choice');
       assert.throws(() => checkWiring(withoutOther), /exit code other/);
       assert.throws(() => checkWiring(workflow.replace('"$RUNNER_TEMP/autopilot-exit.json"', '"/tmp/x.json"')), /exit code file/);
+    });
+    test('the publish job receipt from the model job summary equals the direct receipt', () => {
+      fs.writeFileSync(execution, JSON.stringify([raw]));
+      fs.writeFileSync(path.join(temp, 'autopilot-exit.json'), JSON.stringify({ code: 'shipped_pr' }));
+      const direct = save(output, args); clean();
+      const text = JSON.stringify(summarize(args));
+      assert(!text.includes(secret));
+      const viaSummary = save(output, { ...env, RUNNER_TEMP: temp, EXEC_SUMMARY: text }); clean();
+      assert.deepEqual(viaSummary, direct);
+      fs.unlinkSync(path.join(temp, 'autopilot-exit.json'));
+    });
+    test('a forged or broken summary becomes explicit unknowns, never raw text', () => {
+      const forged = JSON.stringify({ result_subtype: secret, is_error: secret, num_turns: -1, permission_denials_count: '3',
+        denied_tool_counts: { [secret]: 1 }, model_exit_code: secret, execution_file_sha256: secret, read_reason: secret, exit_reason: secret });
+      const r = save(output, { ...env, RUNNER_TEMP: temp, EXEC_SUMMARY: forged }); clean();
+      assert(!JSON.stringify(r).includes(secret));
+      assert.equal(r.num_turns, null); assert.equal(r.model_exit_code, null); assert.equal(r.denied_tool_counts, null);
+      for (const broken of ['', 'not json', '[]', 'x'.repeat(5000)]) {
+        const b = save(output, { ...env, RUNNER_TEMP: temp, EXEC_SUMMARY: broken }); clean();
+        assert(b.observations_unknown.includes('execution_summary_unavailable'));
+        assert.equal(fromSummary(broken).model.num_turns, null);
+      }
     });
     test('checkpoint capture failure is preserved independently of model success', () => {
       const r = receipt({ ...env, CHECKPOINT_OUTCOME: 'failure', CHECKPOINT_SAVED: 'false', CHECKPOINT_REASON: 'capture_failed', DECLARED_PAGE_CHANGE_COUNT: '' }, raw);

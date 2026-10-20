@@ -861,6 +861,42 @@
       "expr": "ancestor.error",
       "disposition": "安全側へ倒れる",
       "note": "2026-10-13: #2062 のマージが HEAD の祖先にあるかの判定。git を起動できない・終了コードが 0 以外・履歴が浅い のどれでも preventionMerged は false になり、許可は prevention_missing で拒否される。照合相手（git の結果）が無いときに許可側へ倒れることは無い。"
+    },
+    {
+      "file": "scripts/autopilot-publish.mjs",
+      "expr": "run.lane",
+      "disposition": "任意項目",
+      "note": "2026-10-20: PR依頼（モデルが書く信用しない入力）の任意欄。欄が無いときは台帳の行にも書かない（推測で埋めない）。欄があるときだけ形を検査し、外れたら公開しない。行そのものは記帳時に autopilot-runs.mjs の validate() を通り、shipped の pr・失敗時の failure_reason など必須の規則はそちらが落とす。scripts/autopilot-publish.test.mjs の request schema で固定。"
+    },
+    {
+      "file": "scripts/autopilot-publish.mjs",
+      "expr": "run.action",
+      "disposition": "任意項目",
+      "note": "2026-10-20: PR依頼（モデルが書く信用しない入力）の任意欄。欄が無いときは台帳の行にも書かない（推測で埋めない）。欄があるときだけ形を検査し、外れたら公開しない。行そのものは記帳時に autopilot-runs.mjs の validate() を通り、shipped の pr・失敗時の failure_reason など必須の規則はそちらが落とす。scripts/autopilot-publish.test.mjs の request schema で固定。"
+    },
+    {
+      "file": "scripts/autopilot-publish.mjs",
+      "expr": "run.artifact",
+      "disposition": "任意項目",
+      "note": "2026-10-20: PR依頼（モデルが書く信用しない入力）の任意欄。欄が無いときは台帳の行にも書かない（推測で埋めない）。欄があるときだけ形を検査し、外れたら公開しない。行そのものは記帳時に autopilot-runs.mjs の validate() を通り、shipped の pr・失敗時の failure_reason など必須の規則はそちらが落とす。scripts/autopilot-publish.test.mjs の request schema で固定。"
+    },
+    {
+      "file": "scripts/autopilot-publish.mjs",
+      "expr": "run.failure_reason",
+      "disposition": "任意項目",
+      "note": "2026-10-20: PR依頼（モデルが書く信用しない入力）の任意欄。欄が無いときは台帳の行にも書かない（推測で埋めない）。欄があるときだけ形を検査し、外れたら公開しない。行そのものは記帳時に autopilot-runs.mjs の validate() を通り、shipped の pr・失敗時の failure_reason など必須の規則はそちらが落とす。scripts/autopilot-publish.test.mjs の request schema で固定。"
+    },
+    {
+      "file": "scripts/autopilot-publish.mjs",
+      "expr": "run.failure_class",
+      "disposition": "任意項目",
+      "note": "2026-10-20: PR依頼（モデルが書く信用しない入力）の任意欄。欄が無いときは台帳の行にも書かない（推測で埋めない）。欄があるときだけ形を検査し、外れたら公開しない。行そのものは記帳時に autopilot-runs.mjs の validate() を通り、shipped の pr・失敗時の failure_reason など必須の規則はそちらが落とす。scripts/autopilot-publish.test.mjs の request schema で固定。"
+    },
+    {
+      "file": "scripts/autopilot-diagnostics.mjs",
+      "expr": "raw.denied_tool_counts",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-20: publish ジョブで読む実行要約（モデルのランナーを通った値）の拒否ツール内訳。欄が無い・形が違うときは null（不明）のまま受領書に残り、0 や空の内訳にはしない。autopilot-diagnostics.test.mjs の偽造要約の検体で固定。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
@@ -1408,6 +1444,12 @@
       "expr": "trackerSource",
       "disposition": "報告のみ",
       "note": "2026-10-17: buildRouteInventoryの任意trackerSourceがnullのとき、(1) VM用scriptを作らず、(2) tracker_source_sha256をnullで報告する2箇所。原本が無い場合はevaluateRoutesが各対象へunevaluated_tracker_source_missingを記録し、offline_predicate_evaluatedはfalseのまま、convertedを作らない。live_verified/browser_executed/network_access/events_dispatchedもfalseを保持する。欠測を実行成功・公開確認・traffic coverageへ読み替える判定ではない。既存site-route-inventory.test.mjsのmissing source検体と追加の単発読取確認で未評価status、hash null、評価ページ0、適格変換0を確認。scanner、既存guard、検査上限や計測metadataを変えず、既存2分岐の読取記録を追加する。"
+    },
+    {
+      "file": "scripts/autopilot-publish.mjs",
+      "expr": "value",
+      "disposition": "書き込み側の選別",
+      "note": "2026-10-20: 検査を通った依頼から null の任意欄を落とすだけ。判定ではない（形の検査は直前の行で済んでいる）。"
     }
   ]
 }

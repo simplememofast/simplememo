@@ -109,8 +109,10 @@ export function checkWiring(source) {
   assert(source.includes('git worktree add --detach "$RUNNER_TEMP/checkpoint-tools" "$GITHUB_SHA"'), 'tools must come from the workflow commit');
   assert(source.includes('--workspace "$GITHUB_WORKSPACE"'), 'capture the failed workspace, not the trusted tools tree');
   const condition = source.match(/id: checkpoint\s+if: >-\s+([\s\S]*?)\n\s+continue-on-error:/)?.[1].replace(/\s+/g, ' ').trim();
-  assert.equal(condition, "!cancelled() && (steps.claude.outcome == 'failure' || (steps.claude.outcome == 'success' && steps.output.outcome == 'failure'))",
-    'checkpoint must also preserve success-with-missing/unknown output, without running after cancellation');
+  // The output check now runs later, in the publish job: keep every model run's
+  // uncommitted declared page work (committed work travels in the handoff).
+  assert.equal(condition, "!cancelled() && (steps.claude.outcome == 'success' || steps.claude.outcome == 'failure')",
+    'checkpoint must preserve every finished model run, without running after cancellation');
   assert(source.includes('actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02'), 'pinned artifact upload required');
   assert(source.includes("steps.checkpoint.outputs.saved == 'true'"), 'upload only a successfully saved checkpoint');
   assert(source.includes('path: ${{ runner.temp }}/autopilot-checkpoint'), 'upload only the bounded checkpoint directory');
@@ -206,13 +208,13 @@ async function selftest() {
     for (const output of ['success', 'failure', 'skipped']) {
       for (const cancelled of [false, true]) {
         assert.equal(shouldSave({ claude: { outcome: claude }, output: { outcome: output } }, () => cancelled),
-          !cancelled && (claude === 'failure' || (claude === 'success' && output === 'failure')));
+          !cancelled && (claude === 'failure' || claude === 'success'));
       }
     }
   }
   // Mutate inside the checkpoint step: other steps share the same condition text.
   const step = source.split('      - name: Preserve declared page work after model or output failure\n')[1].split('\n      - name:')[0];
-  for (const [from, to] of [["steps.output.outcome == 'failure'", "steps.output.outcome == 'success'"], ['!cancelled() &&', 'true &&'],
+  for (const [from, to] of [["steps.claude.outcome == 'success' || steps.claude.outcome == 'failure'", "steps.claude.outcome == 'failure'"], ['!cancelled() &&', 'true &&'],
     ['checkpoint-tools/scripts/autopilot-checkpoint.mjs', 'checkpoint-tools/scripts/unused.mjs']]) {
     const mutated = source.replace(step, step.replace(from, to));
     assert.notEqual(mutated, source, `mutation did not apply: ${from}`);
@@ -232,8 +234,15 @@ async function main() {
   const today = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10).replaceAll('-', '');
   const branch = `claude/obsidian-auto-${today}`, upstream = `refs/remotes/origin/${branch}`;
   assert.equal(git(cwd, ['branch', '--show-current']).trim(), branch, 'model did not leave the expected work branch');
-  git(cwd, ['fetch', '--no-tags', 'origin', `refs/heads/${branch}:${upstream}`]);
-  const base = rev(cwd, upstream), fork = git(cwd, ['merge-base', 'origin/main', base]).trim();
+  // On the Actions route the model does not push: the day branch usually exists only
+  // locally, and its committed work travels in the publish handoff. Then the base is
+  // the local HEAD and only uncommitted declared page work is checkpointed.
+  let base;
+  try {
+    git(cwd, ['fetch', '--no-tags', 'origin', `refs/heads/${branch}:${upstream}`], { stdio: ['ignore', 'pipe', 'ignore'] });
+    base = rev(cwd, upstream);
+  } catch { base = rev(cwd, 'HEAD'); }
+  const fork = git(cwd, ['merge-base', 'origin/main', base]).trim();
   const result = capture({ cwd, fork, base, output: path.resolve(args[args.indexOf('--save') + 1]),
     runId: process.env.GITHUB_RUN_ID, attempt: Number(process.env.GITHUB_RUN_ATTEMPT) });
   if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT,

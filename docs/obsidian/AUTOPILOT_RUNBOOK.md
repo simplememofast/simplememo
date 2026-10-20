@@ -1035,6 +1035,16 @@ Blink で3回「再現しない」を繰り返したあと、**実機に吐か�
 5. `send_later` で60分後の自己チェックを仕込む（マージ確認まで面倒を見る）
 6. `docs/obsidian/AUTOPILOT_LOG.md` に1エントリ追記（同じPRに含める）
 
+### 5-1a. Actions経路（obsidian-autopilot.yml）の読み替え（2026-10-20）
+
+**Actions経路のセッションには書き込みの資格情報が無い。**モデルが動くジョブから GH_PAT・書き込み可能なトークン・id-token を外した（監査 F2/F3: WebFetch/WebSearch や GSC のクエリなど第三者の文章が入るセッションが、push・PR・本番へ届く資格情報を持っていた）。この経路では上の手順2〜4と §5-4 の記帳を次のように読み替える。Mac Codex 経路の手順は変わらない。
+
+- **commit までがセッションの仕事。**`git push`・`gh pr create`・`autopilot-runs.mjs --append`・`decision-monitor.mjs --publish-report`・`build_site_translations.py --write`・`generate_sitemap.py` は実行しない。宣言（§2-1）も実装より先の**別コミット**にする（push はしない。コミットの順序と日時は後の push でそのまま残る）。
+- **最後に PR の依頼を書く。**`$RUNNER_TEMP/autopilot-pr-request.json` に `{"action":"pr","title":…,"body":…,"run":{"run_id","outcome","lane","action","artifact","failure_reason"}}`（PR を出さない日は `{"action":"none"}`）。形はワークフローのプロンプト手順5と `scripts/autopilot-publish.mjs` の `validateRequest()` が正本。**レーンFで直した日は `run` に `"repair_of":["<直した run_id>"]` を入れる**（§6 手順5 の「自分の行に `repair_of` を書く」の読み替え。台帳は直接書かない。publish が main の台帳に実在し自分以外の run_id かを確かめてから、記帳する行に書く）。
+- **当日ブランチの占有は publish 時に起きる。**モデルを動かさない publish ジョブが、引き渡し（git bundle）を検証し（fsck・1つのhead・main との関係・250コミット以内・`.github/**` など拒否パス・symlink/gitlink・5 MB 超のファイル・承認済みでない名義・依頼の形・緊急停止・同日の重複）、当日ブランチへ **force なし**で push、PR を作成（作成者は従来どおり GH_PAT の持ち主）、§5-4 の台帳へ PR 番号を記帳して公開運転表・8言語訳・sitemap を再生成して push し、成果物を照合する。他経路が先に当日ブランチや PR を作っていれば何も push しない（`公開判定: duplicate`）。
+- **死んだ占有の引き継ぎ（§0-2）**は、既存の当日ブランチの上にローカルで積むだけ。publish は fast-forward でしか push しない。
+- **モデルが失敗・時間切れした回**も、コミット済みで検証を通る作業は PR なしで当日ブランチへ push される（従来の途中 push と同じ扱い）。未コミットの宣言済みページ作業はチェックポイント（7日）に残る。
+
 ### 5-1b. マージ**後**に書く台帳は、別のブランチへ（2026-09-03）
 
 **価値契約のある自律施策は、§2-1・§5-4に従ってマージ前に同じPRへ運転台帳を含める。**

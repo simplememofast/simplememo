@@ -22,8 +22,20 @@
 # 【OAuthが無い間は静かに寝る】CLAUDE_CODE_OAUTH_TOKEN が必要。
 # 未設定ならGateで実行せず、課金経路を自動で増やさない。
 #
-# 【GH_PAT】checkout と PR 作成に GH_PAT を優先使用（seo-daily.yml と同じ理由:
-# GITHUB_TOKEN の push はSEO Validationを起動せず、auto-merge が永久に来ない）。
+# 【2026-10-20 権限の分離 — モデルが動くジョブは書き込みの資格情報を持たない】
+# モデルは WebFetch/WebSearch・GSC のクエリ文字列など第三者の文章を読む。同じ
+# ランナーに GH_PAT や書き込みトークンがあると、注入された指示がそのまま push・
+# PR・本番デプロイに届く（監査 F2/F3）。ジョブの秘密情報は sudo で同じランナーの
+# 別ステップからも読めるため、**GH_PAT はモデルのジョブ全体から外した。**
+#   autopilot … モデルが動く。読み取り専用の job token・資格情報を残さない checkout・
+#               id-token なし。作業はローカルのコミットまで（git bundle で引き渡す）。
+#   publish   … 新しいランナーでモデルを動かさず、$GITHUB_SHA の
+#               scripts/autopilot-publish.mjs だけを実行する。引き渡しを検証し
+#               （fsck・経路の拒否リスト・コミットの名義・緊急停止・重複）、当日ブランチへ
+#               force なしで push、PR 作成、運転台帳への PR 番号の記帳、成果物の照合。
+#               GH_PAT はここの3段（push・PR作成・記帳の push）にだけ渡す。
+# PR は従来どおり GH_PAT の持ち主が開く（GITHUB_TOKEN の push は SEO Validation を
+# 起動せず auto-merge が来ないため。seo-daily.yml と同じ理由）。
 
 name: Obsidian Autopilot
 
@@ -41,11 +53,8 @@ on:
         required: false
         default: false
 
-permissions:
-  contents: write
-  pull-requests: write
-  actions: read
-  id-token: write
+# 既定は無権限。ジョブごとに必要なものだけを書く（モデルのジョブは読み取りのみ）。
+permissions: {}
 
 concurrency:
   group: obsidian-autopilot
@@ -55,6 +64,27 @@ jobs:
   autopilot:
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    # 読み取りだけ。Gate・成果物の基準点・モデルの gh は job token（読み取り専用）で読む。
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      actions: read
+    # publish ジョブへ渡すもの。モデルより前に決まった値（run・日付・takeover・基準点・
+    # モデルの結果）だけが判定に使われ、モデルより後の段の値は記録用の手掛かりに留まる。
+    outputs:
+      run: ${{ steps.gate.outputs.run }}
+      today: ${{ steps.gate.outputs.today }}
+      today_dash: ${{ steps.gate.outputs.today_dash }}
+      takeover: ${{ steps.gate.outputs.takeover }}
+      baseline: ${{ steps.output_baseline.outputs.baseline }}
+      model_outcome: ${{ steps.claude.outcome }}
+      exec_summary: ${{ steps.exec_summary.outputs.summary }}
+      audit_verdict: ${{ steps.audit.outputs.verdict }}
+      checkpoint_outcome: ${{ steps.checkpoint.outcome }}
+      checkpoint_saved: ${{ steps.checkpoint.outputs.saved }}
+      checkpoint_reason: ${{ steps.checkpoint.outputs.reason }}
+      declared_page_change_count: ${{ steps.checkpoint.outputs.declared_page_change_count }}
     steps:
       # 【なぜ checkout が先か】判定を .yml の中に持たない。
       #
@@ -71,13 +101,12 @@ jobs:
       #
       # 代償は、スキップする日も checkout ぶんのランナー時間を使うこと。
       # **それは払う。**払わない代わりに払っていたのは「片方だけ直る」ことだった。
-      - name: Checkout（GH_PAT優先・全履歴）
+      - name: Checkout（読み取り専用・全履歴）
         uses: actions/checkout@v4
         with:
-          # GH_PAT が要る理由: GITHUB_TOKEN の push はワークフローを起動しない
-          # （GitHubの再帰防止）。それだと生成PRで SEO Validation が走らず
-          # auto-merge が永久に来ない。seo-daily.yml と同じフォールバック構成。
-          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          # 資格情報を .git/config に残さない。push と PR 作成は publish ジョブが行う
+          # （このジョブには書き込みの資格情報が無い）。
+          persist-credentials: false
           # sitemap の lastmod は git 履歴から引くため浅いと全ページ分が壊れる
           fetch-depth: 0
 
@@ -88,8 +117,8 @@ jobs:
       # **例外で赤くしない。**判定器が落ちた日は「実行済みかもしれない」側へ倒し、
       # notice に理由を出す（赤い通知は翌日から読まれなくなる）。
       #
-      # GH_TOKEN は占有の**中身**（差分・PR・経過分）を読むために要る。
-      # 以降のステップが既に使っているものと同じで、permissions: は広げていない。
+      # GH_TOKEN は占有の**中身**（差分・PR・経過分）を読むために要る。読むだけなので
+      # job token（このジョブでは読み取り専用）で足りる。
       - name: Gate（秘密鍵・当日重複・死んだ占有の引き継ぎ）
         id: gate
         env:
@@ -97,7 +126,7 @@ jobs:
           # This fallback is OAuth-only. Never open a second API-billing path.
           HAS_ANTHROPIC_KEY: 'false'
           FORCE: ${{ inputs.force == true }}
-          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: node scripts/autopilot-gate.mjs --preflight
 
@@ -305,11 +334,13 @@ jobs:
           && steps.route.outputs.run_cap_ok == 'true'
         continue-on-error: true
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           TODAY_DASH: ${{ steps.gate.outputs.today_dash }}
         run: |
           git worktree add --detach "$RUNNER_TEMP/output-tools" "$GITHUB_SHA"
           node "$RUNNER_TEMP/output-tools/scripts/autopilot-output.mjs" --capture "$RUNNER_TEMP/autopilot-output-before.json"
+          # モデルより前の基準点を publish ジョブの照合へ渡す（1 KB 未満）。
+          echo "baseline=$(base64 -w0 "$RUNNER_TEMP/autopilot-output-before.json")" >> "$GITHUB_OUTPUT"
 
       # 【2026-08-21】run 32419185478（06:23 JST）はこのステップが**3秒**で
       # failure になり、その日の主系出荷がゼロになった。08-20 のapt詰まりとは
@@ -324,14 +355,18 @@ jobs:
       # 直前にmainへ書き込んだのが auto-merge（github-actions[bot]）だと
       # `github-actions` になり、これに当たる。
       #
-      # このワークフローは schedule と workflow_dispatch でしか起動せず、
-      # issue_comment 等の外部から起動される経路が無い。つまり第三者の投稿で
-      # ここを踏ませることはできないので、`*` で許可しても権限昇格にならない。
+      # このワークフローは schedule と workflow_dispatch でしか起動しない。ただし
+      # **起動経路が閉じていても、第三者の文章はセッションに入る**（WebFetch/WebSearch・
+      # GSC のクエリ・Issue 本文）。だから安全はここで判断せず、ジョブの権限で担保する:
+      # このジョブには GH_PAT も書き込みトークンも id-token も無く、push と PR 作成は
+      # モデルを動かさない publish ジョブが検証してから行う（2026-10-20）。
       - name: Claude Code（Runbook 1イテレーション実行）
         id: claude
         if: >-
           steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'
           && steps.route.outputs.run_cap_ok == 'true'
+        # ジョブ上限（90分）より前に止め、引き渡しの梱包と upload が必ず走るようにする。
+        timeout-minutes: 75
       # 【2026-08-25 SHA pin】フローティングタグ @v1 をやめて版を固定する。
       #
       # 発端は 08-24・08-25 の2日連続の即時失敗で、そのとき @v1 が指していたのは
@@ -362,10 +397,11 @@ jobs:
       # （いつ・なぜ上げたかが残る）。上げるときはこの行のSHAとコメントを一緒に直すこと。
         uses: anthropics/claude-code-action@16b3b310c3d7b5279df73130324d5205aeea8eac # v1 (Claude Code 2.1.245 / Agent SDK 0.3.245)
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          # 読み取り専用の job token（gh で前回 run のログ等を読むため）。書き込みはできない。
+          GH_TOKEN: ${{ github.token }}
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          github_token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          github_token: ${{ github.token }}
           allowed_bots: "*"
           # 【2026-08-22】run 32528028588 は Claude Code ステップが success で
           # 終わりながら成果物がゼロだった。ジョブログの result 行は
@@ -382,9 +418,9 @@ jobs:
           # リポジトリに `.claude/settings.json` が無いので、SDKの settingSources
           # にある project 層でも補われない。ここで明示するのが唯一の経路。
           #
-          # allowed_bots と同じ理由でBashの全面許可は権限昇格にならない。この
-          # ワークフローは schedule と workflow_dispatch でしか起動せず、
-          # issue_comment 等の外部から起動される経路が無い。
+          # Bash の全面許可が無害だという根拠は「外部起動が無い」ではない（第三者の
+          # 文章はセッションに入る）。根拠はこのジョブの権限で、Bash からも push・
+          # PR 作成・本番への書き込みに使える資格情報が無い（2026-10-20）。
           claude_args: |
             --max-turns 250
             --max-budget-usd ${{ steps.route.outputs.runtime_budget_usd }}
@@ -392,22 +428,23 @@ jobs:
             --allowedTools "Bash,Read,Write,Edit,MultiEdit,Glob,Grep,WebFetch,WebSearch,TodoWrite,NotebookEdit"
           prompt: |
             simplememofast.com のObsidian情報ハブを育てる毎日の定期実行（GitHub Actions版）です。リポジトリはチェックアウト済み・カレントディレクトリがリポジトリルートです。次を厳守して1イテレーションだけ実行してください。
+            【この経路の制約 — Runbook より優先】このセッションには書き込みの資格情報が無い（GitHub のトークンは読み取り専用）。**`git push`・`gh pr create`・PR やIssueへの書き込みはしない。**作業はローカルのコミットで終え、手順5の依頼ファイルを書く。push・PR作成・運転台帳への PR 番号の記帳・公開運転表と生成物の再生成は、モデルを含まない publish ジョブが検証してから行う。Runbook の push / PR 作成の指示は、この経路ではこの読み替えに従う。
 
             0. 【冪等性・最初に必ず】FORCE_RUN=${{ inputs.force == true }} 。FORCE_RUN が true なら本チェックは省略して必ず実行する（手動の検証実行。当日分のstatus JSONは上書きしてよい）。false の場合: `git ls-remote origin refs/heads/claude/obsidian-auto-$(TZ=Asia/Tokyo date +%Y%m%d)` が存在する、または https://simplememofast.com/data/autopilot-status.json の date_jst が当日（JST）なら、本日分は別経路で実行済み。手順8の終了理由（skipped_already_done）だけを書いて終了すること。
-            0-1. 【死んだ占有の引き継ぎ】GATE_TAKEOVER=${{ steps.gate.outputs.takeover == 'true' }} 。true のときだけ、上の「ブランチが存在する＝実行済み」を**この日は適用しない**。当日ブランチは claim だけ取られて90分以上動いていない（宣言ファイル以外の差分0・PR0）とGateが実測している。Runbook §0-2 の「死んだ占有の引き継ぎ」の手順に従い、**既存のブランチの上に**空コミットを積んで占有し直すこと（`git fetch origin <当日ブランチ> && git checkout -B <当日ブランチ> origin/<当日ブランチ>`）。**`--force` / `--force-with-lease` は使わない・ブランチを消さない。**push が非fast-forwardで弾かれたら他経路が復帰したということなので、何もせず終了する。 GATE_STALE_DECLARATIONS=${{ steps.gate.outputs.stale_declarations }} 。空でなければ、その占有には**死んだ run の価値契約の宣言**が残っている。**その契約は実装しない。**Runbook §0-2 の手順で `node scripts/value-contracts.mjs --retire <宣言ファイル> --reason "declaring run <run_id> failed (<failure_class>); takeover re-declares under a new id"` を実行して data/decision-rejections/ へ移し、コミット・pushしてから 3-1 を新しい候補で最初からやり直す。契約と記帳の run_id は `ap-<YYYYMMDD>-actions-$GITHUB_RUN_ID`（Bash で読める）。
+            0-1. 【死んだ占有の引き継ぎ】GATE_TAKEOVER=${{ steps.gate.outputs.takeover == 'true' }} 。true のときだけ、上の「ブランチが存在する＝実行済み」を**この日は適用しない**。当日ブランチは claim だけ取られて90分以上動いていない（宣言ファイル以外の差分0・PR0）とGateが実測している。Runbook §0-2 の「死んだ占有の引き継ぎ」の手順に従い、**既存のブランチの上に**ローカルで作業を積むこと（`git fetch origin <当日ブランチ> && git checkout -B <当日ブランチ> origin/<当日ブランチ>`）。push はしない（publish ジョブが fast-forward でだけ push し、他経路が先に進めていれば何も push しない）。ブランチを消さない。 GATE_STALE_DECLARATIONS=${{ steps.gate.outputs.stale_declarations }} 。空でなければ、その占有には**死んだ run の価値契約の宣言**が残っている。**その契約は実装しない。**Runbook §0-2 の手順で `node scripts/value-contracts.mjs --retire <宣言ファイル> --reason "declaring run <run_id> failed (<failure_class>); takeover re-declares under a new id"` を実行して data/decision-rejections/ へ移し、コミットしてから 3-1 を新しい候補で最初からやり直す。契約と記帳の run_id は `ap-<YYYYMMDD>-actions-$GITHUB_RUN_ID`（Bash で読める）。
             0-2. 【所有者承認の試運転】TRIAL_RUN=${{ steps.contain.outputs.recovery || 'none' }} 。actions_once なら、今日はオーナーが日付を入れた1回限りの試運転の回で、封じ込めはワークフローが判定済み（docs/obsidian/ACTIONS_RECOVERY_ONE_USE.md）。**`node scripts/autopilot-selfheal.mjs --contain` を実行しない**（停止を書き込んで自分を止めることになる）。`--contain --dry-run` が「止めるべき」と exit 1 を返しても、この環境には許可の値が渡っていないためで、止まる理由ではない。⛔ の 10-05・10-06 は直さず repair_of も書かず、通常どおりレーンA〜Eの1アクションを行う。none なら通常の回。
             1. `docs/obsidian/AUTOPILOT_RUNBOOK.md` を読む。以降の判断・実装・出荷はすべてRunbookに従う（このプロンプトより詳しい指示はRunbookが優先）。
             1-1. `AUTOPILOT_DATA_REPORT` のJSONを読む。取得済みの鮮度・実日数・欠損の検査結果が入っている。`ready` なら `GROWTH_GSC_DIR` の検査済みデータを分析に使い、再認証・再取得は不要。`partial` は取得成功だが28日未満、`unavailable` は取得失敗であり0件ではない。Runbook §1-2に従い今回の実測をstatusへ記録する。一時データを公開リポジトリにコピーしない。
             2. `tail -n 200 docs/obsidian/AUTOPILOT_LOG.md` で前回までの記録を確認する。**全文は読まないこと**（77,000文字あり毎日+5,000増える。入力はターンごとに付いて回るので、ここが1回あたり実費の最大要因）。**保留事項は LOG からではなく `data/autopilot-actions-report.json` を見る**（型付きで、閉じ条件が通れば消える。散文の履歴から拾うと解消済みが混ざる）。**台帳そのもの `data/autopilot-actions.json` は読まないこと** — 閉じた行が消えずに貯まるので、LOG と同じく増え続ける（レポート側は open と当日クローズだけなので未処理の件数でしか増えない）。レポートの `as_of_jst` が当日でない場合だけ、09:00 JST のアクチュエータがまだ走っていないということなので台帳側を見てよい。Runbook §0の「読むもの」も、全文を読むものと一部だけ読むものを分けてある——そちらの指定に従うこと。
-            2-1. 【レーンF・A〜Eより先】`node scripts/autopilot-selfheal.mjs` を実行する。未修理の故障が出たら、**その日の最優先アクションは基盤の修理**で、記事は書かない。触ってよいファイルとやってはいけない変更はスクリプトが出力する（検証を弱めない・自分の権限を広げない。これはCIが実際に検出する）。直したら `data/autopilot-runs.json` の自分の行に `repair_of` を書くこと——書かない限り翌日も未修理として上がってくる。⛔ が出ている対象は直さず `owner_requests` に上げる。**監視Issueは `node scripts/health-intake.mjs --dry-run` で読むだけにし、取り込み分の `data/autopilot-actions.json` をこのブランチにコミットしない**（宣言の外のパスになり、PR が decision-ci で必ず落ちる。2026-10-06 の形。取り込みは Autopilot Act が当日中に行う。Runbook §7-1 の依頼を積む日だけは、宣言の touches に入れる）。
+            2-1. 【レーンF・A〜Eより先】`node scripts/autopilot-selfheal.mjs` を実行する。未修理の故障が出たら、**その日の最優先アクションは基盤の修理**で、記事は書かない。触ってよいファイルとやってはいけない変更はスクリプトが出力する（検証を弱めない・自分の権限を広げない。これはCIが実際に検出する）。直したら手順5の依頼ファイルの `run` に `"repair_of":["<直した run_id>"]` を入れること（`data/autopilot-runs.json` は直接書かない。publish ジョブが main の台帳に実在する run_id かを確かめ、記帳する自分の行に書く。スクリプトと Runbook の「自分の行に `repair_of` を書く」は、この経路ではこの読み替えに従う）——書かない限り翌日も未修理として上がってくる。⛔ が出ている対象は直さず `owner_requests` に上げる。**監視Issueは `node scripts/health-intake.mjs --dry-run` で読むだけにし、取り込み分の `data/autopilot-actions.json` をこのブランチにコミットしない**（宣言の外のパスになり、PR が decision-ci で必ず落ちる。2026-10-06 の形。取り込みは Autopilot Act が当日中に行う。Runbook §7-1 の依頼を積む日だけは、宣言の touches に入れる）。
             3. 目標は毎日1記事。ただしRunbook §0のゲート（ノイズフロア＝期待クリック3未満を根拠にしない・品質・検証・実験非干渉）が常に優先。ゲートを通る施策が無い日は堂々とスキップし、保守レーン（Runbook §6）に切り替える。基準を下げて書くことは失敗と定義されている。
-            3-1. 【着手前の価値契約】`node scripts/value-contracts.mjs --readiness` と `--feedback` を読む。承認済み指標がある場合は、Runbook §2-1 に従い候補2件以上を `/tmp/decision-candidates.json` に書く。各候補に `calibration: {snapshot_sha256, reason}` を付け、返された参照hashと、過去の予測・実測が今回の確率と順位にどう関わるかを記す。決済0件なら根拠と不確実性を記し、較正済みとは書かない。`node scripts/value-contracts.mjs --select /tmp/decision-candidates.json` が選んだ契約を先に別コミットでpushする。選択された候補だけを実装する。契約の指標・確率・基準値・対象パスを実装後に変えない。候補が通らない日は不適格理由だけ記録し、出荷を捏造しない。承認済み指標が0件の間は既存運転を維持し、承認欄を代筆しない。
-            4. ブランチは claude/obsidian-auto-$(TZ=Asia/Tokyo date +%Y%m%d)。Runbook §3の実装規約・§4の検証（seo-check等9チェック。ブラウザが要る工程は先に `npx playwright install --with-deps chromium` を実行し、OG生成スクリプトは PLAYWRIGHT のデフォルトパスで動く）を全て通してから commit・push する。**apt を伴うコマンド（`--with-deps` を含む）が数分たっても出力を返さない場合は深追いしないこと。** `--with-deps` を外して再試行し、それでも駄目ならブラウザが要るQAだけを省略して、その旨を status JSON の `checks` に明記したうえで記事の出荷を優先する。2026-08-20に、この種の apt の停止がジョブ上限90分を食い尽くして1日分の出荷をゼロにした前例がある（run 32303452390）。**セットアップのために出荷を落とさない。**
-            4-1. 【PRを作る前と、作業をやめる前に必ず】`node scripts/decision-ci.mjs --verify-local` を実行する。宣言の外のパス（未コミット・未追跡を含む）を挙げる。落ちたら PR を作る前に直す（直し方は出力と Runbook §2-1 手順6-1。宣言し直すときは、先に宣言後の実装コミットを全部 `git revert` して正味ゼロに戻す）。直せない日は宣言を取り下げ、status/LOG だけの PR にする。
-            5. PR作成は `gh pr create`（GH_TOKEN 設定済み）。本文の型はマージ済みPR #470を踏襲。**PR作成後、マージを待たずに** Runbook §5-4の運転台帳へPR番号を記録する。価値契約がある回は宣言した `run_id`・`lane`・`action` を使う。記帳後に `node scripts/decision-monitor.mjs --publish-report` で公開運転表も同期し、続けて `python3 scripts/build_site_translations.py --write`（/autopilot/ の8言語の生成翻訳。2026-10-08 から）と `python3 scripts/generate_sitemap.py` をこの順に回して、同じPRへcommit・pushする（訳を揃えないと SEO Validation の翻訳の検査で落ちてマージされない）。**その最終HEADのpull_request起因のSEO Validationが起動したこと**を確認したら、それ以上は待たずに終了してよい。契約と出荷記録の照合前にはマージされないため、記帳をマージ後まで待たないこと（マージは auto-merge が行い、結果は翌朝の日報メールが拾う。CCR用ツール subscribe_pr_activity / send_later はこの環境には無いので使わない）。
-            6. 【毎回必須】`data/autopilot-status.json` をRunbook §5-2のスキーマで当日の内容に上書きし、`AUTOPILOT_LOG.md` の追記と合わせて同じPRに含める（記事なしの日はこの2ファイルだけのPR）。これが10:00 JSTの日報メールのデータ源。
+            3-1. 【着手前の価値契約】`node scripts/value-contracts.mjs --readiness` と `--feedback` を読む。承認済み指標がある場合は、Runbook §2-1 に従い候補2件以上を `/tmp/decision-candidates.json` に書く。各候補に `calibration: {snapshot_sha256, reason}` を付け、返された参照hashと、過去の予測・実測が今回の確率と順位にどう関わるかを記す。決済0件なら根拠と不確実性を記し、較正済みとは書かない。`node scripts/value-contracts.mjs --select /tmp/decision-candidates.json` が選んだ契約を、実装より先に別コミットにする（push はしない。コミットの順序と日時は publish ジョブの push でそのまま残る）。選択された候補だけを実装する。契約の指標・確率・基準値・対象パスを実装後に変えない。候補が通らない日は不適格理由だけ記録し、出荷を捏造しない。承認済み指標が0件の間は既存運転を維持し、承認欄を代筆しない。
+            4. ブランチは claude/obsidian-auto-$(TZ=Asia/Tokyo date +%Y%m%d)。Runbook §3の実装規約・§4の検証（seo-check等9チェック。ブラウザが要る工程は先に `npx playwright install --with-deps chromium` を実行し、OG生成スクリプトは PLAYWRIGHT のデフォルトパスで動く）を全て通してから commit する（push はしない）。**apt を伴うコマンド（`--with-deps` を含む）が数分たっても出力を返さない場合は深追いしないこと。** `--with-deps` を外して再試行し、それでも駄目ならブラウザが要るQAだけを省略して、その旨を status JSON の `checks` に明記したうえで記事の出荷を優先する。2026-08-20に、この種の apt の停止がジョブ上限90分を食い尽くして1日分の出荷をゼロにした前例がある（run 32303452390）。**セットアップのために出荷を落とさない。**
+            4-1. 【PRの依頼を書く前と、作業をやめる前に必ず】`node scripts/decision-ci.mjs --verify-local` を実行する。宣言の外のパス（未コミット・未追跡を含む）を挙げる。落ちたら PR を作る前に直す（直し方は出力と Runbook §2-1 手順6-1。宣言し直すときは、先に宣言後の実装コミットを全部 `git revert` して正味ゼロに戻す）。直せない日は宣言を取り下げ、status/LOG だけの PR にする。
+            5. 【PRの依頼】PR は作らない。最後のコミットの後、Bash で `$RUNNER_TEMP/autopilot-pr-request.json` に次の形のJSONを書く: `{"action":"pr","title":"<1行・200字以内>","body":"<本文。型はマージ済みPR #470を踏襲>","run":{"run_id":"ap-<YYYYMMDD>-actions-<GITHUB_RUN_ID>","outcome":"shipped|no_artifact|failed","lane":"<A〜F>","action":"<アクション名>","artifact":"<成果物>","failure_reason":"<shipped 以外のとき必須>"}}`（レーンFで直した日だけ `run` に `"repair_of":["<直した run_id>"]` を足す。手順2-1）。価値契約がある回は宣言した `run_id`・`lane`・`action` を使う。PR を出さない日は `{"action":"none"}`。publish ジョブが、検証→当日ブランチへの push→PR 作成→Runbook §5-4 の運転台帳へ PR 番号を記帳→`decision-monitor.mjs --publish-report`・`build_site_translations.py --write`・`generate_sitemap.py` の再生成と push を行う。**このセッションでは `gh pr create`・`autopilot-runs.mjs --append`・`decision-monitor.mjs --publish-report`・`build_site_translations.py`・`generate_sitemap.py` を実行しない**（PR番号の無い行や二重の生成物が残る）。依頼ファイルを書いたら、それ以上は待たずに終了してよい（マージは auto-merge が行い、結果は翌朝の日報メールが拾う。CCR用ツール subscribe_pr_activity / send_later はこの環境には無いので使わない）。
+            6. 【毎回必須】`data/autopilot-status.json` をRunbook §5-2のスキーマで当日の内容に上書きし、`AUTOPILOT_LOG.md` の追記と合わせてコミットに含める（記事なしの日はこの2ファイルだけのコミットで、手順5の依頼は outcome を no_artifact 等にした PR 依頼）。これが10:00 JSTの日報メールのデータ源。
             7. できないこと（iOS Simulator実行・オーナー作業）は偽装せず、Runbook §7に従って owner_requests として積む。
-            8. 【終了前に必ず・最後の操作】Bash で `printf '{"code":"<CODE>"}\n' > "$RUNNER_TEMP/autopilot-exit.json"` を書く。CODE は次のどれか1つ: shipped_pr（記事・修理のPRを作った）/ no_ship_pr（status/LOG だけのPRを作った）/ skipped_already_done（手順0で終了）/ blocked_unverifiable（固有価値を実確認できなかった）/ blocked_scope（宣言の範囲では実装できなかった）/ blocked_local_check（5-1 が落ちて直せなかった）/ abandoned_after_declaration（宣言後にそれ以外の理由でやめた）/ tool_denied（必要な操作が権限で拒否された）/ other。**文章は書かない**（公開される診断に残るのは code だけ）。PR を作れなかった日ほど必要。
+            8. 【終了前に必ず・最後の操作】Bash で `printf '{"code":"<CODE>"}\n' > "$RUNNER_TEMP/autopilot-exit.json"` を書く。CODE は次のどれか1つ: shipped_pr（記事・修理のPRを依頼した）/ no_ship_pr（status/LOG だけのPRを依頼した）/ skipped_already_done（手順0で終了）/ blocked_unverifiable（固有価値を実確認できなかった）/ blocked_scope（宣言の範囲では実装できなかった）/ blocked_local_check（5-1 が落ちて直せなかった）/ abandoned_after_declaration（宣言後にそれ以外の理由でやめた）/ tool_denied（必要な操作が権限で拒否された）/ other。**文章は書かない**（公開される診断に残るのは code だけ）。PR を作れなかった日ほど必要。
 
       # 【2026-08-26】即死したときに、資格情報かどうかを**機械が**切り分ける。
       #
@@ -529,26 +566,8 @@ jobs:
           echo "::error title=Obsidian Autopilot::**使用量上限で1日ぶんの出荷が消えた。**${LIMIT_MESSAGE}。資格情報は無事なので入れ替えないこと。"
           exit 1
 
-      # [2026-08-22 マージ] 下の2ステップは別々のブランチで同時に足された。
-      # 競合ではなく補完関係なので両方残す。**順序に意味がある** —
-      # 「成果物の実行IDを照合」が job を失敗させても、実費の抽出は
-      # `if: always()` で必ず走る。失敗した回にも実費は発生しており、
-      # 成功した回だけ記録すると上限判定が実態より甘くなる。
-
-      # A pre-existing declaration branch passed the former existence check on
-      # 2026-09-05 even though this model run created no PR. Verify a fresh remote
-      # record bound to this run; an open PR remains pending, never production proof.
-      - name: 成果物の実行IDを照合
-        id: output
-        if: steps.claude.outcome == 'success'
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
-          TODAY_DASH: ${{ steps.gate.outputs.today_dash }}
-        run: node "$RUNNER_TEMP/output-tools/scripts/autopilot-output.mjs" --verify "$RUNNER_TEMP/autopilot-output-before.json"
-
-      - name: "成果物判定: ${{ steps.output.outputs.verdict || 'unknown' }}"
-        if: always() && steps.claude.outcome == 'success'
-        run: 'true'
+      # 「成果物の実行IDを照合」と「成果物判定」は publish ジョブへ移した（PR はそこで
+      # 作られるため）。実費の抽出は `if: always()` のまま、失敗した回にも走る。
 
       # 【モデル後の照合】モデルが手順 4-1（--verify-local）を飛ばしても、宣言と残った作業
       # （コミット済み・未コミット・未追跡）をここで照らす。2026-10-06 は success・PR なしで
@@ -660,12 +679,13 @@ jobs:
           print("```")
           PY
 
+      # 成果物の照合は publish ジョブで後から行うため、モデルが走った回は毎回とっておく
+      # （コミット済みの作業は引き渡しに入る。ここに残るのは未コミットの宣言済みページ作業）。
       - name: Preserve declared page work after model or output failure
         id: checkpoint
         if: >-
           !cancelled() &&
-          (steps.claude.outcome == 'failure' ||
-           (steps.claude.outcome == 'success' && steps.output.outcome == 'failure'))
+          (steps.claude.outcome == 'success' || steps.claude.outcome == 'failure')
         continue-on-error: true
         run: |
           git worktree add --detach "$RUNNER_TEMP/checkpoint-tools" "$GITHUB_SHA"
@@ -680,31 +700,172 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
+      # 【引き渡し】コミット済みの作業だけを git bundle にし、PR の依頼と終了コードを添える。
+      # 道具は $GITHUB_SHA の写しから動かす。このジョブの中身はモデルが触れるので、
+      # 梱包の正しさは信用しない — publish ジョブが中身をすべて検証し直す。
+      - name: Pack the work for the publish job
+        id: pack
+        if: >-
+          !cancelled() &&
+          (steps.claude.outcome == 'success' || steps.claude.outcome == 'failure')
+        continue-on-error: true
+        env:
+          DAY: ${{ steps.gate.outputs.today }}
+          TAKEOVER: ${{ steps.gate.outputs.takeover }}
+        run: |
+          git -c core.hooksPath=/dev/null -c core.fsmonitor=false worktree add --detach "$RUNNER_TEMP/pack-tools" "$GITHUB_SHA"
+          node "$RUNNER_TEMP/pack-tools/scripts/autopilot-publish.mjs" --pack --workspace "$GITHUB_WORKSPACE" --out "$RUNNER_TEMP/autopilot-handoff" --day "$DAY" --takeover "$TAKEOVER" 2>/dev/null
+
+      - name: Upload the handoff for the publish job
+        if: always() && steps.pack.outcome == 'success'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: autopilot-handoff-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/autopilot-handoff
+          retention-days: 1
+          if-no-files-found: ignore
+
       # Only typed counts/states/hashes leave the runner; never upload SDK messages.
-      # Independent of checkpoint success and the verifier's exit code.
-      - name: Preserve bounded execution diagnostics
-        id: diagnostics
+      # The receipt itself is assembled in the publish job, after the output check.
+      - name: Summarize the execution file
+        id: exec_summary
         if: >-
           !cancelled() &&
           (steps.claude.outcome == 'success' || steps.claude.outcome == 'failure')
         continue-on-error: true
         env:
           EXEC_FILE: ${{ steps.claude.outputs.execution_file }}
-          TODAY_DASH: ${{ steps.gate.outputs.today_dash }}
-          MODEL_OUTCOME: ${{ steps.claude.outcome }}
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/diagnostic-tools" "$GITHUB_SHA"
+          node "$RUNNER_TEMP/diagnostic-tools/scripts/autopilot-diagnostics.mjs" --summarize
+
+  # 【publish】モデルを動かさないジョブ。新しいランナーで $GITHUB_SHA の道具だけを実行し、
+  # モデルのジョブから来たもの（bundle・依頼JSON・後段の出力）はすべて信用しない入力として扱う。
+  # GH_PAT は push・PR作成・記帳の push の3段にだけ渡す。ログには型付きのコードと件数だけを出す。
+  # 段名は Act の interpretRun が読む語（Gate・Claude Code・緊急停止 など）と重ねない
+  # （scripts/autopilot-publish.mjs --check が検査する）。
+  publish:
+    needs: autopilot
+    if: >-
+      always() && !cancelled()
+      && (needs.autopilot.outputs.model_outcome == 'success' || needs.autopilot.outputs.model_outcome == 'failure')
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
+    steps:
+      - name: Checkout the workflow commit for trusted tools
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: tools
+          persist-credentials: false
+          # 検証は main の履歴と突き合わせ、記帳後の sitemap の lastmod は git 履歴から引く
+          fetch-depth: 0
+
+      - name: Download the handoff
+        continue-on-error: true
+        # このジョブは後の段で GH_PAT を持つので、upload-artifact と同じくフルのコミットSHAで固定する。
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: autopilot-handoff-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/handoff
+
+      - name: Verify the handoff
+        id: verify
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DAY: ${{ needs.autopilot.outputs.today }}
+          TAKEOVER: ${{ needs.autopilot.outputs.takeover }}
+          FORCE: ${{ inputs.force == true }}
+          MODEL_OUTCOME: ${{ needs.autopilot.outputs.model_outcome }}
+        run: node "$GITHUB_WORKSPACE/tools/scripts/autopilot-publish.mjs" --verify --handoff "$RUNNER_TEMP/handoff" --repo-dir "$GITHUB_WORKSPACE/tools" --day "$DAY" --takeover "$TAKEOVER" --force-run "$FORCE" --model-outcome "$MODEL_OUTCOME"
+
+      # 判定を Actions API の段名から読めるようにする（判定コードの段と同じ理由）。
+      - name: "公開判定: ${{ steps.verify.outputs.verdict || 'unknown' }}"
+        if: always()
+        run: 'true'
+
+      - name: Push the work branch
+        id: push
+        if: steps.verify.outputs.verdict == 'publish' || steps.verify.outputs.verdict == 'push_only'
+        env:
+          PUBLISH_TOKEN: ${{ secrets.GH_PAT }}
+          DAY: ${{ needs.autopilot.outputs.today }}
+          HEAD_SHA: ${{ steps.verify.outputs.head }}
+        run: node "$GITHUB_WORKSPACE/tools/scripts/autopilot-publish.mjs" --push --repo-dir "$GITHUB_WORKSPACE/tools" --day "$DAY" --sha "$HEAD_SHA"
+
+      - name: Open the PR
+        id: open_pr
+        if: steps.verify.outputs.verdict == 'publish' && steps.push.outcome == 'success'
+        env:
+          PUBLISH_TOKEN: ${{ secrets.GH_PAT }}
+          DAY: ${{ needs.autopilot.outputs.today }}
+        run: node "$GITHUB_WORKSPACE/tools/scripts/autopilot-publish.mjs" --open-pr --handoff "$RUNNER_TEMP/handoff" --day "$DAY"
+
+      # 信頼できる道具（$GITHUB_SHA の scripts/）を、push したブランチのデータに対して動かす。
+      - name: Record the PR number and regenerate the report
+        id: record
+        if: steps.open_pr.outcome == 'success'
+        env:
+          DAY: ${{ needs.autopilot.outputs.today }}
+          HEAD_SHA: ${{ steps.verify.outputs.head }}
+          PR_NUMBER: ${{ steps.open_pr.outputs.pr }}
+        run: node "$GITHUB_WORKSPACE/tools/scripts/autopilot-publish.mjs" --record --handoff "$RUNNER_TEMP/handoff" --repo-dir "$GITHUB_WORKSPACE/tools" --day "$DAY" --pr "$PR_NUMBER" --sha "$HEAD_SHA"
+
+      - name: Push the ledger commit
+        if: steps.record.outcome == 'success' && steps.record.outputs.record_changed != '0'
+        env:
+          PUBLISH_TOKEN: ${{ secrets.GH_PAT }}
+          DAY: ${{ needs.autopilot.outputs.today }}
+          RECORD_SHA: ${{ steps.record.outputs.record_sha }}
+        run: node "$GITHUB_WORKSPACE/tools/scripts/autopilot-publish.mjs" --push --repo-dir "$GITHUB_WORKSPACE/tools" --day "$DAY" --sha "$RECORD_SHA"
+
+      # A pre-existing declaration branch passed the former existence check on
+      # 2026-09-05 even though this model run created no PR. Verify a fresh remote
+      # record bound to this run; an open PR remains pending, never production proof.
+      # The baseline was captured before the model ran (model job output).
+      - name: 成果物の実行IDを照合
+        id: output
+        if: always() && !cancelled() && needs.autopilot.outputs.model_outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TODAY_DASH: ${{ needs.autopilot.outputs.today_dash }}
+          OUTPUT_BASELINE: ${{ needs.autopilot.outputs.baseline }}
+        run: |
+          printf '%s' "$OUTPUT_BASELINE" | base64 -d > "$RUNNER_TEMP/autopilot-output-before.json"
+          node "$GITHUB_WORKSPACE/tools/scripts/autopilot-output.mjs" --verify "$RUNNER_TEMP/autopilot-output-before.json"
+
+      - name: "成果物判定: ${{ steps.output.outputs.verdict || 'unknown' }}"
+        if: always() && needs.autopilot.outputs.model_outcome == 'success'
+        run: 'true'
+
+      # Only typed counts/states/hashes leave the runner; never upload SDK messages.
+      # Independent of checkpoint success and the verifier's exit code. Values from
+      # the model job are re-validated into finite states by the receipt.
+      - name: Preserve bounded execution diagnostics
+        id: diagnostics
+        if: >-
+          !cancelled() &&
+          (needs.autopilot.outputs.model_outcome == 'success' || needs.autopilot.outputs.model_outcome == 'failure')
+        continue-on-error: true
+        env:
+          EXEC_SUMMARY: ${{ needs.autopilot.outputs.exec_summary }}
+          TODAY_DASH: ${{ needs.autopilot.outputs.today_dash }}
+          MODEL_OUTCOME: ${{ needs.autopilot.outputs.model_outcome }}
           OUTPUT_VERDICT: ${{ steps.output.outputs.verdict }}
           OUTPUT_REASON_CODE: ${{ steps.output.outputs.reason_code }}
           MATCHING_PR_COUNT: ${{ steps.output.outputs.matching_pr_count }}
           CURRENT_RUN_RECORD_COUNT: ${{ steps.output.outputs.current_run_record_count }}
           REMOTE_HEAD_SHA: ${{ steps.output.outputs.remote_head_sha }}
-          CHECKPOINT_OUTCOME: ${{ steps.checkpoint.outcome }}
-          CHECKPOINT_SAVED: ${{ steps.checkpoint.outputs.saved }}
-          CHECKPOINT_REASON: ${{ steps.checkpoint.outputs.reason }}
-          DECLARED_PAGE_CHANGE_COUNT: ${{ steps.checkpoint.outputs.declared_page_change_count }}
-          AUDIT_VERDICT: ${{ steps.audit.outputs.verdict }}
-        run: |
-          git worktree add --detach "$RUNNER_TEMP/diagnostic-tools" "$GITHUB_SHA"
-          node "$RUNNER_TEMP/diagnostic-tools/scripts/autopilot-diagnostics.mjs" --save "$RUNNER_TEMP/autopilot-diagnostic"
+          CHECKPOINT_OUTCOME: ${{ needs.autopilot.outputs.checkpoint_outcome }}
+          CHECKPOINT_SAVED: ${{ needs.autopilot.outputs.checkpoint_saved }}
+          CHECKPOINT_REASON: ${{ needs.autopilot.outputs.checkpoint_reason }}
+          DECLARED_PAGE_CHANGE_COUNT: ${{ needs.autopilot.outputs.declared_page_change_count }}
+          AUDIT_VERDICT: ${{ needs.autopilot.outputs.audit_verdict }}
+        run: node "$GITHUB_WORKSPACE/tools/scripts/autopilot-diagnostics.mjs" --save "$RUNNER_TEMP/autopilot-diagnostic"
 
       - name: Upload bounded execution diagnostics
         if: always() && steps.diagnostics.outputs.saved == 'true'
@@ -721,7 +882,7 @@ jobs:
   # This token exists only in this job: no checkout, PAT, model, or Actions write access.
   notify-completion:
     name: Notify Autopilot Act
-    needs: autopilot
+    needs: [autopilot, publish]
     if: always() && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 3

@@ -22,9 +22,10 @@
       "trust": "none",
       "mitigations": [
         "読んだ内容を**シェルに渡さない**（Runbookの実装規約）",
-        "記事に引用するときは一次情報のURLを併記し、**取得日を書く**"
+        "記事に引用するときは一次情報のURLを併記し、**取得日を書く**",
+        "**Actions主系（obsidian-autopilot.yml）では、読んだセッションに書き込みの資格情報が無い**（2026-10-20）。GH_PAT・書き込み可能なトークン・id-token をモデルのジョブ全体から外し、checkout も資格情報を残さない。push・PR作成・記帳は、モデルを動かさない publish ジョブが $GITHUB_SHA の scripts/autopilot-publish.mjs で引き渡しを検証してから行う（.github/**・秘密ファイル・symlink/gitlink・巨大ファイル・未承認の名義を拒否、force push なし）。配線は node scripts/autopilot-publish.mjs --check がCIで固定する"
       ],
-      "residual_risk": "**セッションの判断そのものは汚染されうる。**『この手順に従え』と書かれたページを読んだときに従わない保証は、モデルの側にしか無い"
+      "residual_risk": "**セッションの判断そのものは汚染されうる。**『この手順に従え』と書かれたページを読んだときに従わない保証は、モデルの側にしか無い。Actions主系でも、汚染されたセッションが書いたページ・スクリプトの変更やPR本文は publish の拒否リストに当たらない限り公開され、SEO Validation が通れば auto-merge される（人の承認を挟む変更は後続）。モデルのランナーには CLAUDE_CODE_OAUTH_TOKEN と GCP の鍵が残る。Mac Codex 経路はこの分離の対象外"
     },
     {
       "id": "github-issue-comment",

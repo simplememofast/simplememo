@@ -298,6 +298,12 @@
       "broke": "実行ID照合削除・開始前と同じ記録の再利用・確認不能をmissingへ変更・snapshotのrun/attempt照合削除・PR待ちを本番証明へ変更・検査をモデルの作業treeから実行する配線へ変更、の6変異を実際の自己検査で検出。観測側のunknown分類を外す変異もAct自己検査で検出。41項目には実CLIのcapture→verifyと終了コード/step output、missing/unknown、開始前snapshotの上書き拒否を含む。手動の実API読取は旧実行33959414641に対応するPR不在を確認したが、過去のGitHub結果や無人実績は書き換えない。"
     },
     {
+      "script": "scripts/autopilot-publish.mjs",
+      "state": "demonstrated",
+      "at": "2026-10-20",
+      "broke": "隔離した写しで6通り壊し、node --test scripts/autopilot-publish.test.mjs（本物のgit・ローカルのbareリポジトリ・通信なし）か --selftest が落ちることを実測。(1) コミット名義の照合を外す → 未承認の著者・共著者・committer を拒否する検体が落ちる。(2) .github を拒否リストから外す → ワークフロー追加と「足して消した」コミットの検体が落ちる。(3) push に --force を足す → 非fast-forwardの更新を拒否する検体が落ちる。(4) publish段の名前とActの読む語の衝突検査を外す → --selftest の改名変異が落ちる。(5) 記帳時の scripts/ の差し替えで先に消すのをやめる → 仕込んだ scripts/json.py が信頼側の実行中に残り記帳の検体が落ちる。(6) 緊急停止の再確認を外す → 停止中に公開する検体が落ちる。元実装は全件成功。--check は実際の obsidian-autopilot.yml を読み、モデルのジョブに GH_PAT・書き込み権限・id-token が無いこと、publish が $GITHUB_SHA の道具だけを実行すること、GH_PAT が3段にしか無いことを確かめる。翻訳・sitemap の再生成（実スクリプト）は単体テストでは置き換えており、本番の1回で確認する。"
+    },
+    {
       "script": "scripts/autopilot-runs.mjs",
       "state": "demonstrated",
       "at": "2026-09-04",

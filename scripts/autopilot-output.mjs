@@ -145,12 +145,20 @@ export function checkWiring(source) {
   assert(source.indexOf('name: Capture output baseline before the model') < source.indexOf('name: Claude Code（'), 'capture must precede the model');
   assert.match(captureStep, /git worktree add --detach "\$RUNNER_TEMP\/output-tools" "\$GITHUB_SHA"/);
   assert.match(captureStep, /node "\$RUNNER_TEMP\/output-tools\/scripts\/autopilot-output.mjs" --capture/);
-  const verifyStep = source.split('      - name: 成果物の実行IDを照合\n')[1]?.split('\n      - name:')[0];
+  // The PR is opened by the model-free publish job, so the receipt is verified there,
+  // against the baseline the model job captured before the model ran.
+  assert.match(captureStep, /echo "baseline=\$\(base64 -w0 "\$RUNNER_TEMP\/autopilot-output-before\.json"\)" >> "\$GITHUB_OUTPUT"/);
+  assert.match(source, /\n      baseline: \$\{\{ steps\.output_baseline\.outputs\.baseline \}\}\n/, 'baseline must leave the model job as a job output');
+  const publishJob = source.split('\n  publish:\n')[1];
+  assert(publishJob, 'publish job must exist');
+  assert(!source.split('\n  publish:\n')[0].includes('      - name: 成果物の実行IDを照合\n'), 'verification must not run in the model job');
+  const verifyStep = publishJob.split('      - name: 成果物の実行IDを照合\n')[1]?.split('\n      - name:')[0];
   assert(verifyStep, 'verification must be wired');
-  assert.match(verifyStep, /steps\.claude\.outcome == 'success'/);
-  assert.match(verifyStep, /node "\$RUNNER_TEMP\/output-tools\/scripts\/autopilot-output.mjs" --verify/);
-  assert.doesNotMatch(verifyStep, /continue-on-error|git ls-remote|curl/);
-  assert.match(source, /name: "成果物判定: \$\{\{ steps\.output\.outputs\.verdict \|\| 'unknown' \}\}"/);
+  assert.match(verifyStep, /needs\.autopilot\.outputs\.model_outcome == 'success'/);
+  assert.match(verifyStep, /OUTPUT_BASELINE: \$\{\{ needs\.autopilot\.outputs\.baseline \}\}/);
+  assert.match(verifyStep, /node "\$GITHUB_WORKSPACE\/tools\/scripts\/autopilot-output.mjs" --verify/);
+  assert.doesNotMatch(verifyStep, /continue-on-error|git ls-remote|curl|secrets\./);
+  assert.match(publishJob, /name: "成果物判定: \$\{\{ steps\.output\.outputs\.verdict \|\| 'unknown' \}\}"/);
 }
 
 async function selftest() {
