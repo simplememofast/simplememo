@@ -939,6 +939,24 @@
       "expr": "lines",
       "disposition": "安全側へ倒れる",
       "note": "2026-10-24: if: の値が続く行（空行か、キーより深い字下げの行）を集める走査の上限。続きが無ければその行だけを式として調べ、どの場合も式を捨てない（拾う範囲が増えるだけ）。selftest で折り返した if: の中の structured_output も拒否されることを確認。"
+    },
+    {
+      "file": "scripts/autopilot-data.mjs",
+      "expr": "report.full_window",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-20: checkReport（モデルのジョブが collect ジョブの報告を読む）の assert の中の項。ready の報告は full_window とダイジェストの label・行数をすべて持つことを要求し、どれかが欠けると assert が落ちて unavailable（digest_validation）になる。欠けたら通す向きではない。--selftest の報告の改変検体で固定。"
+    },
+    {
+      "file": "scripts/autopilot-data.mjs",
+      "expr": "meta.digest",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-20: loadDigest の assert の中の項。届いた meta.json に digest（版・規則・untrusted_fields）が無い・違うときは assert が落ちて unavailable になり、モデルへ GROWTH_GSC_DIR を渡さない。欠けたら規則の照合を飛ばす向きではない。--selftest の規則改変の検体で固定。"
+    },
+    {
+      "file": "scripts/autopilot-data.mjs",
+      "expr": "report.newest_data_date",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-20: loadDigest の assert の中の等式。報告の最新日・日数がダイジェストの dates から導いた値と一致しなければ落ちて unavailable になる。値が無い（null）報告は ready として checkReport を通らないので、ここで欠けたまま一致することは無い。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
@@ -1530,6 +1548,12 @@
       "expr": "before",
       "disposition": "読めないときは止める側",
       "note": "2026-10-27: ledgerReasons。ファイル一覧で変わったとされた台帳が、マージの土台でも head でも読めない（両方 null）なら、一覧と読み出しが食い違っているので unreadable を返して承認待ちにする（点検の指摘）。片側だけ null は ledgerChange が unreadable を返す。両側とも無い台帳を「変更なし」と読むのは publish 側（一覧に出ていない台帳）だけ。"
+    },
+    {
+      "file": "scripts/autopilot-data.mjs",
+      "expr": "value",
+      "disposition": "前提",
+      "note": "2026-10-20: plainData の型の振り分け。JSON の null は値として正当なので plain とする。meta そのものが null・配列・非オブジェクトの場合は buildDigest が plainData より前の assert で落とすので、null の meta が「plain」として通ることは無い（--selftest で null・配列・文字列の meta を拒否することを確認）。"
     }
   ]
 }

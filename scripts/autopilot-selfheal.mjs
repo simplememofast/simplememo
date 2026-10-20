@@ -433,7 +433,18 @@ const SCENARIOS = ledgerScenarios(
  */
 export function checkRecoveryWiring(source) {
   // コメント行は数えない（段の説明に変数名を書くのは配線ではない）。
-  const steps = source.split('\n').filter(l => !/^\s*#/.test(l)).join('\n').split(/\n(?=      - name: )/);
+  const active = source.split('\n').filter(l => !/^\s*#/.test(l)).join('\n');
+  // モデルを動かさない collect ジョブ（Search Console の取得・2026-10-20）は、鍵を使う前に同じ dry-run を
+  // 読むだけで行う。試運転の日に取得だけが止まらないよう同じ値を渡すが、印（id: contain）は出さない。
+  const collectMatch = active.match(/\n {2}collect:\n[\s\S]*?(?=\n {2}[A-Za-z0-9_-]+:\n|$)/);
+  const collectJob = collectMatch ? collectMatch[0] : '';
+  const wired = s => s.includes(`${ACTIONS_RECOVERY.variable}: \${{ vars.${ACTIONS_RECOVERY.variable} }}`);
+  for (const s of collectJob.split(/\n(?=      - name: )/).slice(1)) {
+    const checks = s.includes('node scripts/autopilot-selfheal.mjs --contain --dry-run');
+    assert(checks === s.includes(ACTIONS_RECOVERY.variable) && (!checks || (wired(s) && !/\n        id: contain\n/.test(s))),
+      `collect ジョブで ${ACTIONS_RECOVERY.variable} を読むのは封じ込めの確認だけ（値を渡し、id: contain は使わない）`);
+  }
+  const steps = active.replace(collectJob, '').split(/\n(?=      - name: )/);
   const contain = steps.filter(s => s.includes('node scripts/autopilot-selfheal.mjs --contain --dry-run'));
   assert(contain.length === 1, '封じ込めの段が1つではない');
   assert(/\n        id: contain\n/.test(contain[0]), '封じ込めの段に id: contain が無い（試運転の印が読めない）');
@@ -560,6 +571,12 @@ export function checkRecoveryWiring(source) {
         assert(threw, `${label} を通した`);
       };
       throws(source.replace(`${ACTIONS_RECOVERY.variable}: \${{ vars.${ACTIONS_RECOVERY.variable} }}`, ''), '変数の外れた封じ込め');
+      const modelAt = source.indexOf('\n  autopilot:\n');
+      throws(source.slice(0, modelAt) + source.slice(modelAt).replace(`${ACTIONS_RECOVERY.variable}: \${{ vars.${ACTIONS_RECOVERY.variable} }}`, ''),
+        'モデルのジョブで変数の外れた封じ込め');
+      throws(source.replace('        id: collect_contain\n', '        id: contain\n'), 'collect ジョブの確認に id: contain');
+      throws(source.replace('        id: collect_budget\n', `        id: collect_budget\n        env:\n          ${ACTIONS_RECOVERY.variable}: \${{ vars.${ACTIONS_RECOVERY.variable} }}\n`),
+        'collect ジョブの封じ込め以外の段への変数');
       throws(source.replace('        id: contain\n', ''), 'id の無い封じ込め');
       throws(source.replace('        id: claude\n', `        id: claude\n        env:\n          X: \${{ vars.${ACTIONS_RECOVERY.variable} }}\n`), 'モデルの段への変数');
       throws(source.replace("steps.contain.outputs.recovery == 'actions_once'", "steps.contain.outputs.recovery == 'x'"), '印の段の無い配線');
