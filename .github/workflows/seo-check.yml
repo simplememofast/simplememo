@@ -57,6 +57,9 @@ jobs:
       - name: Refactoring regression tests (no network)
         run: node --test scripts/refactor.test.mjs
 
+      - name: Admin gate verifies the Cloudflare Access JWT (no network)
+        run: node --test scripts/admin-access-middleware.test.mjs
+
       - name: Acquisition measurement and GSC aggregation regressions
         run: node --test growth/lib/measurement.test.mjs growth/lib/ingest-gsc.test.mjs growth/lib/ai-gsc-export.test.mjs growth/lib/gsc-privacy.test.mjs growth/lib/cta-tracking.test.mjs growth/lib/analytics.test.mjs
 

@@ -8,7 +8,7 @@
 
 - 保管場所: **Cloudflare Pages プロジェクトの「環境変数」** に Secret タイプで登録
 - 読み取り箇所: `functions/admin/api/x-verify.js` の `context.env.X_*`
-- 認証保護: `/admin/*` は Cloudflare Access (Zero Trust) でエッジ保護。Identity allowlist は Zero Trust ダッシュボードで管理
+- 認証保護: `/admin/*` は Cloudflare Access (Zero Trust) でエッジ保護。Identity allowlist は Zero Trust ダッシュボードで管理。`functions/admin/_middleware.js` が Access の JWT を検証するため、`ACCESS_TEAM_DOMAIN` と `ACCESS_AUD`（§2）が必須
 - デプロイ後: 環境変数を変更したら **再デプロイが必要**（Pages の仕様）
 
 ---
@@ -17,6 +17,8 @@
 
 | 変数名 | 用途 | 必須か | 取得元 |
 |--------|------|--------|--------|
+| `ACCESS_TEAM_DOMAIN` | Access の JWT を検証するためのチームドメイン（例: `<team>.cloudflareaccess.com`）。秘密値ではない | **必須**（未設定だと `/admin/*` はすべて 500） | Zero Trust ダッシュボード → Settings の Team domain |
+| `ACCESS_AUD` | Access アプリ `simplememo-admin` の Application Audience (AUD) Tag。複数の Access アプリで `/admin/*` を守る場合はカンマ区切りで並べる。秘密値ではない | **必須**（同上） | Zero Trust → Access → Applications → `simplememo-admin` → Overview の AUD Tag |
 | `X_BEARER_TOKEN` | OAuth 2.0 App-only Bearer Token。読み取り API（検索等）で使用 | 推奨 | Developer Portal → Keys and tokens → Bearer Token |
 | `X_API_KEY` | OAuth 1.0a の Consumer Key | 投稿する場合 | Keys and tokens → API Key and Secret |
 | `X_API_SECRET` | OAuth 1.0a の Consumer Secret | 投稿する場合 | 同上 |
@@ -29,7 +31,8 @@
 
 ### どれを先に入れるか
 
-- **最低限**: `X_BEARER_TOKEN` だけ入れれば、この管理画面の「X API 接続テスト」は動きます（Basic ティア以上が必要）。
+- **管理画面を開くために必須**: `ACCESS_TEAM_DOMAIN` と `ACCESS_AUD`。どちらかが欠けると `/admin/*` は開けません（安全側に倒して全拒否）。
+- **最低限**: 上記に加えて `X_BEARER_TOKEN` だけ入れれば、この管理画面の「X API 接続テスト」は動きます（Basic ティア以上が必要）。
 - **日本語アカウント（@simplememofast）への投稿を自動化したい場合**: OAuth 1.0a の 4 点セット（`X_API_KEY` / `X_API_SECRET` / `X_ACCESS_TOKEN` / `X_ACCESS_TOKEN_SECRET`）をすべて登録。
 - **英語アカウント（@simplememo_en）への投稿も自動化したい場合**: 上記 4 点に加えて `X_EN_*` の 4 点（`X_EN_API_KEY` / `X_EN_API_SECRET` / `X_EN_ACCESS_TOKEN` / `X_EN_ACCESS_TOKEN_SECRET`）を登録。投稿時に Body の `account: "en"` で切替。
 - **自アカウント情報（`/2/users/me`）を取得したい場合**: 「動作確認」タブの「自アカウント情報を取得」ボタンから OAuth 1.0a User Context（投稿用キーと同じ 4 点）で叩く。アプリ専用 Bearer Token では取得できないエンドポイント。
@@ -169,7 +172,8 @@ npx wrangler pages dev .
 
 ## 8. セキュリティ上の注意
 
-- 管理画面は Cloudflare Access (Zero Trust) で `simplememofast.com/admin/*` がエッジ保護されています。Identity allowlist は Zero Trust ダッシュボード → Access → Applications → `simplememo-admin` のポリシーで管理。`functions/admin/_middleware.js` は `Cf-Access-Jwt-Assertion` の有無を最終チェックするのみで、ハードコード認証情報はありません。
+- 管理画面は Cloudflare Access (Zero Trust) で `simplememofast.com/admin/*` がエッジ保護されています。Identity allowlist は Zero Trust ダッシュボード → Access → Applications → `simplememo-admin` のポリシーで管理。`functions/admin/_middleware.js` は `Cf-Access-Jwt-Assertion` の JWT をチームの公開鍵（`https://<ACCESS_TEAM_DOMAIN>/cdn-cgi/access/certs`）で署名検証し、`iss`・`aud`（`ACCESS_AUD`）・`exp`/`nbf` を確かめます。ヘッダが付いているだけの要求や、`Cf-Access-Authenticated-User-Email` だけの要求は通しません。ハードコード認証情報はありません。
+- **JWT 検証を入れる前にビルドされたデプロイは、旧ミドルウェア（ヘッダの有無だけを見る門）とビルド時点の Secret のまま残ります。**Pages の各デプロイ（`<hash>.simplememo-596.pages.dev`）は不変で、環境変数もデプロイ時に固定されるため（§1）、コードの更新だけでは塞がりません。JWT 検証版を本番に出すときは、(1) それ以前のデプロイを Pages → Deployments から削除するか、`simplememo-596.pages.dev` と `*.simplememo-596.pages.dev` も Access アプリの対象に入れ、(2) 旧デプロイに外から届いた可能性に備えて `X_*` / `X_EN_*`（OAuth 1.0a の 4 点と Bearer Token）と `POSTIZ_API_KEY` を発行元で再発行し、Cloudflare の値を更新して再デプロイしてください。
 - Secret は一度登録すると Cloudflare Dashboard でも値を再表示できません。控えを別途安全な場所に保管しておくこと。
 - キーが漏洩した疑いがある場合は、Developer Portal で **Regenerate** して旧キーを無効化、Cloudflare の Secret も上書き更新、再デプロイ、という順で対応します。
 - Git の履歴にキーを混入させないため、コードやコメントに直接書かない。`.dev.vars` `.env` などは必ず `.gitignore` に追加。
@@ -198,10 +202,17 @@ npx wrangler pages dev .
 
 - レートリミット超過 → 15 分待つ。クエリの頻度を下げる
 
-### 管理画面自体が開けない
+### 管理画面自体が開けない（403 / 500 / 503）
 
-- Basic 認証の ID/パスワードを忘れた → `functions/admin/_middleware.js` の `CREDENTIALS` を確認
-- Cookie が壊れている → ブラウザでサイトのクッキーを削除してから再ログイン
+応答ヘッダ `X-Auth-Debug` の `reason=` で原因を切り分けます。
+
+- `no_jwt` → Access を通っていない（Access アプリの対象外のホスト名から開いた、または Access の設定漏れ）
+- `not_configured`（500） → `ACCESS_TEAM_DOMAIN` / `ACCESS_AUD` が未設定か形式違い。登録して再デプロイ
+- `aud` → `ACCESS_AUD` がこの Access アプリの AUD Tag と一致しない
+- `kid` / `signature` / `iss` → `ACCESS_TEAM_DOMAIN` が別のチームを指している、またはトークンが偽物
+- `exp` / `nbf` → Access のセッション切れ。Cookie を削除して再ログイン
+- `keys_unavailable`（503） → Access の公開鍵を取得できなかった。時間をおいて再試行
+- ローカルの `wrangler pages dev` は Access を通らないため、`/admin/*` は開けません（ヘッダを手で付けても通りません）
 
 ---
 
