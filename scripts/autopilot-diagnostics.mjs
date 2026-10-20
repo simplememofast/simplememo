@@ -54,8 +54,8 @@ export function modelSummary(execution) {
   };
 }
 
-export function receipt(env, execution = null, executionHash = null, readReason = null, exit = {}) {
-  const model = modelSummary(execution);
+export function receipt(env, execution = null, executionHash = null, readReason = null, exit = {}, summarized = null) {
+  const model = summarized ?? modelSummary(execution);
   const day = /^\d{4}-\d{2}-\d{2}$/.test(env.TODAY_DASH ?? '') ? env.TODAY_DASH : null;
   const verdict = oneOf(env.OUTPUT_VERDICT, Object.keys(REASONS));
   const checkpointOutcome = oneOf(env.CHECKPOINT_OUTCOME, ['success', 'failure', 'skipped', 'cancelled']);
@@ -86,7 +86,7 @@ export function receipt(env, execution = null, executionHash = null, readReason 
   result.observations_unknown = Object.entries(result).filter(([, value]) => value === null).map(([key]) => key);
   if (readReason) result.observations_unknown.push(oneOf(readReason,
     ['execution_file_missing', 'execution_file_unavailable', 'execution_file_oversized',
-      'execution_file_invalid_json', 'execution_file_unexpected_path']) ?? 'execution_file_unavailable');
+      'execution_file_invalid_json', 'execution_file_unexpected_path', 'execution_summary_unavailable']) ?? 'execution_file_unavailable');
   if (exit.reason) result.observations_unknown.push(oneOf(exit.reason,
     ['exit_report_missing', 'exit_report_unavailable', 'exit_report_oversized', 'exit_report_invalid']) ?? 'exit_report_unavailable');
   return result;
@@ -141,27 +141,88 @@ function readExecution(env) {
   } finally { if (fd !== undefined) fs.closeSync(fd); }
 }
 
+// The model job reduces the execution and exit files to this typed summary (a job
+// output); the receipt is assembled in the publish job after the output check.
+const READ_REASONS = ['execution_file_missing', 'execution_file_unavailable', 'execution_file_oversized',
+  'execution_file_invalid_json', 'execution_file_unexpected_path'];
+const EXIT_REASONS = ['exit_report_missing', 'exit_report_unavailable', 'exit_report_oversized', 'exit_report_invalid'];
+const MAX_SUMMARY_BYTES = 4096;
+
+export function summarize(env = process.env) {
+  const read = readExecution(env);
+  const exit = readExit(env);
+  return { ...modelSummary(read.execution), model_exit_code: exit.code ?? null,
+    execution_file_sha256: read.sha256 ?? null, read_reason: read.reason ?? null, exit_reason: exit.reason ?? null };
+}
+
+// The summary passed through the model's runner: every field is re-validated, and
+// anything else (or an unparsable summary) becomes an explicit unknown.
+export function fromSummary(text) {
+  let raw;
+  try {
+    assert(typeof text === 'string' && text.length > 0 && Buffer.byteLength(text) <= MAX_SUMMARY_BYTES);
+    raw = JSON.parse(text);
+    assert(raw && typeof raw === 'object' && !Array.isArray(raw));
+  } catch { return { model: modelSummary(null), readReason: 'execution_summary_unavailable', exit: { reason: 'exit_report_unavailable' } }; }
+  let denied = null;
+  if (raw.denied_tool_counts && typeof raw.denied_tool_counts === 'object' && !Array.isArray(raw.denied_tool_counts)) {
+    const entries = Object.entries(raw.denied_tool_counts);
+    if (entries.length <= TOOLS.size + 1 && entries.every(([tool, n]) => (TOOLS.has(tool) || tool === 'unknown') && count(n) !== null)) {
+      denied = Object.fromEntries(entries);
+    }
+  }
+  const model = {
+    result_subtype: oneOf(raw.result_subtype, SUBTYPES),
+    is_error: typeof raw.is_error === 'boolean' ? raw.is_error : null,
+    num_turns: count(raw.num_turns),
+    permission_denials_count: count(raw.permission_denials_count),
+    denied_tool_counts: denied,
+  };
+  const code = oneOf(raw.model_exit_code, EXIT_CODES);
+  return { model, executionHash: hash(raw.execution_file_sha256, 64), readReason: oneOf(raw.read_reason, READ_REASONS),
+    exit: code ? { code } : { reason: oneOf(raw.exit_reason, EXIT_REASONS) ?? 'exit_report_unavailable' } };
+}
+
 export function save(output, env = process.env) {
   assert(path.isAbsolute(env.RUNNER_TEMP ?? '') && path.isAbsolute(output), 'absolute temp paths required');
   assert.equal(path.basename(output), 'autopilot-diagnostic');
   assert.equal(fs.realpathSync(path.dirname(output)), fs.realpathSync(env.RUNNER_TEMP));
-  const read = readExecution(env);
-  const data = receipt(env, read.execution, read.sha256, read.reason, readExit(env));
+  let data;
+  if (env.EXEC_SUMMARY !== undefined) {
+    const summary = fromSummary(env.EXEC_SUMMARY);
+    data = receipt(env, null, summary.executionHash, summary.readReason, summary.exit, summary.model);
+  } else {
+    const read = readExecution(env);
+    data = receipt(env, read.execution, read.sha256, read.reason, readExit(env));
+  }
   fs.mkdirSync(output, { mode: 0o700 }); // never reuse a directory or upload its prior contents
   fs.writeFileSync(path.join(output, 'receipt.json'), JSON.stringify(data, null, 2) + '\n', { mode: 0o600, flag: 'wx' });
   return data;
 }
 
 export function checkWiring(source) {
-  const step = source.split('      - name: Preserve bounded execution diagnostics\n')[1]?.split('\n      - name:')[0];
+  // The model job reduces the execution file to a typed summary (trusted tools from the
+  // workflow commit); the publish job, after the output check, assembles the receipt.
+  const [modelJob, publishJob] = source.split('\n  publish:\n');
+  assert(publishJob, 'publish job must exist');
+  const summary = modelJob.split('      - name: Summarize the execution file\n')[1]?.split('\n      - name:')[0];
+  assert(summary, 'execution summary must be wired in the model job');
+  assert.match(summary, /(^|\n)        id: exec_summary\n/);
+  assert.match(summary, /!cancelled\(\) &&\s+\(steps\.claude\.outcome == 'success' \|\| steps\.claude\.outcome == 'failure'\)/);
+  assert.match(summary, /\n        continue-on-error: true\n/, 'the summary must not change the execution verdict');
+  assert.match(summary, /git worktree add --detach "\$RUNNER_TEMP\/diagnostic-tools" "\$GITHUB_SHA"/);
+  assert.match(summary, /node "\$RUNNER_TEMP\/diagnostic-tools\/scripts\/autopilot-diagnostics.mjs" --summarize/);
+  assert.match(modelJob, /\n      exec_summary: \$\{\{ steps\.exec_summary\.outputs\.summary \}\}\n/);
+  const step = publishJob.split('      - name: Preserve bounded execution diagnostics\n')[1]?.split('\n      - name:')[0];
   assert(step, 'diagnostic receipt must be wired');
-  assert.match(step, /!cancelled\(\) &&\s+\(steps\.claude\.outcome == 'success' \|\| steps\.claude\.outcome == 'failure'\)/);
-  assert.match(step, /git worktree add --detach "\$RUNNER_TEMP\/diagnostic-tools" "\$GITHUB_SHA"/);
-  assert.match(step, /node "\$RUNNER_TEMP\/diagnostic-tools\/scripts\/autopilot-diagnostics.mjs" --save "\$RUNNER_TEMP\/autopilot-diagnostic"/);
+  assert.match(step, /!cancelled\(\) &&\s+\(needs\.autopilot\.outputs\.model_outcome == 'success' \|\| needs\.autopilot\.outputs\.model_outcome == 'failure'\)/);
+  assert.match(step, /node "\$GITHUB_WORKSPACE\/tools\/scripts\/autopilot-diagnostics.mjs" --save "\$RUNNER_TEMP\/autopilot-diagnostic"/);
+  assert.match(step, /EXEC_SUMMARY: \$\{\{ needs\.autopilot\.outputs\.exec_summary \}\}/);
   assert.match(step, /OUTPUT_REASON_CODE: \$\{\{ steps.output.outputs.reason_code \}\}/);
-  assert.match(step, /CHECKPOINT_REASON: \$\{\{ steps.checkpoint.outputs.reason \}\}/);
-  assert.match(step, /AUDIT_VERDICT: \$\{\{ steps.audit.outputs.verdict \}\}/);
-  const upload = source.split('      - name: Upload bounded execution diagnostics\n')[1]?.split('\n  #')[0];
+  assert.match(step, /CHECKPOINT_REASON: \$\{\{ needs.autopilot.outputs.checkpoint_reason \}\}/);
+  assert.match(step, /AUDIT_VERDICT: \$\{\{ needs.autopilot.outputs.audit_verdict \}\}/);
+  assert.doesNotMatch(step, /secrets\./);
+  const upload = publishJob.split('      - name: Upload bounded execution diagnostics\n')[1]?.split('\n  #')[0];
   assert(upload, 'diagnostic upload must be wired');
   assert.match(upload, /if: always\(\) && steps.diagnostics.outputs.saved == 'true'/);
   assert.match(upload, /\n        continue-on-error: true\n/, 'diagnostic upload must not change the execution verdict');
@@ -179,6 +240,12 @@ export function checkWiring(source) {
 async function main() {
   if (process.argv.includes('--selftest')) return (await import('./autopilot-diagnostics.test.mjs')).selftest();
   if (process.argv.includes('--check')) return checkWiring(fs.readFileSync(path.join(ROOT, '.github/workflows/obsidian-autopilot.yml'), 'utf8'));
+  if (process.argv[2] === '--summarize') {
+    const summary = JSON.stringify(summarize());
+    if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, `summary=${summary}\n`);
+    console.log('Bounded execution summary prepared (typed fields only).');
+    return;
+  }
   assert.equal(process.argv[2], '--save');
   save(process.argv[3]);
   if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, 'saved=true\n');

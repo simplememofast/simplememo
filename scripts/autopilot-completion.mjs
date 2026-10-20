@@ -23,8 +23,13 @@ export function primaryJob(jobs) {
   return jobs.find(job => job.name === 'autopilot') ?? null;
 }
 
+// The output check and its verdict run in the model-free `publish` job (it opens the PR).
+// Act reads one run as the model job's steps followed by the publish job's steps.
 export function primarySteps(jobs) {
-  return primaryJob(jobs)?.steps ?? null;
+  const primary = primaryJob(jobs);
+  if (!primary?.steps) return null;
+  const publish = jobs.find(job => job.name === 'publish');
+  return [...primary.steps, ...(publish?.steps ?? [])];
 }
 
 function isRun(run, id, workflow) {
@@ -109,7 +114,7 @@ export function checkWiring(primary, act, source) {
   const job = primary.split('\n  notify-completion:\n')[1];
   assert.ok(job, 'Completion notification job is missing');
   assert.match(job, /name: Notify Autopilot Act/);
-  assert.match(job, /needs: autopilot/);
+  assert.match(job, /needs: \[autopilot, publish\]/);
   assert.match(job, /if: always\(\) && github\.ref == 'refs\/heads\/main'/);
   assert.match(job, /continue-on-error: true/);
   assert.match(job, /permissions:\n      contents: write\n    steps:/);
@@ -259,14 +264,18 @@ async function selftest() {
     sleep: async () => { waits++; } }), /bounded completion wait/);
   assert.equal(waits, 12);
   const modelSteps = [{ name: 'Claude Code', conclusion: 'failure' }];
-  assert.equal(primarySteps([...jobs, { name: 'autopilot', steps: modelSteps }]), modelSteps);
+  assert.deepEqual(primarySteps([...jobs, { name: 'autopilot', steps: modelSteps }]), modelSteps);
+  const publishSteps = [{ name: '成果物判定: verified', conclusion: 'success' }];
+  assert.deepEqual(primarySteps([...jobs, { name: 'publish', steps: publishSteps }, { name: 'autopilot', steps: modelSteps }]),
+    [...modelSteps, ...publishSteps]);
+  assert.equal(primarySteps([...jobs, { name: 'publish', steps: publishSteps }]), null);
   assert.equal(primarySteps(jobs), null);
   const primary = fs.readFileSync(path.join(ROOT, '.github/workflows/obsidian-autopilot.yml'), 'utf8');
   const act = fs.readFileSync(path.join(ROOT, '.github/workflows/autopilot-act.yml'), 'utf8');
   const source = fs.readFileSync(path.join(ROOT, 'scripts/autopilot-act.mjs'), 'utf8');
   checkWiring(primary, act, source);
   testPendingBranch(act);
-  for (const mutated of [primary.replace('needs: autopilot', 'needs: absent'),
+  for (const mutated of [primary.replace('needs: [autopilot, publish]', 'needs: autopilot'),
     primary.replace('createDispatchEvent', 'getWorkflow'),
     primary.replace('github-token: ${{ github.token }}', 'github-token: ${{ secrets.GH_PAT }}'),
     primary.replace('actions: read', 'actions: write')]) {

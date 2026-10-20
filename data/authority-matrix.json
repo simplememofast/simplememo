@@ -790,7 +790,11 @@
       "つまりこの食い違いは残す。残すなら、**ぶつかる前に分かるようにする。**",
       "ここに載っているパスを触るアクションは無人実行(auto)へ回らず、",
       "push できる副系CCRセッションへ回る（classify() が判定・validateLedger() が検査）。",
-      "レーンFは原因特定までを担い、適用は副系が引き取る——2026-08-25 がその形。"
+      "レーンFは原因特定までを担い、適用は副系が引き取る——2026-08-25 がその形。",
+      "",
+      "【2026-10-20】Actions主系では、モデルのジョブに GH_PAT が無い。push はモデルを動かさない",
+      "publish ジョブ（scripts/autopilot-publish.mjs）が行い、.github/** などを拒否リストで落とすのが第一線、",
+      "GitHub の remote rejected が第二線になった。どちらも、このパスが無人の主系から push されないという結論は同じ。"
     ],
     "unattended_cannot_push": {
       "paths": [
@@ -859,7 +863,8 @@
       "node scripts/code-authorship.mjs --check",
       "node scripts/check-store-facts.mjs --check",
       "node growth/scripts/check-mentions.mjs --check",
-      "node scripts/autopilot-act.mjs --check"
+      "node scripts/autopilot-act.mjs --check",
+      "node scripts/autopilot-publish.mjs --check"
     ]
   },
   "company_monthly_budget": {

@@ -54,6 +54,14 @@ jobs:
       - name: Auto-merge identity guard regression
         run: node scripts/merge-identity-check.js --selftest
 
+      # The Autopilot model job holds no write credential; its handoff is verified and
+      # published by trusted code (scripts/autopilot-publish.mjs). Real git, no network.
+      - name: Autopilot publish guard regression
+        run: |
+          node --test scripts/autopilot-publish.test.mjs
+          node scripts/autopilot-publish.mjs --selftest
+          node scripts/autopilot-publish.mjs --check
+
       - name: Refactoring regression tests (no network)
         run: node --test scripts/refactor.test.mjs
 
