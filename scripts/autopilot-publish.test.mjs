@@ -122,7 +122,8 @@ test('request schema', () => {
     'the ledger vocabulary includes hyphenated classes');
   for (const [extra, code] of [[{ failure_reason: undefined }, 'request_failure_reason'], [{ failure_reason: null }, 'request_failure_reason'],
     [{ failure_reason: '' }, 'request_failure_reason'], [{ failure_class: undefined }, 'request_failure_class'],
-    [{ failure_class: null }, 'request_failure_class'], [{ failure_class: 'No Artifact' }, 'request_failure_class'],
+    [{ failure_class: null }, 'request_failure_class'], [{ failure_class: ['no_artifact'] }, 'request_failure_class'],
+    [{ failure_class: 'No Artifact' }, 'request_failure_class'],
     [{ failure_class: '-x' }, 'request_failure_class'], [{ outcome: 'failed', failure_class: undefined }, 'request_failure_class']]) {
     assert.equal(validateRequest(noShip(extra), DAY).code, code, JSON.stringify(extra));
   }
@@ -369,6 +370,7 @@ test('record refuses a session row that disagrees with the request or lacks its 
   let n = 0;
   for (const [change, req, code] of [[{ failure_class: undefined }, noShip, 'record_row_failure_class'],
     [{ failure_class: 'No Class' }, noShip, 'record_row_failure_class'],
+    [{ failure_class: 'usage_limit' }, noShip, 'record_row_failure_class'],
     [{}, request(), 'record_row_outcome'],
     [{ outcome: 'failed' }, noShip, 'record_row_outcome'],
     [{}, noShip, null]]) {
@@ -381,11 +383,15 @@ test('record refuses a session row that disagrees with the request or lacks its 
       const result = await handoff(f, { req });
       assert.equal(result.verdict, 'publish');
       const calls = [];
+      const work = path.join(f.temp, `record-${n++}`);
       const run = () => record({ repo: f.tools, trusted: f.tools, sha: result.head, day: DAY, pr: 9, request: result.request,
-        runId: '123', work: path.join(f.temp, `record-${n++}`), runner: (...args) => calls.push(args) });
+        runId: '123', work, runner: (...args) => calls.push(args) });
       if (code) {
         assert.throws(run, error => error.code === code, JSON.stringify(change));
         assert.equal(calls.length, 0, 'nothing ran and nothing was written');
+        assert.deepEqual(JSON.parse(fs.readFileSync(path.join(work, 'data/autopilot-runs.json'), 'utf8')).runs,
+          [session], 'rejection leaves the ledger and PR binding unchanged');
+        assert.equal(sh(work, ['rev-parse', 'HEAD']), result.head, 'rejection makes no record commit');
       } else {
         const out = run();
         const bound = JSON.parse(sh(f.tools, ['show', `${out.sha}:data/autopilot-runs.json`])).runs[0];
