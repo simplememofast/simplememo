@@ -28,10 +28,11 @@ export const GENERATED = Object.freeze([
   ...GENERATED_LOCALES.map(locale => `${locale}/autopilot/index.html`),
   'sitemap.xml', 'sitemap-ja.xml', 'sitemap-en.xml', 'sitemap-locales.xml',
 ]);
-// What the publish job's own record commit is expected to touch (trusted code over branch
-// data). Other translation outputs of the same generators are accepted only if they pass
-// hardDenyReason(), exactly like the model's own commits.
-export const RECORD_PATHS = Object.freeze(['data/autopilot-runs.json', ...GENERATED]);
+// The only paths the publish job's own record commit may change (trusted code over branch data;
+// record() refuses any other change, deletions included): the run row, the status JSON's runs
+// block recounted from it (--write-status), the report page, its generated translations and the
+// sitemaps. Each changed file is also held to hardDenyReason(), like the model's own commits.
+export const RECORD_PATHS = Object.freeze(['data/autopilot-runs.json', 'data/autopilot-status.json', ...GENERATED]);
 
 export function isAutopilotBranch(name) {
   return typeof name === 'string' && DAY_BRANCH.test(name);

@@ -65,7 +65,12 @@ export async function runsAt(get, head) {
   return doc.runs;
 }
 
-export async function verify(snapshot, identity, get) {
+// The publish job pushes its record commit seconds before this check, and GitHub moves the PR
+// head asynchronously. 18 reads 5 s apart (about 90 s) before an older head counts as unsettled.
+export const HEAD_SETTLE = Object.freeze({ attempts: 18, interval_ms: 5_000 });
+const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+export async function verify(snapshot, identity, get, { expectedHead = null, settle = HEAD_SETTLE, sleep = pause } = {}) {
   // Bounded observations only; these never participate in the verdict.
   const evidence = { matching_pr_count: null, current_run_record_count: null, remote_head_sha: null };
   let phase = 'snapshot', readFailed = false;
@@ -74,6 +79,7 @@ export async function verify(snapshot, identity, get) {
     catch { readFailed = true; throw Error('remote read unavailable'); }
   };
   try {
+    assert(expectedHead === null || sha(expectedHead), 'expected head must be a commit SHA');
     assert.equal(snapshot?.version, 1, 'snapshot version');
     assert.equal(snapshot.verdict, 'ready', 'baseline unavailable');
     for (const key of ['repo', 'run_id', 'attempt', 'day', 'branch', 'base_sha']) assert.equal(snapshot[key], identity[key], `snapshot ${key} mismatch`);
@@ -100,8 +106,17 @@ export async function verify(snapshot, identity, get) {
     let unreadable = false, invalidOrStale = false;
     for (const listed of prs) {
       assert(Number.isInteger(listed?.number) && listed.number > 0, 'invalid PR inventory');
-      const pr = await read(`/pulls/${listed.number}`);
+      let pr = await read(`/pulls/${listed.number}`);
+      // Only an open PR follows the branch; wait until it shows the record commit just pushed.
+      for (let attempt = 1; expectedHead !== null && pr?.state === 'open' && pr.head?.sha !== expectedHead
+        && attempt < settle.attempts; attempt++) {
+        await sleep(settle.interval_ms);
+        pr = await read(`/pulls/${listed.number}`);
+      }
       assert(pr?.number === listed.number, 'PR disappeared during verification');
+      if (expectedHead !== null && pr.state === 'open' && pr.head?.ref === identity.branch && pr.head.sha !== expectedHead) {
+        unreadable = true; continue; // a head that has not caught up is not proof of absence
+      }
       if (pr.head?.ref !== identity.branch || pr.head.repo?.full_name !== identity.repo
         || pr.base?.ref !== 'main' || pr.base.repo?.full_name !== identity.repo
         || (pr.state !== 'open' && !(pr.state === 'closed' && pr.merged === true))) { invalidOrStale = true; continue; }
@@ -156,6 +171,9 @@ export function checkWiring(source) {
   assert(verifyStep, 'verification must be wired');
   assert.match(verifyStep, /needs\.autopilot\.outputs\.model_outcome == 'success'/);
   assert.match(verifyStep, /OUTPUT_BASELINE: \$\{\{ needs\.autopilot\.outputs\.baseline \}\}/);
+  // Wait for the record commit only when this job pushed it.
+  assert.match(verifyStep, /EXPECTED_HEAD: \$\{\{ steps\.push_record\.outcome == 'success' && steps\.record\.outputs\.record_sha \|\| '' \}\}/);
+  assert.match(publishJob, /      - name: Push the ledger commit\n        id: push_record\n/);
   assert.match(verifyStep, /node "\$GITHUB_WORKSPACE\/tools\/scripts\/autopilot-output.mjs" --verify/);
   assert.doesNotMatch(verifyStep, /continue-on-error|git ls-remote|curl|secrets\./);
   assert.match(publishJob, /name: "成果物判定: \$\{\{ steps\.output\.outputs\.verdict \|\| 'unknown' \}\}"/);
@@ -240,6 +258,46 @@ async function selftest() {
     assert.equal(result.reason_code, code);
     assert.equal(result.verdict, code.startsWith('unknown_') ? 'unknown' : 'missing');
   });
+  // The publish job pushes its record commit seconds before this check; the PR head follows later.
+  const stale = 'c'.repeat(40);
+  const lagging = (staleReads, base = fixture()) => {
+    let reads = 0;
+    return async endpoint => {
+      if (endpoint === '/pulls/940') return ++reads <= staleReads ? { ...pr, head: { ...pr.head, sha: stale } } : base(endpoint);
+      if (endpoint === `/contents/data/autopilot-runs.json?ref=${stale}`) {
+        return { type: 'file', encoding: 'base64', content: Buffer.from(JSON.stringify({ runs: [] })).toString('base64') };
+      }
+      return base(endpoint);
+    };
+  };
+  const waits = [];
+  const settle = { attempts: 4, interval_ms: 1 };
+  const sleep = async ms => { waits.push(ms); };
+  await t('a PR head that catches up with the pushed record is verified', async () => {
+    waits.length = 0;
+    const result = await verify(snapshot, identity, lagging(2), { expectedHead: head, settle, sleep });
+    assert.equal(result.verdict, 'verified'); assert.equal(waits.length, 2);
+  });
+  await t('a PR head that never catches up is unknown, not missing', async () => {
+    waits.length = 0;
+    const result = await verify(snapshot, identity, lagging(99), { expectedHead: head, settle, sleep });
+    assert.equal(result.verdict, 'unknown'); assert.equal(result.reason_code, 'unknown_concurrent_update');
+    assert.equal(waits.length, settle.attempts - 1, 'the wait is bounded');
+  });
+  await t('without a pushed record the stale head is read as before', async () => {
+    waits.length = 0;
+    const result = await verify(snapshot, identity, lagging(99), { settle, sleep });
+    assert.equal(result.verdict, 'missing'); assert.equal(result.reason_code, 'no_current_run_record'); assert.equal(waits.length, 0);
+  });
+  await t('a malformed expected head is unknown', async () => {
+    assert.equal((await verify(snapshot, identity, fixture(), { expectedHead: 'main', settle, sleep })).reason_code, 'unknown_snapshot');
+  });
+  await t('a merged PR is not waited for', async () => {
+    waits.length = 0;
+    const merged = { ...pr, state: 'closed', merged: true };
+    const result = await verify(snapshot, identity, fixture({ current: null, fresh: merged }), { expectedHead: stale, settle, sleep });
+    assert.equal(result.verdict, 'verified'); assert.equal(waits.length, 0);
+  });
   await t('no PR does not manufacture a zero record count or a remote head observation', async () => {
     assert.deepEqual((await check({ prs: [] })).evidence,
       { matching_pr_count: 0, current_run_record_count: null, remote_head_sha: null });
@@ -264,14 +322,16 @@ async function selftest() {
         else throw Error('Unexpected fixture URL');
         return {ok:true,status:200,json:async()=>value};
       };`);
-    const cli = (mode, phase) => spawnSync(process.execPath, ['--import', preload, fileURLToPath(import.meta.url), mode, snapshotFile], {
+    const cli = (mode, phase, extra = {}) => spawnSync(process.execPath, ['--import', preload, fileURLToPath(import.meta.url), mode, snapshotFile], {
       encoding: 'utf8', env: { ...process.env, GH_TOKEN: 'fixture', GITHUB_REPOSITORY: identity.repo,
         GITHUB_RUN_ID: identity.run_id, GITHUB_RUN_ATTEMPT: '1', GITHUB_SHA: old, TODAY_DASH: identity.day,
-        GITHUB_OUTPUT: path.join(directory, 'step-output'), SIMPLEMEMO_OUTPUT_TEST_PHASE: phase },
+        GITHUB_OUTPUT: path.join(directory, 'step-output'), SIMPLEMEMO_OUTPUT_TEST_PHASE: phase, EXPECTED_HEAD: '', ...extra },
     });
     await t('real capture and verifier CLI bind a pending result', async () => {
       assert.equal(cli('--capture', 'capture').status, 0);
       const result = cli('--verify', 'verified'); assert.equal(result.status, 0, result.stderr);
+      assert.equal(cli('--verify', 'verified', { EXPECTED_HEAD: head }).status, 0, 'the CLI reads the pushed record commit');
+      assert.equal(JSON.parse(cli('--verify', 'verified', { EXPECTED_HEAD: 'not-a-sha' }).stdout).reason_code, 'unknown_snapshot');
       assert.equal(JSON.parse(result.stdout).production_verified, false);
       assert.match(fs.readFileSync(path.join(directory, 'step-output'), 'utf8'), /verdict=verified/);
       assert.match(fs.readFileSync(path.join(directory, 'step-output'), 'utf8'), /reason_code=verified_current_run_record/);
@@ -297,7 +357,8 @@ async function main() {
     const identity = runIdentity(process.env);
     const get = githubReader(identity.repo, process.env.GH_TOKEN || process.env.GITHUB_TOKEN);
     result = mode === '--capture' ? await capture(identity, get)
-      : await verify(JSON.parse(fs.readFileSync(filename, 'utf8')), identity, get);
+      : await verify(JSON.parse(fs.readFileSync(filename, 'utf8')), identity, get,
+        { expectedHead: process.env.EXPECTED_HEAD || null });
   } catch { result = unknown('開始前の証跡または今回の実行IDを確認できなかった', 'unknown_snapshot'); }
   if (mode === '--capture') fs.writeFileSync(filename, JSON.stringify(result, null, 2) + '\n', { mode: 0o600, flag: 'wx' });
   console.log(JSON.stringify(result, null, 2));

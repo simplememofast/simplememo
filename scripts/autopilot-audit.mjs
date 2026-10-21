@@ -75,7 +75,7 @@ export function audit({ cwd, day, baseRef = 'origin/main', verify = verifyLocal,
   if (intents.length === 1) {
     const touches = JSON.parse(git('show', `${head}:${intents[0]}`)).touches;
     const added = lines(git('log', '--format=%H', '--diff-filter=A', `${base}..${head}`, '--', intents[0])).at(-1);
-    const allowed = historyBookkeeping(base, git);
+    const allowed = historyBookkeeping(base, git, head);
     if (Array.isArray(touches) && added) {
       const after = lines(git('diff', '--name-only', '--no-renames', added, head));
       outside = [...new Set([...after, ...uncommitted, ...untracked])]

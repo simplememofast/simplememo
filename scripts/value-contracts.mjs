@@ -319,12 +319,33 @@ export function loadIntents() {
  * **data/autopilot-actions.json is deliberately absent:** its rows carry close_check and
  * force_owner, so an undeclared edit could close an escalation. The daily run does not
  * commit it (Runbook §2 Lane F); Act ingests the health issues.
+ * With `head`, a sitemap whose change from base moves <lastmod> dates and nothing else is
+ * bookkeeping too (lastmodOnlySitemaps). Without it, no sitemap is.
  */
-export function historyBookkeeping(base, git) {
+export function historyBookkeeping(base, git, head = null) {
   const registry = 'data/i18n/pages.json';
   const translations = reportTranslationsAt(() => git('ls-tree', base, '--', registry) ? git('show', `${base}:${registry}`) : null);
   return new Set(['data/autopilot-runs.json', 'data/autopilot-status.json', 'docs/obsidian/AUTOPILOT_LOG.md', 'data/distribution-queue.json', REPORT_PAGE,
-    ...translations]);
+    ...translations, ...(head ? lastmodOnlySitemaps(base, head, git) : [])]);
+}
+
+/**
+ * The sitemaps generate_sitemap.py writes. The Actions route's publish job regenerates them after
+ * the model stops, so the model cannot know which dates move. A sitemap is bookkeeping only when
+ * base and head differ in <lastmod> dates alone (CI's generate_sitemap.py --check holds those dates
+ * to the content history). Anything else — a URL added or removed, an attribute, an element, a
+ * missing file — is an authored change and is declared in the contract's touches (Runbook §2-1
+ * step 6). One rule for days with and without a contract (decision-ci.mjs uses it as well).
+ */
+export const GENERATED_SITEMAPS = Object.freeze(['sitemap.xml', 'sitemap-ja.xml', 'sitemap-en.xml', 'sitemap-locales.xml']);
+const sitemapView = xml => xml.replace(/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/g, '<lastmod></lastmod>');
+export function lastmodOnlySitemaps(base, head, git) {
+  return GENERATED_SITEMAPS.filter(file => {
+    try {
+      const [before, after] = [base, head].map(ref => git('ls-tree', ref, '--', file) ? git('show', `${ref}:${file}`) : null);
+      return before !== null && after !== null && sitemapView(before) === sitemapView(after);
+    } catch { return false; }
+  });
 }
 
 // Verify the pre-declaration is a separate ancestor commit; timestamps alone are forgeable.
@@ -338,7 +359,7 @@ export function verifyHistory(c, base, head, cwd = ROOT) {
   const before = git('diff', '--name-only', base, added).split('\n').filter(Boolean);
   if (before.some(p => !p.startsWith('data/decision-intents/') && !p.startsWith('data/decision-rejections/'))) throw new Error('implementation preceded declaration');
   const nums = git('diff', '--numstat', added, head).split('\n').filter(Boolean).map(l => l.split('\t'));
-  const metadata = historyBookkeeping(base, git);
+  const metadata = historyBookkeeping(base, git, head);
   if (nums.some(([, , p]) => p === f)) throw new Error('intent is immutable');
   // **Report every undeclared path at once.** Throwing on the first one showed
   // PR #1993 (2026-10-05) as one undeclared png; the branch had six.
@@ -500,6 +521,8 @@ export async function selftest() {
     const reportPages = { ja: REPORT_PAGE, en: 'en/autopilot/index.html', ko: 'ko/autopilot/index.html' };
     fs.mkdirSync(path.join(dir, 'data/i18n'), { recursive: true });
     fs.writeFileSync(path.join(dir, 'data/i18n/pages.json'), registry(reportPages));
+    const sitemap = (lastmod, extra = '') => `<urlset>\n  <url>\n    <loc>https://simplememofast.com/</loc>\n    <lastmod>${lastmod}</lastmod>\n  </url>${extra}\n</urlset>\n`;
+    fs.writeFileSync(path.join(dir, 'sitemap-ja.xml'), sitemap('2026-09-01'));
     g('add', '.'); g('commit', '-m', 'base');
     const base = g('rev-parse', 'HEAD');
     fs.mkdirSync(path.join(dir, 'data/decision-intents'), { recursive: true });
@@ -514,6 +537,25 @@ export async function selftest() {
     g('add', '.'); g('commit', '-m', 'publish report');
     const reported = g('rev-parse', 'HEAD');
     assert.equal(verifyHistory(c, base, reported, dir).changed_lines, 2, 'generated report translations are bookkeeping');
+    // A sitemap is bookkeeping only when the publish job's generate_sitemap.py moved its dates alone.
+    const newUrl = '\n  <url>\n    <loc>https://simplememofast.com/new/</loc>\n    <lastmod>2026-09-05</lastmod>\n  </url>';
+    const sitemapAt = (from, text) => {
+      g('reset', '-q', '--hard', from); fs.writeFileSync(path.join(dir, 'sitemap-ja.xml'), text);
+      g('add', '.'); g('commit', '-q', '-m', 'regenerate sitemap'); return g('rev-parse', 'HEAD');
+    };
+    assert.equal(verifyHistory(c, base, sitemapAt(reported, sitemap('2026-09-05')), dir).changed_lines, 2, 'a date-only sitemap change is bookkeeping');
+    for (const [text, why] of [[sitemap('2026-09-05', newUrl), 'a new <url> is declared'],
+      [sitemap('2026-09-01').replace('<url>', '<url data-x="1">'), 'an added attribute is not a date'],
+      [sitemap('2026-09-05').replace('</urlset>', '<!-- x --></urlset>'), 'an added node is not a date']]) {
+      assert.throws(() => verifyHistory(c, base, sitemapAt(reported, text), dir), /undeclared path: sitemap-ja\.xml/, why);
+    }
+    // Declared in touches, the same new <url> ships and counts against the declared budget.
+    const indexed = { ...c, id: 'test-contract-sitemap', touches: [...c.touches, 'sitemap-ja.xml'] };
+    g('reset', '-q', '--hard', reported);
+    fs.writeFileSync(path.join(dir, intentPath(indexed.id)), JSON.stringify(indexed, null, 2) + '\n'); g('add', '.'); g('commit', '-q', '-m', 'declare sitemap');
+    assert.equal(verifyHistory(indexed, reported, sitemapAt(g('rev-parse', 'HEAD'), sitemap('2026-09-05', newUrl)), dir).changed_lines, 6,
+      'a declared sitemap URL change is accepted');
+    g('reset', '-q', '--hard', reported);
     // An editorial translation and a route added by the PR itself are not.
     fs.mkdirSync(path.join(dir, 'en/autopilot'), { recursive: true }); fs.writeFileSync(path.join(dir, 'en/autopilot/index.html'), 'edited\n');
     g('add', '.'); g('commit', '-m', 'edit editorial');

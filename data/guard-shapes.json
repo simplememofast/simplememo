@@ -884,19 +884,25 @@
       "file": "scripts/autopilot-publish.mjs",
       "expr": "run.failure_reason",
       "disposition": "任意項目",
-      "note": "2026-10-20: PR依頼（モデルが書く信用しない入力）の任意欄。欄が無いときは台帳の行にも書かない（推測で埋めない）。欄があるときだけ形を検査し、外れたら公開しない。行そのものは記帳時に autopilot-runs.mjs の validate() を通り、shipped の pr・失敗時の failure_reason など必須の規則はそちらが落とす。scripts/autopilot-publish.test.mjs の request schema で固定。"
+      "note": "2026-10-20: PR依頼（モデルが書く信用しない入力）の任意欄。欄が無いときは台帳の行にも書かない（推測で埋めない）。欄があるときだけ形を検査し、外れたら公開しない。行そのものは記帳時に autopilot-runs.mjs の validate() を通り、shipped の pr・失敗時の failure_reason など必須の規則はそちらが落とす。scripts/autopilot-publish.test.mjs の request schema で固定。2026-10-21（監査 F93）: 任意なのは shipped のときだけ。shipped 以外で欄が無い依頼は、PR を開いた後の記帳で落ちる前に validateRequest() が拒否する（何も push しない）。"
     },
     {
       "file": "scripts/autopilot-publish.mjs",
       "expr": "run.failure_class",
       "disposition": "任意項目",
-      "note": "2026-10-20: PR依頼（モデルが書く信用しない入力）の任意欄。欄が無いときは台帳の行にも書かない（推測で埋めない）。欄があるときだけ形を検査し、外れたら公開しない。行そのものは記帳時に autopilot-runs.mjs の validate() を通り、shipped の pr・失敗時の failure_reason など必須の規則はそちらが落とす。scripts/autopilot-publish.test.mjs の request schema で固定。"
+      "note": "2026-10-20: PR依頼（モデルが書く信用しない入力）の任意欄。欄が無いときは台帳の行にも書かない（推測で埋めない）。欄があるときだけ形を検査し、外れたら公開しない。行そのものは記帳時に autopilot-runs.mjs の validate() を通り、shipped の pr・失敗時の failure_reason など必須の規則はそちらが落とす。scripts/autopilot-publish.test.mjs の request schema で固定。2026-10-21（監査 F93）: 任意なのは shipped のときだけ。shipped 以外で欄が無い依頼は validateRequest() が push の前に拒否する（autopilot-selfheal.mjs --check が失敗行に failure_class を要求するため）。"
     },
     {
       "file": "scripts/autopilot-diagnostics.mjs",
       "expr": "raw.denied_tool_counts",
       "disposition": "安全側へ倒れる",
       "note": "2026-10-20: publish ジョブで読む実行要約（モデルのランナーを通った値）の拒否ツール内訳。欄が無い・形が違うときは null（不明）のまま受領書に残り、0 や空の内訳にはしない。autopilot-diagnostics.test.mjs の偽造要約の検体で固定。"
+    },
+    {
+      "file": "scripts/value-contracts.mjs",
+      "expr": "before",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-21（監査 F93）: lastmodOnlySitemaps() の `before !== null && after !== null && sitemapView(before) === sitemapView(after)`。この式が真のときだけ sitemap が台帳扱い（価値契約の touches に要らない）になる。base か head にファイルが無い（null）・読めない（catch）ときは偽で、台帳扱いにならず宣言が要る側に倒れる。value-contracts.mjs --selftest の sitemap の検体で固定。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
@@ -1374,6 +1380,12 @@
       "note": "2026-09-05: リモートブランチrefが404で消えている検体を生成する。マージ済みPRの照合はhead SHAで続行し、open PRのref欠落はunknownにする。"
     },
     {
+      "file": "scripts/autopilot-output.mjs",
+      "expr": "expectedHead",
+      "disposition": "対象が無いときは判定しない",
+      "note": "2026-10-21（監査 F93）: publish ジョブが記帳コミットを push した回だけ EXPECTED_HEAD が渡り、open PR の head がそのコミットになるまで有限回（18回×5秒）待つ。追いつかなければ missing ではなく unknown（unknown_concurrent_update）。null は記帳の push が無かった回で、待つ相手が無いので従来どおり今の PR head を読む（記帳が無ければ missing は事実）。SHA でない値は unknown_snapshot に倒す。scripts/autopilot-output.mjs --selftest の遅れる PR head の検体で固定。"
+    },
+    {
       "file": "scripts/vendor-terms.mjs",
       "expr": "bodyScope",
       "disposition": "安全側へ倒れる",
@@ -1450,6 +1462,12 @@
       "expr": "value",
       "disposition": "書き込み側の選別",
       "note": "2026-10-20: 検査を通った依頼から null の任意欄を落とすだけ。判定ではない（形の検査は直前の行で済んでいる）。"
+    },
+    {
+      "file": "scripts/value-contracts.mjs",
+      "expr": "before",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-21（監査 F93）: lastmodOnlySitemaps() の `before !== null && after !== null && …`。before/after は base・head の sitemap 本文で、ファイルが無いと null。そのときは偽になり sitemap は台帳扱いにならない（価値契約の touches に要る側）。読めないときも catch で偽。value-contracts.mjs --selftest の sitemap の検体で固定。"
     }
   ]
 }
