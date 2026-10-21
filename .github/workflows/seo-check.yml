@@ -59,12 +59,16 @@ jobs:
             const { routineCiScope } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/lib/routine-ci-scope.mjs`);
             const scope = routineCiScope({ eventName: context.eventName, event: context.payload });
             core.setOutput('required', String(scope.required));
+            core.setOutput('waiting_required', String(scope.waitingRequired));
             await core.summary.addHeading('Routine observation scope')
               .addRaw(scope.mode !== 'pull-request'
-                ? 'Operational health runs in the independent routine-health job. Its failure remains visible and does not stop site tests.\n'
-                : scope.required
-                  ? 'This PR changes routine operations. Both current observation checks are required for publication.\n'
-                  : 'This PR does not change routine operations. Observation health is not assessed by this PR and is not a site publication gate. See the main/daily routine-health job; this is not a healthy observation.\n')
+                ? 'Operational health and ledger freshness run in the independent routine-health job. Its failure remains visible and does not stop site tests.\n'
+                : (scope.required
+                  ? 'This PR changes routine operations. Both current observation checks and the autopilot run ledger freshness check are required for publication.\n'
+                  : 'This PR does not change routine operations. Observation health and autopilot run ledger freshness are not assessed by this PR and are not site publication gates; ledger shape and status agreement still run. See the main/daily routine-health job; this is not a healthy observation.\n')
+                + (scope.waitingRequired
+                  ? 'This PR changes waiting-progress inputs. The waiting progress freshness check is required for publication.\n'
+                  : 'This PR does not change waiting-progress inputs. Waiting progress freshness is not assessed by this PR and is not a site publication gate; waiting configuration and counter readability still run. See the main/daily routine-health job; this is not a healthy observation.\n'))
               .addCodeBlock(JSON.stringify(scope, null, 2), 'json').write();
 
       - name: Auto-merge identity guard regression
@@ -820,10 +824,19 @@ jobs:
       # 同日、主系が初出荷したのに status JSON だけが前日のままで、10:00 JST の日報が
       # 「当日分の実行記録なし」と報告した。**日報が読むのは status JSON のほう**なので、
       # 台帳が正しくても、ここが古いと出荷が無かったことになる。
+      #
+      # 2026-10-19 提案（オーナー承認待ちの draft PR。docs/routine-ci-scope.md）:
+      # 全PRで回すのは形・費用台帳・status JSON との突き合わせ（--integrity）。
+      # 鮮度まで見る完全版は、運転に触るPR（routine_scope の required）だけの公開条件にし、
+      # main push / 日次は独立した routine-health ジョブで回して赤いまま見せる。
       - name: Autopilot run ledger（＋日報データ源との突き合わせ）
         run: |
           node scripts/autopilot-runs.mjs --selftest
-          node scripts/autopilot-runs.mjs --check
+          node scripts/autopilot-runs.mjs --integrity
+
+      - name: Required autopilot run ledger freshness
+        if: github.event_name == 'pull_request' && steps.routine_scope.outputs.required == 'true'
+        run: node scripts/autopilot-runs.mjs --check
 
       # 【Lane B の運転台帳】アプリ本体の版を1版1行で持つ（data/app-releases.json）。
       #
@@ -1304,10 +1317,19 @@ jobs:
       #
       # **既知の停止は acknowledged_stall で通すが、review_by が要る。**
       # 期限が切れたら落ちる —— 「知っている」を無期限の免罪符にしない。
+      #
+      # 2026-10-19 提案（オーナー承認待ちの draft PR。docs/routine-ci-scope.md）:
+      # 全PRで回すのは設定と読めるか（--integrity: 上限の欠落・読めない待ち）。
+      # 止まっているかの判定は、待ちの入力に触るPR（routine_scope の waiting_required）
+      # だけの公開条件にし、main push / 日次は routine-health ジョブで回して赤いまま見せる。
       - name: Waiting progress (待ちが進んでいるか)
         run: |
           node scripts/check-waiting-progress.mjs --selftest
-          node scripts/check-waiting-progress.mjs --check
+          node scripts/check-waiting-progress.mjs --integrity
+
+      - name: Required waiting progress freshness
+        if: github.event_name == 'pull_request' && steps.routine_scope.outputs.waiting_required == 'true'
+        run: node scripts/check-waiting-progress.mjs --check
 
       # 【縮退運転】台帳が「代替がある」と書いていることを、**実際に動かして確かめる。**
       #
@@ -1553,8 +1575,9 @@ jobs:
         continue-on-error: true
 
   # Existing main pushes and Main Daily Validation's reusable call monitor the
-  # public snapshots without reading private stores, changing data, or adding a
-  # schedule. Keep this job independent so stale operations cannot skip site tests.
+  # public snapshots and the freshness of the autopilot run and waiting-progress
+  # ledgers without reading private stores, changing data, or adding a schedule.
+  # Keep this job independent so stale operations cannot skip site tests.
   routine-health:
     if: always() && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
@@ -1574,17 +1597,29 @@ jobs:
         id: codex_health
         if: always() && github.event_name != 'pull_request'
         run: python3 scripts/codex-routine-observer.py --check
+      - name: Autopilot run ledger health
+        id: autopilot_runs_health
+        if: always() && github.event_name != 'pull_request'
+        run: node scripts/autopilot-runs.mjs --check
+      - name: Waiting progress health
+        id: waiting_progress_health
+        if: always() && github.event_name != 'pull_request'
+        run: node scripts/check-waiting-progress.mjs --check
       - name: Record actual observation health outcomes
         if: always()
         uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         env:
           CLAUDE_OUTCOME: ${{ steps.claude_health.outcome }}
           CODEX_OUTCOME: ${{ steps.codex_health.outcome }}
+          AUTOPILOT_RUNS_OUTCOME: ${{ steps.autopilot_runs_health.outcome }}
+          WAITING_PROGRESS_OUTCOME: ${{ steps.waiting_progress_health.outcome }}
         with:
           script: |
-            await core.summary.addHeading('Routine observation health')
+            await core.summary.addHeading('Routine observation and ledger freshness health')
               .addTable([
                 [{ data: 'Source', header: true }, { data: 'Actual checker outcome', header: true }],
                 ['Claude snapshot', process.env.CLAUDE_OUTCOME || 'not run'],
                 ['Codex snapshot', process.env.CODEX_OUTCOME || 'not run'],
-              ]).addRaw('\nFailure remains a failed job/workflow. See checker output for the actual diagnostic; failure is not automatically classified as staleness. No observation was collected or refreshed.\n').write();
+                ['Autopilot run ledger', process.env.AUTOPILOT_RUNS_OUTCOME || 'not run'],
+                ['Waiting progress', process.env.WAITING_PROGRESS_OUTCOME || 'not run'],
+              ]).addRaw('\nFailure remains a failed job/workflow. See checker output for the actual diagnostic; failure is not automatically classified as staleness. No observation or ledger was collected, refreshed or modified.\n').write();

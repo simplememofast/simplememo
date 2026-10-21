@@ -3,7 +3,8 @@
  * **「待ち」が本当に進んでいるかを見る。止まっていたら落とす。**
  *
  *   node scripts/check-waiting-progress.mjs            # 一覧
- *   node scripts/check-waiting-progress.mjs --check    # CI
+ *   node scripts/check-waiting-progress.mjs --check    # CI（main/日次・待ちの入力に触るPR）
+ *   node scripts/check-waiting-progress.mjs --integrity # PR: 設定と読めるかだけ（止まっているかは判定しない）
  *   node scripts/check-waiting-progress.mjs --selftest # 判定の自己検査
  *
  * 【なぜ要るか — 待ったのに動かない、を一度やっている】
@@ -96,15 +97,27 @@ export function observe(wait, { root = ROOT, readDir = (p) => fs.readdirSync(p) 
     freshness: (wait.freshness_format === 'utc_timestamp' ? isUtcTimestamp(fresh) : isDate(fresh)) ? fresh : null };
 }
 
+/**
+ * 【2026-10-19 提案・オーナー承認待ちの draft PR】（docs/routine-ci-scope.md）
+ * problems を2つに分けても返す。**problems そのもの（文面・順序）は変えない。**
+ *   integrity — 時間が経っても新しく生まれない問題。待ちの設定（waits の形・上限）と、
+ *               進み具合が読めないこと（欄・ファイル・ディレクトリの欠落、未来の取得時刻）
+ *   stalls    — 時間が経つと生まれる問題。止まった待ちの未承認・承認の期限切れ
+ * 待ちの入力に触れないPRは integrity だけで止める。stalls は main/日次と、
+ * 待ちの入力に触るPRで従来どおり落とす（上限・承認の規則は変えていない）。
+ */
 export function validate(ledger, { now = Date.now(), root = ROOT, observer = null } = {}) {
   const problems = [];
+  const integrity = [];
+  const stalls = [];
   const rows = [];
   const waits = ledger?.waits;
-  if (!Array.isArray(waits)) return { problems: ['waits が配列でない'], rows };
+  if (!Array.isArray(waits)) return { problems: ['waits が配列でない'], rows, integrity: ['waits が配列でない'], stalls };
 
   for (const w of waits) {
     if (!Number.isFinite(w.stale_budget_days) || w.stale_budget_days <= 0) {
-      problems.push(`「${w.id}」の stale_budget_days が正の数でない — **上限の無い待ちは止まっても気づけない**`);
+      const p = `「${w.id}」の stale_budget_days が正の数でない — **上限の無い待ちは止まっても気づけない**`;
+      problems.push(p); integrity.push(p);
       continue;
     }
     const obs = observer ? observer(w) : observe(w, { root });
@@ -115,19 +128,22 @@ export function validate(ledger, { now = Date.now(), root = ROOT, observer = nul
         + (r.value != null && r.target != null ? `。${r.value}/${r.target} のまま` : '');
       if (!r.ack) {
         // **新しく止まった。**誰も知らないので落とす。
-        problems.push(`${head}。**台帳の見込みは ${w.expected ?? '未定'}** — `
-          + '既知なら acknowledged_stall に理由と review_by を書くこと');
+        const p = `${head}。**台帳の見込みは ${w.expected ?? '未定'}** — `
+          + '既知なら acknowledged_stall に理由と review_by を書くこと';
+        problems.push(p); stalls.push(p);
       } else if (r.expired) {
         // **承認の期限が切れた。**「知っている」を無期限の免罪符にしない。
-        problems.push(`${head}。**${w.acknowledged_stall.review_by} までに直す約束が切れている** — `
-          + `${w.acknowledged_stall.why}`);
+        const p = `${head}。**${w.acknowledged_stall.review_by} までに直す約束が切れている** — `
+          + `${w.acknowledged_stall.why}`;
+        problems.push(p); stalls.push(p);
       }
     }
     if (r.state === 'unreadable') {
-      problems.push(`「${w.label}」の進み具合が読めない — ${r.why}`);
+      const p = `「${w.label}」の進み具合が読めない — ${r.why}`;
+      problems.push(p); integrity.push(p);
     }
   }
-  return { problems, rows };
+  return { problems, rows, integrity, stalls };
 }
 
 const T = (id, extra = {}) => ({ id, label: id, stale_budget_days: 4, expected: '2026-09-19', ...extra });
@@ -220,6 +236,32 @@ const SELFTESTS = [
     const r = validate({ waits: [w] }, { now: NOW, observer: STALLED });
     if (!r.problems.length) throw new Error('期限の無い承認が素通りした');
   }],
+  // 【2026-10-19 提案】--integrity の分け方を固定する（docs/routine-ci-scope.md）。
+  // **時間が経つと生まれる問題だけを stalls に入れる。**設定の壊れと読めない待ちを
+  // stalls へ逃がすと、待ちの入力に触れないPRで「読めない」が素通りする。
+  ['**止まっている（未承認・期限切れ）は stalls、設定と読めないは integrity**（problems は和のまま）', () => {
+    const expired = { since: '2026-08-01', why: 'r', review_by: '2026-08-20' };
+    const waits = [T('new-stall'), T('expired', { acknowledged_stall: expired }),
+      { id: 'no-budget', label: 'no-budget', file: 'nope.json' }, T('unreadable')];
+    const observer = (w) => (w.id === 'unreadable' ? { value: 2, target: 28, freshness: null } : STALLED());
+    const r = validate({ waits }, { now: NOW, observer });
+    const named = (list, id) => list.some((p) => p.includes(`「${id}」`));
+    if (!named(r.stalls, 'new-stall') || !named(r.stalls, 'expired')) throw new Error('止まっている待ちを stalls に入れていない');
+    if (named(r.integrity, 'new-stall') || named(r.integrity, 'expired')) throw new Error('止まっているだけの待ちを integrity に入れた');
+    if (!named(r.integrity, 'no-budget') || !named(r.integrity, 'unreadable')) throw new Error('上限の欠落・読めない待ちを integrity に入れていない');
+    if (named(r.stalls, 'no-budget') || named(r.stalls, 'unreadable')) throw new Error('設定の壊れを stalls（鮮度）に分類した');
+    const union = [...r.integrity, ...r.stalls].sort().join('\n');
+    if (r.problems.length !== 4 || union !== [...r.problems].sort().join('\n')) throw new Error('problems が integrity と stalls の和になっていない');
+    const notArray = validate({ waits: null }, { now: NOW });
+    if (notArray.integrity.join() !== notArray.problems.join() || notArray.stalls.length !== 0) {
+      throw new Error('waits の形の壊れを integrity に入れていない');
+    }
+  }],
+  ['**承認済みの停止は integrity にも stalls にも入らない**（新しい赤を足さない）', () => {
+    const w = T('x', { acknowledged_stall: { since: '2026-09-01', why: 'r', review_by: '2026-09-08' } });
+    const r = validate({ waits: [w] }, { now: NOW, observer: STALLED });
+    if (r.integrity.length !== 0 || r.stalls.length !== 0) throw new Error('承認済みの停止を問題に数えた');
+  }],
   // 【2026-09-03 に書き換えた】旧版は「実データの `revenue_28d` が **stalled** であること」を
   // 直接assertしていた。この検査が空回りしていないことを実データで示すのが目的で、
   // 当時それが実際に止まっていたので、そのまま条件に使えた。
@@ -268,7 +310,9 @@ function main() {
   }
 
   const ledger = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
-  const { problems, rows } = validate(ledger);
+  const { problems, rows, integrity, stalls } = validate(ledger);
+  // --integrity は待ちの入力に触れないPR用（docs/routine-ci-scope.md）。両方渡されたら厳しいほう（--check）。
+  const integrityOnly = process.argv.includes('--integrity') && !process.argv.includes('--check');
 
   console.log('待ちが進んでいるか\n');
   for (const r of rows) {
@@ -285,6 +329,21 @@ function main() {
   }
   console.log('\n  **落とすのは「動いていない」ほうだけ。**期日の遅れでは落とさない');
   console.log('  （遅れているだけの待ちを毎日赤くすると、検査が読まれなくなる）。');
+
+  if (integrityOnly) {
+    // 止まっている待ちは隠さずに出す。**ただしこの実行の判定には入れない**（main/日次が落とす）。
+    if (stalls.length > 0) {
+      console.log('\n鮮度（止まっているか）はこの実行の判定に入れていない — 健全とは言わない:');
+      for (const p of stalls) console.log(`  - ${p}`);
+    }
+    if (integrity.length > 0) {
+      console.error('\n待ちの設定か進み具合の読み取りが壊れている:');
+      for (const p of integrity) console.error(`  - ${p}`);
+      process.exit(1);
+    }
+    console.log('\n待ちの設定と進み具合の読み取りに問題なし。止まっているかはこの実行では判定していない — 健全とは言わない。');
+    return;
+  }
 
   if (problems.length) {
     console.error('\n待ちが進んでいない:');
