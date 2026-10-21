@@ -45,6 +45,17 @@ Claude Code のセッションは、この変数を読むことも書くこと�
 新しい `no_artifact` が記帳されると、それ以降この許可は効かなくなる。もう一度試すかは、
 その結果を見てオーナーが決める（コードを変える新しい判断になる）。
 
+## 試運転の日にしないこと（2026-10-21 追記）
+
+- **試運転の日は、その日の定時 run が終わるまで、Obsidian Autopilot を手動起動（workflow_dispatch）も再実行もしない。**
+  再実行は定時の1回目ではないので封じ込めを越えず、手動起動が同じ concurrency group に並ぶと
+  待機中の定時 run が取り消されることがある（取り消された定時 run も `cancelled` の行として記帳されうる）。
+- **publish ジョブだけを再実行しても回復にならない。**引き渡し（handoff）の artifact 名が
+  `run_attempt` を含むので、「Re-run failed jobs」の2回目からは見つからない（`rejected_handoff_missing`）。
+  publish が途中で落ちたら、再実行ではなく、残った当日ブランチ・PR を見てオーナーが次の手を決める。
+- 公開運転表の点数は JST の日付で決まる。記帳（publish）と PR の SEO Validation が JST の日付をまたぐと、
+  運転表が記帳時の日付のままになり、成果物の無い日でも価値契約が要る扱いで落ちる（`check-autopilot-page --check` も同じ境目で落ちる）。
+
 ## 越えた回に変わらないもの
 
 - 緊急停止・予算ゲート・1回あたりの上限・Gate の当日重複・宣言の検査（decision-ci）

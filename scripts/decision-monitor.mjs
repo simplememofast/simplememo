@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { loadIntents, contractProblems, verifyHistory, settle, staticPath, verifiedSettlement, METRICS, approvedMetric } from './value-contracts.mjs';
 import { review, advance, recordSelection } from './decision-review.mjs';
 import { activeStreaks, shippingStreaks } from './autopilot-runs.mjs';
-import { ep as scoreEp, ra as scoreRa } from './autonomy-score.mjs';
+import { ep as scoreEp, ra as scoreRa, score as autonomyScore, loadContext as loadScoreContext } from './autonomy-score.mjs';
 import { automatedDecisionOrigin, runtimeDecisionOrigin, verifyLaunchd, NATIVE_LABEL, NATIVE_SCRIPT } from './lib/decision-origin.mjs';
 import { publicationRetryPlan, retryPendingPublication, stalledPublication } from './lib/decision-publication-retry.mjs';
 import { reportTranslationFiles } from './lib/report-publication.mjs';
@@ -202,18 +202,24 @@ export function renderRunStreaks(html, runs) {
   return html.replace(region, () => content);
 }
 
-export async function publishReport() {
-  const { score, loadContext } = await import('./autonomy-score.mjs');
-  const file = 'autopilot/index.html';
-  const original = fs.readFileSync(path.join(ROOT, file), 'utf8');
+// The whole public report as --publish-report writes it, from the score context (autonomy-score's
+// loadContext(): the run ledger and the other score inputs). Pure. decision-ci calls this same
+// function to tell the record step's regenerated page from an authored one.
+export function renderPublishedReport(html, context) {
   const stages = {};
-  const runs = read('data/autopilot-runs.json').runs;
+  const runs = context.runsDoc.runs;
   for (const r of runs) {
     if (r.outcome === 'shipped') continue;
     if (!['eligibility', 'execution', 'cost', 'absent'].includes(r.failure_stage)) throw new Error(`unclassified run: ${r.run_id}`);
     stages[r.failure_stage] = (stages[r.failure_stage] ?? 0) + 1;
   }
-  const rendered = renderRunStreaks(renderReport(original, score(loadContext()), stages), runs);
+  return renderRunStreaks(renderReport(html, autonomyScore(context), stages), runs);
+}
+
+export async function publishReport() {
+  const file = 'autopilot/index.html';
+  const original = fs.readFileSync(path.join(ROOT, file), 'utf8');
+  const rendered = renderPublishedReport(original, loadScoreContext());
   if (rendered !== original) fs.writeFileSync(path.join(ROOT, file), rendered);
   return rendered !== original;
 }

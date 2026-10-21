@@ -73,6 +73,9 @@ export function gitEnv(token = null, base = process.env) {
   delete env.GIT_DIR; delete env.GIT_WORK_TREE; delete env.GIT_INDEX_FILE; delete env.GIT_OBJECT_DIRECTORY;
   if (token) {
     // The credential lives only in this child's environment: never argv, never .git/config.
+    // A credential-bearing git reads no global config either (url.insteadOf / http.proxy planted
+    // in ~/.gitconfig by an earlier step could redirect the push).
+    env.GIT_CONFIG_GLOBAL = '/dev/null';
     env.GIT_CONFIG_COUNT = '1';
     env.GIT_CONFIG_KEY_0 = 'http.https://github.com/.extraheader';
     env.GIT_CONFIG_VALUE_0 = `AUTHORIZATION: basic ${Buffer.from(`x-access-token:${token}`).toString('base64')}`;
@@ -115,6 +118,8 @@ function readJson(file) {
 
 // ── request (written by the model: untrusted) ──────────────────────────────
 const CONTROL = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f‪-‮⁦-⁩]/g;
+// Same vocabulary as the ledger's classes (no_artifact, usage_limit, route-absent, runner-timeout, ...).
+const FAILURE_CLASS = /^[a-z][a-z0-9_-]{0,47}$/;
 const plain = (value, max) => typeof value === 'string' && value.length > 0 && value.length <= max && !/[\u0000-\u001f\u007f]/.test(value);
 
 /**
@@ -140,7 +145,12 @@ export function validateRequest(raw, day) {
   if (run.action != null && !/^[a-z0-9][a-z0-9_-]{0,63}$/.test(run.action)) return { code: 'request_run_action' };
   if (run.artifact != null && !plain(run.artifact, 300)) return { code: 'request_artifact' };
   if (run.failure_reason != null && !plain(run.failure_reason, 500)) return { code: 'request_failure_reason' };
-  if (run.failure_class != null && !/^[a-z][a-z0-9_]{0,47}$/.test(run.failure_class)) return { code: 'request_failure_class' };
+  if (run.failure_class != null && !FAILURE_CLASS.test(run.failure_class)) return { code: 'request_failure_class' };
+  // A day that did not ship is recorded with why (autopilot-runs.mjs validate() requires failure_reason)
+  // and what kind (autopilot-selfheal.mjs --check requires failure_class). Refused here, before any push,
+  // instead of failing in record after the PR is open.
+  if (run.outcome !== 'shipped' && run.failure_reason == null) return { code: 'request_failure_reason' };
+  if (run.outcome !== 'shipped' && run.failure_class == null) return { code: 'request_failure_class' };
   if (run.repair_of != null) {
     const targets = run.repair_of;
     if (!Array.isArray(targets) || !targets.length || targets.length > MAX_REPAIR_TARGETS
@@ -413,6 +423,11 @@ export function record({ repo, trusted, sha, day, pr, request, runId, work, runn
   if (existing) {
     // The session recorded its row itself: bind it to this PR (and to the requested repair_of), nothing else.
     if (existing.route !== 'actions' || existing.date_jst !== dash || String(existing.external_ref) !== runId) fail('record_foreign_row');
+    // Only a row that already says what the request says: the same outcome and, on a day that did not
+    // ship, a failure class (selfheal --check refuses a failed row without one). Refused before anything
+    // is written; nothing from the request is copied into a row the session wrote.
+    if (existing.outcome !== run.outcome) fail('record_row_outcome');
+    if (run.outcome !== 'shipped' && !(typeof existing.failure_class === 'string' && FAILURE_CLASS.test(existing.failure_class))) fail('record_row_failure_class');
     existing.pr = pr;
   } else {
     const args = ['scripts/autopilot-runs.mjs', '--append', '--run-id', run.run_id, '--date', dash, '--route', 'actions',
@@ -439,6 +454,9 @@ export function record({ repo, trusted, sha, day, pr, request, runId, work, runn
     if (validateRuns(ledger).length) fail('record_invalid_ledger');
     fs.writeFileSync(runsFile, JSON.stringify(ledger, null, 2) + '\n');
   }
+  // The session wrote the status JSON before this row existed; its runs block is recounted from the
+  // ledger now, in the same commit (autopilot-runs.mjs --check compares the two).
+  runner(work, 'node', ['scripts/autopilot-runs.mjs', '--write-status']);
   runner(work, 'node', ['scripts/decision-monitor.mjs', '--publish-report']);
   runner(work, 'python3', ['-E', '-s', 'scripts/build_site_translations.py', '--write']);
   runner(work, 'python3', ['-E', '-s', 'scripts/generate_sitemap.py']);
@@ -446,12 +464,14 @@ export function record({ repo, trusted, sha, day, pr, request, runId, work, runn
   git(work, ['checkout', '--quiet', 'HEAD', '--', ...OVERLAY.filter(dir => git(work, ['ls-tree', '-d', 'HEAD', dir]).trim())]);
   git(work, ['clean', '-fdxq', '--', ...OVERLAY]);
   const changed = git(work, ['status', '--porcelain', '-z', '--untracked-files=all']).split('\0').filter(Boolean).map(row => row.slice(3));
-  // The generators rebuild every translation, as the session used to before committing them
-  // into the same PR. Their output is held to the same rule as the model's commits: nothing
-  // on the hard-deny list, no symlink, no oversized file, and only the run ledger may vanish.
+  // Only the record paths may change (RECORD_PATHS): the generators rebuild every translation, but a
+  // page the session edited arrives with the translations the session built; one this step would
+  // write is refused, not published. Each file is also held to the rule for the model's commits
+  // (hardDenyReason: no symlink, no oversized file).
   for (const file of changed) {
+    if (!RECORD_PATHS.includes(file)) fail('record_unexpected_change');
     const st = fs.lstatSync(path.join(work, file), { throwIfNoEntry: false });
-    if (!st) { if (!RECORD_PATHS.includes(file)) fail('record_unexpected_change'); continue; }
+    if (!st) continue;
     const mode = st.isSymbolicLink() ? '120000' : st.isFile() ? ((st.mode & 0o111) ? '100755' : '100644') : 'other';
     if (hardDenyReason(file, { mode, size: st.isFile() ? st.size : null })) fail('record_unexpected_change');
   }
@@ -514,6 +534,9 @@ export function checkWiring(source) {
   const checkout = steps.find(step => /uses: actions\/checkout@/.test(step));
   assert(checkout && /ref: \$\{\{ github\.sha \}\}/.test(checkout) && /path: tools/.test(checkout)
     && /persist-credentials: false/.test(checkout) && !/token:/.test(checkout), 'publish checks out the workflow commit without credentials');
+  // This job holds GH_PAT later: its actions are pinned to a full commit SHA, never a moving tag.
+  assert(steps.filter(step => /uses: /.test(step)).every(step => /uses: [\w.-]+\/[\w.-]+@[0-9a-f]{40}(?:\s|$)/.test(step)),
+    'publish actions must be pinned to a full commit SHA');
   for (const step of steps) {
     const name = stepName(step);
     assert(!RESERVED_STEP_WORDS.some(word => name.includes(word)), `publish step name collides with Act's step keys: ${name}`);

@@ -11,8 +11,10 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
-import { contractProblems, approvedMetric, METRICS, verifyHistory, historyBookkeeping, selectContract, predictionFeedback, retireIntent } from './value-contracts.mjs';
-import { reportTranslationsAt } from './lib/report-publication.mjs';
+import { contractProblems, approvedMetric, METRICS, verifyHistory, historyBookkeeping, lastmodOnlySitemaps, selectContract, predictionFeedback, retireIntent } from './value-contracts.mjs';
+import { REPORT_PAGE, reportTranslationsAt } from './lib/report-publication.mjs';
+import { renderPublishedReport } from './decision-monitor.mjs';
+import { loadContext as loadScoreContext } from './autonomy-score.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = 'simplememofast/simplememo';
@@ -34,6 +36,44 @@ export function required(branch, paths, metrics) {
   return METRICS.some(id => approvedMetric(metrics, id)) && paths.some(p => !contractExempt(p));
 }
 const gitAt = cwd => (...a) => execFileSync('git', a, { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }).trim();
+
+/**
+ * What the publish job's record step regenerates with trusted code after the model stops
+ * (scripts/autopilot-publish.mjs record()) and is therefore bookkeeping on a day without a contract:
+ *
+ * - autopilot/index.html, only when the page in the tree CI checked out is byte for byte what
+ *   decision-monitor --publish-report writes over main's page (baseRef) from the score context of
+ *   that same tree: renderPublishedReport(), the function --publish-report itself calls. The tree is
+ *   the CI checkout (the PR merged into main, `cwd`) because that page is the one that merges, and its
+ *   ledgers are the ones autopilot-runs --check, selfheal --check and check-autopilot-page --check
+ *   read. Prose comes from main's page and every generated region from the ledgers, so a value or a
+ *   <script> written into a generated region is not bookkeeping. A tree other than this checkout
+ *   needs its own `context`; without one, or on any error, the page is not bookkeeping (fail closed).
+ *   The score is dated today (JST): a record step and a CI run on different JST dates do not match,
+ *   which fails closed like check-autopilot-page --check across the same date change.
+ * - its generated translations (from main's registry), only together with such a page. That is
+ *   sufficient: CI's build_site_translations.py --check rebuilds every generated translation from the
+ *   checked-out source page and catalogs and fails when any file's text differs from that build, and
+ *   neither the catalogs (data/i18n/translations/*.json) nor any other input of that build (registry,
+ *   overrides, the generator scripts) is ever bookkeeping, so a translation the model wrote fails CI.
+ * - a sitemap whose change moves <lastmod> dates alone (value-contracts' lastmodOnlySitemaps).
+ */
+export function generatedPublication({ base, baseRef, head, files, git, cwd = ROOT, context = null }) {
+  const generated = new Set(lastmodOnlySitemaps(base, head, git));
+  let regenerated = false;
+  if (context && files.includes(REPORT_PAGE)) {
+    try {
+      // Untrimmed: byte for byte, trailing newline included.
+      const original = execFileSync('git', ['show', `${baseRef}:${REPORT_PAGE}`], { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'] });
+      regenerated = renderPublishedReport(original, context()) === fs.readFileSync(path.join(cwd, REPORT_PAGE), 'utf8');
+    } catch { regenerated = false; }
+  }
+  if (regenerated) {
+    generated.add(REPORT_PAGE);
+    for (const file of reportTranslationsAt(() => git('ls-tree', base, '--', 'data/i18n/pages.json') ? git('show', `${base}:data/i18n/pages.json`) : null)) generated.add(file);
+  }
+  return generated;
+}
 
 export function boundRun(contract, before, after) {
   assert(Array.isArray(before) && Array.isArray(after), 'run ledgers required');
@@ -114,7 +154,7 @@ export function verifyLocal({ cwd = ROOT, baseRef = 'origin/main' } = {}) {
     const c = JSON.parse(git('show', `${head}:${intents[0]}`));
     try { verifyHistory(c, base, head, cwd); } catch (error) { problems.push(error.message); }
     if (pending.includes(intents[0])) problems.push(`intent is immutable (uncommitted edit): ${intents[0]}`);
-    const allowed = historyBookkeeping(base, git);
+    const allowed = historyBookkeeping(base, git, head);
     const outside = p => p !== intents[0] && !uncommittedIntents.includes(p) && !c.touches.includes(p) && !allowed.has(p);
     const editedOutside = edited.filter(outside), untrackedOutside = untracked.filter(outside);
     if (editedOutside.length) problems.push(`uncommitted changes outside the declaration: ${editedOutside.join(', ')}`);
@@ -125,7 +165,7 @@ export function verifyLocal({ cwd = ROOT, baseRef = 'origin/main' } = {}) {
   return { branch, base, head, problems };
 }
 
-export async function verifyDecision({ branch, head, baseRef, pr = null, cwd = ROOT, requireContract = false }) {
+export async function verifyDecision({ branch, head, baseRef, pr = null, cwd = ROOT, requireContract = false, reportContext = null }) {
   const git = gitAt(cwd);
   const base = git('merge-base', baseRef, head);
   const metrics = JSON.parse(git('show', `${baseRef}:data/value-metrics.json`));
@@ -146,7 +186,9 @@ export async function verifyDecision({ branch, head, baseRef, pr = null, cwd = R
       // does not exempt treatment/support paths or changes to protected gates.
       // The report's generated translations ride with autopilot/index.html (base registry only).
       const reportTranslations=reportTranslationsAt(()=>git('ls-tree',baseRef,'--','data/i18n/pages.json')?git('show',baseRef+':data/i18n/pages.json'):null);
-      const bookkeeping=p=>['growth/experiments/experiments.json','data/autopilot-runs.json','data/autopilot-status.json','autopilot/index.html','docs/obsidian/AUTOPILOT_LOG.md'].includes(p)||reportTranslations.includes(p)||p.startsWith('data/decision-intents/')||/^data\/decision-rejections\/[a-z0-9-]+\.json$/.test(p);
+      // A sitemap only when its dates alone moved (the publish job regenerates them after the model).
+      const sitemapDates=lastmodOnlySitemaps(base,head,git);
+      const bookkeeping=p=>['growth/experiments/experiments.json','data/autopilot-runs.json','data/autopilot-status.json','autopilot/index.html','docs/obsidian/AUTOPILOT_LOG.md',...sitemapDates].includes(p)||reportTranslations.includes(p)||p.startsWith('data/decision-intents/')||/^data\/decision-rejections\/[a-z0-9-]+\.json$/.test(p);
       assert(files.every(p=>bookkeeping(p)||e.change_paths.includes(p)),'undeclared measurement change path at final head');
       verifySupportingGitDiff(e,base,head,(...a)=>execFileSync('git',a,{cwd,encoding:'utf8',maxBuffer:16*1024*1024}));
     }
@@ -161,7 +203,13 @@ export async function verifyDecision({ branch, head, baseRef, pr = null, cwd = R
     // still requires its directional value contract and canonical shipped row.
     return verifyEvaluationDecision({branch,head,baseRef,pr,cwd});
   }
-  if (!requireContract && !required(branch, files, metrics)) return { state: 'not_required' };
+  // A status/LOG day still carries the record step's regenerated report and sitemaps. The report's
+  // score context is this checkout's own (CI); another tree must bring its own or gets none.
+  if (!requireContract) {
+    const context = reportContext ?? (path.resolve(cwd) === ROOT ? () => loadScoreContext() : null);
+    const generated = required(branch, files, metrics) ? generatedPublication({ base, baseRef, head, files, git, cwd, context }) : new Set();
+    if (!required(branch, files.filter(p => !generated.has(p)), metrics)) return { state: 'not_required' };
+  }
   const intents = files.filter(p => /^data\/decision-intents\/[a-z0-9-]+\.json$/.test(p));
   if (intents.length !== 1) throw new Error('exactly one prospective decision contract is required');
   const c = JSON.parse(git('show', `${head}:${intents[0]}`));
@@ -366,6 +414,64 @@ async function selftest() {
       await assert.rejects(verifyDecision({ ...options, head: g('rev-parse', 'HEAD') }),
         error => error.message === `autonomous decision cannot change its gate or policy: ${gate}`);
     }
+    // A day without a contract (no_artifact/failed): the publish job appends the row, recounts the
+    // status JSON and regenerates the report, its translations and the sitemaps. The report is
+    // bookkeeping only when it is byte for byte renderPublishedReport() of main's page with the
+    // checked tree's ledgers. Real page, real render function; the fixture's run ledger.
+    g('checkout', '--detach', baseRef);
+    const reportPage = fs.readFileSync(path.join(ROOT, REPORT_PAGE), 'utf8');
+    const reportContext = () => ({ ...loadScoreContext(), runsDoc: read('data/autopilot-runs.json') });
+    const translation = 'ar/autopilot/index.html';
+    const sitemap = (lastmod, extra = '') => `<urlset>\n  <url>\n    <loc>https://simplememofast.com/autopilot/</loc>\n    <lastmod>${lastmod}</lastmod>\n  </url>${extra}\n</urlset>\n`;
+    const classified = before.map(r => ({ ...r, failure_stage: 'absent' }));
+    save('data/i18n/pages.json', { version: 1, pages: [{ source: REPORT_PAGE, sourceLocale: 'ja',
+      existing: { ja: REPORT_PAGE, en: 'en/autopilot/index.html' }, pages: { ja: REPORT_PAGE, en: 'en/autopilot/index.html', ar: translation } }] });
+    save('data/autopilot-runs.json', { runs: classified });
+    fs.mkdirSync(path.join(dir, 'autopilot'), { recursive: true }); fs.mkdirSync(path.join(dir, 'ar/autopilot'), { recursive: true });
+    fs.writeFileSync(path.join(dir, REPORT_PAGE), reportPage);
+    fs.writeFileSync(path.join(dir, translation), 'generated translation of the report\n');
+    fs.writeFileSync(path.join(dir, 'sitemap-ja.xml'), sitemap('2026-09-03'));
+    save('data/autopilot-status.json', { date_jst: '2026-09-03' }); g('add', '.'); g('commit', '-m', 'report fixture base');
+    const reportBase = g('rev-parse', 'HEAD');
+    // edit(rendered) -> the page committed (null: main's page untouched).
+    const noContract = ({ edit = page => page, translated = 'regenerated translation\n', map = sitemap('2026-09-04') } = {}) => {
+      g('checkout', '-q', '--detach', reportBase);
+      save('data/autopilot-status.json', { date_jst: '2026-09-04' });
+      save('data/autopilot-runs.json', { runs: [...classified, { run_id: 'no-ship', date_jst: '2026-09-04', outcome: 'no_artifact', failure_stage: 'execution', pr: 124 }] });
+      const page = edit(renderPublishedReport(reportPage, reportContext()));
+      if (page !== null) fs.writeFileSync(path.join(dir, REPORT_PAGE), page);
+      if (translated !== null) fs.writeFileSync(path.join(dir, translation), translated);
+      fs.writeFileSync(path.join(dir, 'sitemap-ja.xml'), map);
+      g('add', '.'); g('commit', '-m', 'record a day without a contract');
+      return verifyDecision({ ...options, baseRef: reportBase, head: g('rev-parse', 'HEAD'), pr: { number: 124 }, reportContext });
+    };
+    const refused = /exactly one prospective decision contract is required/;
+    assert.equal((await noContract()).state, 'not_required',
+      '(e) the page as the shared render function writes it, its translation and sitemap dates are bookkeeping');
+    const regenerated = g('rev-parse', 'HEAD');
+    for (const [why, edit] of [
+      ['(a) a note cell', page => page.replace(/(<tr data-score="vdc">.*?<td class="num">\d+<\/td><td>)[^<]*/, '$1期間内の出荷60件のうち60件。')],
+      ['(b) a decision date', page => page.replaceAll(/(<span data-decision-date>)[^<]*/g, '$12030-01-01')],
+      ['(c) the run-streaks region', page => page.replace(/<!-- run-streaks:start -->[\s\S]*?<!-- run-streaks:end -->/,
+        '<!-- run-streaks:start --><script>document.title = "x"</script><!-- run-streaks:end -->')],
+      ['prose outside the generated regions', page => page.replace('</h1>', '（改）</h1>')],
+      ['the points scale', page => page.replace(/(<tr data-score="vdc">.*?<td class="num">)30(<\/td>)/, '$110$2')],
+    ]) {
+      assert.notEqual(edit(reportPage), reportPage, `fixture edit applies: ${why}`);
+      await assert.rejects(noContract({ edit }), refused, `${why} written by hand is not bookkeeping`);
+    }
+    // (d) A translation changes only with its page: edited while the page stays byte-identical to main's,
+    // it is not bookkeeping. (Edited beside a regenerated page, build_site_translations.py --check refuses
+    // it: scripts/autopilot-publish.test.mjs, end to end no_artifact.)
+    await assert.rejects(noContract({ edit: () => null }), refused,
+      '(d) a report translation edited while the page is byte-identical to main is not bookkeeping');
+    await assert.rejects(noContract({ map: sitemap('2026-09-04', '\n  <url>\n    <loc>https://simplememofast.com/new/</loc>\n    <lastmod>2026-09-04</lastmod>\n  </url>') }),
+      refused, 'a sitemap URL change is not a date-only regeneration');
+    // Without the checked tree's own score context, or with another day's, the page is not bookkeeping (fail closed).
+    g('checkout', '-q', '--detach', regenerated);
+    await assert.rejects(verifyDecision({ ...options, baseRef: reportBase, head: regenerated, pr: { number: 124 } }), refused);
+    await assert.rejects(verifyDecision({ ...options, baseRef: reportBase, head: regenerated, pr: { number: 124 },
+      reportContext: () => ({ ...reportContext(), today: '2030-01-01' }) }), refused);
     // Real retirement -> replacement declaration -> measurement -> treatment.
     // The retired JSON must not invalidate the new measurement's final scope.
     g('checkout', '--detach', baseRef);
