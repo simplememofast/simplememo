@@ -8,7 +8,7 @@ The native Codex automation `obsidian` is the daily master owner at 06:00 Asia/T
 |---|---|
 | Selection, permission, one action, prospective contract, CI, ship | Existing Obsidian Runbook, `value-contracts.mjs`, `autopilot-runs.mjs` |
 | Formal coverage, completion, 100-point instrument | Existing `automation-rate.mjs`, `autonomy-gap.mjs`, `autopilot-runs.mjs`, `autonomy-score.mjs`; exact adapter `growth/lib/company-metrics.mjs` |
-| Routine health and recovery ownership | Existing Routine Observer / `autopilot-act.mjs` / `autopilot-selfheal.mjs`; launchd and GitHub fallback retain their claims |
+| Routine health and recovery ownership | Existing `autopilot-act.mjs` / `autopilot-selfheal.mjs`; the Mac Routine Observer was retired on 2026-10-20 and the routine ledger records a retired, not-observed state (`docs/routine-observer.md`); launchd and GitHub fallback retain their claims |
 | GSC | Existing daily/weekly collector, `growth/lib/gsc.mjs`, BigQuery bulk export; no extra daily GSC query |
 | Bing SEO / AI citations | Same `seo-daily.yml` read job when OAuth is configured; private browser capture through `obsidian`; [collection and limits](../bing-webmaster-collection.md) |
 | GA4 | Scheduled owner `.github/workflows/acquisition-daily.yml` (since 2026-10-15): fixed `ga4-funnel`, same maturity and byte caps, encrypted artifact, ingested on demand. `analytics-read.yml` remains the on-demand path for other fixed reports; for `ga4-funnel` it is a code-guarded fallback only |

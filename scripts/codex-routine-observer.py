@@ -466,6 +466,133 @@ def keys(value, expected):
     require(isinstance(value, dict) and set(value) == set(expected.split()), 'Unexpected metadata fields')
 
 
+# Retired observation (2026-10-20). The same conditions live in retirementStatus()
+# of scripts/check-routine-runs.mjs; change both together (a parity test compares them).
+RETIREMENT_KEY = 'observation_retirement'
+RETIREMENT_FIELDS = ('retired_at', 'reason', 'approved_by', 'last_claude_observed_at',
+                     'last_codex_observed_at', 'reactivation')
+RUN_TIME_FIELDS = ('last_fired_at', 'last_run_fired_at', 'last_run_finished_at')
+STRICT_INSTANT = re.compile(r'(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})(\.\d+)?Z', re.ASCII)
+DAY_ONLY = re.compile(r'\d{4}-\d{2}-\d{2}', re.ASCII)
+
+
+class ObservationRetired(Exception):
+    """The ledger carries the retired marker: observing and writing are refused."""
+
+
+RETIRED_REFUSAL = {'state': 'retired', 'written': False,
+                   'reason': 'Routine observation is retired (' + RETIREMENT_KEY + ' in data/routine-runs.json); '
+                             'remove it in a reviewed change before observing again'}
+
+
+def strict_instant(value):
+    """UTC seconds for YYYY-MM-DDTHH:MM:SS[.fraction]Z only; None otherwise."""
+    match = STRICT_INSTANT.fullmatch(value) if isinstance(value, str) else None
+    if not match:
+        return None
+    try:
+        base = dt.datetime.strptime(match[1] + 'T' + match[2], '%Y-%m-%dT%H:%M:%S')
+    except ValueError:
+        return None
+    return base.replace(tzinfo=dt.timezone.utc).timestamp() + (float('0' + match[3]) if match[3] else 0.0)
+
+
+def day_start(value):
+    if not (isinstance(value, str) and DAY_ONLY.fullmatch(value)):
+        return None
+    try:
+        return dt.datetime.strptime(value, '%Y-%m-%d').replace(tzinfo=dt.timezone.utc).timestamp()
+    except ValueError:
+        return None
+
+
+def refuse_if_retired(full):
+    if isinstance(full, dict) and RETIREMENT_KEY in full:
+        raise ObservationRetired()
+
+
+def retirement_status(full, now=None):
+    """None without a marker; else the fixed reason codes that keep the freshness rule (empty = honoured)."""
+    if not isinstance(full, dict) or RETIREMENT_KEY not in full:
+        return None
+    marker = full[RETIREMENT_KEY]
+    if not isinstance(marker, dict):
+        return ['marker_not_object']
+    clock = timestamp(now) if now else dt.datetime.now(dt.timezone.utc).timestamp()
+    codex = full.get(KEY) if isinstance(full.get(KEY), dict) else {}
+    reasons = []
+    if set(marker) != set(RETIREMENT_FIELDS):
+        reasons.append('marker_fields')
+    for field in ('reason', 'approved_by', 'reactivation'):
+        if not (isinstance(marker.get(field), str) and marker[field].strip()):
+            reasons.append(field + '_empty')
+    # Retirement cannot be claimed over a newer observation: exact last observation times.
+    claude_at = strict_instant(marker.get('last_claude_observed_at'))
+    codex_at = strict_instant(marker.get('last_codex_observed_at'))
+    if claude_at is None or marker.get('last_claude_observed_at') != full.get('observed_at'):
+        reasons.append('claude_observation_mismatch')
+    if codex_at is None or marker.get('last_codex_observed_at') != codex.get('observed_at'):
+        reasons.append('codex_observation_mismatch')
+    if (claude_at is not None and claude_at > clock) or (codex_at is not None and codex_at > clock):
+        reasons.append('observation_in_future')
+    # A date covers that whole UTC day: it must have started, and end at or after both observations.
+    day, exact = day_start(marker.get('retired_at')), strict_instant(marker.get('retired_at'))
+    start = day if day is not None else exact
+    end = day + 86400 - 0.001 if day is not None else exact
+    if start is None:
+        reasons.append('retired_at_invalid')
+    else:
+        if start > clock:
+            reasons.append('retired_at_in_future')
+        if claude_at is None or codex_at is None or end < claude_at or end < codex_at:
+            reasons.append('retired_before_last_observation')
+    observed = strict_instant(full.get('observed_at'))
+    routines = full.get('routines')
+    if not isinstance(routines, list):
+        reasons.append('routines_invalid')
+    else:
+        stops = full.get('intentional_stops') if isinstance(full.get('intentional_stops'), list) else []
+        stop_ids = {f.get('id') for f in stops if isinstance(f, dict) and isinstance(f.get('id'), str)}
+        for row in routines:
+            row = row if isinstance(row, dict) else {}
+            if row.get('observation_state') != 'unavailable' and row.get('id') not in stop_ids:
+                reasons.append('routine_still_observed')
+            last = row.get('last_verified') if isinstance(row.get('last_verified'), dict) else {}
+            source = row.get('source_observation') if isinstance(row.get('source_observation'), dict) else {}
+            times = [source.get('observed_at'), last.get('observed_at')]
+            for item in (row, last.get('routine') if isinstance(last.get('routine'), dict) else {}):
+                times += [item.get(k) for k in RUN_TIME_FIELDS]
+            if any(v is not None and (observed is None or strict_instant(v) is None or strict_instant(v) > observed)
+                   for v in times):
+                reasons.append('routine_run_after_last_observation')
+    automations = codex.get('automations')
+    if not isinstance(automations, list):
+        reasons.append('codex_automations_invalid')
+    elif any(not isinstance(a, dict) or a.get('status') != 'PAUSED' for a in automations):
+        reasons.append('codex_automation_not_paused')
+    return reasons
+
+
+def check(full, now=None, notify=None):
+    """--check. While observation is retired under every condition, freshness is not applied."""
+    notify = notify or (lambda line: print(line, file=sys.stderr))
+    doc = full[KEY]
+    reasons = retirement_status(full, now)
+    if reasons == []:
+        marker = full[RETIREMENT_KEY]
+        # Metadata only; the clock is the last real observation, which is never moved forward.
+        validate(doc, now=doc['observed_at'])
+        notify('retired — not observed since ' + marker['last_claude_observed_at'] + ' (Claude) / '
+               + marker['last_codex_observed_at'] + ' (Codex); observation retired on ' + marker['retired_at']
+               + '; the 3-day freshness rule is not applied while retired and run health is not inferred')
+        return {**summary(doc), 'observation': 'retired', 'not_observed_since': doc['observed_at'],
+                'health': 'not_observed'}
+    if reasons is not None:
+        notify(RETIREMENT_KEY + ' is present but not honoured (' + ', '.join(reasons)
+               + '); the 3-day freshness rule applies')
+    return summary(validate(doc, now=now))
+
+
 def validate(doc, now=None):
     keys(doc, 'schema_version observed_at registered source scheduler_query_complete collection_context automations runs')
     require(type(doc['schema_version']) is int and doc['schema_version'] in (1, 2, 3, 4, 5)
@@ -569,6 +696,8 @@ def validate_run(run, version, observed, seen):
 
 def apply(ledger, codex_dir):
     previous = json.loads(ledger.read_text())
+    # Before any source read: a retired ledger is never observed over or un-retired by a write.
+    refuse_if_retired(previous)
     observed = observe(codex_dir, previous.get(KEY))
     updated = {**previous, KEY: observed}
     # Atomic replacement occurs only after complete DB reads and validation.
@@ -1213,6 +1342,160 @@ class DiagnosticTests(unittest.TestCase):
             self.assertEqual(ledger.read_bytes(), before)
 
 
+class RetirementTests(unittest.TestCase):
+    # Synthetic ledgers and temporary stores only; the real ledger is read, never written.
+    observed = '2026-10-20T07:05:33.382Z'
+    codex_observed = '2026-10-20T07:05:28.373Z'
+
+    @staticmethod
+    def at(days):
+        return iso(int((timestamp('2026-10-20T00:00:00.000Z') + days * 86400) * 1000))
+
+    def retired_full(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); Tests().setup_store(root)
+            codex = observe(root, now=self.codex_observed)
+        for automation in codex['automations']:
+            automation['status'] = 'PAUSED'
+        empty = dict.fromkeys(('enabled', 'cron_expression', 'run_once_at', 'next_run_at', 'last_fired_at',
+                               'last_run_status', 'last_run_fired_at', 'last_run_finished_at', 'last_run_session_id'))
+        return {
+            'observed_at': self.observed, 'max_snapshot_age_days': 3, 'open_budget': 1,
+            'open_findings': [{'id': 'trig_gone', 'what': 'observation_unavailable', 'found_at': '2026-10-06', 'why': 'x'}],
+            'intentional_stops': [{'id': 'trig_stop', 'why': 'x'}],
+            'routines': [
+                {'id': 'trig_stop', 'name': 'stopped', 'enabled': False, 'cron_expression': '0 0 * * *',
+                 'run_once_at': None, 'next_run_at': None, 'last_fired_at': '2026-09-01T00:00:00Z',
+                 'last_run_status': 'SUCCEEDED', 'last_run_fired_at': '2026-09-01T00:00:00Z',
+                 'last_run_finished_at': '2026-09-01T00:05:00Z'},
+                {'id': 'trig_gone', 'name': 'gone', **empty, 'observation_state': 'unavailable',
+                 'source_observation': {'id': 'trig_gone', 'method': 'GET', 'endpoint': '/v1/code/triggers/trig_gone',
+                                        'http_status': 404, 'observed_at': self.observed},
+                 'last_verified': {'observed_at': '2026-10-06T07:44:56.773Z', 'routine': {
+                     'id': 'trig_gone', 'name': 'gone', 'enabled': True, 'last_fired_at': '2026-09-05T12:40:53.619116Z',
+                     'last_run_fired_at': '2026-09-05T12:40:53.619116Z', 'last_run_finished_at': '2026-09-05T12:41:00Z'}}},
+            ],
+            KEY: codex,
+            RETIREMENT_KEY: {'retired_at': '2026-10-20', 'reason': 'selftest', 'approved_by': 'owner decision 2026-10-20',
+                             'last_claude_observed_at': self.observed, 'last_codex_observed_at': self.codex_observed,
+                             'reactivation': 'selftest'},
+        }
+
+    def broken_conditions(self):
+        def marker(**change):
+            return lambda d: d[RETIREMENT_KEY].update(change)
+        def drop(field):
+            return lambda d: d[RETIREMENT_KEY].pop(field)
+        def routine(**change):
+            return lambda d: d['routines'][0].update(change)
+        cases = [(f'missing {field}', drop(field)) for field in RETIREMENT_FIELDS]
+        cases += [('blank reason', marker(reason=' ')), ('extra field', marker(extra='x')),
+                  ('marker not an object', lambda d: d.update({RETIREMENT_KEY: True})),
+                  ('claude mismatch', marker(last_claude_observed_at='2026-10-20T07:05:33.383Z')),
+                  ('codex mismatch', marker(last_codex_observed_at='2026-10-20T07:05:28.374Z')),
+                  ('claude refreshed', lambda d: d.update(observed_at='2026-10-21T00:00:00.000Z')),
+                  ('codex refreshed', lambda d: d[KEY].update(observed_at='2026-10-21T00:00:00.000Z'))]
+        cases += [('retired_at ' + v, marker(retired_at=v)) for v in (
+            '2026-11-01', '2026-11-01T00:00:00Z', '2026-10-19', '2026-10-20T07:05:00Z', '2026-02-31',
+            '20 Oct 2026', '2026-10-20T16:00:00+09:00', '２０２６-10-20')]
+        cases += [('active routine', lambda d: d['routines'].append(
+                      {'id': 'trig_active', 'enabled': True, 'last_fired_at': '2026-10-20T00:00:00Z'})),
+                  ('stop record removed', lambda d: d.update(intentional_stops=[])),
+                  ('stop without id', lambda d: (d['intentional_stops'].append({'why': 'x'}),
+                                                 d['routines'].append({'name': 'no id', 'enabled': True}))),
+                  ('newer run', routine(last_run_finished_at='2026-10-21T00:00:00Z')),
+                  ('unreadable run time', routine(last_fired_at='later')),
+                  ('newer historical run', lambda d: d['routines'][1]['last_verified']['routine'].update(
+                      last_run_fired_at='2026-10-22T00:00:00Z')),
+                  ('codex active', lambda d: d[KEY]['automations'][1].update(status='ACTIVE'))]
+        return cases
+
+    def test_retired_check_passes_ten_and_thirty_days_later_and_says_so(self):
+        for days in (10, 30):
+            lines = []
+            result = check(self.retired_full(), now=self.at(days), notify=lines.append)
+            self.assertEqual((result['observation'], result['health']), ('retired', 'not_observed'))
+            self.assertEqual(result['not_observed_since'], self.codex_observed)
+            self.assertEqual(len(lines), 1)
+            self.assertTrue(lines[0].startswith('retired — not observed since ' + self.observed))
+
+    def test_same_ledger_without_marker_fails_after_four_days(self):
+        full = self.retired_full(); del full[RETIREMENT_KEY]
+        with self.assertRaisesRegex(ValueError, 'Codex observation is stale or future'):
+            check(full, now=self.at(4), notify=self.fail)
+
+    def test_each_broken_condition_restores_the_freshness_rule(self):
+        for name, mutate in self.broken_conditions():
+            with self.subTest(name):
+                full = self.retired_full(); mutate(full); lines = []
+                self.assertTrue(retirement_status(full, self.at(10)))
+                with self.assertRaisesRegex(ValueError, 'Codex observation is stale or future'):
+                    check(full, now=self.at(10), notify=lines.append)
+                self.assertEqual(len(lines), 1)
+                self.assertIn('not honoured', lines[0])
+
+    def test_real_ledger_is_retired_or_stale(self):
+        real = json.loads((ROOT / 'data/routine-runs.json').read_text())
+        if RETIREMENT_KEY in real:
+            for days in (10, 30):
+                self.assertEqual(check(real, now=self.at(days), notify=lambda line: None)['observation'], 'retired')
+        else:
+            stale = iso(int((timestamp(real[KEY]['observed_at']) + 4 * 86400) * 1000))
+            with self.assertRaisesRegex(ValueError, 'stale'):
+                check(real, now=stale, notify=lambda line: None)
+
+    def test_conditions_match_the_node_checker(self):
+        import subprocess
+        cases = [self.retired_full()]
+        valid_iso = self.retired_full(); valid_iso[RETIREMENT_KEY]['retired_at'] = self.observed
+        cases.append(valid_iso)
+        for _, mutate in self.broken_conditions():
+            full = self.retired_full(); mutate(full); cases.append(full)
+        now = self.at(10)
+        check_node = subprocess.run(['node', '--input-type=module', '-e',
+            "import {retirementStatus} from './scripts/check-routine-runs.mjs';"
+            "let s='';for await(const c of process.stdin)s+=c;const {cases,now}=JSON.parse(s);"
+            "console.log(JSON.stringify(cases.map(d=>retirementStatus(d,{now:Date.parse(now)}).valid)));"],
+            cwd=ROOT, input=json.dumps({'cases': cases, 'now': now}), text=True, capture_output=True, timeout=30)
+        self.assertEqual(check_node.returncode, 0, check_node.stderr)
+        expected = [retirement_status(c, now) == [] for c in cases]
+        self.assertEqual(expected[:2], [True, True])
+        self.assertNotIn(True, expected[2:])
+        self.assertEqual(json.loads(check_node.stdout), expected)
+
+    def test_apply_refuses_before_reading_sources_and_writes_nothing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); ledger = root / 'ledger.json'
+            ledger.write_text(json.dumps(self.retired_full()) + '\n')
+            before = ledger.read_bytes()
+            with self.assertRaises(ObservationRetired):
+                apply(ledger, root / 'missing-store')
+            self.assertEqual(ledger.read_bytes(), before)
+            plain = self.retired_full(); del plain[RETIREMENT_KEY]
+            ledger.write_text(json.dumps(plain) + '\n')
+            with self.assertRaises(sqlite3.OperationalError):  # control: the source read is reached
+                apply(ledger, root / 'missing-store')
+
+    def test_cli_apply_and_probe_exit_2_and_check_reports_retired(self):
+        import subprocess
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); ledger = root / 'ledger.json'
+            ledger.write_text(json.dumps(self.retired_full()) + '\n')
+            before = ledger.read_bytes()
+            for mode in ('--apply', '--probe'):
+                run = subprocess.run([sys.executable, __file__, mode, '--ledger', str(ledger),
+                                      '--codex-dir', str(root / 'missing-store')], capture_output=True, text=True, timeout=30)
+                self.assertEqual(run.returncode, 2, run.stdout + run.stderr)
+                self.assertEqual(json.loads(run.stdout), RETIRED_REFUSAL)
+                self.assertNotIn(str(root), run.stdout + run.stderr)
+                self.assertEqual(ledger.read_bytes(), before)
+            run = subprocess.run([sys.executable, __file__, '--check', '--ledger', str(ledger)],
+                                 capture_output=True, text=True, timeout=30)
+            self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+            self.assertEqual(json.loads(run.stdout)['observation'], 'retired')
+            self.assertTrue(run.stderr.startswith('retired — not observed since'))
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     mode = parser.add_mutually_exclusive_group(required=True)
@@ -1236,12 +1519,16 @@ if __name__ == '__main__':
             elif options.apply:
                 result = apply(options.ledger, options.codex_dir)
             elif options.probe:
-                prior = json.loads(options.ledger.read_text()).get(KEY)
-                result = summary(observe(options.codex_dir, prior))
+                full = json.loads(options.ledger.read_text())
+                refuse_if_retired(full)
+                result = summary(observe(options.codex_dir, full.get(KEY)))
             else:
-                doc = json.loads(options.ledger.read_text())[KEY]
-                result = summary(validate(doc))
+                result = check(json.loads(options.ledger.read_text()))
             print(json.dumps(result))
+        except ObservationRetired:
+            # Documented refusal: exit 2, nothing read from the Codex stores, nothing written.
+            print(json.dumps(RETIRED_REFUSAL))
+            sys.exit(2)
         except Exception as error:
             # Database paths, exception messages and transcript text stay local.
             print(json.dumps(failure_payload(error)))

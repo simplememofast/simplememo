@@ -563,14 +563,32 @@ class RecoveryTests(unittest.TestCase):
             'branchClaimed': False, 'prTodayExists': False, 'prodStatusDate': '2026-09-20',
             'mainStatusDate': '2026-09-20', 'primaryRunStatus': 'none'}}
         recovery = {'installed': True, 'allowed': True, 'required': True}
-        def gate(change=None):
+        # The real gate also reads data/routine-runs.json next to it. Run it from a scratch
+        # copy with an explicit routine ledger, so this test does not depend on whether
+        # observation is currently retired; the retired case is checked at the end.
+        observed = {'observed_at': '2026-09-20T00:00:00Z', 'routines': []}
+        def gate(change=None, ledger=observed, field='run'):
             effective = recovery_snapshot(snapshot, recovery)
             effective['state'].update(change or {})
-            with tempfile.NamedTemporaryFile('w', suffix='.json') as stream:
-                json.dump(effective, stream); stream.flush()
-                result = subprocess.run(['node', str(ROOT / 'scripts/codex-autopilot-preflight.mjs'),
-                                         '--input', stream.name], capture_output=True, text=True)
-            return json.loads(result.stdout)['run'] if result.returncode == 0 else False
+            with tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp).resolve()
+                pending = ['scripts/codex-autopilot-preflight.mjs']
+                while pending:
+                    name = pending.pop()
+                    target = root / name
+                    if target.exists():
+                        continue
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    text = (ROOT / name).read_text()
+                    target.write_text(text)
+                    pending += [os.path.normpath(os.path.join(os.path.dirname(name), m))
+                                for m in re.findall(r"""from\s*['"](\.[^'"]+\.mjs)['"]""", text)]
+                (root / 'data').mkdir()
+                (root / 'data/routine-runs.json').write_text(json.dumps(ledger))
+                (root / 'input.json').write_text(json.dumps(effective))
+                result = subprocess.run(['node', str(root / 'scripts/codex-autopilot-preflight.mjs'),
+                                         '--input', str(root / 'input.json')], capture_output=True, text=True)
+            return json.loads(result.stdout)[field] if result.returncode == 0 else False
         self.assertTrue(gate())
         self.assertTrue(snapshot['state']['agentStopped'])
         snapshot['state']['agentStopReason'] = 'human_stop'
@@ -583,6 +601,9 @@ class RecoveryTests(unittest.TestCase):
                        {'credentialsAvailable': False}, {'githubApiReachable': False},
                        {'mainStatusDate': snapshot['state']['todayJst']}, {'primaryRunStatus': None}]:
             with self.subTest(change=change): self.assertFalse(gate(change))
+        # Retired routine observation (2026-10-20): the recovery permit does not admit a run either.
+        retired = {**observed, 'observation_retirement': {'retired_at': '2026-09-20'}}
+        self.assertEqual(gate(ledger=retired, field='code'), 'skip_observation_retired')
 
 
 if __name__ == '__main__':
