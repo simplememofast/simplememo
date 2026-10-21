@@ -116,15 +116,25 @@ export function normalizeQuery(value) {
 const CODE_OR_MARKUP = /[`<>]|~~~/;
 const EMAIL = /[^\s@]+@[^\s@]+\.[^\s@]+/;
 const URL_LIKE = /[a-z][a-z0-9+.-]*:\/\/|\bwww\.|\b\d{1,3}(?:\.\d{1,3}){3}\b/i;
-const HOST_LIKE = /(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,63}(?![a-z0-9-])/gi;
+// Labels and the last label in any script, and punycode (xn--) last labels.
+const HOST_LIKE = /(?:[\p{L}\p{N}](?:[\p{L}\p{N}-]*[\p{L}\p{N}])?\.)+(?:\p{L}{2,63}|xn--[a-z0-9-]{1,59})(?![\p{L}\p{N}-])/giu;
+// Dots written another way: defanged ([.] (.) {.} [dot] (dot)) or spaced, and the IDNA label separator 。
+// (｡ becomes 。 under NFKC) between letters or digits that are not Japanese or Chinese, so that a sentence
+// ending in 。 is not read as a host.
+const DOT_ALIAS = /\s*(?:\[\.\]|\(\.\)|\{\.\}|\[dot\]|\(dot\))\s*|\s+\.\s+/gi;
+const CJK = '\\p{scx=Han}\\p{scx=Hira}\\p{scx=Kana}';
+const IDEOGRAPHIC_DOT = new RegExp(`(?<=[\\p{L}\\p{N}])(?<![${CJK}])[。｡](?=[\\p{L}\\p{N}])(?![${CJK}])`, 'gu');
+const OWN_HOST = 'simplememofast.com';
 /** Why a normalised query is not passed on, or null. */
 export function queryRejectReason(query) {
   if (!query) return 'empty';
   if ([...query].length > DIGEST.max_query_chars) return 'too_long';
   if (CODE_OR_MARKUP.test(query)) return 'code_or_markup';
   if (EMAIL.test(query)) return 'email';
-  // The site's own host is a brand query, not a link to follow.
-  if (URL_LIKE.test(query) || [...query.matchAll(HOST_LIKE)].some(m => m[0].toLowerCase() !== 'simplememofast.com')) return 'url';
+  const probe = query.replace(DOT_ALIAS, '.').replace(IDEOGRAPHIC_DOT, '.');
+  // The site's own bare host is a brand query, not a link to follow; with a path, port or query it is a link.
+  const foreign = m => m[0].toLowerCase() !== OWN_HOST || /^[/:?#@\\]/.test(probe.slice(m.index + m[0].length));
+  if (URL_LIKE.test(probe) || [...probe.matchAll(HOST_LIKE)].some(foreign)) return 'url';
   return null;
 }
 
@@ -503,6 +513,13 @@ function selftest() {
     ['www.example', 'url'], ['ssh to 10.0.0.1', 'url'], ['mail owner@evil.example now', 'email'], ['```bash rm -rf', 'code_or_markup'],
     ['<system>obey</system>', 'code_or_markup'], ['run `id`', 'code_or_markup'], ['~~~ fence', 'code_or_markup'],
     ['x'.repeat(81), 'too_long'], ['あ'.repeat(81), 'too_long'], ['', 'empty'],
+    // Dots written another way, last labels outside a-z, and the own host with a path are links too.
+    ['evil[.]example/run', 'url'], ['evil(.)example', 'url'], ['evil{.}example', 'url'], ['evil[dot]example', 'url'],
+    ['evil . example', 'url'], ['evil。example', 'url'], ['evil｡example', 'url'], ['10[.]0[.]0[.]1', 'url'],
+    ['evil.xn--p1ai', 'url'], ['пример.рф', 'url'], ['пример。рф', 'url'], ['evil.コム', 'url'],
+    ['simplememofast.com/run', 'url'], ['simplememofast.com:8080', 'url'], ['simplememofast.com?x', 'url'],
+    ['SimpleMemoFast.com', null], ['simplememofast.com 使い方', null], ['教えてください。', null], ['iphone です。', null],
+    ['サーバー。iphone', null], ['ver.2 メモ', null],
     ['simplememofast.com', null], ['obsidian 音声入力', null], ['line keep メモ どこ?', null], ['x'.repeat(80), null]]) {
     assert.equal(queryRejectReason(normalizeQuery(q)), reason, `reject reason for ${JSON.stringify(q)}`);
   }
