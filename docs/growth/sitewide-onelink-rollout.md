@@ -12,8 +12,11 @@ is unchanged. Wider route coverage is not proof of website-to-install CVR.
 Keep the nine existing hero links and their `pilot` attributes exactly as they
 are, including `https://simplememofast.onelink.me/it5q/l250gib4`. SEO Validation
 enforces this against `growth/onelink-pilot.json` (`growth/lib/onelink-pilot.test.mjs`):
-the pilot short code may appear only in those nine hero hrefs, and the QA short
-code in no site file except the tracker's classifier. Do not append
+the pilot short code may appear only in those nine hero hrefs, the pilot label
+(`data-app-route="onelink"`, `data-app-traffic="pilot"`, variant `onelink_v1`)
+only on those nine anchors, and the QA short code in no site file except
+`js/app-store-tracking.js` (exempt as a whole, but never holding the full QA
+link). Do not append
 `c=website_bridge_v1` to that short URL: appended parameters do not override a
 stored campaign. A template's Secure Shortlinks setting can also prevent
 attribution when parameters are appended. See the official

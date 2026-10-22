@@ -160,7 +160,8 @@ https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e1303231
 
 HTML内では `&` を `&amp;` とする。**同じPRで [`growth/onelink-pilot.json`](onelink-pilot.json) の
 `state` を `active` から `rolled_back` に変える。**これを忘れると下の見張りがSEO Validationで落ちる
-（9ページの冒頭ボタンが pilot でない）。逆に `state` だけ倒してリンクが残っていても落ちる。
+（9ページの冒頭ボタンが pilot でない）。逆に `state` だけ倒してリンクが残っていても、hrefだけ戻して
+`data-app-route` / `data-app-traffic` や variant `onelink_v1` が残っていても落ちる。
 通常のPR・SEO Validation・Git経由の本番反映を使い、
 復旧時刻・本番SHAを同じ計測変更履歴に残す。過去のQA/pilot記録は削除しない。
 `state` は見張りのスイッチで、開始・復旧の記録ではない（記録は従来どおり `measurement_changes` と
@@ -170,21 +171,45 @@ HTML内では `&` を `&amp;` とする。**同じPRで [`growth/onelink-pilot.j
 
 SEO Validation の「OneLink pilot hero anchors match growth/onelink-pilot.json」
 （`node --test growth/lib/onelink-pilot.test.mjs`）が、[`growth/onelink-pilot.json`](onelink-pilot.json)
-と実際のチェックアウトを突き合わせる。公開後、これを機械で確かめる所が無かった
-（`tag-cta-placements.js` と `apply-cpp-ppid.js` は直接Appleのリンクだけを見て、#2100 の
-`site-route-inventory` はCIでは見本しか読まない）。
+と実際のチェックアウトを突き合わせる。公開後、実際のチェックアウトでこれを確かめるCIは無かった。
+生成翻訳1ページだけの手直しは `build_site_translations.py --check` が既に落とすが、日本語元ページの
+heroを直して翻訳を再生成した場合や、短縮URL・pilot の目印・QAのリンクを別の場所へ写した場合は、
+どこも赤くならなかった（`tag-cta-placements.js` と `apply-cpp-ppid.js` は直接Appleのリンクだけを見て、
+#2100 の `site-route-inventory` はCIでは見本しか読まない）。
 
 - `state: active` の間: 9ページそれぞれに、hrefがちょうどpilot短縮URLの `<a>` が1個だけあり、
   上の表の計測属性5つを同じ値で1回ずつ持ち、class に `lpr-btn-primary` を含む。
   pilotの短縮コードはそのページのほかの場所にも、ほかのサイトのファイルにも無い。
-- `state: rolled_back` の間: pilotの短縮コードはサイトのどこにも無い。
-- どちらの間も、QAの短縮コードはサイトのファイルに無い（例外は分類に使う
-  `js/app-store-tracking.js` だけで、HTMLは例外にできない）。
+- pilot の目印（`data-app-route="onelink"`・`data-app-traffic="pilot"`・variant `onelink_v1`）を持つ `<a>` は、
+  その冒頭ボタンのほかに無い。GA4 は短縮コードを問わず route と traffic の目印で pilot と数える
+  （`js/app-store-tracking.js`、`ga4-funnel.sql` の saw_onelink / clicked_onelink）ので、別の短縮コードや
+  直接Appleのリンクに目印を写すと pilot の表示・クリックが黙って増える。テストは計測スクリプトを
+  オフラインで動かし、pilot と数えられるリンクがこの目印を持つことを確かめる。
+- `state: rolled_back` の間: pilotの短縮コードも目印も、サイトのどこにも無い。
+- どちらの間も、QAの短縮コードはサイトのファイルに無い。例外は分類に使う `js/app-store-tracking.js` だけで、
+  ほかのファイルは例外に書けない。そのファイルは丸ごと例外になる（分類以外の使い方を見分けない）ので、
+  変えるときは中身を読む。ただしQAの短縮URLそのもの（ホストつき）はそのファイルにも置けない。
+- 短縮コードは、文字参照・%エンコード（二重を含む）・JavaScript のエスケープを戻し、大文字小文字を
+  区別せずに数える。実行時に部品から組み立てたリンクは見えない。
 - サイトのファイル = `functions/_middleware.js` が404を返すもの（`INTERNAL_PREFIXES`・`/CLAUDE.md`・
   配信しない `data/*.json`）を除いた全ファイル。`_redirects`・`functions/`・`admin/`・`assets/`・`js/` を含む。
   画像の中身（QR）は読まない。
-- 計測スクリプトの `<script>` タグ・aria-label・文言・ページ内の位置は見ない。9ページの範囲を変えるときは、
-  先に範囲を決めて、`growth/onelink-pilot.json` と `measurement_changes` を揃える（テストが両者の一致を見る）。
+- 計測スクリプトの `<script>` タグ・aria-label・文言・ページ内の位置は見ない。
+- 9ページの一覧は、`measurement_changes` の記録の scope、`scripts/site-route-inventory.mjs` の
+  `PILOT_FILES`、`growth/lib/company-acquisition.mjs` の `PILOT_HUB_PATHS`（指標の対象ページ）とも
+  一致させる（テストが見る）。
+
+9ページの範囲を変えるときは、上の「実際の開始時刻を記録する・準備日を開始日にしない」を守るため2段で進める。
+
+1. 変更PR（本番反映の前）: HTML、`growth/onelink-pilot.json` の `pages`、上の2つの一覧を変え、
+   `unrecorded_scope_change` に何を変えたかの短い説明を書く。`measurement_changes` にはまだ書かない
+   （版の名前は開始日を含むので、開始後に決める）。
+2. 本番反映を確かめた後のPR: 実際の開始時刻・本番SHAつきの記録を `measurement_changes` に足し、
+   同じPRで `measurement_change` をその版にして `unrecorded_scope_change` を `null` に戻す。
+
+テストは、説明が無いのに `pages` が記録と違う、`pages` と同じ scope の記録が後ろに足されたのに切り替えて
+いない、`pages` が記録と同じなのに説明が残っている、のどれでも落ちる。新しい記録は名前ではなく scope で
+見つける。説明を残したまま記録を忘れる遅れはCIでは分からないので、2の記録までを1つの作業とする。
 
 ## 別枠の全サイト導線draft（2026-10-16）
 

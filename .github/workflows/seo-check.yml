@@ -312,9 +312,11 @@ jobs:
 
       # OneLink pilot（#1047）の冒頭ボタン9個を、実際のチェックアウトで固定する。
       # 上の CTA・CPP の検査が見るのは直接Appleのリンク（id6758438948 を含む href）だけで、
-      # #2100 の site-route-inventory は CI では見本しか読まない。翻訳の再生成や手直しで hero が直接Appleへ戻っても、pilot の
-      # 短縮URLが別のページ・スクリプト・転送へ写っても、QAの短縮URLが公開物に出ても、
-      # どこも赤くならなかった（どれも pilot の campaign が数えるものを黙って変える）。
+      # #2100 の site-route-inventory は CI では見本しか読まない。生成翻訳1ページだけの手直しは
+      # build_site_translations.py --check が落とすが、日本語元ページの hero を直して翻訳を再生成し
+      # 直接Appleへ戻しても、pilot の短縮URLや目印（data-app-traffic="pilot" など）が別のページ・
+      # スクリプト・転送へ写っても、QAの短縮URLが公開物に出ても、どこも赤くならなかった
+      # （どれも pilot の campaign や GA4 の pilot 系列が数えるものを黙って変える）。
       # 戻すときは hero と同じPRで growth/onelink-pilot.json の state を rolled_back にする
       # （growth/ONELINK_PILOT.md「不具合時の戻し方」）。計測スクリプトのタグ・文言・ページ内の位置は見ない。
       - name: OneLink pilot hero anchors match growth/onelink-pilot.json
