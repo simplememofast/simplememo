@@ -193,6 +193,32 @@ affected workflow definitions pass actionlint, and whitespace validation passes.
 These 323 executed tests are this checkpoint's validation, not a sum with older
 reported runs.
 
+### Credential inventory preflight
+
+Bootstrap PR 2143 at `0799dd0df7c2e63197617a61a52260d9c905f2b9` failed
+[SEO run 39753201900](https://github.com/simplememofast/simplememo/actions/runs/39753201900)
+at `Credential scope and revocation`. The new workflow referenced
+`CF_ACCESS_PREVIEW_CLIENT_ID` and `CF_ACCESS_PREVIEW_CLIENT_SECRET` without
+registering their owner, scope and revocation procedure in
+`data/credential-expiry.json`. This was a missing inventory record, not evidence
+that either actual credential was rejected or expired.
+
+The repair registers the pair as one dedicated Cloudflare credential. It keeps
+the existing expiry policy, exemptions and checks unchanged. Its declared
+`expires_at` remains null because the exact UTC expiry is unknown; the record
+separately documents the UI display and the enforced short operational deadline.
+Revoking the dedicated Cloudflare token invalidates distributed copies; deleting
+GitHub Environment secrets only stops future distribution. Existing email Allow
+and retired-admin Block policies remain unchanged. No credential value or new
+authentication configuration is involved in this repair.
+
+The same failed run completed all 12,751 viewport probes (Blink deep 42, Blink
+all-pages 10,136, WebKit 2,573), with zero problems and zero unmeasured probes.
+The three model evaluations remain unmeasured under their existing report-only
+policy. Later steps were skipped after the inventory failure, so this run does
+not satisfy the SEO gate. A fresh normal PR run must validate the repaired
+inventory and complete the later checks before merge.
+
 ## Bootstrap and remaining unknowns
 
 The current `main` advanced to `ca6a3b3b1` through PRs 2135, 2140 and 2142. The
