@@ -43,7 +43,7 @@ export const ALERT_STATES = Object.freeze(['envelope_invalid', 'envelope_files_u
 //   existing_receipt_failed (a failed receipt for that end-date already existed and was kept).
 // Only event=schedule runs raise it. Manual runs, dry runs and a gate that decided not to collect (stop, end-date
 // already collected) never raise it; the integrity ALERT_STATES above apply to every run, manual ones included.
-// It clears when a later scheduled run delivers that source (SCHEDULE_DELIVERED_STATES without a failed receipt;
+// It clears when a later scheduled run delivers that source (SCHEDULE_DELIVERED_STATES with a verified receipt;
 // key_pending hands AppsFlyer back to the local reader). It also disappears, without any delivery, once the lost
 // run leaves the run listing (RETENTION_DAYS + 1 days), so an emergency stop longer than that hides an old loss.
 // While a completed run is re-run, GitHub lists it as in progress and its record sits out until the re-run
@@ -57,14 +57,19 @@ export const SCHEDULE_DELIVERED_STATES = Object.freeze(['admitted', 'already_adm
 // the same gap: it opens issues only from its 07:00 JST run, and a disabled workflow makes it fail instead.
 export const SCHEDULE_SILENCE_MINUTES = SCHEDULE_EXPECTATIONS.find(e => e.path === ACQUISITION_WORKFLOW)?.max_silence_minutes ?? null;
 
-// A failed receipt is never a delivery. For GA4 it is also a loss: export-analytics.mjs seals a query error,
-// a blocked or incomplete result and exits 1, the ingest admits it as a failed receipt, and collectAnalytics
+// Only a verified receipt is a delivery. A failed one is, for GA4, also a loss: export-analytics.mjs seals a query
+// error, a blocked or incomplete result and exits 1, the ingest admits it as a failed receipt, and collectAnalytics
 // returns that receipt before any legacy dispatch (company-data.mjs), so the end-date stays without GA4 data.
-// For AppsFlyer it is neither: collectAppsFlyer reads the end-date again locally over an Actions failure
-// receipt (attempts 1, failure actions_reader_failed), so a sealed AppsFlyer failure neither alerts nor clears.
+// For AppsFlyer it is neither: collectAppsFlyer returns an existing receipt only when it is verified, has used three
+// attempts or failed on permission_or_credential, so over an Actions failure receipt (attempts 1, failure
+// actions_reader_failed) a collect on the same JST day (the window follows the JST date) reads that end-date again
+// locally, with at most the two attempts left. If that read fails too, the failed receipt shows in that collect
+// (its status partial), not here.
+// A receipt still pending (a legacy GA4 dispatch in flight when the run was recorded) neither clears nor alerts.
 // already_admitted carries the receipt status because an earlier ingest of a then-unfinished record admitted it.
-const failedReceipt = s => s.state === 'admitted_failed'
-  || (['already_admitted', 'existing_receipt_retained'].includes(s.state) && s.status === 'failed');
+const RECEIPT_STATES = Object.freeze(['already_admitted', 'existing_receipt_retained']);
+const failedReceipt = s => s.state === 'admitted_failed' || (RECEIPT_STATES.includes(s.state) && s.status === 'failed');
+const delivery = s => SCHEDULE_DELIVERED_STATES.includes(s.state) && (!RECEIPT_STATES.includes(s.state) || s.status === 'verified');
 const RECEIPT_PREFIX = Object.freeze({ ga4: 'ga4-funnel', appsflyer: 'appsflyer' });
 
 /** The receipt this run (attempt 1) wrote for the source, or null. Read only. */
@@ -89,7 +94,7 @@ function scheduleOutcome(r, source, receipts) {
   if (SCHEDULE_LOSS_STATES.includes(s.state)) return { lost: s.state };
   if (s.state === 'not_run' && r.jobs?.gate !== 'success') return { lost: `gate_${r.jobs?.gate ?? 'absent'}` };
   if (failedReceipt(s)) return source === 'ga4' ? { lost: s.state === 'existing_receipt_retained' ? 'existing_receipt_failed' : 'admitted_failed' } : {};
-  return SCHEDULE_DELIVERED_STATES.includes(s.state) ? { delivered: true } : {};
+  return delivery(s) ? { delivered: true } : {};
 }
 
 /** Derived on every ingest from the retained run records; the records themselves stay as first written. */
@@ -386,9 +391,9 @@ const ACTIONS = {
 };
 const SCHEDULE_ALERTS = Object.freeze(['scheduled_collection_lost', 'scheduled_run_silent']);
 
-// The most urgent standing action first: a repository-level token copy, then the AppsFlyer key state, then
-// integrity alerts (they outlive later successes). A lost or silent schedule appends its own action, so a key
-// or integrity action never hides it; each of those clears by itself.
+// One standing action, as before: a repository-level token copy, else the AppsFlyer key state, else integrity
+// alerts (they outlive later successes). A lost or silent schedule appends its own action after it, so a key or
+// integrity action never hides it; each of those clears by itself.
 function statusAction(h) {
   const alerts = h.alerts ?? [], states = new Set(alerts.map(a => a.state));
   const schedule = SCHEDULE_ALERTS.filter(s => states.has(s)).map(s => ACTIONS[s]);

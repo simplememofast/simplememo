@@ -331,13 +331,19 @@ too). So does a scheduled run that left a source without data
 result) or `existing_receipt_failed` (a failed receipt for that end-date already
 existed and was kept). A failed GA4 receipt is final: `collect --analytics`
 returns it and never dispatches the legacy fallback for that end-date. A sealed
-AppsFlyer failure (`admitted_failed`, `actions_reader_failed`) does not alert,
-because the local reader in `collect` reads that end-date again over the Actions
-failure receipt; health therefore does not tell whether the Actions AppsFlyer
-read itself works (the run records do). A loss clears when a later scheduled run
-delivers that source (admitted, already admitted or an existing receipt
-retained, unless that receipt failed; `key_pending` for AppsFlyer). A failed
-receipt, a stopped run and a manual export do not clear it. It also disappears
+AppsFlyer failure (`admitted_failed`, `actions_reader_failed`) does not alert:
+the local reader returns an existing receipt only when it is verified, has used
+three attempts or failed on `permission_or_credential`, so a `collect` on the
+same JST day (the window follows the JST date) reads that end-date again over
+the Actions failure receipt (attempts 1), with at most the two attempts left. If
+that local read fails too, it shows as a failed AppsFlyer receipt in that
+`collect` (status `partial`), not in health; and with no `collect` that day the
+end-date is not read again. Health therefore does not tell whether the Actions
+AppsFlyer read itself works (the run records do). A loss clears when a later
+scheduled run delivers that source: admitted, or already admitted / an existing
+receipt retained whose receipt is verified (`key_pending` for AppsFlyer). A
+failed or still pending receipt (a legacy GA4 dispatch in flight), a stopped
+run and a manual export do not clear it. It also disappears
 without any delivery once the lost run leaves the run listing (retention plus
 one day, 15 days), so an emergency stop longer than that hides an old loss.
 While a finished run is re-run it is listed as in progress, and its loss (or a
@@ -353,9 +359,11 @@ reporting a disabled workflow. These alerts change no guard input, fallback,
 dispatch, receipt or run record. They do change two statuses: the ingest status
 reads `alert`, and the collection-level `status` of `collect` /
 `acquisition-ingest` (printed, and written to `latest-collection.json` and
-`collection-events/<uuid>.json`) reads `partial` while an alert is open, as it
-already did for integrity alerts. Nothing in this repository retries,
-dispatches or exits differently on either status. If the reviewed reader
+`collection-events/<uuid>.json`, and recorded as the command observation's
+`result_status`) reads `partial` while an alert is open, as it already did for
+integrity alerts. Nothing in this repository retries, dispatches or exits
+differently on either status (the readers of `collection-events` use the
+AppsFlyer receipt inside each event, not this status). If the reviewed reader
 changes in `simplememo-api`, AppsFlyer ingest stops with `reader_divergence`
 until a reviewed PR re-vendors the file and updates its pin in the workflow
 and `growth/lib/acquisition-handoff.mjs` together.

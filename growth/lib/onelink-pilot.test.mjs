@@ -210,7 +210,8 @@ test('a short code in another spelling is still found: percent, entity and scrip
     ['js/new.js', `location.href = "${MANIFEST.short_url.replaceAll('/', '\\/')}";`],
     ['js/new.js', `location.href = "${MANIFEST.short_url.replaceAll('/', '\\u002F')}";`],
     ['index.html', page(`<a href="${entity(MANIFEST.short_url, CODE)}">`)],
-    ['index.html', page(`<a href="${MANIFEST.short_url.replace(`/${CODE}`, `/&#x${CODE.charCodeAt(0).toString(16)};${CODE.slice(1)}`)}">`)],    ['index.html', page(`<a href="${MANIFEST.short_url.replace(CODE, CODE.toUpperCase())}">`)],
+    ['index.html', page(`<a href="${MANIFEST.short_url.replace(`/${CODE}`, `/&#x${CODE.charCodeAt(0).toString(16)};${CODE.slice(1)}`)}">`)],
+    ['index.html', page(`<a href="${MANIFEST.short_url.replace(CODE, CODE.toUpperCase())}">`)],
   ]) {
     const f = fixture(t);
     f.write(rel, text);

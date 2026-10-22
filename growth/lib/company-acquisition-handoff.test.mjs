@@ -644,7 +644,7 @@ test('a lost source clears when a later scheduled run delivers it; a stop, a man
   // A delivery before the loss does not clear it.
   const after = ingest(stateRoot(t), github(merge(scheduled(), lostRun({ id: 502, createdAt: LATER_AT }))));
   assert.deepEqual(after.alerts, lostAlerts(502, { ga4: 'job_failed_without_artifact', appsflyer: 'job_failed_without_artifact' }, LATER_AT));
-  // A receipt that already existed for the end-date counts as delivered, and so does key_pending for AppsFlyer
+  // A verified receipt that already existed for the end-date counts as delivered, and so does key_pending for AppsFlyer
   // (the local reader owns AppsFlyer again until the secret is registered).
   const kept = stateRoot(t), dir = path.join(kept, 'data/collection-receipts'); fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
   for (const name of ['ga4-funnel-2026-10-10.json', 'appsflyer-2026-10-14.json']) fs.writeFileSync(path.join(dir, name), JSON.stringify({ status: 'verified' }));
@@ -666,6 +666,18 @@ test('a lost source clears when a later scheduled run delivers it; a stop, a man
   const blocked = ingest(legacy, github(merge(lostRun(), scheduled())));
   assert.deepEqual([blocked.latest.ga4, blocked.latest.appsflyer], ['existing_receipt_retained', 'admitted']);
   assert.deepEqual(blocked.alerts, [...lostAlerts(500, { ga4: 'job_failed_without_artifact' }), ...lostAlerts(501, { ga4: 'existing_receipt_failed' }, RUN_AT)]);
+  // Only a verified receipt delivers. One still pending when the run was recorded (a legacy GA4 dispatch in flight)
+  // neither clears the older loss nor adds one.
+  const inFlight = stateRoot(t), flightDir = path.join(inFlight, 'data/collection-receipts'); fs.mkdirSync(flightDir, { recursive: true, mode: 0o700 });
+  fs.writeFileSync(path.join(flightDir, 'ga4-funnel-2026-10-10.json'), JSON.stringify({ status: 'dispatched' }));
+  const dispatched = ingest(inFlight, github(merge(lostRun(), scheduled())));
+  assert.deepEqual([dispatched.latest.ga4, dispatched.latest.appsflyer], ['existing_receipt_retained', 'admitted']);
+  assert.deepEqual(dispatched.alerts, lostAlerts(500, { ga4: 'job_failed_without_artifact' }));
+  // A verified admission made by an earlier ingest of the then-unfinished record (already_admitted) is a delivery.
+  const earlier = stateRoot(t);
+  assert.deepEqual(ingest(earlier, github({ ...merge(lostRun(), scheduled()), upstream: null })).alerts, lostAlerts(500, { appsflyer: 'job_failed_without_artifact' }));
+  const readmitted = ingest(earlier, github(merge(lostRun(), scheduled())));
+  assert.deepEqual([readmitted.latest.ga4, readmitted.latest.appsflyer, readmitted.status, readmitted.alerts], ['already_admitted', 'admitted', 'verified', []]);
   // Integrity alerts keep their own action text and their own lifetime; the loss is listed beside them.
   const tampered = merge(lostRun(), scheduled({ af: afPayload({ mutate: p => { p.provenance.event = 'workflow_dispatch'; } }) }));
   const both = stateRoot(t), b = ingest(both, github(tampered));
