@@ -71,9 +71,9 @@
 //   4. Map retired paths to their live targets, and answer 410 Gone for
 //      slugs that never existed here.
 //
-// /admin/* is protected by its own middleware (Cloudflare Access auth).
+// /admin/* is retired by its terminal middleware (HTTP 410).
 // We must pass those requests through unmodified — root middleware runs
-// FIRST, and a 301 here would prevent the Access auth from being checked.
+// FIRST; pass these paths to the terminal retirement response.
 
 // BEGIN data-publication (scripts/check-publication.mjs --write)
 // **サイトが配信しない data/*.json。**一覧は data/publication-policy.json が正。
@@ -248,10 +248,10 @@ export const onRequest = async (context) => {
   const url = new URL(context.request.url);
   const path = url.pathname;
 
-  // Preserve Cloudflare Access auth chain for /admin/*. On the www host this
+  // Preserve the terminal retirement response for /admin/*. On the www host this
   // passes through too — `_redirects` still moves it to the apex afterwards,
-  // and auth-before-redirect is the safer order for those paths anyway.
-  if (path.startsWith("/admin/")) {
+  // with the retirement response still taking precedence.
+  if (path === "/admin" || path.startsWith("/admin/")) {
     return context.next();
   }
 

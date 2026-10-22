@@ -18,12 +18,6 @@ globalThis.fetch = async () => { throw new Error('Network access is disabled in 
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
-const moduleURL = (src) => 'data:text/javascript,' + encodeURIComponent(src);
-const sharedURL = moduleURL(read('functions/admin/api/_shared.js'));
-const { safeJson, json, credKeysFor, firstMissing } = await import(sharedURL);
-const { onRequest: deleteTweet } = await import(moduleURL(
-  read('functions/admin/api/x-delete.js').replace("'./_shared.js'", JSON.stringify(sharedURL))));
-
 test('workflow extraction preserves inline/block order and deduplicates commands', () => {
   const yaml = `
 steps:
@@ -239,56 +233,6 @@ for (const key of ['GIT_INDEX_FILE', 'GIT_DIR', 'GIT_WORK_TREE', 'GIT_CONFIG_COU
     assert.equal(fs.readFileSync(source, 'utf8'), 'untouched');
   });
 }
-
-test('API JSON reader preserves valid JSON values and non-JSON error bodies', async () => {
-  for (const value of [{ data: { id: '123' } }, null, [1, 2], 'text', 0, false]) {
-    assert.deepEqual(await safeJson(new Response(JSON.stringify(value))), value);
-  }
-  for (const text of ['<html>upstream error</html>', '{broken', '']) {
-    assert.deepEqual(await safeJson(new Response(text)), { _raw: text });
-  }
-});
-
-test('API JSON reader handles unreadable streams without attempting a second read', async () => {
-  const stream = new ReadableStream({ start(controller) { controller.error(new Error('read failed')); } });
-  assert.deepEqual(await safeJson(new Response(stream)), { _raw: '(本文読み取り不能)' });
-});
-
-test('JSON response headers and status remain unchanged', async () => {
-  const response = json({ error: 'fixture' }, 400);
-  assert.equal(response.status, 400);
-  assert.equal(response.headers.get('cache-control'), 'no-store');
-  assert.equal(response.headers.get('content-type'), 'application/json;charset=utf-8');
-  assert.deepEqual(await response.json(), { error: 'fixture' });
-});
-
-test('X credential selection preserves account mapping and missing-key order', () => {
-  for (const account of ['ja', 'en']) {
-    const prefix = account === 'en' ? 'X_EN_' : 'X_';
-    const keys = ['API_KEY', 'API_SECRET', 'ACCESS_TOKEN', 'ACCESS_TOKEN_SECRET'].map((k) => prefix + k);
-    assert.deepEqual(Object.values(credKeysFor(account)), keys);
-    const env = {};
-    for (const key of keys) {
-      assert.equal(firstMissing(env, credKeysFor(account)), key);
-      env[key] = 'fixture';
-    }
-    assert.equal(firstMissing(env, credKeysFor(account)), null);
-  }
-  assert.deepEqual(credKeysFor('unknown'), credKeysFor('ja'));
-});
-
-test('delete endpoint validates credentials before parsing or attempting a network request', async () => {
-  const env = {};
-  for (const key of ['X_API_KEY', 'X_API_SECRET', 'X_ACCESS_TOKEN', 'X_ACCESS_TOKEN_SECRET']) {
-    const response = await deleteTweet({
-      request: new Request('https://example.invalid/admin/api/x-delete', { method: 'POST', body: 'invalid JSON' }),
-      env,
-    });
-    assert.equal(response.status, 400);
-    assert.deepEqual(await response.json(), { error: key + ' 未設定' });
-    env[key] = 'fixture';
-  }
-});
 
 test('shared selftest runner continues after failures and retains the failure count', () => {
   const originalLog = console.log;

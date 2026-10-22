@@ -17,6 +17,7 @@
  */
 
 import path from "node:path";
+import fs from "node:fs";
 
 function localAuthorities(port) {
   return [`localhost:${port}`, `127.0.0.1:${port}`, `[::1]:${port}`];
@@ -42,4 +43,15 @@ export function resolveOutDir(outRoot, dir) {
   const resolved = path.resolve(root, dir);
   if (path.dirname(resolved) !== root) return null;
   return resolved;
+}
+
+// Check real paths as well as lexical paths. A child symlink must not turn an
+// otherwise valid name into a read/write outside the permitted root.
+export function existingPathInside(root, rel) {
+  if (typeof rel !== 'string' || path.isAbsolute(rel)) return null;
+  try {
+    const base = fs.realpathSync(root);
+    const target = fs.realpathSync(path.resolve(root, rel));
+    return target.startsWith(base + path.sep) ? target : null;
+  } catch { return null; }
 }

@@ -11,7 +11,7 @@ import fs from "node:fs";
 import path from "node:path";
 import archiver from "archiver";
 import { generateSet, composeSlide } from "./compose-slides.js";
-import { isLocalRequest, resolveOutDir } from "./server-guard.js";
+import { isLocalRequest, resolveOutDir, existingPathInside } from "./server-guard.js";
 
 const app = express();
 const PORT = 3456;
@@ -31,7 +31,14 @@ app.use(express.json());
 app.use("/admin", express.static(path.join(import.meta.dirname, "..", "admin")));
 
 // Serve generated images
-app.use("/slides", express.static(path.join(import.meta.dirname, "out")));
+const OUT_ROOT = path.join(import.meta.dirname, "out");
+app.use("/slides", (req, res, next) => {
+  let rel;
+  try { rel = decodeURIComponent(req.path).replace(/^\//, ''); }
+  catch { return res.status(400).send("Invalid path"); }
+  if (!existingPathInside(OUT_ROOT, rel)) return res.status(404).send("Not found");
+  next();
+}, express.static(OUT_ROOT));
 
 // Latest generation state
 let latestDir = null;
@@ -40,9 +47,7 @@ let latestPlan = null;
 // Join `rel` onto `root` (same semantics as path.join) and return the result
 // only if it stays strictly inside `root`; null for non-strings and escapes.
 function joinInside(root, rel) {
-  if (typeof rel !== "string") return null;
-  const joined = path.join(root, rel);
-  return joined.startsWith(root + path.sep) ? joined : null;
+  return existingPathInside(root, rel);
 }
 
 // ── Generate 6 slides ───────────────────────────────────────────
@@ -95,10 +100,11 @@ app.post("/api/regenerate", async (req, res) => {
 
     const outDir = resolveOutDir(path.join(import.meta.dirname, "out"), dir);
     if (!outDir) return res.status(400).json({ ok: false, error: "invalid dir" });
-    if (!fs.existsSync(outDir)) return res.status(404).json({ ok: false, error: "dir not found" });
+    if (!existingPathInside(OUT_ROOT, dir)) return res.status(404).json({ ok: false, error: "dir not found" });
 
     // Re-read plan
     const planPath = path.join(outDir, "slide_plan.json");
+    if (!existingPathInside(outDir, "slide_plan.json")) return res.status(404).json({ ok: false, error: "plan not found" });
     const plan = JSON.parse(fs.readFileSync(planPath, "utf-8"));
     const slide = plan.slides[index];
 
@@ -115,6 +121,7 @@ app.post("/api/regenerate", async (req, res) => {
     const buf = await composeSlide(bgFile, slide.text, newLayout, newPosition, slide.crop_variant, brand);
 
     const filename = `slide_${index + 1}.png`;
+    if (fs.lstatSync(path.join(outDir, filename), { throwIfNoEntry: false })?.isSymbolicLink()) throw new Error("invalid slide path");
     fs.writeFileSync(path.join(outDir, filename), buf);
 
     // Update plan
@@ -143,7 +150,12 @@ app.get("/api/zip/:dir", (req, res) => {
   // as a missing dir.
   const outDir = resolveOutDir(path.join(import.meta.dirname, "out"), req.params.dir);
   if (!outDir) return res.status(404).send("Not found");
-  if (!fs.existsSync(outDir)) return res.status(404).send("Not found");
+  if (!existingPathInside(OUT_ROOT, req.params.dir)) return res.status(404).send("Not found");
+
+  const files = [...Array.from({ length: 6 }, (_, i) => `slide_${i + 1}.png`), "slide_plan.json"];
+  for (const file of files) {
+    if (fs.existsSync(path.join(outDir, file)) && !existingPathInside(outDir, file)) return res.status(404).send("Not found");
+  }
 
   res.setHeader("Content-Type", "application/zip");
   res.setHeader("Content-Disposition", `attachment; filename="${req.params.dir}.zip"`);

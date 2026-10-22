@@ -87,3 +87,19 @@ test("resolveOutDir refuses traversal, separators and non-strings", () => {
     assert.equal(resolveOutDir(root, dir), null, `should refuse ${JSON.stringify(dir)}`);
   }
 });
+
+// Lexical path validation alone does not contain filesystem symlinks.
+import fs from 'node:fs';
+import os from 'node:os';
+import { existingPathInside } from './server-guard.js';
+test('real-path boundary rejects sibling prefixes, traversal and symlink escapes', (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'slide-path-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const root = path.join(dir, 'out');
+  fs.mkdirSync(root); fs.mkdirSync(path.join(dir, 'out-other'));
+  fs.writeFileSync(path.join(root, 'slide.png'), 'local');
+  fs.writeFileSync(path.join(dir, 'out-other', 'secret'), 'outside');
+  fs.symlinkSync(path.join(dir, 'out-other'), path.join(root, 'linked'));
+  assert.equal(existingPathInside(root, 'slide.png'), path.join(root, 'slide.png'));
+  for (const rel of ['../out-other/secret', 'linked/secret', 'linked', '.', 'missing']) assert.equal(existingPathInside(root, rel), null);
+});
