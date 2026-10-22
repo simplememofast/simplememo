@@ -1,5 +1,5 @@
 // Model-free intake. Execution status is not proof of a post, shipment, or repair.
-import { diagnose, validate, OVERDUE_GRACE_HOURS } from '../check-routine-runs.mjs';
+import { diagnose, validate, OVERDUE_GRACE_HOURS, RETIREMENT_KEY } from '../check-routine-runs.mjs';
 import { createHash } from 'node:crypto';
 
 // Publication-loop suppression, not authorization or evidence of recovery.
@@ -65,8 +65,12 @@ const millis = value => typeof value === 'string' ? Date.parse(value) : NaN;
 const validId = value => typeof value === 'string' && /^trig_[A-Za-z0-9]+$/.test(value);
 const label = value => String(value ?? '').replace(/[\x00-\x1f\x7f<>`]/g, ' ').slice(0, 120);
 
+// A retired ledger (any marker, valid or not) is not observed: its last
+// observation is history, never fresh evidence for actions or closure.
+const retired = doc => Boolean(doc) && typeof doc === 'object' && Object.hasOwn(doc, RETIREMENT_KEY);
+
 function readable(doc, now) {
-  if (!doc || !Number.isFinite(now) || millis(doc.observed_at) > now) return false;
+  if (!doc || retired(doc) || !Number.isFinite(now) || millis(doc.observed_at) > now) return false;
   const proof = doc.observation;
   if (proof?.method !== 'GET' || proof.endpoint !== '/v1/code/triggers'
     || proof.include_last_run !== true || proof.has_more !== false
@@ -115,6 +119,7 @@ export function deriveRoutineActions(doc, { now = Date.now() } = {}) {
 export function routineResolved(params, ctx) {
   const doc = ctx.routineDoc, now = ctx.now ?? Date.now();
   const open = evidence => ({ closed: false, evidence });
+  if (retired(doc)) return open(`定期タスクの観測は退役中（not observed since ${doc.observed_at}）。判定不能であり解消ではない`);
   if (!validId(params.routine_id) || !Number.isFinite(millis(params.observed_at)) || !readable(doc, now))
     return open('新鮮で完全な定期タスク観測がないため判定不能');
   if (millis(doc.observed_at) < millis(params.observed_at)) return open('調査対象より古い観測');

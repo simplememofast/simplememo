@@ -137,6 +137,15 @@
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
   "$max_snapshot_age_days": "これより古い写しでは検査を通さない。**読めているつもりを緑にしない**",
+  "observation_retirement": {
+    "retired_at": "2026-10-21",
+    "reason": "観測する対象が動いていない（登録済みの Claude routine はすべて参照不可、Codex の予約はすべて PAUSED）ため、Mac 上の毎時観測を止めた。所有者のマシンでリポジトリのコードをタイマー実行する回数を減らす（Decision Monitor の Mac タイマー退役と同じ方針）。",
+    "approved_by": "owner decision 2026-10-20",
+    "last_claude_observed_at": "2026-10-21T07:21:17.544Z",
+    "last_codex_observed_at": "2026-10-21T07:21:11.111Z",
+    "reactivation": "固定（pin）され隔離された観測器を用意し、この欄を消すPRをレビューを経て入れてから観測を再開する。欄がある間、書き手（routine-observer.mjs と codex-routine-observer.py の --apply・--probe、check-routine-runs.mjs --sync）は何も書かずに exit 2 で終わり、Codex の着手前判定は skip_observation_retired で着手しない。"
+  },
+  "$observation_retirement": "2026-10-20 の所有者判断で退役（docs/routine-observer.md）。observed_at と codex_observation は最後の実測のまま残し、進めない。check-routine-runs.mjs --check と codex-routine-observer.py --check は、次の条件が全部揃うときだけ写しの鮮度（max_snapshot_age_days）を適用せず『retired — not observed since <時刻>』を出す: 欄が6項目そろって空でない／last_claude_observed_at・last_codex_observed_at が observed_at・codex_observation.observed_at と一字一句同じ／retired_at（UTC の日付または時刻）が最後の観測以後で、検査時刻より未来でない／登録済み routine がすべて参照不可か intentional_stops にあり、最後の観測より新しい実行時刻を持たない／Codex の予約がすべて PAUSED。1つでも欠ければ鮮度の規則がそのまま効く。routine-actions・Act・Codex の取り込みは退役中を『観測していない』として扱い、健全とも解消とも数えない。",
   "open_budget": 1,
   "$open_budget": "2026-08-28: 4件から2件へ（副系A/B は止めたままにする判断を下して intentional_stops へ移した）。**下げる方向にしか動かさない**\n\n**[2026-08-31] 2 → 4。**Obsidian 系の2件が 08-28 と 08-31 のあいだに壊れた。**枠を広げたのではなく、理由を書いた行を2つ足した結果として一致させた**（この検査は `open.length !== budget` で落ちるので、**枠だけ広げることはできない**）。**原因は特定できていないので、直したら減らすこと。**\n\n2026-09-13: 4 → 1。9/7の所有者判断と停止観測を照合し、旧X/Reddit 3件を理由・履歴付き intentional_stops へ整理。後継の成功を意味しない。",
   "open_findings": [
