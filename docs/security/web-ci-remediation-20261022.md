@@ -2,6 +2,37 @@
 
 対象は `simplememofast/simplememo` のみ。基準 main は `98fe630d4abba7e8045bdbd834d70202f5b6d720`（調査開始時の `cd7bca653` の次）。作業ブランチは `codex/web-ci-security-local-20261022`。最後のリモート main 照合でも同じ SHA。
 
+## 最新状態（2026-10-22 UTC、以下の初回記録を更新）
+
+Draft [#2139](https://github.com/simplememofast/simplememo/pull/2139) のリモート候補は `2bd012e80171d0d48c7cabdcacc8a4575762a0d0`。mainとの差分は44ファイル。下記のローカル追加修正では検査スクリプト・回帰テスト・本記録の3ファイルを変更し、候補全体は45ファイルとなる。merge・本番デプロイは未実施。管理SNS廃止、#2136保留、Apple/iOS対象外を維持する。
+
+| 候補SHAに対する既存CI | 結果とリリース判定 |
+| --- | --- |
+| [SEO Validation 39705575507](https://github.com/simplememofast/simplememo/actions/runs/39705575507) | 失敗。Waiting progressでGSC週次データが10日経過し、上限9日を超過。停止了承のreview_byは10月10日に失効済み。後続の必須検査は未実行なのでリリースを阻害する |
+| [Homepage Asset Cache Verification 39705575641](https://github.com/simplememofast/simplememo/actions/runs/39705575641) | 失敗。正規の候補previewがCloudflare Accessの別originログインへ移り、HTTP200を返す。資産のキャッシュ検証は未完了で、リリースを阻害する |
+| [PageSpeed Audit 39705575568](https://github.com/simplememofast/simplememo/actions/runs/39705575568) | 失敗。本番日本語中央値Performance71（必要90）、LCP5.45秒（上限3.5）、TBT240ms（上限200）。ローカル日本語/英語・本番英語は通過。今回ホームHTML/資産は変更していないが、必須基準未達は免除しない |
+| GSC Crawled URL Checks / GSC Redirect Audit / Homepage Section Rendering | 成功。部分成功をCI全体の成功とは扱わない |
+
+Cloudflareの候補ビルドは成功し、既存previewは `https://b6c05156.simplememo-596.pages.dev`（deployment `b6c05156-e90a-46e9-83cd-a83c2e442e25`）。Access認証経路は未解消。保護設定・新しい認証情報・secret設定は変更していない。既存ログにある本番ホーム2ページ・33資産の一致は、未変更ホームの一致であり本セキュリティ修正の反映証明ではない。
+
+SEOのreport-only viewport測定はblink_deep42、blink_sweep10136、webkit2573の**計12751件が完了**し、失敗/問題0・未測定0。別のreport-only内容検査には中国語2ページの数値矛盾6件、72日前のbenchmarkと現アプリ版の不一致が残る。これらを未計測のまま合格とは扱わない。
+
+### 追加のローカル診断・修正
+
+- キャッシュ検査は従来HTTP200だけを確認し、Accessのログイン文書でも `page.evaluate` の資産取得へ進んでいた。最終ページURLと応答URLが承認originのルートで一致し、Content-TypeがHTMLであることを先に検査する。想定外の遷移では証跡を書き、ブラウザーを閉じて失敗する。既存の資産ハッシュ・サイズ・ヘッダー・304の検査とGET/HEADのみの同一origin通信制限は変更していない。この修正自体はAccess接続条件を解消しない。
+- 外部通信なしの新しい回帰9件は、修正前に4成功/5失敗、修正後に9成功。既存17件を含む **26/26成功、失敗0、省略0**。別担当レビューでも同じ結果。`check-selftests --check`、`check-guard-shapes --check`、構文、`git diff --check` 成功。
+- 鮮度ゲートは正しい。既存の週次 [#2109](https://github.com/simplememofast/simplememo/pull/2109)、head `5d39408464b0cb8b954c4d831ea538d3313845d2` に真正な10月21日の28日窓データ（9月22日〜10月19日）がある。同じ7ファイルを一時ツリーへそのまま配置した診断では、現行ゲートが経過1日・問題0で通過。現行checkoutの10月12日データは経過10日で正しく失敗。鮮度自己テスト16件・週次自己テスト14件は成功。データや日付だけを#2139へ重複取込していない。
+- #2109自身の既存CIは `Intent axes` で失敗している。新たに100表示以上となった `/zh/blog/memo-habit`（258表示/0クリック）、`/blog/chatgpt-memo-workflow`（113/0）、`/blog/morning-memo-routine`（110/1）、`/en/blog/digital-vs-handwritten-notes`（105/0）について未判断理由の台帳記録が必要。取得済みの根拠に沿ったレビューを既存PR側で完了する必要があり、重みや了承期限を捏造・延長しない。古い停止理由に書かれた#1659は既に10月14日マージ済み。
+- PageSpeedのローカル回帰16件・集計検査20件・ホーム整合性とその故障注入自己テストは成功。本番特有のネットワーク/外部計測条件をローカル成功で代用せず、性能閾値やanalyticsは変更していない。既存artifact `pagespeed-mobile-reports`（ID `12394911737`、15,427,555 bytes、SHA256 `552585d95c2dbb8a1904a50ed677036bd5a8254b5fc204b4829d607bb2064207`）のメタデータは読めたが、ツールが返したファイルURLの取得を環境プロキシが403で拒否。本文は未取得で、別経路の回避や再試行は行っていない。具体的なLCP/TBT原因は未確定。
+
+この追加診断のテスト実行は **92件成功**（キャッシュ26、性能回帰16、性能集計20、鮮度16、週次14）。初回検証と重なる項目を含むため、以下の初回217実行と合算して独立テスト数とはしない。新規push・CI起動/再実行・merge・本番deploy・外部投稿は行っていない。
+
+### 今回の費用条件
+
+主会話の2026-10-22 03:30:25 UTCの所有者指示「50ドル前後で」（message `Sentinel_a2d832e551b081918dd83b3ec2e05125`）に基づき、全体上限50 USDのうちWeb担当の追加CI/ビルド/デプロイは**厳密に最大25 USD**。以前の費用承認不足は更新されたが、基準未達やAccess保護の変更を許可する指示ではない。今回のローカル診断では追加の外部CI/ビルド/デプロイを起動していない。残額を確認できない有料処理と、既知の失敗を再現するだけのCI反復は保留する。
+
+既存PRの全3候補SHAを照合した直接起動は18 run/19 attempt、実行25 job/skip3、計107分52秒。すべてpublic repoの `ubuntu-latest` で、[GitHub公式規則](https://docs.github.com/en/billing/concepts/product-billing/github-actions)上の標準ランナー実行時間料金は無料。19 artifactの表示容量は52,834,585 bytes、保存14日/90日で、全量が超過課金と仮定した容量×保存期間×[公式単価](https://docs.github.com/en/billing/concepts/product-billing/github-actions#storage-pricing) `$0.25/GB月` の試算は約$0.00575。実請求額ではない。Cloudflare Functionsの実リクエスト数/CPU/当月残枠は接続ツールから読めず、[従量料金](https://developers.cloudflare.com/workers/platform/pricing/)を含む担当総額の$25以内は確定できない。次のpushは直接6 workflow/8実行job、設定上449 runner分の上限だが、HTTP/CPU量や後続workflow_runの費用上限とは異なる。確認目的だけの再実行はしない。
+
 ## 既存修正の扱い
 
 - Draft [#2121](https://github.com/simplememofast/simplememo/pull/2121) の `e0aa50d9` をローカルへ再利用（`eee0708d7`）。管理SNSは廃止。JWT復活は行わない。
