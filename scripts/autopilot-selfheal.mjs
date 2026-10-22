@@ -176,7 +176,8 @@ export function ownerRequest(target, actionsDoc) {
 /**
  * 所有者が承認した、Actions 副系の**1回限りの試運転**（2026-10-13 オーナー判断）。
  *
- * 10-05・10-06 の no_artifact で修理上限に達し、10-07 から封じ込めで止まっている。
+ * 10-05・10-06 の no_artifact で修理上限に達し、10-07 から封じ込めで止まっている（10-22 の試運転の
+ * no_artifact で、対象に 10-22 が加わった）。
  * 10-06 の直接原因は確定できず（#2062）、修理としては記録していない。止めたままでは
  * PR 前の照合（--verify-local）や終了理由の記録が効くかを確かめる手段が無いので、
  * **オーナーが日付を1つ入れた日の定時 run だけ**封じ込めを越えさせる。
@@ -188,7 +189,7 @@ export function ownerRequest(target, actionsDoc) {
  *
  * **越えさせるのは封じ込めだけ。**緊急停止・予算・Gate の当日重複・宣言の検査はそのまま効く。
  * 台帳の故障行・修理回数・上限は書き換えない。試運転の結果は通常の行として残り、
- * 出荷しても 10-05・10-06 は修理済みにならない（repair_of を書くかは別の判断）。
+ * 出荷しても 10-05・10-06・10-22 は修理済みにならない（repair_of を書くかは別の判断）。
  * 対象・回数・行の中身が1つでも変わったら（新しい故障を含む）、許可は効かない。
  */
 export const ACTIONS_RECOVERY = Object.freeze({
@@ -201,6 +202,9 @@ export const ACTIONS_RECOVERY = Object.freeze({
   targets: Object.freeze({
     'ap-20261005-actions-37249907984': '0905a2f74774556ca976dcbb371c315bf53a865f1fddc33a88de391f0d80520f',
     'ap-20261006-actions': 'd97bdfee43b807e2dc3a49736d7f545e4c653f3c42b84a1b2c43cb09a2083bbf',
+    // 2026-10-22 のオーナー判断（直してもう一度試す）。10-22 の試運転は依頼ファイルを残さずに終わり、
+    // no_artifact の行が1つ増えた。その行を #2140 のマージ時点の指紋で足す。上限と回数は変えていない。
+    'ap-20261022-actions': 'cf22dd3f842519d3d0a712bcf2d0cbba4fa4ddc666c8878aa8c8fbb8508c83a8',
   }),
 });
 
@@ -436,10 +440,11 @@ export function checkRecoveryWiring(source) {
 }
 
 {
-  // 許可を出した時点の台帳（#2063 のマージ）。後から本物の故障が増えても、この固定入力は変わらない。
-  const PINNED_LEDGER = '9d67f58c5e1291d32b4649ad1b063be0e5699ade';
-  const NOW = new Date('2026-10-14T22:45:00Z'); // JST 10-15 07:45（定時 07:30 の配信遅れ）
-  const ENV = { AUTOPILOT_RECOVERY_ONCE: '2026-10-15', GITHUB_ACTIONS: 'true', GITHUB_EVENT_NAME: 'schedule',
+  // 許可の対象を最後に決めた時点の台帳（#2140 のマージ。10-22 の行が入った）。後から本物の故障が増えても、
+  // この固定入力は変わらない。
+  const PINNED_LEDGER = '6fd9ca8e66d700ff8198f2434e91fcf33f24bebf';
+  const NOW = new Date('2026-10-23T22:45:00Z'); // JST 10-24 07:45（定時 07:30 の配信遅れ）
+  const ENV = { AUTOPILOT_RECOVERY_ONCE: '2026-10-24', GITHUB_ACTIONS: 'true', GITHUB_EVENT_NAME: 'schedule',
     GITHUB_RUN_ATTEMPT: '1', GITHUB_REPOSITORY: 'simplememofast/simplememo', GITHUB_REF: 'refs/heads/main',
     GITHUB_WORKFLOW_REF: 'simplememofast/simplememo/.github/workflows/obsidian-autopilot.yml@refs/heads/main' };
   const STOP = { stopped: false, agents: { actions: { stopped: false } } };
@@ -459,11 +464,11 @@ export function checkRecoveryWiring(source) {
   SCENARIOS.push(
     ['試運転の許可: 固定した台帳・定時の1回目・当日の日付なら封じ込めを1回だけ越える', () => {
       const r = actionsRecoveryOnce(fixture());
-      assert(r.allowed && r.date === '2026-10-15' && r.targets.length === 2, `正しい条件で越えない: ${r.reason}`);
+      assert(r.allowed && r.date === '2026-10-24' && r.targets.length === 3, `正しい条件で越えない: ${r.reason}`);
       // 越えるのは JST の当日だけ。UTC の日付で判定すると 09:00 JST 前に1日ずれる。
-      refused({ ...fixture(), now: new Date('2026-10-14T14:59:00Z') }, 'not_today');
-      assert(actionsRecoveryOnce({ ...fixture(), now: new Date('2026-10-14T15:00:00Z') }).allowed, 'JST 0時ちょうどを当日と読まない');
-      refused({ ...fixture(), now: new Date('2026-10-15T15:00:00Z') }, 'not_today');
+      refused({ ...fixture(), now: new Date('2026-10-23T14:59:00Z') }, 'not_today');
+      assert(actionsRecoveryOnce({ ...fixture(), now: new Date('2026-10-23T15:00:00Z') }).allowed, 'JST 0時ちょうどを当日と読まない');
+      refused({ ...fixture(), now: new Date('2026-10-24T15:00:00Z') }, 'not_today');
     }],
     ['試運転の許可: 日付が無い・形が違う値では越えない', () => {
       for (const value of [undefined, '', '  ']) refused({ ...fixture(), env: { ...ENV, AUTOPILOT_RECOVERY_ONCE: value } }, 'not_requested');
@@ -493,11 +498,15 @@ export function checkRecoveryWiring(source) {
     }],
     ['試運転の許可: 対象・回数・種別・行の中身が1つでも変われば越えない（新しい故障を含む）', () => {
       const f = fixture();
-      const [first, second] = f.analysis.escalate;
-      refused({ ...f, analysis: { ...f.analysis, escalate: [first] } }, 'containment_changed');
-      refused({ ...f, analysis: { ...f.analysis, escalate: [first, second, { ...second, run_id: 'ap-20261015-actions' }] } }, 'containment_changed');
+      // 対象の数に依存させない（数が合わないだけで拒否されると、行ごとの検査が試されないまま緑になる）。
+      const all = f.analysis.escalate;
+      const last = all.length - 1;
+      const swap = change => all.map((t, i) => (i === last ? { ...t, ...change } : t));
+      refused({ ...f, analysis: { ...f.analysis, escalate: all.slice(0, last) } }, 'containment_changed');
+      refused({ ...f, analysis: { ...f.analysis, escalate: [...all, { ...all[last], run_id: 'ap-20261024-actions' }] } }, 'containment_changed');
+      refused({ ...f, analysis: { ...f.analysis, escalate: swap({ run_id: 'ap-20261024-actions' }) } }, 'containment_changed');
       for (const change of [{ repair_attempts_for_class: 6 }, { failure_class: 'unknown' }, { route: 'ccr-0920' }]) {
-        refused({ ...f, analysis: { ...f.analysis, escalate: [first, { ...second, ...change }] } }, 'containment_changed');
+        refused({ ...f, analysis: { ...f.analysis, escalate: swap(change) } }, 'containment_changed');
       }
       const edited = f.rows.map(r => r.run_id === 'ap-20261006-actions' ? { ...r, failure_reason: '書き換え' } : r);
       refused({ ...f, rows: edited }, 'target_row_changed');
@@ -505,8 +514,8 @@ export function checkRecoveryWiring(source) {
       refused({ ...f, rows: doubled }, 'target_row_changed');
       refused({ ...f, rows: null }, 'target_row_changed');
       refused({ ...f, preventionMerged: false }, 'prevention_missing');
-      // 新しい no_artifact が1件増えると、封じ込めの対象が3件になって越えない。
-      const later = { run_id: 'ap-20261015-actions', date_jst: '2026-10-15', route: 'actions', attempted: true,
+      // 新しい no_artifact が1件増えると、封じ込めの対象が4件になって越えない。
+      const later = { run_id: 'ap-20261024-actions', date_jst: '2026-10-24', route: 'actions', attempted: true,
         outcome: 'no_artifact', failure_class: 'no_artifact', source: 'test' };
       const grown = analyze({ runs: [...f.rows, later] }, JSON.parse(fs.readFileSync(MATRIX_PATH, 'utf8')),
         JSON.parse(fs.readFileSync(path.join(ROOT, 'data/escalation-rules.json'), 'utf8')).rules);
@@ -590,7 +599,7 @@ if (isMain) {
       if (recovery.allowed) {
         console.log(`所有者承認の試運転（1回限り）: ${recovery.date} の定時 run。対象 ${recovery.targets.join(', ')}`);
         console.log('封じ込めだけを越える。故障行・修理回数・上限・緊急停止・予算・宣言の検査はそのまま。');
-        console.log('結果は通常の行として残る。出荷しても 10-05・10-06 は修理済みにならない。');
+        console.log('結果は通常の行として残る。出荷しても 10-05・10-06・10-22 は修理済みにならない。');
         if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, 'recovery=actions_once\n');
         process.exit(0);
       }
