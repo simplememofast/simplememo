@@ -1425,14 +1425,16 @@ jobs:
       # 無かった。帰結は pr-evaluation-due.mjs が **2026-10-08 の D+14 を永久に拾わない**
       # こと（実測: due(ledger,'2026-10-08') が [] を返す）。
       # 「レコードが存在しない」はレコードを見ても分からないので、別の検査にしてある。
+      - name: PR release ledger regression
+        run: |
+          node scripts/check-pr-release-ledger.mjs --selftest
+          node --test scripts/pr-release-publication-exception.test.mjs
+
       - name: PR release ledger completeness
         uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         with:
           script: |
-            const { execFileSync } = await import('node:child_process');
-            execFileSync(process.execPath, ['--test', 'scripts/pr-release-publication-exception.test.mjs'], { stdio: 'inherit' });
-            const { runSelftest, checkPublication } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/check-pr-release-ledger.mjs`);
-            if (runSelftest()) throw new Error('PR release ledger selftest failed');
+            const { checkPublication } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/check-pr-release-ledger.mjs`);
             let associatedPullRequests = [];
             if (context.eventName === 'push' && context.ref === 'refs/heads/main') {
               // This public-repository endpoint supports unauthenticated reads:

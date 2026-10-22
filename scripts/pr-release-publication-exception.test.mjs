@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { audit, isPr2139Publication, pr7PublicationException } from './check-pr-release-ledger.mjs';
+import { extractCommands } from './preflight.mjs';
+import { wiredChecks, gatingChecks } from './check-selftests.mjs';
 
 const read = relative => JSON.parse(fs.readFileSync(new URL(relative, import.meta.url), 'utf8'));
 const config = read('../data/pr-release-ledger.json');
@@ -160,3 +162,61 @@ test('workflow preserves read-only permissions and bounds its public merge looku
   assert.match(step, /response\.status !== 200\) throw/);
   assert.doesNotMatch(step, /Authorization|secrets\.|github\.rest|pull-requests: write|continue-on-error/);
 });
+
+test('ordinary run wiring exposes both regressions to preflight and preserves the selftest ratchet', () => {
+  const workflow = fs.readFileSync(new URL('../.github/workflows/seo-check.yml', import.meta.url), 'utf8');
+  const commands = extractCommands(workflow);
+  assert.ok(commands.some(c => c.runner === 'node' && c.script === 'scripts/check-pr-release-ledger.mjs' && c.args.includes('--selftest')));
+  assert.ok(commands.some(c => c.runner === 'node' && c.script === '--test' && c.args.includes('scripts/pr-release-publication-exception.test.mjs')));
+  assert.ok(wiredChecks().includes('scripts/check-pr-release-ledger.mjs'));
+  assert.ok(gatingChecks().includes('scripts/check-pr-release-ledger.mjs'));
+});
+
+// Execute the actual workflow JavaScript with only its module import and network
+// dependencies injected. No token, network request, CI run or public write occurs.
+const yaml = fs.readFileSync(new URL('../.github/workflows/seo-check.yml', import.meta.url), 'utf8');
+const block = yaml.split('      - name: PR release ledger completeness\n')[1].split('\n      - name:')[0];
+const script = block.split('          script: |\n')[1].split('\n')
+  .filter(line => line.startsWith('            ')).map(line => line.slice(12)).join('\n');
+const importLine = "const { checkPublication } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/check-pr-release-ledger.mjs`);";
+assert.ok(script.includes(importLine), 'workflow import must remain explicitly injectable');
+const execute = new (Object.getPrototypeOf(async function () {}).constructor)(
+  'context', 'core', 'fetch', 'AbortSignal', 'hooks', script.replace(importLine, 'const { checkPublication } = hooks;'));
+
+for (const scenario of ['valid-main', 'valid-pr', 'other-pr', 'other-merge', '403', '500', 'invalid-json', 'not-array', 'redirect', 'timeout']) {
+  test(`real workflow wiring: ${scenario}`, async () => {
+    const source = clone(scenario.endsWith('-pr') ? publication : mainPublication);
+    if (scenario === 'other-pr') source.event.number = source.event.pull_request.number = 2144;
+    let calls = 0, checks = 0;
+    const failures = [];
+    const context = { repo: { owner: 'simplememofast', repo: 'simplememo' },
+      eventName: source.eventName, payload: source.event, ref: source.ref, sha: source.sha };
+    const fetch = async (url, options) => {
+      calls++;
+      assert.equal(url, `https://api.github.com/repos/${repository}/commits/${sha}/pulls?per_page=100`);
+      assert.deepEqual(options.headers, { Accept: 'application/vnd.github+json' });
+      assert.equal(options.redirect, 'error');
+      assert.ok(options.signal instanceof AbortSignal);
+      if (scenario === 'redirect' || scenario === 'timeout') throw new Error(scenario);
+      return { status: scenario === '403' || scenario === '500' ? Number(scenario) : 200,
+        json: async () => {
+          if (scenario === 'invalid-json') throw new SyntaxError('invalid JSON');
+          if (scenario === 'not-array') return {};
+          const rows = clone(mainPublication.associatedPullRequests);
+          if (scenario === 'other-merge') rows[0].number = 2144;
+          return rows;
+        } };
+    };
+    const hooks = { checkPublication: p => { checks++; return run(config, annotations, p).length ? 1 : 0; } };
+    const operation = execute(context, { setFailed: message => failures.push(message) }, fetch, AbortSignal, hooks);
+    if (['403', '500', 'invalid-json', 'not-array', 'redirect', 'timeout'].includes(scenario)) {
+      await assert.rejects(operation);
+      assert.equal(checks, 0);
+    } else {
+      await operation;
+      assert.equal(checks, 1);
+      assert.equal(failures.length, scenario.startsWith('other-') ? 1 : 0);
+    }
+    assert.equal(calls, scenario.endsWith('-pr') ? 0 : 1, 'never retry or fall back to another identity');
+  });
+}
