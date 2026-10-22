@@ -62,3 +62,17 @@ node --input-type=module -e 'globalThis.fetch=async()=>{throw Error("External ne
 - **Cloudflare確認は未実施。** カスタムドメイン、production pages.dev、wildcard previewと過去デプロイのAccess封じ込め、および公開後410の確認が残る。現在のGitコードだけでは歴史的デプロイを停止できない。
 - **旧資格情報の失効/削除は未実施。** X/Postiz等の他利用者を確認し、発行元での失効とPages/Actions側の廃止コピー整理を、既存の所有者手順で行う必要がある。今回の指示ではtoken変更・権限変更・deployを行わない。
 - #2136の保留判断は維持。API/iOSの変更・テスト、Apple申請、merge/deploy、実投稿、外部モデルAPI/Claude Codeの起動、顧客連絡は行っていない。GitHub securityの拒否を回避する操作も行っていない。
+
+## デプロイ承認後の再確認（2026-10-22 UTC）
+
+所有者の「デプロイまでお願い」を受け、Webセキュリティ修正のpush・Draft PR・必須検査・merge・通常の本番反映を進める準備を行った。新規費用・認証/権限拡張・secret新設定の禁止は継続。候補コードは `db4d5cebee11bb0303787534bdca269fd58fd947`、予定先は既存Cloudflare Pagesの `https://simplememofast.com`（既存pages.dev系統 `simplememo-596.pages.dev`）。
+
+- remote mainをfetchして再照合し、引き続き `98fe630d4`。候補はその子孫で競合なし。#2121と#2136は同じheadのDraft・未マージ。別担当repoには触れていない。
+- ローカル境界/実サーバー17件を再実行し全成功。npm audit 0、重点4workflowのactionlint成功。未pushのため、候補headに対するGitHub CI結果はまだ存在しない。
+- **SEO警告のリリース判定を明確化:** `seo-check.js` 単体のexit 1は警告のみ。既存 `seo-check.yml` の `Run SEO validation` はexit 2以上を阻害条件としており、mainと同一のエラー0・警告2652は、このステップだけを理由にリリースを阻害しない。今回の修正で判定を変えていない。CI全体の成功を意味するものでもない。
+- **Undici:** toolsのlockにはUndiciは含まれない。CI/ローカル用Node24.22.1の実測内蔵版は7.30.1。[Node公式リリース](https://nodejs.org/en/blog/release/v24.22.1/)と、7.30.1が修正版である[上流advisory](https://github.com/nodejs/undici/security/advisories/GHSA-xjj6-f33q-929c)を照合。Web本番のCloudflare実行基盤と、別担当API repoの依存は別であり、API側の未解消事項を本記録で成功扱いしない。
+- 現ブランチだけのpushはリポジトリのworkflow定義上Actions 0本。Draft PR作成はSEO Validation、PageSpeed Audit、Homepage Section Rendering、Homepage Asset Cache Verification、GSC Redirect Audit、GSC Crawled URL Checksの6本および既存workflow_run連鎖の起動候補となる。publicの標準Ubuntuランナー時間は[公式規則](https://docs.github.com/en/billing/concepts/product-billing/github-actions)上無料。
+- **費用停止条件:** `pagespeed-audit.yml` は本番ページを複数回測定し、`gsc-indexing.yml` のPR baselineも100超の本番URLへHTTPアクセスする。リポジトリの2026-09-07確認記録はWorkers Paidの既存契約と、未照合の従量上限を示す。Pages Functionsは[Workers Paidのリクエスト/CPU従量](https://developers.cloudflare.com/pages/functions/pricing/)に含まれ、枠超過時は[公式料金](https://developers.cloudflare.com/workers/platform/pricing/)の追加リクエスト100万件あたり$0.30、追加CPU100万msあたり$0.02の対象となる。当月の実使用量・残枠を確認できず、追加額を0と確定できない。GitHub artifact保存容量のアカウント残枠も未確認。
+- 既存GitHub CLIのplan確認は前回 `GET /user` がForbiddenで、同じ拒否を再試行していない。接続GitHubツールは個人billing API未対応。追加で確認したDesktop Commanderは接続端末0台で、認証済み管理画面を読む既存経路が無い。関連する10月の課金通知を既存メール接続で限定検索したが、現在残枠を確定する資料は得られなかった。新grant・新token・ログイン・購読変更は行っていない。
+
+**状態:** push・Draft PR作成・merge・deploy・本番/previewへの新しいHTTP readbackはいずれも未実行（ツールに拒否されたpushではなく、費用条件により実行前で保留）。本番は変更していない。安全検査の削除、ライブ検査の無効化、予算増額で進めることはしない。必要なのは、既存アカウントの当月リクエスト/CPUと保存容量の残枠に関する確認、または所有者による費用条件の具体的な判断である。追加費用禁止の条件が維持される間は、その条件を確認できるまで出荷操作を保留する。
