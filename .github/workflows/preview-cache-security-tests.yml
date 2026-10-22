@@ -1,0 +1,36 @@
+name: Preview Cache Security Regressions
+on:
+  pull_request:
+    paths:
+      - 'scripts/perf/cache_access*'
+      - '.github/workflows/home-perf-cache-approved.yml'
+      - '.github/workflows/preview-cache-security-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/perf/cache_access*'
+      - '.github/workflows/home-perf-cache-approved.yml'
+      - '.github/workflows/preview-cache-security-tests.yml'
+permissions:
+  contents: read
+concurrency:
+  group: preview-cache-regressions-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24.22.1'
+          package-manager-cache: false
+      - name: Run synthetic authorization, transport and contract attacks
+        env:
+          NODE_OPTIONS: ''
+          NODE_DEBUG: ''
+          NODE_DEBUG_NATIVE: ''
+        run: node --test scripts/perf/cache_access*.test.cjs

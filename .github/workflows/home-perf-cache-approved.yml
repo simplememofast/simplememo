@@ -1,0 +1,158 @@
+name: Approved Homepage Cache Verification
+run-name: Homepage cache PR 2139 @ ${{ inputs.head_sha }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      head_sha:
+        description: Full owner-reviewed head SHA of PR 2139
+        required: true
+        type: string
+
+# These are read-only API scopes. No check/status/deployment write is needed.
+permissions:
+  contents: read
+  pull-requests: read
+  checks: read
+  actions: read
+
+concurrency:
+  group: approved-preview-cache-2139
+  cancel-in-progress: false
+
+env:
+  NODE_OPTIONS: ''
+  NODE_DEBUG: ''
+  NODE_DEBUG_NATIVE: ''
+
+jobs:
+  resolve:
+    name: Resolve cache PR 2139 @ ${{ inputs.head_sha }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      head_sha: ${{ steps.candidate.outputs.head_sha }}
+      manifest_sha256: ${{ steps.candidate.outputs.manifest_sha256 }}
+      deployment_id: ${{ steps.candidate.outputs.deployment_id }}
+      preview_origin: ${{ steps.candidate.outputs.preview_origin }}
+      valid_until: ${{ steps.candidate.outputs.valid_until }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Record trusted checkout
+        id: checkout
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Resolve reviewed candidate
+        id: candidate
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        env:
+          REQUESTED_HEAD_SHA: ${{ inputs.head_sha }}
+          TRUSTED_CHECKOUT_SHA: ${{ steps.checkout.outputs.sha }}
+          TRUSTED_WORKFLOW_SHA: ${{ github.workflow_sha }}
+          TRUSTED_WORKFLOW_REF: ${{ github.workflow_ref }}
+        with:
+          script: |
+            const { inspectCandidate } = require('./scripts/perf/cache_access_context.cjs');
+            const { configurationReadback } = require('./scripts/perf/cache_access_configuration.json');
+            try {
+              if (!configurationReadback) throw new Error('CONFIGURATION_READBACK_REQUIRED');
+              const { data: run } = await github.rest.actions.getWorkflowRun({
+                owner: 'simplememofast', repo: 'simplememo', run_id: context.runId,
+              });
+              const now = Date.now();
+              const deadline = Math.min(Date.parse(run.created_at) + 3600000,
+                Date.parse(configurationReadback.authorizationNotAfter));
+              if (!Number.isFinite(deadline) || deadline <= now) throw new Error('APPROVAL_EXPIRED');
+              const validUntil = new Date(deadline).toISOString();
+              const source = {
+                repository: context.repo.owner + '/' + context.repo.repo,
+                eventName: context.eventName, ref: context.ref,
+                workflowRef: process.env.TRUSTED_WORKFLOW_REF,
+                workflowSha: process.env.TRUSTED_WORKFLOW_SHA,
+                sha: context.sha, checkoutSha: process.env.TRUSTED_CHECKOUT_SHA,
+                runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+                actor: context.actor, triggeringActor: process.env.GITHUB_TRIGGERING_ACTOR,
+              };
+              const result = await inspectCandidate({ github, context: source,
+                checkoutSha: process.env.TRUSTED_CHECKOUT_SHA,
+                request: { pullRequestNumber: 2139, approvedHeadSha: process.env.REQUESTED_HEAD_SHA },
+                validUntil, now });
+              core.setOutput('head_sha', result.headSha);
+              core.setOutput('manifest_sha256', result.manifestSha256);
+              core.setOutput('deployment_id', result.deploymentId);
+              core.setOutput('preview_origin', result.previewOrigin);
+              core.setOutput('valid_until', validUntil);
+              await core.summary.addHeading('Review the exact cache target')
+                .addRaw('PR 2139 / ' + result.headSha + '\n\n')
+                .addRaw('Immutable preview: ' + result.previewOrigin + '\n\n')
+                .addRaw('Approval deadline: ' + validUntil + '\n').write();
+            } catch {
+              core.setFailed('PREVIEW_CANDIDATE_RESOLUTION_FAILED');
+            }
+
+  verify:
+    name: Verify reviewed cache PR 2139 @ ${{ needs.resolve.outputs.head_sha }}
+    needs: resolve
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    environment:
+      name: preview-cache-ci
+      url: ${{ needs.resolve.outputs.preview_origin }}
+    outputs:
+      verified: ${{ steps.contract.outputs.verified }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Record trusted checkout
+        id: checkout
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Authorize reviewed preview
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        env:
+          REQUESTED_HEAD_SHA: ${{ needs.resolve.outputs.head_sha }}
+          TRUSTED_CHECKOUT_SHA: ${{ steps.checkout.outputs.sha }}
+          TRUSTED_WORKFLOW_SHA: ${{ github.workflow_sha }}
+          TRUSTED_WORKFLOW_REF: ${{ github.workflow_ref }}
+          APPROVAL_VALID_UNTIL: ${{ needs.resolve.outputs.valid_until }}
+        with:
+          script: |
+            const { authorizeCurrentRun } = require('./scripts/perf/cache_access_workflow.cjs');
+            try { await authorizeCurrentRun({ github, context }); }
+            catch { core.setFailed('PREVIEW_ENVIRONMENT_APPROVAL_FAILED'); }
+      - name: Verify response contract
+        id: contract
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        env:
+          REQUESTED_HEAD_SHA: ${{ needs.resolve.outputs.head_sha }}
+          TRUSTED_CHECKOUT_SHA: ${{ steps.checkout.outputs.sha }}
+          TRUSTED_WORKFLOW_SHA: ${{ github.workflow_sha }}
+          TRUSTED_WORKFLOW_REF: ${{ github.workflow_ref }}
+          APPROVAL_VALID_UNTIL: ${{ needs.resolve.outputs.valid_until }}
+          EXPECTED_MANIFEST_SHA256: ${{ needs.resolve.outputs.manifest_sha256 }}
+          EXPECTED_DEPLOYMENT_ID: ${{ needs.resolve.outputs.deployment_id }}
+          CF_ACCESS_PREVIEW_CLIENT_ID: ${{ secrets.CF_ACCESS_PREVIEW_CLIENT_ID }}
+          CF_ACCESS_PREVIEW_CLIENT_SECRET: ${{ secrets.CF_ACCESS_PREVIEW_CLIENT_SECRET }}
+        with:
+          script: |
+            const { verifyCurrentRun } = require('./scripts/perf/cache_access_workflow.cjs');
+            try {
+              const receipt = await verifyCurrentRun({ github, context });
+              core.info(JSON.stringify(receipt));
+              if (receipt.verified !== true) throw new Error('CACHE_CONTRACT_FAILED');
+              core.setOutput('verified', 'true');
+            } catch { core.setFailed('PREVIEW_CACHE_CONTRACT_FAILED'); }
+
+  proof:
+    name: Cache proof ${{ needs.resolve.outputs.head_sha }} ${{ needs.resolve.outputs.manifest_sha256 }} ${{ needs.resolve.outputs.deployment_id }}
+    needs: [resolve, verify]
+    if: ${{ needs.verify.outputs.verified == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    permissions: {}
+    steps:
+      - name: Seal successful proof
+        run: 'true'
