@@ -2,11 +2,14 @@
 """Validate all mobile lab runs; gate local pages and verified production only."""
 from __future__ import annotations
 import json
+import html
 import math
 import os
 from pathlib import Path
+import re
 import statistics
-from variability import diagnostics, group_variability, render_variability
+from urllib.parse import urlsplit, urlunsplit
+from variability import diagnostics, finite, group_variability, render_variability
 
 METRICS = ('first-contentful-paint', 'largest-contentful-paint', 'total-blocking-time', 'cumulative-layout-shift')
 CATEGORIES = ('performance', 'accessibility', 'best-practices', 'seo')
@@ -21,6 +24,158 @@ BUDGETS = {
     'local-ja': (90, 3000), 'local-en': (95, 2500),
     'production-ja': (90, 3500), 'production-en': (90, 3000),
 }
+DIAGNOSTIC_LIMIT = 3
+DIAGNOSTIC_SCAN_LIMIT = 1000
+
+
+def public_diagnostics(report):
+    """Bounded optional audit evidence; never used to decide a budget result.
+
+    Only selectors and public URL components are retained, not DOM snippets,
+    request headers, query strings, fragments, or arbitrary audit descriptions.
+    Unknown schemas/units remain unavailable instead of guessed timings.
+    """
+    audits = report.get('audits', {})
+    truncated = set()
+
+    def details(key):
+        audit = audits.get(key)
+        value = audit.get('details') if isinstance(audit, dict) else None
+        return value if isinstance(value, dict) else {}
+
+    def rows(key):
+        pending = [(details(key), 0)]
+        found = []
+        # LCP node and insight tables can be nested; do not traverse arbitrary
+        # report keys or allow a malformed optional table to flood the summary.
+        for _ in range(DIAGNOSTIC_SCAN_LIMIT):
+            if not pending:
+                break
+            item, depth = pending.pop(0)
+            if not isinstance(item, dict):
+                continue
+            found.append(item)
+            children = item.get('items')
+            if depth < 4 and isinstance(children, list):
+                room = DIAGNOSTIC_SCAN_LIMIT - len(found) - len(pending)
+                if len(children) > room:
+                    truncated.add(key)
+                pending.extend((child, depth + 1) for child in children[:room])
+            elif isinstance(children, list) and children:
+                truncated.add(key)
+        if pending:
+            truncated.add(key)
+        return found
+
+    def label(value, limit=80):
+        if not isinstance(value, str) or not value.strip():
+            return None
+        text = ' '.join(''.join(c if c.isprintable() else ' ' for c in value).split())
+        return text[:limit] if text else None
+
+    def public_url(value):
+        if not isinstance(value, str) or len(value) > 4096 or any(c.isspace() or not c.isprintable() for c in value):
+            return None
+        try:
+            parts = urlsplit(value)
+            if parts.scheme not in ('http', 'https') or not parts.hostname or parts.username or parts.password:
+                return None
+            parts.port  # Reject malformed ports, including out-of-range values.
+            cleaned = urlunsplit((parts.scheme, parts.netloc, parts.path, '', ''))
+        except ValueError:
+            return None
+        return cleaned if len(cleaned) <= 240 else None
+
+    def timing(value):
+        # An overflowing or absurd optional duration must not invalidate an
+        # otherwise valid measurement. The bound is diagnostic-only (one day).
+        return isinstance(value, (int, float)) and not isinstance(value, bool) and 0 <= value <= 86400000 and finite(value)
+
+    result = {'lcp_selector': None, 'main_thread': [], 'resources': [],
+              'bootup': [], 'render_blocking': [], 'unavailable': [], 'omitted': {}}
+    for key in ('lcp-breakdown-insight', 'largest-contentful-paint-element'):
+        for item in rows(key):
+            node = item.get('node', item if item.get('type') == 'node' else {})
+            selector = node.get('selector') if isinstance(node, dict) else None
+            # Attribute selectors can contain arbitrary page data. Emit only a
+            # bounded structural selector, never node text or HTML snippets.
+            if isinstance(selector, str) and selector.strip() and len(selector) <= 160 and re.fullmatch(r'[A-Za-z0-9_.*# >:+~(),-]+', selector):
+                result['lcp_selector'] = selector.strip()
+                break
+        if result['lcp_selector']:
+            break
+
+    for item in rows('mainthread-work-breakdown'):
+        group = label(item.get('groupLabel') or item.get('group'))
+        if group and timing(item.get('duration')):
+            result['main_thread'].append({'group': group, 'duration_ms': item['duration']})
+
+    network = details('network-requests')
+    headings = network.get('headings', [])
+    def milliseconds(key):
+        matches = [h.get('valueType') for h in headings if isinstance(h, dict) and h.get('key') == key] if isinstance(headings, list) else []
+        return matches == ['ms']
+    # Explicit heading units avoid confusing old second-valued timestamps with
+    # millisecond-valued schemas. Unsupported versions remain unavailable.
+    for start, end in (('networkRequestTime', 'networkEndTime'), ('startTime', 'endTime')):
+        if not milliseconds(start) or not milliseconds(end):
+            continue
+        for item in rows('network-requests'):
+            url = public_url(item.get('url'))
+            if url and timing(item.get(start)) and timing(item.get(end)) and item[end] >= item[start]:
+                result['resources'].append({'url': url, 'duration_ms': item[end] - item[start]})
+        break
+
+    for item in rows('bootup-time'):
+        url = public_url(item.get('url'))
+        if url and timing(item.get('total')):
+            result['bootup'].append({'url': url, 'total_ms': item['total']})
+    for key in ('render-blocking-resources', 'render-blocking-insight'):
+        for item in rows(key):
+            url = public_url(item.get('url'))
+            if url and timing(item.get('wastedMs')):
+                result['render_blocking'].append({'url': url, 'estimated_savings_ms': item['wastedMs']})
+
+    for key, field in (('main_thread', 'duration_ms'), ('resources', 'duration_ms'),
+                       ('bootup', 'total_ms'), ('render_blocking', 'estimated_savings_ms')):
+        result[key].sort(key=lambda row: (-row[field], row.get('url', row.get('group', ''))))
+        result['omitted'][key] = max(0, len(result[key]) - DIAGNOSTIC_LIMIT)
+        result[key] = result[key][:DIAGNOSTIC_LIMIT]
+    result['unavailable'] = [key for key in ('lcp_selector', 'main_thread', 'resources', 'bootup', 'render_blocking') if not result[key]]
+    result['truncated_audits'] = sorted(truncated)
+    return result
+
+
+def render_public_diagnostics(rows):
+    if not rows:
+        return []
+    lines = ['', '## Optional timing diagnostics', '',
+             'Each run is retained. Top three available entries per audit; unavailable means missing, malformed, or unsupported data.',
+             'Observed trace phases below are not simulated mobile timings. Other durations retain their Lighthouse audit meaning; render-blocking savings are estimates, not transfer times.']
+
+    def safe(value):
+        return html.escape(str(value), quote=True).replace('|', '&#124;').replace('`', '&#96;')
+
+    def ms(value):
+        return f'{value:.1f}' if finite(value) else 'unavailable'
+
+    for row in rows:
+        trace = row['trace_diagnostics']
+        evidence = row['public_diagnostics']
+        lines += ['', f"- {safe(row['file'])}: LCP selector `{safe(evidence['lcp_selector'] or 'unavailable')}`",
+                  '  Observed trace (ms): LCP ' + ms(trace['observed_lcp_ms']) + ', FCP ' + ms(trace['observed_fcp_ms']) + '; ' +
+                  ', '.join(f'{key} {ms(value)}' for key, value in trace['lcp_parts_ms'].items())]
+        if evidence['truncated_audits']:
+            lines.append('  Scan limit reached; rankings are partial for: ' + ', '.join(evidence['truncated_audits']))
+        for key, title, field in (('main_thread', 'Main-thread groups (ms)', 'duration_ms'),
+                                  ('resources', 'Resource duration (ms)', 'duration_ms'),
+                                  ('bootup', 'Script bootup total (ms)', 'total_ms'),
+                                  ('render_blocking', 'Render-blocking estimated savings (ms)', 'estimated_savings_ms')):
+            entries = [f"`{safe(item.get('url', item.get('group')))}` {ms(item[field])}" for item in evidence[key]]
+            text = '; '.join(entries) if entries else 'unavailable'
+            omitted = evidence['omitted'][key]
+            lines.append(f'  {title}: {text}' + (f'; {omitted} more valid entries omitted' if omitted else ''))
+    return lines
 
 
 def number(value, name, maximum=None):
@@ -53,7 +208,8 @@ def read_run(path):
     categories = {key: number(report['categories'][key]['score'], f'{path.name}: {key}', 1) for key in CATEGORIES}
     metrics = {key: number(report['audits'][key]['numericValue'], f'{path.name}: {key}') for key in METRICS}
     return {'file': path.name, 'group': group, 'performance': categories['performance'] * 100,
-            'categories': categories, 'metrics': metrics, 'warnings': report.get('runWarnings', []), 'trace_diagnostics': diagnostics(report)}
+            'categories': categories, 'metrics': metrics, 'warnings': report.get('runWarnings', []),
+            'trace_diagnostics': diagnostics(report), 'public_diagnostics': public_diagnostics(report)}
 
 
 def summarize(root: Path, *, require_production=False, expected_commit=None):
@@ -111,6 +267,7 @@ def render(summary):
         a = row['metrics']
         lines.append(f"| {row['file']} | {row['performance']:.0f} | {a[METRICS[0]]/1000:.2f} | {a[METRICS[1]]/1000:.2f} | {a[METRICS[2]]:.0f} | {a[METRICS[3]]:.4f} |")
     lines += render_variability(summary.get('variability', {}))
+    lines += render_public_diagnostics(summary.get('runs', []))
     lines += ['', MEASUREMENT, '', 'Enforced groups: ' + ', '.join(summary.get('enforced_groups', []))]
     if summary.get('production_verified') is False:
         lines.append('Production is an unverified baseline observation, not evidence that this checkout is deployed.')

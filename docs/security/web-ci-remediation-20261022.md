@@ -4,7 +4,14 @@
 
 ## 最新状態（2026-10-22 UTC、以下の初回記録を更新）
 
-Draft [#2139](https://github.com/simplememofast/simplememo/pull/2139) のリモート候補は `2bd012e80171d0d48c7cabdcacc8a4575762a0d0`。mainとの差分は44ファイル。ナビゲーション検査の追加はローカル `f662935e878781e141aed1edc56e47be3ac3130b` に保存（候補全体45ファイル）。さらに下記の動画遅延読み込みと検証記録を追加し、候補全体は47ファイルとなる。merge・本番デプロイは未実施。管理SNS廃止、#2136保留、Apple/iOS対象外を維持する。
+Draft [#2139](https://github.com/simplememofast/simplememo/pull/2139) のpush前リモート候補は `2bd012e80171d0d48c7cabdcacc8a4575762a0d0`。mainとの差分は44ファイル。ナビゲーション検査は `f662935e878781e141aed1edc56e47be3ac3130b`、動画遅延読み込みと検証記録は `487d95f260fb10cb4def3de3e1f99d9ceb356beb` に保存。下記の任意診断ログ2ファイルを含む候補全体は49ファイル。merge・本番デプロイは未実施。管理SNS廃止、#2136保留、Apple/iOS対象外を維持する。過去の節にある「未push」等はその時点の記録であり、現状は本節を優先する。
+
+2026-10-22 04:49:57 UTCの所有者指示「金額問題なし、デプロイお願い」を受け、既存の通常リリース手順を継続する。共同予算50 USDのうち**Web割当25 USDを維持**し、API分を消費しない。新プラン、資格情報・保護設定の変更、既知の拒否の回避、失敗した必須検査を無視したmergeは許可されていない。
+
+- SEO前提修正は既存 [#2109](https://github.com/simplememofast/simplememo/pull/2109) をDraftへ変更した後、`08b940119666bba2b1c06dc945946a7aa597603f` としてpush済み。変更は既存データへの未判断理由4件・16行だけで、数値分類・閾値・真正な週次データ・了承期限は変えていない。実worktreeでIntent自己テスト46/46、Intent実データ・Waiting検査が成功。[SEO Validation 39724966221](https://github.com/simplememofast/simplememo/actions/runs/39724966221) は開始済みで、最終結果は未確定。他PRの無条件mergeや重複取込はしていない。
+- 次回通常CIが新規生成するLighthouse結果から、全12測定のLCP構造selector、観測trace、CPU群・resource・bootup・render-blockingの上位3件を既存ログに表示する。URLの認証情報/query/fragment、DOM本文、ヘッダーは出力しない。欠損・未対応単位は `unavailable`、走査打ち切りは明示する。既存の失敗判定・予算・未検証本番の扱いは不変。集計検査**28/28成功**（既存20＋新規8）、独立レビューと `git diff --check` 成功。過去に拒否されたartifactの再取得は行わない。
+- HTMLの変更により次回PR計測の本番一致証跡は未検証となり得る。PRがローカル予算だけで成功しても、本番71点/LCP5.45秒/TBT240msが解消したとは扱わない。新しい実診断の確認が必要。
+- Accessの管理設定は既存接続から読めない（管理APIの拒否を観測したのではなく、利用できる管理ツール/接続端末がない）。CIのpreviewがログインへ遷移したことは確認済み。既存Service Authポリシー・Service Tokenの名前と有効期限・対応する既存Actions secret名/Environment名のみ確認を依頼し、秘密値は要求していない。現在のキャッシュworkflowにその認証設定はない。
 
 | 候補SHAに対する既存CI | 結果とリリース判定 |
 | --- | --- |
@@ -29,9 +36,9 @@ SEOのreport-only viewport測定はblink_deep42、blink_sweep10136、webkit2573�
 
 ### 今回の費用条件
 
-主会話の2026-10-22 03:30:25 UTCの所有者指示「50ドル前後で」（message `Sentinel_a2d832e551b081918dd83b3ec2e05125`）に基づき、全体上限50 USDのうちWeb担当の追加CI/ビルド/デプロイは**厳密に最大25 USD**。以前の費用承認不足は更新されたが、基準未達やAccess保護の変更を許可する指示ではない。今回のローカル診断では追加の外部CI/ビルド/デプロイを起動していない。残額を確認できない有料処理と、既知の失敗を再現するだけのCI反復は保留する。
+主会話の2026-10-22 03:30:25 UTCの所有者指示「50ドル前後で」（message `Sentinel_a2d832e551b081918dd83b3ec2e05125`）に基づき、全体50 USDのうちWeb担当の追加CI/ビルド/デプロイは**最大25 USD**。04:49:57 UTCの追加指示でもWebへの割当は増えていない。以前の費用承認不足は更新されたが、基準未達やAccess保護の変更を許可する指示ではない。#2109の通常SEO CIは1回起動済みで、artifact保存ステップはない。診断目的のない同一CI反復は行わない。
 
-既存PRの全3候補SHAを照合した直接起動は18 run/19 attempt、実行25 job/skip3、計107分52秒。すべてpublic repoの `ubuntu-latest` で、[GitHub公式規則](https://docs.github.com/en/billing/concepts/product-billing/github-actions)上の標準ランナー実行時間料金は無料。19 artifactの表示容量は52,834,585 bytes、保存14日/90日で、全量が超過課金と仮定した容量×保存期間×[公式単価](https://docs.github.com/en/billing/concepts/product-billing/github-actions#storage-pricing) `$0.25/GB月` の試算は約$0.00575。実請求額ではない。Cloudflare Functionsの実リクエスト数/CPU/当月残枠は接続ツールから読めず、[従量料金](https://developers.cloudflare.com/workers/platform/pricing/)を含む担当総額の$25以内は確定できない。次のpushは直接6 workflow/8実行job、設定上449 runner分の上限だが、HTTP/CPU量や後続workflow_runの費用上限とは異なる。確認目的だけの再実行はしない。
+既存PRの全3候補SHAを照合した直接起動は18 run/19 attempt、実行25 job/skip3、計107分52秒。すべてpublic repoの `ubuntu-latest` で、[GitHub公式規則](https://docs.github.com/en/billing/concepts/product-billing/github-actions)上の標準ランナー実行時間料金は無料。19 artifactの表示容量は52,834,585 bytes、保存14日/90日で、全量が超過課金と仮定した容量×保存期間×[公式単価](https://docs.github.com/en/billing/concepts/product-billing/github-actions#storage-pricing) `$0.25/GB月` の試算は約$0.00575。実請求額ではない。次の#2139 pushは直接6 workflow/8実行job。前回同head分の70分8秒は実績参照であり、次の所要時間の保証ではない。前回容量29.4 MiB相当のartifactを追加すると、全量超過課金の保存試算は約$0.0034。Cloudflare Functionsの実リクエスト数/CPU/当月残枠は接続ツールから読めず、[従量料金](https://developers.cloudflare.com/workers/platform/pricing/)分は未精算。既存post-main readbackの固定部分はHTML1＋資産298＝299要求、12,617,552 bytesだが、他のブラウザー/GSC要求もあるため全体額とはしない。通常フローの費用承認に従い、追加の反復や予算の再配分は行わない。
 
 ### 独立したローカル性能診断と#2109の判断案
 
@@ -54,7 +61,7 @@ SEOのreport-only viewport測定はblink_deep42、blink_sweep10136、webkit2573�
 
 選択肢は、(1)推奨案のとおり未判断理由を記録してデータ公開を進める、(2)流入意図・導入/課金・利用頻度の根拠が揃ってから既存尺度の数値を宣言する、の2つ。現在のデータから本人に任意の重みを選んでもらう必要はない。
 
-固定head `5d39408464b0cb8b954c4d831ea538d3313845d2` の一時ツリーで、4理由の追加だけによりIntent自己テスト45成功/1失敗→46/46成功、実データ検査も失敗→成功。同じ真正な10月21日データでWaiting検査は変更前後とも成功。既存13理由、閾値100、81個のGSCファイル、1,283ページの数値分類、未宣言17ページ、未宣言クリック割合0.11535401750198886は不変。独立レビュー済み。差分案・原ログ・不変条件は `/tmp/simplememo-seo-local-2109/relevance-undecided.proposed.patch` と `proposal-validation.md` に保存し、#2109/#2139へ適用していない。次は既存#2109の最新head・担当を再照合して通常レビューで適用する工程であり、全SEO CIの成功を証明したものではない。
+固定head `5d39408464b0cb8b954c4d831ea538d3313845d2` の一時ツリーで、4理由の追加だけによりIntent自己テスト45成功/1失敗→46/46成功、実データ検査も失敗→成功。同じ真正な10月21日データでWaiting検査は変更前後とも成功。既存13理由、閾値100、81個のGSCファイル、1,283ページの数値分類、未宣言17ページ、未宣言クリック割合0.11535401750198886は不変。独立レビュー後、既存#2109のheadとDraft状態を再照合し、実worktreeで再検証した `08b940119` を同じPRへpush済み。#2139へは重複取込していない。差分・原ログ・不変条件は `/tmp/simplememo-seo-local-2109/` に保存。全SEO CIの成功はまだ証明していない。
 
 ## 既存修正の扱い
 
