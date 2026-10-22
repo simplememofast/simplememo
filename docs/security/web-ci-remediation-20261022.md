@@ -76,3 +76,7 @@ node --input-type=module -e 'globalThis.fetch=async()=>{throw Error("External ne
 - 既存GitHub CLIのplan確認は前回 `GET /user` がForbiddenで、同じ拒否を再試行していない。接続GitHubツールは個人billing API未対応。追加で確認したDesktop Commanderは接続端末0台で、認証済み管理画面を読む既存経路が無い。関連する10月の課金通知を既存メール接続で限定検索したが、現在残枠を確定する資料は得られなかった。新grant・新token・ログイン・購読変更は行っていない。
 
 **状態:** push・Draft PR作成・merge・deploy・本番/previewへの新しいHTTP readbackはいずれも未実行（ツールに拒否されたpushではなく、費用条件により実行前で保留）。本番は変更していない。安全検査の削除、ライブ検査の無効化、予算増額で進めることはしない。必要なのは、既存アカウントの当月リクエスト/CPUと保存容量の残枠に関する確認、または所有者による費用条件の具体的な判断である。追加費用禁止の条件が維持される間は、その条件を確認できるまで出荷操作を保留する。
+
+## 費用承認と出荷再開（2026-10-22 JST）
+
+所有者が「費用は問題ないので進めて」と明示したため、上記の費用条件による保留を解除した。既存フローでpush、Draft PR、CI、レビュー、merge、通常のCloudflare Pages本番反映と最小限のreadbackを進める。プラン変更・権限拡張・secret新設定は行わない。#2136の保留、管理SNSの廃止、Apple/iOSとClaude Code起動・実投稿テストの禁止は維持する。remote mainは引き続き `98fe630d4`、#2121/#2105/#2136も未マージDraftのままである。以下の出荷操作の成否はGitHub/Cloudflareの実結果で追記・報告する。
