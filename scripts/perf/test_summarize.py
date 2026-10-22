@@ -67,6 +67,14 @@ class SummaryTests(unittest.TestCase):
             edit(r)
             self.write(f'{group}-{run}.report.json', r)
 
+    def cli_env(self, **overrides):
+        # Synthetic receipts and output files belong to this fixture, never to
+        # the surrounding CI checkout/event or its real step-summary file.
+        return {**os.environ, 'PERF_RESULTS': str(self.root),
+                'PERF_EXPECTED_COMMIT': COMMIT, 'GITHUB_EVENT_NAME': 'pull_request',
+                'GITHUB_REF': 'refs/pull/1/merge', 'GITHUB_STEP_SUMMARY': str(self.root / 'step.md'),
+                **overrides}
+
     def test_all_four_groups_are_enforced(self):
         result = audit.summarize(self.root, require_production=True, expected_commit=COMMIT)
         self.assertEqual(result['status'], 'success')
@@ -156,7 +164,7 @@ class SummaryTests(unittest.TestCase):
 
     def test_cli_retains_failure_artifacts_even_under_python_optimization(self):
         (self.root / 'local-en-2.report.json').unlink()
-        env = {**os.environ, 'PERF_RESULTS': str(self.root), 'GITHUB_STEP_SUMMARY': str(self.root / 'step.md')}
+        env = self.cli_env()
         result = subprocess.run([sys.executable, '-O', audit.__file__], env=env, capture_output=True, text=True)
         self.assertEqual(result.returncode, 1)
         self.assertEqual(json.loads((self.root / 'summary.json').read_text())['status'], 'failure')
@@ -164,7 +172,7 @@ class SummaryTests(unittest.TestCase):
 
     def test_main_push_cannot_silently_ignore_unverified_production(self):
         self.write('production-deployment.json', {'verified': False})
-        env = {**os.environ, 'PERF_RESULTS': str(self.root), 'GITHUB_EVENT_NAME': 'push', 'GITHUB_REF': 'refs/heads/main'}
+        env = self.cli_env(GITHUB_EVENT_NAME='push', GITHUB_REF='refs/heads/main')
         result = subprocess.run([sys.executable, audit.__file__], env=env, capture_output=True, text=True)
         self.assertEqual(result.returncode, 1)
 
@@ -348,7 +356,7 @@ class SummaryTests(unittest.TestCase):
         self.patch_run('production-ja', lambda r: r['audits'][audit.METRICS[2]].update(numericValue=240))
         for name in audit.EXPECTED:
             self.write(name, with_public_diagnostics(json.loads((self.root / name).read_text())))
-        env = {**os.environ, 'PERF_RESULTS': str(self.root), 'GITHUB_STEP_SUMMARY': str(self.root / 'step.md')}
+        env = self.cli_env()
         result = subprocess.run([sys.executable, '-O', audit.__file__], env=env, capture_output=True, text=True)
         self.assertEqual(result.returncode, 1)
         saved = json.loads((self.root / 'summary.json').read_text())

@@ -13,6 +13,10 @@ Draft [#2139](https://github.com/simplememofast/simplememo/pull/2139) のpush前
 - HTMLの変更により次回PR計測の本番一致証跡は未検証となり得る。PRがローカル予算だけで成功しても、本番71点/LCP5.45秒/TBT240msが解消したとは扱わない。新しい実診断の確認が必要。
 - Accessの管理設定は既存接続から読めない（管理APIの拒否を観測したのではなく、利用できる管理ツール/接続端末がない）。CIのpreviewがログインへ遷移したことは確認済み。既存Service Authポリシー・Service Tokenの名前と有効期限・対応する既存Actions secret名/Environment名のみ確認を依頼し、秘密値は要求していない。現在のキャッシュworkflowにその認証設定はない。
 
+候補 `3959f8f4d43aace3d6e6d5d53b44c40f04ef0096` を既存Draft #2139へpushした。Cloudflare previewビルドは成功（deployment `39581066-0406-47a8-b132-ea4d58cd6582`、`https://39581066.simplememo-596.pages.dev`）。[Cache CI 39725488735](https://github.com/simplememofast/simplememo/actions/runs/39725488735) は26/26回帰成功後、Accessログイン転送を新しいガードが検出し、資産取得前に失敗した。認証問題は未解消で、本番反映の証拠ではない。
+
+[PageSpeed 39725488694](https://github.com/simplememofast/simplememo/actions/runs/39725488694) は新規CLIテストの環境分離不足で計測前に失敗した。CIの `PERF_EXPECTED_COMMIT`（実マージ参照）をテストが継承し、合成fixtureのcommitと衝突した。**新しいLighthouse12測定は全て未実行**で、性能の成功/失敗とは評価しない。テストの子プロセスだけにfixture commit・event/ref・一時出力先を固定し、main-push拒否テストは引き続きpush/mainを明示する。実CLIの検証や閾値は変更していない。修正前は同じCI環境で1/28失敗を再現し、修正後は通常・同じCI環境・敵対的な継承環境＋Python最適化で各28/28成功。実失敗の原因を修正した新候補で検証し、旧候補の無目的な再実行は行わない。
+
 | 候補SHAに対する既存CI | 結果とリリース判定 |
 | --- | --- |
 | [SEO Validation 39705575507](https://github.com/simplememofast/simplememo/actions/runs/39705575507) | 失敗。Waiting progressでGSC週次データが10日経過し、上限9日を超過。停止了承のreview_byは10月10日に失効済み。後続の必須検査は未実行なのでリリースを阻害する |
