@@ -893,16 +893,40 @@
       "note": "2026-10-20: PR依頼（モデルが書く信用しない入力）の任意欄。欄が無いときは台帳の行にも書かない（推測で埋めない）。欄があるときだけ形を検査し、外れたら公開しない。行そのものは記帳時に autopilot-runs.mjs の validate() を通り、shipped の pr・失敗時の failure_reason など必須の規則はそちらが落とす。scripts/autopilot-publish.test.mjs の request schema で固定。2026-10-21（監査 F93）: 任意なのは shipped のときだけ。shipped 以外で欄が無い依頼は validateRequest() が push の前に拒否する（autopilot-selfheal.mjs --check が失敗行に failure_class を要求するため）。"
     },
     {
-      "file": "scripts/autopilot-diagnostics.mjs",
-      "expr": "raw.denied_tool_counts",
-      "disposition": "安全側へ倒れる",
-      "note": "2026-10-20: publish ジョブで読む実行要約（モデルのランナーを通った値）の拒否ツール内訳。欄が無い・形が違うときは null（不明）のまま受領書に残り、0 や空の内訳にはしない。autopilot-diagnostics.test.mjs の偽造要約の検体で固定。"
-    },
-    {
       "file": "scripts/value-contracts.mjs",
       "expr": "before",
       "disposition": "安全側へ倒れる",
       "note": "2026-10-21（監査 F93）: lastmodOnlySitemaps() の `before !== null && after !== null && sitemapView(before) === sitemapView(after)`。この式が真のときだけ sitemap が台帳扱い（価値契約の touches に要らない）になる。base か head にファイルが無い（null）・読めない（catch）ときは偽で、台帳扱いにならず宣言が要る側に倒れる。value-contracts.mjs --selftest の sitemap の検体で固定。"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "results",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-22（監査 F94）: fetchRunCost の `!results.length && !cost`。results はモデルの2つの段（本体と1回の再開）の時間内の result 行だけ（resultValues、1段に2行あれば null で unreadable）。行が無ければ AI実費 の行に戻り、それも無ければモデル未着手を確かめた回だけ absent、ほかは unreadable（0円・不存在にしない）。selftest の時刻つき検体（窓の外の行を足さない・同じ段の2行は決めない）で固定。"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "limit.attempted",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-22: selftest の検体（interpretRun の戻り値）。attempted が欠けると t が偽になり自己検査が落ちる。規則が消える向きではない。"
+    },
+    {
+      "file": "scripts/autopilot-diagnostics.mjs",
+      "expr": "copy.reason",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-22（監査 F94）: summarize の再開後の読み分け。再開前に取った本体の写しが読めない（reason あり・sha256 なし）ならその理由のまま不明、読めても確認段が記録した sha256 と違えば execution_file_changed（不明）。再開の実行ファイルを本体として数える向きには倒れない。autopilot-diagnostics.test.mjs の写しの改変検体で固定。"
+    },
+    {
+      "file": "scripts/autopilot-diagnostics.mjs",
+      "expr": "after.sha256",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-22（監査 F94）: 再開の要約は、本体の sha256 が分かり、今の実行ファイルの sha256 がそれと違うときだけ読む。どちらかが欠ければ再開の欄は不明（null）のまま。"
+    },
+    {
+      "file": "scripts/autopilot-publish.mjs",
+      "expr": "read.value",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-22（監査 F94）: handoffFileState。JSON として読めても値が偽（null・false・0・空文字）や配列なら not_object（無いのと同じ扱いで再開の判断に回る）。publish 側の verify は依頼を自分で読み直して検査する。--selftest の状態の検体で固定。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
@@ -1468,6 +1492,12 @@
       "expr": "before",
       "disposition": "安全側へ倒れる",
       "note": "2026-10-21（監査 F93）: lastmodOnlySitemaps() の `before !== null && after !== null && …`。before/after は base・head の sitemap 本文で、ファイルが無いと null。そのときは偽になり sitemap は台帳扱いにならない（価値契約の touches に要る側）。読めないときも catch で偽。value-contracts.mjs --selftest の sitemap の検体で固定。"
+    },
+    {
+      "file": "scripts/autopilot-diagnostics.mjs",
+      "expr": "handoff",
+      "disposition": "前提",
+      "note": "2026-10-22（監査 F94）: save の経路の振り分け。publish ジョブは --handoff を渡し、詰め込まれた要約だけを読む（無い・改変・壊れは明示の不明）。渡さない経路はファイルを持つランナー（テスト・手元）用で、publish のランナーには実行ファイルが無いので値はすべて不明になる。配線は checkWiring が固定する。"
     }
   ]
 }

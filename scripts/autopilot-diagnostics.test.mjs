@@ -4,7 +4,9 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { modelSummary, receipt, save, checkWiring, summarize, fromSummary, EXIT_CODES, AUDIT_VERDICTS } from './autopilot-diagnostics.mjs';
+import { createHash } from 'node:crypto';
+import { modelSummary, receipt, save, checkWiring, summarize, fromSummary, readHandoffSummary, EXIT_CODES, AUDIT_VERDICTS, MAX_EXECUTION_BYTES } from './autopilot-diagnostics.mjs';
+import { pack, MAIN_EXECUTION_COPY, SUMMARY_FILE } from './autopilot-publish.mjs';
 import { VERDICTS } from './autopilot-audit.mjs';
 import { interpretRun } from './autopilot-act.mjs';
 
@@ -70,7 +72,11 @@ export async function selftest() {
     ["needs.autopilot.outputs.model_outcome == 'success' || needs.autopilot.outputs.model_outcome == 'failure'", "needs.autopilot.outputs.model_outcome == 'success'"],
     ['diagnostic-tools" "$GITHUB_SHA"', 'diagnostic-tools" "HEAD"'],
     ['autopilot-diagnostics.mjs" --summarize', 'autopilot-diagnostics.mjs" --save'],
-    ['EXEC_SUMMARY: ${{ needs.autopilot.outputs.exec_summary }}', 'EXEC_FILE: ${{ needs.autopilot.outputs.exec_summary }}'],
+    ['--save "$RUNNER_TEMP/autopilot-diagnostic" --handoff "$RUNNER_TEMP/handoff"', '--save "$RUNNER_TEMP/autopilot-diagnostic"'],
+    ['          RESUME_OUTCOME: ${{ steps.resume.outcome }}\n          RESUME_DECISION', '          RESUME_DECISION'],
+    ['          MAIN_EXECUTION_SHA256: ${{ steps.handoff_files.outputs.main_execution_sha256 }}\n        run: |\n          git worktree add --detach "$RUNNER_TEMP/diagnostic-tools"',
+      '        run: |\n          git worktree add --detach "$RUNNER_TEMP/diagnostic-tools"'],
+    ['      audit_verdict: ${{ steps.audit.outputs.verdict }}\n', '      audit_verdict: ${{ steps.audit.outputs.verdict }}\n      exec_summary: ${{ steps.exec_summary.outputs.summary }}\n'],
     ['path: ${{ runner.temp }}/autopilot-diagnostic', 'path: ${{ runner.temp }}'],
     ["steps.diagnostics.outputs.saved == 'true'", 'true'],
     ["steps.diagnostics.outputs.saved == 'true'\n        continue-on-error: true", "steps.diagnostics.outputs.saved == 'true'"],
@@ -153,7 +159,7 @@ export async function selftest() {
     });
     clean(); fs.unlinkSync(execution);
     test('oversized input remains explicitly unknown', () => {
-      fs.writeFileSync(execution, ''); fs.truncateSync(execution, 32 * 1024 * 1024 + 1);
+      fs.writeFileSync(execution, ''); fs.truncateSync(execution, MAX_EXECUTION_BYTES + 1);
       const r = save(output, args); assert(r.observations_unknown.includes('execution_file_oversized'));
     });
     clean();
@@ -193,27 +199,133 @@ export async function selftest() {
       assert.throws(() => checkWiring(withoutOther), /exit code other/);
       assert.throws(() => checkWiring(workflow.replace('"$RUNNER_TEMP/autopilot-exit.json"', '"/tmp/x.json"')), /exit code file/);
     });
-    test('the publish job receipt from the model job summary equals the direct receipt', () => {
+    // The publish job reads the summary from the downloaded handoff (summary.json, sha256 in the manifest).
+    const handoffDir = path.join(temp, 'handoff');
+    const putHandoff = (text, { sha = createHash('sha256').update(text ?? '').digest('hex'), manifest = true } = {}) => {
+      fs.rmSync(handoffDir, { recursive: true, force: true }); fs.mkdirSync(handoffDir);
+      if (text !== undefined) fs.writeFileSync(path.join(handoffDir, 'summary.json'), text);
+      if (manifest) fs.writeFileSync(path.join(handoffDir, 'manifest.json'), JSON.stringify({ files: { 'summary.json': { sha256: sha, size: 1 } } }));
+    };
+    const viaHandoff = () => { const r = save(output, { ...env, RUNNER_TEMP: temp }, { handoff: handoffDir }); clean(); return r; };
+    test('the publish job receipt from the packed summary equals the direct receipt', () => {
       fs.writeFileSync(execution, JSON.stringify([raw]));
       fs.writeFileSync(path.join(temp, 'autopilot-exit.json'), JSON.stringify({ code: 'shipped_pr' }));
       const direct = save(output, args); clean();
-      const text = JSON.stringify(summarize(args));
-      assert(!text.includes(secret));
-      const viaSummary = save(output, { ...env, RUNNER_TEMP: temp, EXEC_SUMMARY: text }); clean();
-      assert.deepEqual(viaSummary, direct);
-      fs.unlinkSync(path.join(temp, 'autopilot-exit.json'));
+      // The real CLI writes the summary file; the real pack puts it in the handoff with its hash.
+      const cli = spawnSync(process.execPath, [path.join(root, 'scripts/autopilot-diagnostics.mjs'), '--summarize'],
+        { encoding: 'utf8', env: { ...process.env, ...args } });
+      assert.equal(cli.status, 0, cli.stderr);
+      const text = fs.readFileSync(path.join(temp, SUMMARY_FILE), 'utf8');
+      assert(!text.includes(secret) && !cli.stdout.includes(secret));
+      const workspace = fs.mkdtempSync(path.join(temp, 'not-a-repository-'));
+      const packed = path.join(temp, 'packed');
+      pack({ workspace, out: packed, day: '20261006', runnerTemp: temp });
+      assert.equal(JSON.parse(fs.readFileSync(path.join(packed, 'manifest.json'), 'utf8')).files['summary.json'].sha256,
+        createHash('sha256').update(text).digest('hex'));
+      const fromPack = save(output, { ...env, RUNNER_TEMP: temp }, { handoff: packed }); clean();
+      assert.deepEqual(fromPack, direct);
+      putHandoff(text);
+      assert.deepEqual(viaHandoff(), direct);
+      for (const leftover of [path.join(temp, 'autopilot-exit.json'), path.join(temp, SUMMARY_FILE), packed, workspace]) fs.rmSync(leftover, { recursive: true });
     });
-    test('a forged or broken summary becomes explicit unknowns, never raw text', () => {
+    test('a forged, altered or broken summary becomes explicit unknowns, never raw text', () => {
       const forged = JSON.stringify({ result_subtype: secret, is_error: secret, num_turns: -1, permission_denials_count: '3',
-        denied_tool_counts: { [secret]: 1 }, model_exit_code: secret, execution_file_sha256: secret, read_reason: secret, exit_reason: secret });
-      const r = save(output, { ...env, RUNNER_TEMP: temp, EXEC_SUMMARY: forged }); clean();
+        denied_tool_counts: { [secret]: 1 }, model_exit_code: secret, execution_file_sha256: secret, read_reason: secret, exit_reason: secret,
+        request_after_main: secret, exit_after_main: 'present ', resume_decision: secret, resume_outcome: secret,
+        request_after_resume: secret, exit_after_resume: 'not_run\n', resume_result_subtype: secret, resume_num_turns: -1,
+        resume_permission_denials_count: 1.5, resume_denied_tool_counts: { [secret]: 1 } });
+      putHandoff(forged);
+      const r = viaHandoff();
       assert(!JSON.stringify(r).includes(secret));
       assert.equal(r.num_turns, null); assert.equal(r.model_exit_code, null); assert.equal(r.denied_tool_counts, null);
+      for (const key of ['request_after_main', 'exit_after_main', 'resume_decision', 'resume_outcome', 'request_after_resume',
+        'exit_after_resume', 'resume_result_subtype', 'resume_num_turns', 'resume_permission_denials_count', 'resume_denied_tool_counts']) {
+        assert.equal(r[key], null, key); assert(r.observations_unknown.includes(key), key);
+      }
       for (const broken of ['', 'not json', '[]', 'x'.repeat(5000)]) {
-        const b = save(output, { ...env, RUNNER_TEMP: temp, EXEC_SUMMARY: broken }); clean();
+        putHandoff(broken);
+        const b = viaHandoff();
         assert(b.observations_unknown.includes('execution_summary_unavailable'));
         assert.equal(fromSummary(broken).model.num_turns, null);
       }
+      // Dropped on the way: no file, no manifest, a hash that is not the manifest's, a link, no handoff at all.
+      const good = JSON.stringify({ num_turns: 3 });
+      for (const [label, arrange] of [['missing', () => putHandoff(undefined)], ['no manifest', () => putHandoff(good, { manifest: false })],
+        ['altered', () => putHandoff(good, { sha: 'f'.repeat(64) })],
+        ['symlink', () => { putHandoff(undefined); const target = path.join(temp, 'linked.json'); fs.writeFileSync(target, good);
+          fs.symlinkSync(target, path.join(handoffDir, 'summary.json'));
+          fs.writeFileSync(path.join(handoffDir, 'manifest.json'), JSON.stringify({ files: { 'summary.json': { sha256: createHash('sha256').update(good).digest('hex') } } })); }],
+        ['no handoff', () => fs.rmSync(handoffDir, { recursive: true, force: true })]]) {
+        arrange();
+        assert.equal(readHandoffSummary(handoffDir), undefined, label);
+        const d = viaHandoff();
+        assert(d.observations_unknown.includes('execution_summary_unavailable') && d.num_turns === null, label);
+      }
+      putHandoff(good);
+      assert.equal(viaHandoff().num_turns, 3, 'the same summary with its manifest hash is read');
+      fs.rmSync(handoffDir, { recursive: true, force: true }); fs.rmSync(path.join(temp, 'linked.json'));
+    });
+    test('the summary records the handoff files, the one resume and its result, typed and bounded', () => {
+      const requestFile = path.join(temp, 'autopilot-pr-request.json');
+      const copy = path.join(temp, MAIN_EXECUTION_COPY);
+      const mainExec = JSON.stringify([{ type: 'result', subtype: 'success', is_error: false, num_turns: 236, total_cost_usd: 15.41336,
+        permission_denials: [{ tool_name: 'Write', tool_input: { file_path: secret } }] }]);
+      const mainSha = createHash('sha256').update(mainExec).digest('hex');
+      const resumeExec = JSON.stringify([{ type: 'result', subtype: 'success', is_error: false, num_turns: 4, total_cost_usd: 0.5,
+        permission_denials: [{ tool_name: 'Bash', tool_input: { command: secret } }] }]);
+      const after = { ...args, REQUEST_AFTER_MAIN: 'missing', EXIT_AFTER_MAIN: 'missing', RESUME_DECISION: 'resume', MAIN_EXECUTION_SHA256: mainSha };
+      const roundTrip = summary => { const text = JSON.stringify(summary); assert(!text.includes(secret)); putHandoff(text); return viaHandoff(); };
+
+      // Both files written by the main session: no resume; nothing after it is "unknown".
+      fs.writeFileSync(execution, mainExec);
+      const plain = summarize({ ...after, REQUEST_AFTER_MAIN: 'present', EXIT_AFTER_MAIN: 'present', RESUME_DECISION: 'not_needed', RESUME_OUTCOME: 'skipped' });
+      assert.equal(plain.num_turns, 236); assert.equal(plain.request_after_resume, 'not_run'); assert.equal(plain.resume_num_turns, null);
+      const plainReceipt = roundTrip(plain);
+      assert.equal(plainReceipt.resume_outcome, 'skipped'); assert.equal(plainReceipt.resume_decision, 'not_needed');
+      assert(!plainReceipt.observations_unknown.some(key => key.startsWith('resume_')), 'a resume that did not run is not unknown');
+
+      // The resume ran: the main session is read from the copy taken before it, the resume from the rewritten file.
+      fs.writeFileSync(copy, mainExec); fs.writeFileSync(execution, resumeExec);
+      fs.writeFileSync(requestFile, JSON.stringify({ action: 'none' })); fs.writeFileSync(exitFile, JSON.stringify({ code: 'no_ship_pr' }));
+      const resumed = summarize({ ...after, RESUME_OUTCOME: 'success' });
+      assert.equal(resumed.num_turns, 236); assert.deepEqual(resumed.denied_tool_counts, { Write: 1 }); assert.equal(resumed.execution_file_sha256, mainSha);
+      assert.equal(resumed.resume_num_turns, 4); assert.deepEqual(resumed.resume_denied_tool_counts, { Bash: 1 });
+      assert.equal(resumed.resume_permission_denials_count, 1); assert.equal(resumed.resume_result_subtype, 'success');
+      assert.equal(resumed.request_after_resume, 'present'); assert.equal(resumed.exit_after_resume, 'present');
+      assert.equal(resumed.model_exit_code, 'no_ship_pr'); assert.equal(resumed.request_after_main, 'missing');
+      const resumedReceipt = roundTrip(resumed);
+      for (const [key, value] of Object.entries({ request_after_main: 'missing', exit_after_main: 'missing', resume_decision: 'resume',
+        resume_outcome: 'success', request_after_resume: 'present', exit_after_resume: 'present', resume_num_turns: 4, num_turns: 236 })) {
+        assert.deepEqual(resumedReceipt[key], value, key);
+      }
+
+      // The resume left nothing usable: still missing after it, its result unknown (it ran).
+      fs.unlinkSync(requestFile); fs.writeFileSync(exitFile, '{"code":');
+      fs.writeFileSync(execution, mainExec);
+      const empty = summarize({ ...after, RESUME_OUTCOME: 'failure' });
+      assert.equal(empty.request_after_resume, 'missing'); assert.equal(empty.exit_after_resume, 'invalid_json');
+      assert.equal(empty.resume_num_turns, null, 'the main session\'s file is not the resume\'s');
+      assert(roundTrip(empty).observations_unknown.includes('resume_num_turns'));
+
+      // The copy no longer matches the hash recorded before the resume: unknown, not the altered numbers.
+      fs.writeFileSync(copy, mainExec.replace('236', '1')); fs.writeFileSync(execution, resumeExec);
+      const changed = summarize({ ...after, RESUME_OUTCOME: 'success' });
+      assert.equal(changed.read_reason, 'execution_file_changed'); assert.equal(changed.num_turns, null); assert.equal(changed.resume_num_turns, 4);
+      assert(roundTrip(changed).observations_unknown.includes('execution_file_changed'));
+      for (const leftover of [copy, exitFile, execution]) fs.rmSync(leftover, { force: true });
+
+      // The largest summary the fields allow stays within the bound fromSummary accepts.
+      const tools = ['Bash', 'Read', 'Write', 'Edit', 'MultiEdit', 'Glob', 'Grep', 'WebFetch', 'WebSearch', 'TodoWrite', 'NotebookEdit',
+        'Task', 'BashOutput', 'KillShell', 'ToolSearch', 'unknown'];
+      const most = Object.fromEntries(tools.map(tool => [tool, Number.MAX_SAFE_INTEGER]));
+      const largest = JSON.stringify({ result_subtype: 'error_max_structured_output_retries', is_error: false, num_turns: Number.MAX_SAFE_INTEGER,
+        permission_denials_count: Number.MAX_SAFE_INTEGER, denied_tool_counts: most, model_exit_code: 'abandoned_after_declaration',
+        execution_file_sha256: 'a'.repeat(64), read_reason: 'execution_file_unexpected_path', exit_reason: 'exit_report_unavailable',
+        request_after_main: 'invalid_json', exit_after_main: 'invalid_json', resume_decision: 'session_id_invalid', resume_outcome: 'cancelled',
+        request_after_resume: 'invalid_json', exit_after_resume: 'invalid_json', resume_result_subtype: 'error_max_structured_output_retries',
+        resume_num_turns: Number.MAX_SAFE_INTEGER, resume_permission_denials_count: Number.MAX_SAFE_INTEGER, resume_denied_tool_counts: most });
+      assert(Buffer.byteLength(largest) <= 4096, `largest summary is ${Buffer.byteLength(largest)} bytes`);
+      assert.deepEqual(fromSummary(largest).handoff.resume_denied_tool_counts, most);
     });
     test('checkpoint capture failure is preserved independently of model success', () => {
       const r = receipt({ ...env, CHECKPOINT_OUTCOME: 'failure', CHECKPOINT_SAVED: 'false', CHECKPOINT_REASON: 'capture_failed', DECLARED_PAGE_CHANGE_COUNT: '' }, raw);
@@ -221,7 +333,7 @@ export async function selftest() {
       assert.equal(r.declared_page_change_count, null); assert.equal(r.output_verdict, 'missing');
     });
     // Test the Python actually embedded in the workflow; no duplicate parser fixture.
-    const embedded = workflow.match(/          python3 - "\$f" <<'PY' \| tee -a "\$GITHUB_STEP_SUMMARY"\n([\s\S]*?)\n          PY/);
+    const embedded = workflow.match(/          python3 - "\$@" <<'PY' \| tee -a "\$GITHUB_STEP_SUMMARY"\n([\s\S]*?)\n          PY/);
     assert(embedded, 'cost extraction heredoc required');
     const python = embedded[1].split('\n').map(line => line.slice(10)).join('\n');
     for (const [fields, expected] of [[raw, '2'], [{ permission_denials: [] }, '0'],
@@ -234,6 +346,50 @@ export async function selftest() {
         assert(!cli.stdout.includes(secret));
       });
     }
+    // The whole step as the workflow runs it: after a resume, the cost is the main session's copy
+    // (bound to the hash recorded before the resume) plus the resume's file, in the line Act reads.
+    const costStep = workflow.split('      - name: 実費の抽出（台帳への追記は翌日のセッションが行う）\n')[1].split('\n      - name:')[0];
+    const costShell = path.join(temp, 'cost-step.sh');
+    fs.writeFileSync(costShell, costStep.split('        run: |\n')[1].split('\n')
+      .filter(line => !line.trim() || line.startsWith('          ')).map(line => line.slice(10)).join('\n'));
+    const mainExec = JSON.stringify([{ type: 'result', total_cost_usd: 15.41336, num_turns: 236, permission_denials: [{ tool_name: 'Write' }] }]);
+    const mainSha = createHash('sha256').update(mainExec).digest('hex');
+    const resumeExec = JSON.stringify([{ type: 'result', total_cost_usd: 0.5, num_turns: 4, permission_denials: [] }]);
+    const costRun = (resumeOutcome, sha = mainSha) => {
+      const summary = path.join(temp, 'step-summary.md'); fs.rmSync(summary, { force: true });
+      const cli = spawnSync('bash', ['-e', costShell], { encoding: 'utf8', cwd: root, env: { ...process.env, RUNNER_TEMP: temp,
+        EXEC_FILE: execution, TASK_KIND: 'article', GITHUB_RUN_ID: '123', GITHUB_STEP_SUMMARY: summary,
+        RESUME_OUTCOME: resumeOutcome, MAIN_EXECUTION_SHA256: sha } });
+      assert.equal(cli.status, 0, cli.stderr);
+      assert(!/"total_cost_usd"|"num_turns"/.test(cli.stdout), 'the step prints nothing Act would count twice');
+      return cli.stdout;
+    };
+    const actLine = text => Number(text.match(/AI実費:\s*\*\*\$([0-9.]+)\*\*/)?.[1]);
+    test('the cost step sums the main session and the resume after a resume', () => {
+      fs.writeFileSync(path.join(temp, MAIN_EXECUTION_COPY), mainExec); fs.writeFileSync(execution, resumeExec);
+      const out = costRun('success');
+      assert.equal(actLine(out), 15.9134); assert(out.includes('turns 240 / permission_denials 1'), out);
+      assert(out.includes('--cost 15.91336 --turns 240'), out);
+      assert(out.includes('主セッション $15.4134 / 引き渡しファイルのための再開 $0.5000'), out);
+    });
+    test('the cost step without a resume reads the one execution file, as before', () => {
+      fs.writeFileSync(execution, mainExec);
+      for (const outcome of ['skipped', '']) {
+        const out = costRun(outcome);
+        assert.equal(actLine(out), 15.4134); assert(out.includes('turns 236 / permission_denials 1') && !out.includes('内訳'), out);
+      }
+    });
+    test('an altered copy or a resume without its own execution file is not counted as a total', () => {
+      fs.writeFileSync(path.join(temp, MAIN_EXECUTION_COPY), mainExec.replace('15.41336', '0.01')); fs.writeFileSync(execution, resumeExec);
+      let out = costRun('success');
+      assert(Number.isNaN(actLine(out)) && out.includes('取得できなかった（主セッション分: '), out);
+      fs.writeFileSync(path.join(temp, MAIN_EXECUTION_COPY), mainExec); fs.writeFileSync(execution, mainExec);
+      out = costRun('failure');
+      assert(Number.isNaN(actLine(out)) && out.includes('取得できなかった（再開分: 再開の実行ログが無い）'), out);
+      fs.rmSync(path.join(temp, MAIN_EXECUTION_COPY));
+      out = costRun('success');
+      assert(Number.isNaN(actLine(out)) && out.includes('取得できなかった（主セッション分: '), out);
+    });
   } finally { fs.rmSync(temp, { recursive: true, force: true }); }
   console.log(`diagnostics: ${tests} privacy, missingness, workflow and real CLI/cost checks passed`);
 }

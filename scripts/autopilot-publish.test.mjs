@@ -8,7 +8,8 @@ import path from 'node:path';
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { pack, verifyHandoff, pushBranch, record, validateRequest, prPayload, openPr, checkWiring, gitEnv,
-  PublishError, RECORD_IDENTITY, MAX_REPAIR_TARGETS } from './autopilot-publish.mjs';
+  PublishError, RECORD_IDENTITY, MAX_REPAIR_TARGETS, handoffFileState, MAIN_EXECUTION_COPY } from './autopilot-publish.mjs';
+import { save as saveDiagnostics } from './autopilot-diagnostics.mjs';
 import { classifyAutopilotChange, hardDenyReason, isAutopilotBranch, RECORD_PATHS } from './lib/autopilot-paths.mjs';
 import { validate as validateRuns } from './autopilot-runs.mjs';
 
@@ -493,6 +494,175 @@ test('record recounts the status JSON from the ledger, so the CI ledger checks p
       assert.match(stale.check.stderr, /runs\.totals\.runs/);
     } finally { f.cleanup(); }
   }
+});
+
+// ── 2026-10-22: the handoff files, and one resume of the same session when they are missing ──
+const SESSION = 'bf8acc9e-2dec-4cca-8674-f9d04adcd74a';
+const outputsOf = file => Object.fromEntries((fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '').split('\n').filter(Boolean)
+  .map(line => [line.slice(0, line.indexOf('=')), line.slice(line.indexOf('=') + 1)]));
+const executionFile = (turns, usd, denied = []) => JSON.stringify([{ type: 'system', subtype: 'init' }, { type: 'result', subtype: 'success',
+  is_error: false, num_turns: turns, total_cost_usd: usd, permission_denials: denied.map(tool_name => ({ tool_name })) }]);
+const REQUEST_FILE = 'autopilot-pr-request.json', EXIT_FILE = 'autopilot-exit.json';
+
+/**
+ * The model job's tail as obsidian-autopilot.yml wires it, with the two claude-code-action steps stubbed:
+ * the check (real CLI, the step's env) → the resume (a stub, run only under the step's `if:`, which
+ * checkWiring pins) → the summary (real CLI) → pack; then the publish job's verify and diagnostic receipt.
+ */
+const minutesAgo = minutes => String(Math.floor(Date.now() / 1000) - minutes * 60);
+async function modelJobTail(f, { outcome = 'success', mainWrites = {}, resumeWrites = {}, sessionId = SESSION, budget = '20',
+  jobStarted = minutesAgo(48) } = {}) {
+  const exec = path.join(f.temp, 'claude-execution-output.json');
+  fs.writeFileSync(exec, executionFile(236, 15.41336, ['Write']));
+  for (const [name, text] of Object.entries(mainWrites)) fs.writeFileSync(path.join(f.temp, name), text);
+  const stepEnv = extra => ({ ...process.env, GITHUB_ACTIONS: '', RUNNER_TEMP: f.temp, EXEC_FILE: exec, ...extra });
+  const checkOutput = path.join(f.temp, 'github-output-handoff-files');
+  const check = spawnSync(process.execPath, [path.join(ROOT, 'scripts/autopilot-publish.mjs'), '--inspect-handoff'], { encoding: 'utf8',
+    env: stepEnv({ GITHUB_OUTPUT: checkOutput, MODEL_OUTCOME: outcome, SESSION_ID: sessionId, RUNTIME_BUDGET_USD: budget,
+      JOB_STARTED_EPOCH: jobStarted }) });
+  assert.equal(check.status, 0, check.stderr);
+  assert(!check.stdout.includes(f.temp), 'the check prints typed states only');
+  const checked = outputsOf(checkOutput);
+  let resumeOutcome = 'skipped';
+  if (outcome === 'success' && checked.resume === 'true') {
+    resumeOutcome = 'success';
+    // The resumed session: the action rewrites its execution file; the session writes what the case says.
+    fs.writeFileSync(exec, executionFile(4, 0.5));
+    for (const [name, text] of Object.entries(resumeWrites)) fs.writeFileSync(path.join(f.temp, name), text);
+  }
+  const summary = spawnSync(process.execPath, [path.join(ROOT, 'scripts/autopilot-diagnostics.mjs'), '--summarize'], { encoding: 'utf8',
+    env: stepEnv({ RESUME_OUTCOME: resumeOutcome, RESUME_DECISION: checked.resume_decision ?? '', REQUEST_AFTER_MAIN: checked.request_after_main ?? '',
+      EXIT_AFTER_MAIN: checked.exit_after_main ?? '', MAIN_EXECUTION_SHA256: checked.main_execution_sha256 ?? '' }) });
+  assert.equal(summary.status, 0, summary.stderr);
+  const out = path.join(f.temp, 'autopilot-handoff');
+  pack({ workspace: f.work, out, day: DAY, runnerTemp: f.temp });
+  let verified;
+  try { verified = await verifyHandoff({ handoff: out, repo: f.tools, day: DAY, modelOutcome: outcome, remote: f.origin, listPrs: async () => [] }); }
+  catch (error) { if (!(error instanceof PublishError)) throw error; verified = { verdict: error.code }; }
+  const receipt = saveDiagnostics(path.join(f.temp, 'autopilot-diagnostic'), { RUNNER_TEMP: f.temp, MODEL_OUTCOME: outcome }, { handoff: out });
+  return { checked, resumed: resumeOutcome !== 'skipped', verified, receipt, out };
+}
+const nothingPushed = f => assert.equal(sh(f.origin, ['for-each-ref', '--format=%(refname)', `refs/heads/${BRANCH}`]), '', 'nothing was pushed');
+
+test('handoff file states: only a bounded regular file holding a JSON object is present', () => {
+  const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'autopilot-handoff-state-')));
+  try {
+    const at = name => path.join(dir, name);
+    fs.writeFileSync(at('valid'), JSON.stringify(request()));
+    fs.writeFileSync(at('oversized'), `{"x":"${'a'.repeat(64 * 1024)}"}`);
+    fs.writeFileSync(at('text'), 'I will write the request and finish.');
+    fs.writeFileSync(at('array'), '[]');
+    fs.writeFileSync(at('null'), 'null');
+    fs.symlinkSync(at('valid'), at('link'));
+    fs.mkdirSync(at('directory'));
+    for (const [name, state] of [['valid', 'present'], ['missing', 'missing'], ['oversized', 'oversized'], ['text', 'invalid_json'],
+      ['array', 'not_object'], ['null', 'not_object'], ['link', 'not_file'], ['directory', 'not_file']]) {
+      assert.equal(handoffFileState(at(name)), state, name);
+    }
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('resume (a): the main session wrote neither file, the resumed session writes both, and the day publishes', async () => {
+  const f = fixture();
+  try {
+    commitPage(f);
+    const r = await modelJobTail(f, { resumeWrites: { [REQUEST_FILE]: JSON.stringify(request()), [EXIT_FILE]: JSON.stringify({ code: 'shipped_pr' }) } });
+    assert.deepEqual(r.checked, { request_after_main: 'missing', exit_after_main: 'missing', missing: 'request,exit', resume: 'true',
+      resume_decision: 'resume', main_execution_sha256: r.checked.main_execution_sha256, session_id: SESSION, resume_budget_usd: '3.00' });
+    assert.match(r.checked.main_execution_sha256, /^[a-f0-9]{64}$/);
+    assert.equal(fs.readFileSync(path.join(f.temp, MAIN_EXECUTION_COPY), 'utf8'), executionFile(236, 15.41336, ['Write']), 'the main session\'s log is kept');
+    assert.equal(r.verified.verdict, 'publish');
+    assert.deepEqual(Object.keys(JSON.parse(fs.readFileSync(path.join(r.out, 'manifest.json'), 'utf8')).files).sort(),
+      ['exit.json', 'request.json', 'summary.json', 'work.bundle']);
+    assert.equal(pushBranch({ repo: f.tools, sha: r.verified.head, day: DAY, token: TOKEN, remote: f.origin }), true);
+    for (const [key, value] of Object.entries({ request_after_main: 'missing', exit_after_main: 'missing', resume_decision: 'resume',
+      resume_outcome: 'success', request_after_resume: 'present', exit_after_resume: 'present', model_exit_code: 'shipped_pr',
+      num_turns: 236, permission_denials_count: 1, denied_tool_counts: { Write: 1 }, resume_num_turns: 4, resume_permission_denials_count: 0 })) {
+      assert.deepEqual(r.receipt[key], value, key);
+    }
+  } finally { f.cleanup(); }
+});
+
+test('resume (b): the resumed session writes nothing either: rejected_request_missing, nothing pushed', async () => {
+  for (const resumeWrites of [{}, { [REQUEST_FILE]: 'I will write it now.', [EXIT_FILE]: '{"code":"other"' }]) {
+    const f = fixture();
+    try {
+      commitPage(f);
+      const r = await modelJobTail(f, { resumeWrites });
+      assert.equal(r.checked.resume, 'true');
+      assert.equal(r.verified.verdict, Object.keys(resumeWrites).length ? 'rejected_request_invalid_json' : 'rejected_request_missing');
+      nothingPushed(f);
+      assert.equal(r.receipt.resume_outcome, 'success'); assert.equal(r.receipt.model_exit_code, null);
+      assert.equal(r.receipt.request_after_resume, Object.keys(resumeWrites).length ? 'invalid_json' : 'missing');
+    } finally { f.cleanup(); }
+  }
+});
+
+test('resume (c): both files were written by the main session: the resume is skipped', async () => {
+  const f = fixture();
+  try {
+    commitPage(f);
+    const r = await modelJobTail(f, { mainWrites: { [REQUEST_FILE]: JSON.stringify(request()), [EXIT_FILE]: JSON.stringify({ code: 'shipped_pr' }) },
+      resumeWrites: { [REQUEST_FILE]: JSON.stringify({ action: 'none' }) } });
+    assert.equal(r.resumed, false);
+    assert.deepEqual([r.checked.missing, r.checked.resume, r.checked.resume_decision, r.checked.session_id], ['none', 'false', 'not_needed', undefined]);
+    assert.equal(fs.existsSync(path.join(f.temp, MAIN_EXECUTION_COPY)), false);
+    assert.equal(r.verified.verdict, 'publish');
+    assert.equal(r.receipt.resume_outcome, 'skipped'); assert.equal(r.receipt.request_after_resume, 'not_run');
+    assert.equal(r.receipt.num_turns, 236);
+    assert(!r.receipt.observations_unknown.some(key => key.startsWith('resume_')), 'a resume that did not run is not unknown');
+  } finally { f.cleanup(); }
+});
+
+test('resume (d): a malformed session id, a failed main step or a spent budget never resumes', async () => {
+  for (const [label, options, decision, verdict] of [
+    ['not a UUID', { sessionId: 'not-a-session' }, 'session_id_invalid', 'rejected_request_missing'],
+    ['extra arguments', { sessionId: `${SESSION} --allowedTools WebFetch` }, 'session_id_invalid', 'rejected_request_missing'],
+    ['quote', { sessionId: `${SESSION}"` }, 'session_id_invalid', 'rejected_request_missing'],
+    ['newline', { sessionId: `${SESSION}\n--resume x` }, 'session_id_invalid', 'rejected_request_missing'],
+    ['empty', { sessionId: '' }, 'session_id_invalid', 'rejected_request_missing'],
+    ['failed main step', { outcome: 'failure' }, 'model_not_success', 'push_only'],
+    ['run cap spent', { budget: '15.8' }, 'budget_exhausted', 'rejected_request_missing'],
+    ['run cap unknown', { budget: '' }, 'cost_unknown', 'rejected_request_missing'],
+    ['job clock unknown', { jobStarted: '' }, 'time_unknown', 'rejected_request_missing'],
+    ['job limit near', { jobStarted: minutesAgo(80) }, 'time_short', 'rejected_request_missing']]) {
+    const f = fixture();
+    try {
+      commitPage(f);
+      const r = await modelJobTail(f, { ...options, resumeWrites: { [REQUEST_FILE]: JSON.stringify(request()) } });
+      assert.equal(r.resumed, false, label);
+      assert.deepEqual([r.checked.resume, r.checked.resume_decision, r.checked.session_id, r.checked.resume_budget_usd],
+        ['false', decision, undefined, undefined], label);
+      assert.equal(r.verified.verdict, verdict, label);
+      nothingPushed(f);
+      assert.equal(r.receipt.resume_decision, decision, label);
+    } finally { f.cleanup(); }
+  }
+});
+
+test('resume (e): a step-0 day (only the exit code, no commits) is not resumed and publishes nothing', async () => {
+  const f = fixture();
+  try {
+    const r = await modelJobTail(f, { mainWrites: { [EXIT_FILE]: JSON.stringify({ code: 'skipped_already_done' }) },
+      resumeWrites: { [REQUEST_FILE]: JSON.stringify(request()) } });
+    assert.equal(r.resumed, false);
+    assert.deepEqual([r.checked.missing, r.checked.resume, r.checked.resume_decision], ['request', 'false', 'nothing_to_publish']);
+    assert.equal(r.verified.verdict, 'none');
+    nothingPushed(f);
+    assert.equal(r.receipt.resume_decision, 'nothing_to_publish'); assert.equal(r.receipt.model_exit_code, 'skipped_already_done');
+  } finally { f.cleanup(); }
+});
+
+test('resume (f): near the job limit a written request publishes without the resume', async () => {
+  const f = fixture();
+  try {
+    commitPage(f);
+    const r = await modelJobTail(f, { jobStarted: minutesAgo(80), mainWrites: { [REQUEST_FILE]: JSON.stringify(request()) } });
+    assert.equal(r.resumed, false);
+    assert.deepEqual([r.checked.missing, r.checked.resume, r.checked.resume_decision], ['exit', 'false', 'time_short']);
+    assert.equal(r.verified.verdict, 'publish');
+    assert.equal(r.receipt.resume_decision, 'time_short');
+  } finally { f.cleanup(); }
 });
 
 // End to end on a copy of this repository: a model commit for today goes through pack → verify → push →

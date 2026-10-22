@@ -2487,7 +2487,10 @@ export const HANDLERS = {
       }
       const args = ['--append', '--date', recorded?.date_jst ?? r.date_jst, '--route', recorded?.route ?? r.route,
         '--run-id', String(r.external_ref), '--cost', String(cost.usd),
-        '--note', '日次アクチュエータが自動追記（ジョブログの result 行。結果は運転台帳で判明した場合のみ）'];
+        '--note', cost.resume_unpaid
+          // The main session's cost is real; booking nothing would drop it. The note says what is missing.
+          ? '日次アクチュエータが自動追記（ジョブログの result 行。引き渡しファイルのための再開は result 行が無く、その実費（最大 $3）を含まない）'
+          : '日次アクチュエータが自動追記（ジョブログの result 行。結果は運転台帳で判明した場合のみ）'];
       if (r.outcome) args.push('--outcome', r.outcome);
       if (recorded) args.push('--enrich-missing-metadata');
       if (cost.turns != null) args.push('--turns', String(cost.turns));
@@ -2820,6 +2823,35 @@ export function costCandidates(ctx, pendingRuns = ctx.ledgerDoc?.actions?.find(a
  * - `{ state: 'gone', why }`     … ログが消えている（410 / run が無い 404）。実費はあったが、もう取れない
  * - `{ state: 'unreadable', why }` … 一時的に読めない。**除外しない**（翌日また試す）
  */
+// The model steps of the primary job whose result lines are the run's cost: the main session and its
+// one resume (obsidian-autopilot.yml). Only lines printed inside those steps count, at most one per
+// step, so a line printed by anything else in the job (a git hook, a later step) is never added; two in
+// one step make the value unreadable (null). A job or log without timing (older logs) keeps the old rule:
+// the first line only. resume_unpaid: the resume ran but no line of its own was read, so its cost (at
+// most its --max-budget-usd) is not in values.
+export const RESUME_STEP = 'Resume the session once for the missing handoff files';
+export function resultValues(text, job, key) {
+  const steps = (job?.steps ?? []).filter(s => s.name?.startsWith('Claude Code') || s.name === RESUME_STEP);
+  const windows = steps.map(s => [Date.parse(s.started_at), Date.parse(s.completed_at)]);
+  const resumed = steps.map(s => s.name === RESUME_STEP && s.conclusion !== 'skipped');
+  // One line at a time, anchored at its start (as readCostTaskKind): a log line can be long and written by
+  // the model, and one multi-line pattern over the whole text rescans such a line from every U+2028/U+2029 in it.
+  const pattern = new RegExp(`^(?:(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z) )?[^\\r\\n]*?"${key}"\\s*:\\s*([^\\s,}]{1,40})`);
+  const lines = text.split(/\r?\n/).map(line => pattern.exec(line)).filter(Boolean);
+  const timed = windows.length > 0 && windows.every(([a, b]) => Number.isFinite(a) && Number.isFinite(b) && b >= a)
+    && lines.every(m => m[1] !== undefined);
+  if (!timed) return { values: lines.length ? [Number(lines[0][2])] : [], resume_unpaid: resumed.includes(true) };
+  const perStep = windows.map(() => []);
+  for (const m of lines) {
+    const at = Date.parse(m[1]);
+    // Step times are whole seconds; allow one second on either side.
+    const i = windows.findIndex(([a, b]) => at >= a - 1000 && at < b + 1000);
+    if (i >= 0) perStep[i].push(Number(m[2]));
+  }
+  if (perStep.some(values => values.length > 1)) return null;
+  return { values: perStep.flat(), resume_unpaid: resumed.some((ran, i) => ran && perStep[i].length === 0) };
+}
+
 export async function fetchRunCost(repo, token, runId, { fetchImpl = fetch } = {}) {
   if (!isActionsRunRef(runId)) {
     return { state: 'gone', why: `Actions の run id ではない（${runId}）— この経路のログは Actions API から読めない` };
@@ -2849,20 +2881,27 @@ export async function fetchRunCost(repo, token, runId, { fetchImpl = fetch } = {
   let text;
   try { text = await lr.text(); }
   catch (e) { return { state: 'unreadable', why: `ログ本文を読めない: ${String(e).slice(0, 80)}` }; }
-  const cost = text.match(/"total_cost_usd"\s*:\s*([0-9.]+)/)
-    ?? text.match(/AI実費:\s*\*\*\$([0-9.]+)\*\*/);
-  if (!cost) {
+  // [2026-10-22] The primary job can run the action twice: the main session and, when it left the
+  // handoff files unwritten, one resume of the same session (obsidian-autopilot.yml). Each prints its
+  // own result line, so the run's cost and turns are the sum of those result lines, not the first.
+  const read = resultValues(text, job, 'total_cost_usd');
+  if (read === null) return { state: 'unreadable', why: 'モデルの段に result 行が2つ以上ある（どれが実費か決められない）' };
+  const results = read.values;
+  const cost = results.length ? null : text.match(/AI実費:\s*\*\*\$([0-9.]+)\*\*/);
+  if (!results.length && !cost) {
     const model = (job.steps ?? []).find(s => s.name?.includes('Claude Code'));
     // Cancellation or a lost result line can follow real model consumption.
     // Only a confirmed skipped model step proves that this run did not reach it.
     return model?.conclusion === 'skipped' ? { state: 'absent' }
       : { state: 'unreadable', why: '実費行が無いがモデル未着手は確認できない。0円・不存在として除外しない' };
   }
-  if (!Number.isFinite(Number(cost[1]))) return { state: 'unreadable', why: '実費行の金額が不正' };
-  const turns = text.match(/"num_turns"\s*:\s*(\d+)/);
+  const usd = results.length ? results.reduce((sum, value) => sum + value, 0) : Number(cost[1]);
+  if (!Number.isFinite(usd) || !results.every(value => Number.isFinite(value) && value >= 0)) return { state: 'unreadable', why: '実費行の金額が不正' };
+  const turns = (resultValues(text, job, 'num_turns')?.values ?? []).filter(value => Number.isInteger(value) && value >= 0);
   const routed = readCostTaskKind(text, job, runId);
   const unavailable = routed ? null : readLegacyTaskKindAbsence(job, runId);
-  return { state: 'measured', usd: Number(cost[1]), turns: turns ? Number(turns[1]) : null,
+  return { state: 'measured', usd, turns: turns.length ? turns.reduce((sum, value) => sum + value, 0) : null,
+    ...(results.length && read.resume_unpaid ? { resume_unpaid: true } : {}),
     ...routed, ...(unavailable ? { task_kind_unavailable: unavailable } : {}) };
 }
 
@@ -4834,6 +4873,60 @@ async function selftest() {
     const measured = await fetchRunCost('o/r', 'tok', '1',
       { fetchImpl: mk(okJobs, withLog('{"total_cost_usd":1.25,"num_turns":9}')) });
     t('実費行を読めたら measured', measured.state === 'measured' && measured.usd === 1.25 && measured.turns === 9);
+    // The resume of the session prints a second result line in the same job: both are paid, and only
+    // the lines printed inside the two model steps count (a git hook or a later step prints nothing that adds up).
+    const timedJob = { id: 1, name: 'autopilot', steps: [
+      { name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'success', started_at: '2026-10-22T00:46:30Z', completed_at: '2026-10-22T01:33:05Z' },
+      { name: 'Check the handoff files after the model', conclusion: 'success', started_at: '2026-10-22T01:33:05Z', completed_at: '2026-10-22T01:33:08Z' },
+      { name: RESUME_STEP, conclusion: 'success', started_at: '2026-10-22T01:33:08Z', completed_at: '2026-10-22T01:35:00Z' },
+      { name: '実費の抽出（台帳への追記は翌日のセッションが行う）', conclusion: 'success', started_at: '2026-10-22T01:35:10Z', completed_at: '2026-10-22T01:35:11Z' }] };
+    const timedJobs = { ok: true, status: 200, json: async () => ({ jobs: [{ id: 99, name: 'Notify Autopilot Act' }, timedJob] }) };
+    const resumedLog = ['2026-10-22T01:33:04.5199500Z   "num_turns": 236,', '2026-10-22T01:33:04.5200440Z   "total_cost_usd": 15.41336,',
+      '2026-10-22T01:33:04.6000000Z Set session_id: x', '2026-10-22T01:34:59.1000000Z   "num_turns": 4,',
+      '2026-10-22T01:34:59.2000000Z   "total_cost_usd": 0.5,', '2026-10-22T01:35:10.5000000Z * AI実費: **$15.9134** / turns 240 / permission_denials 1'].join('\n');
+    const resumed = await fetchRunCost('o/r', 'tok', '1', { fetchImpl: mk(timedJobs, withLog(resumedLog)) });
+    t('再開した回は2つのモデルの段の result 行の合計（最初の1行ではない）', resumed.state === 'measured'
+      && Math.abs(resumed.usd - 15.91336) < 1e-9 && resumed.turns === 240);
+    const planted = resumedLog + '\n2026-10-22T01:35:10.6000000Z "total_cost_usd": 9999';
+    const ignored = await fetchRunCost('o/r', 'tok', '1', { fetchImpl: mk(timedJobs, withLog(planted)) });
+    t('モデルの段の外で出た result 行は足さない（フックや後の段）', ignored.state === 'measured' && Math.abs(ignored.usd - 15.91336) < 1e-9);
+    const doubled = resumedLog + '\n2026-10-22T01:20:00.0000000Z "total_cost_usd": 0.01';
+    t('同じモデルの段に result 行が2つあれば決めない', (await fetchRunCost('o/r', 'tok', '1',
+      { fetchImpl: mk(timedJobs, withLog(doubled)) })).state === 'unreadable');
+    const untimed = ['"total_cost_usd": 15.41336', '"total_cost_usd": 9999'].join('\n');
+    const legacy = await fetchRunCost('o/r', 'tok', '1', { fetchImpl: mk(okJobs, withLog(untimed)) });
+    t('時刻の無いログは従来どおり最初の1行だけ', legacy.state === 'measured' && legacy.usd === 15.41336);
+    const resumeStep = workflow.split(/^ {6}- name: /m).find(b => b.startsWith(`${RESUME_STEP}\n`));
+    t('本番workflowの再開の段の名前と reader が一致する', Boolean(resumeStep) && /^ {8}id: resume$/m.test(resumeStep ?? ''));
+    t('result 行の金額が1つでも壊れていれば合計しない', (await fetchRunCost('o/r', 'tok', '1',
+      { fetchImpl: mk(timedJobs, withLog(resumedLog.replace('"total_cost_usd": 0.5', '"total_cost_usd": 1.2.3'))) })).state === 'unreadable');
+    t('負の金額の result 行は合計しない', (await fetchRunCost('o/r', 'tok', '1',
+      { fetchImpl: mk(timedJobs, withLog(resumedLog.replace('"total_cost_usd": 0.5', '"total_cost_usd": -15'))) })).state === 'unreadable');
+    // A resume that ran but printed no result line (timeout, cancel, crash): the main cost is booked, marked as
+    // leaving the resume out; a skipped resume leaves nothing out.
+    const unpaidLog = resumedLog.split('\n').filter(line => !line.startsWith('2026-10-22T01:34:59')).join('\n');
+    const unpaid = await fetchRunCost('o/r', 'tok', '1', { fetchImpl: mk(timedJobs, withLog(unpaidLog)) });
+    t('再開の段が result 行を出さなければ主セッション分だけを、再開分を含まないと印して返す', unpaid.state === 'measured'
+      && unpaid.usd === 15.41336 && unpaid.turns === 236 && unpaid.resume_unpaid === true);
+    const skippedJob = { ...timedJob, steps: timedJob.steps.map(step => step.name === RESUME_STEP ? { ...step, conclusion: 'skipped' } : step) };
+    const notResumed = await fetchRunCost('o/r', 'tok', '1', { fetchImpl: mk({ ...timedJobs, json: async () => ({ jobs: [skippedJob] }) }, withLog(unpaidLog)) });
+    t('再開しなかった回は含まない分が無い', notResumed.state === 'measured' && notResumed.usd === 15.41336 && notResumed.resume_unpaid === undefined);
+    t('時刻の無いログで再開した回は最初の1行だけで、再開分を含まないと印す', (await fetchRunCost('o/r', 'tok', '1',
+      { fetchImpl: mk({ ...timedJobs, json: async () => ({ jobs: [{ ...timedJob, steps: timedJob.steps.map(({ started_at, ...step }) => step) }] }) },
+        withLog(untimed)) })).resume_unpaid === true);
+    let unpaidArgs;
+    await HANDLERS['append-cost']({ repo: 'o/r', token: 'fixture', costDoc: { runs: [] }, runsDoc: { runs: [] },
+      workflowRuns: [{ id: 1, created_at: '2026-10-22T00:45:00Z', jst_date: '2026-10-22', status: 'completed', conclusion: 'success',
+        steps: [{ name: 'Claude Code', conclusion: 'success' }] }] },
+    { close_check: { params: {} } }, { readCost: async () => unpaid, append: values => { unpaidArgs = values; return 'appended'; } });
+    t('再開分を含まない実費は、その旨の注記で記帳する', unpaidArgs?.[unpaidArgs.indexOf('--cost') + 1] === '15.41336'
+      && unpaidArgs[unpaidArgs.indexOf('--note') + 1].includes('含まない'));
+    // The log is downloaded text that the model can write to: one long line full of line separators must stay linear.
+    const longLine = `2026-10-22T01:00:00.0000000Z ${'\u2028'.repeat(2_000_000)}`;
+    const startedAt = performance.now();
+    const longRead = resultValues(`${resumedLog}\n${longLine}`, timedJob, 'total_cost_usd');
+    t('長い1行（行区切り文字だらけ）でも読み取りは線形', performance.now() - startedAt < 5000
+      && Math.abs(longRead.values.reduce((sum, value) => sum + value, 0) - 15.91336) < 1e-9);
     const originalFetch = globalThis.fetch;
     try {
       globalThis.fetch = mk(routeJobs, withLog(`${routeLine}\n{"total_cost_usd":1.25,"num_turns":9}`));
