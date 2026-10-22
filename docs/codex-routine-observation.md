@@ -1,5 +1,9 @@
 # Codexへの移管後の実行記録
 
+> **2026-10-20 退役。** この観測を走らせていたMacの毎時処理は退役した（[routine-observer.md](routine-observer.md) の「2026-10-20: 退役」）。
+> `data/routine-runs.json` に `observation_retirement` がある間、`codex-routine-observer.py --apply`・`--probe` は何も書かずにexit 2で終わり、
+> `--check` は退役の条件が揃う間 `retired — not observed since <時刻>` を出して鮮度を適用しない。以下は退役までの記録。
+
 2026-09-08、既存の毎時処理に scripts/codex-routine-observer.py を追加した。
 対象は codex-autopilot-execution.md で役割を確認した obsidian と obsidian-2。
 既存のClaude登録19件の観測と停止履歴は保持する。

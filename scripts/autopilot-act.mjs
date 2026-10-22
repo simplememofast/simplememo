@@ -65,6 +65,7 @@ import { observeViewport, deriveViewportActions, viewportMeasured } from './lib/
 import { settleArtifactPr, settlementSelftest } from './lib/artifact-settlement.mjs';
 import { githubReader } from './autopilot-output.mjs';
 import { reconcileObservation } from './routine-observer.mjs';
+import { retirementStatus } from './check-routine-runs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -153,7 +154,7 @@ export const CLOSE_CHECKS = {
   codex_ledger_covers_runs(_params, ctx) {
     const intake = codexRunIntake(ctx.routineDoc, ctx.runsDoc, { now: ctx.now ?? Date.now() });
     return { closed: intake.valid && intake.rows.length + intake.triage.length + intake.unavailable.length === 0,
-      evidence: `観測有効=${intake.valid}、未記帳のCodex結果 ${intake.rows.length} 件、原因分類 ${intake.triage.length} 件、未記帳または未分類で参照不可 ${intake.unavailable.length} 件` };
+      evidence: `観測有効=${intake.valid}${intake.retired ? '（観測は退役中・not observed）' : ''}、未記帳のCodex結果 ${intake.rows.length} 件、原因分類 ${intake.triage.length} 件、未記帳または未分類で参照不可 ${intake.unavailable.length} 件` };
   },
 
   viewport_measured: viewportMeasured,
@@ -1067,6 +1068,10 @@ function appendRoutineFreshnessAction(ctx, out) {
   // 積む先があるので、ここが D6（status JSON の鮮度）と同じ形になる。
   //
   // **閾値は上限より1日早い。**上限に達してから積むと、積んだ日には既にCIが赤い。
+  //
+  // [2026-10-20] 観測を退役した台帳（条件が揃った observation_retirement）は鮮度の対象外。
+  // 取り直しは退役中は拒否されるので、「取り直せ」と積まない。条件が欠ければ従来どおり積む。
+  if (retirementStatus(ctx.routineDoc, { now: ctx.now ?? Date.now() }).valid) return;
   if (ctx.routineDoc?.observed_at) {
     const max = ctx.routineDoc.max_snapshot_age_days;
     const observed = Date.parse(ctx.routineDoc.observed_at);
@@ -3974,6 +3979,21 @@ async function selftest() {
     t('**上限が数でなければ積まない**（正が無いときこの規則を発火させない）',
       derive({ routineDoc: { observed_at: '2026-08-01T00:00:00Z', max_snapshot_age_days: 'たくさん' }, today: '2026-09-04' })
         .filter((a) => a.id === 'act-routine-snapshot-stale').length === 0);
+    // [2026-10-20] 退役（条件が揃った observation_retirement）中は「取り直せ」と積まない。
+    // 条件が1つでも欠ければ従来どおり積む（退役を名乗るだけで鮮度の警告を消せない）。
+    const observedAt = '2026-09-01T00:00:00.000Z';
+    const retiredDoc = () => ({ observed_at: observedAt, max_snapshot_age_days: 3, routines: [],
+      intentional_stops: [], open_findings: [], open_budget: 0,
+      codex_observation: { observed_at: observedAt, automations: [{ id: 'obsidian', status: 'PAUSED' }] },
+      observation_retirement: { retired_at: '2026-09-01', reason: 'x', approved_by: 'owner decision',
+        last_claude_observed_at: observedAt, last_codex_observed_at: observedAt, reactivation: 'x' } });
+    const staleRows = (routineDoc) => derive({ routineDoc, today: '2026-09-10', now: Date.parse('2026-09-10T00:00:00Z') })
+      .filter((a) => a.id === 'act-routine-snapshot-stale');
+    t('**退役中は写しの取り直しを積まない**', staleRows(retiredDoc()).length === 0);
+    const activeCodex = retiredDoc(); activeCodex.codex_observation.automations[0].status = 'ACTIVE';
+    t('**退役の条件が欠ければ（Codex の予約が ACTIVE）従来どおり積む**', staleRows(activeCodex).length === 1);
+    const noMarker = retiredDoc(); delete noMarker.observation_retirement;
+    t('退役の欄が無ければ従来どおり積む', staleRows(noMarker).length === 1);
   }
   {
     // **再発したら開け直す。**IDが固定の行（act-ledger-sync 等）は、これが無いと
@@ -5490,6 +5510,10 @@ async function main() {
 
   if (has('json')) { console.log(JSON.stringify(payload, null, 2)); return; }
 
+  // 退役中の副系観測は「観測していない」と明示する（健全とも解消とも読ませない）。
+  if (retirementStatus(ctx.routineDoc).present) {
+    console.log(`副系の観測: retired — not observed since ${ctx.routineDoc.observed_at}（退役中。routine の状態は判定しない）\n`);
+  }
   console.log(render(sum, applied, today));
 }
 

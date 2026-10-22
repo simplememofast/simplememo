@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 // Read-only observer. No model calls, trigger changes, login, or credential refresh.
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { normalizeRoutines, diagnose, validate } from './check-routine-runs.mjs';
+import { normalizeRoutines, diagnose, validate, RETIREMENT_KEY } from './check-routine-runs.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ID = /^trig_[A-Za-z0-9]+$/;
@@ -115,6 +117,9 @@ export async function observeUnavailable(previous, observation, { token, fetchIm
 }
 
 export function reconcileObservation(previous, observation) {
+  // A retired ledger keeps its last real observation. Never carry the marker
+  // onto a newer observation; removing it is a reviewed change, not a write here.
+  assert(!Object.hasOwn(previous, RETIREMENT_KEY), 'Routine observation is retired; refusing to record a new observation');
   assert(observation.complete === true && time(observation.observed_at), 'Complete observation required');
   assert(Date.parse(observation.observed_at) >= Date.parse(previous.observed_at), 'Older observation rejected');
   const current = new Map(observation.records.map(r => [r.id, r]));
@@ -227,6 +232,27 @@ export function reconcileObservation(previous, observation) {
   const checked = validate(next, { now });
   assert.equal(checked.problems.length, 0, 'Observed routine ledger is inconsistent');
   return next;
+}
+
+// Run this CLI in a scratch copy with only the given ledger and no credential.
+function observerCli(ledger, mode) {
+  const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'routine-observer-cli-')));
+  try {
+    for (const rel of ['scripts/routine-observer.mjs', 'scripts/check-routine-runs.mjs', 'scripts/lib/selftest.mjs']) {
+      fs.mkdirSync(path.dirname(path.join(dir, rel)), { recursive: true });
+      fs.copyFileSync(path.join(ROOT, rel), path.join(dir, rel));
+    }
+    const file = path.join(dir, 'data/routine-runs.json');
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    const before = JSON.stringify(ledger, null, 2) + '\n';
+    fs.writeFileSync(file, before);
+    const env = { ...process.env, CLAUDE_CODE_OAUTH_TOKEN: '' };
+    const r = spawnSync(process.execPath, [path.join(dir, 'scripts/routine-observer.mjs'), mode],
+      { cwd: dir, env, encoding: 'utf8', timeout: 30000 });
+    return { status: r.status, stdout: r.stdout, stderr: r.stderr, before, after: fs.readFileSync(file, 'utf8') };
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 }
 
 async function selftest() {
@@ -414,10 +440,40 @@ async function selftest() {
     const invalid = structuredClone(unavailable); mutate(invalid);
     assert(validate(invalid, { now: Date.parse(observed.observed_at) }).problems.length > 0);
   }
-  const { routineResolved } = await import('./lib/routine-actions.mjs');
+  const { routineResolved, deriveRoutineActions } = await import('./lib/routine-actions.mjs');
   assert.equal(routineResolved({ routine_id: row.id, observed_at: stoppedPrior.observed_at },
     { routineDoc: unavailable, now: Date.parse(observed.observed_at) }).closed, false, 'Unavailable must not close a repair action');
-  console.log('routine-observer: complete pagination, private-field exclusion, failure/pending transitions, verified completion and stop preservation passed');
+
+  // Retired observation (2026-10-20): never recorded over, never read as fresh evidence.
+  const marker = { retired_at: '2026-10-20', reason: 'selftest', approved_by: 'owner decision 2026-10-20',
+    last_claude_observed_at: observed.observed_at, last_codex_observed_at: observed.observed_at, reactivation: 'selftest' };
+  const retiredPrior = { ...structuredClone(missingActive), [RETIREMENT_KEY]: marker };
+  assert.throws(() => reconcileObservation(retiredPrior, evidence), /retired/, 'A retired ledger must not record a new observation');
+  assert(deriveRoutineActions(missingActive, { now: Date.parse(observed.observed_at) }).length > 0,
+    'Control: an observed unavailable routine derives an investigation action');
+  assert.equal(deriveRoutineActions(retiredPrior, { now: Date.parse(observed.observed_at) }).length, 0,
+    'A retired ledger is not observed evidence for new actions');
+  const retiredResolution = routineResolved({ routine_id: row.id, observed_at: stoppedPrior.observed_at },
+    { routineDoc: retiredPrior, now: Date.parse(observed.observed_at) });
+  assert.equal(retiredResolution.closed, false, 'Retired observation must not close a repair action');
+  assert.match(retiredResolution.evidence, /not observed/);
+  // The real CLI in a scratch copy: retired --apply/--probe exit 2 before any credential
+  // or API use and write nothing. The control without the marker reaches the credential check.
+  const ledgerDoc = { observed_at: observed.observed_at, max_snapshot_age_days: 3, routines: [], open_findings: [],
+    intentional_stops: [], open_budget: 0, [RETIREMENT_KEY]: marker };
+  for (const mode of ['--apply', '--probe']) {
+    const cli = observerCli(ledgerDoc, mode);
+    assert.equal(cli.status, 2, `${mode} while retired: ${cli.stderr}`);
+    assert.equal(cli.after, cli.before, `${mode} wrote a retired ledger`);
+    const out = JSON.parse(cli.stdout);
+    assert.equal(out.state, 'retired'); assert.equal(out.written, false);
+  }
+  const { [RETIREMENT_KEY]: _removed, ...plainLedger } = ledgerDoc;
+  const control = observerCli(plainLedger, '--apply');
+  assert.equal(control.status, 1, 'Control without the marker must reach the credential check');
+  assert.match(control.stderr, /credential unavailable/);
+  assert.equal(control.after, control.before);
+  console.log('routine-observer: complete pagination, private-field exclusion, failure/pending transitions, verified completion, stop preservation and retired refusal passed');
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -425,6 +481,13 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     assert(process.argv.includes('--apply') || process.argv.includes('--probe'), 'Use --apply or --probe');
     const file = path.join(ROOT, 'data/routine-runs.json');
     const prior = JSON.parse(fs.readFileSync(file, 'utf8'));
+    if (Object.hasOwn(prior, RETIREMENT_KEY)) {
+      // Retired: no credential use, no API read, no write. Exit 2 is the documented refusal.
+      console.log(JSON.stringify({ state: 'retired', written: false, not_observed_since: prior.observed_at,
+        reason: `Routine observation is retired (${RETIREMENT_KEY} in data/routine-runs.json); remove it in a reviewed change before observing again` }));
+      process.exitCode = 2;
+      return;
+    }
     const options = { token: process.env.CLAUDE_CODE_OAUTH_TOKEN };
     const observed = await observeUnavailable(prior, await collect(options), options);
     const next = reconcileObservation(prior, observed);

@@ -6,6 +6,12 @@ snapshot does not establish that a site change is defective. This separation was
 approved by the owner on 2026-10-17. The observation schema, three-day age limits,
 historical failures, and source-access restrictions remain unchanged.
 
+On 2026-10-20 the owner retired the Mac routine observer. While the ledger carries a
+valid `observation_retirement` marker (conditions in `docs/routine-observer.md`), both
+actual checks print `retired — not observed since <time>` instead of applying the
+three-day limit; they do not report the routines as healthy. If any condition fails,
+the three-day limit applies unchanged.
+
 | Context | Required checks | Meaning of an observation failure |
 | --- | --- | --- |
 | Every PR | All existing site checks; all routine observer selftests; CI scope regression tests | A failing mandatory check still blocks publication |

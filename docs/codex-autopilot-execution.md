@@ -104,6 +104,9 @@ observer preflight が導出された `repair_limit` を延期する。明示停
    一度許可された初回ターンを、後続の拒否判定で未着手スキップに変えない。
    下記の各値には取得元・取得時刻を別のローカル証跡として添える。
    `decision.run:false`または検査例外なら実装・claim・投稿へ進まない。forceは使わない。
+   [2026-10-20] Routine Observerは退役した（[routine-observer.md](routine-observer.md)）。`data/routine-runs.json`に
+   `observation_retirement`がある間、このゲートは`skip_observation_retired`で着手しない。下の収集も行われない。
+   予約を再開する前に、固定した観測器を戻してこの欄を消すPRを入れる。
    Routine Observerが判定ハッシュと初回終了状態を公開台帳へ収集し、Actが未記帳の
    失敗・中断・証拠のあるスキップだけを取り込む。正常終了だけで出荷・修復済みとしない。
    自動検知の帰属には、初めて終了を観測した回のlaunchd親PID・interval起動・
