@@ -507,13 +507,21 @@ export function checkWiring(source) {
   assert.match(source, /\npermissions: \{\}\n/, 'workflow-level permissions must be empty');
   assert.doesNotMatch(activeLines(source), /id-token/, 'no job may request an OIDC token');
   const jobs = splitJobs(source);
-  assert.deepEqual([...jobs.keys()], ['autopilot', 'publish', 'notify-completion'], 'job order: autopilot, publish, notify-completion');
+  assert.deepEqual([...jobs.keys()], ['collect', 'autopilot', 'publish', 'notify-completion'], 'job order: collect, autopilot, publish, notify-completion');
+  // collect (Search Console, no model; scripts/autopilot-data.mjs --check owns its wiring):
+  // Act does not read its steps, and their names must not look like the model job's.
+  for (const step of stepsOf(jobs.get('collect'))) {
+    assert(!RESERVED_STEP_WORDS.some(word => stepName(step).includes(word)), `collect step name collides with Act's step keys: ${stepName(step)}`);
+    assert(!/uses: actions\/checkout@/.test(step) || (/persist-credentials: false/.test(step) && !/token:/.test(step)),
+      'collect checkout must not persist a credential');
+  }
   const model = activeLines(jobs.get('autopilot'));
   assert.match(model, /\n    permissions:\n      contents: read\n/, 'model job must declare read-only permissions');
   assert.doesNotMatch(model, /: write\b/, 'model job must hold no write permission');
   assert.doesNotMatch(model, /GH_PAT|PUBLISH_TOKEN/, 'GH_PAT must not be anywhere in the model job');
+  // The GCP key is in the collect job only (2026-10-20, audit F6): the model job keeps its own credential.
   const modelSecrets = [...model.matchAll(/secrets\.([A-Z0-9_]+)/g)].map(m => m[1]);
-  assert(modelSecrets.every(name => ['CLAUDE_CODE_OAUTH_TOKEN', 'GCP_SERVICE_ACCOUNT_JSON'].includes(name)), 'unexpected secret in the model job');
+  assert(modelSecrets.every(name => name === 'CLAUDE_CODE_OAUTH_TOKEN'), 'unexpected secret in the model job');
   const modelCheckouts = stepsOf(jobs.get('autopilot')).filter(step => /uses: actions\/checkout@/.test(step));
   assert(modelCheckouts.length === 1 && modelCheckouts.every(step => /persist-credentials: false/.test(step) && !/token:/.test(step)),
     'model checkout must not persist a credential');
@@ -624,6 +632,17 @@ function selftest() {
   }
   const renamed = workflow.slice(0, publishStart) + workflow.slice(publishStart).replace('name: Verify the handoff', 'name: Gate the handoff');
   assert.throws(() => checkWiring(renamed), /collides/); n++;
+  const collectRenamed = workflow.replace('name: Stop switch for this route (read-only copy)', 'name: 緊急停止の確認（collect）');
+  t(collectRenamed !== workflow, 'collect rename mutation applies');
+  assert.throws(() => checkWiring(collectRenamed), /collides/); n++;
+  const modelStart = workflow.indexOf('\n  autopilot:\n');
+  const modelPersists = workflow.slice(0, modelStart) + workflow.slice(modelStart).replace('persist-credentials: false', 'persist-credentials: true');
+  t(modelPersists !== workflow, 'model checkout mutation applies');
+  assert.throws(() => checkWiring(modelPersists), /model checkout must not persist a credential/); n++;
+  const gcpInModel = workflow.slice(0, modelStart) + workflow.slice(modelStart).replace('          GH_TOKEN: ${{ github.token }}\n',
+    '          GH_TOKEN: ${{ github.token }}\n          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}\n');
+  t(gcpInModel !== workflow, 'model secret mutation applies');
+  assert.throws(() => checkWiring(gcpInModel), /unexpected secret in the model job/); n++;
   const toolsMoved = workflow.slice(0, publishStart) + workflow.slice(publishStart).replace('"$GITHUB_WORKSPACE/tools/scripts/autopilot-publish.mjs" --verify', 'scripts/autopilot-publish.mjs --verify');
   t(toolsMoved !== workflow, 'tools mutation applies');
   assert.throws(() => checkWiring(toolsMoved), /workflow-commit tools/); n++;

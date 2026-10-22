@@ -27,8 +27,10 @@
 # ランナーに GH_PAT や書き込みトークンがあると、注入された指示がそのまま push・
 # PR・本番デプロイに届く（監査 F2/F3）。ジョブの秘密情報は sudo で同じランナーの
 # 別ステップからも読めるため、**GH_PAT はモデルのジョブ全体から外した。**
+#   collect   … モデルを動かさない。Search Console（BigQuery）を読み、検索語を絞った
+#               ダイジェストだけを渡す。GCP の鍵はここの取得の1段にだけ渡す（2026-10-20・監査 F6）。
 #   autopilot … モデルが動く。読み取り専用の job token・資格情報を残さない checkout・
-#               id-token なし。作業はローカルのコミットまで（git bundle で引き渡す）。
+#               id-token なし・GCP の鍵なし。作業はローカルのコミットまで（git bundle で引き渡す）。
 #   publish   … 新しいランナーでモデルを動かさず、$GITHUB_SHA の
 #               scripts/autopilot-publish.mjs だけを実行する。引き渡しを検証し
 #               （fsck・経路の拒否リスト・コミットの名義・緊急停止・重複）、当日ブランチへ
@@ -61,7 +63,117 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # 【collect】Search Console の取得（2026-10-20・監査 F6）。モデルを動かさない。
+  #
+  # 検索語は Google で検索する誰もが書ける文字列で、モデルはそれを analyze.mjs の出力として
+  # 読む。ジョブの秘密情報は sudo で同じランナーの別の段からも読めるため、GCP の鍵は
+  # モデルのジョブ全体から外し、このジョブの取得の1段にだけ渡す。生のスナップショットは
+  # このランナーから出さない。モデルのジョブへ渡すのは scripts/autopilot-data.mjs --digest が
+  # 作るダイジェスト（1日で消える成果物）と型付きの報告だけ。
+  #
+  # BigQuery を読む前に、モデルのジョブと同じ読み取りだけの判定（当日分・緊急停止・修理上限・
+  # 予算と1回上限）をここでも行い、走らない日は鍵を使わない。注釈と赤い段はモデルのジョブの
+  # 判定だけが出す（ここでは出力を捨て、止める日も段を赤くしない）。Act はこのジョブの段を
+  # 読まないが、段名は Act の読む語と重ねない（scripts/autopilot-publish.mjs --check が検査する）。
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # 取得できない日はモデルのジョブが unavailable として扱う。run の結論は変えない
+    # （Act は run の結論も読む）。
+    continue-on-error: true
+    # 読み取りだけ。Gate の材料（当日ブランチの中身・PR 一覧）を job token で読む。
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
+    steps:
+      - name: Checkout the workflow commit (no stored credential)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+          # 試運転の許可（封じ込め）は git の祖先関係を見るため、モデルのジョブと同じく全履歴
+          fetch-depth: 0
+
+      # モデルの鍵はこのジョブに渡さないので、鍵の有無はモデルのジョブの Gate だけが見る。
+      - name: Run decision for today (read-only copy)
+        id: collect_gate
+        env:
+          HAS_CLAUDE_TOKEN: 'true'
+          HAS_ANTHROPIC_KEY: 'false'
+          FORCE: ${{ inputs.force == true }}
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node scripts/autopilot-gate.mjs --preflight > /dev/null
+
+      - name: Stop switch for this route (read-only copy)
+        id: collect_stop
+        if: steps.collect_gate.outputs.run == 'true'
+        run: |
+          STOP="$(node -p "
+            const d = require('./data/emergency-stop.json');
+            const a = (d.agents || {}).actions || {};
+            d.stopped || a.stopped ? 'stopped' : '';
+          ")"
+          if [ -z "$STOP" ]; then
+            echo "stopped=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "stopped=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # 止めるべき日はこの段だけが失敗し、以降は何もしない。試運転の日はモデルのジョブと同じ値で越える。
+      - name: Repair limit for this route (read-only copy)
+        id: collect_contain
+        if: steps.collect_gate.outputs.run == 'true' && steps.collect_stop.outputs.stopped == 'false'
+        continue-on-error: true
+        env:
+          AUTOPILOT_RECOVERY_ONCE: ${{ vars.AUTOPILOT_RECOVERY_ONCE }}
+        run: node scripts/autopilot-selfheal.mjs --contain --dry-run > /dev/null
+
+      - name: Spend limits for this task (read-only copy)
+        id: collect_budget
+        if: steps.collect_contain.outcome == 'success'
+        run: |
+          ok=false
+          if node scripts/autopilot-budget.mjs --check > /dev/null; then
+            if node scripts/autopilot-selfheal.mjs --json | grep -q '"lane_f_required": true'; then
+              KIND=repair
+            else
+              KIND=article
+            fi
+            if node scripts/autopilot-budget.mjs --check-run-cap --task "$KIND" > /dev/null; then
+              ok=true
+            fi
+          fi
+          echo "ok=$ok" >> "$GITHUB_OUTPUT"
+
+      # SEO Daily's daily snapshot exists only in its separate runner. Collect here;
+      # only the digest and a typed report leave this step.
+      - name: Collect the Search Console digest
+        id: gsc_collect
+        if: >-
+          steps.collect_gate.outputs.run == 'true' && steps.collect_stop.outputs.stopped == 'false'
+          && steps.collect_contain.outcome == 'success' && steps.collect_budget.outputs.ok == 'true'
+        timeout-minutes: 5
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
+        run: node scripts/autopilot-data.mjs --digest "$RUNNER_TEMP/gsc-digest"
+
+      # 公開の成果物（1日で消える）。週次のスナップショットは既に公開リポジトリにある。
+      - name: Upload the Search Console digest
+        id: gsc_upload
+        if: steps.gsc_collect.outcome == 'success'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: autopilot-gsc-digest-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/gsc-digest
+          retention-days: 1
+          if-no-files-found: error
+
   autopilot:
+    needs: collect
+    # collect が失敗・スキップしても走る（ダイジェストが届かない日は unavailable としてモデルへ渡す）。
+    # 取り消された run では走らない（publish と同じ形）。
+    if: always() && !cancelled()
     runs-on: ubuntu-latest
     timeout-minutes: 90
     # 読み取りだけ。Gate・成果物の基準点・モデルの gh は job token（読み取り専用）で読む。
@@ -290,17 +402,30 @@ jobs:
             echo "::notice title=Obsidian Autopilot::$KIND の1回あたり実費上限が未レビューのため主系をスキップ。解除は node scripts/autopilot-budget.mjs --ack-overrun <run_id> --why \"…\"（人間のみ）。副系CCRは別経路のため止まらない。"
           fi
 
-      # SEO Daily's daily snapshot exists only in its separate runner.
-      # Pass verified data to the model; keep credentials in this step.
-      - name: Collect verified Search Console inputs
-        id: collect_data
+      # 【Search Console】取得はモデルを動かさない collect ジョブが行う（このジョブに GCP の鍵は無い）。
+      # ここではダイジェストだけを受け取り、$GITHUB_SHA の scripts/autopilot-data.mjs で同じ規則を
+      # 当て直して何も変わらないときだけ GROWTH_GSC_DIR に置く。届かない・検査に通らない日は
+      # unavailable（取得失敗であり0件ではない）としてモデルへ渡す。どちらの段も失敗で後続を
+      # 止めない（止めると Act が「1回上限で止まった」と読み違える）。
+      - name: Download the Search Console digest
+        id: gsc_download
+        if: >-
+          steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'
+          && steps.route.outputs.run_cap_ok == 'true'
+        continue-on-error: true
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: autopilot-gsc-digest-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/gsc-digest
+
+      - name: Load the checked Search Console digest
+        id: gsc_digest
         if: >-
           steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'
           && steps.route.outputs.run_cap_ok == 'true'
         timeout-minutes: 5
-        env:
-          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
-        run: node scripts/autopilot-data.mjs --output "$RUNNER_TEMP/autopilot-data.json"
+        continue-on-error: true
+        run: node scripts/autopilot-data.mjs --use-digest "$RUNNER_TEMP/gsc-digest" --output "$RUNNER_TEMP/autopilot-data.json"
 
       # 【2026-08-20】この1行が主系の初回本番運転を丸ごと潰した。秘密鍵を入れて
       # 初めてGateを通った run 32303452390 で、apt が**一切出力しないまま**
@@ -434,7 +559,7 @@ jobs:
             0-1. 【死んだ占有の引き継ぎ】GATE_TAKEOVER=${{ steps.gate.outputs.takeover == 'true' }} 。true のときだけ、上の「ブランチが存在する＝実行済み」を**この日は適用しない**。当日ブランチは claim だけ取られて90分以上動いていない（宣言ファイル以外の差分0・PR0）とGateが実測している。Runbook §0-2 の「死んだ占有の引き継ぎ」の手順に従い、**既存のブランチの上に**ローカルで作業を積むこと（`git fetch origin <当日ブランチ> && git checkout -B <当日ブランチ> origin/<当日ブランチ>`）。push はしない（publish ジョブが fast-forward でだけ push し、他経路が先に進めていれば何も push しない）。ブランチを消さない。 GATE_STALE_DECLARATIONS=${{ steps.gate.outputs.stale_declarations }} 。空でなければ、その占有には**死んだ run の価値契約の宣言**が残っている。**その契約は実装しない。**Runbook §0-2 の手順で `node scripts/value-contracts.mjs --retire <宣言ファイル> --reason "declaring run <run_id> failed (<failure_class>); takeover re-declares under a new id"` を実行して data/decision-rejections/ へ移し、コミットしてから 3-1 を新しい候補で最初からやり直す。契約と記帳の run_id は `ap-<YYYYMMDD>-actions-$GITHUB_RUN_ID`（Bash で読める）。
             0-2. 【所有者承認の試運転】TRIAL_RUN=${{ steps.contain.outputs.recovery || 'none' }} 。actions_once なら、今日はオーナーが日付を入れた1回限りの試運転の回で、封じ込めはワークフローが判定済み（docs/obsidian/ACTIONS_RECOVERY_ONE_USE.md）。**`node scripts/autopilot-selfheal.mjs --contain` を実行しない**（停止を書き込んで自分を止めることになる）。`--contain --dry-run` が「止めるべき」と exit 1 を返しても、この環境には許可の値が渡っていないためで、止まる理由ではない。⛔ の 10-05・10-06 は直さず repair_of も書かず、通常どおりレーンA〜Eの1アクションを行う。none なら通常の回。
             1. `docs/obsidian/AUTOPILOT_RUNBOOK.md` を読む。以降の判断・実装・出荷はすべてRunbookに従う（このプロンプトより詳しい指示はRunbookが優先）。
-            1-1. `AUTOPILOT_DATA_REPORT` のJSONを読む。取得済みの鮮度・実日数・欠損の検査結果が入っている。`ready` なら `GROWTH_GSC_DIR` の検査済みデータを分析に使い、再認証・再取得は不要。`partial` は取得成功だが28日未満、`unavailable` は取得失敗であり0件ではない。Runbook §1-2に従い今回の実測をstatusへ記録する。一時データを公開リポジトリにコピーしない。
+            1-1. `AUTOPILOT_DATA_REPORT` のJSONを読む。取得済みの鮮度・実日数・欠損の検査結果が入っている。`ready` なら `GROWTH_GSC_DIR` の検査済みデータを分析に使い、再認証・再取得は不要（このジョブに Search Console の資格情報は無い）。当日分の検索語はダイジェストで、期待クリック3以上の上位行だけ（80字まで・URL/メール/コード/タグを含む行は除外）。クラスタ・会話型・カニバリの表は残った行だけを数えるので、全行の集計と除外の件数は当日の `meta.json` の `digest` を見る。`partial` は取得成功だが28日未満、`unavailable` は取得失敗（ダイジェストが届かない・検査に通らない日を含む）であり0件ではない。Runbook §1-2に従い今回の実測をstatusへ記録する。一時データを公開リポジトリにコピーしない。
             2. `tail -n 200 docs/obsidian/AUTOPILOT_LOG.md` で前回までの記録を確認する。**全文は読まないこと**（77,000文字あり毎日+5,000増える。入力はターンごとに付いて回るので、ここが1回あたり実費の最大要因）。**保留事項は LOG からではなく `data/autopilot-actions-report.json` を見る**（型付きで、閉じ条件が通れば消える。散文の履歴から拾うと解消済みが混ざる）。**台帳そのもの `data/autopilot-actions.json` は読まないこと** — 閉じた行が消えずに貯まるので、LOG と同じく増え続ける（レポート側は open と当日クローズだけなので未処理の件数でしか増えない）。レポートの `as_of_jst` が当日でない場合だけ、09:00 JST のアクチュエータがまだ走っていないということなので台帳側を見てよい。Runbook §0の「読むもの」も、全文を読むものと一部だけ読むものを分けてある——そちらの指定に従うこと。
             2-1. 【レーンF・A〜Eより先】`node scripts/autopilot-selfheal.mjs` を実行する。未修理の故障が出たら、**その日の最優先アクションは基盤の修理**で、記事は書かない。触ってよいファイルとやってはいけない変更はスクリプトが出力する（検証を弱めない・自分の権限を広げない。これはCIが実際に検出する）。直したら手順5の依頼ファイルの `run` に `"repair_of":["<直した run_id>"]` を入れること（`data/autopilot-runs.json` は直接書かない。publish ジョブが main の台帳に実在する run_id かを確かめ、記帳する自分の行に書く。スクリプトと Runbook の「自分の行に `repair_of` を書く」は、この経路ではこの読み替えに従う）——書かない限り翌日も未修理として上がってくる。⛔ が出ている対象は直さず `owner_requests` に上げる。**監視Issueは `node scripts/health-intake.mjs --dry-run` で読むだけにし、取り込み分の `data/autopilot-actions.json` をこのブランチにコミットしない**（宣言の外のパスになり、PR が decision-ci で必ず落ちる。2026-10-06 の形。取り込みは Autopilot Act が当日中に行う。Runbook §7-1 の依頼を積む日だけは、宣言の touches に入れる）。
             3. 目標は毎日1記事。ただしRunbook §0のゲート（ノイズフロア＝期待クリック3未満を根拠にしない・品質・検証・実験非干渉）が常に優先。ゲートを通る施策が無い日は堂々とスキップし、保守レーン（Runbook §6）に切り替える。基準を下げて書くことは失敗と定義されている。

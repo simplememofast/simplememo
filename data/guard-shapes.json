@@ -903,6 +903,24 @@
       "expr": "before",
       "disposition": "安全側へ倒れる",
       "note": "2026-10-21（監査 F93）: lastmodOnlySitemaps() の `before !== null && after !== null && sitemapView(before) === sitemapView(after)`。この式が真のときだけ sitemap が台帳扱い（価値契約の touches に要らない）になる。base か head にファイルが無い（null）・読めない（catch）ときは偽で、台帳扱いにならず宣言が要る側に倒れる。value-contracts.mjs --selftest の sitemap の検体で固定。"
+    },
+    {
+      "file": "scripts/autopilot-data.mjs",
+      "expr": "report.full_window",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-20: checkReport（モデルのジョブが collect ジョブの報告を読む）の assert の中の項。ready の報告は full_window とダイジェストの label・行数をすべて持つことを要求し、どれかが欠けると assert が落ちて unavailable（digest_validation）になる。欠けたら通す向きではない。--selftest の報告の改変検体で固定。"
+    },
+    {
+      "file": "scripts/autopilot-data.mjs",
+      "expr": "meta.digest",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-20: loadDigest の assert の中の項。届いた meta.json に digest（版・規則・untrusted_fields）が無い・違うときは assert が落ちて unavailable になり、モデルへ GROWTH_GSC_DIR を渡さない。欠けたら規則の照合を飛ばす向きではない。--selftest の規則改変の検体で固定。"
+    },
+    {
+      "file": "scripts/autopilot-data.mjs",
+      "expr": "report.newest_data_date",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-20: loadDigest の assert の中の等式。報告の最新日・日数がダイジェストの dates から導いた値と一致しなければ落ちて unavailable になる。値が無い（null）報告は ready として checkReport を通らないので、ここで欠けたまま一致することは無い。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
@@ -1468,6 +1486,12 @@
       "expr": "before",
       "disposition": "安全側へ倒れる",
       "note": "2026-10-21（監査 F93）: lastmodOnlySitemaps() の `before !== null && after !== null && …`。before/after は base・head の sitemap 本文で、ファイルが無いと null。そのときは偽になり sitemap は台帳扱いにならない（価値契約の touches に要る側）。読めないときも catch で偽。value-contracts.mjs --selftest の sitemap の検体で固定。"
+    },
+    {
+      "file": "scripts/autopilot-data.mjs",
+      "expr": "value",
+      "disposition": "前提",
+      "note": "2026-10-20: plainData の型の振り分け。JSON の null は値として正当なので plain とする。meta そのものが null・配列・非オブジェクトの場合は buildDigest が plainData より前の assert で落とすので、null の meta が「plain」として通ることは無い（--selftest で null・配列・文字列の meta を拒否することを確認）。"
     }
   ]
 }
