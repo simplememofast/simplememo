@@ -1,9 +1,16 @@
 # Preview cache verification: inactive local preparation
 
-Status: local preparation only, 2026-10-22. No Access policy, token, GitHub
+Status: initial local preparation at `e1e1337ae`, 2026-10-22. No Access policy, token, GitHub
 secret, Environment, workflow, CI run, or deployed site is changed by these
 helpers. No real credential has been supplied to them. The existing cache check
 still fails at Access and remains a release blocker.
+
+The owner subsequently authorized the limited settings setup by a separate
+operator. Current configuration requirements, independently observed provider
+format corrections, and the Environment-approval proof design are recorded in
+[activation preparation](preview-cache-ci-activation-20261022.md). Statements
+below about pending authorization and unconfirmed provider identity describe the
+initial checkpoint; they must not be used as the current activation state.
 
 ## Evidence and scope
 

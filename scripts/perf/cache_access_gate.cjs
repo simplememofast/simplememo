@@ -14,6 +14,13 @@ const { createHash } = require('node:crypto');
 const REPOSITORY = 'simplememofast/simplememo';
 const OWNER = 'simplememofast';
 const WORKFLOW_REF = REPOSITORY + '/.github/workflows/home-perf-cache-approved.yml@refs/heads/main';
+// Independently matched on prior main success checks 119353254222 and
+// 119658829319, not learned from the candidate's check 119662420279.
+const CLOUDFLARE_APP_ID = 85455;
+const CLOUDFLARE_APP_SLUG = 'cloudflare-workers-and-pages';
+// Cloudflare's dashboard project name and assigned pages.dev suffix differ.
+const CLOUDFLARE_PROJECT = 'simplememo';
+const PREVIEW_SUFFIX = 'simplememo-596.pages.dev';
 const SHA = /^[a-f0-9]{40}$/;
 const SHA256 = /^[a-f0-9]{64}$/;
 const UUID = '[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}';
@@ -57,10 +64,10 @@ function validatePolicy(policy, now) {
   requireThat(Number.isFinite(instant(policy.validUntil)) && now < instant(policy.validUntil), 'trusted policy is missing a valid unexpired deadline');
   // Its deadline must also be no later than the real token expiry, verified by
   // the operator outside this module. The gate has no access to a token.
-  requireThat(Number.isSafeInteger(policy.cloudflareAppId) && policy.cloudflareAppId > 0, 'trusted policy needs an independently verified Cloudflare App ID');
-  requireThat(typeof policy.cloudflareAppSlug === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(policy.cloudflareAppSlug), 'trusted policy needs an independently verified Cloudflare App slug');
+  requireThat(policy.cloudflareAppId === CLOUDFLARE_APP_ID, 'trusted policy needs the independently verified Cloudflare App ID');
+  requireThat(policy.cloudflareAppSlug === CLOUDFLARE_APP_SLUG, 'trusted policy needs the independently verified Cloudflare App slug');
   requireThat(typeof policy.cloudflareAccountId === 'string' && /^[a-f0-9]{32}$/.test(policy.cloudflareAccountId), 'trusted policy needs a Cloudflare account ID');
-  requireThat(policy.cloudflareProjectName === 'simplememo-596', 'trusted policy must name the approved Pages project');
+  requireThat(policy.cloudflareProjectName === CLOUDFLARE_PROJECT, 'trusted policy must name the approved Pages project');
   requireThat(typeof policy.expectedManifestSha256 === 'string' && SHA256.test(policy.expectedManifestSha256), 'trusted policy needs a reviewed manifest SHA256');
 }
 
@@ -93,17 +100,41 @@ function validatePullRequest(pr, request, policy) {
 
 function previewOrigin(summary) {
   requireThat(typeof summary === 'string' && Buffer.byteLength(summary) <= 65536, 'deployment summary is missing or too large');
+  // The verified Cloudflare format includes a separate mutable branch alias.
+  // Validate and remove only that exact labelled row. Its URL is never returned
+  // or used as a credential destination. An alias elsewhere still fails below.
+  const branchRows = [...summary.matchAll(/<tr><td><strong>Branch Preview URL:<\/strong><\/td><td>\s*<a href='([^']+)'>([^<]+)<\/a>\s*<\/td><\/tr>/g)];
+  requireThat(summary.split('Branch Preview URL:').length - 1 === branchRows.length, 'deployment summary has a malformed branch alias row');
+  requireThat(branchRows.length <= 1, 'deployment summary has ambiguous branch aliases');
+  if (branchRows.length === 1) {
+    const [row, href, label] = branchRows[0];
+    requireThat(href === label && /^https:\/\/[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.simplememo-596\.pages\.dev$/.test(href), 'branch alias must be an exact same-project root');
+    requireThat(!/^https:\/\/[a-f0-9]{8}\./.test(href), 'branch alias cannot hide another immutable deployment');
+    summary = summary.replace(row, '');
+  }
   const candidates = [];
   for (const match of summary.matchAll(/https?:\/\/[^\s<>"'`]+/gi)) {
     let value = match[0];
     // Cloudflare emits Markdown links. Remove exactly their paired closing
     // delimiter, never normalize host names, ports, paths, or query strings.
     if (summary[match.index - 1] === '(' && value.endsWith(')')) value = value.slice(0, -1);
-    if (/pages\.dev/i.test(value)) candidates.push(value);
+    let pagesCandidate = /pages\.dev/i.test(value);
+    // Include encoded/IDNA-normalized Pages hosts in the candidate set so a
+    // noncanonical second URL cannot disappear from ambiguity validation. The
+    // raw URL must still pass the strict, unencoded root check below.
+    try { pagesCandidate ||= /pages\.dev/i.test(new URL(value).hostname); } catch { /* not a valid host */ }
+    if (pagesCandidate) candidates.push(value);
   }
-  requireThat(candidates.length === 1, 'deployment summary must contain exactly one Pages URL');
-  requireThat(/^https:\/\/[a-f0-9]{8}\.simplememo-596\.pages\.dev\/?$/.test(candidates[0]), 'deployment URL must be the exact immutable preview root');
-  return new URL(candidates[0]).origin;
+  requireThat(candidates.length > 0, 'deployment summary must contain an immutable Pages URL');
+  const origins = new Set();
+  for (const candidate of candidates) {
+    requireThat(/^https:\/\/[a-f0-9]{8}\.simplememo-596\.pages\.dev\/?$/.test(candidate), 'deployment URL must be the exact immutable preview root');
+    const origin = new URL(candidate);
+    requireThat(origin.hostname.endsWith('.' + PREVIEW_SUFFIX), 'deployment must use the assigned preview domain');
+    origins.add(origin.origin);
+  }
+  requireThat(origins.size === 1, 'deployment summary has ambiguous immutable previews');
+  return [...origins][0];
 }
 
 function validateDeployment(check, policy) {
@@ -113,7 +144,9 @@ function validateDeployment(check, policy) {
   requireThat(check.name === 'Cloudflare Pages' && check.status === 'completed' && check.conclusion === 'success', 'Cloudflare deployment must be completed and successful');
   requireThat(check.head_sha === policy.approvedHeadSha, 'deployment is for a different head');
   requireThat(check.app.id === policy.cloudflareAppId && check.app.slug === policy.cloudflareAppSlug, 'deployment provider does not match trusted policy');
-  const prefix = 'https://dash.cloudflare.com/' + policy.cloudflareAccountId + '/pages/view/' + policy.cloudflareProjectName + '/';
+  // Exact observed Cloudflare dashboard routing syntax only. No general query
+  // parser/redirect target is accepted, and extra/encoded query data fails.
+  const prefix = 'https://dash.cloudflare.com/?to=/' + policy.cloudflareAccountId + '/pages/view/' + policy.cloudflareProjectName + '/';
   requireThat(typeof check.details_url === 'string' && check.details_url.startsWith(prefix), 'deployment dashboard must match the approved account and project');
   const deploymentId = check.details_url.slice(prefix.length);
   requireThat(new RegExp('^' + UUID + '$').test(deploymentId), 'deployment dashboard must identify one deployment without credentials or URL extras');

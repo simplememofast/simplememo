@@ -23,12 +23,12 @@ function fixture() {
       base: { ref: 'main', repo: { full_name: 'simplememofast/simplememo', fork: false } },
       head: { sha: HEAD, repo: { full_name: 'simplememofast/simplememo', fork: false } } },
     checkRun: { name: 'Cloudflare Pages', status: 'completed', conclusion: 'success', head_sha: HEAD,
-      app: { id: 4242, slug: 'synthetic-cloudflare-pages' },
-      details_url: `https://dash.cloudflare.com/${ACCOUNT}/pages/view/simplememo-596/${DEPLOYMENT}`,
+      app: { id: 85455, slug: 'cloudflare-workers-and-pages' },
+      details_url: `https://dash.cloudflare.com/?to=/${ACCOUNT}/pages/view/simplememo/${DEPLOYMENT}`,
       output: { summary: `Preview: [deployment](${PREVIEW}/)` } },
     policy: { approvedPullRequestNumber: 2139, approvedHeadSha: HEAD, validUntil: '2026-10-22T12:00:00Z',
-      cloudflareAppId: 4242, cloudflareAppSlug: 'synthetic-cloudflare-pages', cloudflareAccountId: ACCOUNT,
-      cloudflareProjectName: 'simplememo-596', expectedManifestSha256: digest(reviewedManifest) },
+      cloudflareAppId: 85455, cloudflareAppSlug: 'cloudflare-workers-and-pages', cloudflareAccountId: ACCOUNT,
+      cloudflareProjectName: 'simplememo', expectedManifestSha256: digest(reviewedManifest) },
     reviewedManifest, now: Date.parse('2026-10-22T11:00:00Z'),
   };
 }
@@ -117,6 +117,8 @@ test('the exact independently configured provider App ID and slug are mandatory'
   for (const value of [undefined, '', 'cloudflare/pages']) rejected(input => { input.policy.cloudflareAppSlug = value; });
   rejected(input => { input.checkRun.app.id = 9999; });
   rejected(input => { input.checkRun.app.slug = 'other-provider'; });
+  rejected(input => { input.policy.cloudflareAppId = input.checkRun.app.id = 4242; });
+  rejected(input => { input.policy.cloudflareAppSlug = input.checkRun.app.slug = 'self-approved-provider'; });
   rejected(input => { input.checkRun.app = null; });
   rejected(input => { delete input.policy.cloudflareAppId; });
 });
@@ -132,8 +134,10 @@ test('dashboard links bind provider origin, account, project and immutable deplo
   const good = fixture().checkRun.details_url;
   for (const details_url of [good.replace('https:', 'http:'), good.replace('dash.cloudflare.com', 'dash.cloudflare.com.evil.test'),
     good.replace('dash.cloudflare.com', 'dash.cloudflare.com:443'), good.replace('https://', 'https://user@'),
-    good.replace(ACCOUNT, 'f'.repeat(32)), good.replace('simplememo-596', 'different-project'),
-    good + '?view=1', good + '#preview', good + '/', good.replace(DEPLOYMENT, 'latest'),
+    good.replace(ACCOUNT, 'f'.repeat(32)), good.replace('/simplememo/', '/different-project/'),
+    good.replace('/simplememo/', '/simplememo-596/'), good.replace('/?to=/', '/'),
+    good.replace('/?to=/', '/?to=%2F'), good.replace('/?to=/', '/?other=1&to=/'),
+    good + '?view=1', good + '&other=1', good + '#preview', good + '/', good.replace(DEPLOYMENT, 'latest'),
     good.replace(DEPLOYMENT, '8765abcd-0000-4000-8000-000000000000')]) {
     rejected(input => { input.checkRun.details_url = details_url; });
   }
@@ -148,10 +152,52 @@ test('preview extraction rejects alternate suffixes, branches, URL extras and am
     PREVIEW + '\\@evil.test', 'https://evil.test', 'https://1234abcd%2esimplememo-596.pages.dev']) {
     rejected(input => { input.checkRun.output.summary = `Preview: [deployment](${url})`; });
   }
-  for (const summary of ['', PREVIEW + ' ' + PREVIEW, PREVIEW + ' https://8765abcd.simplememo-596.pages.dev',
-    PREVIEW + ' https://1234abcd.other.pages.dev', PREVIEW + ' HTTPS://8765abcd.simplememo-596.pages.dev', 'x'.repeat(65537)]) {
+  for (const summary of ['', PREVIEW + ' https://8765abcd.simplememo-596.pages.dev',
+    PREVIEW + ' https://1234abcd.other.pages.dev', PREVIEW + ' HTTPS://8765abcd.simplememo-596.pages.dev',
+    PREVIEW + ' https://8765abcd.simplememo-596.pages%2edev',
+    PREVIEW + ' https://8765abcd.simplememo-596.pages%2edev.',
+    PREVIEW + ' https://8765abcd.simplememo-596.pages%2edev.evil.test',
+    PREVIEW + ' https://8765abcd.simplememo-596.%70ages.dev',
+    PREVIEW + ' https://8765abcd.simplememo-596.pages。dev', 'x'.repeat(65537)]) {
     rejected(input => { input.checkRun.output.summary = summary; });
   }
+});
+
+test('the observed Cloudflare summary accepts repeated href/text and isolates its mutable branch row', () => {
+  const input = fixture();
+  const branch = 'https://codex-web-ci-security-local.simplememo-596.pages.dev';
+  input.checkRun.output.summary = `<table><tr><td><strong>Latest commit:</strong> </td><td>
+<code>bbbbbbb</code>
+</td></tr>
+<tr><td><strong>Status:</strong></td><td>&nbsp;✅&nbsp; Deploy successful!</td></tr>
+<tr><td><strong>Preview URL:</strong></td><td>
+<a href='${PREVIEW}'>${PREVIEW}</a>
+</td></tr>
+<tr><td><strong>Branch Preview URL:</strong></td><td>
+<a href='${branch}'>${branch}</a>
+</td></tr>
+</table>
+
+[View logs](${input.checkRun.details_url})
+`;
+  assert.equal(authorizeCacheCheck(input).previewOrigin, PREVIEW);
+  for (const summary of [PREVIEW + ' ' + PREVIEW, `<a href='${PREVIEW}'>${PREVIEW}/</a>`]) {
+    input.checkRun.output.summary = summary;
+    assert.equal(authorizeCacheCheck(input).previewOrigin, PREVIEW);
+  }
+});
+
+test('branch rows cannot hide another deployment, malformed link, alternate host or URL extras', () => {
+  const alias = 'https://codex-web-ci-security-local.simplememo-596.pages.dev';
+  const row = (href, label = href) => `<tr><td><strong>Branch Preview URL:</strong></td><td>\n<a href='${href}'>${label}</a>\n</td></tr>`;
+  for (const branchRow of [row('https://8765abcd.simplememo-596.pages.dev'), row(alias, PREVIEW),
+    row(alias + '?x=1'), row(alias + '#x'), row(alias + ':443'), row(alias + '/path'),
+    row(alias.replace('simplememo-596', 'other-project')), row(alias.replace('https://', 'https://user@')),
+    row(alias) + row(alias), row(alias).replace('<a ', '<span '), row(alias).replace('</a>', '</span>'),
+    row(PREVIEW).replace('href=', 'url=')]) {
+    rejected(input => { input.checkRun.output.summary = PREVIEW + '\n' + branchRow; });
+  }
+  rejected(input => { input.checkRun.output.summary = PREVIEW + '\n' + alias; });
 });
 
 test('reviewed manifest bytes and head must be independently fixed', () => {

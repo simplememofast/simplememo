@@ -34,12 +34,12 @@ test('gate, bounded transport and full contract agree on all real assets and Pag
       base: { ref: 'main', repo: { full_name: 'simplememofast/simplememo', fork: false } },
       head: { sha, repo: { full_name: 'simplememofast/simplememo', fork: false } } },
     checkRun: { name: 'Cloudflare Pages', status: 'completed', conclusion: 'success', head_sha: sha,
-      app: { id: 4242, slug: 'synthetic-cloudflare-pages' },
-      details_url: `https://dash.cloudflare.com/${account}/pages/view/simplememo-596/${deploymentId}`,
+      app: { id: 85455, slug: 'cloudflare-workers-and-pages' },
+      details_url: `https://dash.cloudflare.com/?to=/${account}/pages/view/simplememo/${deploymentId}`,
       output: { summary: `Preview: [deployment](${origin}/)` } },
     policy: { approvedPullRequestNumber: 2139, approvedHeadSha: sha, validUntil: '2026-10-22T12:00:00Z',
-      cloudflareAppId: 4242, cloudflareAppSlug: 'synthetic-cloudflare-pages', cloudflareAccountId: account,
-      cloudflareProjectName: 'simplememo-596', expectedManifestSha256: hash(reviewedManifest) },
+      cloudflareAppId: 85455, cloudflareAppSlug: 'cloudflare-workers-and-pages', cloudflareAccountId: account,
+      cloudflareProjectName: 'simplememo', expectedManifestSha256: hash(reviewedManifest) },
     reviewedManifest, now: Date.parse('2026-10-22T11:00:00Z'),
   });
   const { onRequest } = await import(pathToFileURL(path.join(ROOT, 'functions/assets/home-perf/_middleware.js')).href);
