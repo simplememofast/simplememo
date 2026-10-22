@@ -3,10 +3,12 @@
 This is code-side preparation after the owner's explicit authorization of the
 limited Access and GitHub Environment setup. A separate operator performs that
 setup. This checkout never creates a token, receives its value, writes a secret,
-or changes Access/Environment settings. The workflow and its consumers are local
-preparation only. `cache_access_configuration.json` deliberately remains
-`{"configurationReadback":null}`; actual authentication and all external changes
-remain blocked pending complete readback and separate activation approval.
+or changes Access/Environment settings. The owner approved introducing the
+trusted verifier before the security candidate's checks and normal deployment.
+`cache_access_configuration.json` contains only independently reported settings
+and a short operational deadline. A real run still requires the protected
+Environment's owner approval and all live validation; no authentication result
+is implied by this configuration.
 
 ## Configuration contract for the operator
 
@@ -22,7 +24,7 @@ remain blocked pending complete readback and separate activation approval.
 | Repository secret fallback | None; do not put these values in repository-wide secrets |
 | Access scope | The approved dedicated, seven-day service token is associated with Service Auth for the existing preview app; the actual scope is `*.simplememo-596.pages.dev` |
 | Existing policies | Keep the existing email Allow policy and the separate everyone Block for retired admin unchanged |
-| Readback | Environment numeric ID, names, branch/reviewer/bypass conditions, observation time, and exact token expiry with timezone; never credential values |
+| Readback | Environment numeric ID, names, branch/reviewer/bypass conditions, UTC observation time, and an independently justified token-expiry lower bound beyond the operational deadline; never credential values |
 
 The disabled self-review restriction does not automatically approve a job. The
 owner still performs the Environment approval, with the candidate SHA visible.
@@ -42,14 +44,27 @@ the preview app were reported present; the email Allow and retired-admin Block
 were unchanged. These are operator reports, not API or authentication results
 from this checkout.
 
-The token UI displays `2026-10-29 17:29` without a timezone. Its exact UTC expiry
-is **unconfirmed**; GitHub's displayed timezone cannot establish Cloudflare's.
-An independent operational deadline, for example 24 hours after a confirmed UTC
-readback, could conservatively shorten the allowed operation window. It must not
-be presented as the token's actual expiry or as evidence of a successful login.
-That option is a design proposal only: no deadline or partial settings have been
-inserted into the null configuration. Each eventual run is additionally capped
-at one hour from its own creation, and a denied request fails without retry.
+The operator identified this token's absolute expiry display as
+`2026-10-29 17:29`, without a timezone. Its exact UTC expiry is **unconfirmed**;
+GitHub's displayed timezone cannot establish Cloudflare's. Instead of choosing
+a timezone, consider every UTC offset in the conservative range -24 to +24 hours,
+wider than civil timezones. Also subtract one minute to cover rounding of the
+minute-resolution display:
+
+```text
+actual expiry UTC = displayed local expiry - UTC offset
+earliest expiry bound = 2026-10-28T17:28:00Z
+internal deadline     = 2026-10-23T08:44:02Z
+margin                = 128 hours, 43 minutes, 58 seconds
+```
+
+The internal deadline is 24 hours after the confirmed UTC readback and precedes
+every expiry interpretation in that range. This verifies the required ordering
+without claiming an exact token expiry. The committed configuration therefore
+uses that short operational deadline, not a guessed expiry timestamp. Each run
+is additionally capped at one hour from its own creation. Expiry, a denied
+request or a redirect fails without retry; this calculation is not an
+authentication test and does not establish that the credentials work.
 
 ## Confirmed provider metadata, not credentials
 
@@ -178,6 +193,32 @@ affected workflow definitions pass actionlint, and whitespace validation passes.
 These 323 executed tests are this checkpoint's validation, not a sum with older
 reported runs.
 
+### Credential inventory preflight
+
+Bootstrap PR 2143 at `0799dd0df7c2e63197617a61a52260d9c905f2b9` failed
+[SEO run 39753201900](https://github.com/simplememofast/simplememo/actions/runs/39753201900)
+at `Credential scope and revocation`. The new workflow referenced
+`CF_ACCESS_PREVIEW_CLIENT_ID` and `CF_ACCESS_PREVIEW_CLIENT_SECRET` without
+registering their owner, scope and revocation procedure in
+`data/credential-expiry.json`. This was a missing inventory record, not evidence
+that either actual credential was rejected or expired.
+
+The repair registers the pair as one dedicated Cloudflare credential. It keeps
+the existing expiry policy, exemptions and checks unchanged. Its declared
+`expires_at` remains null because the exact UTC expiry is unknown; the record
+separately documents the UI display and the enforced short operational deadline.
+Revoking the dedicated Cloudflare token invalidates distributed copies; deleting
+GitHub Environment secrets only stops future distribution. Existing email Allow
+and retired-admin Block policies remain unchanged. No credential value or new
+authentication configuration is involved in this repair.
+
+The same failed run completed all 12,751 viewport probes (Blink deep 42, Blink
+all-pages 10,136, WebKit 2,573), with zero problems and zero unmeasured probes.
+The three model evaluations remain unmeasured under their existing report-only
+policy. Later steps were skipped after the inventory failure, so this run does
+not satisfy the SEO gate. A fresh normal PR run must validate the repaired
+inventory and complete the later checks before merge.
+
 ## Bootstrap and remaining unknowns
 
 The current `main` advanced to `ca6a3b3b1` through PRs 2135, 2140 and 2142. The
@@ -197,10 +238,11 @@ requirements remain unknown, not absent. If bootstrap is blocked by a mandatory
 check, report the exact dependency; do not disable it or merge the failed
 security candidate to obtain trusted code.
 
-Credential use, push, new CI, merge and deploy remain pending separate concrete
-activation approval; configuration readback alone does not authorize those
-operations. Keep the Web allocation within 25 USD of the shared 50 USD budget.
-After complete readback and approval, reconcile the final candidate, review the
-code and proof wiring, pass all applicable checks, and only then proceed through
-the normal merge/deploy/readback flow. The bootstrap's main merge is itself a
-normal Cloudflare Pages deployment trigger and must be included in that approval.
+The owner explicitly approved the prerequisite main introduction, then PR 2139's
+required checks and normal merge/deployment, at 2026-10-22 08:50:39 UTC. Keep the
+Web allocation within 25 USD of the shared 50 USD budget. Reconcile the final
+candidate, review the code and proof wiring, pass all applicable checks, and only
+then proceed through the normal merge/deploy/readback flow. The bootstrap's main
+merge is itself a normal Cloudflare Pages deployment trigger, included in that
+approval. The owner must still approve the particular Environment run; neither
+the workflow nor an agent may approve it on the owner's behalf or use bypass.
