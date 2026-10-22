@@ -112,7 +112,8 @@
       "what": "開発記録の外部ブログ配信（devlog-syndication.yml）が執筆モデルへ渡す、dev.to の公開API（自分の記事の題名・書き出し・本文の印）と、はてなブログの公開フィード（題名・要約）。2026-10-03 から、はてなブログ「メモの設計図」（simplememofast.hatenadiary.jp/feed）とライブドアブログ（captio.livedoor.blog/atom.xml。本文は CDATA の HTML）の公開フィードも入る。日本語の3媒体は互いの記事の題名・書き出しを sibling_posts として受け取る（題材を共有するため）。どちらもオーナーが選択式で名指しして追加した媒体",
       "trust": "partial",
       "mitigations": [
-        "執筆ステップには Read / Write / Edit / Glob / Grep しか渡さない（Bash・WebFetch なし）。**投稿用の鍵は執筆ステップの環境に無い**",
+        "執筆・手直しは専用ジョブ（Read / Write / Edit / Glob / Grep。Bash・WebFetch なし）。投稿キー・IDENTITY_DENYLIST を参照する検証・投稿はモデルが一度も動かない別ランナー。各 checkout は同じ github.sha に固定し資格情報を残さない",
+        "文脈はモデルを動かさない prepare の成果物だけを使う。モデルからは article.json と費用記録だけを runner.temp に受け取り、syndication-input.mjs が256KiB上限・通常ファイル・JSONの型と欄を検査して記事だけを取り込む。モデルのコード・文脈・設定を信頼側にコピーしない",
         "外部から読むのは自分のアカウントの記事だけ（dev.to の simple_memo・はてなID simplememofast の2つのブログ・ライブドアの captio）。コメント・他人の記事は読まない",
         "フィードからモデルへ渡すのは、題名・URL・公開日時・書き出し（はてな・ライブドアは要約か本文のタグを除いた先頭300字）と、本文の印・見える題材の記録から読んだ題材の ID だけ。本文の HTML そのものは渡さない",
         "モデルの出力は JSON ファイルとしてだけ受け取り、投稿前にスクリプトが機械的に検査する（数字の出典・禁止表現・名乗り・リンク先の実在・重複。重複は姉妹ブログの題名・題材とも比べる）。検査を通らない記事は投稿しない",

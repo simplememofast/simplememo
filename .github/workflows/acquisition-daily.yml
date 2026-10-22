@@ -96,7 +96,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: '24'
+          node-version: '24.22.1'
       # 秘密を持たないジョブ。緊急停止（全体と経路 acquisition。経路が無ければ落ちる）・窓・既存の成果物だけを見る。
       - name: Gate (emergency stop, window, one collection per end-date)
         id: gate
@@ -119,7 +119,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: '24'
+          node-version: '24.22.1'
       - name: Recipient public key matches the pinned fingerprint
         env:
           ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64: ${{ vars.ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64 }}
@@ -183,7 +183,7 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         if: steps.key.outputs.has_key == 'true'
         with:
-          node-version: '24'
+          node-version: '24.22.1'
       # 鍵を置く前に照合する。ここまでにリポジトリのコードは1行も走っていない。名前は取り込み側（PINS_STEP）が読む。
       - name: Pinned code and recipient (before the token exists)
         if: steps.key.outputs.has_key == 'true'

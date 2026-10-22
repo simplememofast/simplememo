@@ -52,7 +52,6 @@ env:
   GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID || 'yurika-simplememo' }}
   BQ_DATASET: ${{ vars.BQ_DATASET || 'searchconsole' }}
   GSC_PROPERTY: ${{ vars.GSC_PROPERTY || 'sc-domain:simplememofast.com' }}
-  GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
 
 jobs:
   bing:
@@ -67,12 +66,12 @@ jobs:
     env:
       GOOGLE_SERVICE_ACCOUNT_JSON: ''
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: '20'
+          node-version: '24.22.1'
       - name: Read Bing search and encrypt results
         env:
           BING_WEBMASTER_CLIENT_ID: ${{ secrets.BING_WEBMASTER_CLIENT_ID }}
@@ -81,7 +80,7 @@ jobs:
           ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64: ${{ vars.ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64 }}
         run: node growth/scripts/collect-bing.mjs "${{ runner.temp }}/bing/bing-search.enc.json"
       - name: Retain only encrypted Bing output
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: bing-search-encrypted-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/bing/bing-search.enc.json
@@ -89,24 +88,34 @@ jobs:
           retention-days: 14
 
   measure:
+    if: github.ref == 'refs/heads/main'
+    env:
+      GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
+      INPUT_DAYS: ${{ inputs.days || '28' }}
+      INPUT_SNAPSHOT: ${{ inputs.snapshot || false }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: write
       pull-requests: write
     steps:
+      - name: Validate manual input as data
+        run: |
+          [[ "$INPUT_DAYS" =~ ^[1-9][0-9]*$ ]] || { echo 'Invalid days (positive integer)'; exit 1; }
+          [[ "$INPUT_SNAPSHOT" == 'true' || "$INPUT_SNAPSHOT" == 'false' ]] || exit 1
+
       # PAT があればそれで checkout する。push に使う資格情報がこれで決まり、
       # GITHUB_TOKEN による push は他のワークフローを起動しない（GitHubの
       # 再帰防止）ため、PAT でないと SEO Validation が走らず auto-merge も
       # 発火しない。未設定なら GITHUB_TOKEN に落ちて、PRは作られるが
       # マージには手動の再実行が要る。
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: '20'
+          node-version: '24.22.1'
 
       # 資格情報が無い状態で走らせると BigQuery の認証エラーで落ちる。
       # それは「設定がまだ」であって「壊れた」ではないので、区別して止める。
@@ -194,7 +203,7 @@ jobs:
           label="$(date -u +%Y-%m-%d)"
           echo "label=$label" >> "$GITHUB_OUTPUT"
           node growth/scripts/ingest-bigquery.mjs \
-            --days "${{ github.event.inputs.days || '28' }}" \
+            --days "$INPUT_DAYS" \
             --label "$label"
 
       # 【公開表示の突き合わせ】評価・件数・公開バージョンは JSON-LD の
@@ -285,7 +294,7 @@ jobs:
         id: retain_daily
         if: steps.seal_daily.outcome == 'success'
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: seo-daily-encrypted-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/seo-daily-export/seo-daily.enc.json
@@ -314,7 +323,7 @@ jobs:
         id: when
         run: |
           set -euo pipefail
-          out="$(node scripts/should-snapshot.mjs --decide --manual "${{ github.event.inputs.snapshot }}")"
+          out="$(node scripts/should-snapshot.mjs --decide --manual "$INPUT_SNAPSHOT")"
           echo "$out" | head -1 >> "$GITHUB_OUTPUT"
           {
             echo ""
@@ -373,7 +382,7 @@ jobs:
 
       - name: Commit and open PR
         if: steps.when.outputs.snapshot == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         env:
           LABEL: ${{ steps.snapshot.outputs.label }}
           HAS_PAT: ${{ secrets.GH_PAT != '' }}

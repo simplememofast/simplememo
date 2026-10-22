@@ -18,26 +18,42 @@ concurrency:
   group: seo-validation-${{ github.event_name }}-${{ github.ref }}-${{ github.ref == 'refs/heads/main' && github.run_id || 'latest' }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+permissions:
+  contents: read
+
 jobs:
   seo-check:
     runs-on: ubuntu-latest
     steps:
       # Full history is required for content-derived sitemap lastmod dates.
       # IndexNow also needs the first-parent diff for the published commit.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: '20'
+          node-version: '24.22.1'
+          package-manager-cache: false
+
+      - name: Web and CI security boundaries
+        run: node --test scripts/ci-security.test.mjs
+
+      - name: Locked tools dependency advisory gate
+        working-directory: tools
+        run: |
+          npm ci --ignore-scripts --no-audit
+          npm audit --omit=dev --audit-level=moderate
+
+      - name: Native image and local server compatibility
+        run: node --test scripts/tools-runtime.test.mjs
 
       - name: Routine CI scope regression
         run: node --test scripts/routine-ci-scope.test.mjs
 
       - name: Determine required routine observation checks
         id: routine_scope
-        uses: actions/github-script@v7
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         with:
           script: |
             const { routineCiScope } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/lib/routine-ci-scope.mjs`);
@@ -1506,12 +1522,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: '20'
+          node-version: '24.22.1'
       - name: Claude observation health
         id: claude_health
         if: always() && github.event_name != 'pull_request'
@@ -1522,7 +1538,7 @@ jobs:
         run: python3 scripts/codex-routine-observer.py --check
       - name: Record actual observation health outcomes
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         env:
           CLAUDE_OUTCOME: ${{ steps.claude_health.outcome }}
           CODEX_OUTCOME: ${{ steps.codex_health.outcome }}
