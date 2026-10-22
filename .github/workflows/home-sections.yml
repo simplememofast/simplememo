@@ -39,6 +39,11 @@ jobs:
       - name: Install pinned functional browser tools
         timeout-minutes: 4
         run: |
+          # The Azure mirror can trickle forever without an inactivity timeout.
+          # Keep the runner's existing official HTTPS fallbacks and APT trust.
+          grep -qE '^https://archive\.ubuntu\.com/ubuntu/([[:space:]]|$)' /etc/apt/apt-mirrors.txt
+          sudo sed -i '\|^http://azure\.archive\.ubuntu\.com/ubuntu/|d' /etc/apt/apt-mirrors.txt
+          ! grep -qF 'azure.archive.ubuntu.com' /etc/apt/apt-mirrors.txt
           # Bound stalled mirrors, including apt invoked by Playwright via sudo.
           sudo tee /etc/apt/apt.conf.d/99-ci-timeouts > /dev/null <<'APT'
           Acquire::http::Timeout "30";
