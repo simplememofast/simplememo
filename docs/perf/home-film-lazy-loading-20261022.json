@@ -1,0 +1,159 @@
+{
+  "version": 1,
+  "recorded_at": "2026-10-22T03:44:22.193432+00:00",
+  "source_commit": "f662935e878781e141aed1edc56e47be3ac3130b",
+  "candidate_change": "Only add loading=\"lazy\" to the existing Japanese homepage video. Keep poster/source URLs, bytes, preload=none, controls and playback script.",
+  "browser": "151.0.7922.173",
+  "settings": {
+    "viewport": [
+      412,
+      823
+    ],
+    "dpr": 1.75,
+    "cpuSlowdown": 4,
+    "latencyMs": 150,
+    "throughputBytesPerSecond": 200000,
+    "thirdParty": "blocked; production-host analytics not active"
+  },
+  "order": [
+    {
+      "pair": 1,
+      "variant": "baseline"
+    },
+    {
+      "pair": 1,
+      "variant": "lazy"
+    },
+    {
+      "pair": 2,
+      "variant": "lazy"
+    },
+    {
+      "pair": 2,
+      "variant": "baseline"
+    },
+    {
+      "pair": 3,
+      "variant": "baseline"
+    },
+    {
+      "pair": 3,
+      "variant": "lazy"
+    }
+  ],
+  "measurements": [
+    {
+      "variant": "baseline",
+      "html_sha256": "cd8a8a353954d82f7fef6c0b3aa84e377ba2be2075d5908eacf07cc5bd135041",
+      "lcp_ms": [
+        1800,
+        1192,
+        1240
+      ],
+      "median_lcp_ms": 1240,
+      "initial_subresource_encoded_bytes": [
+        233350,
+        233350,
+        233350
+      ],
+      "poster_request_count": [
+        1,
+        1,
+        1
+      ],
+      "long_task_count": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "variant": "lazy",
+      "html_sha256": "7bc10c225ed0dd33106013bc539d1fb9b524c60edb515d6330ca78132672919c",
+      "lcp_ms": [
+        1256,
+        1128,
+        1252
+      ],
+      "median_lcp_ms": 1252,
+      "initial_subresource_encoded_bytes": [
+        84234,
+        84234,
+        84234
+      ],
+      "poster_request_count": [
+        0,
+        0,
+        0
+      ],
+      "long_task_count": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "findings": {
+    "initial_subresource_bytes_saved_each_run": 149116,
+    "initial_viewport_pixel_equal": true,
+    "viewport_image_pixels": [
+      721,
+      1440
+    ],
+    "lcp_improvement_established": false,
+    "production_lcp_or_tbt_cause_established": false,
+    "production_gate_cleared": false
+  },
+  "functional_scenarios": [
+    {
+      "mode": "autoplay",
+      "pass": true,
+      "initialPoster": 0,
+      "posterRequests": 1,
+      "mediaRequests": 1
+    },
+    {
+      "mode": "reduced-motion",
+      "pass": true,
+      "initialPoster": 0,
+      "posterRequests": 1,
+      "mediaRequests": 1
+    },
+    {
+      "mode": "no-javascript",
+      "pass": true,
+      "initialPoster": 0,
+      "posterRequests": 1,
+      "mediaRequests": 1
+    },
+    {
+      "mode": "source-failure-retry",
+      "pass": true,
+      "initialPoster": 0,
+      "posterRequests": 1,
+      "mediaRequests": 2
+    }
+  ],
+  "local_integrity_checks": [
+    "check_home_film.py --selftest: 10 corruptions rejected; film/benchmark/schema/versions agree",
+    "perf/verify_home.py --selftest: four injected regressions rejected",
+    "perf/verify_home.py: source hashes/glyphs/inline CSS/assets agree",
+    "perf/browser_checks.cjs: 20/20 existing Japanese/English viewport, density and JavaScript-disabled scenarios passed"
+  ],
+  "scope_limits": [
+    "Local loopback browser runs only, with external HTTP blocked. This is not Lighthouse and not a production measurement.",
+    "Three paired trials alternate baseline/lazy order. LCP median is 1240ms vs1252ms: bandwidth improves, LCP does not.",
+    "All local observations have no long tasks; the existing production TBT240ms is not reproduced.",
+    "The script-disabled functional harness uses runner-side polling because page timers do not run when JavaScript is disabled.",
+    "No Access change, artifact403 retry, external posting, push, CI, merge or deploy."
+  ],
+  "standard": "https://html.spec.whatwg.org/multipage/media.html#attr-media-loading",
+  "local_raw_evidence": [
+    "/tmp/simplememo-perf-local-20261022/observations.json",
+    "/tmp/simplememo-perf-poster-ab-20261022/observations.json",
+    "/tmp/simplememo-perf-poster-ab-20261022/functional.json",
+    "/tmp/simplememo-perf-poster-ab.cjs",
+    "/tmp/simplememo-film-functional.cjs",
+    "/tmp/simplememo-home-regression-20261022/browser-checks.json"
+  ]
+}
