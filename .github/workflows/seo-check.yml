@@ -1426,9 +1426,33 @@ jobs:
       # こと（実測: due(ledger,'2026-10-08') が [] を返す）。
       # 「レコードが存在しない」はレコードを見ても分からないので、別の検査にしてある。
       - name: PR release ledger completeness
-        run: |
-          node scripts/check-pr-release-ledger.mjs --selftest
-          node scripts/check-pr-release-ledger.mjs --check
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        with:
+          script: |
+            const { execFileSync } = await import('node:child_process');
+            execFileSync(process.execPath, ['--test', 'scripts/pr-release-publication-exception.test.mjs'], { stdio: 'inherit' });
+            const { runSelftest, checkPublication } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/check-pr-release-ledger.mjs`);
+            if (runSelftest()) throw new Error('PR release ledger selftest failed');
+            let associatedPullRequests = [];
+            if (context.eventName === 'push' && context.ref === 'refs/heads/main') {
+              // This public-repository endpoint supports unauthenticated reads:
+              // https://docs.github.com/en/rest/commits/commits#list-pull-requests-associated-with-a-commit
+              // No token/scope change; on denial or timeout fail, never retry via another identity.
+              if (!/^[0-9a-f]{40}$/.test(context.sha)) throw new Error('Invalid main commit');
+              const response = await fetch('https://api.github.com/repos/simplememofast/simplememo/commits/' + context.sha + '/pulls?per_page=100', {
+                headers: { Accept: 'application/vnd.github+json' },
+                signal: AbortSignal.timeout(10000), redirect: 'error',
+              });
+              if (response.status !== 200) throw new Error('Public merge identity lookup unavailable');
+              associatedPullRequests = await response.json();
+              if (!Array.isArray(associatedPullRequests)) throw new Error('Invalid merge identity response');
+            }
+            const result = checkPublication({
+              repository: context.repo.owner + '/' + context.repo.repo,
+              eventName: context.eventName, event: context.payload,
+              ref: context.ref, sha: context.sha, associatedPullRequests,
+            });
+            if (result) core.setFailed('PR release ledger completeness failed');
 
       # BigQuery の資格情報まわり。ネットワークにもGCPにも触らない
       # （token エンドポイントは fetch を差し替えて潰してある）ので、
