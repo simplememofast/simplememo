@@ -60,7 +60,7 @@ jobs:
           # Keep the runner's existing official HTTPS fallbacks and APT trust.
           grep -qE '^https://archive\.ubuntu\.com/ubuntu/([[:space:]]|$)' /etc/apt/apt-mirrors.txt
           sudo sed -i '\|^http://azure\.archive\.ubuntu\.com/ubuntu/|d' /etc/apt/apt-mirrors.txt
-          ! grep -qF 'azure.archive.ubuntu.com' /etc/apt/apt-mirrors.txt
+          if grep -qF 'azure.archive.ubuntu.com' /etc/apt/apt-mirrors.txt; then exit 1; fi
           # Fail on unavailable package indexes and bound stalled mirrors.
           sudo tee /etc/apt/apt.conf.d/99-ci-timeouts > /dev/null <<'APT'
           Acquire::http::Timeout "30";
