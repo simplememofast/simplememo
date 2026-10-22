@@ -2,6 +2,7 @@
 // completed agent turn is never inferred to have shipped or repaired anything.
 import { createHash } from 'node:crypto';
 import { FAULT_GATE_CODES } from './autopilot-gate-codes.mjs';
+import { RETIREMENT_KEY } from '../check-routine-runs.mjs';
 const uuid = x => typeof x === 'string' && /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(x);
 const digest = x => createHash('sha256').update(JSON.stringify(Object.fromEntries(Object.entries(x).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)))).digest('hex');
 const instant = x => typeof x === 'string' && x.endsWith('Z') ? Date.parse(x) : NaN;
@@ -36,6 +37,10 @@ function nativeDetection(entry, first, observed) {
 export function codexRunIntake(routineDoc, runsDoc, { now = Date.now(), automatic = false } = {}) {
   const doc = routineDoc?.codex_observation;
   const empty = { valid: false, rows: [], triage: [], unresolved: [], unavailable: [] };
+  // Retired observation: the last snapshot is history, not a fresh observation.
+  if (routineDoc && typeof routineDoc === 'object' && Object.hasOwn(routineDoc, RETIREMENT_KEY)) {
+    return { ...empty, retired: true };
+  }
   const observed = instant(doc?.observed_at);
   if (![2, 3, 4, 5].includes(doc?.schema_version) || doc.source !== 'local_codex_scheduler_and_session_store'
     || doc.scheduler_query_complete !== true || !Number.isFinite(observed) || observed > now
@@ -249,6 +254,12 @@ export async function codexIntakeSelftest() {
     const bad = structuredClone(successful); Object.assign(bad.codex_observation.runs[0].gate_receipt, change);
     assert.throws(() => intake(bad), /unverified/);
   }
+  const retired = { ...doc(), [RETIREMENT_KEY]: { retired_at: '2026-09-13' } };
+  assert.equal(intake(doc()).valid, true, 'control: the same fresh observation is valid');
+  assert.equal(intake(retired).valid, false, 'a retired ledger is not observed evidence');
+  assert.equal(intake(retired).retired, true);
+  assert.equal(intake(retired).rows.length, 0);
+  assert.throws(() => applyCodexTriage(retired, { runs: [] }, { now }), /fresh complete/);
   const stale = doc(); stale.codex_observation.observed_at = '2026-09-01T00:00:00Z';
   assert.equal(intake(stale).valid, false);
   assert.throws(() => applyCodexTriage(stale, { runs: [failed] }, { now }), /fresh complete/);

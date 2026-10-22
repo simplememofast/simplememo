@@ -7,6 +7,7 @@
  *   node scripts/check-routine-runs.mjs --selftest
  *   node scripts/check-routine-runs.mjs --snapshot-fresh   # 写しの鮮度だけ（閉じ条件用）
  *   node scripts/check-routine-runs.mjs --sync <list_triggers の生JSON>   # 写しを取り直す
+ *   （台帳に observation_retirement がある間、--sync は書かずに exit 2。--check の扱いは RETIREMENT_KEY の説明）
  *
  * 【台帳の「構造的に不可」は半分だけ正しかった】
  * `data/automation-coverage.json` の ⑩「実行の完全記録（副系）」は
@@ -35,7 +36,9 @@
  */
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { assert, broken, run } from './lib/selftest.mjs';
 
@@ -45,6 +48,116 @@ export const LEDGER_PATH = path.join(ROOT, 'data/routine-runs.json');
 const DAY = 86_400_000;
 /** 発火予定をこれだけ過ぎたら「止まっている」。cron の揺れと写しの遅れを吸収する。 */
 export const OVERDUE_GRACE_HOURS = 6;
+
+/**
+ * **観測の退役（2026-10-20・オーナー判断）。**
+ *
+ * Mac の毎時観測を止めた。台帳はこの欄で「退役している」と明示し、最後の実測は
+ * そのまま残す（observed_at を進めない）。欄がある間は:
+ *   - 書き手（routine-observer.mjs / codex-routine-observer.py の --apply・--probe、
+ *     ここの --sync）は**書かずに exit 2** で終わる。欄の削除はレビューを経たPRでだけ行う
+ *   - 読み手（routine-actions・Act の取り込み・Codex の着手前判定）は「観測していない」として扱う
+ *   - `--check` は、下の条件が**全部**揃うときだけ写しの鮮度（max_snapshot_age_days）を適用せず、
+ *     `retired — not observed since <時刻>` を出す。1つでも欠ければ鮮度の規則はそのまま効く
+ * 同じ条件を codex-routine-observer.py の retirement_status() が持つ（両方を同時に直すこと）。
+ */
+export const RETIREMENT_KEY = 'observation_retirement';
+export const RETIREMENT_FIELDS = ['retired_at', 'reason', 'approved_by',
+  'last_claude_observed_at', 'last_codex_observed_at', 'reactivation'];
+const RUN_TIME_FIELDS = ['last_fired_at', 'last_run_fired_at', 'last_run_finished_at'];
+const INSTANT_RE = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})(\.\d+)?Z$/;
+const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** UTC の時刻（末尾 Z）だけを読む。ローカル時刻・繰り上がる日付（2月31日など）は NaN。 */
+function instantMs(value) {
+  const m = typeof value === 'string' ? INSTANT_RE.exec(value) : null;
+  if (!m) return NaN;
+  const base = Date.parse(`${m[1]}T${m[2]}Z`);
+  if (!Number.isFinite(base) || new Date(base).toISOString().slice(0, 19) !== `${m[1]}T${m[2]}`) return NaN;
+  return base + (m[3] ? Number(`0${m[3]}`) * 1000 : 0);
+}
+
+/** YYYY-MM-DD を UTC のその日の 00:00 として読む。 */
+function dayStartMs(value) {
+  if (typeof value !== 'string' || !DAY_RE.test(value)) return NaN;
+  const t = Date.parse(`${value}T00:00:00Z`);
+  return Number.isFinite(t) && new Date(t).toISOString().slice(0, 10) === value ? t : NaN;
+}
+
+/**
+ * 退役の欄が「採用してよい形」か。**純関数。**
+ * present … 欄が在る（中身を問わない。書き手と読み手はこちらで止まる）
+ * valid   … 鮮度の規則を外してよい条件が全部揃っている（`--check` だけがこちらを使う）
+ */
+export function retirementStatus(doc, { now = Date.now() } = {}) {
+  if (!doc || typeof doc !== 'object' || !Object.hasOwn(doc, RETIREMENT_KEY)) {
+    return { present: false, valid: false, reasons: [] };
+  }
+  const m = doc[RETIREMENT_KEY];
+  if (!m || typeof m !== 'object' || Array.isArray(m)) {
+    return { present: true, valid: false, reasons: [`${RETIREMENT_KEY} がオブジェクトでない`] };
+  }
+  const reasons = [];
+  if (Object.keys(m).sort().join(' ') !== [...RETIREMENT_FIELDS].sort().join(' ')) {
+    reasons.push(`欄が ${RETIREMENT_FIELDS.join(' / ')} と一致しない`);
+  }
+  for (const k of ['reason', 'approved_by', 'reactivation']) {
+    if (typeof m[k] !== 'string' || !m[k].trim()) reasons.push(`${k} が空`);
+  }
+  // 退役を名乗りながら観測を進めることはできない —— 最後の実測と一字一句同じであること。
+  const claude = instantMs(m.last_claude_observed_at);
+  const codex = instantMs(m.last_codex_observed_at);
+  if (!Number.isFinite(claude) || m.last_claude_observed_at !== doc.observed_at) {
+    reasons.push('last_claude_observed_at が台帳の observed_at と一致しない');
+  }
+  if (!Number.isFinite(codex) || m.last_codex_observed_at !== doc.codex_observation?.observed_at) {
+    reasons.push('last_codex_observed_at が codex_observation.observed_at と一致しない');
+  }
+  if (claude > now || codex > now) reasons.push('最後の観測が検査時刻より未来');
+  // 日付だけなら UTC のその日全体。始まりが未来でないこと・終わりが最後の観測以後であること。
+  const day = dayStartMs(m.retired_at);
+  const exact = instantMs(m.retired_at);
+  const start = Number.isFinite(day) ? day : exact;
+  const end = Number.isFinite(day) ? day + DAY - 1 : exact;
+  if (!Number.isFinite(start)) {
+    reasons.push('retired_at が日付（YYYY-MM-DD）でも UTC 時刻でもない');
+  } else {
+    if (start > now) reasons.push('retired_at が検査時刻より未来');
+    if (!(end >= claude && end >= codex)) reasons.push('retired_at が最後の観測より前');
+  }
+  // 登録済みの routine はすべて参照不可か意図的停止で、最後の観測より新しい実行を名乗らない。
+  const observed = instantMs(doc.observed_at);
+  if (!Array.isArray(doc.routines)) {
+    reasons.push('routines が配列でない');
+  } else {
+    const stops = new Set((Array.isArray(doc.intentional_stops) ? doc.intentional_stops : [])
+      .filter((f) => f && typeof f === 'object' && typeof f.id === 'string').map((f) => f.id));
+    for (const r of doc.routines) {
+      if (r?.observation_state !== 'unavailable' && !stops.has(r?.id)) {
+        reasons.push(`${r?.id}: 参照不可でも意図的停止でもない`);
+      }
+      const times = [r?.source_observation?.observed_at, r?.last_verified?.observed_at];
+      for (const row of [r, r?.last_verified?.routine]) for (const k of RUN_TIME_FIELDS) times.push(row?.[k]);
+      if (times.some((v) => v !== null && v !== undefined && !(instantMs(v) <= observed))) {
+        reasons.push(`${r?.id}: 最後の観測より新しい（または読めない）実行時刻を持つ`);
+      }
+    }
+  }
+  // Codex の予約は最後の観測で全部 PAUSED。
+  const automations = doc.codex_observation?.automations;
+  if (!Array.isArray(automations)) {
+    reasons.push('codex_observation.automations が配列でない');
+  } else {
+    for (const a of automations) if (a?.status !== 'PAUSED') reasons.push(`Codex の予約 ${a?.id} が PAUSED でない`);
+  }
+  return { present: true, valid: reasons.length === 0, reasons, marker: m };
+}
+
+function retiredLine(m) {
+  return `retired — not observed since ${m.last_claude_observed_at} (Claude) / ${m.last_codex_observed_at} (Codex)。`
+    + `観測は ${m.retired_at} に退役（${m.approved_by}）。退役中は写しの鮮度を検査しない。`
+    + '**routine の健全性は判定していない**（緑は健全を意味しない）';
+}
 
 /**
  * 1つの routine の健全性。**純関数。**
@@ -105,12 +218,22 @@ export function validate(doc, { now = Date.now() } = {}) {
     problems.push('max_snapshot_age_days が正の数でない — **上限の無い鮮度は鮮度ではない**');
   } else {
     const observed = Date.parse(doc.observed_at ?? '');
+    const retirement = retirementStatus(doc, { now });
     if (!Number.isFinite(observed)) {
       problems.push('observed_at が読めない — **いつ読んだ写しか分からないものを検査に使わない**');
-    } else if (now - observed > maxAge * DAY) {
-      const days = ((now - observed) / DAY).toFixed(1);
-      problems.push(`写しが ${days} 日前で古い（上限 ${maxAge} 日）`
-        + ' — **セッションが list_triggers を取り直すこと。**CIからは叩けない');
+    } else if (retirement.valid) {
+      // 鮮度だけを外す。黙って通さず、退役していることを必ず出す。
+      warnings.push(retiredLine(retirement.marker));
+    } else {
+      if (retirement.present) {
+        warnings.push(`${RETIREMENT_KEY} は在るが採用しない（${retirement.reasons.join(' / ')}）— 写しの鮮度の規則をそのまま適用する`);
+      }
+      if (now - observed > maxAge * DAY) {
+        const days = ((now - observed) / DAY).toFixed(1);
+        problems.push(`写しが ${days} 日前で古い（上限 ${maxAge} 日）`
+          + ' — **セッションが list_triggers を取り直すこと。**CIからは叩けない'
+          + (retirement.present ? `（${RETIREMENT_KEY} を採用しなかった理由: ${retirement.reasons.join(' / ')}）` : ''));
+      }
     }
   }
 
@@ -246,6 +369,10 @@ export function normalizeRoutines(payload) {
  * **取り直しが判断を上書きすると、この台帳は現状を追認する表になる。**
  */
 export function applySync(doc, payload, { now = new Date() } = {}) {
+  // 退役中の台帳を取り直すと、欄を残したまま observed_at だけが進む。欄の削除はレビューを経たPRで。
+  if (doc && typeof doc === 'object' && Object.hasOwn(doc, RETIREMENT_KEY)) {
+    throw new Error(`${RETIREMENT_KEY} がある間は写しを取り直さない（退役中）`);
+  }
   const routines = normalizeRoutines(payload);
   if (!routines) return null;
   return { ...doc, observed_at: now.toISOString().replace(/\.\d+Z$/, 'Z'), routines };
@@ -273,6 +400,64 @@ function selftest() {
     };
     d.routines.push(r);
     return r;
+  };
+
+  // 退役の検査は実データの中身（いま観測しているもの）に依らない合成の台帳で行う。
+  // 意図的停止1本と参照不可1本（未解消の記録あり）、Codex の予約2本は PAUSED。
+  const RETIRED_DAY = Date.parse('2026-10-20T00:00:00Z');
+  const retiredFixture = () => {
+    const observed = '2026-10-20T07:05:33.382Z', codex = '2026-10-20T07:05:28.373Z';
+    const empty = { enabled: null, cron_expression: null, run_once_at: null, next_run_at: null, last_fired_at: null,
+      last_run_status: null, last_run_fired_at: null, last_run_finished_at: null, last_run_session_id: null };
+    return {
+      observed_at: observed, max_snapshot_age_days: 3, open_budget: 1,
+      open_findings: [{ id: 'trig_gone', what: 'observation_unavailable', found_at: '2026-10-06', why: '個別GETも404' }],
+      intentional_stops: [{ id: 'trig_stop', why: 'オーナーが止めた' }],
+      routines: [
+        { id: 'trig_stop', name: 'stopped', enabled: false, cron_expression: '0 0 * * *', run_once_at: null,
+          next_run_at: null, last_fired_at: '2026-09-01T00:00:00Z', last_run_status: 'SUCCEEDED',
+          last_run_fired_at: '2026-09-01T00:00:00Z', last_run_finished_at: '2026-09-01T00:05:00Z' },
+        { id: 'trig_gone', name: 'gone', ...empty, observation_state: 'unavailable',
+          source_observation: { id: 'trig_gone', method: 'GET', endpoint: '/v1/code/triggers/trig_gone',
+            http_status: 404, observed_at: observed },
+          last_verified: { observed_at: '2026-10-06T07:44:56.773Z', routine: { id: 'trig_gone', name: 'gone',
+            enabled: true, cron_expression: '0 0 * * *', run_once_at: null, next_run_at: '2026-10-07T00:00:00Z',
+            last_fired_at: '2026-09-05T12:40:53.619116Z', last_run_status: 'FAILED',
+            last_run_fired_at: '2026-09-05T12:40:53.619116Z', last_run_finished_at: '2026-09-05T12:41:00Z' } } },
+      ],
+      codex_observation: { observed_at: codex, automations: [
+        { id: 'obsidian', status: 'PAUSED' }, { id: 'obsidian-2', status: 'PAUSED' }] },
+      [RETIREMENT_KEY]: { retired_at: '2026-10-20', reason: 'selftest', approved_by: 'owner decision 2026-10-20',
+        last_claude_observed_at: observed, last_codex_observed_at: codex, reactivation: 'selftest' },
+    };
+  };
+  const staleAt = (d, days) => validate(d, { now: Date.parse(d.observed_at) + days * DAY }).problems;
+  const expectStale = (d, label = '') => {
+    const { problems, warnings } = validate(d, { now: RETIRED_DAY + 10 * DAY });
+    assert(problems.some((x) => x.includes('古い')), `${label} 3日の規則に戻らなかった: ${problems.join(' / ')}`);
+    assert(!warnings.some((w) => w.startsWith('retired —')), `${label} 採用しない欄で退役中と出した`);
+    assert(warnings.some((w) => w.includes('採用しない')), `${label} 採用しない理由が出ていない`);
+  };
+  // 実CLIを、複製した台帳だけを持つ一時ディレクトリで走らせる（実台帳には触れない）。
+  const sandboxCli = (ledger, args, files = {}) => {
+    // realpath: macOS の一時ディレクトリはシンボリックリンク越しで、そのままだと入口判定が外れる。
+    const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'routine-runs-cli-')));
+    try {
+      for (const rel of ['scripts/check-routine-runs.mjs', 'scripts/lib/selftest.mjs']) {
+        fs.mkdirSync(path.dirname(path.join(dir, rel)), { recursive: true });
+        fs.copyFileSync(path.join(ROOT, rel), path.join(dir, rel));
+      }
+      const file = path.join(dir, 'data/routine-runs.json');
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      const before = `${JSON.stringify(ledger, null, 2)}\n`;
+      fs.writeFileSync(file, before);
+      for (const [name, value] of Object.entries(files)) fs.writeFileSync(path.join(dir, name), JSON.stringify(value));
+      const r = spawnSync(process.execPath, [path.join(dir, 'scripts/check-routine-runs.mjs'), ...args],
+        { cwd: dir, encoding: 'utf8' });
+      return { status: r.status, stdout: r.stdout, stderr: r.stderr, before, after: fs.readFileSync(file, 'utf8') };
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   };
 
   const scenarios = [
@@ -499,7 +684,9 @@ function selftest() {
       assert(normalizeRoutines(null) === null);
     }],
     ['**取り直しは判断を上書きしない**（現状を追認する表にしない）', () => {
-      const after = applySync(real, { data: [] }, { now: new Date('2026-08-29T00:00:00Z') });
+      // 退役中の台帳は取り直さない（下の退役の検査）。ここは取り直しそのものの規則を見る。
+      const after = applySync(broken(real, (d) => { delete d[RETIREMENT_KEY]; }),
+        { data: [] }, { now: new Date('2026-08-29T00:00:00Z') });
       assert(after.routines.length === 0, '写しは差し替わる');
       assert(after.open_findings.length === real.open_findings.length, 'open_findings が消えている');
       assert(after.open_budget === real.open_budget, 'open_budget が動いている');
@@ -512,8 +699,10 @@ function selftest() {
     // --- 写しの鮮度 -----------------------------------------------------
     ['**写しが古いと落とす**（読めているつもりを緑にしない）', () => {
       // Advance from the observation itself, not a fixed calendar date that
-      // stops being stale when a real snapshot is refreshed.
-      const p = validate(real, { now: Date.parse(real.observed_at) + (real.max_snapshot_age_days + 1) * DAY }).problems;
+      // stops being stale when a real snapshot is refreshed. The retired
+      // marker is removed here: this is the rule that applies without it.
+      const plain = broken(real, (d) => { delete d[RETIREMENT_KEY]; });
+      const p = validate(plain, { now: Date.parse(real.observed_at) + (real.max_snapshot_age_days + 1) * DAY }).problems;
       assert(p.some((x) => x.includes('古い')), p.join(' / '));
     }],
     ['observed_at が読めなければ落とす', () => {
@@ -523,6 +712,91 @@ function selftest() {
     ['鮮度の上限が無ければ落とす', () => {
       const p = V(broken(real, (d) => { delete d.max_snapshot_age_days; })).problems;
       assert(p.some((x) => x.includes('max_snapshot_age_days')), p.join(' / '));
+    }],
+
+    // --- 観測の退役（2026-10-20） ----------------------------------------
+    // 退役の欄が条件を全部満たすときだけ鮮度を外す。1つでも欠ければ3日の規則に戻る。
+    ['**退役中は +10日・+30日でも通り、退役中と出す**（黙って通さない）', () => {
+      for (const days of [10, 30]) {
+        const { problems, warnings } = validate(retiredFixture(), { now: RETIRED_DAY + days * DAY });
+        assert(problems.length === 0, `+${days}日: ${problems.join(' / ')}`);
+        assert(warnings.some((w) => w.startsWith('retired — not observed since 2026-10-20T07:05:33.382Z')),
+          `+${days}日: 退役中と出ていない: ${warnings.join(' / ')}`);
+      }
+    }],
+    ['**同じ台帳から退役の欄を消すと +4日で落ちる**', () => {
+      const p = staleAt(broken(retiredFixture(), (d) => { delete d[RETIREMENT_KEY]; }), 4);
+      assert(p.some((x) => x.includes('古い')), p.join(' / '));
+    }],
+    ['**実データ: 退役の欄があれば +10日・+30日で通る / 無ければ +4日で落ちる**', () => {
+      if (Object.hasOwn(real, RETIREMENT_KEY)) {
+        for (const days of [10, 30]) {
+          const { problems, warnings } = validate(real, { now: RETIRED_DAY + days * DAY });
+          assert(problems.length === 0, `+${days}日: ${problems.join(' / ')}`);
+          assert(warnings.some((w) => w.startsWith('retired — not observed since')), warnings.join(' / '));
+        }
+      } else {
+        const p = validate(real, { now: Date.parse(real.observed_at) + 4 * DAY }).problems;
+        assert(p.some((x) => x.includes('古い')), p.join(' / '));
+      }
+    }],
+    ...RETIREMENT_FIELDS.map((field) => [`退役の欄から ${field} が欠けたら3日の規則に戻る`, () => {
+      expectStale(broken(retiredFixture(), (d) => { delete d[RETIREMENT_KEY][field]; }));
+    }]),
+    ['退役の欄が空文字・余分な欄・オブジェクトでないなら3日の規則に戻る', () => {
+      expectStale(broken(retiredFixture(), (d) => { d[RETIREMENT_KEY].reason = ' '; }));
+      expectStale(broken(retiredFixture(), (d) => { d[RETIREMENT_KEY].extra = 'x'; }));
+      expectStale(broken(retiredFixture(), (d) => { d[RETIREMENT_KEY] = true; }));
+    }],
+    ['**最後の観測と一致しない（観測を進めて退役を名乗る）なら3日の規則に戻る**', () => {
+      expectStale(broken(retiredFixture(), (d) => { d[RETIREMENT_KEY].last_claude_observed_at = '2026-10-20T07:05:33.383Z'; }));
+      expectStale(broken(retiredFixture(), (d) => { d[RETIREMENT_KEY].last_codex_observed_at = '2026-10-20T07:05:28.374Z'; }));
+      expectStale(broken(retiredFixture(), (d) => { d.observed_at = '2026-10-21T00:00:00.000Z'; }));
+      expectStale(broken(retiredFixture(), (d) => { d.codex_observation.observed_at = '2026-10-21T00:00:00.000Z'; }));
+    }],
+    ['**retired_at が未来・最後の観測より前・読めないなら3日の規則に戻る**', () => {
+      const at = (value) => broken(retiredFixture(), (d) => { d[RETIREMENT_KEY].retired_at = value; });
+      for (const value of ['2026-11-01', '2026-11-01T00:00:00Z', '2026-10-19', '2026-10-20T07:05:00Z',
+        '2026-02-31', '20 Oct 2026', '2026-10-20T16:00:00+09:00']) {
+        expectStale(at(value), value);
+      }
+      // 未来かどうかは検査の時計で決める（+10日の時計なら 11-01 は未来）。
+      const ok = validate(at('2026-10-20T07:05:33.382Z'), { now: RETIRED_DAY + 10 * DAY });
+      assert(ok.problems.length === 0, `最後の観測と同じ時刻の退役を拒否した: ${ok.problems.join(' / ')}`);
+    }],
+    ['**参照不可でも意図的停止でもない routine が1本でもあれば3日の規則に戻る**', () => {
+      expectStale(broken(retiredFixture(), (d) => {
+        d.routines.push({ id: 'trig_active', name: 'active', enabled: true, cron_expression: '0 0 * * *', run_once_at: null,
+          next_run_at: '2026-10-21T00:00:00Z', last_fired_at: '2026-10-20T00:00:00Z', last_run_status: 'SUCCEEDED' });
+      }));
+      expectStale(broken(retiredFixture(), (d) => { d.intentional_stops = []; d.open_findings.push(
+        { id: 'trig_stop', what: 'stopped', found_at: '2026-10-20', why: 'x' }); d.open_budget += 1; }));
+      // ID の無い停止記録は、ID の無い routine を「意図的停止」に見せない。
+      expectStale(broken(retiredFixture(), (d) => {
+        d.intentional_stops.push({ why: 'x' }); d.routines.push({ name: 'no id', enabled: true });
+      }));
+    }],
+    ['**最後の観測より新しい実行を名乗る routine があれば3日の規則に戻る**', () => {
+      expectStale(broken(retiredFixture(), (d) => { d.routines[0].last_run_finished_at = '2026-10-21T00:00:00Z'; }));
+      expectStale(broken(retiredFixture(), (d) => { d.routines[0].last_fired_at = 'いつか'; }));
+      expectStale(broken(retiredFixture(), (d) => { d.routines[1].last_verified.routine.last_run_fired_at = '2026-10-22T00:00:00Z'; }));
+    }],
+    ['**Codex の予約が1本でも ACTIVE なら3日の規則に戻る**', () => {
+      expectStale(broken(retiredFixture(), (d) => { d.codex_observation.automations[1].status = 'ACTIVE'; }));
+      expectStale(broken(retiredFixture(), (d) => { delete d.codex_observation; }));
+    }],
+    ['**退役中の台帳は取り直さない**（関数でも、--sync でも書かない）', () => {
+      let refused = false;
+      try { applySync(retiredFixture(), { data: [] }); } catch (e) { refused = /退役中/.test(e.message); }
+      assert(refused, 'applySync が退役中の台帳を取り直した');
+      const cli = sandboxCli(retiredFixture(), ['--sync', 'payload.json'], { 'payload.json': { data: [] } });
+      assert(cli.status === 2, `--sync の終了コード ${cli.status}: ${cli.stderr}`);
+      assert(cli.after === cli.before, '--sync が退役中の台帳を書き換えた');
+      assert(/retired/.test(cli.stderr), cli.stderr);
+      // 対照: 欄が無ければ同じ取り直しは書く（拒否が常に起きる形でないことを確かめる）。
+      const plain = sandboxCli(broken(retiredFixture(), (d) => { delete d[RETIREMENT_KEY]; }),
+        ['--sync', 'payload.json'], { 'payload.json': { data: [] } });
+      assert(plain.status === 0 && plain.after !== plain.before, `対照の取り直しが書かなかった: ${plain.stderr}`);
     }],
   ];
   return run(scenarios, { label: '副系の実行記録' });
@@ -565,6 +839,11 @@ if (isMain) {
       process.exit(1);
     }
     const before = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
+    if (before && typeof before === 'object' && Object.hasOwn(before, RETIREMENT_KEY)) {
+      console.error(`retired — ${RETIREMENT_KEY} がある間は写しを取り直さない。何も書いていない。`);
+      console.error('観測を再開するには、固定した観測器を用意し、この欄を消すPRをレビューを経て入れる。');
+      process.exit(2);
+    }
     const payload = JSON.parse(fs.readFileSync(src, 'utf8'));
     const after = applySync(before, payload);
     if (!after) { console.error(`${src} が list_triggers の応答に見えない`); process.exit(1); }
@@ -577,6 +856,8 @@ if (isMain) {
 
   const doc = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
   const { problems, warnings, unhealthy } = validate(doc);
+  // 退役中は観測していないので、どの行も「ok」とは書かない。
+  const retired = retirementStatus(doc).valid;
 
   const age = ((Date.now() - Date.parse(doc.observed_at)) / DAY).toFixed(1);
   console.log(`副系の実行記録 — routine ${doc.routines.length} 本（写しは ${age} 日前）\n`);
@@ -586,7 +867,7 @@ if (isMain) {
   for (const r of doc.routines) {
     const what = diagnose(r, { now: Date.now(),
       observedAt: Number.isFinite(shownAt) ? shownAt : Date.now() });
-    const mark = what ? `**${what}**` : 'ok';
+    const mark = what ? `**${what}**` : retired ? 'not observed' : 'ok';
     console.log(`  ${mark.padEnd(14)} ${(r.name ?? '').slice(0, 40)}`);
   }
   console.log(`\n  要追跡 ${unhealthy?.length ?? 0} 件`
@@ -607,7 +888,10 @@ if (isMain) {
     process.exit(1);
   }
   if (process.argv.includes('--check')) {
-    console.log('\n写しの鮮度・列挙の網羅・ラチェットに問題なし。'
-      + '**「緑」は異常が無いという意味ではない** — 未対応は上に出ている。');
+    console.log(retired
+      ? '\n退役中（not observed）: 退役の条件・列挙の網羅・ラチェットに問題なし。写しの鮮度は検査していない。'
+        + '**routine が健全だという意味ではない。**'
+      : '\n写しの鮮度・列挙の網羅・ラチェットに問題なし。'
+        + '**「緑」は異常が無いという意味ではない** — 未対応は上に出ている。');
   }
 }
