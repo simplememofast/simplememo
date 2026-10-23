@@ -354,7 +354,8 @@ scheduled run created within the cron-silence limit for this workflow
 (`scripts/lib/cron-silence.mjs`, 1680 minutes, counted from the newest scheduled
 run GitHub created) sets `scheduled_run_silent` until the next one appears;
 look at the workflow's own run list and state (disabled, no run created, a late
-start), because Cron Health opens issues only at 07:00 JST and fails instead of
+start), because Cron Health opens issues only from its daily 07:00 JST run or a
+manual dispatch and fails instead of
 reporting a disabled workflow. These alerts change no guard input, fallback,
 dispatch, receipt or run record. They do change two statuses: the ingest status
 reads `alert`, and the collection-level `status` of `collect` /

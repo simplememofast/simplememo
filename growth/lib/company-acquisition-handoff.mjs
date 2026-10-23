@@ -52,9 +52,9 @@ export const SCHEDULE_LOSS_STATES = Object.freeze(['job_failed_without_artifact'
 export const SCHEDULE_DELIVERED_STATES = Object.freeze(['admitted', 'already_admitted', 'existing_receipt_retained', 'key_pending']);
 // Liveness uses the same limit and boundary as cron-health for this workflow (scripts/lib/cron-silence.mjs: one
 // day plus four hours for delayed starts), measured from the newest scheduled run GitHub created, queued and
-// in-progress runs included. Actual starts drift about two hours after the nominal 21:23 UTC, so only a change
+// in-progress runs included. Actual starts drift two to three hours after the nominal 21:23 UTC, so only a change
 // in that delay of over four hours from one day to the next reaches it. Cron Health is not a second witness of
-// the same gap: it opens issues only from its 07:00 JST run, and a disabled workflow makes it fail instead.
+// the same gap: it opens issues only from its daily 07:00 JST run or a manual dispatch, and a disabled workflow makes it fail instead.
 export const SCHEDULE_SILENCE_MINUTES = SCHEDULE_EXPECTATIONS.find(e => e.path === ACQUISITION_WORKFLOW)?.max_silence_minutes ?? null;
 
 // Only a verified receipt is a delivery. A failed one is, for GA4, also a loss: export-analytics.mjs seals a query
@@ -387,7 +387,7 @@ const ACTIONS = {
   key_pending: `Owner registers ${APPSFLYER_SECRET} as a secret of the ${APPSFLYER_ENVIRONMENT} environment (never a repository secret); the job rests until then.`,
   alert: 'Inspect health.json alerts (integrity of an Actions artifact or setup); the local readers stay available.',
   scheduled_collection_lost: 'A scheduled acquisition-daily run left a source without data (health.json alerts: run_id, source, verdict); inspect that run. The alert changes no guard: a fallback that existed still runs (the local AppsFlyer reader; the legacy GA4 dispatch only for an end-date without an Actions artifact or receipt), and a GA4 failed receipt (admitted_failed, existing_receipt_failed) stays final. Clears when a later scheduled run delivers that source, or without any delivery once the lost run leaves the 15-day run listing.',
-  scheduled_run_silent: `No scheduled acquisition-daily run was created within ${SCHEDULE_SILENCE_MINUTES} minutes (the cron-silence limit). Open the Acquisition Daily workflow's run list and state in GitHub Actions: disabled (enable it again; stop only through data/emergency-stop.json), no scheduled run created, or a start delayed past the limit. A Cron Health issue may not exist: it opens issues only at 07:00 JST, and a disabled workflow makes it fail instead. Clears when the next scheduled run appears.`,
+  scheduled_run_silent: `No scheduled acquisition-daily run was created within ${SCHEDULE_SILENCE_MINUTES} minutes (the cron-silence limit). Open the Acquisition Daily workflow's run list and state in GitHub Actions: disabled (enable it again; stop only through data/emergency-stop.json), no scheduled run created, or a start delayed past the limit. A Cron Health issue may not exist: it opens issues only from its daily 07:00 JST run or a manual dispatch, and a disabled workflow makes it fail instead. Clears when the next scheduled run appears.`,
 };
 const SCHEDULE_ALERTS = Object.freeze(['scheduled_collection_lost', 'scheduled_run_silent']);
 

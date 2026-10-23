@@ -185,12 +185,14 @@ heroを直して翻訳を再生成した場合や、短縮URL・pilot の目印�
   （`js/app-store-tracking.js`、`ga4-funnel.sql` の saw_onelink / clicked_onelink）ので、別の短縮コードや
   直接Appleのリンクに目印を写すと pilot の表示・クリックが黙って増える。テストは計測スクリプトを
   オフラインで動かし、pilot と数えられるリンクがこの目印を持つことを確かめる。
-- `state: rolled_back` の間: pilotの短縮コードも目印も、サイトのどこにも無い。
+- `state: rolled_back` の間: pilotの短縮コードも目印も、サイトのどこにも無い（目印が見える範囲は下のとおり）。
 - どちらの間も、QAの短縮コードはサイトのファイルに無い。例外は分類に使う `js/app-store-tracking.js` だけで、
   ほかのファイルは例外に書けない。そのファイルは丸ごと例外になる（分類以外の使い方を見分けない）ので、
   変えるときは中身を読む。ただしQAの短縮URLそのもの（ホストつき）はそのファイルにも置けない。
 - 短縮コードは、文字参照・%エンコード（二重を含む）・JavaScript のエスケープを戻し、大文字小文字を
   区別せずに数える。実行時に部品から組み立てたリンクは見えない。
+- 目印は `.html` の `<a>` の開始タグでだけ見る（コメント・`<script>`・`<template>` の中は見ない）。
+  `<template>` の中の目印や、スクリプトが書き出す・付ける目印は見えない（いまのサイトには該当する作りが無い）。
 - サイトのファイル = `functions/_middleware.js` が404を返すもの（`INTERNAL_PREFIXES`・`/CLAUDE.md`・
   配信しない `data/*.json`）を除いた全ファイル。`_redirects`・`functions/`・`admin/`・`assets/`・`js/` を含む。
   画像の中身（QR）は読まない。
@@ -204,6 +206,8 @@ heroを直して翻訳を再生成した場合や、短縮URL・pilot の目印�
 1. 変更PR（本番反映の前）: HTML、`growth/onelink-pilot.json` の `pages`、上の2つの一覧を変え、
    `unrecorded_scope_change` に何を変えたかの短い説明を書く。`measurement_changes` にはまだ書かない
    （版の名前は開始日を含むので、開始後に決める）。
+   ページ数が変わるときは、`growth/lib/onelink-pilot.test.mjs` と `scripts/site-route-inventory.mjs` に
+   書かれた 9 も直す（CI が落ちて気づくが、理由は表示されない）。
 2. 本番反映を確かめた後のPR: 実際の開始時刻・本番SHAつきの記録を `measurement_changes` に足し、
    同じPRで `measurement_change` をその版にして `unrecorded_scope_change` を `null` に戻す。
 

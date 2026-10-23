@@ -14,7 +14,8 @@ are, including `https://simplememofast.onelink.me/it5q/l250gib4`. SEO Validation
 enforces this against `growth/onelink-pilot.json` (`growth/lib/onelink-pilot.test.mjs`):
 the pilot short code may appear only in those nine hero hrefs, the pilot label
 (`data-app-route="onelink"`, `data-app-traffic="pilot"`, variant `onelink_v1`)
-only on those nine anchors, and the QA short code in no site file except
+only on those nine anchors (as written in HTML `<a>` tags; a label inside
+`<template>` or set by a script is not seen), and the QA short code in no site file except
 `js/app-store-tracking.js` (exempt as a whole, but never holding the full QA
 link). Do not append
 `c=website_bridge_v1` to that short URL: appended parameters do not override a
