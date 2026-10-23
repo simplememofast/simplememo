@@ -10,6 +10,8 @@
  * commit, never the model — verifies it, pushes the day branch without force,
  * opens the PR, records the PR number with trusted code and pushes that record.
  *
+ *   --inspect-handoff (model job, after the model, from a $GITHUB_SHA worktree) are the
+ *              request and exit files there; resume the same session once for them?
  *   --pack     (model job, from a $GITHUB_SHA worktree) bundle the committed work
  *   --verify   (publish job, no credential) verdict: publish | push_only | none |
  *              duplicate | stopped | rejected_<code>
@@ -94,26 +96,128 @@ export function git(cwd, args, { token = null, input, allowFail = false, encodin
   return result.stdout;
 }
 
-function readBounded(file, limit = MAX_JSON_BYTES) {
+export function readBounded(file, limit = MAX_JSON_BYTES) {
   let fd;
   try {
     if (!fs.lstatSync(file).isFile()) return { reason: 'not_file' };
     fd = fs.openSync(file, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW | fs.constants.O_NONBLOCK);
     const stat = fs.fstatSync(fd);
     if (!stat.isFile() || stat.size > limit) return { reason: 'oversized' };
-    const buffer = Buffer.alloc(limit + 1);
+    // Sized by the file, not the limit (the execution file's limit is large); a file that grows
+    // while it is read is not trusted.
+    const buffer = Buffer.alloc(stat.size + 1);
     const length = fs.readSync(fd, buffer, 0, buffer.length, 0);
-    if (length > limit) return { reason: 'oversized' };
+    if (length > stat.size) return { reason: 'unreadable' };
     return { bytes: buffer.subarray(0, length) };
   } catch (error) {
     return { reason: error.code === 'ENOENT' ? 'missing' : 'unreadable' };
   } finally { if (fd !== undefined) fs.closeSync(fd); }
 }
 
-function readJson(file) {
+export function readJson(file) {
   const read = readBounded(file);
   if (!read.bytes) return { reason: read.reason };
   try { return { value: JSON.parse(read.bytes.toString('utf8')) }; } catch { return { reason: 'invalid_json' }; }
+}
+
+// ── after the model (model job, from a $GITHUB_SHA worktree; every file there is untrusted) ──
+// 2026-10-22 (run 39701630744): the model committed its work and ended without writing the request
+// (prompt step 5) or the exit code (step 8), so the day published nothing. When either is missing
+// after a successful main step, the workflow resumes the same session once, with a fixed prompt that
+// asks only for those files, narrower tools, a small turn cap and a budget inside the run's cap.
+export const HANDOFF_FILES = Object.freeze({ request: 'autopilot-pr-request.json', exit: 'autopilot-exit.json' });
+export const EXECUTION_FILE = 'claude-execution-output.json';
+// The resume rewrites the action's execution file: the main session's is copied first (diagnostics/cost).
+export const MAIN_EXECUTION_COPY = 'autopilot-execution-main.json';
+// The bounded execution summary travels in the handoff (a job output carrying JSON was dropped by the runner).
+export const SUMMARY_FILE = 'autopilot-summary.json';
+export const FILE_STATES = ['present', 'missing', 'not_file', 'oversized', 'unreadable', 'invalid_json', 'not_object'];
+export const RESUME_DECISIONS = ['not_needed', 'nothing_to_publish', 'model_not_success', 'session_id_invalid', 'time_unknown',
+  'time_short', 'cost_unknown', 'budget_exhausted', 'resume'];
+// max_usd/max_turns/minutes are the resume step's ceilings; below min_usd of the run's remaining budget there is
+// no room for the few calls the files need, so the resume is not started.
+export const RESUME_LIMITS = Object.freeze({ max_usd: 3, min_usd: 0.5, max_turns: 12, minutes: 8 });
+// The model job's limit, and room for what runs outside the resume: the checkout before the Gate step starts the
+// job's clock, and the steps after the resume (audit, cost, checkpoint, summary, pack, upload; ~1 minute in all on
+// 2026-10-22). A resume that does not fit would cut the job before the handoff is uploaded.
+export const JOB_TIME = Object.freeze({ job_minutes: 90, outside_minutes: 5 });
+// A day that ends at prompt step 0 writes only the exit code (step 8): no request is expected.
+export const NO_REQUEST_EXIT_CODE = 'skipped_already_done';
+// A long session (the 2026-10-22 trial ran 236 turns) must not make the main cost unreadable.
+export const MAX_EXECUTION_BYTES = 128 * 1024 * 1024;
+const SESSION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+export const validSessionId = value => typeof value === 'string' && SESSION_ID.test(value);
+const usdValue = value => typeof value === 'string' && /^\d{1,6}(?:\.\d{1,20})?$/.test(value) ? Number(value) : null;
+
+/** present when the file is a bounded regular file (no symlink) holding a JSON object; else why not. */
+export function handoffFileState(file) {
+  const read = readJson(file);
+  if (read.reason) return FILE_STATES.includes(read.reason) ? read.reason : 'unreadable';
+  return read.value && typeof read.value === 'object' && !Array.isArray(read.value) ? 'present' : 'not_object';
+}
+
+export function handoffFileStates(runnerTemp) {
+  return { request: handoffFileState(path.join(runnerTemp, HANDOFF_FILES.request)),
+    exit: handoffFileState(path.join(runnerTemp, HANDOFF_FILES.exit)) };
+}
+
+/** The main session's execution file (written by the pinned action after the session): hash and cost. */
+export function readMainExecution(runnerTemp, execFile = '') {
+  const expected = path.join(runnerTemp, EXECUTION_FILE);
+  if (execFile && path.resolve(execFile) !== expected) return { reason: 'unexpected_path' };
+  const read = readBounded(expected, MAX_EXECUTION_BYTES);
+  if (!read.bytes) return { reason: read.reason };
+  const sha256 = createHash('sha256').update(read.bytes).digest('hex');
+  let doc;
+  try { doc = JSON.parse(read.bytes.toString('utf8')); } catch { return { sha256, bytes: read.bytes, reason: 'invalid_json' }; }
+  const result = (Array.isArray(doc) ? [...doc].reverse() : [doc]).find(item => item?.type === 'result');
+  const cost = result?.total_cost_usd;
+  return { sha256, bytes: read.bytes, cost: typeof cost === 'number' && Number.isFinite(cost) && cost >= 0 ? cost : null };
+}
+
+/** Pure: resume once only for a successful main step whose files are missing, within the job's time and the run's budget. */
+export function resumeDecision({ modelOutcome, states, exitCode, sessionId, elapsedSeconds, runtimeBudgetUsd, mainCostUsd }) {
+  if (states.request === 'present' && states.exit === 'present') return { decision: 'not_needed' };
+  if (states.request === 'missing' && states.exit === 'present' && exitCode === NO_REQUEST_EXIT_CODE) return { decision: 'nothing_to_publish' };
+  // A failed main step publishes push_only, which never reads the request; a limit stop must not spend more.
+  if (modelOutcome !== 'success') return { decision: 'model_not_success' };
+  if (!validSessionId(sessionId)) return { decision: 'session_id_invalid' };
+  // A request already written publishes without the resume; a resume cut by the job's limit would lose it.
+  if (!(Number.isFinite(elapsedSeconds) && elapsedSeconds >= 0)) return { decision: 'time_unknown' };
+  if (elapsedSeconds > (JOB_TIME.job_minutes - JOB_TIME.outside_minutes - RESUME_LIMITS.minutes) * 60) return { decision: 'time_short' };
+  // The run's cap (scripts/autopilot-budget.mjs --runtime-budget) covers the main session and the resume.
+  if (!(Number.isFinite(runtimeBudgetUsd) && runtimeBudgetUsd > 0 && Number.isFinite(mainCostUsd) && mainCostUsd >= 0)) {
+    return { decision: 'cost_unknown' };
+  }
+  const usd = Math.floor(Math.min(RESUME_LIMITS.max_usd, runtimeBudgetUsd - mainCostUsd) * 100) / 100;
+  if (!(usd >= RESUME_LIMITS.min_usd)) return { decision: 'budget_exhausted' };
+  return { decision: 'resume', session_id: sessionId, budget_usd: usd.toFixed(2) };
+}
+
+export function inspectAfterModel({ runnerTemp, modelOutcome, sessionId, runtimeBudgetUsd, execFile, jobStartedEpoch, now = Date.now() }) {
+  assert(path.isAbsolute(runnerTemp ?? ''), 'absolute RUNNER_TEMP required');
+  const states = handoffFileStates(runnerTemp);
+  const exit = states.exit === 'present' ? readJson(path.join(runnerTemp, HANDOFF_FILES.exit)).value : null;
+  const main = readMainExecution(runnerTemp, execFile);
+  // The Gate step's `date +%s` (the job's clock, recorded before the model ran).
+  const started = typeof jobStartedEpoch === 'string' && /^\d{10}$/.test(jobStartedEpoch) ? Number(jobStartedEpoch) : NaN;
+  const decided = resumeDecision({ modelOutcome, states, exitCode: exit?.code, sessionId, elapsedSeconds: Math.floor(now / 1000) - started,
+    runtimeBudgetUsd: usdValue(runtimeBudgetUsd), mainCostUsd: main.cost });
+  if (decided.decision === 'resume') {
+    // Never over an existing path (a planted file or link): readers then find a copy that does not
+    // match main_execution_sha256 and report it as unknown. The resume itself does not depend on it.
+    try { fs.writeFileSync(path.join(runnerTemp, MAIN_EXECUTION_COPY), main.bytes, { mode: 0o600, flag: 'wx' }); } catch { /* see above */ }
+  }
+  return { states, ...decided, main_execution_sha256: main.sha256 ?? null };
+}
+
+/** GITHUB_OUTPUT values: typed only. session_id and the budget are set only for a resume. */
+export function inspectOutputs(result) {
+  const missing = ['request', 'exit'].filter(name => result.states[name] !== 'present');
+  return { request_after_main: result.states.request, exit_after_main: result.states.exit,
+    missing: missing.length ? missing.join(',') : 'none', resume: result.decision === 'resume',
+    resume_decision: result.decision, main_execution_sha256: result.main_execution_sha256 ?? '',
+    ...(result.decision === 'resume' ? { session_id: result.session_id, resume_budget_usd: result.budget_usd } : {}) };
 }
 
 // ── request (written by the model: untrusted) ──────────────────────────────
@@ -207,11 +311,13 @@ export function pack({ workspace, out, day, takeover = false, runnerTemp = proce
     git(workspace, ['update-ref', HANDOFF_REF, head]);
     git(workspace, ['bundle', 'create', path.join(out, 'work.bundle'), HANDOFF_REF, `^${base}`]);
   }
-  for (const [from, to] of [['autopilot-pr-request.json', 'request.json'], ['autopilot-exit.json', 'exit.json']]) {
+  // summary.json: the bounded execution summary (scripts/autopilot-diagnostics.mjs --summarize, typed
+  // fields only), re-validated by the publish job's receipt. Its sha256 is in the manifest like the rest.
+  for (const [from, to] of [[HANDOFF_FILES.request, 'request.json'], [HANDOFF_FILES.exit, 'exit.json'], [SUMMARY_FILE, 'summary.json']]) {
     const read = runnerTemp ? readBounded(path.join(runnerTemp, from)) : { reason: 'missing' };
     if (read.bytes) fs.writeFileSync(path.join(out, to), read.bytes, { mode: 0o600, flag: 'wx' });
   }
-  for (const name of ['work.bundle', 'request.json', 'exit.json']) {
+  for (const name of ['work.bundle', 'request.json', 'exit.json', 'summary.json']) {
     const file = path.join(out, name);
     if (!fs.existsSync(file)) continue;
     const bytes = fs.readFileSync(file);
@@ -524,6 +630,49 @@ export function checkWiring(source) {
   assert(packStep && /worktree add --detach "\$RUNNER_TEMP\/pack-tools" "\$GITHUB_SHA"/.test(packStep)
     && /node "\$RUNNER_TEMP\/pack-tools\/scripts\/autopilot-publish\.mjs" --pack/.test(packStep), 'pack must run from the workflow commit');
 
+  // The one resume of the session (2026-10-22): decided by workflow-commit code right after the main
+  // step; the same pinned action, the model credential and the read-only job token only, Bash/Read/Write
+  // only, small caps, a fixed prompt, and only after a successful main step whose files are missing.
+  const modelSteps = stepsOf(jobs.get('autopilot'));
+  const inspect = modelSteps.find(step => /\n        id: handoff_files\n/.test(step));
+  const resume = modelSteps.find(step => /\n        id: resume\n/.test(step));
+  assert(inspect && resume, 'the handoff check and the resume step must be wired');
+  assert(modelSteps.indexOf(claude) + 1 === modelSteps.indexOf(inspect) && modelSteps.indexOf(inspect) + 1 === modelSteps.indexOf(resume),
+    'the handoff check follows the main step, and the resume follows the check');
+  assert(/git -c core\.hooksPath=\/dev\/null -c core\.fsmonitor=false worktree add --detach "\$RUNNER_TEMP\/handoff-tools" "\$GITHUB_SHA"\n/.test(inspect)
+    && /\n {10}node "\$RUNNER_TEMP\/handoff-tools\/scripts\/autopilot-publish\.mjs" --inspect-handoff\n/.test(inspect)
+    && /\n        if: >-\n          !cancelled\(\) &&\n          \(steps\.claude\.outcome == 'success' \|\| steps\.claude\.outcome == 'failure'\)\n/.test(inspect)
+    && inspect.includes('\n          SESSION_ID: ${{ steps.claude.outputs.session_id }}\n')
+    && inspect.includes('\n          RUNTIME_BUDGET_USD: ${{ steps.route.outputs.runtime_budget_usd }}\n')
+    && !/secrets\./.test(inspect), 'the handoff check runs workflow-commit code after every finished main step, without a credential');
+  const pinned = step => step.match(/\n        uses: (anthropics\/claude-code-action@[0-9a-f]{40})(?:\s|$)/)?.[1];
+  assert.equal(modelSteps.filter(step => /uses: anthropics\/claude-code-action@/.test(step)).length, 2, 'one main session and one resume');
+  assert(pinned(claude) && pinned(resume) === pinned(claude), 'the resume uses the main step\'s pinned action');
+  assert.match(resume, /\n        if: >-\n          !cancelled\(\) && steps\.claude\.outcome == 'success'\n          && steps\.handoff_files\.outputs\.resume == 'true'\n/,
+    'the resume runs only after a successful main step, when the check asked for it');
+  assert.match(resume, /\n        continue-on-error: true\n/, 'the resume must not change the job verdict');
+  assert(resume.includes(`\n        timeout-minutes: ${RESUME_LIMITS.minutes}\n`), 'the resume has the short timeout its time rule assumes');
+  // The time rule (resumeDecision) reads the job's clock, recorded by the Gate step before the model ran.
+  const gate = modelSteps.find(step => /\n        id: gate\n/.test(step));
+  assert(gate && modelSteps.indexOf(gate) < modelSteps.indexOf(claude)
+    && /\n        run: \|\n          echo "job_started_epoch=\$\(date \+%s\)" >> "\$GITHUB_OUTPUT"\n          node scripts\/autopilot-gate\.mjs --preflight\n/.test(gate)
+    && inspect.includes('\n          JOB_STARTED_EPOCH: ${{ steps.gate.outputs.job_started_epoch }}\n'), 'the handoff check reads the job\'s clock from the Gate step');
+  assert(model.includes(`\n    timeout-minutes: ${JOB_TIME.job_minutes}\n`), 'the job limit the resume\'s time rule assumes');
+  assert.deepEqual([...resume.matchAll(/secrets\.([A-Z0-9_]+)/g)].map(m => m[1]), ['CLAUDE_CODE_OAUTH_TOKEN'], 'the resume gets the model credential only');
+  assert(resume.includes('\n          github_token: ${{ github.token }}\n') && !/\n        env:\n/.test(resume)
+    && [...resume.matchAll(/token: (.*)/g)].length === 2, 'the resume gets only the read-only job token');
+  const resumeArgs = resume.match(/\n          claude_args: \|\n((?: {12}[^\n]*\n)*)/)?.[1].split('\n').map(line => line.trim()).filter(Boolean);
+  assert.deepEqual(resumeArgs, ['--resume ${{ steps.handoff_files.outputs.session_id }}', `--max-turns ${RESUME_LIMITS.max_turns}`,
+    '--max-budget-usd ${{ steps.handoff_files.outputs.resume_budget_usd }}', '--model ${{ steps.route.outputs.model }}',
+    '--allowedTools "Bash,Read,Write"'], 'the resume: the validated session, small caps, the same model, Bash/Read/Write only');
+  const resumePrompt = resume.split('\n          prompt: |\n')[1];
+  assert(resumePrompt && !resumePrompt.includes('${{'), 'the resume prompt is fixed text');
+  for (const step of [inspect, resume]) {
+    const name = stepName(step);
+    assert(!RESERVED_STEP_WORDS.some(word => name.includes(word)) && !/SDKの停止理由|成果物|資格情報|^公開判定:/.test(name),
+      `model step name collides with Act's step keys: ${name}`);
+  }
+
   const publish = jobs.get('publish');
   const pub = activeLines(publish);
   assert.match(pub, /\n    needs: autopilot\n/, 'publish runs after the model job');
@@ -608,6 +757,37 @@ function selftest() {
   t(repairOfCode(repair.run, new Set(['ap-20261018-actions'])) === 'repair_of_unknown', 'unknown target refused');
   t(repairOfCode(repair.run, new Set(['ap-20261019-actions'])) === null, 'known target accepted');
   t(repairOfCode(repair.run, null) === 'repair_of_base_unreadable', 'unreadable base refused');
+  const session = 'bf8acc9e-2dec-4cca-8674-f9d04adcd74a';
+  t(validSessionId(session), 'a session id is a lowercase UUID');
+  for (const bad of ['', 'BF8ACC9E-2DEC-4CCA-8674-F9D04ADCD74A', `${session} --allowedTools WebFetch`, `${session}\n`, `"${session}"`,
+    session.slice(1), `${session}0`, null, 7]) t(!validSessionId(bad), `session id refused: ${JSON.stringify(bad)}`);
+  const missing = { request: 'missing', exit: 'present' };
+  const decide = extra => resumeDecision({ modelOutcome: 'success', states: missing, sessionId: session, elapsedSeconds: 48 * 60,
+    runtimeBudgetUsd: 20, mainCostUsd: 15.41336, ...extra });
+  t(decide().decision === 'resume' && decide().budget_usd === '3.00' && decide().session_id === session, 'resume capped at $3');
+  t(decide({ mainCostUsd: 18.7 }).budget_usd === '1.30', 'resume budget is what the run cap leaves');
+  t(decide({ mainCostUsd: 19.6 }).decision === 'budget_exhausted', 'no resume below the floor');
+  t(decide({ mainCostUsd: 21 }).decision === 'budget_exhausted', 'no resume over the run cap');
+  t(decide({ mainCostUsd: null }).decision === 'cost_unknown' && decide({ runtimeBudgetUsd: null }).decision === 'cost_unknown', 'unknown cost: no resume');
+  t(decide({ sessionId: 'x' }).decision === 'session_id_invalid', 'invalid session: no resume');
+  t(decide({ modelOutcome: 'failure' }).decision === 'model_not_success', 'a failed main step is not resumed');
+  t(decide({ states: { request: 'present', exit: 'present' } }).decision === 'not_needed', 'both present: no resume');
+  t(decide({ states: { request: 'present', exit: 'invalid_json' } }).decision === 'resume', 'an unusable exit file is missing');
+  // Step 0 days write only the exit code; any other code, or an unusable request, still needs the request.
+  t(decide({ exitCode: 'skipped_already_done' }).decision === 'nothing_to_publish', 'a step-0 day is not resumed');
+  for (const [label, extra] of [['another exit code', { exitCode: 'shipped_pr' }], ['no exit code', { exitCode: undefined }],
+    ['an unusable request', { exitCode: 'skipped_already_done', states: { request: 'invalid_json', exit: 'present' } }],
+    ['no exit file', { exitCode: 'skipped_already_done', states: { request: 'missing', exit: 'missing' } }]]) {
+    t(decide(extra).decision === 'resume', `resumed: ${label}`);
+  }
+  // The job's limit: the resume (8 min) and the steps outside it (5 min) must fit in 90 minutes from the Gate step's clock.
+  t(decide({ elapsedSeconds: 77 * 60 }).decision === 'resume', 'a resume that fits in the job is started');
+  t(decide({ elapsedSeconds: 77 * 60 + 1 }).decision === 'time_short', 'a resume that would be cut by the job limit is not started');
+  for (const elapsedSeconds of [NaN, -1, undefined, Infinity]) {
+    t(decide({ elapsedSeconds }).decision === 'time_unknown', `unknown elapsed time: no resume (${elapsedSeconds})`);
+  }
+  t(inspectOutputs({ states: missing, decision: 'session_id_invalid', main_execution_sha256: null }).session_id === undefined,
+    'no session id leaves the check unless it resumes');
   const workflow = fs.readFileSync(path.join(ROOT, '.github/workflows/obsidian-autopilot.yml'), 'utf8');
   checkWiring(workflow); n++;
   const publishStart = workflow.indexOf('\n  publish:\n');
@@ -627,7 +807,56 @@ function selftest() {
   const toolsMoved = workflow.slice(0, publishStart) + workflow.slice(publishStart).replace('"$GITHUB_WORKSPACE/tools/scripts/autopilot-publish.mjs" --verify', 'scripts/autopilot-publish.mjs --verify');
   t(toolsMoved !== workflow, 'tools mutation applies');
   assert.throws(() => checkWiring(toolsMoved), /workflow-commit tools/); n++;
-  console.log(`autopilot-publish: ${n} path, request and workflow-wiring checks passed`);
+  // The resume step: every weakening is refused.
+  const resumeAt = workflow.indexOf('      - name: Resume the session once for the missing handoff files\n');
+  const resumeEnd = workflow.indexOf('\n      - name: ', resumeAt + 1);
+  for (const [from, to] of [
+    ['--allowedTools "Bash,Read,Write"', '--allowedTools "Bash,Read,Write,WebFetch"'],
+    ['--max-turns 12', '--max-turns 50'],
+    ["\n          && steps.handoff_files.outputs.resume == 'true'", ''],
+    ["steps.claude.outcome == 'success'\n", "steps.claude.outcome != 'skipped'\n"],
+    ['--resume ${{ steps.handoff_files.outputs.session_id }}', '--resume ${{ steps.claude.outputs.session_id }}'],
+    ['claude-code-action@16b3b310c3d7b5279df73130324d5205aeea8eac', 'claude-code-action@v1'],
+    ['github_token: ${{ github.token }}', 'github_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}'],
+    ['        continue-on-error: true\n', ''],
+    ['- name: Resume the session once for the missing handoff files', '- name: Claude Code resume for the missing handoff files'],
+    ['            3. ほかには何もしない。', '            3. ${{ steps.gate.outputs.today }} ほかには何もしない。'],
+    [`timeout-minutes: ${RESUME_LIMITS.minutes}\n`, `timeout-minutes: ${RESUME_LIMITS.minutes + 1}\n`],
+  ]) {
+    const block = workflow.slice(resumeAt, resumeEnd);
+    t(block.includes(from), `resume mutation applies: ${from}`);
+    const mutated = workflow.slice(0, resumeAt) + block.replace(from, to) + workflow.slice(resumeEnd);
+    assert.throws(() => checkWiring(mutated), undefined, `resume mutation must fail: ${from}`); n++;
+  }
+  // The job's clock: recorded by the Gate step, read by the check, against the job limit the rule assumes.
+  for (const [from, to] of [
+    ['          echo "job_started_epoch=$(date +%s)" >> "$GITHUB_OUTPUT"\n', ''],
+    ['          JOB_STARTED_EPOCH: ${{ steps.gate.outputs.job_started_epoch }}\n', ''],
+    ['          JOB_STARTED_EPOCH: ${{ steps.gate.outputs.job_started_epoch }}\n', '          JOB_STARTED_EPOCH: ${{ steps.resume.outputs.job_started_epoch }}\n'],
+    [`    timeout-minutes: ${JOB_TIME.job_minutes}\n`, `    timeout-minutes: ${JOB_TIME.job_minutes + 30}\n`],
+  ]) {
+    const mutated = workflow.replace(from, to);
+    t(mutated !== workflow, `clock mutation applies: ${from.trim()}`);
+    assert.throws(() => checkWiring(mutated), /clock|job limit/, `clock mutation must fail: ${from.trim()}`); n++;
+  }
+  const now = Date.parse('2026-10-24T01:30:00Z');
+  const clockDir = fs.mkdtempSync(path.join(os.tmpdir(), 'autopilot-clock-'));
+  try {
+    fs.writeFileSync(path.join(clockDir, EXECUTION_FILE), JSON.stringify([{ type: 'result', total_cost_usd: 15.41336, num_turns: 236 }]));
+    const inspectAt = (jobStartedEpoch, extra = {}) => inspectAfterModel({ runnerTemp: clockDir, modelOutcome: 'success', sessionId: session,
+      runtimeBudgetUsd: '20', jobStartedEpoch, now, ...extra }).decision;
+    t(inspectAt(String(now / 1000 - 48 * 60)) === 'resume', 'the check measures the elapsed time from the Gate step\'s clock');
+    t(inspectAt(String(now / 1000 - 80 * 60)) === 'time_short', 'a late check does not resume');
+    for (const bad of ['', '17613', '1761300000 ', '1.7e9', `${now / 1000 - 48 * 60}\n`, undefined]) {
+      t(inspectAt(bad) === 'time_unknown', `an unreadable clock does not resume: ${JSON.stringify(bad)}`);
+    }
+    fs.writeFileSync(path.join(clockDir, HANDOFF_FILES.exit), JSON.stringify({ code: NO_REQUEST_EXIT_CODE }));
+    t(inspectAt(String(now / 1000 - 48 * 60)) === 'nothing_to_publish', 'the check reads the exit code of a step-0 day');
+  } finally { fs.rmSync(clockDir, { recursive: true, force: true }); }
+  const inspectMoved = workflow.replace('"$RUNNER_TEMP/handoff-tools/scripts/autopilot-publish.mjs" --inspect-handoff', 'scripts/autopilot-publish.mjs --inspect-handoff');
+  t(inspectMoved !== workflow, 'inspect mutation applies');
+  assert.throws(() => checkWiring(inspectMoved), /handoff check/); n++;
+  console.log(`autopilot-publish: ${n} path, request, resume and workflow-wiring checks passed`);
 }
 
 async function main(argv = process.argv.slice(2)) {
@@ -635,6 +864,14 @@ async function main(argv = process.argv.slice(2)) {
   if (argv.includes('--check')) {
     checkWiring(fs.readFileSync(path.join(ROOT, '.github/workflows/obsidian-autopilot.yml'), 'utf8'));
     console.log('autopilot-publish: workflow wiring OK (model job has no write credential; publish runs only workflow-commit tools)');
+    return;
+  }
+  if (argv.includes('--inspect-handoff')) {
+    const result = inspectAfterModel({ runnerTemp: process.env.RUNNER_TEMP, modelOutcome: process.env.MODEL_OUTCOME,
+      sessionId: process.env.SESSION_ID, runtimeBudgetUsd: process.env.RUNTIME_BUDGET_USD, execFile: process.env.EXEC_FILE,
+      jobStartedEpoch: process.env.JOB_STARTED_EPOCH });
+    output(inspectOutputs(result));
+    console.log(`handoff files after the model: request=${result.states.request} exit=${result.states.exit} resume=${result.decision}`);
     return;
   }
   assert(!argv.includes('--remote'), '--remote is a test-only parameter');
@@ -687,7 +924,7 @@ async function main(argv = process.argv.slice(2)) {
     console.log(`run record prepared: changed_files=${result.changed}`);
     return;
   }
-  throw Error('Use --pack, --verify, --push, --open-pr, --record, --check or --selftest');
+  throw Error('Use --inspect-handoff, --pack, --verify, --push, --open-pr, --record, --check or --selftest');
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
