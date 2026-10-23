@@ -6,7 +6,12 @@ import { extractCommands } from './preflight.mjs';
 import { wiredChecks, gatingChecks } from './check-selftests.mjs';
 
 const read = relative => JSON.parse(fs.readFileSync(new URL(relative, import.meta.url), 'utf8'));
-const config = read('../data/pr-release-ledger.json');
+const liveConfig = read('../data/pr-release-ledger.json');
+// PR2146 independently updated main's deadline while PR2139 was in CI.
+// Keep that live record intact. The expired fixture retains the original
+// October22 boundary so every negative exception case still exercises expiry.
+const config = structuredClone(liveConfig);
+config.known_unrecorded.find(e => e.id === 'pr7-dialogue-memo').resolve_by = '2026-10-22';
 const annotations = read('../growth/data/annotations.json');
 const experiments = read('../growth/experiments/experiments.json');
 const repository = 'simplememofast/simplememo';
@@ -28,6 +33,22 @@ const mainPublication = {
 const clone = x => structuredClone(x);
 const run = (c = config, a = annotations, p = publication, today = '2026-10-23', e = experiments) => audit(c, a, e, today, p);
 const expired = result => result.some(x => x.includes('置き去り'));
+
+test('the current upstream deadline is preserved and cannot inherit the old exception', () => {
+  const entry = liveConfig.known_unrecorded.find(e => e.id === 'pr7-dialogue-memo');
+  assert.equal(entry.resolve_by, '2026-11-04');
+  assert.ok(entry.$comment_extension_2026_10_23);
+  assert.equal(pr7PublicationException(liveConfig, annotations, '2026-10-23', publication), null);
+  assert.deepEqual(audit(liveConfig, annotations, experiments, '2026-10-23'), []);
+  assert.equal(expired(audit(liveConfig, annotations, experiments, '2026-11-05', publication)), true);
+});
+
+test('extending the fixture deadline never expands the pinned exception', () => {
+  const changed = clone(config);
+  changed.known_unrecorded.find(e => e.id === 'pr7-dialogue-memo').resolve_by = '2026-10-24';
+  assert.equal(pr7PublicationException(changed, annotations, '2026-10-25', publication), null);
+  assert.equal(expired(run(changed, annotations, publication, '2026-10-25')), true);
+});
 
 test('owner exception allows only the existing unresolved release during PR2139 publication', () => {
   assert.deepEqual(run(), []);
