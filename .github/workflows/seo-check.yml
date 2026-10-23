@@ -18,26 +18,42 @@ concurrency:
   group: seo-validation-${{ github.event_name }}-${{ github.ref }}-${{ github.ref == 'refs/heads/main' && github.run_id || 'latest' }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+permissions:
+  contents: read
+
 jobs:
   seo-check:
     runs-on: ubuntu-latest
     steps:
       # Full history is required for content-derived sitemap lastmod dates.
       # IndexNow also needs the first-parent diff for the published commit.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: '20'
+          node-version: '24.22.1'
+          package-manager-cache: false
+
+      - name: Web and CI security boundaries
+        run: node --test scripts/ci-security.test.mjs
+
+      - name: Locked tools dependency advisory gate
+        working-directory: tools
+        run: |
+          npm ci --ignore-scripts --no-audit
+          npm audit --omit=dev --audit-level=moderate
+
+      - name: Native image and local server compatibility
+        run: node --test scripts/tools-runtime.test.mjs
 
       - name: Routine CI scope regression
         run: node --test scripts/routine-ci-scope.test.mjs
 
       - name: Determine required routine observation checks
         id: routine_scope
-        uses: actions/github-script@v7
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         with:
           script: |
             const { routineCiScope } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/lib/routine-ci-scope.mjs`);
@@ -1409,10 +1425,36 @@ jobs:
       # 無かった。帰結は pr-evaluation-due.mjs が **2026-10-08 の D+14 を永久に拾わない**
       # こと（実測: due(ledger,'2026-10-08') が [] を返す）。
       # 「レコードが存在しない」はレコードを見ても分からないので、別の検査にしてある。
-      - name: PR release ledger completeness
+      - name: PR release ledger regression
         run: |
           node scripts/check-pr-release-ledger.mjs --selftest
-          node scripts/check-pr-release-ledger.mjs --check
+          node --test scripts/pr-release-publication-exception.test.mjs
+
+      - name: PR release ledger completeness
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        with:
+          script: |
+            const { checkPublication } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/check-pr-release-ledger.mjs`);
+            let associatedPullRequests = [];
+            if (context.eventName === 'push' && context.ref === 'refs/heads/main') {
+              // This public-repository endpoint supports unauthenticated reads:
+              // https://docs.github.com/en/rest/commits/commits#list-pull-requests-associated-with-a-commit
+              // No token/scope change; on denial or timeout fail, never retry via another identity.
+              if (!/^[0-9a-f]{40}$/.test(context.sha)) throw new Error('Invalid main commit');
+              const response = await fetch('https://api.github.com/repos/simplememofast/simplememo/commits/' + context.sha + '/pulls?per_page=100', {
+                headers: { Accept: 'application/vnd.github+json' },
+                signal: AbortSignal.timeout(10000), redirect: 'error',
+              });
+              if (response.status !== 200) throw new Error('Public merge identity lookup unavailable');
+              associatedPullRequests = await response.json();
+              if (!Array.isArray(associatedPullRequests)) throw new Error('Invalid merge identity response');
+            }
+            const result = checkPublication({
+              repository: context.repo.owner + '/' + context.repo.repo,
+              eventName: context.eventName, event: context.payload,
+              ref: context.ref, sha: context.sha, associatedPullRequests,
+            });
+            if (result) core.setFailed('PR release ledger completeness failed');
 
       # BigQuery の資格情報まわり。ネットワークにもGCPにも触らない
       # （token エンドポイントは fetch を差し替えて潰してある）ので、
@@ -1506,12 +1548,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: '20'
+          node-version: '24.22.1'
       - name: Claude observation health
         id: claude_health
         if: always() && github.event_name != 'pull_request'
@@ -1522,7 +1564,7 @@ jobs:
         run: python3 scripts/codex-routine-observer.py --check
       - name: Record actual observation health outcomes
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         env:
           CLAUDE_OUTCOME: ${{ steps.claude_health.outcome }}
           CODEX_OUTCOME: ${{ steps.codex_health.outcome }}

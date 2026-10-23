@@ -11,9 +11,19 @@ import fs from "node:fs";
 import path from "node:path";
 import archiver from "archiver";
 import { generateSet, composeSlide } from "./compose-slides.js";
+import { isLocalRequest, resolveOutDir, existingPathInside } from "./server-guard.js";
 
 const app = express();
 const PORT = 3456;
+
+// Only answer requests addressed to this machine's loopback name, so a
+// DNS-rebinding page (whose Host is its own domain) cannot reach the API,
+// and whose Origin, if sent, is this server's own, so a cross-site page
+// cannot POST to it (see server-guard.js).
+app.use((req, res, next) => {
+  if (!isLocalRequest(req.headers, PORT)) return res.status(403).send("Forbidden");
+  next();
+});
 
 app.use(express.json());
 
@@ -21,11 +31,24 @@ app.use(express.json());
 app.use("/admin", express.static(path.join(import.meta.dirname, "..", "admin")));
 
 // Serve generated images
-app.use("/slides", express.static(path.join(import.meta.dirname, "out")));
+const OUT_ROOT = path.join(import.meta.dirname, "out");
+app.use("/slides", (req, res, next) => {
+  let rel;
+  try { rel = decodeURIComponent(req.path).replace(/^\//, ''); }
+  catch { return res.status(400).send("Invalid path"); }
+  if (!existingPathInside(OUT_ROOT, rel)) return res.status(404).send("Not found");
+  next();
+}, express.static(OUT_ROOT));
 
 // Latest generation state
 let latestDir = null;
 let latestPlan = null;
+
+// Join `rel` onto `root` (same semantics as path.join) and return the result
+// only if it stays strictly inside `root`; null for non-strings and escapes.
+function joinInside(root, rel) {
+  return existingPathInside(root, rel);
+}
 
 // ── Generate 6 slides ───────────────────────────────────────────
 app.post("/api/generate", async (req, res) => {
@@ -73,18 +96,21 @@ app.post("/api/generate", async (req, res) => {
 app.post("/api/regenerate", async (req, res) => {
   try {
     const { dir, index, variant = "A", brand = false } = req.body || {};
-    if (index < 0 || index > 5) return res.status(400).json({ ok: false, error: "index must be 0-5" });
+    if (!Number.isInteger(index) || index < 0 || index > 5) return res.status(400).json({ ok: false, error: "index must be 0-5" });
 
-    const outDir = path.join(import.meta.dirname, "out", dir);
-    if (!fs.existsSync(outDir)) return res.status(404).json({ ok: false, error: "dir not found" });
+    const outDir = resolveOutDir(path.join(import.meta.dirname, "out"), dir);
+    if (!outDir) return res.status(400).json({ ok: false, error: "invalid dir" });
+    if (!existingPathInside(OUT_ROOT, dir)) return res.status(404).json({ ok: false, error: "dir not found" });
 
     // Re-read plan
     const planPath = path.join(outDir, "slide_plan.json");
+    if (!existingPathInside(outDir, "slide_plan.json")) return res.status(404).json({ ok: false, error: "plan not found" });
     const plan = JSON.parse(fs.readFileSync(planPath, "utf-8"));
     const slide = plan.slides[index];
 
     const bgDir = path.join(import.meta.dirname, "backgrounds", "master");
-    const bgFile = path.join(bgDir, slide.background);
+    const bgFile = joinInside(bgDir, slide.background);
+    if (!bgFile) throw new Error("slide_plan.json background is outside backgrounds/master");
 
     // Regenerate with new random layout/position (keep same crop for consistency, or randomize)
     const LAYOUTS = ["poster_dark", "caption_subtle", "caption_light"];
@@ -95,6 +121,7 @@ app.post("/api/regenerate", async (req, res) => {
     const buf = await composeSlide(bgFile, slide.text, newLayout, newPosition, slide.crop_variant, brand);
 
     const filename = `slide_${index + 1}.png`;
+    if (fs.lstatSync(path.join(outDir, filename), { throwIfNoEntry: false })?.isSymbolicLink()) throw new Error("invalid slide path");
     fs.writeFileSync(path.join(outDir, filename), buf);
 
     // Update plan
@@ -112,14 +139,23 @@ app.post("/api/regenerate", async (req, res) => {
     });
   } catch (e) {
     console.error("[regenerate] error:", e);
-    res.status(500).json({ ok: false, error: e.message });
+    res.status(500).json({ ok: false, error: "regenerate failed" });
   }
 });
 
 // ── ZIP download ────────────────────────────────────────────────
 app.get("/api/zip/:dir", (req, res) => {
-  const outDir = path.join(import.meta.dirname, "out", req.params.dir);
-  if (!fs.existsSync(outDir)) return res.status(404).send("Not found");
+  // :dir is URL-decoded ("..%2F" -> "../"), so accept only a plain directory
+  // name directly under tools/out before touching the filesystem; same 404
+  // as a missing dir.
+  const outDir = resolveOutDir(path.join(import.meta.dirname, "out"), req.params.dir);
+  if (!outDir) return res.status(404).send("Not found");
+  if (!existingPathInside(OUT_ROOT, req.params.dir)) return res.status(404).send("Not found");
+
+  const files = [...Array.from({ length: 6 }, (_, i) => `slide_${i + 1}.png`), "slide_plan.json"];
+  for (const file of files) {
+    if (fs.existsSync(path.join(outDir, file)) && !existingPathInside(outDir, file)) return res.status(404).send("Not found");
+  }
 
   res.setHeader("Content-Type", "application/zip");
   res.setHeader("Content-Disposition", `attachment; filename="${req.params.dir}.zip"`);
@@ -139,7 +175,13 @@ app.get("/api/zip/:dir", (req, res) => {
 });
 
 // ── Start ───────────────────────────────────────────────────────
-app.listen(PORT, () => {
+// Loopback only (IPv4 + IPv6), never the LAN interfaces.
+app.listen(PORT, "127.0.0.1", () => {
   console.log(`\n  TikTok Slide Builder`);
   console.log(`  http://localhost:${PORT}/admin/\n`);
+});
+app.listen(PORT, "::1").on("error", (e) => {
+  // No IPv6 loopback on this host: the 127.0.0.1 listener is enough.
+  if (e.code === "EADDRNOTAVAIL" || e.code === "EAFNOSUPPORT") return;
+  throw e;
 });

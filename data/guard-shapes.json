@@ -950,8 +950,9 @@
     "scripts/qr-routing.test.mjs",
     "scripts/should-snapshot.mjs",
     "scripts/sync-shared-chrome.mjs",
-    "scripts/viewport-pool.test.mjs",
-    "scripts/viewport-pool-browser.test.mjs"
+    "scripts/tools-runtime.test.mjs",
+    "scripts/viewport-pool-browser.test.mjs",
+    "scripts/viewport-pool.test.mjs"
   ],
   "$no_ledger_binding": [
     {
@@ -975,7 +976,8 @@
       "scripts/execution-priorities.test.mjs": "合成の業務棚卸し・評価を prioritize に渡す回帰テスト。実台帳JSONを直接読まない。別モジュールの証拠ファイル存在確認と未達blocked_on判定を通し、期限切れ・物理境界・分母維持・無効参照を検査する。実台帳のCLI検査は execution-priorities.mjs --check で別途行う。",
       "growth/scripts/collect-bing.mjs": "Official Bing API reader through lib/bing-webmaster.mjs; no local ledger reads. Validates runtime and encryption before refresh; tests cover missing credentials, source/date/schema failures, bounded retries and redaction.",
       "scripts/bing-capture.mjs": "Private capture state is read and validated in lib/company-bing.mjs. This thin CLI has no local ledger binding; module tests reject missing, stale, tampered, concurrent and mismatched attempt evidence.",
-      "scripts/enable-sitewide-app-routes.test.mjs": "合成HTMLと一時ディレクトリ内のfixtureだけを使うopt-in更新回帰テスト。実台帳JSONは読まない。直接readFileSyncするのは自作HTMLであり、import先のupdaterも同じ一時rootのHTMLとtracker fixtureを読む。既存trackerだけの変更、dry-run不変、対象外ページ保持、冪等性を検査するため、台帳由来の束縛が無いのは設計どおり。"
+      "scripts/enable-sitewide-app-routes.test.mjs": "合成HTMLと一時ディレクトリ内のfixtureだけを使うopt-in更新回帰テスト。実台帳JSONは読まない。直接readFileSyncするのは自作HTMLであり、import先のupdaterも同じ一時rootのHTMLとtracker fixtureを読む。既存trackerだけの変更、dry-run不変、対象外ページ保持、冪等性を検査するため、台帳由来の束縛が無いのは設計どおり。",
+      "scripts/tools-runtime.test.mjs": "合成画像・一時ディレクトリのslide_plan.json・loopback HTTPだけでsharpとローカルサーバーの互換性を検証するテスト。実運用の台帳JSONを読まず、投稿・モデル・外部サービスを呼ばない。Host/Origin、パス横断・symlink、LAN非公開、正常PNG/ZIPを実行して検証する。"
     },
     "scripts/preflight.mjs … **台帳を読まない。**読むのは `.github/workflows/seo-check.yml` で、そこから実行する検査の一覧を導出する（一覧を手で持つと、CI に検査を足した日に古くなる）。判定を持たない実行器なので、台帳由来の束縛が無いのは設計どおり",
     "\n",

@@ -35,9 +35,22 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24.22.1'
       - name: Install pinned functional browser tools
+        timeout-minutes: 4
         run: |
+          # The Azure mirror can trickle forever without an inactivity timeout.
+          # Keep the runner's existing official HTTPS fallbacks and APT trust.
+          grep -qE '^https://archive\.ubuntu\.com/ubuntu/([[:space:]]|$)' /etc/apt/apt-mirrors.txt
+          sudo sed -i '\|^http://azure\.archive\.ubuntu\.com/ubuntu/|d' /etc/apt/apt-mirrors.txt
+          if grep -qF 'azure.archive.ubuntu.com' /etc/apt/apt-mirrors.txt; then exit 1; fi
+          # Bound stalled mirrors, including apt invoked by Playwright via sudo.
+          sudo tee /etc/apt/apt.conf.d/99-ci-timeouts > /dev/null <<'APT'
+          Acquire::http::Timeout "30";
+          Acquire::https::Timeout "30";
+          Acquire::Retries "2";
+          APT::Update::Error-Mode "any";
+          APT
           npm install --prefix "$RUNNER_TEMP/tools" --no-save playwright@1.55.0
           "$RUNNER_TEMP/tools/node_modules/.bin/playwright" install --with-deps ${{ matrix.browser }}
       - name: Prepare identical-content rendering control

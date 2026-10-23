@@ -37,7 +37,7 @@ jobs:
           token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24.22.1'
       - name: Exercise contract, selection and recovery gates
         run: |
           node scripts/value-contracts.mjs --selftest

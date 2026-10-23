@@ -53,6 +53,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 import { todayJst } from './lib/jst.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -61,6 +62,55 @@ export const ANNOTATIONS_PATH = path.join(ROOT, 'growth/data/annotations.json');
 export const EXPERIMENTS_PATH = path.join(ROOT, 'growth/experiments/experiments.json');
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+// Owner-authorized on 2026-10-23 for Web PR #2139 only. This does not
+// evaluate PR⑦, extend its deadline, or assert any historical gate passed.
+const PR7 = Object.freeze({
+  id: 'pr7-dialogue-memo',
+  published_at: '2026-09-24',
+  url: 'https://prtimes.jp/main/html/rd/p/000000011.000182412.html',
+  resolve_by: '2026-10-22',
+});
+// Pin the entire existing annotation, including its unresolved-evidence note.
+const PR7_ANNOTATION_SHA256 = '371d75022c4cd07972bc8861223509f0f8610c4b579147021a4a93ed2a50484e';
+const REPOSITORY = 'simplememofast/simplememo';
+const HEAD_BRANCH = 'codex/web-ci-security-local-20261022';
+
+export function isPr2139Publication({ repository, eventName, event, ref, sha, associatedPullRequests = [] } = {}) {
+  if (repository !== REPOSITORY || event?.repository?.full_name !== REPOSITORY) return false;
+  const matches = pr => pr?.number === 2139 && pr.base?.ref === 'main'
+    && pr.base?.repo?.full_name === REPOSITORY && pr.head?.repo?.full_name === REPOSITORY
+    && pr.head?.ref === HEAD_BRANCH;
+  if (eventName === 'pull_request') {
+    return ref === 'refs/pull/2139/merge' && event.number === 2139 && matches(event.pull_request);
+  }
+  // Only the exact normal merge's main push, not future main commits or PRs.
+  // The workflow supplies GitHub's read-only associated-PR response, not a
+  // commit-message guess or a user-provided exception flag.
+  return eventName === 'push' && ref === 'refs/heads/main' && event.ref === ref
+    && event.deleted === false && /^[0-9a-f]{40}$/.test(sha ?? '') && event.after === sha
+    && Array.isArray(associatedPullRequests)
+    && associatedPullRequests.some(pr => matches(pr) && Number.isFinite(Date.parse(pr.merged_at))
+      && pr.merge_commit_sha === sha);
+}
+
+function isPr7Annotation(a) {
+  return createHash('sha256').update(JSON.stringify(a)).digest('hex') === PR7_ANNOTATION_SHA256;
+}
+
+export function pr7PublicationException(config, annotations, today, publication = {}) {
+  if (!isPr2139Publication(publication) || today < '2026-10-23') return null;
+  const entries = (config.known_unrecorded || []).filter(e => e?.id === PR7.id);
+  if (entries.length !== 1) return null;
+  const entry = entries[0];
+  if (!Object.entries(PR7).every(([k, v]) => entry[k] === v)) return null;
+  const approval = entry.owner_approved_web_publication_exception;
+  if (approval?.approved_by !== 'repository_owner' || approval.approved_on !== '2026-10-23'
+      || approval.pull_request !== 2139 || approval.scope !== 'web-publication-only'
+      || approval.historical_evaluation !== 'unverified') return null;
+  const matched = (annotations.annotations || []).filter(isPr7Annotation);
+  return matched.length === 1 ? entry : null;
+}
 
 /** JST の今日（台帳の日付は全部 JST 基準）。 */
 export { todayJst };
@@ -97,7 +147,7 @@ export function ledgerState(annotations) {
  * 落とす理由を配列で返す。空なら通る。
  * **読めない入力は「通す」側に倒さない** —— 設定を消して黙らせられる検査にしない。
  */
-export function audit(config, annotations, experiments, today = todayJst()) {
+export function audit(config, annotations, experiments, today = todayJst(), publication = {}) {
   const problems = [];
 
   if (!config || typeof config !== 'object') {
@@ -110,16 +160,18 @@ export function audit(config, annotations, experiments, today = todayJst()) {
     return ['growth/experiments/experiments.json が読めない — 突き合わせられないので通さない。'];
   }
 
+  const exception = pr7PublicationException(config, annotations, today, publication);
   // ① 2つの台帳の食い違い —— これが 2026-09-24 に実際に起きた穴
   const from = config.cross_check_from;
   if (ISO_DATE.test(String(from))) {
     const shipped = shippedExperimentDates(experiments);
     const parked = new Set(
-      (config.known_unrecorded || []).map((e) => e?.published_at).filter(Boolean),
+      (config.known_unrecorded || []).filter(e => e !== exception).map((e) => e?.published_at).filter(Boolean),
     );
     for (const a of annotations.annotations || []) {
       if (a.type !== 'pr' || !ISO_DATE.test(String(a.date)) || a.date < from) continue;
       if (shipped.has(a.date)) continue;
+      if (exception && isPr7Annotation(a)) continue;
       if (parked.has(a.date)) continue;  // 期限つきで把握済みのものは ③ が見る
       problems.push(
         `${a.date} の配信が annotations にあるのに experiments に無い — ` +
@@ -161,7 +213,7 @@ export function audit(config, annotations, experiments, today = todayJst()) {
       problems.push(`known_unrecorded「${entry?.id ?? '?'}」の resolve_by が日付ではない`);
       continue;
     }
-    if (by < today) {
+    if (by < today && entry !== exception) {
       problems.push(
         `known_unrecorded「${entry.id}」（${entry.published_at} 配信）が期限 ${by} を過ぎている — ` +
         `**未記録のまま置き去りになっている。**台帳へ転記するか、期限を延ばす理由を書く。`,
@@ -295,7 +347,7 @@ const SCENARIOS = [
   }],
 ];
 
-function runSelftest() {
+export function runSelftest() {
   let failed = 0;
   for (const [name, fn] of SCENARIOS) {
     try { fn(); console.log(`  ok   ${name}`); }
@@ -309,15 +361,13 @@ function readJson(p) {
   try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return null; }
 }
 
-function main() {
-  const argv = process.argv.slice(2);
-  if (argv.includes('--selftest')) process.exit(runSelftest() === 0 ? 0 : 1);
-
+export function checkPublication(publication = {}) {
   const config = readJson(CONFIG_PATH);
   const annotations = readJson(ANNOTATIONS_PATH);
   const experiments = readJson(EXPERIMENTS_PATH);
   const today = todayJst();
-  const problems = audit(config, annotations, experiments, today);
+  const problems = audit(config, annotations, experiments, today, publication);
+  const exception = config && annotations && pr7PublicationException(config, annotations, today, publication);
   const state = annotations ? ledgerState(annotations) : { n: null, last_release: null };
 
   // **件数は毎回出す。**--backtest の n をそのまま全件数と読ませないため。
@@ -335,9 +385,22 @@ function main() {
   if (problems.length) {
     console.error('\nPR配信台帳: 不整合');
     for (const p of problems) console.error(`  - ${p}`);
-    process.exit(argv.includes('--check') ? 1 : 0);
+    return 1;
   }
-  console.log('\n台帳の確認は期限内。把握済みの未記録も期限内。');
+  if (exception) {
+    console.log('\nオーナー承認の Web PR #2139 限定例外: pr7-dialogue-memo の未記録・期限超過を出荷阻害にしない。');
+    console.log('未記録と期限超過は存続。歴史的評価・D-SCORE・ゲート合否は未確認のまま。その他の台帳検査は適用済み。');
+  } else {
+    console.log('\n台帳の確認は期限内。把握済みの未記録も期限内。');
+  }
+  return 0;
+}
+
+function main() {
+  const argv = process.argv.slice(2);
+  if (argv.includes('--selftest')) process.exit(runSelftest() === 0 ? 0 : 1);
+  const result = checkPublication();
+  process.exit(argv.includes('--check') ? result : 0);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main();

@@ -2,23 +2,38 @@
 // Bounded, read-only public response verification; no analytics submissions.
 const fs = require('node:fs'), path = require('node:path');
 const { execFileSync } = require('node:child_process');
-const { chromium } = require('playwright');
 const ROOT = path.resolve(__dirname, '../..');
-const origin = new URL(process.env.PERF_ORIGIN || 'https://simplememofast.com');
-if (origin.protocol !== 'https:' || origin.pathname !== '/' || origin.search || origin.hash || origin.username || origin.password || !(origin.hostname === 'simplememofast.com' || /^[a-z0-9-]+\.simplememo-596\.pages\.dev$/.test(origin.hostname))) throw Error('Unapproved test origin');
-const output = process.env.PERF_RESULTS;
-if (!output) throw Error('PERF_RESULTS required');
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets/home-perf/manifest.json')));
-async function main() {
+async function main({ baseURL = process.env.PERF_ORIGIN || 'https://simplememofast.com', output = process.env.PERF_RESULTS, chromium = require('playwright').chromium } = {}) {
+  const origin = new URL(baseURL);
+  if (origin.protocol !== 'https:' || origin.pathname !== '/' || origin.search || origin.hash || origin.username || origin.password || !(origin.hostname === 'simplememofast.com' || /^[a-z0-9-]+\.simplememo-596\.pages\.dev$/.test(origin.hostname))) throw Error('Unapproved test origin');
+  if (!output) throw Error('PERF_RESULTS required');
   fs.mkdirSync(output, { recursive: true });
   const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] });
   const receipt = { checked_at: new Date().toISOString(), origin: origin.origin, expected_commit: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim(), verified: false };
+  // Preserve bounded transport evidence without response bodies, credentials or
+  // URL query strings, so access pages and browser failures stay distinguishable.
+  const safeURL = value => { const u = new URL(value); return u.origin + u.pathname; };
+  receipt.transport_failures = [];
   try {
     const ctx = await browser.newContext();
     await ctx.route('**/*', r => new URL(r.request().url()).origin === origin.origin && ['GET', 'HEAD'].includes(r.request().method()) ? r.continue() : r.abort());
     const page = await ctx.newPage();
+    page.on('requestfailed', request => {
+      if (receipt.transport_failures.length < 12) receipt.transport_failures.push({
+        url: safeURL(request.url()), method: request.method(), error: request.failure()?.errorText,
+      });
+    });
     const response = await page.goto(origin.origin + '/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    receipt.navigation = { url: safeURL(page.url()), status: response?.status(),
+      content_type: response?.headers()['content-type'],
+      content_security_policy: response?.headers()['content-security-policy'],
+      same_origin: new URL(page.url()).origin === origin.origin };
     if (response?.status() !== 200) throw Error('Homepage HTTP ' + response?.status());
+    // An Access/login page can also return HTTP 200. Do not execute the asset
+    // probe in that document or mistake its fetch failures for cache failures.
+    if (page.url() !== origin.origin + '/' || response.url() !== origin.origin + '/') throw Error('Unexpected homepage navigation: expected the approved origin root');
+    if (receipt.navigation.content_type?.split(';')[0].trim().toLowerCase() !== 'text/html') throw Error('Homepage Content-Type is not text/html');
     // Return every observation before asserting, including errors and headers.
     // A failed Promise must not erase the evidence from other in-flight requests.
     const observations = await page.evaluate(async entries => {
@@ -71,7 +86,12 @@ async function main() {
     if (receipt.failures.length) throw Error(receipt.failures.join('\n'));
     receipt.verified = true;
     console.log('PASS: ' + Object.keys(receipt.assets).length + ' canonical asset hashes/policies, mutable/error controls and ' + Object.keys(receipt.conditionals).length + ' conditional GET/HEAD policies.');
-  } catch (e) { receipt.error = String(e); throw e; }
+  } catch (e) {
+    receipt.error = String(e);
+    console.error('Transport evidence: ' + JSON.stringify({ navigation: receipt.navigation, failures: receipt.transport_failures }));
+    throw e;
+  }
   finally { fs.writeFileSync(path.join(output, 'cache-response-proof.json'), JSON.stringify(receipt, null, 2) + '\n'); await browser.close(); }
 }
-main().catch(e => { console.error(e); process.exitCode = 1; });
+module.exports = { main };
+if (require.main === module) main().catch(e => { console.error(e); process.exitCode = 1; });
