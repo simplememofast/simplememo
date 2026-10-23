@@ -17,12 +17,14 @@
 //
 // 【何を出すか】`--json` で、期限が来ていて**評価が完了していない**ものだけ。
 // 何も無ければ空配列。Routine 側は「空なら何もせず終わる」だけでよい。
+// 実験行が欠けた既知の配信も data/pr-release-ledger.json から拾う。
+// これは取得待ちの通知であり、実験の登録・採点・配信許可を代行しない。
 //
 //   node scripts/pr-evaluation-due.mjs            # 人が読む形
 //   node scripts/pr-evaluation-due.mjs --json     # Routine が読む形
 //   node scripts/pr-evaluation-due.mjs --selftest
 //
-// 【拾わないもの】
+// 【実験台帳から拾わないもの】
 //   - `status` が running 以外（planned は配信前・evaluated は済み・cancelled は取り下げ）
 //   - `evaluation_at` が未来、または読めない日付
 // 部分転記や全項目取得済みでも running なら残す。取得と評価完了は別。
@@ -31,6 +33,7 @@
 // **「読めない日付」は拾わない側に倒す。**拾う側に倒すと、書き間違えた1行が
 // 毎日 Chrome を起こして分析画面を開きに行く。逆に落とす側の誤りは
 // 「期限の日に鳴らない」で、これは `--json` が空なのを見れば分かる。
+// 既知の未記録配信の設定不備は、未取得0件と混ぜずエラーにする。
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -38,6 +41,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const LEDGER_PATH = path.join(ROOT, 'growth/experiments/experiments.json');
+export const RELEASE_LEDGER_PATH = path.join(ROOT, 'data/pr-release-ledger.json');
 
 /** 転記先の、実際に値が入るキー（`$comment` と導出値 `boarded` を除く）。 */
 export const POST_KEYS = [
@@ -85,10 +89,11 @@ export function isCaptured(post) {
  * **純関数。**今日（JST）の時点で評価期限が来ていて、まだ評価が完了していない
  * `pr_release` を返す。**台帳を書き換えない** —— 書くのは取得できた側の仕事。
  */
-export function due(rows, todayJst) {
+export function due(rows, todayJst, knownUnrecorded = []) {
+  validateKnownUnrecorded(knownUnrecorded);
   if (!Array.isArray(rows)) return [];
   if (!validDate(todayJst)) return [];
-  return rows.filter((e) => {
+  const recorded = rows.filter((e) => {
     if (!e || typeof e !== 'object') return false;
     if (e.type !== 'pr_release') return false;
     if (e.status !== 'running') return false;
@@ -104,6 +109,53 @@ export function due(rows, todayJst) {
     days_overdue: daysBetween(e.evaluation_at, todayJst),
     ...captureState(e.discover_boarding_post),
   }));
+  const unrecorded = knownUnrecorded.flatMap(entry => {
+    if (entry.evaluation_at > todayJst) return [];
+    // 日付だけでは同日の別配信と区別できない。台帳の明示IDだけで結ぶ。
+    const existing = rows.find(e => e && (e.id === entry.experiment_id || e.id === entry.id));
+    if (existing?.type === 'pr_release' && ['running', 'evaluated'].includes(existing.status)) return [];
+    // 公開済みの記録とplanned/frozen/cancelledが食い違うなら照合を要求する。
+    // 取得へ自動で進めたり、状態・既存の計測値を書き換えたりしない。
+    return [{
+      id: entry.experiment_id,
+      evaluation_at: entry.evaluation_at,
+      started_at: entry.published_at,
+      days_overdue: daysBetween(entry.evaluation_at, todayJst),
+      ...captureState(existing?.discover_boarding_post),
+      next_step: existing ? 'review_existing_experiment_state' : 'capture_then_reconcile_missing_experiment',
+      missing_experiment: !existing,
+      ...(existing ? { existing_status: existing.status ?? null, existing_experiment_id: existing.id } : {}),
+      source: 'data/pr-release-ledger.json',
+      source_id: entry.id,
+      recording_deadline: entry.resolve_by,
+    }];
+  });
+  return [...recorded, ...unrecorded];
+}
+
+/** 明示された D+14 と記録期限を分ける。日付や計測値を推測しない。 */
+export function validateKnownUnrecorded(entries) {
+  if (!Array.isArray(entries)) throw new Error('pr-release-ledger: known_unrecorded must be an array');
+  const ids = new Set();
+  const experimentIds = new Set();
+  for (const entry of entries) {
+    const at = `pr-release-ledger known_unrecorded ${entry?.id ?? '(missing id)'}`;
+    for (const key of ['id', 'experiment_id']) {
+      if (typeof entry?.[key] !== 'string' || !entry[key].trim())
+        throw new Error(`${at}: ${key} is required`);
+    }
+    if (ids.has(entry.id) || experimentIds.has(entry.experiment_id))
+      throw new Error(`${at}: duplicate id or experiment_id`);
+    ids.add(entry.id);
+    experimentIds.add(entry.experiment_id);
+    for (const key of ['published_at', 'evaluation_at', 'resolve_by']) {
+      if (!validDate(entry[key])) throw new Error(`${at}: ${key} must be a valid YYYY-MM-DD date`);
+    }
+    if (daysBetween(entry.published_at, entry.evaluation_at) !== 14)
+      throw new Error(`${at}: evaluation_at must be the explicit D+14 date, not the recording deadline`);
+    if (entry.resolve_by < entry.evaluation_at)
+      throw new Error(`${at}: resolve_by precedes evaluation_at`);
+  }
 }
 
 export function daysBetween(fromIso, toIso) {
@@ -120,7 +172,15 @@ export function todayJst(now = Date.now()) {
 
 function readRows() {
   const doc = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
-  return Array.isArray(doc) ? doc : (doc.experiments ?? []);
+  const rows = Array.isArray(doc) ? doc : doc?.experiments;
+  if (!Array.isArray(rows)) throw new Error('experiments.json: experiments must be an array');
+  return rows;
+}
+
+export function readKnownUnrecorded(file = RELEASE_LEDGER_PATH) {
+  const doc = JSON.parse(fs.readFileSync(file, 'utf8'));
+  validateKnownUnrecorded(doc?.known_unrecorded);
+  return doc.known_unrecorded;
 }
 
 function selftest() {
@@ -185,6 +245,37 @@ function selftest() {
   t('台帳が配列でなければ空', due(null, '2026-09-17').length === 0);
   t('欠けているキーを列挙する', due(one({}), '2026-09-17')[0].missing.length === POST_KEYS.length);
 
+  const unrecorded = [{ id: 'synthetic-pr7', experiment_id: 'synthetic-pr7',
+    published_at: '2026-09-24', evaluation_at: '2026-10-08', resolve_by: '2026-11-04' }];
+  const savedUnrecorded = JSON.stringify(unrecorded);
+  t('未記録配信もD+14前には取得しない', due([], '2026-10-07', unrecorded).length === 0);
+  const missingRow = due([], '2026-10-08', unrecorded)[0];
+  t('未記録配信をD+14当日から拾う', missingRow?.missing_experiment === true
+    && missingRow.days_overdue === 0 && missingRow.recording_deadline === '2026-11-04');
+  t('記録期限の延長で観測終了日を変えない', due([], '2026-11-05', unrecorded)[0]?.evaluation_at === '2026-10-08');
+  t('未記録配信に数値や採点を補わない', missingRow?.capture_state === 'uncaptured'
+    && missingRow.required_missing.length === 4 && !Object.hasOwn(missingRow, 'pv')
+    && !Object.hasOwn(missingRow, 'd_score_pre') && !Object.hasOwn(missingRow, 'status'));
+  for (const status of ['planned', 'running', 'frozen', 'evaluated', 'cancelled']) {
+    const existing = { ...base, id: 'synthetic-pr7', started_at: '2026-09-24', status, evaluation_at: '2026-10-08' };
+    const result = due([existing], '2026-10-23', unrecorded);
+    const conflict = !['running', 'evaluated'].includes(status);
+    t(`同IDの${status}を重複・再開せず不一致は照合へ`, result.length === (status === 'evaluated' ? 0 : 1)
+      && result.every(r => !r.missing_experiment)
+      && (!conflict || (result[0].next_step === 'review_existing_experiment_state'
+        && result[0].existing_status === status)));
+    const sameDayOther = { ...existing, id: 'other-id' };
+    t(`同日・別IDの${status}で未記録PRを隠さない`,
+      due([sameDayOther], '2026-10-23', unrecorded).some(r => r.id === 'synthetic-pr7' && r.missing_experiment));
+  }
+  const rejectsKnown = entries => { try { due([], '2026-10-23', entries); return false; } catch { return true; } };
+  t('壊れた未記録設定を0件と報告しない', rejectsKnown(null)
+    && rejectsKnown([{ ...unrecorded[0], evaluation_at: '2026-09-31' }])
+    && rejectsKnown([{ ...unrecorded[0], evaluation_at: undefined }])
+    && rejectsKnown([{ ...unrecorded[0], evaluation_at: '2026-11-04' }])
+    && rejectsKnown([unrecorded[0], unrecorded[0]]));
+  t('未記録の入力台帳を変更しない', JSON.stringify(unrecorded) === savedUnrecorded);
+
   t('実データが読める', Array.isArray(readRows()) && readRows().length > 0);
   // **実データで「いま何も期限が来ていない」ことも固定する。**
   // 9/17 より前にこれが非空になったら、台帳側で日付か status が動いている。
@@ -207,18 +298,26 @@ function selftest() {
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
-  if (process.argv.includes('--selftest')) process.exit(selftest());
-  const today = todayJst();
-  const rows = due(readRows(), today);
-  if (process.argv.includes('--json')) { console.log(JSON.stringify(rows, null, 2)); process.exit(0); }
-  if (!rows.length) {
-    console.log(`評価期限の来た PR 実験は無い（${today} JST 時点）。**何もしないのが正しい。**`);
-    process.exit(0);
-  }
-  console.log(`評価期限の来た PR 実験: ${rows.length}件（${today} JST 時点）\n`);
-  for (const r of rows) {
-    console.log(`  ${r.id}  評価日 ${r.evaluation_at}（${r.days_overdue}日経過）`);
-    console.log(`    状態: ${r.capture_state} / 次の処理: ${r.next_step}`);
-    console.log(`    未転記: ${r.missing.join(' / ')} / 要照合: ${r.existing_fields.join(' / ')}`);
+  try {
+    const knownUnrecorded = readKnownUnrecorded();
+    if (process.argv.includes('--selftest')) process.exit(selftest());
+    const today = todayJst();
+    const rows = due(readRows(), today, knownUnrecorded);
+    if (process.argv.includes('--json')) { console.log(JSON.stringify(rows, null, 2)); process.exit(0); }
+    if (!rows.length) {
+      console.log(`評価期限の来た PR 実験は無い（${today} JST 時点）。**何もしないのが正しい。**`);
+      process.exit(0);
+    }
+    console.log(`評価期限の来た PR 実験: ${rows.length}件（${today} JST 時点）\n`);
+    for (const r of rows) {
+      console.log(`  ${r.id}  評価日 ${r.evaluation_at}（${r.days_overdue}日経過）`);
+      if (r.missing_experiment) console.log(`    実験行未登録 / 出典: ${r.source} / 記録期限: ${r.recording_deadline}（評価対象日は変えない）`);
+      if (r.next_step === 'review_existing_experiment_state') console.log(`    公開済み記録と実験状態が不一致: ${r.existing_experiment_id} / ${r.existing_status}（照合するまで取得・再開しない）`);
+      console.log(`    状態: ${r.capture_state} / 次の処理: ${r.next_step}`);
+      console.log(`    未転記: ${r.missing.join(' / ')} / 要照合: ${r.existing_fields.join(' / ')}`);
+    }
+  } catch (error) {
+    console.error(`PR evaluation due: ${error.message}（判定失敗。未取得0件ではない）`);
+    process.exitCode = 1;
   }
 }

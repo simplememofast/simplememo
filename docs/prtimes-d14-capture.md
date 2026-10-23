@@ -8,6 +8,14 @@
 
 ## 1. 対象と期限
 
+2026-10-23補足: `pr-evaluation-due.mjs` は実験行に加え、
+`data/pr-release-ledger.json` の `known_unrecorded` にある評価日付きの未記録配信も返す。
+`missing_experiment: true` の行は取得待ちの発見であり、実験登録・評価完了・配信許可ではない。
+PR⑦の状態と残作業は [D+14評価記録](pr7-d14-evaluation-2026-10-23.md) を参照する。
+既存実験と照合し、評価済みの実験を再度開かない。
+`next_step: review_existing_experiment_state` は、既知の配信と同じIDの実験状態が
+食い違っていることを示す。自動で取得・再開・完了へ進めず、元の実験状態を確認する。
+
 最新の `origin/main` を取得し、対象リポジトリの開発規約を確認する。ユーザーの作業チェックアウトをリセットせず、台帳を変更する作業には清潔な個別worktreeを使う。
 
 ```sh

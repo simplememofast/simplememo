@@ -207,6 +207,7 @@ export function score(record) {
  */
 export function backtest(annotations) {
   const rows = [];
+  const excluded = [];
   let unparsed = 0;
   for (const a of annotations.annotations || []) {
     if (a.type !== 'pr') continue;
@@ -214,7 +215,20 @@ export function backtest(annotations) {
     const pv = /([\d,]+)PV/.exec(a.label);
     const syn = /転載(\d+)/.exec(a.label);
     const board = /(?:^|[^非])乗車/.test(a.label) ? true : /非乗車/.test(a.label) ? false : null;
-    if (!ds || !pv) { unparsed++; continue; }
+    if (!ds || !pv) {
+      unparsed++;
+      excluded.push({
+        date: a.date,
+        label: a.label.split('—')[0].trim(),
+        d_score: ds ? Number(ds[1]) : null,
+        pv: pv ? Number(pv[1].replace(/,/g, '')) : null,
+        syndication: syn ? Number(syn[1]) : null,
+        // A word such as 「乗車はD+14に追記」 is not an observed outcome.
+        boarded: null,
+        missing: [!ds && 'D-SCORE', !pv && 'PV'].filter(Boolean),
+      });
+      continue;
+    }
     rows.push({
       date: a.date,
       d_score: Number(ds[1]),
@@ -228,7 +242,7 @@ export function backtest(annotations) {
   const boarded = rows.filter((r) => r.boarded === true);
   const notBoarded = rows.filter((r) => r.boarded === false);
   return {
-    rows, unparsed,
+    rows, unparsed, excluded, total_releases: rows.length + excluded.length,
     boarded_min_score: boarded.length ? Math.min(...boarded.map((r) => r.d_score)) : null,
     not_boarded_max_score: notBoarded.length ? Math.max(...notBoarded.map((r) => r.d_score)) : null,
   };
@@ -240,6 +254,30 @@ export function backtest(annotations) {
 // この採点が守っているのは「空欄のまま撃たない」と「手で足した total が
 // 独り歩きしない」こと。**その2つが効かなくなったときに検出できること**を固定する。
 const SCENARIOS = [
+  ['欠測した配信を一覧に残し、比較母数や乗車実績を捏造しない', () => {
+    const bt = backtest({ annotations: [
+      { type: 'pr', date: '2026-06-01', label: 'PR② — 6,000PV・転載50・D-SCORE 80・乗車' },
+      { type: 'pr', date: '2026-09-24', label: 'PR⑦ — PV・D-SCORE・乗車はD+14に追記' },
+      { type: 'feature', date: '2026-09-24', label: '別の機能更新' },
+    ] });
+    if (bt.total_releases !== 2 || bt.rows.length !== 1 || bt.excluded.length !== 1
+        || bt.unparsed !== 1 || bt.excluded[0].date !== '2026-09-24'
+        || bt.excluded[0].d_score !== null || bt.excluded[0].pv !== null
+        || bt.excluded[0].boarded !== null || bt.excluded[0].missing.length !== 2
+        || bt.boarded_min_score !== 80 || bt.not_boarded_max_score !== null) {
+      throw new Error('欠測した配信が消えた、または較正データに混ざった');
+    }
+  }],
+  ['PVだけ判明しても未採点の配信を較正対象にしない', () => {
+    const bt = backtest({ annotations: [
+      { type: 'pr', date: '2026-09-24', label: 'PR⑦ — 1,234PV・転載42・配信前採点なし' },
+    ] });
+    if (bt.rows.length || bt.excluded[0]?.pv !== 1234
+        || bt.excluded[0]?.syndication !== 42 || bt.excluded[0]?.d_score !== null
+        || bt.boarded_min_score !== null || bt.not_boarded_max_score !== null) {
+      throw new Error('未採点の実測を消した、または点数を補完した');
+    }
+  }],
   ['**空欄のまま撃たない**（軸が数値でなければ problem）', () => {
     const r = score({ d_score_pre: {} });
     if (!r.problems.length) throw new Error('空欄が通った');
@@ -475,11 +513,14 @@ if (isMain) {
 
   if (has('backtest')) {
     const bt = backtest(JSON.parse(fs.readFileSync(ANNOTATIONS, 'utf8')));
-    console.log(`D-SCORE backtest (n=${bt.rows.length}${bt.unparsed ? `, ${bt.unparsed} 件は書式が違い拾えなかった` : ''})`);
+    console.log(`D-SCORE backtest (配信一覧=${bt.total_releases}, 比較対象 n=${bt.rows.length}, 欠測等による除外=${bt.excluded.length})`);
     console.log('  score  PV        転載   Discover  件名');
     for (const r of bt.rows) {
       const b = r.boarded === true ? '乗車  ' : r.boarded === false ? '非乗車' : '不明  ';
       console.log(`  ${String(r.d_score).padStart(3)}    ${String(r.pv).padStart(7)}   ${String(r.syndication ?? '-').padStart(3)}   ${b}    ${r.label}`);
+    }
+    for (const r of bt.excluded) {
+      console.log(`  未評価  ${String(r.pv ?? '未取得').padStart(7)}   ${String(r.syndication ?? '未取得').padStart(3)}   不明      ${r.date} ${r.label}（比較対象外: ${r.missing.join('・')}なし）`);
     }
     if (bt.boarded_min_score !== null && bt.not_boarded_max_score !== null) {
       console.log('');
