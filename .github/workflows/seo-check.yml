@@ -30,6 +30,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -77,6 +78,12 @@ jobs:
           node --test scripts/autopilot-publish.test.mjs
           node scripts/autopilot-publish.mjs --selftest
           node scripts/autopilot-publish.mjs --check
+
+      # Unattended Autopilot PRs that change more than run ledgers wait for the owner
+      # (auto-merge.yml + Environment autopilot-approval). Runs the workflow's own script
+      # bodies against a mocked GitHub client. No network.
+      - name: Autopilot owner-approval gate regression
+        run: node scripts/autopilot-approval-check.mjs --selftest
 
       - name: Refactoring regression tests (no network)
         run: node --test scripts/refactor.test.mjs
