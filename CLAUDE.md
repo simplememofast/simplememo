@@ -92,6 +92,18 @@ mainへのマージ＝本番デプロイなので、検証を通ったコミッ�
   コミットIDの祖先判定（`git merge-base --is-ancestor`）では確かめられない。
 - **draft PR は対象外** — 出荷を保留したいときは draft にしておけばよい。
   Ready にすると、次の検証成功時にマージされる。
+- **無人の自律運転ブランチ（`claude/obsidian-auto-<YYYYMMDD>`）は、台帳以外を変えるならオーナーの承認待ち**
+  （2026-10-20 オーナー判断・セキュリティ監査 F2/F3）—— 台帳（`data/autopilot-status.json`・
+  `data/autopilot-runs.json`・`data/autopilot-cost.json`・`docs/obsidian/AUTOPILOT_LOG.md`・
+  新しく足した `data/decision-intents|decision-rejections/*.json`）だけの PR はこれまでどおり自動マージ。
+  それ以外（ページ・スクリプト・/autopilot/ と翻訳・sitemap の生成物も含む）は PR を開いたまま
+  `autopilot:owner-approval` を付け、同じ run の `merge-after-approval` ジョブが Environment
+  `autopilot-approval` の承認を待つ。承認すると、検証済みの SHA・ファイル一覧・名義を確かめ直して
+  同じ squash でマージする。Environment に simplememofast の required reviewer が無ければマージしない。
+  **承認は検証と同じ JST の日のうちに** —— 日をまたぐと sitemap の lastmod（squash の JST 日付）が
+  ずれるので、ジョブはマージせず、生成物を作り直して push し直す必要がある。判定は
+  `scripts/autopilot-approval-check.mjs`。ほかのブランチ（オーナーのセッション、Act の
+  `claude/autopilot-act-*`、`Codex/*` など）の自動マージは変わらない。
 - **ワークフローファイルを触る PR は、head の blob がマージ結果の blob と一致しないと
   マージできない（読み。GitHubの仕様としては未確認）** —— 2026-09-05、PR #938
   （`seo-check.yml` に2行追加）で auto-merge が2回 `403 refusing to allow a GitHub App

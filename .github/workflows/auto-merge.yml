@@ -11,6 +11,14 @@
 #
 # 注意: workflow_run で起動するワークフローは常にデフォルトブランチ(main)の
 # 定義が使われる。このファイルを編集しても、main にマージされるまで反映されない。
+#
+# 【無人の自律運転ブランチはオーナーの承認つき（2026-10-20 オーナー判断・監査 F2/F3）】
+# claude/obsidian-auto-<YYYYMMDD> の PR は、台帳（scripts/lib/autopilot-paths.mjs の LEDGER と、
+# 新しく足した宣言・却下のファイル）だけを変えるときに限って、ここで自動マージする。
+# 台帳以外（ページ・スクリプト・/autopilot/ と翻訳・sitemap の生成物を含む）を変える PR は
+# 開いたまま残し、同じ run の merge-after-approval ジョブが Environment autopilot-approval で
+# オーナーの承認を待つ。判定は main の scripts/autopilot-approval-check.mjs。
+# ほかのブランチ（オーナーのセッション・Act・Codex/* など）の扱いは変えていない。
 
 name: Auto-merge Claude PRs
 
@@ -34,6 +42,12 @@ jobs:
     concurrency:
       group: auto-merge-${{ github.event.workflow_run.head_branch }}
       cancel-in-progress: false
+    # 承認待ちにした自律運転の PR を merge-after-approval へ渡す（それ以外は空）。
+    outputs:
+      approval_pr: ${{ steps.merge.outputs.approval_pr }}
+      approval_sha: ${{ steps.merge.outputs.approval_sha }}
+      approval_files: ${{ steps.merge.outputs.approval_files }}
+      validated_at: ${{ steps.merge.outputs.validated_at }}
     steps:
       - name: Checkout the trusted merge guard
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -69,12 +83,21 @@ jobs:
             }
 
             // 検証時点の関連付けを信用せず、現在開いているPRをheadから引き直す。
+            // List only PRs into main. Anyone can open PRs from this branch into
+            // other bases; listed by head alone they could fill the first page
+            // (newest 30) and hide the PR into main. GitHub allows one open PR
+            // per head and base, so more than one means the listing is not what
+            // this gate assumes (or is truncated): withhold rather than merge a subset.
             const { data: prs } = await github.rest.pulls.list({
-              owner, repo, state: 'open', head: `${owner}:${branch}`,
+              owner, repo, state: 'open', head: `${owner}:${branch}`, base: 'main',
             });
+            if (prs.length > 1) {
+              core.setFailed(`${branch}: more than one open PR into main listed; merge withheld`);
+              return;
+            }
 
             if (prs.length === 0) {
-              core.info(`${branch} に対する open な PR が無いため何もしない`);
+              core.info(`${branch} から main への open な PR が無いため何もしない`);
               return;
             }
 
@@ -143,6 +166,49 @@ jobs:
                 return;
               }
 
+              // 無人の自律運転ブランチ（claude/obsidian-auto-<YYYYMMDD>）だけの門。台帳だけを
+              // 変える PR はこのままマージし、それ以外は開いたまま merge-after-approval に渡す。
+              // 判定の失敗はこの PR だけを承認待ちにする。setFailed も return もしない
+              // （ほかのブランチと、この run の完了を待つ Act・decision-monitor に影響させない）。
+              if (/^claude\/obsidian-auto-(\d{8})$/.test(branch)) {
+                let policy = null;
+                let verdict;
+                try {
+                  policy = await import(`${process.env.GITHUB_WORKSPACE}/scripts/autopilot-approval-check.mjs`);
+                  if (!policy.isAutopilotBranch(branch)) throw new Error('branch scope differs from the policy');
+                  const files = pr.changed_files > policy.MAX_LISTED_FILES ? null
+                    : await github.paginate(github.rest.pulls.listFiles, {
+                      owner, repo, pull_number: pr.number, per_page: 100,
+                    });
+                  verdict = { ...policy.autoMergeClass(files, pr.changed_files),
+                    files: Array.isArray(files) ? policy.fileListHash(files) : '' };
+                } catch {
+                  verdict = { class: 'approval', reasons: ['policy_error'], files: '' };
+                }
+                if (verdict.class !== 'ledger') {
+                  core.setOutput('approval_pr', String(pr.number));
+                  core.setOutput('approval_sha', validatedSha);
+                  core.setOutput('approval_files', verdict.files || '');
+                  core.setOutput('validated_at', run.created_at || '');
+                  try {
+                    await github.rest.issues.addLabels({
+                      owner, repo, issue_number: pr.number, labels: ['autopilot:owner-approval'],
+                    });
+                  } catch {
+                    core.info(`#${pr.number}: 表示用のラベルを付けられなかった（判定には影響しない）`);
+                  }
+                  try {
+                    await core.summary.addHeading('Autopilot PR はオーナーの承認待ち')
+                      .addRaw(policy ? policy.approvalSummary({ pr: pr.number, reasons: verdict.reasons })
+                        : '判定を読み込めなかったため、この PR は承認待ちにした。\n').write();
+                  } catch {
+                    core.info('ジョブサマリを書けなかった（判定には影響しない）');
+                  }
+                  core.notice(`#${pr.number} は台帳以外を変えるため自動マージしない（承認待ち: merge-after-approval）`);
+                  continue;
+                }
+              }
+
               const { data: merged } = await github.rest.pulls.merge({
                 owner, repo,
                 pull_number: pr.number,
@@ -170,6 +236,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ steps.merge.outputs.merged_sha }}
+          persist-credentials: false
           fetch-depth: 10
 
       - name: Setup Node
@@ -183,3 +250,143 @@ jobs:
         if: steps.merge.outputs.merged_count != '0' && steps.merge.outputs.merged_count != ''
         continue-on-error: true
         run: node scripts/indexnow-notify.js --since ${{ steps.merge.outputs.merged_count }}
+
+  # 承認待ちにした自律運転の PR を、オーナーの承認の後にだけマージする（2026-10-20 オーナー判断）。
+  # Environment autopilot-approval（Required reviewers: simplememofast）はオーナーが作る。
+  # GitHub は参照された Environment が無いと保護なしで作るので、ここで保護を API で確かめ、
+  # 無ければマージしない。承認されたら、検証済みの SHA・ファイル一覧・名義を確かめ直し、
+  # JST の日付が検証の日と同じときだけ、通常の経路と同じ squash でマージする。
+  merge-after-approval:
+    needs: auto-merge
+    if: needs.auto-merge.outputs.approval_pr != ''
+    runs-on: ubuntu-latest
+    environment: autopilot-approval
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read   # Environment の保護ルールを読む（GET /environments）。write は与えない
+    # 新しい検証が来たら、古い承認待ちは取り消す（同じ PR に承認待ちは1つ）。
+    concurrency:
+      group: autopilot-approval-${{ needs.auto-merge.outputs.approval_pr }}
+      cancel-in-progress: true
+    outputs:
+      merged_sha: ${{ steps.merge.outputs.merged_sha }}
+    steps:
+      - name: Checkout the trusted merge guard
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Merge the approved Autopilot PR
+        id: merge
+        uses: actions/github-script@v7
+        env:
+          APPROVAL_PR: ${{ needs.auto-merge.outputs.approval_pr }}
+          APPROVAL_SHA: ${{ needs.auto-merge.outputs.approval_sha }}
+          APPROVAL_FILES: ${{ needs.auto-merge.outputs.approval_files }}
+          VALIDATED_AT: ${{ needs.auto-merge.outputs.validated_at }}
+        with:
+          script: |
+            const {
+              approvedMergeOwner, completeCommitList, findUnapprovedPrincipals,
+            } = require(`${process.env.GITHUB_WORKSPACE}/scripts/merge-identity-check.js`);
+            const policy = await import(`${process.env.GITHUB_WORKSPACE}/scripts/autopilot-approval-check.mjs`);
+            const run = context.payload.workflow_run;
+            const branch = run.head_branch || '';
+            const { owner, repo } = context.repo;
+            const refuse = async code => {
+              core.setFailed(`Autopilot approval: ${code}; not merged`);
+              try {
+                await core.summary.addHeading('Autopilot PR: 承認の後もマージしなかった')
+                  .addRaw(policy.refusalSummary(code)).write();
+              } catch {
+                core.info('ジョブサマリを書けなかった');
+              }
+            };
+
+            // 承認に意味があるのは、Environment の required reviewer にオーナーがいるときだけ。
+            let environment = null;
+            try {
+              ({ data: environment } = await github.request('GET /repos/{owner}/{repo}/environments/{environment_name}', {
+                owner, repo, environment_name: policy.APPROVAL_ENVIRONMENT,
+              }));
+            } catch {
+              environment = null;
+            }
+            const protection = policy.environmentProtection(environment);
+            if (!protection.ok) return refuse(protection.reason);
+
+            const input = policy.approvalInput(process.env);
+            if (!input.ok) return refuse('invalid_input');
+            if (!policy.isAutopilotBranch(branch)) return refuse('not_autopilot_branch');
+
+            // sitemap の lastmod は squash コミットの JST 日付。日をまたいだら作り直しが要る。
+            if (!policy.sameJstDay(input.validatedAt, new Date()).ok) return refuse('jst_day_changed');
+
+            // 検証した PR のままかを、今の状態で確かめ直す。
+            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: input.pr });
+            if (pr.state !== 'open' || pr.draft || pr.base?.ref !== 'main'
+              || pr.head?.repo?.full_name !== `${owner}/${repo}` || pr.head?.ref !== branch
+              || pr.head?.sha !== input.sha) {
+              return refuse('pr_changed');
+            }
+            const openerLogin = pr.user?.login;
+            if (openerLogin !== 'simplememofast') return refuse('unapproved_opener');
+            const { data: openerProfile } = await github.rest.users.getByUsername({ username: openerLogin });
+            if (!approvedMergeOwner(openerLogin, openerProfile)) return refuse('unapproved_opener');
+            if (!Number.isInteger(pr.commits) || pr.commits < 1 || pr.commits > 250) return refuse('commit_identity');
+            const commits = await github.paginate(github.rest.pulls.listCommits, {
+              owner, repo, pull_number: pr.number, per_page: 100,
+            });
+            if (!completeCommitList(pr.commits, commits) || findUnapprovedPrincipals(commits).length) {
+              return refuse('commit_identity');
+            }
+            if (!Number.isInteger(pr.changed_files) || pr.changed_files < 1 || pr.changed_files > policy.MAX_LISTED_FILES) {
+              return refuse('file_list_changed');
+            }
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner, repo, pull_number: pr.number, per_page: 100,
+            });
+            if (files.length !== pr.changed_files || policy.fileListHash(files) !== input.files) {
+              return refuse('file_list_changed');
+            }
+
+            const { data: merged } = await github.rest.pulls.merge({
+              owner, repo,
+              pull_number: pr.number,
+              merge_method: 'squash',
+              sha: input.sha,
+              // Same message as the normal path: no unverified PR or commit prose.
+              commit_title: `Merge validated PR #${pr.number}`,
+              commit_message: `Source PR: https://github.com/${owner}/${repo}/pull/${pr.number}\nValidated head: ${input.sha}`,
+            });
+            core.setOutput('merged_sha', merged.sha);
+            core.notice(`#${pr.number} をオーナーの承認の後に ${input.sha.slice(0, 7)} でマージした`);
+
+  # 通常の経路と同じく、マージした run が IndexNow 通知まで行う（失敗はマージに影響させない）。
+  # マージした tree のスクリプトを動かすので、書き込み権限のあるジョブとは別のランナーで、
+  # 読み取りだけのトークンで動かす。
+  indexnow-after-approval:
+    needs: merge-after-approval
+    if: needs.merge-after-approval.outputs.merged_sha != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout merged commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.merge-after-approval.outputs.merged_sha }}
+          persist-credentials: false
+          fetch-depth: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.1'
+
+      - name: IndexNow notify (merged diff)
+        continue-on-error: true
+        run: node scripts/indexnow-notify.js --since 1
