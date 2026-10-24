@@ -927,6 +927,18 @@
       "expr": "read.value",
       "disposition": "安全側へ倒れる",
       "note": "2026-10-22（監査 F94）: handoffFileState。JSON として読めても値が偽（null・false・0・空文字）や配列なら not_object（無いのと同じ扱いで再開の判断に回る）。publish 側の verify は依頼を自分で読み直して検査する。--selftest の状態の検体で固定。"
+    },
+    {
+      "file": "scripts/autopilot-publish.mjs",
+      "expr": "source",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-24: workflowExpressions が生のワークフロー文字列から ${{ … }} の終わり（'…' の外の }}）を探す走査の上限と引用の判定。判定を消す向きではない: }} が見つからなければ末尾までを1つの式として拾い、調べる範囲が増えるだけ。checkWiring はその全部に structured_output や toJSON(steps…) が無いことを求める。selftest で # 行・括弧形・toJSON の式がすべて拒否されることを確認。"
+    },
+    {
+      "file": "scripts/autopilot-publish.mjs",
+      "expr": "lines",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-24: if: の値が続く行（空行か、キーより深い字下げの行）を集める走査の上限。続きが無ければその行だけを式として調べ、どの場合も式を捨てない（拾う範囲が増えるだけ）。selftest で折り返した if: の中の structured_output も拒否されることを確認。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
