@@ -167,8 +167,29 @@ test('every waiting-progress input requires the waiting freshness check, alone o
     assert.equal(routineScopeForPaths(['index.html', file]).waitingCount, 1, file);
   }
   assert.equal(routineScopeForPaths([]).waitingRequired, false);
-  assert.equal(routineScopeForPaths(['growth/data/gsc/2026-10-12/summary.json']).waitingRequired, false,
-    'weekly GSC ingest is not gated on the hand-synced revenue mirror');
+  const ingest = 'growth/data/gsc/2026-10-12/summary.json';
+  assert.equal(routineScopeForPaths([ingest], { deletedPaths: [] }).waitingRequired, false,
+    'adding a weekly GSC snapshot is not gated on the hand-synced revenue mirror');
+  assert.equal(routineScopeForPaths([ingest], { deletedPaths: [ingest] }).waitingRequired, true,
+    'deleting a GSC snapshot can move the newest date back, so it is a waiting input');
+  assert.equal(routineScopeForPaths([ingest], { deletedPaths: [ingest] }).waitingDeletionCount, 1);
+  assert.equal(routineScopeForPaths(['index.html', ingest], { deletedPaths: [] }).waitingRequired, false);
+  assert.equal(routineScopeForPaths([ingest]).waitingRequired, true,
+    'without a deletion inventory a GSC change may be a deletion: fail closed');
+});
+
+test('a missing, invalid or inconsistent deletion inventory cannot narrow the waiting scope', () => {
+  const ingest = 'growth/data/gsc/2026-10-12/summary.json';
+  for (const deletedPaths of [null, {}, 'growth/data/gsc', [''], [null], ['/tmp/x'], ['growth/data/gsc/../x'], ['x\0y']]) {
+    assert.throws(() => routineScopeForPaths([ingest], { deletedPaths }), String(deletedPaths));
+  }
+  assert.throws(() => routineScopeForPaths(['index.html'], { deletedPaths: [ingest] }),
+    /Inconsistent deleted-path inventory/, 'a deletion outside the changed paths is not a complete inventory');
+  assert.throws(() => routineScopeForPaths([ingest], null));
+  // Deletions elsewhere only matter through the explicit lists, as before.
+  assert.equal(routineScopeForPaths(['index.html'], { deletedPaths: ['index.html'] }).waitingRequired, false);
+  assert.equal(routineScopeForPaths(['data/revenue-series.json'],
+    { deletedPaths: ['data/revenue-series.json'] }).waitingRequired, true);
 });
 
 test('routine and waiting scopes are independent', () => {
@@ -188,16 +209,19 @@ test('a checker cannot exempt its own change from its freshness gate', () => {
 });
 
 // A new wait must be classified on purpose. Its counter file is in scope; a dated
-// directory is only allowed on the explicit, documented exclusion list.
-const EXCLUDED_WAIT_DIRS = ['growth/data/gsc'];
+// directory is only allowed on the explicit, documented append-only list, where
+// additions are not gated and every deletion is.
+const APPEND_ONLY_WAIT_DIRS = ['growth/data/gsc'];
 
-test('every counter the waiting ledger reads is in scope or explicitly excluded', () => {
+test('every counter the waiting ledger reads is in scope or an append-only directory whose deletions are', () => {
   const ledger = JSON.parse(fs.readFileSync('data/waiting-progress.json', 'utf8'));
   assert.ok(Array.isArray(ledger.waits) && ledger.waits.length > 0, 'the real waiting ledger has waits');
   for (const wait of ledger.waits) {
     if (wait.dir) {
-      assert.ok(EXCLUDED_WAIT_DIRS.includes(wait.dir), wait.id + ': unclassified directory wait ' + wait.dir);
-      assert.equal(routineScopeForPaths([wait.dir + '/2099-01-01/meta.json']).waitingRequired, false, wait.dir);
+      assert.ok(APPEND_ONLY_WAIT_DIRS.includes(wait.dir), wait.id + ': unclassified directory wait ' + wait.dir);
+      const file = wait.dir + '/2099-01-01/meta.json';
+      assert.equal(routineScopeForPaths([file], { deletedPaths: [] }).waitingRequired, false, wait.dir);
+      assert.equal(routineScopeForPaths([file], { deletedPaths: [file] }).waitingRequired, true, wait.dir);
     } else {
       assert.equal(typeof wait.file, 'string', wait.id);
       assert.equal(routineScopeForPaths([wait.file]).waitingRequired, true, wait.id + ': ' + wait.file);
@@ -405,6 +429,42 @@ test('changing, deleting or moving a waiting input remains required; advanced ma
   assert.equal(result.waitingRequired, false);
   assert.equal(result.required, false);
   assert.equal(result.changedCount, 1);
+});
+
+test('adding a GSC date directory is not gated; deleting or renaming one is', t => {
+  const f = fixture(t);
+  f.write('growth/data/gsc/2026-10-12/summary.json', '{}\n');
+  f.write('growth/data/gsc/2026-10-21/summary.json', '{}\n');
+  f.write('growth/data/gsc/2026-10-21/meta.json', '{}\n');
+  const base = f.commit();
+  const fromBase = () => f.scope(base, f.commit());
+
+  f.write('growth/data/gsc/2026-10-28/summary.json', '{}\n');
+  const added = fromBase();
+  assert.equal(added.waitingRequired, false, 'a weekly ingest only adds a newer date');
+  assert.equal(added.waitingDeletionCount, 0);
+  f.git('reset', '-q', '--hard', base);
+
+  f.write('growth/data/gsc/2026-10-21/summary.json', '{"edited":true}\n');
+  assert.equal(fromBase().waitingRequired, false, 'editing inside a date directory does not move the newest date');
+  f.git('reset', '-q', '--hard', base);
+
+  f.git('rm', '-q', '-r', 'growth/data/gsc/2026-10-21');
+  const reverted = fromBase();
+  assert.equal(reverted.waitingRequired, true, 'reverting the latest ingest moves the newest date back');
+  assert.equal(reverted.waitingDeletionCount, 2);
+  assert.equal(reverted.required, false);
+  f.git('reset', '-q', '--hard', base);
+
+  f.git('mv', 'growth/data/gsc/2026-10-21', 'growth/data/gsc/2026-10-11');
+  const renamed = fromBase();
+  assert.equal(renamed.waitingRequired, true, 'a rename is a deletion of the old date under --no-renames');
+  assert.equal(renamed.waitingDeletionCount, 2);
+  f.git('reset', '-q', '--hard', base);
+
+  f.git('rm', '-q', 'growth/data/gsc/2026-10-12/summary.json');
+  f.write('index.html', 'site change\n');
+  assert.equal(fromBase().waitingRequired, true, 'any deletion under the directory is gated, conservatively');
 });
 
 test('preflight runs both integrity forms and reports both full freshness checks as conditional', () => {
