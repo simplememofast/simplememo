@@ -69,12 +69,21 @@ jobs:
             }
 
             // 検証時点の関連付けを信用せず、現在開いているPRをheadから引き直す。
+            // List only PRs into main. Anyone can open PRs from this branch into
+            // other bases; listed by head alone they could fill the first page
+            // (newest 30) and hide the PR into main. GitHub allows one open PR
+            // per head and base, so more than one means the listing is not what
+            // this gate assumes (or is truncated): withhold rather than merge a subset.
             const { data: prs } = await github.rest.pulls.list({
-              owner, repo, state: 'open', head: `${owner}:${branch}`,
+              owner, repo, state: 'open', head: `${owner}:${branch}`, base: 'main',
             });
+            if (prs.length > 1) {
+              core.setFailed(`${branch}: more than one open PR into main listed; merge withheld`);
+              return;
+            }
 
             if (prs.length === 0) {
-              core.info(`${branch} に対する open な PR が無いため何もしない`);
+              core.info(`${branch} から main への open な PR が無いため何もしない`);
               return;
             }
 
