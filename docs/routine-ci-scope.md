@@ -23,6 +23,27 @@ ledger stale, so the daily Act sync stopped and the autopilot run ledger became 
 too. The hand-synced revenue mirror passed its four-day budget at the same time. From
 then on every site PR failed both freshness gates for reasons it did not cause.
 
+**This proposal does not remove every clock-driven gate on every PR.** The site job
+step `Autopilot page vs ledger` (`check-autopilot-page.mjs --check`) still runs on
+every PR and is outside this proposal. It compares `/autopilot/` with an autonomy
+score whose 28-day window ends today (`windowOf()` in `autonomy-score.mjs`). The
+daily Act run regenerates that page. When the daily pipeline stops, the clock alone
+can therefore make the page disagree with the score, and every PR fails this step.
+Measured on 2026-10-24 with a Node clock shift, on main at 561b3283a and on this
+branch alike (ledger last synced 2026-10-23T01:33Z, page 2026-10-23T17:00Z): it
+passed at 2026-10-25 and failed at 2026-10-26 (total 47.5 vs 45.4, `ra` 4.0 vs 2.5,
+`ep` 8.7 vs 8.1). The run ledger freshness check had already failed at 2026-10-25.
+Whether it fails depends on the data: on the 2026-10-17 to 10-19 deadlock snapshot
+(0bdae2130) it passed at 10-17T15Z, 10-18T03Z and 10-19T03Z, so that deadlock came
+only from the two gates above. Before this proposal, `Autopilot run ledger` failed
+first and the job skipped every later step. With it, a site PR passes that step and
+can stop at `Autopilot page vs ledger` about one day later. The same sweep over the
+site job's other unconditional `--check` and `--integrity` commands on this branch
+found no other result that changed between 2026-10-24 and 10-26. It ran without Git
+history and shifted only the Node clock, so Python checks and checks that need Git
+history were not assessed. Whether to scope this gate is a separate owner decision;
+this proposal does not change it.
+
 | Context | Required checks | Meaning of an observation failure |
 | --- | --- | --- |
 | Every PR | All existing site checks; all routine observer selftests; CI scope regression tests; `autopilot-runs --selftest` and `--integrity` (ledger shape, cost-ledger readability, status JSON agreement); `check-waiting-progress --selftest` and `--integrity` (waiting configuration such as a missing `stale_budget_days`, and readable counters) | A failing mandatory check still blocks publication |
@@ -99,8 +120,8 @@ file or directory, or a future rolling timestamp). If both `--check` and
 `--integrity` are given, `--check` wins. The thresholds and acknowledgement rules are
 unchanged: one day of ledger lag, `stale_budget_days` 4 and 9, and `review_by` expiry.
 Other freshness gates in `seo-check.yml`, such as the app release ledger and
-prior-art, are untouched. `autopilot-act.yml` still runs the full ledger check before
-it writes.
+prior-art, are untouched, and so is `Autopilot page vs ledger` (see the status section).
+`autopilot-act.yml` still runs the full ledger check before it writes.
 
 CI routing (`seo-check.yml`, the scope helper and regression tests, and this policy)
 is validated by unconditional contract tests. Changing that routing is not a new
