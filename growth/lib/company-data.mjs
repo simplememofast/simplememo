@@ -182,6 +182,17 @@ export function collectAsc({ stateRoot, iosRepo = path.join(os.homedir(), 'simpl
   return receipt;
 }
 
+const ANALYTICS_REPO = 'simplememofast/simplememo';
+const ANALYTICS_WORKFLOW = '.github/workflows/analytics-read.yml';
+// The envelope is sealed to a public key, so it proves nothing about its sender; the run
+// that produced it must. Fork, branch, event and workflow-path drift are rejected.
+function acceptedAnalyticsRun(detail, remote, title) {
+  return Number.isSafeInteger(remote.databaseId) && remote.databaseId > 0 && detail?.id === remote.databaseId
+    && detail.repository?.full_name === ANALYTICS_REPO && detail.head_repository?.full_name === ANALYTICS_REPO
+    && detail.path === ANALYTICS_WORKFLOW && detail.head_branch === 'main' && detail.event === 'workflow_dispatch'
+    && detail.display_title === title && /^[a-f0-9]{40}$/.test(detail.head_sha ?? '') && detail.head_sha === remote.headSha;
+}
+
 // Dispatch is recorded BEFORE the side effect. An uncertain result is looked up
 // by the same UUID, never blindly dispatched again. A later tick resumes it.
 // GA4 ga4-funnel is owned by acquisition-daily.yml; a new legacy dispatch is a
@@ -220,11 +231,19 @@ export function collectAnalytics({ stateRoot, report = 'ga4-funnel', now = new D
     receipt.status = 'dispatched'; atomicJson(file, receipt);
     return receipt;
   }
-  const runs = JSON.parse(run('gh', ['run', 'list', '--workflow', 'analytics-read.yml', ...args, '--limit', '100',
+  const title = 'Analytics API ' + receipt.request_tag;
+  // Only main-branch workflow_dispatch runs are listed, so runs of a modified copy of the
+  // workflow (e.g. a fork pull request) can neither match nor push the requested run out.
+  const runs = JSON.parse(run('gh', ['run', 'list', '--workflow', 'analytics-read.yml', ...args, '--branch', 'main', '--event', 'workflow_dispatch', '--limit', '100',
     '--json', 'databaseId,displayTitle,status,conclusion,headSha'], { cwd: ROOT }));
-  const matches = runs.filter(r => r.displayTitle === 'Analytics API ' + receipt.request_tag);
+  const matches = runs.filter(r => r.displayTitle === title);
   if (matches.length !== 1) return { ...receipt, lookup_state: matches.length ? 'duplicate_request_requires_diagnosis' : 'not_visible_yet' };
   const remote = matches[0];
+  // The title is public and chosen by whoever starts a run; it only nominates a candidate.
+  // The run itself must be this repository's main-branch dispatch of analytics-read.yml.
+  const detail = Number.isSafeInteger(remote.databaseId) && remote.databaseId > 0
+    ? JSON.parse(run('gh', ['api', `repos/${ANALYTICS_REPO}/actions/runs/${remote.databaseId}`], { cwd: ROOT })) : null;
+  if (!acceptedAnalyticsRun(detail, remote, title)) return { ...receipt, lookup_state: 'unexpected_run_identity_requires_diagnosis' };
   receipt.run_id = remote.databaseId;
   if (remote.status !== 'completed') { atomicJson(file, receipt); return receipt; }
   const dir = privateState(path.join(stateRoot, 'data/analytics-' + remote.databaseId));
