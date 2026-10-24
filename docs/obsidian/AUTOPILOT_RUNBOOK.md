@@ -815,7 +815,7 @@ node scripts/autopilot-selfheal.mjs
    - **宣言の外のコミット** … `git revert <commit>` で戻す（force push はしない）
    - **そのパスが本当に要る** … 宣言は変えられない。**効くのは「最後の」宣言**で、`--retire` で取り下げて宣言し直すと、やり直す前に積んだコミットは全部「宣言より前」に数えられ `implementation preceded declaration` で落ちる。だから順番は (1) 宣言後の実装コミットを全部 `git revert` して正味ゼロに戻す → (2) `node scripts/value-contracts.mjs --retire` → (3) 必要なパスを `touches` に入れた新しい宣言を別コミットで push → (4) 実装をやり直す（`git cherry-pick` 可）
    - **今日は出せない** … 宣言を取り下げ、status/LOG だけの PR にする（運転台帳と公開運転表は触らない。記帳は Act が行う）
-6-2. **最後の操作として**、`$RUNNER_TEMP/autopilot-exit.json` に `{"code":"<CODE>"}` を書く（語彙はプロンプト手順8）。公開される診断（`scripts/autopilot-diagnostics.mjs`）が読むのはこの語彙だけで、文章は捨てる。10-06 は success で終わって PR が無く、なぜ止まったかを誰も言えなかった。
+6-2. **最後の操作として**、終了コードを渡す（語彙はプロンプト手順8）。Actions 経路の主のセッションでは、プロンプト手順5の依頼と同じ StructuredOutput の `exit_code` に入れて1回だけ呼ぶ（2026-10-24〜。ワークフローが `$RUNNER_TEMP/autopilot-exit.json` に写す）。再開したセッションは `$RUNNER_TEMP/autopilot-exit.json` に `{"code":"<CODE>"}` を書く。公開される診断（`scripts/autopilot-diagnostics.mjs`）が読むのはこの語彙だけで、文章は捨てる。10-06 は success で終わって PR が無く、なぜ止まったかを誰も言えなかった。
 7. 事後決済と限定的な静的ページの復旧は Decision Monitor が行う。未来の結果、観測できない費用、欠測日を補完しない。契約なしの過去の出荷を契約に紐づけない。
 
 成熟の基準は決済20件。方向の改善が20件の窓で乏しい場合、次の10回のうち2回を適格候補の下位から選ぶ。成熟前には選択の枠組みを変更しない。R1以上の権限や日次実行回数を自動で拡大する処理は持たない。
@@ -898,6 +898,8 @@ python3 scripts/generate_sitemap.py --dry-run
 
 **⚠ `check-viewport-overflow` はブラウザが要る。**`npm i --no-save playwright-core` を先に。
 CI では**報告のみ**なので、**落とす側はここ。**通らないままコミットしない。
+
+**Actions 経路（2026-10-24〜・背景実行なし）では `--check --no-sweep` を落とす側にする。**10言語化（2026-10-08）で全面が 2534 面になり、`--check` は CI 実測 28分38秒（Blink 全面×4幅 約20分 ＋ WebKit 全面320px 8分43秒）。この経路は背景実行を止めてあり（再開が古い通知に当たらないように）、モデルの段は75分なので、全面の掃きは毎回は回せない。`--no-sweep` は深い3面×14幅（両エンジン）と WebKit 全面320px を見る（約10分・`timeout` 1500000）。Blink の全面×4幅は PR の SEO Validation が `--report` で測る（落とさない）。そのため共有の CSS / JS を変えた日に、深い3面以外のページの 360・900・1100px で Blink だけに出る横はみ出しは、この経路では止まらない（オーナーが受け入れた残余・2026-10-24）。
 **320px を必ず含めてある** —— 2026-09-03、配信当日に足した PRESS 帯が実機で横スクロールを
 起こしたが、その日の検証は 390 / 900 / 1280px を見て「異常なし」と報告していた。
 **幅を1つ足りなく選んだだけで、この種の不具合は本番へ出る。**
@@ -1040,8 +1042,8 @@ Blink で3回「再現しない」を繰り返したあと、**実機に吐か�
 **Actions経路のセッションには書き込みの資格情報が無い。**モデルが動くジョブから GH_PAT・書き込み可能なトークン・id-token を外した（監査 F2/F3: WebFetch/WebSearch や GSC のクエリなど第三者の文章が入るセッションが、push・PR・本番へ届く資格情報を持っていた）。この経路では上の手順2〜4と §5-4 の記帳を次のように読み替える。Mac Codex 経路の手順は変わらない。
 
 - **commit までがセッションの仕事。**`git push`・`gh pr create`・`autopilot-runs.mjs --append`・`decision-monitor.mjs --publish-report`・`generate_sitemap.py` は実行しない。公開ページを編集・追加した回の訳（`build_site_translations.py`）だけはセッションが揃えて commit する（publish の記帳は台帳・status JSON・公開運転表とその生成訳・sitemap 以外を変えない。手順はプロンプト手順4）。宣言（§2-1）も実装より先の**別コミット**にする（push はしない。コミットの順序と日時は後の push でそのまま残る）。
-- **最後に PR の依頼を書く。**`$RUNNER_TEMP/autopilot-pr-request.json` に `{"action":"pr","title":…,"body":…,"run":{"run_id","outcome","lane","action","artifact","failure_reason","failure_class"}}`（PR を出さない日は `{"action":"none"}`）。形はワークフローのプロンプト手順5と `scripts/autopilot-publish.mjs` の `validateRequest()` が正本。**レーンFで直した日は `run` に `"repair_of":["<直した run_id>"]` を入れる**（§6 手順5 の「自分の行に `repair_of` を書く」の読み替え。台帳は直接書かない。publish が main の台帳に実在し自分以外の run_id かを確かめてから、記帳する行に書く）。
-- **依頼と終了コードは、status JSON・LOG を含む最後のコミットの直後に書き、読み戻してから終える**（プロンプト手順5・8）。LOG や status に「依頼を書く」と記しても書いたことにはならない（2026-10-22 の試運転はそう記して終わり、何も公開されなかった）。主の段が success で2つのどちらかが無いときは、ワークフローが同じセッションを1回だけ再開して書かせる（Bash・Read・Write のみ・12ターン・$3 以内かつ run の上限内・8分。手順0で終える日と、ジョブ上限に収まらない回は再開しない。`docs/obsidian/ACTIONS_RECOVERY_ONE_USE.md`）。それでも依頼が無ければ publish は何も push しない。
+- **最後に PR の依頼を渡す。**StructuredOutput の `request` に `{"action":"pr","title":…,"body":…,"run":{"run_id","outcome","lane","action","artifact","failure_reason","failure_class"}}`（PR を出さない日は `{"action":"none"}`）を入れ、プロンプト手順8の `exit_code` と合わせて1回だけ呼ぶ（2026-10-24〜。ワークフローが `$RUNNER_TEMP/autopilot-pr-request.json` に写す。再開したセッションはこのファイルを直接書く）。形はワークフローのプロンプト手順5と `scripts/autopilot-publish.mjs` の `validateRequest()` が正本。**レーンFで直した日は `run` に `"repair_of":["<直した run_id>"]` を入れる**（§6 手順5 の「自分の行に `repair_of` を書く」の読み替え。台帳は直接書かない。publish が main の台帳に実在し自分以外の run_id かを確かめてから、記帳する行に書く）。
+- **依頼と終了コードは、status JSON・LOG を含む最後のコミットの後に、最後の行為として StructuredOutput で渡す**（プロンプト手順5・8。呼ぶとセッションは終わる）。LOG や status に「依頼を書く」と記しても依頼にはならない（2026-10-22・10-24 の試運転はどちらも依頼が無いまま終わり、何も公開されなかった）。主の段が success で2つのどちらかが無いときは、ワークフローが同じセッションを1回だけ再開して書かせる（Bash・Read・Write のみ・12ターン・$3 以内かつ run の上限内・8分。手順0で終える日と、ジョブ上限に収まらない回は再開しない。`docs/obsidian/ACTIONS_RECOVERY_ONE_USE.md`）。それでも依頼が無ければ publish は何も push しない。
 - **当日ブランチの占有は publish 時に起きる。**モデルを動かさない publish ジョブが、引き渡し（git bundle）を検証し（fsck・1つのhead・main との関係・250コミット以内・`.github/**` など拒否パス・symlink/gitlink・5 MB 超のファイル・承認済みでない名義・依頼の形・緊急停止・同日の重複）、当日ブランチへ **force なし**で push、PR を作成（作成者は従来どおり GH_PAT の持ち主）、§5-4 の台帳へ PR 番号を記帳して公開運転表・8言語訳・sitemap を再生成して push し、成果物を照合する。他経路が先に当日ブランチや PR を作っていれば何も push しない（`公開判定: duplicate`）。
 - **死んだ占有の引き継ぎ（§0-2）**は、既存の当日ブランチの上にローカルで積むだけ。publish は fast-forward でしか push しない。
 - **モデルが失敗・時間切れした回**も、コミット済みで検証を通る作業は PR なしで当日ブランチへ push される（従来の途中 push と同じ扱い）。未コミットの宣言済みページ作業はチェックポイント（7日）に残る。
