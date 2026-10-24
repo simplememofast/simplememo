@@ -23,9 +23,10 @@
       "mitigations": [
         "読んだ内容を**シェルに渡さない**（Runbookの実装規約）",
         "記事に引用するときは一次情報のURLを併記し、**取得日を書く**",
-        "**Actions主系（obsidian-autopilot.yml）では、読んだセッションに書き込みの資格情報が無い**（2026-10-20）。GH_PAT・書き込み可能なトークン・id-token をモデルのジョブ全体から外し、checkout も資格情報を残さない。push・PR作成・記帳は、モデルを動かさない publish ジョブが $GITHUB_SHA の scripts/autopilot-publish.mjs で引き渡しを検証してから行う（.github/**・秘密ファイル・symlink/gitlink・巨大ファイル・未承認の名義を拒否、force push なし）。配線は node scripts/autopilot-publish.mjs --check がCIで固定する"
+        "**Actions主系（obsidian-autopilot.yml）では、読んだセッションに書き込みの資格情報が無い**（2026-10-20）。GH_PAT・書き込み可能なトークン・id-token をモデルのジョブ全体から外し、checkout も資格情報を残さない。push・PR作成・記帳は、モデルを動かさない publish ジョブが $GITHUB_SHA の scripts/autopilot-publish.mjs で引き渡しを検証してから行う（.github/**・秘密ファイル・symlink/gitlink・巨大ファイル・未承認の名義を拒否、force push なし）。配線は node scripts/autopilot-publish.mjs --check がCIで固定する",
+        "**無人の自律運転ブランチ（claude/obsidian-auto-<日付>）のPRは、台帳以外を変えるならオーナーの承認なしに main へ入らない**（2026-10-20）。auto-merge.yml が main の scripts/autopilot-approval-check.mjs で変更パスを分類し、ページ・スクリプト・生成物を含む PR は Environment autopilot-approval でオーナーが承認したときだけ merge-after-approval ジョブがマージする（検証済みSHA・ファイル一覧・名義・JSTの同じ日を確かめ直す。Environment に保護が無ければマージしない）。Actions主系と Mac Codex 経路の両方に効く。SEO Validation は読み取りだけのトークンで PR のコードを動かす。配線は node scripts/autopilot-approval-check.mjs --selftest がCIで固定する"
       ],
-      "residual_risk": "**セッションの判断そのものは汚染されうる。**『この手順に従え』と書かれたページを読んだときに従わない保証は、モデルの側にしか無い。Actions主系でも、汚染されたセッションが書いたページ・スクリプトの変更やPR本文は publish の拒否リストに当たらない限り公開され、SEO Validation が通れば auto-merge される（人の承認を挟む変更は後続）。モデルのランナーには CLAUDE_CODE_OAUTH_TOKEN と GCP の鍵が残る。Mac Codex 経路はこの分離の対象外"
+      "residual_risk": "**セッションの判断そのものは汚染されうる。**『この手順に従え』と書かれたページを読んだときに従わない保証は、モデルの側にしか無い。汚染されたセッションが書いたページ・スクリプトの変更は、承認する人が差分を読んで見抜けなければ本番へ出る。台帳（status JSON の自由文・AUTOPILOT_LOG.md など）だけの PR と、PR本文・コミットメッセージは承認なしで公開・自動マージされる。GH_PAT を持つ者やオーナーのログインで動く経路（Mac Codex を含む）は、API で直接マージしたり別名のブランチへ push したりして、この承認を通らずに済む。モデルのランナーには CLAUDE_CODE_OAUTH_TOKEN と GCP の鍵が残る。Mac Codex 経路は資格情報の分離の対象外"
     },
     {
       "id": "github-issue-comment",

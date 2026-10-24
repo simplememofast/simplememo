@@ -29,7 +29,9 @@ export const protectedPaths = ['data/value-metrics.json', 'data/autonomy-score.j
   'scripts/autopilot-budget.mjs', 'scripts/check-credential-probe.mjs',
   'scripts/codex-recovery-permit.py',
   // The trusted publish path of the Actions route (and the identity rule it applies).
-  'scripts/autopilot-publish.mjs', 'scripts/lib/autopilot-paths.mjs', 'scripts/merge-identity-check.js'];
+  'scripts/autopilot-publish.mjs', 'scripts/lib/autopilot-paths.mjs', 'scripts/merge-identity-check.js',
+  // The owner-approval rule auto-merge.yml applies to these same branches.
+  'scripts/autopilot-approval-check.mjs'];
 export const contractExempt = p => ['data/autopilot-runs.json', 'data/autopilot-status.json', 'docs/obsidian/AUTOPILOT_LOG.md'].includes(p) || p.startsWith('data/decision-rejections/');
 export function required(branch, paths, metrics) {
   if (!/^claude\/obsidian-auto-/.test(branch)) return false;
