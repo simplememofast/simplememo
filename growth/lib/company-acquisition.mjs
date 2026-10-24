@@ -195,7 +195,9 @@ function automationExcluded(production, valid, quality) {
 
 // OneLink pilot readout (owner decision 2026-10-15; growth/ONELINK_PILOT.md 指標の定義).
 // Existing ga4-funnel columns only. The official rates above stay unchanged.
-const PILOT_HUBS = new Set(['/obsidian/', ...['ar','es','id','ko','pt-BR','tr','zh','zh-Hant'].map(l => `/${l}/obsidian/`)]);
+// Same nine pages as growth/onelink-pilot.json (growth/lib/onelink-pilot.test.mjs compares them).
+export const PILOT_HUB_PATHS = Object.freeze(['/obsidian/', ...['ar','es','id','ko','pt-BR','tr','zh','zh-Hant'].map(l => `/${l}/obsidian/`)]);
+const PILOT_HUBS = new Set(PILOT_HUB_PATHS);
 const LEGACY_PILOT_SCOPE = 'Primary: production sessions landing on the nine pilot hubs with a recorded Store-link click within 24h by any app route (direct Apple + OneLink, deduplicated). Auxiliary: OneLink pilot impression sessions that clicked, all landings, QA excluded. Clicks do not prove Store arrival or installs; not per-language, and never replaces the official rate.';
 
 const SITEWIDE_COUNTS = ['sessions_with_sitewide_onelink_impression', 'sessions_with_sitewide_onelink_click_24h',

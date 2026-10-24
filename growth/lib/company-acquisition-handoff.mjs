@@ -14,6 +14,7 @@ import { ACQUISITION_REPO, ACQUISITION_WORKFLOW, ACQUISITION_WORKFLOW_REF, RETEN
   APPSFLYER_CREDENTIAL_ORIGIN, APPSFLYER_SECRET, APPSFLYER_ENVIRONMENT, COLLECTION_ATTEMPT, RECIPIENT_SPKI_SHA256,
   GA4_ARTIFACT, GA4_DRYRUN_ARTIFACT, APPSFLYER_ARTIFACT, GA4_ENVELOPE, APPSFLYER_ENVELOPE,
   ENVELOPE_LIMIT, ga4ArtifactName, acceptedRun, validDay, acquisitionStop } from './acquisition-handoff.mjs';
+import { SCHEDULE_EXPECTATIONS } from '../../scripts/lib/cron-silence.mjs';
 
 const DAY = 86400000;
 const CAP_BYTES = 2 * 1024 ** 3;
@@ -31,9 +32,79 @@ const command = (name, args, options = {}) => execFileSync(name, args, {
 class Final extends Error {}       // Recorded once; never retried.
 const final = state => { throw new Final(state); };
 // Final states that mean the artifact or the setup is not what the workflow promises. They keep
-// the ingest out of 'verified' while the run stays inside the retention window.
+// the ingest out of 'verified' while the run stays inside the retention window, even after later successes.
 export const ALERT_STATES = Object.freeze(['envelope_invalid', 'envelope_files_unexpected', 'provenance_mismatch',
   'reader_divergence', 'duplicate_artifacts', 'artifact_size_invalid', 'pins_mismatch', 'environment_unverified']);
+// scheduled_collection_lost: a scheduled run left a source without data. Verdicts:
+// - SCHEDULE_LOSS_STATES: the job failed or finished without an artifact, or the artifact had expired when the
+//   run was inventoried (unless that run's own receipt exists; see scheduleOutcome);
+// - gate_<conclusion>: the gate did not succeed, so both sources were lost;
+// - GA4 only, a failed receipt (see failedReceipt): admitted_failed (the run's own sealed failure) or
+//   existing_receipt_failed (a failed receipt for that end-date already existed and was kept).
+// Only event=schedule runs raise it. Manual runs, dry runs and a gate that decided not to collect (stop, end-date
+// already collected) never raise it; the integrity ALERT_STATES above apply to every run, manual ones included.
+// It clears when a later scheduled run delivers that source (SCHEDULE_DELIVERED_STATES with a verified receipt;
+// key_pending hands AppsFlyer back to the local reader). It also disappears, without any delivery, once the lost
+// run leaves the run listing (RETENTION_DAYS + 1 days), so an emergency stop longer than that hides an old loss.
+// While a completed run is re-run, GitHub lists it as in progress and its record sits out until the re-run
+// completes: its own loss, or a delivery that cleared an older one, is re-evaluated then.
+export const SCHEDULE_LOSS_STATES = Object.freeze(['job_failed_without_artifact', 'artifact_missing', 'artifact_expired']);
+export const SCHEDULE_DELIVERED_STATES = Object.freeze(['admitted', 'already_admitted', 'existing_receipt_retained', 'key_pending']);
+// Liveness uses the same limit and boundary as cron-health for this workflow (scripts/lib/cron-silence.mjs: one
+// day plus four hours for delayed starts), measured from the newest scheduled run GitHub created, queued and
+// in-progress runs included. Actual starts drift two to three hours after the nominal 21:23 UTC, so only a change
+// in that delay of over four hours from one day to the next reaches it. Cron Health is not a second witness of
+// the same gap: it opens issues only from its daily 07:00 JST run or a manual dispatch, and a disabled workflow makes it fail instead.
+export const SCHEDULE_SILENCE_MINUTES = SCHEDULE_EXPECTATIONS.find(e => e.path === ACQUISITION_WORKFLOW)?.max_silence_minutes ?? null;
+
+// Only a verified receipt is a delivery. A failed one is, for GA4, also a loss: export-analytics.mjs seals a query
+// error, a blocked or incomplete result and exits 1, the ingest admits it as a failed receipt, and collectAnalytics
+// returns that receipt before any legacy dispatch (company-data.mjs), so the end-date stays without GA4 data.
+// For AppsFlyer it is neither: collectAppsFlyer returns an existing receipt only when it is verified, has used three
+// attempts or failed on permission_or_credential, so over an Actions failure receipt (attempts 1, failure
+// actions_reader_failed) a collect on the same JST day (the window follows the JST date) reads that end-date again
+// locally, with at most the two attempts left. If that read fails too, the failed receipt shows in that collect
+// (its status partial), not here.
+// A receipt still pending (a legacy GA4 dispatch in flight when the run was recorded) neither clears nor alerts.
+// already_admitted carries the receipt status because an earlier ingest of a then-unfinished record admitted it.
+const RECEIPT_STATES = Object.freeze(['already_admitted', 'existing_receipt_retained']);
+const failedReceipt = s => s.state === 'admitted_failed' || (RECEIPT_STATES.includes(s.state) && s.status === 'failed');
+const delivery = s => SCHEDULE_DELIVERED_STATES.includes(s.state) && (!RECEIPT_STATES.includes(s.state) || s.status === 'verified');
+const RECEIPT_PREFIX = Object.freeze({ ga4: 'ga4-funnel', appsflyer: 'appsflyer' });
+
+/** The receipt this run (attempt 1) wrote for the source, or null. Read only. */
+function ownReceipt(receipts, r, source) {
+  const end = r[`${source}_artifact_end`];
+  if (!validDay(end)) return null;
+  try {
+    const prior = read(path.join(receipts, `${RECEIPT_PREFIX[source]}-${end}.json`));
+    return prior?.origin?.run_id === r.run_id && prior.origin.run_attempt === COLLECTION_ATTEMPT ? prior : null;
+  } catch { return null; }
+}
+
+// A record is rewritten until both sources are final. If the other source kept retrying until the artifacts
+// expired, an admitted source turns into artifact_expired in the frozen record; the receipt that run wrote is
+// the better witness, so it decides (records and receipts stay as they are).
+function scheduleOutcome(r, source, receipts) {
+  let s = r[source];
+  if (s.state === 'artifact_expired') {
+    const own = ownReceipt(receipts, r, source);
+    if (own) s = { state: 'already_admitted', status: own.status ?? null };
+  }
+  if (SCHEDULE_LOSS_STATES.includes(s.state)) return { lost: s.state };
+  if (s.state === 'not_run' && r.jobs?.gate !== 'success') return { lost: `gate_${r.jobs?.gate ?? 'absent'}` };
+  if (failedReceipt(s)) return source === 'ga4' ? { lost: s.state === 'existing_receipt_retained' ? 'existing_receipt_failed' : 'admitted_failed' } : {};
+  return delivery(s) ? { delivered: true } : {};
+}
+
+/** Derived on every ingest from the retained run records; the records themselves stay as first written. */
+function scheduleLosses(records, receipts) {
+  const scheduled = records.filter(r => r.event === 'schedule');
+  const outcomes = scheduled.map(r => Object.fromEntries(['ga4', 'appsflyer'].map(source => [source, scheduleOutcome(r, source, receipts)])));
+  const delivered = Object.fromEntries(['ga4', 'appsflyer'].map(source => [source, outcomes.findLastIndex(o => o[source].delivered)]));
+  return scheduled.flatMap((r, i) => ['ga4', 'appsflyer'].filter(source => i > delivered[source] && outcomes[i][source].lost)
+    .map(source => ({ run_id: r.run_id, created_at: r.created_at, source, state: 'scheduled_collection_lost', verdict: outcomes[i][source].lost })));
+}
 
 /** Never replaces an existing receipt, whatever its status or origin. */
 function createOnce(file, value) {
@@ -285,8 +356,14 @@ export function collectAcquisitionHandoff({ stateRoot, now = new Date(), run = c
   const ran = records.filter(r => !['not_run', 'dry_run', 'job_failed_without_artifact', 'artifact_missing', 'ingest_error']
     .includes(r.appsflyer.state)).at(-1);
   const scope = secretScope(json);
+  const latestSchedule = accepted.filter(r => r.event === 'schedule').map(r => r.created_at).sort().at(-1) ?? null;
+  // Exactly at the limit still counts as alive (same boundary as cron-silence). No scheduled run in the
+  // listing at all is silence too; an unreadable listing is 'unavailable', not silence.
+  const silent = runs !== null && !(Date.parse(latestSchedule) >= now.getTime() - SCHEDULE_SILENCE_MINUTES * 60000);
   const alerts = [...records.flatMap(r => ['ga4', 'appsflyer'].filter(k => ALERT_STATES.includes(r[k].state))
     .map(source => ({ run_id: r.run_id, source, state: r[source].state }))),
+    ...scheduleLosses(records, ctx.receipts),
+    ...(silent ? [{ source: 'schedule', state: 'scheduled_run_silent', latest_schedule_at: latestSchedule, max_silence_minutes: SCHEDULE_SILENCE_MINUTES }] : []),
     ...(scope === 'repository_secret_present' ? [{ source: 'appsflyer', state: 'repository_secret_present' }] : [])];
   const health = { schema_version: 1, source: 'acquisition_actions_handoff', workflow: ACQUISITION_WORKFLOW,
     status: runs === null ? 'unavailable' : alerts.length ? 'alert' : failures.length ? 'unavailable' : 'verified', observed_at: now.toISOString(),
@@ -294,7 +371,7 @@ export function collectAcquisitionHandoff({ stateRoot, now = new Date(), run = c
     ga4_artifact_ends: [...new Set(records.map(r => r.ga4_artifact_end).filter(Boolean))].sort(),
     // Artifacts seen but not yet admitted (retryable). Final verdicts leave the local reader free to fall back.
     appsflyer_pending_ends: [...new Set(records.filter(r => r.appsflyer.retry).map(r => r.appsflyer_artifact_end).filter(Boolean))].sort(),
-    latest_schedule_at: accepted.filter(r => r.event === 'schedule').map(r => r.created_at).sort().at(-1) ?? null,
+    latest_schedule_at: latestSchedule,
     latest: newest && { run_id: newest.run_id, event: newest.event, created_at: newest.created_at,
       ga4: newest.ga4.state, appsflyer: newest.appsflyer.state },
     appsflyer_key: !ran ? 'unknown' : ['key_pending', 'environment_unverified'].includes(ran.appsflyer.state) ? ran.appsflyer.state : 'registered',
@@ -309,14 +386,28 @@ const ACTIONS = {
   environment_unverified: `Limit the ${APPSFLYER_ENVIRONMENT} environment's deployment branches to main only; the token is not used until then.`,
   key_pending: `Owner registers ${APPSFLYER_SECRET} as a secret of the ${APPSFLYER_ENVIRONMENT} environment (never a repository secret); the job rests until then.`,
   alert: 'Inspect health.json alerts (integrity of an Actions artifact or setup); the local readers stay available.',
+  scheduled_collection_lost: 'A scheduled acquisition-daily run left a source without data (health.json alerts: run_id, source, verdict); inspect that run. The alert changes no guard: a fallback that existed still runs (the local AppsFlyer reader; the legacy GA4 dispatch only for an end-date without an Actions artifact or receipt), and a GA4 failed receipt (admitted_failed, existing_receipt_failed) stays final. Clears when a later scheduled run delivers that source, or without any delivery once the lost run leaves the 15-day run listing.',
+  scheduled_run_silent: `No scheduled acquisition-daily run was created within ${SCHEDULE_SILENCE_MINUTES} minutes (the cron-silence limit). Open the Acquisition Daily workflow's run list and state in GitHub Actions: disabled (enable it again; stop only through data/emergency-stop.json), no scheduled run created, or a start delayed past the limit. A Cron Health issue may not exist: it opens issues only from its daily 07:00 JST run or a manual dispatch, and a disabled workflow makes it fail instead. Clears when the next scheduled run appears.`,
 };
+const SCHEDULE_ALERTS = Object.freeze(['scheduled_collection_lost', 'scheduled_run_silent']);
+
+// One standing action, as before: a repository-level token copy, else the AppsFlyer key state, else integrity
+// alerts (they outlive later successes). A lost or silent schedule appends its own action after it, so a key or
+// integrity action never hides it; each of those clears by itself.
+function statusAction(h) {
+  const alerts = h.alerts ?? [], states = new Set(alerts.map(a => a.state));
+  const schedule = SCHEDULE_ALERTS.filter(s => states.has(s)).map(s => ACTIONS[s]);
+  const integrity = alerts.some(a => ALERT_STATES.includes(a.state)) || (h.status === 'alert' && !schedule.length);
+  const first = h.appsflyer_secret_scope === 'repository_secret_present' ? ACTIONS.repository_secret_present
+    : ACTIONS[h.appsflyer_key] ?? (integrity ? ACTIONS.alert : null);
+  return [first, ...schedule].filter(Boolean).join(' ') || null;
+}
 
 /** Stable, non-numeric view for status commands. */
 export function acquisitionHandoffStatus({ stateRoot }) {
   try {
     const h = read(path.join(stateRoot, 'data/acquisition-actions/health.json'));
-    const action = h.appsflyer_secret_scope === 'repository_secret_present' ? ACTIONS.repository_secret_present
-      : ACTIONS[h.appsflyer_key] ?? (h.status === 'alert' ? ACTIONS.alert : null);
+    const action = statusAction(h);
     return { workflow: ACQUISITION_WORKFLOW, ingest_status: h.status, ingested_at: h.observed_at,
       ga4: h.latest?.ga4 ?? 'no_completed_run', appsflyer: h.latest?.appsflyer ?? 'no_completed_run', appsflyer_key: h.appsflyer_key,
       appsflyer_secret_scope: h.appsflyer_secret_scope ?? 'unknown', alert_states: [...new Set((h.alerts ?? []).map(a => a.state))].sort(),

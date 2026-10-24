@@ -321,7 +321,50 @@ and equal to `simplememo-api` `origin/main`), and writes the existing receipt
 shapes without overwriting any existing receipt. Failed remote runs are
 recorded once; nothing is dispatched or retried. Integrity verdicts,
 `pins_mismatch`, `environment_unverified` and a repository-level copy of the token (names-only
-secret listing) set the ingest status to `alert`. If the reviewed reader
+secret listing) set the ingest status to `alert` (run verdicts on manual runs
+too). So does a scheduled run that left a source without data
+(`scheduled_collection_lost`, with run ID, source and verdict):
+`job_failed_without_artifact`,
+`artifact_missing`, `artifact_expired` (unless that run's own receipt exists),
+`gate_<conclusion>` when the gate did not succeed, and for GA4 a failed receipt:
+`admitted_failed` (the run sealed a query error, a blocked or an incomplete
+result) or `existing_receipt_failed` (a failed receipt for that end-date already
+existed and was kept). A failed GA4 receipt is final: `collect --analytics`
+returns it and never dispatches the legacy fallback for that end-date. A sealed
+AppsFlyer failure (`admitted_failed`, `actions_reader_failed`) does not alert:
+the local reader returns an existing receipt only when it is verified, has used
+three attempts or failed on `permission_or_credential`, so a `collect` on the
+same JST day (the window follows the JST date) reads that end-date again over
+the Actions failure receipt (attempts 1), with at most the two attempts left. If
+that local read fails too, it shows as a failed AppsFlyer receipt in that
+`collect` (status `partial`), not in health; and with no `collect` that day the
+end-date is not read again. Health therefore does not tell whether the Actions
+AppsFlyer read itself works (the run records do). A loss clears when a later
+scheduled run delivers that source: admitted, or already admitted / an existing
+receipt retained whose receipt is verified (`key_pending` for AppsFlyer). A
+failed or still pending receipt (a legacy GA4 dispatch in flight), a stopped
+run and a manual export do not clear it. It also disappears
+without any delivery once the lost run leaves the run listing (retention plus
+one day, 15 days), so an emergency stop longer than that hides an old loss.
+While a finished run is re-run it is listed as in progress, and its loss (or a
+delivery that cleared an older one) is evaluated again when the re-run
+completes. Manual runs, dry runs and a gate that decided not to collect (stop,
+end-date already collected) never raise `scheduled_collection_lost`. No
+scheduled run created within the cron-silence limit for this workflow
+(`scripts/lib/cron-silence.mjs`, 1680 minutes, counted from the newest scheduled
+run GitHub created) sets `scheduled_run_silent` until the next one appears;
+look at the workflow's own run list and state (disabled, no run created, a late
+start), because Cron Health opens issues only from its daily 07:00 JST run or a
+manual dispatch and fails instead of
+reporting a disabled workflow. These alerts change no guard input, fallback,
+dispatch, receipt or run record. They do change two statuses: the ingest status
+reads `alert`, and the collection-level `status` of `collect` /
+`acquisition-ingest` (printed, and written to `latest-collection.json` and
+`collection-events/<uuid>.json`, and recorded as the command observation's
+`result_status`) reads `partial` while an alert is open, as it already did for
+integrity alerts. Nothing in this repository retries, dispatches or exits
+differently on either status (the readers of `collection-events` use the
+AppsFlyer receipt inside each event, not this status). If the reviewed reader
 changes in `simplememo-api`, AppsFlyer ingest stops with `reader_divergence`
 until a reviewed PR re-vendors the file and updates its pin in the workflow
 and `growth/lib/acquisition-handoff.mjs` together.
