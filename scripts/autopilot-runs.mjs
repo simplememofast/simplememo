@@ -280,7 +280,7 @@ export function statusAgreement(doc, statusDoc) {
 /**
  * `--check` / `--integrity` が落とす理由を、**落とす順に**並べる。
  *
- * 【2026-10-19 提案・オーナー承認待ちの draft PR】（docs/routine-ci-scope.md）
+ * 【2026-10-19 提案。承認はオーナーがその draft PR をマージすることだけ】（docs/routine-ci-scope.md）
  * 運転に触れないPRでは鮮度（staleness）だけを公開条件から外し、
  * **status JSON との突き合わせは全PRで残す。**statusAgreement() は時計を読まない ——
  * 台帳の最終記入・記事・数値ブロックを status JSON と比べるだけなので、

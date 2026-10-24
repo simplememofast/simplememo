@@ -98,7 +98,7 @@ export function observe(wait, { root = ROOT, readDir = (p) => fs.readdirSync(p) 
 }
 
 /**
- * 【2026-10-19 提案・オーナー承認待ちの draft PR】（docs/routine-ci-scope.md）
+ * 【2026-10-19 提案。承認はオーナーがその draft PR をマージすることだけ】（docs/routine-ci-scope.md）
  * problems を2つに分けても返す。**problems そのもの（文面・順序）は変えない。**
  *   integrity — 時間が経っても新しく生まれない問題。待ちの設定（waits の形・上限）と、
  *               進み具合が読めないこと（欄・ファイル・ディレクトリの欠落、未来の取得時刻）

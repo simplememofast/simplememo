@@ -153,7 +153,7 @@ test('preflight retains all routine selftests and reports conditional real obser
   assert.ok(commands.some(c => c.script === '--test' && c.args.includes('scripts/routine-ci-scope.test.mjs')));
 });
 
-// --- 2026-10-19 proposal (draft PR awaiting owner approval): ledger freshness scope ---
+// --- 2026-10-19 proposal (approved only by the owner merging its draft PR): ledger freshness scope ---
 // Autopilot run ledger freshness reuses the routine operations scope. Waiting
 // progress freshness has its own inputs. Integrity checks stay on every PR.
 
