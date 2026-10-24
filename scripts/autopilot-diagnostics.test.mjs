@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { modelSummary, receipt, save, checkWiring, summarize, fromSummary, readHandoffSummary, EXIT_CODES, AUDIT_VERDICTS, MAX_EXECUTION_BYTES } from './autopilot-diagnostics.mjs';
+import { modelSummary, receipt, save, checkWiring, summarize, fromSummary, readHandoffSummary, EXIT_CODES, AUDIT_VERDICTS, MAX_EXECUTION_BYTES, endingFacts, TOOL_NAMES } from './autopilot-diagnostics.mjs';
 import { pack, MAIN_EXECUTION_COPY, SUMMARY_FILE } from './autopilot-publish.mjs';
 import { VERDICTS } from './autopilot-audit.mjs';
 import { interpretRun } from './autopilot-act.mjs';
@@ -193,11 +193,54 @@ export async function selftest() {
       assert(r.observations_unknown.includes('exit_report_unavailable'));
     });
     clean(); fs.unlinkSync(exitFile);
-    test('every exit code is offered by the prompt step that requests the file', () => {
+    test('every exit code is offered by the prompt step that requests the structured exit_code', () => {
       const withoutOther = workflow.replace(/\/\s*other。/, '。');
       assert.notEqual(withoutOther, workflow, 'fixture removes the "other" choice');
       assert.throws(() => checkWiring(withoutOther), /exit code other/);
-      assert.throws(() => checkWiring(workflow.replace('"$RUNNER_TEMP/autopilot-exit.json"', '"/tmp/x.json"')), /exit code file/);
+      assert.throws(() => checkWiring(workflow.replace('StructuredOutput の `exit_code`', 'exit_code')), /structured result/);
+      assert.throws(() => checkWiring(workflow.replace('          HANDOFF_SOURCE: ${{ steps.handoff_files.outputs.handoff_source }}\n', '')), /HANDOFF_SOURCE/);
+    });
+    test('how the session ended: counts and enums only, never text', () => {
+      const exec = [{ type: 'system', subtype: 'init' },
+        { type: 'assistant', message: { content: [{ type: 'tool_use', name: 'Bash', input: { command: `node x.mjs & # ${secret}` } }] } },
+        { type: 'system', subtype: 'task_started', task_id: 'b1', is_backgrounded: true },
+        { type: 'system', subtype: 'task_started', task_id: 'sync-agent', is_backgrounded: false },
+        { type: 'user', tool_use_result: { backgroundTaskId: 'b2', stdout: '' }, message: { content: [{ type: 'tool_result',
+          content: `Command did not complete within its 120s timeout and was moved to the background ${secret}` }] } },
+        { type: 'user', message: { content: [{ type: 'tool_result', content: 'Exit code 143\nCommand timed out after 600s' }] } },
+        { type: 'system', subtype: 'task_notification', task_id: 'b1', status: 'completed' },
+        { type: 'user', isSynthetic: true, message: { content: [{ type: 'text', text: '[structured-output-enforce] You MUST call the StructuredOutput tool' }] } },
+        { type: 'assistant', message: { content: [{ type: 'tool_use', name: 'mcp__x__y', input: {} }, { type: 'tool_use', name: secret, input: {} }] } },
+        { type: 'result', subtype: 'success', stop_reason: 'end_turn', terminal_reason: secret, num_turns: 3, permission_denials: [{ tool_name: 'Monitor' }, { tool_name: 'mcp__a__b' }] }];
+      const facts = endingFacts(exec);
+      assert.deepEqual(facts, { background_started: 2, background_finished: 1, background_open_at_result: 1, bash_timed_out: 1,
+        moved_to_background: 1, detached_commands: 1, structured_reminders: 1, structured_output: 'absent', last_stop_reason: 'end_turn',
+        terminal_reason: null, last_tool: 'unknown' });
+      assert.deepEqual(modelSummary(exec).denied_tool_counts, { Monitor: 1, mcp: 1 });
+      assert(!JSON.stringify(facts).includes(secret));
+      for (const value of [null, {}, 'x']) assert(Object.values(endingFacts(value)).every(v => v === null));
+    });
+    test('a denial of any tool the pinned CLI lists is named, never unknown', () => {
+      assert.deepEqual(modelSummary({ type: 'result', permission_denials: ['DesignSync', 'ReportFindings', 'ShareOnboardingGuide']
+        .map(tool_name => ({ tool_name })) }).denied_tool_counts, { DesignSync: 1, ReportFindings: 1, ShareOnboardingGuide: 1 });
+    });
+    test('a structured result nested thousands deep: the summary CLI finishes, says invalid, and keeps every other fact', () => {
+      const depth = 10_000;
+      fs.writeFileSync(execution, `[{"type":"system","subtype":"task_started","task_id":"b1","is_backgrounded":true},`
+        + `{"type":"result","subtype":"success","num_turns":115,"stop_reason":"end_turn","permission_denials":[{"tool_name":"Monitor"}],`
+        + `"structured_output":{"exit_code":"shipped_pr","request":{"action":"pr","run":${'['.repeat(depth)}${']'.repeat(depth)}}}}]`);
+      const cli = spawnSync(process.execPath, [path.join(root, 'scripts/autopilot-diagnostics.mjs'), '--summarize'],
+        { encoding: 'utf8', env: { ...process.env, ...args, HANDOFF_SOURCE: 'files' } });
+      assert.equal(cli.status, 0, cli.stderr);
+      const summary = JSON.parse(fs.readFileSync(path.join(temp, SUMMARY_FILE), 'utf8'));
+      assert.equal(summary.structured_output, 'invalid');
+      assert.equal(summary.read_reason, null);
+      for (const [key, value] of Object.entries({ num_turns: 115, background_open_at_result: 1, last_stop_reason: 'end_turn', handoff_source: 'files' })) {
+        assert.equal(summary[key], value, key);
+      }
+      assert.deepEqual(summary.denied_tool_counts, { Monitor: 1 });
+      assert.equal(fromSummary(JSON.stringify(summary)).ending.structured_output, 'invalid');
+      fs.rmSync(path.join(temp, SUMMARY_FILE)); fs.unlinkSync(execution);
     });
     // The publish job reads the summary from the downloaded handoff (summary.json, sha256 in the manifest).
     const handoffDir = path.join(temp, 'handoff');
@@ -315,16 +358,20 @@ export async function selftest() {
       for (const leftover of [copy, exitFile, execution]) fs.rmSync(leftover, { force: true });
 
       // The largest summary the fields allow stays within the bound fromSummary accepts.
-      const tools = ['Bash', 'Read', 'Write', 'Edit', 'MultiEdit', 'Glob', 'Grep', 'WebFetch', 'WebSearch', 'TodoWrite', 'NotebookEdit',
-        'Task', 'BashOutput', 'KillShell', 'ToolSearch', 'unknown'];
+      const tools = [...TOOL_NAMES, 'unknown', 'mcp'];
       const most = Object.fromEntries(tools.map(tool => [tool, Number.MAX_SAFE_INTEGER]));
       const largest = JSON.stringify({ result_subtype: 'error_max_structured_output_retries', is_error: false, num_turns: Number.MAX_SAFE_INTEGER,
         permission_denials_count: Number.MAX_SAFE_INTEGER, denied_tool_counts: most, model_exit_code: 'abandoned_after_declaration',
         execution_file_sha256: 'a'.repeat(64), read_reason: 'execution_file_unexpected_path', exit_reason: 'exit_report_unavailable',
         request_after_main: 'invalid_json', exit_after_main: 'invalid_json', resume_decision: 'session_id_invalid', resume_outcome: 'cancelled',
         request_after_resume: 'invalid_json', exit_after_resume: 'invalid_json', resume_result_subtype: 'error_max_structured_output_retries',
-        resume_num_turns: Number.MAX_SAFE_INTEGER, resume_permission_denials_count: Number.MAX_SAFE_INTEGER, resume_denied_tool_counts: most });
-      assert(Buffer.byteLength(largest) <= 4096, `largest summary is ${Buffer.byteLength(largest)} bytes`);
+        resume_num_turns: Number.MAX_SAFE_INTEGER, resume_permission_denials_count: Number.MAX_SAFE_INTEGER, resume_denied_tool_counts: most,
+        background_started: 100000, background_finished: 100000, background_open_at_result: 100000, bash_timed_out: 100000,
+        moved_to_background: 100000, detached_commands: 100000, structured_reminders: 100000, structured_output: 'unreadable',
+        last_stop_reason: 'stop_sequence', terminal_reason: 'structured_output_retry_exhausted', last_tool: 'ShareOnboardingGuide',
+        handoff_source: 'structured' });
+      assert(Buffer.byteLength(largest) <= 8192, `largest summary is ${Buffer.byteLength(largest)} bytes`);
+      assert.equal(fromSummary(largest).ending.terminal_reason, 'structured_output_retry_exhausted');
       assert.deepEqual(fromSummary(largest).handoff.resume_denied_tool_counts, most);
     });
     test('checkpoint capture failure is preserved independently of model success', () => {

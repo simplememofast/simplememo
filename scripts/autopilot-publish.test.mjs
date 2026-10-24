@@ -511,9 +511,13 @@ const REQUEST_FILE = 'autopilot-pr-request.json', EXIT_FILE = 'autopilot-exit.js
  */
 const minutesAgo = minutes => String(Math.floor(Date.now() / 1000) - minutes * 60);
 async function modelJobTail(f, { outcome = 'success', mainWrites = {}, resumeWrites = {}, sessionId = SESSION, budget = '20',
-  jobStarted = minutesAgo(48) } = {}) {
+  jobStarted = minutesAgo(48), structured, structuredText } = {}) {
   const exec = path.join(f.temp, 'claude-execution-output.json');
-  fs.writeFileSync(exec, executionFile(236, 15.41336, ['Write']));
+  const main = JSON.parse(executionFile(236, 15.41336, ['Write']));
+  if (structured !== undefined) main[main.length - 1].structured_output = structured;
+  // A value JSON.stringify cannot serialise (nested thousands deep) is spliced in as text.
+  const text = JSON.stringify(main);
+  fs.writeFileSync(exec, structuredText === undefined ? text : `${text.slice(0, -2)},"structured_output":${structuredText}}]`);
   for (const [name, text] of Object.entries(mainWrites)) fs.writeFileSync(path.join(f.temp, name), text);
   const stepEnv = extra => ({ ...process.env, GITHUB_ACTIONS: '', RUNNER_TEMP: f.temp, EXEC_FILE: exec, ...extra });
   const checkOutput = path.join(f.temp, 'github-output-handoff-files');
@@ -532,7 +536,8 @@ async function modelJobTail(f, { outcome = 'success', mainWrites = {}, resumeWri
   }
   const summary = spawnSync(process.execPath, [path.join(ROOT, 'scripts/autopilot-diagnostics.mjs'), '--summarize'], { encoding: 'utf8',
     env: stepEnv({ RESUME_OUTCOME: resumeOutcome, RESUME_DECISION: checked.resume_decision ?? '', REQUEST_AFTER_MAIN: checked.request_after_main ?? '',
-      EXIT_AFTER_MAIN: checked.exit_after_main ?? '', MAIN_EXECUTION_SHA256: checked.main_execution_sha256 ?? '' }) });
+      EXIT_AFTER_MAIN: checked.exit_after_main ?? '', MAIN_EXECUTION_SHA256: checked.main_execution_sha256 ?? '',
+      HANDOFF_SOURCE: checked.handoff_source ?? '' }) });
   assert.equal(summary.status, 0, summary.stderr);
   const out = path.join(f.temp, 'autopilot-handoff');
   pack({ workspace: f.work, out, day: DAY, runnerTemp: f.temp });
@@ -568,7 +573,7 @@ test('resume (a): the main session wrote neither file, the resumed session write
     commitPage(f);
     const r = await modelJobTail(f, { resumeWrites: { [REQUEST_FILE]: JSON.stringify(request()), [EXIT_FILE]: JSON.stringify({ code: 'shipped_pr' }) } });
     assert.deepEqual(r.checked, { request_after_main: 'missing', exit_after_main: 'missing', missing: 'request,exit', resume: 'true',
-      resume_decision: 'resume', main_execution_sha256: r.checked.main_execution_sha256, session_id: SESSION, resume_budget_usd: '3.00' });
+      handoff_source: 'none', structured_output: 'absent', resume_decision: 'resume', main_execution_sha256: r.checked.main_execution_sha256, session_id: SESSION, resume_budget_usd: '3.00' });
     assert.match(r.checked.main_execution_sha256, /^[a-f0-9]{64}$/);
     assert.equal(fs.readFileSync(path.join(f.temp, MAIN_EXECUTION_COPY), 'utf8'), executionFile(236, 15.41336, ['Write']), 'the main session\'s log is kept');
     assert.equal(r.verified.verdict, 'publish');
@@ -580,6 +585,53 @@ test('resume (a): the main session wrote neither file, the resumed session write
       num_turns: 236, permission_denials_count: 1, denied_tool_counts: { Write: 1 }, resume_num_turns: 4, resume_permission_denials_count: 0 })) {
       assert.deepEqual(r.receipt[key], value, key);
     }
+  } finally { f.cleanup(); }
+});
+
+test('structured (a): the 2026-10-24 shape — no files, the structured result — publishes without a resume', async () => {
+  const f = fixture();
+  try {
+    commitPage(f);
+    const r = await modelJobTail(f, { structured: { exit_code: 'shipped_pr', request: request() },
+      resumeWrites: { [REQUEST_FILE]: JSON.stringify({ action: 'none' }) } });
+    assert.equal(r.resumed, false);
+    assert.deepEqual([r.checked.request_after_main, r.checked.exit_after_main, r.checked.handoff_source, r.checked.structured_output,
+      r.checked.resume_decision, r.checked.session_id], ['missing', 'missing', 'structured', 'present', 'not_needed', undefined]);
+    assert.equal(r.verified.verdict, 'publish');
+    assert.deepEqual(JSON.parse(fs.readFileSync(path.join(r.out, 'request.json'), 'utf8')), request());
+    for (const [key, value] of Object.entries({ model_exit_code: 'shipped_pr', handoff_source: 'structured', structured_output: 'present',
+      request_after_main: 'missing', resume_outcome: 'skipped' })) assert.deepEqual(r.receipt[key], value, key);
+  } finally { f.cleanup(); }
+});
+
+test('structured (b): the structured result wins over files the model wrote; an unusable one changes nothing', async () => {
+  for (const [label, structured, verdict, source] of [
+    ['valid over stale files', { exit_code: 'no_ship_pr', request: { action: 'push_only' } }, 'push_only', 'structured'],
+    ['invalid (extra key)', { exit_code: 'other', request: { action: 'none' }, note: 'x' }, 'publish', 'files'],
+  ]) {
+    const f = fixture();
+    try {
+      commitPage(f);
+      const r = await modelJobTail(f, { structured,
+        mainWrites: { [REQUEST_FILE]: JSON.stringify(request()), [EXIT_FILE]: JSON.stringify({ code: 'shipped_pr' }) } });
+      assert.equal(r.verified.verdict, verdict, label); assert.equal(r.checked.handoff_source, source, label);
+      assert.equal(r.resumed, false, label);
+    } finally { f.cleanup(); }
+  }
+});
+
+test('structured (c): a structured result nested 10,000 deep is invalid; the check and the summary finish on the files', async () => {
+  const deep = `{"exit_code":"no_ship_pr","request":{"action":"push_only","run":${'['.repeat(10_000)}${']'.repeat(10_000)}}}`;
+  const f = fixture();
+  try {
+    commitPage(f);
+    const r = await modelJobTail(f, { structuredText: deep,
+      mainWrites: { [REQUEST_FILE]: JSON.stringify(request()), [EXIT_FILE]: JSON.stringify({ code: 'shipped_pr' }) } });
+    assert.deepEqual([r.checked.structured_output, r.checked.handoff_source, r.checked.resume_decision, r.resumed],
+      ['invalid', 'files', 'not_needed', false]);
+    assert.equal(r.verified.verdict, 'publish');
+    for (const [key, value] of Object.entries({ structured_output: 'invalid', handoff_source: 'files', model_exit_code: 'shipped_pr',
+      request_after_main: 'present', num_turns: 236 })) assert.deepEqual(r.receipt[key], value, key);
   } finally { f.cleanup(); }
 });
 

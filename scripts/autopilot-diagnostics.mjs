@@ -7,13 +7,22 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { readBounded, readJson, handoffFileStates, FILE_STATES, RESUME_DECISIONS, EXECUTION_FILE,
-  MAIN_EXECUTION_COPY, SUMMARY_FILE } from './autopilot-publish.mjs';
+  MAIN_EXECUTION_COPY, SUMMARY_FILE, EXIT_CODES, HANDOFF_SCHEMA, HANDOFF_SOURCES, STRUCTURED_STATES, structuredHandoff } from './autopilot-publish.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // Same bound as the resume decision in autopilot-publish.mjs (a long session must stay readable).
 export const MAX_EXECUTION_BYTES = 128 * 1024 * 1024;
-const TOOLS = new Set(['Bash', 'Read', 'Write', 'Edit', 'MultiEdit', 'Glob', 'Grep',
-  'WebFetch', 'WebSearch', 'TodoWrite', 'NotebookEdit', 'Task', 'BashOutput', 'KillShell', 'ToolSearch']);
+// Tool names a denial may carry. 2026-10-24: both denials of run 40047075713 were 'unknown' — the list predated
+// Claude Code 2.1.245 (Agent/Task*, Monitor, Workflow, Skill, ScheduleWakeup, ...). Names only; never inputs.
+// mcp__* tools count as 'mcp'. Anything else stays 'unknown'.
+export const TOOL_NAMES = Object.freeze(['Bash', 'Read', 'Write', 'Edit', 'MultiEdit', 'Glob', 'Grep',
+  'WebFetch', 'WebSearch', 'TodoWrite', 'NotebookEdit', 'Task', 'BashOutput', 'KillShell', 'ToolSearch',
+  'Agent', 'TaskOutput', 'TaskStop', 'TaskCreate', 'TaskGet', 'TaskList', 'TaskUpdate', 'Monitor', 'Workflow', 'Skill',
+  'AskUserQuestion', 'ExitPlanMode', 'EnterPlanMode', 'ScheduleWakeup', 'CronCreate', 'CronDelete', 'CronList',
+  'SendMessage', 'ListAgents', 'RemoteTrigger', 'PushNotification', 'EnterWorktree', 'ExitWorktree', 'StructuredOutput',
+  'DesignSync', 'ReportFindings', 'ShareOnboardingGuide']);
+const TOOLS = new Set(TOOL_NAMES);
+const toolKey = name => TOOLS.has(name) ? name : typeof name === 'string' && name.startsWith('mcp__') ? 'mcp' : 'unknown';
 const REASONS = {
   verified: ['verified_current_run_record'],
   missing: ['no_matching_pr', 'no_current_run_record', 'invalid_or_stale_record'],
@@ -24,9 +33,66 @@ const SUBTYPES = ['success', 'error_max_turns', 'error_max_budget_usd',
 const CHECKPOINT_REASONS = ['saved', 'no_unpublished_page_changes', 'capture_failed'];
 // The model's own finite statement of why it stopped (prompt step 8). 2026-10-06 ended
 // with subtype=success and no PR, and nothing said why. Free text is never read.
-export const EXIT_CODES = ['shipped_pr', 'no_ship_pr', 'skipped_already_done', 'blocked_unverifiable',
-  'blocked_scope', 'blocked_local_check', 'abandoned_after_declaration', 'tool_denied', 'other'];
+// One list with the structured result's schema (autopilot-publish.mjs HANDOFF_SCHEMA).
+export { EXIT_CODES };
 const MAX_EXIT_BYTES = 4096;
+// Finite facts about how the main session ended (2026-10-24: neither trial said why it stopped). Counts,
+// enums and booleans computed from the execution file on the model's runner; no text leaves it.
+const STOP_REASONS = ['end_turn', 'tool_use', 'max_tokens', 'stop_sequence', 'pause_turn', 'refusal'];
+const TERMINAL_REASONS = ['completed', 'max_turns', 'budget_exhausted', 'structured_output_retry_exhausted', 'stop_hook_prevented',
+  'hook_stopped', 'background_requested', 'tool_deferred', 'tool_deferred_unavailable', 'aborted_streaming', 'aborted_tools',
+  'blocking_limit', 'rapid_refill_breaker', 'prompt_too_long', 'image_error', 'model_error', 'api_error',
+  'malformed_tool_use_exhausted', 'turn_setup_failed'];
+const MAX_FACT = 100000;
+const capped = n => Math.min(n, MAX_FACT);
+const ENDING_FIELDS = ['background_started', 'background_finished', 'background_open_at_result', 'bash_timed_out',
+  'moved_to_background', 'detached_commands', 'structured_reminders', 'structured_output', 'last_stop_reason', 'terminal_reason',
+  'last_tool'];
+
+const textOf = content => typeof content === 'string' ? content
+  : Array.isArray(content) ? content.map(part => typeof part?.text === 'string' ? part.text : typeof part === 'string' ? part : '').join('\n') : '';
+
+/** How the session ended, as counts and enums only (null when the execution is not a message list). */
+export function endingFacts(execution) {
+  const none = Object.fromEntries(ENDING_FIELDS.map(key => [key, null]));
+  if (!Array.isArray(execution)) return none;
+  const started = new Set(), finished = new Set();
+  let timedOut = 0, moved = 0, detached = 0, reminders = 0, lastTool = 'none';
+  for (const m of execution) {
+    // Backgrounded tasks only: a synchronous subagent also reports task_started, and finishes inside the turn.
+    if (m?.type === 'system' && m.subtype === 'task_started' && m.is_backgrounded === true && typeof m.task_id === 'string') started.add(m.task_id);
+    if (m?.type === 'system' && m.subtype === 'task_notification' && typeof m.task_id === 'string') finished.add(m.task_id);
+    if (m?.type === 'user') {
+      const id = m.tool_use_result?.backgroundTaskId;
+      if (typeof id === 'string') started.add(id);
+      const blocks = Array.isArray(m.message?.content) ? m.message.content : [];
+      for (const block of blocks) {
+        const text = block?.type === 'tool_result' ? textOf(block.content) : '';
+        if (/Command timed out after/.test(text)) timedOut++;
+        if (/was moved to the background/.test(text)) moved++;
+      }
+      if (m.isSynthetic && textOf(m.message?.content).includes('[structured-output-enforce]')) reminders++;
+    }
+    if (m?.type === 'assistant' && Array.isArray(m.message?.content)) {
+      for (const block of m.message.content) {
+        if (block?.type !== 'tool_use') continue;
+        lastTool = toolKey(block.name);
+        const command = block.name === 'Bash' && typeof block.input?.command === 'string' ? block.input.command : '';
+        // Quoted text is not shell syntax (a URL's `?a=1&b=2`); what is left is checked for a process left behind.
+        const bare = command.replace(/'[^']*'|"(?:\\.|[^"\\])*"/g, '');
+        if (/\bnohup\b|\bsetsid\b|\bdisown\b|(?<![&<>|])&(?![&>])/.test(bare)) detached++;
+      }
+    }
+  }
+  const result = [...execution].reverse().find(item => item?.type === 'result');
+  const open = [...started].filter(id => !finished.has(id)).length;
+  return { background_started: capped(started.size), background_finished: capped([...finished].filter(id => started.has(id)).length),
+    background_open_at_result: capped(open), bash_timed_out: capped(timedOut), moved_to_background: capped(moved),
+    detached_commands: capped(detached), structured_reminders: capped(reminders),
+    structured_output: result ? structuredHandoff(execution).state : null,
+    last_stop_reason: oneOf(result?.stop_reason, STOP_REASONS), terminal_reason: oneOf(result?.terminal_reason, TERMINAL_REASONS),
+    last_tool: lastTool };
+}
 // The post-model audit's verdict (scripts/autopilot-audit.mjs VERDICTS). Its paths stay in its own artifact.
 export const AUDIT_VERDICTS = ['clean', 'problems', 'not_on_day_branch', 'unavailable'];
 // The handoff files and the one resume of the session (obsidian-autopilot.yml, 2026-10-22). A
@@ -51,7 +117,7 @@ export function modelSummary(execution) {
   if (Array.isArray(raw)) {
     deniedToolCounts = {};
     for (const item of raw) {
-      const tool = TOOLS.has(item?.tool_name) ? item.tool_name : 'unknown';
+      const tool = toolKey(item?.tool_name);
       deniedToolCounts[tool] = (deniedToolCounts[tool] ?? 0) + 1;
     }
   }
@@ -69,7 +135,10 @@ const resumeFields = model => ({ resume_result_subtype: model.result_subtype, re
 const NO_HANDOFF = Object.freeze({ request_after_main: null, exit_after_main: null, resume_decision: null, resume_outcome: null,
   request_after_resume: null, exit_after_resume: null, ...resumeFields(modelSummary(null)) });
 
-export function receipt(env, execution = null, executionHash = null, readReason = null, exit = {}, summarized = null, handoff = NO_HANDOFF) {
+const NO_ENDING = Object.freeze({ ...Object.fromEntries(ENDING_FIELDS.map(key => [key, null])), handoff_source: null });
+
+export function receipt(env, execution = null, executionHash = null, readReason = null, exit = {}, summarized = null, handoff = NO_HANDOFF,
+  ending = NO_ENDING) {
   const model = summarized ?? modelSummary(execution);
   const day = /^\d{4}-\d{2}-\d{2}$/.test(env.TODAY_DASH ?? '') ? env.TODAY_DASH : null;
   const verdict = oneOf(env.OUTPUT_VERDICT, Object.keys(REASONS));
@@ -95,6 +164,7 @@ export function receipt(env, execution = null, executionHash = null, readReason 
     declared_page_change_count: envCount(env.DECLARED_PAGE_CHANGE_COUNT),
     model_exit_code: oneOf(exit.code, EXIT_CODES),
     ...handoff,
+    ...NO_ENDING, ...ending,
     post_model_audit: oneOf(env.AUDIT_VERDICT, AUDIT_VERDICTS),
     execution_file_sha256: hash(executionHash, 64),
     production_verified: false,
@@ -169,7 +239,7 @@ function readExecutionAt(expected) {
 const READ_REASONS = ['execution_file_missing', 'execution_file_unavailable', 'execution_file_oversized',
   'execution_file_invalid_json', 'execution_file_unexpected_path', 'execution_file_changed'];
 const EXIT_REASONS = ['exit_report_missing', 'exit_report_unavailable', 'exit_report_oversized', 'exit_report_invalid'];
-const MAX_SUMMARY_BYTES = 4096;
+const MAX_SUMMARY_BYTES = 8192;
 
 export function summarize(env = process.env) {
   const resumed = RESUMED.includes(env.RESUME_OUTCOME);
@@ -187,7 +257,8 @@ export function summarize(env = process.env) {
   }
   const exit = readExit(env);
   const states = resumed ? handoffFileStates(env.RUNNER_TEMP) : null;
-  return { ...modelSummary(read.execution), model_exit_code: exit.code ?? null,
+  return { ...modelSummary(read.execution), ...endingFacts(read.execution),
+    handoff_source: oneOf(env.HANDOFF_SOURCE, HANDOFF_SOURCES), model_exit_code: exit.code ?? null,
     execution_file_sha256: read.sha256 ?? null, read_reason: read.reason ?? null, exit_reason: exit.reason ?? null,
     request_after_main: oneOf(env.REQUEST_AFTER_MAIN, FILE_STATES), exit_after_main: oneOf(env.EXIT_AFTER_MAIN, FILE_STATES),
     resume_decision: oneOf(env.RESUME_DECISION, RESUME_DECISIONS), resume_outcome: oneOf(env.RESUME_OUTCOME, STEP_OUTCOMES),
@@ -211,11 +282,11 @@ export function fromSummary(text) {
     assert(typeof text === 'string' && text.length > 0 && Buffer.byteLength(text) <= MAX_SUMMARY_BYTES);
     raw = JSON.parse(text);
     assert(raw && typeof raw === 'object' && !Array.isArray(raw));
-  } catch { return { model: modelSummary(null), readReason: 'execution_summary_unavailable', exit: { reason: 'exit_report_unavailable' }, handoff: NO_HANDOFF }; }
+  } catch { return { model: modelSummary(null), ending: NO_ENDING, readReason: 'execution_summary_unavailable', exit: { reason: 'exit_report_unavailable' }, handoff: NO_HANDOFF }; }
   const deniedCounts = value => {
     if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
     const entries = Object.entries(value);
-    return entries.length <= TOOLS.size + 1 && entries.every(([tool, n]) => (TOOLS.has(tool) || tool === 'unknown') && count(n) !== null)
+    return entries.length <= TOOLS.size + 2 && entries.every(([tool, n]) => (TOOLS.has(tool) || tool === 'unknown' || tool === 'mcp') && count(n) !== null)
       ? Object.fromEntries(entries) : null;
   };
   const model = {
@@ -237,8 +308,16 @@ export function fromSummary(text) {
     resume_permission_denials_count: count(raw.resume_permission_denials_count),
     resume_denied_tool_counts: deniedCounts(raw.resume_denied_tool_counts),
   };
+  const ending = {
+    background_started: count(raw.background_started), background_finished: count(raw.background_finished),
+    background_open_at_result: count(raw.background_open_at_result), bash_timed_out: count(raw.bash_timed_out),
+    moved_to_background: count(raw.moved_to_background), detached_commands: count(raw.detached_commands),
+    structured_reminders: count(raw.structured_reminders), structured_output: oneOf(raw.structured_output, STRUCTURED_STATES),
+    last_stop_reason: oneOf(raw.last_stop_reason, STOP_REASONS), terminal_reason: oneOf(raw.terminal_reason, TERMINAL_REASONS),
+    last_tool: raw.last_tool === 'none' || raw.last_tool === 'unknown' || raw.last_tool === 'mcp' || TOOLS.has(raw.last_tool) ? raw.last_tool : null,
+    handoff_source: oneOf(raw.handoff_source, HANDOFF_SOURCES) };
   const code = oneOf(raw.model_exit_code, EXIT_CODES);
-  return { model, executionHash: hash(raw.execution_file_sha256, 64), readReason: oneOf(raw.read_reason, READ_REASONS),
+  return { model, ending, executionHash: hash(raw.execution_file_sha256, 64), readReason: oneOf(raw.read_reason, READ_REASONS),
     exit: code ? { code } : { reason: oneOf(raw.exit_reason, EXIT_REASONS) ?? 'exit_report_unavailable' }, handoff };
 }
 
@@ -251,11 +330,11 @@ export function save(output, env = process.env, { handoff } = {}) {
     // The publish job: the summary the model job packed. Missing, altered or unparsable -> explicit unknowns.
     assert(path.isAbsolute(handoff), 'absolute handoff path required');
     const summary = fromSummary(readHandoffSummary(handoff));
-    data = receipt(env, null, summary.executionHash, summary.readReason, summary.exit, summary.model, summary.handoff);
+    data = receipt(env, null, summary.executionHash, summary.readReason, summary.exit, summary.model, summary.handoff, summary.ending);
   } else {
     // On the runner that holds the files (tests, local use): the same typed summary the model job packs.
     const summary = fromSummary(JSON.stringify(summarize(env)));
-    data = receipt(env, null, summary.executionHash, summary.readReason, summary.exit, summary.model, summary.handoff);
+    data = receipt(env, null, summary.executionHash, summary.readReason, summary.exit, summary.model, summary.handoff, summary.ending);
   }
   fs.mkdirSync(output, { mode: 0o700 }); // never reuse a directory or upload its prior contents
   fs.writeFileSync(path.join(output, 'receipt.json'), JSON.stringify(data, null, 2) + '\n', { mode: 0o600, flag: 'wx' });
@@ -306,10 +385,15 @@ export function checkWiring(source) {
   assert.match(upload, /retention-days: 7\n/);
   assert.doesNotMatch(source, /show_full_output:\s*['"]?true/);
   // The prompt must ask for the finite exit code the receipt reads, on that same line
-  // (a word such as "other" appears elsewhere in the workflow anyway).
-  const exitStep = source.split('\n').find(line => line.includes('"$RUNNER_TEMP/autopilot-exit.json"'));
-  assert(exitStep, 'prompt must request the exit code file');
+  // (a word such as "other" appears elsewhere in the workflow anyway). 2026-10-24: it is the structured
+  // result's exit_code (one list with HANDOFF_SCHEMA); the resume still writes the file in the same words.
+  const exitStep = source.split('\n').find(line => line.includes('StructuredOutput の `exit_code`'));
+  assert(exitStep, 'prompt must request the exit code in the structured result');
   for (const code of EXIT_CODES) assert(new RegExp(`(^|[^a-z_])${code}([^a-z_]|$)`).test(exitStep), `prompt must offer exit code ${code}`);
+  assert.deepEqual(HANDOFF_SCHEMA.properties.exit_code.enum, [...EXIT_CODES], 'the schema offers exactly the receipt\'s exit codes');
+  for (const line of ['HANDOFF_SOURCE: ${{ steps.handoff_files.outputs.handoff_source }}']) {
+    assert(summary.includes(`\n          ${line}\n`), `the summary must receive ${line.split(':')[0]}`);
+  }
 }
 
 async function main() {

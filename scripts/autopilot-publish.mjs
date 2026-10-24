@@ -145,6 +145,42 @@ export const JOB_TIME = Object.freeze({ job_minutes: 90, outside_minutes: 5 });
 export const NO_REQUEST_EXIT_CODE = 'skipped_already_done';
 // A long session (the 2026-10-22 trial ran 236 turns) must not make the main cost unreadable.
 export const MAX_EXECUTION_BYTES = 128 * 1024 * 1024;
+// 2026-10-24 (run 40047075713): the main session again ended without either file (2 of 2 trials), and the
+// resume ran 0 turns: on resume, Claude Code 2.1.245 first answers a stale notice for a background task the
+// main session left running (shouldQuery:false → result with num_turns 0), and the pinned action stops at that
+// first result. Two changes, both through claude_args of the main step:
+//  - the final handoff is the session's structured result (--json-schema HANDOFF_SCHEMA). When the model ends
+//    its turn without calling StructuredOutput, the CLI itself tells it to (verified on 2.1.245, 2026-10-24),
+//    so the handoff no longer depends on the model remembering two files. --inspect-handoff copies that result
+//    into the two files; the publish job validates them exactly as before (same author: the model).
+//  - background tasks are off (MAIN_SETTINGS): no task outlives the session, so a resume meets no stale notice.
+//    Long checks run in the foreground, bounded by the Bash timeouts set here (default 10 min, max 40 min).
+// The exit codes are the receipt's (autopilot-diagnostics.mjs re-exports this list).
+export const EXIT_CODES = Object.freeze(['shipped_pr', 'no_ship_pr', 'skipped_already_done', 'blocked_unverifiable',
+  'blocked_scope', 'blocked_local_check', 'abandoned_after_declaration', 'tool_denied', 'other']);
+// Same limits as validateRequest (which the publish job still applies in full); [0-9] instead of \d keeps the
+// schema free of backslashes inside claude_args.
+export const HANDOFF_SCHEMA = Object.freeze({ type: 'object', additionalProperties: false, required: ['exit_code', 'request'], properties: {
+  exit_code: { type: 'string', enum: [...EXIT_CODES] },
+  request: { type: 'object', additionalProperties: false, required: ['action'], properties: {
+    action: { type: 'string', enum: ['pr', 'push_only', 'none'] },
+    title: { type: 'string', minLength: 1, maxLength: 200 },
+    body: { type: 'string', maxLength: 30000 },
+    run: { type: 'object', additionalProperties: false, required: ['run_id', 'outcome'], properties: {
+      run_id: { type: 'string', pattern: '^ap-[0-9]{8}-actions(-[0-9]{1,20})?$' },
+      outcome: { type: 'string', enum: ['shipped', 'no_artifact', 'failed'] },
+      lane: { type: 'string', pattern: '^[A-F]$' },
+      action: { type: 'string', pattern: '^[a-z0-9][a-z0-9_-]{0,63}$' },
+      artifact: { type: 'string', maxLength: 300 },
+      failure_reason: { type: 'string', maxLength: 500 },
+      failure_class: { type: 'string', pattern: '^[a-z][a-z0-9_-]{0,47}$' },
+      repair_of: { type: 'array', minItems: 1, maxItems: 20, items: { type: 'string' } } } } } } } });
+// The main step's process settings (claude_args --settings): background tasks off, foreground limits on.
+export const MAIN_SETTINGS = '{"env":{"CLAUDE_CODE_DISABLE_BACKGROUND_TASKS":"1","BASH_DEFAULT_TIMEOUT_MS":"600000","BASH_MAX_TIMEOUT_MS":"2400000"}}';
+// Tools that start CLI-tracked background work or schedule later turns; none of them can be answered in this route.
+export const MAIN_DISALLOWED_TOOLS = 'Monitor,Workflow,ScheduleWakeup,CronCreate,CronDelete,RemoteTrigger,PushNotification';
+export const HANDOFF_SOURCES = ['structured', 'files', 'none'];
+export const STRUCTURED_STATES = ['present', 'absent', 'invalid', 'unreadable'];
 const SESSION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 export const validSessionId = value => typeof value === 'string' && SESSION_ID.test(value);
 const usdValue = value => typeof value === 'string' && /^\d{1,6}(?:\.\d{1,20})?$/.test(value) ? Number(value) : null;
@@ -172,7 +208,61 @@ export function readMainExecution(runnerTemp, execFile = '') {
   try { doc = JSON.parse(read.bytes.toString('utf8')); } catch { return { sha256, bytes: read.bytes, reason: 'invalid_json' }; }
   const result = (Array.isArray(doc) ? [...doc].reverse() : [doc]).find(item => item?.type === 'result');
   const cost = result?.total_cost_usd;
-  return { sha256, bytes: read.bytes, cost: typeof cost === 'number' && Number.isFinite(cost) && cost >= 0 ? cost : null };
+  return { sha256, bytes: read.bytes, doc, cost: typeof cost === 'number' && Number.isFinite(cost) && cost >= 0 ? cost : null };
+}
+
+// The request is model-written: its shape is bounded before anything serialises it. A value nested some
+// thousands deep makes JSON.stringify throw RangeError, which took --inspect-handoff and --summarize down with
+// it. Iterative, never recursive; the byte count is a lower bound of the serialised size (UTF-8 never has fewer
+// bytes than UTF-16 units), so a request within MAX_JSON_BYTES is never turned away here. A container's commas
+// and keys are counted before its children are queued, so a very wide one is turned away without queuing them.
+export const MAX_STRUCTURED_DEPTH = 16;
+function boundedShape(value, maxDepth, maxBytes) {
+  const stack = [[value, 1]];
+  let bytes = 0;
+  while (stack.length) {
+    const [item, depth] = stack.pop();
+    bytes += typeof item === 'string' ? item.length + 2 : 1;
+    if (item !== null && typeof item === 'object') {
+      if (depth > maxDepth) return false;
+      const children = Object.values(item);
+      bytes += Math.max(children.length - 1, 0);
+      if (!Array.isArray(item)) for (const key of Object.keys(item)) bytes += key.length + 3;
+      if (bytes > maxBytes) return false;
+      for (const child of children) stack.push([child, depth + 1]);
+    }
+    if (bytes > maxBytes) return false;
+  }
+  return true;
+}
+
+/**
+ * The session's structured result (--json-schema), as the bytes of the two handoff files, or why not.
+ * Shape only: the request is model-written either way and the publish job validates it in full.
+ */
+export function structuredHandoff(doc) {
+  const result = (Array.isArray(doc) ? [...doc].reverse() : [doc]).find(item => item?.type === 'result');
+  const value = result?.structured_output;
+  if (value === undefined || value === null) return { state: 'absent' };
+  if (typeof value !== 'object' || Array.isArray(value)) return { state: 'invalid' };
+  const keys = Object.keys(value).sort();
+  if (keys.join(',') !== 'exit_code,request' || !EXIT_CODES.includes(value.exit_code)) return { state: 'invalid' };
+  if (!value.request || typeof value.request !== 'object' || Array.isArray(value.request)) return { state: 'invalid' };
+  if (!boundedShape(value.request, MAX_STRUCTURED_DEPTH, MAX_JSON_BYTES)) return { state: 'invalid' };
+  const request = Buffer.from(JSON.stringify(value.request));
+  if (request.length > MAX_JSON_BYTES) return { state: 'invalid' };
+  return { state: 'present', request, exit: Buffer.from(JSON.stringify({ code: value.exit_code })) };
+}
+
+// Never through whatever is at the path (a planted link or file): a fresh file in a fresh directory, renamed
+// over it (rename replaces a link itself, never its target; a directory there makes it fail, and the state says so).
+function materialize(runnerTemp, name, bytes) {
+  const dir = fs.mkdtempSync(path.join(runnerTemp, 'autopilot-structured-'));
+  try {
+    const fresh = path.join(dir, name);
+    fs.writeFileSync(fresh, bytes, { mode: 0o600, flag: 'wx' });
+    fs.renameSync(fresh, path.join(runnerTemp, name));
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 }
 
 /** Pure: resume once only for a successful main step whose files are missing, within the job's time and the run's budget. */
@@ -196,9 +286,19 @@ export function resumeDecision({ modelOutcome, states, exitCode, sessionId, elap
 
 export function inspectAfterModel({ runnerTemp, modelOutcome, sessionId, runtimeBudgetUsd, execFile, jobStartedEpoch, now = Date.now() }) {
   assert(path.isAbsolute(runnerTemp ?? ''), 'absolute RUNNER_TEMP required');
-  const states = handoffFileStates(runnerTemp);
-  const exit = states.exit === 'present' ? readJson(path.join(runnerTemp, HANDOFF_FILES.exit)).value : null;
+  // What the model wrote itself (reported as *_after_main), then the session's structured result over it.
+  const written = handoffFileStates(runnerTemp);
   const main = readMainExecution(runnerTemp, execFile);
+  const structured = main.doc !== undefined ? structuredHandoff(main.doc) : { state: 'unreadable' };
+  if (structured.state === 'present') {
+    for (const key of ['request', 'exit']) {
+      try { materialize(runnerTemp, HANDOFF_FILES[key], structured[key]); } catch { /* the state below says what is there */ }
+    }
+  }
+  const states = structured.state === 'present' ? handoffFileStates(runnerTemp) : written;
+  const source = states.request === 'present' && states.exit === 'present'
+    ? (structured.state === 'present' ? 'structured' : 'files') : 'none';
+  const exit = states.exit === 'present' ? readJson(path.join(runnerTemp, HANDOFF_FILES.exit)).value : null;
   // The Gate step's `date +%s` (the job's clock, recorded before the model ran).
   const started = typeof jobStartedEpoch === 'string' && /^\d{10}$/.test(jobStartedEpoch) ? Number(jobStartedEpoch) : NaN;
   const decided = resumeDecision({ modelOutcome, states, exitCode: exit?.code, sessionId, elapsedSeconds: Math.floor(now / 1000) - started,
@@ -208,14 +308,17 @@ export function inspectAfterModel({ runnerTemp, modelOutcome, sessionId, runtime
     // match main_execution_sha256 and report it as unknown. The resume itself does not depend on it.
     try { fs.writeFileSync(path.join(runnerTemp, MAIN_EXECUTION_COPY), main.bytes, { mode: 0o600, flag: 'wx' }); } catch { /* see above */ }
   }
-  return { states, ...decided, main_execution_sha256: main.sha256 ?? null };
+  return { states, written, handoff_source: source, structured_output: structured.state, ...decided, main_execution_sha256: main.sha256 ?? null };
 }
 
 /** GITHUB_OUTPUT values: typed only. session_id and the budget are set only for a resume. */
 export function inspectOutputs(result) {
   const missing = ['request', 'exit'].filter(name => result.states[name] !== 'present');
-  return { request_after_main: result.states.request, exit_after_main: result.states.exit,
+  const written = result.written ?? result.states;
+  return { request_after_main: written.request, exit_after_main: written.exit,
     missing: missing.length ? missing.join(',') : 'none', resume: result.decision === 'resume',
+    handoff_source: HANDOFF_SOURCES.includes(result.handoff_source) ? result.handoff_source : 'none',
+    structured_output: STRUCTURED_STATES.includes(result.structured_output) ? result.structured_output : 'unreadable',
     resume_decision: result.decision, main_execution_sha256: result.main_execution_sha256 ?? '',
     ...(result.decision === 'resume' ? { session_id: result.session_id, resume_budget_usd: result.budget_usd } : {}) };
 }
@@ -609,6 +712,93 @@ const activeLines = text => text.split('\n').filter(line => !/^\s*#/.test(line))
 const stepsOf = job => activeLines(job).split(/\n(?=      - name: )/).slice(1);
 const stepName = step => step.match(/^      - name: (.*)$/m)?.[1].replace(/^"|"$/g, '') ?? '';
 
+// A model step's `claude_args: |` block as the action receives it: a literal block runs on past blank lines, to
+// the first non-blank line indented less than its content (12 spaces here). stepsOf has dropped `#` lines, as
+// the action does before it splits the arguments.
+function claudeArgsLines(step) {
+  const lines = step.split('\n');
+  const at = lines.indexOf('          claude_args: |');
+  assert(at !== -1 && lines.filter(line => /^\s*claude_args\s*:/.test(line)).length === 1, 'each model step has one claude_args block');
+  const block = [];
+  for (const line of lines.slice(at + 1)) {
+    if (line.trim() && !line.startsWith(' '.repeat(12))) break;
+    block.push(line.slice(12));
+  }
+  return block;
+}
+
+// The words the pinned action splits claude_args into (shell-quote), for the plain forms only: bare text and
+// '…' / "…" parts, joined when adjacent. Whatever shell-quote would read another way (a backslash, `$` outside
+// single quotes — it expands to nothing —, `#` outside quotes — a comment to the end —, a backtick, an open
+// quote) fails the check instead of being guessed at. Actions replaces ${{ }} before the action sees it.
+function claudeArgWords(lines) {
+  const words = [];
+  const part = /'[^'\\]*'|"[^"\\$`]*"|[^\s'"\\$#`]+/y;
+  for (const raw of lines) {
+    if (raw.trim().startsWith('#')) continue;
+    const line = raw.replace(/\$\{\{[^}]*\}\}/g, 'EXPR');
+    let i = 0;
+    while (i < line.length) {
+      if (line[i] === ' ' || line[i] === '\t') { i++; continue; }
+      const start = i;
+      let word = '', m;
+      while ((part.lastIndex = i, m = part.exec(line))) {
+        word += /^['"]/.test(m[0]) ? m[0].slice(1, -1) : m[0];
+        i = part.lastIndex;
+      }
+      assert(i > start && (i === line.length || line[i] === ' ' || line[i] === '\t'),
+        'claude_args holds plain words only (no \\, $, # or ` outside single quotes, no open quote)');
+      words.push(word);
+    }
+  }
+  return words;
+}
+
+// The action hands every word that starts with `--` to the CLI as an option (`--name value` or `--name=value`),
+// and the CLI keeps the last value of a repeated option: a second one, in any form, overrides the pinned one.
+// Exactly one, in the `--name value` form, its value byte-equal to the constant. Returns its index.
+function onlyOption(words, names, value, message) {
+  const lower = names.map(name => name.toLowerCase());
+  const at = words.flatMap((word, i) => word.startsWith('--') && lower.includes(word.slice(2).split('=')[0].toLowerCase()) ? [i] : []);
+  assert(at.length === 1 && words[at[0]] === `--${names[0]}` && words[at[0] + 1] === value, message);
+  return at[0];
+}
+
+// Every expression Actions evaluates in the raw workflow text: each ${{ … }} (inside run/prompt blocks too,
+// `#` lines included; a '…' literal may hold `}}`), and each `if:` value (an expression without ${{ }}; a
+// folded one runs on over its more-indented lines).
+function workflowExpressions(source) {
+  const found = [];
+  for (let at = source.indexOf('${{'); at !== -1; at = source.indexOf('${{', at + 3)) {
+    let i = at + 3, quoted = false;
+    for (; i < source.length && (quoted || !source.startsWith('}}', i)); i++) if (source[i] === "'") quoted = !quoted;
+    found.push(source.slice(at + 3, i));
+  }
+  const lines = source.split('\n');
+  lines.forEach((line, n) => {
+    const key = line.match(/^(\s*(?:-\s+)?)(?:if|'if'|"if")\s*:/);
+    if (!key) return;
+    let text = line.slice(key[0].length);
+    for (let k = n + 1; k < lines.length && (!lines[k].trim() || lines[k].search(/\S/) > key[1].length); k++) text += '\n' + lines[k];
+    found.push(text);
+  });
+  return found;
+}
+
+// Reads a model step's outputs (or every step's) as a whole — toJSON(steps), toJSON(steps.claude),
+// toJSON(steps.claude.outputs), a wildcard or a computed index —, which would carry the structured result.
+// Contexts are case-insensitive. Single named values (outputs.<name>, outcome, conclusion) are fine.
+function readsWholeModelOutputs(expression, modelIds) {
+  for (const m of expression.matchAll(/(?<![\w.-])steps(?![\w-])/gi)) {
+    const rest = expression.slice(m.index);
+    const id = rest.match(/^steps\s*\.\s*([A-Za-z_][\w-]*)/i)?.[1];
+    if (!id) return true;
+    if (!modelIds.includes(id.toLowerCase())) continue;
+    if (!/^steps\s*\.\s*[A-Za-z_][\w-]*\s*\.\s*(?:outcome|conclusion|outputs\s*\.\s*[A-Za-z_][\w-]*)(?![\w-])/i.test(rest)) return true;
+  }
+  return false;
+}
+
 export function checkWiring(source) {
   assert.match(source, /\npermissions: \{\}\n/, 'workflow-level permissions must be empty');
   assert.doesNotMatch(activeLines(source), /id-token/, 'no job may request an OIDC token');
@@ -661,10 +851,29 @@ export function checkWiring(source) {
   assert.deepEqual([...resume.matchAll(/secrets\.([A-Z0-9_]+)/g)].map(m => m[1]), ['CLAUDE_CODE_OAUTH_TOKEN'], 'the resume gets the model credential only');
   assert(resume.includes('\n          github_token: ${{ github.token }}\n') && !/\n        env:\n/.test(resume)
     && [...resume.matchAll(/token: (.*)/g)].length === 2, 'the resume gets only the read-only job token');
-  const resumeArgs = resume.match(/\n          claude_args: \|\n((?: {12}[^\n]*\n)*)/)?.[1].split('\n').map(line => line.trim()).filter(Boolean);
-  assert.deepEqual(resumeArgs, ['--resume ${{ steps.handoff_files.outputs.session_id }}', `--max-turns ${RESUME_LIMITS.max_turns}`,
+  const resumeLines = claudeArgsLines(resume);
+  assert.deepEqual(resumeLines.map(line => line.trim()).filter(Boolean), ['--resume ${{ steps.handoff_files.outputs.session_id }}', `--max-turns ${RESUME_LIMITS.max_turns}`,
     '--max-budget-usd ${{ steps.handoff_files.outputs.resume_budget_usd }}', '--model ${{ steps.route.outputs.model }}',
-    '--allowedTools "Bash,Read,Write"'], 'the resume: the validated session, small caps, the same model, Bash/Read/Write only');
+    `--settings '${MAIN_SETTINGS}'`, '--allowedTools "Bash,Read,Write"'],
+    'the resume: the validated session, small caps, the same model, no background tasks, Bash/Read/Write only');
+  onlyOption(claudeArgWords(resumeLines), ['settings'], MAIN_SETTINGS, 'the resume runs without background tasks: one --settings, the constant');
+  // 2026-10-24: the main session ends with a structured result and leaves no background task behind. One of
+  // each option, byte-equal to the constant (an appended second one would silently win).
+  const mainWords = claudeArgWords(claudeArgsLines(claude));
+  onlyOption(mainWords, ['settings'], MAIN_SETTINGS, 'the main session runs without background tasks, with bounded foreground limits');
+  const disallowed = onlyOption(mainWords, ['disallowedTools', 'disallowed-tools'], MAIN_DISALLOWED_TOOLS,
+    'the main session cannot start monitors, workflows or scheduled turns');
+  // The action reads every following word that is not an option as one more value of --disallowedTools.
+  assert(mainWords[disallowed + 2] === undefined || mainWords[disallowed + 2].startsWith('--'), 'the main session\'s --disallowedTools has one value');
+  onlyOption(mainWords, ['json-schema'], JSON.stringify(HANDOFF_SCHEMA), 'the main session ends with the handoff schema (HANDOFF_SCHEMA)');
+  // The structured result reaches the handoff only through --inspect-handoff (workflow-commit code), never an
+  // expression: neither by name (any case, dotted or bracketed) nor inside a model step's outputs read whole.
+  const modelIds = [...jobs.values()].flatMap(job => stepsOf(job)).filter(step => /uses: anthropics\/claude-code-action@/.test(step))
+    .map(step => step.match(/\n        id: ([\w-]+)\n/)?.[1]?.toLowerCase()).filter(Boolean);
+  for (const expression of workflowExpressions(source)) {
+    assert.doesNotMatch(expression, /structured_output/i, 'no expression reads the structured result');
+    assert(!readsWholeModelOutputs(expression, modelIds), 'no expression reads a model step\'s outputs whole (the structured result is one of them)');
+  }
   const resumePrompt = resume.split('\n          prompt: |\n')[1];
   assert(resumePrompt && !resumePrompt.includes('${{'), 'the resume prompt is fixed text');
   for (const step of [inspect, resume]) {
@@ -856,7 +1065,146 @@ function selftest() {
   const inspectMoved = workflow.replace('"$RUNNER_TEMP/handoff-tools/scripts/autopilot-publish.mjs" --inspect-handoff', 'scripts/autopilot-publish.mjs --inspect-handoff');
   t(inspectMoved !== workflow, 'inspect mutation applies');
   assert.throws(() => checkWiring(inspectMoved), /handoff check/); n++;
-  console.log(`autopilot-publish: ${n} path, request, resume and workflow-wiring checks passed`);
+  // 2026-10-24: the main step's structured result and its background-free settings are pinned.
+  const claudeAt = workflow.indexOf('      - name: Claude Code（Runbook 1イテレーション実行）\n');
+  const claudeEnd = workflow.indexOf('\n      - name: ', claudeAt + 1);
+  const schemaLine = `--json-schema '${JSON.stringify(HANDOFF_SCHEMA)}'`;
+  for (const [from, to] of [
+    [`            --settings '${MAIN_SETTINGS}'\n`, ''],
+    ['"CLAUDE_CODE_DISABLE_BACKGROUND_TASKS":"1",', ''],
+    [`            --disallowedTools "${MAIN_DISALLOWED_TOOLS}"\n`, ''],
+    [`            ${schemaLine}\n`, ''],
+    ['"exit_code":{"type":"string","enum":["shipped_pr",', '"exit_code":{"type":"string","enum":['],
+  ]) {
+    const block = workflow.slice(claudeAt, claudeEnd);
+    t(block.includes(from), `main-step mutation applies: ${from.trim().slice(0, 40)}`);
+    const mutated = workflow.slice(0, claudeAt) + block.replace(from, to) + workflow.slice(claudeEnd);
+    assert.throws(() => checkWiring(mutated), undefined, `main-step mutation must fail: ${from.trim().slice(0, 40)}`); n++;
+  }
+  const exposed = workflow.replace('          RESUME_OUTCOME: ${{ steps.resume.outcome }}\n          RESUME_DECISION',
+    '          RESUME_OUTCOME: ${{ steps.resume.outcome }}\n          SO: ${{ steps.claude.outputs.structured_output }}\n          RESUME_DECISION');
+  t(exposed !== workflow, 'structured output exposure mutation applies');
+  assert.throws(() => checkWiring(exposed), /structured result/); n++;
+  // A second option appended in any form the action's parser accepts overrides the pinned one (the CLI keeps the
+  // last value): the main step holds exactly one of each, the resume exactly one --settings.
+  const resumeBlock = workflow.slice(resumeAt, resumeEnd);
+  const settingsLine = `            --settings '${MAIN_SETTINGS}'\n`;
+  const disallowedLine = `            --disallowedTools "${MAIN_DISALLOWED_TOOLS}"\n`;
+  const append = (line, extra) => [line, `${line}            ${extra}\n`];
+  // Every form shell-quote reads as the same option: single quotes, double quotes, unquoted, --flag=value.
+  const forms = {
+    'single quotes': (flag, value) => `--${flag} '${value}'`,
+    'double quotes': (flag, value) => `--${flag} "${value}"`,
+    unquoted: (flag, value) => `--${flag} ${value}`,
+    "--flag='value'": (flag, value) => `--${flag}='${value}'`,
+    '--flag=value': (flag, value) => `--${flag}=${value}`,
+  };
+  const appended = [];
+  for (const [flag, line, value, expected] of [
+    ['settings', settingsLine, '{}', /background tasks/],
+    ['json-schema', `            ${schemaLine}\n`, '{}', /handoff schema/],
+    ['disallowedTools', disallowedLine, 'Bash', /monitors/],
+    ['disallowed-tools', disallowedLine, 'Bash', /monitors/],
+  ]) {
+    for (const [form, text] of Object.entries(forms)) appended.push([`second --${flag}, ${form}`, claudeAt, claudeEnd, append(line, text(flag, value)), expected]);
+  }
+  for (const [form, text] of Object.entries(forms)) appended.push([`resume: second --settings, ${form}`, resumeAt, resumeEnd, append(settingsLine, text('settings', '{}')), /resume/]);
+  for (const [label, at, end, [from, to], expected] of [
+    ...appended,
+    ['second --settings, quoted name', claudeAt, claudeEnd, append(settingsLine, `'--settings' '{}'`), /background tasks/],
+    ['second --settings, escaped quotes', claudeAt, claudeEnd, append(settingsLine, '--settings "{\\"env\\":{}}"'), /plain words/],
+    ['second --settings, on the same line', claudeAt, claudeEnd, ['            --max-turns 250\n', "            --max-turns 250 --settings '{}'\n"], /background tasks/],
+    ['second --settings, after a blank line', claudeAt, claudeEnd, ['\n          prompt: |\n', "\n\n            --settings '{}'\n          prompt: |\n"], /background tasks/],
+    ['the only --settings as --settings=value', claudeAt, claudeEnd, [settingsLine, `            --settings='${MAIN_SETTINGS}'\n`], /background tasks/],
+    ['a second value of --disallowedTools', claudeAt, claudeEnd, [disallowedLine, `            --disallowedTools "${MAIN_DISALLOWED_TOOLS}" "Bash"\n`], /one value/],
+    ['a second claude_args block', claudeAt, claudeEnd, ['          claude_args: |\n', "          claude_args: --settings '{}'\n          claude_args: |\n"], /one claude_args/],
+    ['resume: second --settings, after a blank line', resumeAt, resumeEnd, ['\n          prompt: |\n', "\n\n            --settings '{}'\n          prompt: |\n"], /resume/],
+    ['resume: second --settings=value, on the same line', resumeAt, resumeEnd, ['--allowedTools "Bash,Read,Write"\n', '--allowedTools "Bash,Read,Write" --settings={}\n'], /resume/],
+  ]) {
+    const block = at === resumeAt ? resumeBlock : workflow.slice(claudeAt, claudeEnd);
+    t(block.includes(from), `option mutation applies: ${label}`);
+    const mutated = workflow.slice(0, at) + block.replace(from, to) + workflow.slice(end);
+    assert.throws(() => checkWiring(mutated), expected, `option mutation must fail: ${label}`); n++;
+  }
+  // The structured result never reaches an expression: in the raw text (Actions expands `#` lines of run and prompt
+  // blocks too), by name in any case or bracket form, nor in a model step's outputs read whole.
+  const envAt = '          RESUME_OUTCOME: ${{ steps.resume.outcome }}\n          RESUME_DECISION';
+  const env = expression => [envAt, `          SO: \${{ ${expression} }}\n${envAt}`];
+  const runLine = '          git worktree add --detach "$RUNNER_TEMP/diagnostic-tools" "$GITHUB_SHA"\n';
+  const promptLine = '            1. `docs/obsidian/AUTOPILOT_RUNBOOK.md` を読む。';
+  const ifLine = "        if: always() && steps.claude.conclusion != 'skipped'\n";
+  for (const [label, [from, to]] of [
+    ['a # line in a run block', [runLine, `          # \${{ steps.claude.outputs.structured_output }}\n${runLine}`]],
+    ['a # line in the prompt', [promptLine, `            # \${{ steps.claude.outputs.structured_output }}\n${promptLine}`]],
+    ['bracket, single quotes', env("steps.claude.outputs['structured_output']")],
+    ['bracket, double quotes', env('steps.claude.outputs["structured_output"]')],
+    ['another case', env('steps.claude.outputs.STRUCTURED_OUTPUT')],
+    ['toJSON(steps.claude.outputs)', env('toJSON(steps.claude.outputs)')],
+    ['toJSON(steps.claude)', env('toJSON(steps.claude)')],
+    ['toJSON(steps)', env('toJSON(steps)')],
+    ['toJSON(steps.resume.outputs)', env('toJSON(steps.resume.outputs)')],
+    ['toJSON(STEPS.Claude.Outputs)', env('toJSON(STEPS.Claude.Outputs)')],
+    ['every output by wildcard', env("join(steps.claude.outputs.*, ',')")],
+    ['a computed step', env("toJSON(steps[format('{0}', 'claude')])")],
+    ['an if: condition', [ifLine, "        if: always() && steps.claude.outputs.structured_output != ''\n"]],
+    ['an if : condition', [ifLine, "        if : always() && steps.claude.outputs.structured_output != ''\n"]],
+    ['an if: condition reading the outputs whole', [ifLine, "        if: always() && toJSON(steps.claude.outputs) != '{}'\n"]],
+  ]) {
+    const mutated = workflow.replace(from, to);
+    t(mutated !== workflow, `expression mutation applies: ${label}`);
+    assert.throws(() => checkWiring(mutated), /structured result/, `expression mutation must fail: ${label}`); n++;
+  }
+  t(checkWiring(workflow.replace(...env('toJSON(steps.route.outputs)'))), 'a step that runs no model may still be read whole');
+  // A structured result nested past the bound is invalid before anything serialises it (JSON.stringify throws
+  // RangeError at some thousands of levels, which took --inspect-handoff and --summarize down).
+  const nestedText = (depth, code = 'other') => `{"exit_code":"${code}","request":{"action":"none","run":${'['.repeat(depth)}${']'.repeat(depth)}}}`;
+  for (const [depth, state] of [[MAX_STRUCTURED_DEPTH - 1, 'present'], [MAX_STRUCTURED_DEPTH, 'invalid'], [10_000, 'invalid'], [200_000, 'invalid']]) {
+    t(structuredHandoff([{ type: 'result', structured_output: JSON.parse(nestedText(depth)) }]).state === state, `structured result nested ${depth} -> ${state}`);
+  }
+  t(structuredHandoff([{ type: 'result', structured_output: { exit_code: 'other', request: Object.fromEntries(
+    Array.from({ length: 5000 }, (_, i) => [`k${i}`, 'x'.repeat(10)])) } }]).state === 'invalid', 'a wide structured result over the byte bound is invalid');
+  t(structuredHandoff([{ type: 'result', structured_output: { exit_code: 'other', request: { action: 'none', run: new Array(70_000).fill(0) } } }]).state === 'invalid',
+    'a structured result with a very wide array is invalid');
+  // The structured result: shape only, the two files' bytes, never anything else of the result.
+  const req = { action: 'pr', title: 'T', body: 'B', run: { run_id: 'ap-20261024-actions-1', outcome: 'shipped', lane: 'F' } };
+  const ok = structuredHandoff([{ type: 'result', structured_output: { exit_code: 'shipped_pr', request: req }, result: 'x' }]);
+  t(ok.state === 'present' && JSON.parse(ok.request).run.lane === 'F' && JSON.parse(ok.exit).code === 'shipped_pr', 'structured result read');
+  for (const [label, value, state] of [['absent', undefined, 'absent'], ['null', null, 'absent'], ['array', [], 'invalid'],
+    ['extra key', { exit_code: 'other', request: { action: 'none' }, note: 'x' }, 'invalid'], ['bad code', { exit_code: 'done', request: { action: 'none' } }, 'invalid'],
+    ['request not object', { exit_code: 'other', request: 'pr' }, 'invalid'],
+    ['oversized', { exit_code: 'other', request: { action: 'pr', body: 'a'.repeat(70_000) } }, 'invalid']]) {
+    t(structuredHandoff([{ type: 'result', structured_output: value }]).state === state, `structured result ${label} -> ${state}`);
+  }
+  const soDir = fs.mkdtempSync(path.join(os.tmpdir(), 'autopilot-structured-test-'));
+  try {
+    const decoy = path.join(soDir, 'decoy.json');
+    fs.writeFileSync(decoy, 'unchanged');
+    fs.symlinkSync(decoy, path.join(soDir, HANDOFF_FILES.request)); // a planted link is replaced, its target untouched
+    fs.writeFileSync(path.join(soDir, EXECUTION_FILE), JSON.stringify([{ type: 'result', total_cost_usd: 5.3, num_turns: 115,
+      structured_output: { exit_code: 'shipped_pr', request: req } }]));
+    const r = inspectAfterModel({ runnerTemp: soDir, modelOutcome: 'success', sessionId: session, runtimeBudgetUsd: '20',
+      jobStartedEpoch: String(Math.floor(Date.now() / 1000) - 30 * 60) });
+    t(r.decision === 'not_needed' && r.handoff_source === 'structured' && r.written.request === 'not_file', 'structured result makes both files; no resume');
+    t(fs.readFileSync(decoy, 'utf8') === 'unchanged', 'the link target is never written');
+    t(validateRequest(readJson(path.join(soDir, HANDOFF_FILES.request)).value, '20261024').request?.run.run_id === 'ap-20261024-actions-1',
+      'the copied request passes the publish validation unchanged');
+    const o = inspectOutputs(r);
+    t(o.request_after_main === 'not_file' && o.handoff_source === 'structured' && o.structured_output === 'present' && o.resume === false,
+      'outputs report what the model wrote and where the handoff came from');
+  } finally { fs.rmSync(soDir, { recursive: true, force: true }); }
+  const deepDir = fs.mkdtempSync(path.join(os.tmpdir(), 'autopilot-structured-deep-'));
+  try {
+    fs.writeFileSync(path.join(deepDir, EXECUTION_FILE),
+      `[{"type":"result","total_cost_usd":5.3,"num_turns":115,"structured_output":${nestedText(10_000, 'shipped_pr')}}]`);
+    fs.writeFileSync(path.join(deepDir, HANDOFF_FILES.request), JSON.stringify(req));
+    fs.writeFileSync(path.join(deepDir, HANDOFF_FILES.exit), JSON.stringify({ code: 'shipped_pr' }));
+    const r = inspectAfterModel({ runnerTemp: deepDir, modelOutcome: 'success', sessionId: session, runtimeBudgetUsd: '20',
+      jobStartedEpoch: String(Math.floor(Date.now() / 1000) - 30 * 60) });
+    t(r.structured_output === 'invalid' && r.handoff_source === 'files' && r.decision === 'not_needed'
+      && readJson(path.join(deepDir, HANDOFF_FILES.request)).value?.run?.run_id === req.run.run_id,
+      'a deeply nested structured result is invalid: the check finishes on the files the model wrote');
+  } finally { fs.rmSync(deepDir, { recursive: true, force: true }); }
+  console.log(`autopilot-publish: ${n} path, request, resume, structured-result and workflow-wiring checks passed`);
 }
 
 async function main(argv = process.argv.slice(2)) {
@@ -871,7 +1219,8 @@ async function main(argv = process.argv.slice(2)) {
       sessionId: process.env.SESSION_ID, runtimeBudgetUsd: process.env.RUNTIME_BUDGET_USD, execFile: process.env.EXEC_FILE,
       jobStartedEpoch: process.env.JOB_STARTED_EPOCH });
     output(inspectOutputs(result));
-    console.log(`handoff files after the model: request=${result.states.request} exit=${result.states.exit} resume=${result.decision}`);
+    console.log(`handoff files after the model: request=${result.states.request} exit=${result.states.exit} source=${result.handoff_source}`
+      + ` structured=${result.structured_output} resume=${result.decision}`);
     return;
   }
   assert(!argv.includes('--remote'), '--remote is a test-only parameter');
