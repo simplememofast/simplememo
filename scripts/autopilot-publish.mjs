@@ -249,7 +249,7 @@ export function validateRequest(raw, day) {
   if (run.action != null && !/^[a-z0-9][a-z0-9_-]{0,63}$/.test(run.action)) return { code: 'request_run_action' };
   if (run.artifact != null && !plain(run.artifact, 300)) return { code: 'request_artifact' };
   if (run.failure_reason != null && !plain(run.failure_reason, 500)) return { code: 'request_failure_reason' };
-  if (run.failure_class != null && !FAILURE_CLASS.test(run.failure_class)) return { code: 'request_failure_class' };
+  if (run.failure_class != null && !(typeof run.failure_class === 'string' && FAILURE_CLASS.test(run.failure_class))) return { code: 'request_failure_class' };
   // A day that did not ship is recorded with why (autopilot-runs.mjs validate() requires failure_reason)
   // and what kind (autopilot-selfheal.mjs --check requires failure_class). Refused here, before any push,
   // instead of failing in record after the PR is open.
@@ -530,10 +530,11 @@ export function record({ repo, trusted, sha, day, pr, request, runId, work, runn
     // The session recorded its row itself: bind it to this PR (and to the requested repair_of), nothing else.
     if (existing.route !== 'actions' || existing.date_jst !== dash || String(existing.external_ref) !== runId) fail('record_foreign_row');
     // Only a row that already says what the request says: the same outcome and, on a day that did not
-    // ship, a failure class (selfheal --check refuses a failed row without one). Refused before anything
+    // ship, the same failure class (selfheal --check refuses a failed row without one). Refused before anything
     // is written; nothing from the request is copied into a row the session wrote.
     if (existing.outcome !== run.outcome) fail('record_row_outcome');
-    if (run.outcome !== 'shipped' && !(typeof existing.failure_class === 'string' && FAILURE_CLASS.test(existing.failure_class))) fail('record_row_failure_class');
+    if (run.outcome !== 'shipped' && !(typeof existing.failure_class === 'string' && FAILURE_CLASS.test(existing.failure_class)
+      && existing.failure_class === run.failure_class)) fail('record_row_failure_class');
     existing.pr = pr;
   } else {
     const args = ['scripts/autopilot-runs.mjs', '--append', '--run-id', run.run_id, '--date', dash, '--route', 'actions',
