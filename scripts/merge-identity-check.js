@@ -122,6 +122,7 @@ function selftest() {
     message: 'fix\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>' } };
   assert.deepEqual(findUnapprovedPrincipals([trialCommit]), []);
   for (const near of [{ name: 'Claude Sonnet 5', email: 'person@example.invalid' },
+    { name: 'Claude Sonnet 5', email: 'someone@anthropic.com' },
     { name: 'Claude Sonnet 5 Private Person', email: 'noreply@anthropic.com' },
     { name: 'Claude Sonnet', email: 'noreply@anthropic.com' },
     { name: 'Claude Haiku 4.5', email: 'noreply@anthropic.com.example' }]) {
@@ -129,6 +130,9 @@ function selftest() {
   }
   // Every model the daily run can be routed to has its co-author name approved; otherwise that
   // day's publish job refuses the work. A new model in the routing table fails here first.
+  // The names are what Claude Code is expected to write ('Claude ' + the model's display name).
+  // Only 'Claude Sonnet 5' has been seen on a daily-run commit (2026-10-25); if Claude Code writes
+  // another name, publish refuses the work (fails closed) and this table needs that name.
   const COAUTHOR_NAMES = { 'claude-haiku-4-5-20251001': 'Claude Haiku 4.5', 'claude-sonnet-5': 'Claude Sonnet 5',
     'claude-opus-5': 'Claude Opus 5' };
   const routing = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'model-routing.json'), 'utf8'));
