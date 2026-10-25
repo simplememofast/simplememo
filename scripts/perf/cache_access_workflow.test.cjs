@@ -37,7 +37,7 @@ function fixture(change = {}) {
       events.push('fresh-metadata');
       assert.equal(input.approval, capability);
       assert.equal(input.request.approvedHeadSha, HEAD);
-      assert.equal(input.request.pullRequestNumber, 2139);
+      assert.equal(input.request.pullRequestNumber, 2164);
       assert.ok(!Object.hasOwn(input.context, 'runId'));
       return { authorization };
     },

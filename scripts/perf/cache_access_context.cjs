@@ -66,8 +66,8 @@ function contextData(context, checkoutSha, withRunId = false) {
 }
 function requestData(request) {
   record(request, 'REQUEST_INVALID', ['pullRequestNumber', 'approvedHeadSha']);
-  need((request.pullRequestNumber === 2139 || request.pullRequestNumber === '2139') && sha(request.approvedHeadSha), 'REQUEST_INVALID');
-  return freeze({ pullRequestNumber: 2139, approvedHeadSha: request.approvedHeadSha });
+  need((request.pullRequestNumber === 2164 || request.pullRequestNumber === '2164') && sha(request.approvedHeadSha), 'REQUEST_INVALID');
+  return freeze({ pullRequestNumber: 2164, approvedHeadSha: request.approvedHeadSha });
 }
 async function get(github, group, method, params, code) {
   try {
@@ -112,8 +112,8 @@ async function candidate(input) {
   const context = contextData(input.context, input.checkoutSha), request = requestData(input.request);
   const { github, now, validUntil } = input, headSha = request.approvedHeadSha;
   clock(now, validUntil);
-  const pr = pullData(await get(github, 'pulls', 'get', { pull_number: 2139 }, 'PR_READ_FAILED'));
-  need(pr.number === 2139 && pr.state === 'open' && pr.merged === false && pr.user.login === OWNER
+  const pr = pullData(await get(github, 'pulls', 'get', { pull_number: 2164 }, 'PR_READ_FAILED'));
+  need(pr.number === 2164 && pr.state === 'open' && pr.merged === false && pr.user.login === OWNER
     && pr.base.ref === 'main' && pr.base.repo.full_name === FULL_REPO && pr.base.repo.fork === false
     && pr.head.sha === headSha && pr.head.repo.full_name === FULL_REPO && pr.head.repo.fork === false, 'PR_INVALID');
   const checks = [], ids = new Set();
@@ -135,12 +135,12 @@ async function candidate(input) {
   need(checks.length === total, 'CHECK_LIST_INCOMPLETE');
   const raw = manifestData(await get(github, 'repos', 'getContent', { path: MANIFEST_PATH, ref: headSha }, 'MANIFEST_READ_FAILED'), headSha);
   const manifestSha256 = createHash('sha256').update(raw).digest('hex');
-  const policy = { approvedPullRequestNumber: 2139, approvedHeadSha: headSha, validUntil,
+  const policy = { approvedPullRequestNumber: 2164, approvedHeadSha: headSha, validUntil,
     cloudflareAppId: 85455, cloudflareAppSlug: 'cloudflare-workers-and-pages',
     cloudflareAccountId: '6f37d8ca103aa4af6a3722fc3c3e1ef6', cloudflareProjectName: 'simplememo', expectedManifestSha256: manifestSha256 };
   // Re-read the PR after bounded content/check reads; never authorize a moved or
   // closed head merely because it matched before those asynchronous operations.
-  const freshPr = pullData(await get(github, 'pulls', 'get', { pull_number: 2139 }, 'PR_READ_FAILED'));
+  const freshPr = pullData(await get(github, 'pulls', 'get', { pull_number: 2164 }, 'PR_READ_FAILED'));
   let result;
   for (const value of checks) {
     if (value.name !== 'Cloudflare Pages' || value.status !== 'completed' || value.conclusion !== 'success') continue;
@@ -236,7 +236,7 @@ async function readEnvironmentApproval(input) {
       && run.event === 'workflow_dispatch' && run.head_branch === 'main'
       && run.head_sha === context.sha && [WORKFLOW_PATH, WORKFLOW_PATH + '@main'].includes(run.path)
       && run.actor.login === OWNER && run.triggering_actor.login === OWNER && run.run_attempt === 1
-      && run.display_title === 'Homepage cache PR 2139 @ ' + headSha && run.status === 'in_progress'
+      && run.display_title === 'Homepage cache PR 2164 @ ' + headSha && run.status === 'in_progress'
       && run.conclusion === null && Number.isFinite(createdAt) && createdAt <= initialNow && expiry <= createdAt + HOUR, 'RUN_INVALID');
     const { environmentId } = await readEnvironmentConfiguration({ github, configurationReadback, now, validUntil });
     // Official endpoint: GET /repos/{owner}/{repo}/actions/runs/{run_id}/approvals

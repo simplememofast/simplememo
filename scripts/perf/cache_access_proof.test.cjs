@@ -21,13 +21,13 @@ function fixture() {
     event: 'workflow_dispatch', head_branch: 'main', head_sha: MAIN, run_attempt: 1,
     status: 'completed', conclusion: 'success', actor: { login: OWNER }, triggering_actor: { login: OWNER },
     repository: { full_name: REPO, fork: false }, head_repository: { full_name: REPO, fork: false },
-    display_title: 'Homepage cache PR 2139 @ ' + HEAD,
+    display_title: 'Homepage cache PR 2164 @ ' + HEAD,
     created_at: at(0), run_started_at: at(1), updated_at: at(55),
   };
   const jobs = [
-    { id: 101, name: 'Resolve cache PR 2139 @ ' + HEAD, started_at: at(2), completed_at: at(10),
+    { id: 101, name: 'Resolve cache PR 2164 @ ' + HEAD, started_at: at(2), completed_at: at(10),
       steps: [step(1, 'Set up job', 2, 3), step(2, 'Resolve reviewed candidate', 3, 9), step(3, 'Complete job', 9, 10)] },
-    { id: 102, name: 'Verify reviewed cache PR 2139 @ ' + HEAD, started_at: at(15), completed_at: at(40),
+    { id: 102, name: 'Verify reviewed cache PR 2164 @ ' + HEAD, started_at: at(15), completed_at: at(40),
       steps: [step(1, 'Set up job', 15, 16), step(2, 'Authorize reviewed preview', 16, 20),
         step(3, 'Verify response contract', 20, 39), step(4, 'Complete job', 39, 40)] },
     { id: 103, name: 'Cache proof ' + HEAD + ' ' + MANIFEST + ' ' + DEPLOYMENT, started_at: at(45), completed_at: at(50),
@@ -125,8 +125,8 @@ for (const [key, values] of Object.entries({
   head_branch: ['candidate', 'refs/heads/main', undefined], head_sha: [HEAD, undefined],
   run_attempt: [0, 2, '1', undefined], status: ['queued', 'in_progress', undefined],
   conclusion: ['failure', 'skipped', 'neutral', 'cancelled', null],
-  display_title: ['Homepage cache PR 2136 @ ' + HEAD, 'Homepage cache PR 2139 @ ' + MAIN,
-    'Homepage cache PR 2139 @ ' + HEAD + ' extra'],
+  display_title: ['Homepage cache PR 2136 @ ' + HEAD, 'Homepage cache PR 2139 @ ' + HEAD, 'Homepage cache PR 2164 @ ' + MAIN,
+    'Homepage cache PR 2164 @ ' + HEAD + ' extra'],
 })) {
   test(`run ${key} must match the trusted source and exact reviewed candidate`, () => {
     for (const value of values) reject(f => { f.run[key] = value; }, 'run');
