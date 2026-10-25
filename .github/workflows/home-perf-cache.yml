@@ -54,7 +54,7 @@ jobs:
       - name: Resolve trusted main verifier
         if: github.event_name == 'pull_request' && github.event.pull_request.number == 2139
         id: trusted
-        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             try {
@@ -89,7 +89,7 @@ jobs:
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: Verify approved preview proof
         if: github.event_name == 'pull_request' && github.event.pull_request.number == 2139
-        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           TRUSTED_CHECKOUT_SHA: ${{ steps.checkout.outputs.sha }}
         with:
@@ -110,7 +110,7 @@ jobs:
       - name: Resolve the exact successful deployment
         if: github.event_name != 'pull_request' || github.event.pull_request.number != 2139
         id: deployment
-        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const sha = context.payload.pull_request?.head.sha || context.sha;

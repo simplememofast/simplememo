@@ -53,7 +53,7 @@ jobs:
 
       - name: Determine required routine observation checks
         id: routine_scope
-        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const { routineCiScope } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/lib/routine-ci-scope.mjs`);
@@ -1443,7 +1443,7 @@ jobs:
           node --test scripts/pr-release-publication-exception.test.mjs
 
       - name: PR release ledger completeness
-        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const { checkPublication } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/check-pr-release-ledger.mjs`);
@@ -1576,7 +1576,7 @@ jobs:
         run: python3 scripts/codex-routine-observer.py --check
       - name: Record actual observation health outcomes
         if: always()
-        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           CLAUDE_OUTCOME: ${{ steps.claude_health.outcome }}
           CODEX_OUTCOME: ${{ steps.codex_health.outcome }}

@@ -46,7 +46,7 @@ jobs:
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: Resolve reviewed candidate
         id: candidate
-        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           REQUESTED_HEAD_SHA: ${{ inputs.head_sha }}
           TRUSTED_CHECKOUT_SHA: ${{ steps.checkout.outputs.sha }}
@@ -111,7 +111,7 @@ jobs:
         id: checkout
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: Authorize reviewed preview
-        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           REQUESTED_HEAD_SHA: ${{ needs.resolve.outputs.head_sha }}
           TRUSTED_CHECKOUT_SHA: ${{ steps.checkout.outputs.sha }}
@@ -125,7 +125,7 @@ jobs:
             catch { core.setFailed('PREVIEW_ENVIRONMENT_APPROVAL_FAILED'); }
       - name: Verify response contract
         id: contract
-        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           REQUESTED_HEAD_SHA: ${{ needs.resolve.outputs.head_sha }}
           TRUSTED_CHECKOUT_SHA: ${{ steps.checkout.outputs.sha }}
