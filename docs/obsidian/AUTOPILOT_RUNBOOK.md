@@ -72,8 +72,8 @@
   通っているので、**上限に達した経路はそもそも走らない**
 - 例外は**所有者が日付を入れた1回だけ**。GitHub Actions の副系は、オーナーが repository
   variable `AUTOPILOT_RECOVERY_ONCE` に JST の日付を入れた日の定時の1回目に限り、
-  10-05・10-06・10-22・10-24 の封じ込めを越える（`docs/obsidian/ACTIONS_RECOVERY_ONE_USE.md`）。
-  **AIはこの変数を作らない・変えない。**越えた回でも 10-05・10-06・10-22・10-24 の repair_of は書かない。
+  10-05・10-06・10-22・10-24・10-25 の封じ込めを越える（`docs/obsidian/ACTIONS_RECOVERY_ONE_USE.md`）。
+  **AIはこの変数を作らない・変えない。**越えた回でも 10-05・10-06・10-22・10-24・10-25 の repair_of は書かない。
   越えた回のモデルは `--contain` を実行しない（プロンプト手順0-2の TRIAL_RUN=actions_once）。
   モデルの環境には許可の値が渡らないので、`--contain --dry-run` の exit 1 を止まる理由にしない
 
