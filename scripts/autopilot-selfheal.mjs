@@ -208,7 +208,7 @@ export const ACTIONS_RECOVERY = Object.freeze({
     // 2026-10-24 のオーナー判断（F95 の修正 #2156 のマージ後にもう一度試す）。10-24 の試運転も依頼を
     // 残さずに終わり、no_artifact の行が1つ増えた。その行を #2153 のマージ時点の指紋で足す。上限と回数は変えていない。
     'ap-20261024-actions': 'e730ebb7e0ad2c00163eb90968667b2f50418830aadffd1ce3858ffa6f442d4b',
-    // 2026-10-25 のオーナー判断（監査 F97 の修正のマージ後にもう一度試す）。10-25 の試運転は引き渡しまで届いたが、
+    // 2026-10-25 のオーナー判断（監査 F97 の修正とこの更新をマージし、もう一度試す日は後で決める）。10-25 の試運転は引き渡しまで届いたが、
     // publish がコミットの共同作者の名義を拒否して何も公開されず、no_artifact の行が1つ増えた。その行を #2159 の
     // マージ時点の指紋で足す。上限と回数は変えていない。
     'ap-20261025-actions': '6c25e6e7611c6add70a10ede8ceffb896a2be6f56e13211d71e32a105b895a0e',
@@ -451,7 +451,8 @@ export function checkRecoveryWiring(source) {
   // この固定入力は変わらない。
   const PINNED_LEDGER = 'b2bee3618fa1235bb13b2213010aa8a806f22532';
   // 検体の「新しい故障」。固定した台帳に無い id にする（実在の行と重なると新しい故障の検査にならない。
-  // 前に使っていた ap-20261024-actions は、10-24 の試運転で本物の行になった）。
+  // 前に使っていた ap-20261024-actions は、10-24 の試運転で本物の行になった。直前の ap-20261025-actions-selftest
+  // から、検体の日付に合わせて変えた）。
   const NEW_FAILURE = 'ap-20261026-actions-selftest';
   const NOW = new Date('2026-10-25T22:45:00Z'); // JST 10-26 07:45（定時 07:30 の配信遅れ）
   const ENV = { AUTOPILOT_RECOVERY_ONCE: '2026-10-26', GITHUB_ACTIONS: 'true', GITHUB_EVENT_NAME: 'schedule',
@@ -534,7 +535,7 @@ export function checkRecoveryWiring(source) {
       }
       refused({ ...f, rows: null }, 'target_row_changed');
       refused({ ...f, preventionMerged: false }, 'prevention_missing');
-      // 新しい no_artifact が1件増えると、封じ込めの対象が5件になって越えない。
+      // 新しい no_artifact が1件増えると、封じ込めの対象が6件になって越えない。
       const later = { run_id: NEW_FAILURE, date_jst: '2026-10-26', route: 'actions', attempted: true,
         outcome: 'no_artifact', failure_class: 'no_artifact', source: 'test' };
       const grown = analyze({ runs: [...f.rows, later] }, JSON.parse(fs.readFileSync(MATRIX_PATH, 'utf8')),
@@ -619,7 +620,7 @@ if (isMain) {
       if (recovery.allowed) {
         console.log(`所有者承認の試運転（1回限り）: ${recovery.date} の定時 run。対象 ${recovery.targets.join(', ')}`);
         console.log('封じ込めだけを越える。故障行・修理回数・上限・緊急停止・予算・宣言の検査はそのまま。');
-        console.log('結果は通常の行として残る。出荷しても 10-05・10-06・10-22・10-24 は修理済みにならない。');
+        console.log('結果は通常の行として残る。出荷しても 10-05・10-06・10-22・10-24・10-25 は修理済みにならない。');
         if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, 'recovery=actions_once\n');
         process.exit(0);
       }
