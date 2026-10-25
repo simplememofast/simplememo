@@ -405,7 +405,8 @@ jobs:
       # 代償は上流の修正も自動では入らないこと。**それは意図した代償**で、
       # 版を上げるのは data/autopilot-actions.json に起票してから行う
       # （いつ・なぜ上げたかが残る）。上げるときはこの行のSHAとコメントを一緒に直すこと。
-        uses: anthropics/claude-code-action@16b3b310c3d7b5279df73130324d5205aeea8eac # v1 (Claude Code 2.1.245 / Agent SDK 0.3.245)
+      # 2026-10-25: BunのBrotli修正版へ更新。act-pin-claude-code-actionの追記とPR #2164に根拠。
+        uses: anthropics/claude-code-action@925afb53776cf1a2b738c6bdbed37b4d4000ef13 # v1.0.262 (Bun 1.4.4 / Claude Code 2.1.310 / Agent SDK 0.3.310)
         env:
           # 読み取り専用の job token（gh で前回 run のログ等を読むため）。書き込みはできない。
           GH_TOKEN: ${{ github.token }}
@@ -515,7 +516,7 @@ jobs:
         continue-on-error: true
         timeout-minutes: 8
         # 主の段（id: claude）と同じ SHA。版を上げるときは両方を一緒に直す。
-        uses: anthropics/claude-code-action@16b3b310c3d7b5279df73130324d5205aeea8eac # v1 (Claude Code 2.1.245 / Agent SDK 0.3.245)
+        uses: anthropics/claude-code-action@925afb53776cf1a2b738c6bdbed37b4d4000ef13 # v1.0.262 (Bun 1.4.4 / Claude Code 2.1.310 / Agent SDK 0.3.310)
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ github.token }}
