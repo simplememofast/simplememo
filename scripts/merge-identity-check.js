@@ -3,6 +3,8 @@
 // Keep this allowlist public: it names approved product and automation
 // identities, not any private identity that a commit might disclose.
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 
 function approvedPrincipal(principal) {
   const name = String(principal?.name || '').trim();
@@ -25,6 +27,12 @@ function approvedPrincipal(principal) {
     // bound to the github-actions[bot] account id. Owner-approved 2026-10-14; before
     // this, every unattended artifact PR was refused here after a green validation.
     ['claude[bot]', ['41898282+claude[bot]@users.noreply.github.com']],
+    // Claude Code adds `Co-Authored-By: <model name> <noreply@anthropic.com>` to the commits
+    // it writes. The daily run uses the models in data/model-routing.json, and the selftest
+    // fails if a routed model's name is missing here. On 2026-10-25 the trial's publish job
+    // refused the run's commits because 'Claude Sonnet 5' was not listed.
+    ['Claude Sonnet 5', ['noreply@anthropic.com']],
+    ['Claude Haiku 4.5', ['noreply@anthropic.com']],
   ]);
   if (known.get(name)?.includes(email)) return true;
 
@@ -108,6 +116,32 @@ function selftest() {
     { name: 'claude[bot] Private Person', email: '41898282+claude[bot]@users.noreply.github.com' },
     { name: 'Private Person', email: '41898282+claude[bot]@users.noreply.github.com' }]) {
     assert.equal(approvedPrincipal(near), false, JSON.stringify(near));
+  }
+  // The trailer on the 2026-10-25 trial's commits, and nothing near it.
+  const trialCommit = { ...good, commit: { author: dailyRun, committer: dailyRun,
+    message: 'fix\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>' } };
+  assert.deepEqual(findUnapprovedPrincipals([trialCommit]), []);
+  for (const near of [{ name: 'Claude Sonnet 5', email: 'person@example.invalid' },
+    { name: 'Claude Sonnet 5', email: 'someone@anthropic.com' },
+    { name: 'Claude Sonnet 5 Private Person', email: 'noreply@anthropic.com' },
+    { name: 'Claude Sonnet', email: 'noreply@anthropic.com' },
+    { name: 'Claude Haiku 4.5', email: 'noreply@anthropic.com.example' }]) {
+    assert.equal(approvedPrincipal(near), false, JSON.stringify(near));
+  }
+  // Every model the daily run can be routed to has its co-author name approved; otherwise that
+  // day's publish job refuses the work. A new model in the routing table fails here first.
+  // The names are what Claude Code is expected to write ('Claude ' + the model's display name).
+  // Only 'Claude Sonnet 5' has been seen on a daily-run commit (2026-10-25); if Claude Code writes
+  // another name, publish refuses the work (fails closed) and this table needs that name.
+  const COAUTHOR_NAMES = { 'claude-haiku-4-5-20251001': 'Claude Haiku 4.5', 'claude-sonnet-5': 'Claude Sonnet 5',
+    'claude-opus-5': 'Claude Opus 5' };
+  const routing = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'model-routing.json'), 'utf8'));
+  const routed = Object.keys(routing.models || {});
+  assert.ok(routed.length > 0, 'data/model-routing.json lists no models');
+  for (const model of routed) {
+    const name = COAUTHOR_NAMES[model];
+    assert.ok(name, `data/model-routing.json routes to ${model}: add its co-author name to COAUTHOR_NAMES and the allowlist`);
+    assert.equal(approvedPrincipal({ name, email: 'noreply@anthropic.com' }), true, `${name} (${model}) is not an approved co-author`);
   }
   assert.equal(approvedMergeOwner('simplememofast', { login: 'simplememofast', name: 'SimpleMemo Developer', email: 'simplememo.com@gmail.com' }), true);
   assert.equal(approvedMergeOwner('simplememofast', { login: 'simplememofast', name: 'SimpleMemo Developer (Private Person)', email: 'simplememo.com@gmail.com' }), false);
