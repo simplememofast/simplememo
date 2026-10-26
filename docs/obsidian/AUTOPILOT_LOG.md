@@ -4151,3 +4151,41 @@ p=0.20。`publishing_day_rate` は5件の決済のうち p=0.70/0.55/0.35/0.25 �
 
 ## 2026-10-04 — Refresh: second-brain guide title
 - Native owner obsidian, actions route, planned 06:00 JST, task 01a10392-c32e-78e3-a7ca-fb2d158f0351. Scheduler inventory, initial preflight and preclaim readback passed; unique shared daily branch obtained. No stop or budget override. - Compared the 815-impression/11-click method guide with the 251-impression/3-click Roam comparison. The title emphasized email and Obsidian while H1/body teach CODE/PARA and a one-note exercise. One action aligns five metadata title fields; body, description, CTA, canonical and tracking stay unchanged. - Prospective contract second-brain-title-20261004 and Company b0898ee2-79f3-40c8-9078-715106f1e91f were sealed and bound before implementation. Registered experiment gsc-second-brain-title-20261004 in a separate registry-only commit before the page edit; no subsequent registry formatting change. - GSC source37081053944 covers09/02..09/29. Post window10/04..10/31 and evaluation11/03 are fixed. Operational publishing_day_rate is separate from SEO, acquisition and profit. Sampled search results are context, not causal or ranking proof. - VFU retains its old failure and latest reason=null; no reproduced safe repair or resend. CTA original export has32 missing landings, all without timestamped page views in its bounded scan; source-limit diagnosis is private and quality remains blocked. No data filled or discarded. - Daily GSC/AppsFlyer and resumed same-request GA4 verified; ASC reused; BingAPI partial retained. BingW40 and Sep30 fixed AI observation reused. Service notice48h/49rows: latest fresh, errors0/eligible0, no active or failure; historical observation gap retained. - AppsFlyer operational follow-up now reports7/7distinct verified native collection days and KEEP. This is pipeline acceptance, not complete parent zero-touch or business impact. Goal notification native-evidence issue remains under verification. Existing experiment windows and original failures retained. - PR1959: publication pending final-head SEO Validation, merge and served-byte match. LocalSEO0errors/60warnings and relevant static gates pass. Browser evidence and final completion remain separate. CodexactualUSD null/unavailable; Claude cost ledger unchanged; no observed owner intervention is not proof of complete H0 observation.
+
+
+## 2026-10-26 — GitHub Actions主系・レーンA保守。gsc-obsidian-install-20260922-r2 を inconclusive で評価
+
+### 判定
+
+`data/emergency-stop.json` は全体・経路とも `stopped: false`。当日ブランチ `claude/obsidian-auto-20261026` は origin に無く、本番 `data/autopilot-status.json` の `date_jst` は 2026-10-05 だったため冪等チェックを通過。`node scripts/autopilot-selfheal.mjs` はレーンF対象なし（過去の `usage_limit` 系は `owner` 判断で既知の制約・5件の `no_artifact`（10-05・10-06・10-22・10-24・10-25）は修理上限3回超で人に上げたまま、TRIAL_RUNの指示どおり今回は直さず `repair_of` も書かない）。
+
+### レーンA〜Eの走査
+
+`coverage-queue.json` の唯一の pending（C29 `/obsidian/compare/craft/`）は `collides_with: /vs/craft/`（既存サイトに実在）で不適格 — 衝突はリポジトリ内で確定する判定なので、レーンEの走査はここで止めず終了（他に pending 無し）。`refresh-queue.json` の `queued` 項目（A5 議事録＝やらないことリストで除外／A8 note-to-email／A9 obsidian使い方／A11-A13 中国語memo-habit・fastest-voice-memo）はいずれも範囲外か鮮度が古い。新しい BigQuery スナップショット（`AUTOPILOT_DATA_REPORT`: `ready`, `newest_data_date` 2026-10-23, 28日窓, lag 3日）で `growth/scripts/analyze.mjs --only unanswered` を再実行したところ、Obsidianハブの強い未回答意図を検出: 「obsidian ダウンロード」250imp・pos6.5・0クリック（期待7.5クリック損失）、着地先は `/obsidian/getting-started/`。
+
+このページは `gsc-obsidian-install-20260922-r2`（evaluation_at 2026-10-23・exclusive scope・当時まさに「ダウンロード導線を強調する」施策）の対象で、3日オーバーデュー中だった。実験が走っている間は同ページへの追加変更を入れない規則（Runbook §0 原則5）に従い、今日のアクションはこの実験の評価とした。
+
+### 実装
+
+`node growth/scripts/experiments.mjs evaluate gsc-obsidian-install-20260922-r2 --decision inconclusive --snapshot 2026-10-26 --note "..."`。評価に使ったBQスナップショット（`GROWTH_GSC_DIR`）の期間は2026-09-26..2026-10-23で、`comparablePeriods`のゲート（baseline.end < started_at < after.start、同じ日数、lag≥3日）を実測で通過（due候補に挙がっていたことを `experiments.mjs due` で事前確認）。
+
+結果: 完全一致ページ `/obsidian/getting-started/` のWEB GSC CTRが baseline 0.66%（9clicks/1371imp, 2026-08-23..09-19）→ post 0.83%（17clicks/2039imp, 2026-09-26..10-23）。事前登録の retain ライン（+0.30pp絶対）に届かず（+0.18pp）。position も 8.41→7.47 に改善、clicksもbaseline超だが、impressionsが+49%増えており（ガードレールに明記の需要/ミックス交絡）、この小さなCTR増分を単離できない。dropでもないのでrevertも不適。`decision_rule`の「otherwise inconclusive」に当たると判断した。
+
+### 価値契約
+
+`obsidian-install-r2-evaluate-20261026` を実装より先に別コミットでpush（push自体はこのセッションでは行わず、publishに依頼）。`publishing_day_rate`・p=0.5・horizon 1日。対抗候補は同じ仕組みで評価可能な `gsc-note-to-email-20260923`（範囲外のため次点）。較正根拠: `publishing_day_rate` は決済10件・平均Brier 0.3915で、p=0.55〜0.70帯はほぼevent=0（過信）、低いp（0.15・0.30）でevent=1が出た実績があるため、本日は実装済みで検証も完了している強い状況でも p=0.5 に抑えた。
+
+### 台帳
+
+- run_id: `ap-20261026-actions-40249667656`
+- 変更ファイル: `growth/experiments/experiments.json`（1件評価）, `data/decision-intents/obsidian-install-r2-evaluate-20261026.json`（宣言）, `data/autopilot-status.json`, 本ログ
+- このセッションには書き込み資格情報が無いため、push・PR作成・記帳・公開運転表再生成はpublishジョブへ依頼する（StructuredOutput）
+- owner_requests: 繰り返し no_artifact 5件（10-05・10-06・10-22・10-24・10-25）はレーンFの修理上限（同種故障3回）を超えて人に上げたまま。Actions書き込み権限分離後のpublish経路そのものの点検が必要。
+
+### 検証
+
+ローカルで exit 0: `check-css-version`・`check-benchmark`・`check-url-normalization`・`check-internal-redirects`・`sync_constants --check`・`tag-cta-placements --check`・`check-experiments`（overdue 3→2）・`autopilot-budget --check`・`check-authority --check`・`autopilot-selfheal --check`・`autopilot-drill --check`・`automation-rate --check`・`check-pr-facts --check`・`check-landing-freshness --check`・`check-viewport-overflow --static`・`d-score --check`・`generate_sitemap.py --dry-run`。`seo-check.js` は 0 errors・2652 warnings（originクリーンチェックアウトでも同数と確認済みの既存ベースライン、今回の変更由来ではない）。`decision-ci.mjs --verify-local` は `problems: []`。
+
+**検証していないこと:** 本文HTML・画像は1行も変えていないため、ブラウザを使う動的な `check-viewport-overflow --check` は対象外。`autopilot-runs.mjs --check` はこのセッションでは台帳append（publishジョブの仕事）を行わないため、台帳最終記入とstatus JSONのdate_jstの食い違いで非0終了する想定どおりの状態（publish側が記帳すれば解消）。
+
+`ROUTINE_MCP_PROBE: not_applicable Actions経路のためCCRのMCPは対象外`
