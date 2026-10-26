@@ -41,14 +41,17 @@
         "PR作成"
       ],
       "requires_approval": false,
-      "human_only": [],
-      "gate": "SEO Validation 13チェックに合格した**そのSHAだけ**をauto-mergeがマージする。落ちればマージされない",
+      "human_only": [
+        "無人の自律運転ブランチ（claude/obsidian-auto-<日付>）のPRで、台帳以外を変えるもののマージ"
+      ],
+      "gate": "SEO Validation 13チェックに合格した**そのSHAだけ**をauto-mergeがマージする。落ちればマージされない。無人の自律運転ブランチ（claude/obsidian-auto-<日付>）のPRで台帳以外（ページ・スクリプト・生成物）を変えるものは自動マージせず、オーナーが Environment autopilot-approval で承認したときだけ merge-after-approval ジョブが、検証済みSHA・ファイル一覧・名義・JSTの同じ日を確かめ直してマージする",
       "evidence": [
         ".github/workflows/seo-check.yml",
-        ".github/workflows/auto-merge.yml"
+        ".github/workflows/auto-merge.yml",
+        "scripts/autopilot-approval-check.mjs"
       ],
       "status": "active",
-      "note": "mainへのマージ＝本番公開。出荷を保留したいときはdraft PRにする（auto-mergeはdraftを対象外にしている）"
+      "note": "mainへのマージ＝本番公開。出荷を保留したいときはdraft PRにする（auto-mergeはdraftを対象外にしている）\n\n**[2026-10-20] オーナー判断で human_only を1つ足した。**セキュリティ監査 F2/F3（外部のページや検索語を読むAIのPRが、人の確認なしに本番へ自動マージされる）への対応として、オーナーが「HTML/JS やスクリプトを変えるPRは人の承認が要る（自動マージしない）」を選び、範囲は無人の自律運転ブランチ（Actions主系と Mac の Codex 自動実行）だけ、承認は Environment の required reviewer（オーナー）、生成物も承認の側に数える、を選んだ。オーナーのセッション・Act・Codex/* などほかのブランチの自動マージは変えていない。**GH_PAT を持つ者やオーナーのログインで動く経路は、API で直接マージしたり別名のブランチへ push したりしてこの門を通らずに済む**（オーナーが受け入れた残り）。"
     },
     {
       "domain": "サイト構造の変更（URL・リダイレクト・実験中ページ）",
@@ -864,7 +867,8 @@
       "node scripts/check-store-facts.mjs --check",
       "node growth/scripts/check-mentions.mjs --check",
       "node scripts/autopilot-act.mjs --check",
-      "node scripts/autopilot-publish.mjs --check"
+      "node scripts/autopilot-publish.mjs --check",
+      "node scripts/autopilot-approval-check.mjs --selftest"
     ]
   },
   "company_monthly_budget": {

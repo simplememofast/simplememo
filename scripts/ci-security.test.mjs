@@ -118,7 +118,7 @@ test('SEO manual days are shell data: valid values work; substitutions and range
 });
 
 test('security-sensitive actions use immutable revisions and supported Node; audit is blocking', () => {
-  for (const name of ['seo-check.yml', 'seo-daily.yml', 'devlog-syndication.yml', 'devlog-syndication-platform.yml']) {
+  for (const name of ['seo-check.yml', 'seo-daily.yml', 'devlog-syndication.yml', 'devlog-syndication-platform.yml', 'auto-merge.yml']) {
     const src = read('.github/workflows/' + name);
     for (const m of src.matchAll(/uses: ([^\s#]+)/g)) {
       if (m[1].startsWith('./')) continue;

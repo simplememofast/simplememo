@@ -297,6 +297,31 @@
       "blocked_by": null
     },
     {
+      "id": "autopilot-owner-approval",
+      "stops": "無人の自律運転ブランチ（claude/obsidian-auto-<日付>）のPRのうち、台帳以外（ページ・スクリプト・/autopilot/ と翻訳・sitemap の生成物）を変えるものが、オーナーの承認なしに main へ入ること（＝本番デプロイ）",
+      "evidence": [
+        ".github/workflows/auto-merge.yml",
+        "scripts/autopilot-approval-check.mjs",
+        "scripts/lib/autopilot-paths.mjs"
+      ],
+      "how_to_drill": "`node scripts/autopilot-approval-check.mjs --selftest` が auto-merge.yml の2つの script 本体をモックの GitHub で実行し、台帳以外を変える PR がマージされず承認待ちの出力になること、保護の無い Environment・JST の日付の変化・検証後の変更では承認ジョブがマージしないことを見る。本番では、台帳以外を変える autopilot の PR に autopilot:owner-approval が付き、その run の merge-after-approval が承認待ちになることを見る",
+      "drills": [
+        {
+          "at": "2026-10-20",
+          "level": "static",
+          "by": "ai",
+          "observed": "auto-merge.yml を読んで配線を確認した: 日付ブランチだけが判定に入り（scripts/lib/autopilot-paths.mjs の DAY_BRANCH と同じ式であることを自己テストが照合）、台帳以外を変える PR は pulls.merge の前で continue し、merge-after-approval は needs: auto-merge・environment: autopilot-approval・承認待ちの PR があるときだけ走る。どの checkout も資格情報を残さず、secrets を参照しない。"
+        },
+        {
+          "at": "2026-10-20",
+          "level": "unit",
+          "by": "ai",
+          "observed": "自己テストで、生成物だけ・ページ・スクリプトを変える PR がマージされずに承認待ちの出力とラベルになり setFailed もしないこと、判定の失敗・読み込めない判定・3000件超でも承認待ちに倒れること、Act・owner-recovery・Codex/* のブランチはそのまま自動マージされること、承認ジョブが Environment の保護なし・別の reviewer・JST の日付の変化・head や一覧や名義の変化でマージしないことを観測。止める側を外す11通りの壊し方で、それぞれ自己テストが落ちることも見た（data/check-selftests.json）。"
+        }
+      ],
+      "blocked_by": "auto-merge.yml の変更は main に入るまで効かない（workflow_run は既定ブランチの定義を使う）ので、この門が本番で PR を止めた記録はまだ無い。Environment autopilot-approval（Required reviewers: simplememofast、Deployment branches は main だけ）は 2026-10-20 にオーナーが作成済み。承認の後のジョブがワークフローのトークンでその保護（必須の承認者）を読めるかは、本番の最初の承認で確かめる（読めなければマージしない＝止まる側に倒れる）"
+    },
+    {
       "id": "credential-revocation",
       "stops": "すべての自動運転（この仕組みの外側からの最後の手段）",
       "evidence": [
