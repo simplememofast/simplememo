@@ -2,6 +2,8 @@
 // Diagnostic only: no result from this experiment satisfies a PR performance gate.
 // Usage in the existing Linux measurement environment:
 // NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/diagnose_render_document.cjs --capture
+// --capture-negative-repair runs only two loopback controls with a temporary,
+// hash-checked one-byte CDP-reporting repair, then restores the installed source.
 // --self-test exercises only pure flag validation; it never imports browser tools.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -21,6 +23,10 @@ const ORDER = Object.freeze([
   ...['default', 'restored', 'restored', 'default', 'default', 'restored'].map(arm => ({kind: 'production', arm, url: TARGET})),
   ...['default', 'restored'].map(arm => ({kind: 'fixture', arm, url: FIXTURE})),
 ]);
+const REPAIR_ORDER = Object.freeze(ORDER.filter(item => item.kind === 'fixture'));
+const CONSOLE_ORIGINAL_SHA256 = '512cb67e34e30672ec872a4fc8f846904a5b77006426186c6bf7819993a1191a';
+const CONSOLE_ORIGINAL_TEXT = "config: [{name: 'discouragedAPIUse', threshold: -1}]";
+const CONSOLE_REPAIRED_TEXT = "config: [{name: 'discouragedAPIUse', threshold: -2}]";
 const COMMON = Object.freeze(['--headless', '--no-sandbox', '--disable-dev-shm-usage']);
 const CATEGORIES = 'viz,cc,gpu,graphics.pipeline,disabled-by-default-devtools.timeline.frame';
 const LIMIT = 64 * 1024 * 1024;
@@ -28,6 +34,98 @@ const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 function need(condition, code) { if (!condition) throw new Error(code); }
 function jsonFile(file, value, exclusive = false) {
   fs.writeFileSync(file, JSON.stringify(value, null, 2) + '\n', {flag: exclusive ? 'wx' : 'w'});
+}
+
+function repairBytes(original) {
+  need(Buffer.isBuffer(original) && sha256(original) === CONSOLE_ORIGINAL_SHA256, 'REPAIR_SOURCE_HASH_MISMATCH');
+  const text = original.toString('utf8');
+  need(text.split(CONSOLE_ORIGINAL_TEXT).length === 2, 'REPAIR_TARGET_NOT_EXACT');
+  const patched = Buffer.from(text.replace(CONSOLE_ORIGINAL_TEXT, CONSOLE_REPAIRED_TEXT));
+  const offsets = [...original.keys()].filter(index => original[index] !== patched[index]);
+  need(original.length === patched.length && offsets.length === 1
+    && original[offsets[0]] === 49 && patched[offsets[0]] === 50, 'REPAIR_NOT_SINGLE_BYTE');
+  return {patched, offset: offsets[0]};
+}
+
+function relativeModulePath(root, file) {
+  need(path.isAbsolute(root) && path.isAbsolute(file) && root === path.resolve(root) && file === path.resolve(file), 'REPAIR_PATH_NOT_CANONICAL');
+  const relative = path.relative(root, file);
+  need(relative && !relative.startsWith('..' + path.sep) && relative !== '..' && !path.isAbsolute(relative), 'REPAIR_PATH_OUTSIDE_TOOLS');
+  return relative;
+}
+
+function checkedModulePath(root, file) {
+  const relative = relativeModulePath(root, file);
+  need(fs.realpathSync(root) === root && !fs.lstatSync(root).isSymbolicLink(), 'REPAIR_ROOT_SYMLINK');
+  let current = root;
+  const parts = relative.split(path.sep);
+  for (const [index, part] of parts.entries()) {
+    current = path.join(current, part);
+    const stat = fs.lstatSync(current);
+    need(!stat.isSymbolicLink() && (index === parts.length - 1 ? stat.isFile() : stat.isDirectory()), 'REPAIR_MODULE_SYMLINK_OR_TYPE');
+  }
+  need(fs.realpathSync(file) === file, 'REPAIR_MODULE_PATH_CHANGED');
+  return relative;
+}
+
+function readRepairFd(fd) {
+  const stat = fs.fstatSync(fd);
+  need(stat.isFile() && stat.nlink === 1 && stat.size > 0 && stat.size <= 16384, 'REPAIR_FD_INVALID');
+  const bytes = Buffer.alloc(stat.size);
+  let offset = 0;
+  while (offset < bytes.length) {
+    const count = fs.readSync(fd, bytes, offset, bytes.length - offset, offset);
+    need(count > 0, 'REPAIR_READ_INCOMPLETE');
+    offset += count;
+  }
+  return bytes;
+}
+
+function prepareRepair(root, file) {
+  const relative = checkedModulePath(root, file);
+  need(typeof fs.constants.O_NOFOLLOW === 'number', 'REPAIR_NOFOLLOW_UNAVAILABLE');
+  const fd = fs.openSync(file, fs.constants.O_RDWR | fs.constants.O_NOFOLLOW);
+  try {
+    const original = readRepairFd(fd), {patched, offset} = repairBytes(original);
+    const inode = fs.fstatSync(fd);
+    const originalSha256 = sha256(original), patchedSha256 = sha256(patched);
+    const metadata = {hypothesisOnly: true, installedModule: relative, originalSha256, patchedSha256,
+      replacement: {from: CONSOLE_ORIGINAL_TEXT, to: CONSOLE_REPAIRED_TEXT, occurrences: 1, changedBytes: 1},
+      applied: false, restoration: {attempted: false, succeeded: false}};
+    const verifyIdentity = () => {
+      checkedModulePath(root, file);
+      const named = fs.lstatSync(file), opened = fs.fstatSync(fd);
+      need(named.dev === inode.dev && named.ino === inode.ino && opened.dev === inode.dev && opened.ino === inode.ino
+        && named.nlink === 1 && opened.nlink === 1, 'REPAIR_INODE_CHANGED');
+    };
+    return {metadata,
+      apply() {
+        verifyIdentity();
+        need(sha256(readRepairFd(fd)) === originalSha256, 'REPAIR_SOURCE_CHANGED');
+        need(fs.writeSync(fd, patched.subarray(offset, offset + 1), 0, 1, offset) === 1, 'REPAIR_WRITE_INCOMPLETE');
+        fs.fsyncSync(fd);
+        need(sha256(readRepairFd(fd)) === patchedSha256, 'REPAIR_READBACK_FAILED');
+        metadata.applied = true;
+      },
+      restore() {
+        metadata.restoration.attempted = true;
+        try {
+          verifyIdentity();
+          const current = sha256(readRepairFd(fd));
+          need(current === originalSha256 || current === patchedSha256, 'REPAIR_RESTORE_UNEXPECTED_CONTENT');
+          if (current === patchedSha256) {
+            need(fs.writeSync(fd, original.subarray(offset, offset + 1), 0, 1, offset) === 1, 'REPAIR_RESTORE_WRITE_INCOMPLETE');
+            fs.fsyncSync(fd);
+          }
+          metadata.restoration.sha256 = sha256(readRepairFd(fd));
+          need(metadata.restoration.sha256 === originalSha256, 'REPAIR_RESTORE_READBACK_FAILED');
+          metadata.restoration.succeeded = true;
+        } catch (error) {
+          metadata.restoration.error = /^[A-Z_]+$/.test(error.message) ? error.message : 'REPAIR_RESTORE_FAILED';
+          throw error;
+        } finally { fs.closeSync(fd); }
+      }};
+  } catch (error) { fs.closeSync(fd); throw error; }
 }
 
 function buildArms(defaults) {
@@ -157,17 +255,19 @@ function validateReport(file, item, expectation) {
     tbtMs: report.audits['total-blocking-time'].numericValue};
 }
 
-async function capture() {
+async function capture(repairMode = false) {
   const deadline = Date.now() + 390000;
+  const order = repairMode ? REPAIR_ORDER : ORDER;
   need(process.platform === 'linux', 'LINUX_PROC_ATTESTATION_REQUIRED');
   need(process.env.PERF_RESULTS && path.isAbsolute(process.env.PERF_RESULTS), 'PERF_RESULTS_REQUIRED');
   need(!process.env.HEADLESS, 'HEADLESS_ENV_OVERRIDE_UNSUPPORTED');
-  const base = fs.realpathSync(process.env.PERF_RESULTS), output = path.join(base, 'diagnostic');
+  const base = fs.realpathSync(process.env.PERF_RESULTS), output = path.join(base, repairMode ? 'diagnostic-negative-repair' : 'diagnostic');
   fs.mkdirSync(output); // Refuse to overwrite/reuse any previous experiment.
-  const summary = {diagnosticOnly: true, acceptanceGate: false, adoptionApproved: false, url: TARGET, order: ORDER,
+  const summary = {diagnosticOnly: true, acceptanceGate: false, adoptionApproved: false, url: repairMode ? FIXTURE : TARGET, order,
     startedAt: new Date().toISOString(), driverSha256: sha256(fs.readFileSync(__filename)), captures: [], complete: false};
   const summaryPath = path.join(output, 'experiment.json');
   jsonFile(summaryPath, summary, true);
+  let repair;
   try {
     const lhPackagePath = require.resolve('lighthouse/package.json');
     const lh = JSON.parse(fs.readFileSync(lhPackagePath, 'utf8'));
@@ -176,6 +276,20 @@ async function capture() {
     const launcherPackagePath = fromLighthouse.resolve('chrome-launcher/package.json');
     const launcherPackage = JSON.parse(fs.readFileSync(launcherPackagePath, 'utf8'));
     const launcherEntry = fromLighthouse.resolve('chrome-launcher');
+    if (repairMode) {
+      need(process.env.RUNNER_TEMP && path.isAbsolute(process.env.RUNNER_TEMP)
+        && process.env.RUNNER_TEMP === path.resolve(process.env.RUNNER_TEMP), 'REPAIR_RUNNER_TEMP_REQUIRED');
+      need(launcherPackage.version === '1.2.2', 'REPAIR_LAUNCHER_VERSION_CHANGED');
+      const root = path.join(process.env.RUNNER_TEMP, 'perf-tools/node_modules');
+      const cliPath = path.resolve(path.dirname(lhPackagePath), lh.bin.lighthouse);
+      for (const file of [lhPackagePath, launcherPackagePath, launcherEntry, cliPath]) checkedModulePath(root, file);
+      const consolePath = path.join(path.dirname(lhPackagePath), 'core/gather/gatherers/console-messages.js');
+      repair = prepareRepair(root, consolePath);
+      summary.repair = repair.metadata;
+      jsonFile(summaryPath, summary);
+      repair.apply();
+      jsonFile(summaryPath, summary);
+    }
     const launcher = await import(pathToFileURL(launcherEntry).href);
     need(typeof launcher.Launcher?.defaultFlags === 'function'
       && typeof launcher.getChromePath === 'function', 'LAUNCHER_INTERFACE_CHANGED');
@@ -183,6 +297,7 @@ async function capture() {
     const chromePath = launcher.getChromePath();
     const version = spawnSync(chromePath, ['--version'], {encoding: 'utf8', timeout: 10000, maxBuffer: 65536});
     need(version.status === 0 && /Chrome 155\./.test(version.stdout), 'CHROME_VERSION_CHANGED');
+    if (repairMode) need(version.stdout.trim() === 'Google Chrome 155.0.8059.39', 'REPAIR_CHROME_VERSION_CHANGED');
     const cli = path.resolve(path.dirname(lhPackagePath), lh.bin.lighthouse);
     const fixtureBytes = fs.readFileSync(path.join(FIXTURE_DIR, 'dbw-minimal-negative.html'));
     const expectationBytes = fs.readFileSync(path.join(FIXTURE_DIR, 'expected-negative.json'));
@@ -199,7 +314,7 @@ async function capture() {
     jsonFile(summaryPath, summary);
     let totalBytes = 0, firstExecutable = null;
     const firstSettings = {};
-    for (const [index, item] of ORDER.entries()) {
+    for (const [index, item] of order.entries()) {
       const {arm, kind, url} = item;
       need(Date.now() + 30000 < deadline, 'EXPERIMENT_TIME_LIMIT');
       const directory = path.join(output, `${index + 1}-${kind}-${arm}`);
@@ -254,7 +369,7 @@ async function capture() {
         }
       }
     }
-    summary.complete = summary.captures.length === ORDER.length && summary.captures.every(item => item.complete);
+    summary.complete = summary.captures.length === order.length && summary.captures.every(item => item.complete);
     need(summary.complete, 'EXPERIMENT_INCOMPLETE');
     summary.negativeControlsPassed = summary.captures.filter(item => item.kind === 'fixture')
       .every(item => item.report.negativeControlsPassed);
@@ -263,10 +378,15 @@ async function capture() {
     summary.error = /^[A-Z_]+$/.test(error.message) ? error.message : 'EXPERIMENT_FAILED';
     throw error;
   } finally {
-    summary.finishedAt = new Date().toISOString();
-    jsonFile(summaryPath, summary);
+    try { if (repair) repair.restore(); }
+    catch (error) { summary.error = 'REPAIR_RESTORATION_FAILED'; throw error; }
+    finally {
+      summary.finishedAt = new Date().toISOString();
+      jsonFile(summaryPath, summary);
+    }
   }
-  console.log('Diagnostic capture complete; six public samples and two negative controls retained. This is not a PR gate result.');
+  console.log(repairMode ? 'Diagnostic capture complete; two loopback negative controls retained and source restored. This is not a PR gate result.'
+    : 'Diagnostic capture complete; six public samples and two negative controls retained. This is not a PR gate result.');
 }
 
 function selfTest() {
@@ -306,15 +426,26 @@ function selfTest() {
   assert.equal(negativeControls(falsePass, messages, expectation).negativeControlsPassed, false);
   const wrongSource = structuredClone(report); wrongSource.audits['geolocation-on-start'].details.items[0].source.url = 'http://other.invalid/';
   assert.equal(negativeControls(wrongSource, messages, expectation).negativeControlsPassed, false);
-  console.log('PASS: flag isolation, process attestation and negative-control false-pass rejection; no browser executed.');
+  assert.throws(() => repairBytes(Buffer.from(CONSOLE_ORIGINAL_TEXT)), /REPAIR_SOURCE_HASH_MISMATCH/);
+  assert.throws(() => repairBytes(Buffer.from(CONSOLE_REPAIRED_TEXT)), /REPAIR_SOURCE_HASH_MISMATCH/);
+  const root = '/runner/_temp/perf-tools/node_modules';
+  assert.equal(relativeModulePath(root, root + '/lighthouse/core/gather/gatherers/console-messages.js'),
+    'lighthouse/core/gather/gatherers/console-messages.js');
+  for (const invalid of [root, root + '-other/lighthouse/console-messages.js', '/other/console-messages.js', root + '/../outside.js']) {
+    assert.throws(() => relativeModulePath(root, invalid));
+  }
+  assert.equal(REPAIR_ORDER.length, 2);
+  assert(REPAIR_ORDER.every(item => item.url === FIXTURE && item.kind === 'fixture'));
+  assert.equal(ORDER.length, 8);
+  console.log('PASS: flags, process attestation, negative controls and repair input/path rejection; no browser executed.');
 }
 
-module.exports = {buildArms, attestArguments, negativeControls};
+module.exports = {buildArms, attestArguments, negativeControls, repairBytes, relativeModulePath};
 if (require.main === module) {
   if (process.argv.length === 3 && process.argv[2] === '--self-test') selfTest();
-  else if (process.argv.length === 3 && process.argv[2] === '--capture') capture().catch(() => {
+  else if (process.argv.length === 3 && ['--capture', '--capture-negative-repair'].includes(process.argv[2])) capture(process.argv[2] === '--capture-negative-repair').catch(() => {
     console.error('Diagnostic failed; retained experiment.json contains the bounded status. No automatic retry.');
     process.exitCode = 1;
   });
-  else { console.error('Choose --self-test (no browser) or --capture (Linux diagnostic only).'); process.exitCode = 2; }
+  else { console.error('Choose --self-test (no browser), --capture, or --capture-negative-repair (Linux diagnostic only).'); process.exitCode = 2; }
 }
