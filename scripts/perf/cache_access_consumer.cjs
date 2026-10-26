@@ -121,7 +121,7 @@ async function latestRun(github, workflowId, headSha, clock) {
     ids.add(run.id); numbers.add(run.run_number);
     const created = instant(run.created_at, 'RUN_LIST_INVALID');
     need(created <= clock(), 'RUN_LIST_INVALID');
-    if (run.display_title === 'Homepage cache PR 2164 @ ' + headSha) matching.push({ run, identity, created });
+    if (run.display_title === 'Homepage cache PR 2175 @ ' + headSha) matching.push({ run, identity, created });
   }
   // Fail closed if this candidate is absent from the bounded result. Never
   // hunt arbitrarily far back for a green result. Equal timestamps are ordered
@@ -138,7 +138,7 @@ function producerContext(run, workflowId, trustedMainSha, headSha) {
     && run.actor.login === OWNER && run.triggering_actor.login === OWNER
     && run.repository.full_name === REPOSITORY && run.repository.fork === false
     && run.head_repository.full_name === REPOSITORY && run.head_repository.fork === false
-    && run.display_title === 'Homepage cache PR 2164 @ ' + headSha, 'RUN_INVALID');
+    && run.display_title === 'Homepage cache PR 2175 @ ' + headSha, 'RUN_INVALID');
   // These ten keys are reconstructed from authenticated producer-run metadata,
   // never from candidate-controlled workflow outputs or artifacts. This is an
   // inspect-only context; it does not issue the credential-use capability.
@@ -180,7 +180,7 @@ async function verifyPublishedProof(input) {
     need(clock() < deadline, 'APPROVAL_EXPIRED');
     const validUntil = new Date(deadline).toISOString();
     const candidate = await inspectCandidate({ github, context, checkoutSha,
-      request: { pullRequestNumber: 2164, approvedHeadSha: headSha }, validUntil, now: clock });
+      request: { pullRequestNumber: 2175, approvedHeadSha: headSha }, validUntil, now: clock });
     const environment = await readEnvironmentConfiguration({ github, configurationReadback, validUntil, now: clock });
     // Exact first-attempt and own-run routes, not latest-job, artifact or URL
     // fields from an API response. GitHub review JSON has no run_attempt field.
@@ -200,7 +200,7 @@ async function verifyPublishedProof(input) {
     // provide one atomic snapshot; a later release step still needs its own
     // exact-head gate, but changes observed during this read are not accepted.
     const freshCandidate = await inspectCandidate({ github, context, checkoutSha,
-      request: { pullRequestNumber: 2164, approvedHeadSha: headSha }, validUntil, now: clock });
+      request: { pullRequestNumber: 2175, approvedHeadSha: headSha }, validUntil, now: clock });
     need(freshCandidate.headSha === candidate.headSha && freshCandidate.manifestSha256 === candidate.manifestSha256
       && freshCandidate.deploymentId === candidate.deploymentId && freshCandidate.previewOrigin === candidate.previewOrigin, 'CANDIDATE_CHANGED');
     need(await workflow(github) === workflowId, 'WORKFLOW_CHANGED');

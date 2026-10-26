@@ -1,11 +1,11 @@
 name: Approved Homepage Cache Verification
-run-name: Homepage cache PR 2164 @ ${{ inputs.head_sha }}
+run-name: Homepage cache PR 2175 @ ${{ inputs.head_sha }}
 
 on:
   workflow_dispatch:
     inputs:
       head_sha:
-        description: Full owner-reviewed head SHA of PR 2164
+        description: Full owner-reviewed head SHA of PR 2175
         required: true
         type: string
 
@@ -17,7 +17,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: approved-preview-cache-2164
+  group: approved-preview-cache-2175
   cancel-in-progress: false
 
 env:
@@ -27,7 +27,7 @@ env:
 
 jobs:
   resolve:
-    name: Resolve cache PR 2164 @ ${{ inputs.head_sha }}
+    name: Resolve cache PR 2175 @ ${{ inputs.head_sha }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -77,7 +77,7 @@ jobs:
               };
               const result = await inspectCandidate({ github, context: source,
                 checkoutSha: process.env.TRUSTED_CHECKOUT_SHA,
-                request: { pullRequestNumber: 2164, approvedHeadSha: process.env.REQUESTED_HEAD_SHA },
+                request: { pullRequestNumber: 2175, approvedHeadSha: process.env.REQUESTED_HEAD_SHA },
                 validUntil, now });
               core.setOutput('head_sha', result.headSha);
               core.setOutput('manifest_sha256', result.manifestSha256);
@@ -85,7 +85,7 @@ jobs:
               core.setOutput('preview_origin', result.previewOrigin);
               core.setOutput('valid_until', validUntil);
               await core.summary.addHeading('Review the exact cache target')
-                .addRaw('PR 2164 / ' + result.headSha + '\n\n')
+                .addRaw('PR 2175 / ' + result.headSha + '\n\n')
                 .addRaw('Immutable preview: ' + result.previewOrigin + '\n\n')
                 .addRaw('Approval deadline: ' + validUntil + '\n').write();
             } catch {
@@ -93,7 +93,7 @@ jobs:
             }
 
   verify:
-    name: Verify reviewed cache PR 2164 @ ${{ needs.resolve.outputs.head_sha }}
+    name: Verify reviewed cache PR 2175 @ ${{ needs.resolve.outputs.head_sha }}
     needs: resolve
     runs-on: ubuntu-latest
     timeout-minutes: 8

@@ -37,7 +37,7 @@ function fixture(change = {}) {
       events.push('fresh-metadata');
       assert.equal(input.approval, capability);
       assert.equal(input.request.approvedHeadSha, HEAD);
-      assert.equal(input.request.pullRequestNumber, 2164);
+      assert.equal(input.request.pullRequestNumber, 2175);
       assert.ok(!Object.hasOwn(input.context, 'runId'));
       return { authorization };
     },
@@ -113,6 +113,12 @@ for (const stage of ['transport', 'verify']) test(`${stage} cannot reflect raw f
 
 test('workflow is manual, main-checked, pinned, Environment-gated and has no candidate execution or write scope', () => {
   const workflow = fs.readFileSync(path.resolve(__dirname, '../../.github/workflows/home-perf-cache-approved.yml'), 'utf8');
+  assert.ok(workflow.includes('run-name: Homepage cache PR 2175 @ ${{ inputs.head_sha }}'));
+  assert.ok(workflow.includes('name: Resolve cache PR 2175 @ ${{ inputs.head_sha }}'));
+  assert.ok(workflow.includes('name: Verify reviewed cache PR 2175 @ ${{ needs.resolve.outputs.head_sha }}'));
+  assert.match(workflow, /group: approved-preview-cache-2175\b/);
+  assert.match(workflow, /pullRequestNumber: 2175, approvedHeadSha: process\.env\.REQUESTED_HEAD_SHA/);
+  assert.doesNotMatch(workflow, /\b2164\b|inputs\.pull_request|inputs\.pr_number/);
   assert.match(workflow, /workflow_dispatch:/);
   assert.doesNotMatch(workflow, /pull_request_target:|workflow_run:|\bpush:|\bpull_request:/);
   assert.doesNotMatch(workflow, /permissions:\s*write-all|:\s*write\b|createReview|reviewPendingDeployments|checks\.create|upload-artifact|download-artifact/);
