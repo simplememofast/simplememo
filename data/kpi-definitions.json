@@ -44,9 +44,9 @@
       "name": "AI完走率",
       "formula": "本番へ出荷できた実行 ÷ 着手した実行",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 23,
-      "checksum": "19c765edbd9b47fc",
-      "changed_at": "2026-10-24",
+      "version": 24,
+      "checksum": "e3f475a4bc769464",
+      "changed_at": "2026-10-26",
       "why_it_matters": "分母は attempted。秘密鍵未設定のGateスキップは着手に数えない（正しく働く安全装置を失敗率にしない）",
       "history": [
         {
@@ -158,6 +158,11 @@
           "version": 23,
           "at": "2026-10-24",
           "why": "定義は変えていない。scripts/autopilot-runs.mjs のコメント1行（提案の承認状態の書き方）を、マージの前後どちらでも正しい文に直しただけで、算出・判定・出力には触れていない。"
+        },
+        {
+          "version": 24,
+          "at": "2026-10-26",
+          "why": "定義は変えていない。scripts/autopilot-runs.mjs のコメント1行に、2026-10-26 のオーナー承認を書き足しただけで、算出・判定・出力には触れていない。"
         }
       ],
       "source_dependencies": {
@@ -775,9 +780,9 @@
       "name": "連続稼働日数",
       "formula": "停止日 = no_run の行がある日（同じ日に主系の skipped_gate 行が並んでいても停止）。稼働日 = no_run の行が無く、行が1つでもある日。行の無い日は連続を切る。current は台帳の最終記入日で終わる連続、longest は窓内の最長",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 15,
-      "checksum": "19c765edbd9b47fc",
-      "changed_at": "2026-10-24",
+      "version": 16,
+      "checksum": "e3f475a4bc769464",
+      "changed_at": "2026-10-26",
       "why_it_matters": "08-27 に「16日間連続で稼働」を取り下げたが、次に「連続」と書くときの定義がどこにも無かった。定義を置いて数えると 2026-08-18 から16日（08-16・17 で一度切れている）。**skipped_gate を稼働と読むと23日連続が復活する**ので、no_run を日単位の判定として優先する側に固定した",
       "history": [
         {
@@ -849,6 +854,11 @@
           "version": 15,
           "at": "2026-10-24",
           "why": "定義は変えていない。scripts/autopilot-runs.mjs のコメント1行（提案の承認状態の書き方）を、マージの前後どちらでも正しい文に直しただけで、算出・判定・出力には触れていない。"
+        },
+        {
+          "version": 16,
+          "at": "2026-10-26",
+          "why": "定義は変えていない。scripts/autopilot-runs.mjs のコメント1行に、2026-10-26 のオーナー承認を書き足しただけで、算出・判定・出力には触れていない。"
         }
       ],
       "source_dependencies": {
@@ -860,9 +870,9 @@
       "name": "連続出荷日数",
       "formula": "出荷（outcome = shipped）の行がある日だけが続く。停止（no_run）・失敗・Gateスキップ・行の無い日はすべて連続を切る。同じ日にどれか1経路でも出荷していればその日は出荷日。current は台帳の最終記入日で終わる連続、longest は窓内の最長",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 14,
-      "checksum": "19c765edbd9b47fc",
-      "changed_at": "2026-10-24",
+      "version": 15,
+      "checksum": "e3f475a4bc769464",
+      "changed_at": "2026-10-26",
       "why_it_matters": "**連続稼働は、失敗し続けても伸びる。**主系が落ちて行が立った日は「記録がある日」なので稼働に数えるのが正しく、そこは変えていない。だが実際に 2026-09-02 時点の連続稼働 16 日は、**08-29〜08-31 の出荷ゼロ3日を丸ごとまたいでいる**（08-29 は副系が claim だけ取って死に、08-30・08-31 は主系・副系とも週次上限の 429）。稼働だけを公開面に出すと、その3日は読めない。切れる指標を隣に置く",
       "history": [
         {
@@ -929,6 +939,11 @@
           "version": 14,
           "at": "2026-10-24",
           "why": "定義は変えていない。scripts/autopilot-runs.mjs のコメント1行（提案の承認状態の書き方）を、マージの前後どちらでも正しい文に直しただけで、算出・判定・出力には触れていない。"
+        },
+        {
+          "version": 15,
+          "at": "2026-10-26",
+          "why": "定義は変えていない。scripts/autopilot-runs.mjs のコメント1行に、2026-10-26 のオーナー承認を書き足しただけで、算出・判定・出力には触れていない。"
         }
       ],
       "source_dependencies": {
@@ -940,8 +955,8 @@
       "name": "連続公開日数",
       "formula": "公開レーン（A=SEO / B=AIO / C=Evidence Asset / D=Paid relevance例外 / E=Coverage）の outcome=shipped の行がある日だけが続く。**レーンF（自己修復）と lane の無い日（保守のみ）は切る。**停止・失敗・Gateスキップ・行の無い日も切る。同じ日にどれか1経路でも公開レーンで出荷していればその日は公開日",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 12,
-      "changed_at": "2026-10-24",
+      "version": 13,
+      "changed_at": "2026-10-26",
       "why_it_matters": "連続出荷は自己修復も出荷として数えるので、**自分を直し続けても伸びる。**2026-09-03 の実物: 連続出荷 3日のうち 2日がレーンF で、公開面に出たのは1日だけ。新規カバレッジ（レーンE）は 08-28 が最後で6日空いていた。連続稼働に対して連続出荷を足したときと同じ形の穴が、一段内側に残っていた。**どちらが正しい優先順位かはこの指標では決めない**（故障が続けばレーンFが勝つのが正しい日もある）。決められるように、まず分けて数える",
       "history": [
         {
@@ -1003,9 +1018,14 @@
           "version": 12,
           "at": "2026-10-24",
           "why": "定義は変えていない。scripts/autopilot-runs.mjs のコメント1行（提案の承認状態の書き方）を、マージの前後どちらでも正しい文に直しただけで、算出・判定・出力には触れていない。"
+        },
+        {
+          "version": 13,
+          "at": "2026-10-26",
+          "why": "定義は変えていない。scripts/autopilot-runs.mjs のコメント1行に、2026-10-26 のオーナー承認を書き足しただけで、算出・判定・出力には触れていない。"
         }
       ],
-      "checksum": "19c765edbd9b47fc",
+      "checksum": "e3f475a4bc769464",
       "source_dependencies": {
         "scripts/lib/intervention-observation.mjs": "8243cbb4cc44c5e1"
       }
@@ -1015,9 +1035,9 @@
       "name": "無介入出荷の連続日数",
       "formula": "出荷の行があり、その日の全行のinterventionsが明示[]（recorded_zero）である日だけが続く、記録上無介入出荷の連続。どの経路にも既知の介入があれば切れる。停止・未出荷・行の無い日も切る。既知介入の無い出荷日に未指定/null/不正記録が混ざると無介入の成否はunknownとなり、最長とactive_daysはnull、currentは末日で既知の断絶が確定する0以外はnullとし、確定記録だけの下限はrecorded_lower_boundに別表示する。明示[]は完全な人介入観測や実際のzero-touch完遂を証明しない",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 14,
-      "checksum": "19c765edbd9b47fc",
-      "changed_at": "2026-10-24",
+      "version": 15,
+      "checksum": "e3f475a4bc769464",
+      "changed_at": "2026-10-26",
       "why_it_matters": "率には天井がある —— 総合自動化率の到達可能上限は 82.9%（scripts/autonomy-gap.mjs）で、そこから先は物理・対人・観測不能で動かない。**時間には天井が無い。**「オーナーが何日触らずに済んだか」は伸ばし続けられる指標で、率が頭打ちになった後も自律性の前進を測れる。\n\n**出荷があることを条件に入れてある。**入れないと、壊れたまま誰も直しに行かない日が無介入として積み上がる（08-30・08-31 がその形）。触っていないのは自律していたからではないので、放置で伸びる自律指標にはしない",
       "history": [
         {
@@ -1084,6 +1104,11 @@
           "version": 14,
           "at": "2026-10-24",
           "why": "定義は変えていない。scripts/autopilot-runs.mjs のコメント1行（提案の承認状態の書き方）を、マージの前後どちらでも正しい文に直しただけで、算出・判定・出力には触れていない。"
+        },
+        {
+          "version": 15,
+          "at": "2026-10-26",
+          "why": "定義は変えていない。scripts/autopilot-runs.mjs のコメント1行に、2026-10-26 のオーナー承認を書き足しただけで、算出・判定・出力には触れていない。"
         }
       ],
       "source_dependencies": {
@@ -1365,9 +1390,9 @@
       "name": "失敗の層別帰属率",
       "formula": "出荷しなかった run のうち failure_stage（eligibility / execution / cost / absent）を持つ割合。scripts/autopilot-runs.mjs の validate() が 100% を強制する（欠けた行があれば --check が落ちる）",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 11,
-      "checksum": "19c765edbd9b47fc",
-      "changed_at": "2026-10-24",
+      "version": 12,
+      "checksum": "e3f475a4bc769464",
+      "changed_at": "2026-10-26",
       "why_it_matters": "**『死んだ run は選択ミスか実行ミスか』は、調べれば分かる問いではなく、記録が同じ列に入っているせいで原理的に答えられない問いだった。**2026-09-04 に層を足して数えたら、出荷しなかった 23 行は適格性 12 / 実行 6 / コスト 3 / 経路不在 2 に分かれた。**適格性が最大の層**で、そこには 2026-09-04 まで「秘密鍵が在るか」以外の判定が無かった",
       "history": [
         {
@@ -1419,6 +1444,11 @@
           "version": 11,
           "at": "2026-10-24",
           "why": "定義は変えていない。scripts/autopilot-runs.mjs のコメント1行（提案の承認状態の書き方）を、マージの前後どちらでも正しい文に直しただけで、算出・判定・出力には触れていない。"
+        },
+        {
+          "version": 12,
+          "at": "2026-10-26",
+          "why": "定義は変えていない。scripts/autopilot-runs.mjs のコメント1行に、2026-10-26 のオーナー承認を書き足しただけで、算出・判定・出力には触れていない。"
         }
       ],
       "source_dependencies": {

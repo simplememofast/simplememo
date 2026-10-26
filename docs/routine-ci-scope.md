@@ -14,9 +14,8 @@ the three-day limit applies unchanged.
 
 ## Status of the 2026-10-19 ledger freshness extension
 
-**This extension was proposed on 2026-10-19 as a draft PR. It is in force only on a
-main that contains it: the owner's merge of that PR is its approval, and nothing
-else approves it.** It applies the 2026-10-17 principle to two more freshness gates:
+**This extension was proposed on 2026-10-19 as a draft PR and approved by the owner
+on 2026-10-26 (multiple choice), who delegated the merge to Claude.** It applies the 2026-10-17 principle to two more freshness gates:
 the autopilot run ledger and waiting progress. The reason for the
 proposal is the 2026-10-17 to 10-19 deadlock. The broken Mac observer made the routine
 ledger stale, so the daily Act sync stopped and the autopilot run ledger became stale
