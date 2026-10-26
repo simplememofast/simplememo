@@ -52,7 +52,7 @@ jobs:
       # This fresh runner has never executed candidate code. Resolve main once,
       # check out its immutable SHA, then bind the consumer to the measured HEAD.
       - name: Resolve trusted main verifier
-        if: github.event_name == 'pull_request' && github.event.pull_request.number == 2139
+        if: github.event_name == 'pull_request' && github.event.pull_request.number == 2164
         id: trusted
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
@@ -68,13 +68,13 @@ jobs:
               core.setOutput('sha', sha);
             } catch { core.setFailed('TRUSTED_MAIN_RESOLUTION_FAILED'); }
       - name: Checkout trusted main verifier
-        if: github.event_name == 'pull_request' && github.event.pull_request.number == 2139
+        if: github.event_name == 'pull_request' && github.event.pull_request.number == 2164
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ steps.trusted.outputs.sha }}
           persist-credentials: false
       - name: Checkout public cache target
-        if: github.event_name != 'pull_request' || github.event.pull_request.number != 2139
+        if: github.event_name != 'pull_request' || github.event.pull_request.number != 2164
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -84,11 +84,11 @@ jobs:
           node-version: '24.22.1'
           package-manager-cache: false
       - name: Record verifier checkout
-        if: github.event_name == 'pull_request' && github.event.pull_request.number == 2139
+        if: github.event_name == 'pull_request' && github.event.pull_request.number == 2164
         id: checkout
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: Verify approved preview proof
-        if: github.event_name == 'pull_request' && github.event.pull_request.number == 2139
+        if: github.event_name == 'pull_request' && github.event.pull_request.number == 2164
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           TRUSTED_CHECKOUT_SHA: ${{ steps.checkout.outputs.sha }}
@@ -108,7 +108,7 @@ jobs:
               if (receipt.verified !== true) core.setFailed('Exact reviewed preview has no complete successful cache proof');
             } catch { core.setFailed('Approved preview proof could not be verified'); }
       - name: Resolve the exact successful deployment
-        if: github.event_name != 'pull_request' || github.event.pull_request.number != 2139
+        if: github.event_name != 'pull_request' || github.event.pull_request.number != 2164
         id: deployment
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
@@ -124,12 +124,12 @@ jobs:
             }
             throw new Error('No successful exact-SHA Cloudflare deployment; do not test an old revision.');
       - name: Install pinned browser client
-        if: github.event_name != 'pull_request' || github.event.pull_request.number != 2139
+        if: github.event_name != 'pull_request' || github.event.pull_request.number != 2164
         run: |
           mkdir -p "$RUNNER_TEMP/cache-results"
           npm install --prefix "$RUNNER_TEMP/perf-tools" --no-save playwright@1.55.0
       - name: Verify real response bodies and cache policies
-        if: github.event_name != 'pull_request' || github.event.pull_request.number != 2139
+        if: github.event_name != 'pull_request' || github.event.pull_request.number != 2164
         env:
           NODE_PATH: ${{ runner.temp }}/perf-tools/node_modules
           PERF_RESULTS: ${{ runner.temp }}/cache-results
