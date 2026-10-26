@@ -113,7 +113,7 @@ export function checkWiring(source) {
   // uncommitted declared page work (committed work travels in the handoff).
   assert.equal(condition, "!cancelled() && (steps.claude.outcome == 'success' || steps.claude.outcome == 'failure')",
     'checkpoint must preserve every finished model run, without running after cancellation');
-  assert(source.includes('actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02'), 'pinned artifact upload required');
+  assert(source.includes('actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'), 'pinned artifact upload required');
   assert(source.includes("steps.checkpoint.outputs.saved == 'true'"), 'upload only a successfully saved checkpoint');
   assert(source.includes('path: ${{ runner.temp }}/autopilot-checkpoint'), 'upload only the bounded checkpoint directory');
   return condition;

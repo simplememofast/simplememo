@@ -1025,7 +1025,7 @@ function selftest() {
     ["\n          && steps.handoff_files.outputs.resume == 'true'", ''],
     ["steps.claude.outcome == 'success'\n", "steps.claude.outcome != 'skipped'\n"],
     ['--resume ${{ steps.handoff_files.outputs.session_id }}', '--resume ${{ steps.claude.outputs.session_id }}'],
-    ['claude-code-action@16b3b310c3d7b5279df73130324d5205aeea8eac', 'claude-code-action@v1'],
+    ['claude-code-action@925afb53776cf1a2b738c6bdbed37b4d4000ef13', 'claude-code-action@v1'],
     ['github_token: ${{ github.token }}', 'github_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}'],
     ['        continue-on-error: true\n', ''],
     ['- name: Resume the session once for the missing handoff files', '- name: Claude Code resume for the missing handoff files'],
