@@ -252,7 +252,7 @@ jobs:
         run: node scripts/indexnow-notify.js --since ${{ steps.merge.outputs.merged_count }}
 
   # 承認待ちにした自律運転の PR を、オーナーの承認の後にだけマージする（2026-10-20 オーナー判断）。
-  # Environment autopilot-approval（Required reviewers: simplememofast）はオーナーが作る。
+  # Environment autopilot-approval（Required reviewers: simplememofast）は 2026-10-20 にオーナーが作成済み。
   # GitHub は参照された Environment が無いと保護なしで作るので、ここで保護を API で確かめ、
   # 無ければマージしない。承認されたら、検証済みの SHA・ファイル一覧・名義を確かめ直し、
   # JST の日付が検証の日と同じときだけ、通常の経路と同じ squash でマージする。

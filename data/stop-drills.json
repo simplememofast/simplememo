@@ -319,7 +319,7 @@
           "observed": "自己テストで、生成物だけ・ページ・スクリプトを変える PR がマージされずに承認待ちの出力とラベルになり setFailed もしないこと、判定の失敗・読み込めない判定・3000件超でも承認待ちに倒れること、Act・owner-recovery・Codex/* のブランチはそのまま自動マージされること、承認ジョブが Environment の保護なし・別の reviewer・JST の日付の変化・head や一覧や名義の変化でマージしないことを観測。止める側を外す11通りの壊し方で、それぞれ自己テストが落ちることも見た（data/check-selftests.json）。"
         }
       ],
-      "blocked_by": "auto-merge.yml の変更は main に入るまで効かない（workflow_run は既定ブランチの定義を使う）ので、この門が本番で PR を止めた記録はまだ無い。Environment autopilot-approval（Required reviewers: simplememofast）はオーナーが作る。作るまでは承認待ちの PR はマージされない（止まる側に倒れる）"
+      "blocked_by": "auto-merge.yml の変更は main に入るまで効かない（workflow_run は既定ブランチの定義を使う）ので、この門が本番で PR を止めた記録はまだ無い。Environment autopilot-approval（Required reviewers: simplememofast、Deployment branches は main だけ）は 2026-10-20 にオーナーが作成済み。承認の後のジョブがワークフローのトークンでその保護（必須の承認者）を読めるかは、本番の最初の承認で確かめる（読めなければマージしない＝止まる側に倒れる）"
     },
     {
       "id": "credential-revocation",

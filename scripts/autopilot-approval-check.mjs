@@ -415,6 +415,10 @@ async function selftest() {
   t(refused(await runApproval({ pr: { state: 'closed' } }), 'pr_changed'), 'closed PR: no merge');
   t(refused(await runApproval({ pr: { draft: true } }), 'pr_changed'), 'draft PR: no merge');
   t(refused(await runApproval({ pr: { base: { ref: 'other' } } }), 'pr_changed'), 'other base: no merge');
+  t(refused(await runApproval({ pr: { head: { ref: 'claude/obsidian-auto-20261021', sha: SHA,
+    repo: { full_name: `${OWNER}/${REPO_NAME}` } } } }), 'pr_changed'), 'other head branch: no merge');
+  t(refused(await runApproval({ pr: { head: { ref: 'claude/obsidian-auto-20261020', sha: SHA,
+    repo: { full_name: `someone/${REPO_NAME}` } } } }), 'pr_changed'), 'fork head: no merge');
   t(refused(await runApproval({ branch: 'Codex/decision-observe-20261020' }), 'not_autopilot_branch'), 'non-autopilot run: no merge');
   t(refused(await runApproval({ pr: { user: { login: 'someone' } } }), 'unapproved_opener'), 'other opener: no merge');
   t(refused(await runApproval({ fail: { authorName: 'Private Person' } }), 'commit_identity'), 'unapproved identity: no merge');
