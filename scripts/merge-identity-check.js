@@ -75,7 +75,13 @@ function findUnapprovedPrincipals(commits) {
     for (const field of ['author', 'committer']) {
       if (!approvedPrincipal(commit[field])) problems.push({ sha, field });
     }
-    for (const line of String(commit.message || '').split(/\r?\n/)) {
+    const message = String(commit.message || '');
+    // A line break other than LF/CRLF (a bare CR, VT, FF, NEL, U+2028, U+2029) splits lines differently
+    // for git, a renderer and this check, so a co-author line can hide behind one, or an approved
+    // trailer can carry another name after one. Such messages are refused outright (none on main
+    // as of 2026-10-26); the co-author lines are then read the way git reads them.
+    if (/\r(?!\n)|[\v\f\u0085\u2028\u2029]/.test(message)) problems.push({ sha, field: 'message-line-break' });
+    for (const line of message.split(/\r?\n/)) {
       if (!/^\s*Co-authored-by:/i.test(line)) continue;
       const match = /^\s*Co-authored-by:\s*(.+?)\s*<([^<>]+)>\s*$/i.exec(line);
       if (!match || !approvedPrincipal({ name: match[1], email: match[2] })) {
@@ -121,6 +127,20 @@ function selftest() {
   const trialCommit = { ...good, commit: { author: dailyRun, committer: dailyRun,
     message: 'fix\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>' } };
   assert.deepEqual(findUnapprovedPrincipals([trialCommit]), []);
+  // Any other line break is refused: a co-author line hidden behind one, an approved trailer that
+  // carries another name after one, and even an approved trailer after one (2026-10-25 audit note).
+  const withMessage = message => [{ ...trialCommit, commit: { ...trialCommit.commit, message } }];
+  for (const separator of ['\r', '\u2028', '\u2029', '\u0085', '\v', '\f']) {
+    const tag = JSON.stringify(separator);
+    assert.deepEqual(findUnapprovedPrincipals(withMessage(`fix${separator}Co-authored-by: Private Person <person@example.invalid>`))
+      .map(p => p.field), ['message-line-break'], tag);
+    assert.deepEqual(findUnapprovedPrincipals(withMessage(`fix\n\nCo-authored-by: Claude <noreply@anthropic.com>${separator}Private Person <p@example.invalid>`))
+      .map(p => p.field), ['message-line-break', 'co-author'], tag);
+    assert.deepEqual(findUnapprovedPrincipals(withMessage(`fix${separator}Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>`))
+      .map(p => p.field), ['message-line-break'], tag);
+  }
+  assert.deepEqual(findUnapprovedPrincipals(withMessage('fix\r\n\r\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\r\n')), [],
+    'CRLF line endings are ordinary');
   for (const near of [{ name: 'Claude Sonnet 5', email: 'person@example.invalid' },
     { name: 'Claude Sonnet 5', email: 'someone@anthropic.com' },
     { name: 'Claude Sonnet 5 Private Person', email: 'noreply@anthropic.com' },
