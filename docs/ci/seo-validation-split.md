@@ -72,8 +72,16 @@ with `actions: read` in addition to `contents: read`. The current SEO job has
 only `contents: read`. That addition is not present in this preparatory change
 and must be approved before activation. The evaluator must execute immutable
 trusted-main code, parse artifacts as data and avoid executing candidate code
-with its read token. No new secret, token, write permission, `checks: read`,
-branch-protection change or auto-merge redesign is proposed here.
+with its read token. The evaluator's workflow definition must itself come from
+the trusted default branch: checking out main inside a PR-controlled job is
+insufficient because a PR can edit its steps and permission use. A trusted
+evaluation result must also be a required input to the publication gate. That
+connection is not implemented or approved here; the existing merger currently
+reacts to SEO success and cannot yet enforce this independent result.
+
+No new secret, write permission, `checks: read` or branch-protection change is
+part of this preparatory change. Permission placement and the gate connection
+need a concrete reviewed design before any active split or reuse.
 
 If a new Main Daily resolver job also reads prior-run evidence, review that
 job's use of the workflow's existing `actions: read` separately and include it
