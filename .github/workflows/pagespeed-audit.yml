@@ -104,7 +104,7 @@ jobs:
             sleep 1
           done
           measure() {
-            "$RUNNER_TEMP/perf-tools/node_modules/.bin/lighthouse" "$1" --only-categories=performance,accessibility,best-practices,seo --output=json --output=html --output-path="$PERF_RESULTS/$2" --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --quiet
+            "$RUNNER_TEMP/perf-tools/node_modules/.bin/lighthouse" "$1" --only-categories=performance,accessibility,best-practices,seo --output=json --output=html --output-path="$PERF_RESULTS/$2" --save-assets --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --quiet
           }
           for run in 1 2 3; do
             measure http://127.0.0.1:8765/ "local-ja-$run"
