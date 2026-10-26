@@ -24,7 +24,7 @@ function fixture() {
     assets[`assets/home-perf/${stem}-${digest.slice(0, 12)}.${ext}`] = { bytes: bytes.length, sha256: digest };
   }
   const data = {
-    pr: { number: 2139, state: 'open', merged: false, user: { login: 'simplememofast' },
+    pr: { number: 2164, state: 'open', merged: false, user: { login: 'simplememofast' },
       base: { ref: 'main', repo: { full_name: 'simplememofast/simplememo', fork: false } },
       head: { sha: HEAD, repo: { full_name: 'simplememofast/simplememo', fork: false } }, body: SECRET },
     checks: [{ id: 1, name: 'Cloudflare Pages', status: 'completed', conclusion: 'success', head_sha: HEAD,
@@ -35,7 +35,7 @@ function fixture() {
     run: { id: RUN, repository: { full_name: 'simplememofast/simplememo', fork: false },
       head_repository: { full_name: 'simplememofast/simplememo', fork: false }, event: 'workflow_dispatch', head_branch: 'main',
       head_sha: MAIN, path: '.github/workflows/home-perf-cache-approved.yml', actor: { login: 'simplememofast' },
-      triggering_actor: { login: 'simplememofast' }, run_attempt: 1, display_title: 'Homepage cache PR 2139 @ ' + HEAD,
+      triggering_actor: { login: 'simplememofast' }, run_attempt: 1, display_title: 'Homepage cache PR 2164 @ ' + HEAD,
       status: 'in_progress', conclusion: null, created_at: '2026-10-22T09:50:00Z' },
     environment: { id: 456, name: 'preview-cache-ci', deployment_branch_policy: { protected_branches: false, custom_branch_policies: true },
       protection_rules: [{ type: 'required_reviewers', prevent_self_review: false, reviewers: [{ type: 'User', reviewer: { login: 'simplememofast' } }] }, { type: 'branch_policy' }] },
@@ -62,7 +62,7 @@ function fixture() {
   const configurationReadback = { environmentName: 'preview-cache-ci', environmentId: 456, mainBranchOnly: true, requiredReviewer: 'simplememofast',
     preventSelfReview: false, adminBypassDisabled: true, observedAt: '2026-10-22T09:00:00Z', authorizationNotAfter: '2026-10-23T09:00:00Z' };
   return { data, calls, hooks, github, context, configurationReadback,
-    candidate: { github, context, checkoutSha: MAIN, request: { pullRequestNumber: '2139', approvedHeadSha: HEAD }, validUntil: until, now },
+    candidate: { github, context, checkoutSha: MAIN, request: { pullRequestNumber: '2164', approvedHeadSha: HEAD }, validUntil: until, now },
     approval: { github, runId: RUN, headSha: HEAD, context: { ...context, runId: RUN }, now, validUntil: until, configurationReadback } };
 }
 function staticError(expected) {
@@ -122,7 +122,8 @@ test('unapproved repo, event, ref, actor, checkout, request or expired deadline 
   for (const mutate of [f => { f.candidate.context.repository = 'other/simplememo'; }, f => { f.candidate.context.eventName = 'pull_request'; },
     f => { f.candidate.context.ref = 'refs/heads/candidate'; }, f => { f.candidate.context.actor = 'contributor'; },
     f => { f.candidate.context.triggeringActor = 'contributor'; }, f => { f.candidate.checkoutSha = HEAD; },
-    f => { f.candidate.request.pullRequestNumber = '2136'; }, f => { f.candidate.request.approvedHeadSha = 'invalid'; },
+    f => { f.candidate.request.pullRequestNumber = '2136'; }, f => { f.candidate.request.pullRequestNumber = 2139; },
+    f => { f.candidate.request.pullRequestNumber = '2139'; }, f => { f.candidate.request.approvedHeadSha = 'invalid'; },
     f => { f.candidate.request.approvedHeadSha += '\n'; },
     f => { f.candidate.validUntil = '2026-02-30T10:30:00Z'; }, f => { f.candidate.now = Date.parse(until); }]) {
     const f = await rejectedCandidate(mutate); assert.equal(f.calls.length, 0);
@@ -130,7 +131,7 @@ test('unapproved repo, event, ref, actor, checkout, request or expired deadline 
 });
 
 test('fresh PR requires an open owner-authored nonfork exact head targeting same-repo main', async () => {
-  for (const mutate of [pr => { pr.state = 'closed'; }, pr => { pr.merged = true; }, pr => { pr.user.login = 'contributor'; },
+  for (const mutate of [pr => { pr.number = 2139; }, pr => { pr.state = 'closed'; }, pr => { pr.merged = true; }, pr => { pr.user.login = 'contributor'; },
     pr => { pr.head.sha = MAIN; }, pr => { pr.head.repo.fork = true; }, pr => { pr.head.repo.full_name = 'contributor/simplememo'; },
     pr => { pr.base.repo.fork = true; }, pr => { pr.base.ref = 'candidate'; }, pr => { pr.base.repo.full_name = 'other/simplememo'; }]) {
     await rejectedCandidate(f => mutate(f.data.pr), 'PR_INVALID');

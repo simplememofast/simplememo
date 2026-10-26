@@ -35,7 +35,7 @@ function fixture() {
     event: 'workflow_dispatch', head_branch: 'main', head_sha: MAIN, run_attempt: 1,
     status: 'completed', conclusion: 'success', actor: { login: OWNER }, triggering_actor: { login: OWNER },
     repository: { full_name: REPOSITORY, fork: false }, head_repository: { full_name: REPOSITORY, fork: false },
-    display_title: 'Homepage cache PR 2139 @ ' + HEAD,
+    display_title: 'Homepage cache PR 2164 @ ' + HEAD,
     created_at: at(0), run_started_at: at(1), updated_at: at(55),
   };
   const configurationReadback = { environmentName: 'preview-cache-ci', environmentId: 456, mainBranchOnly: true,
@@ -46,7 +46,7 @@ function fixture() {
     workflow: { id: 98765, path: WORKFLOW, state: 'active' },
     configuration: { configurationReadback }, configurationResponse: null,
     run, runs: [run], totalRuns: null, manifest,
-    pr: { number: 2139, state: 'open', merged: false, user: { login: OWNER },
+    pr: { number: 2164, state: 'open', merged: false, user: { login: OWNER },
       base: { ref: 'main', repo: { full_name: REPOSITORY, fork: false } },
       head: { sha: HEAD, repo: { full_name: REPOSITORY, fork: false } } },
     checks: { total_count: 1, check_runs: [{ id: 7001, name: 'Cloudflare Pages', head_sha: HEAD,
@@ -60,9 +60,9 @@ function fixture() {
     branches: { total_count: 1, branch_policies: [{ name: 'main', type: 'branch' }] },
     reviews: [{ state: 'approved', user: { login: OWNER }, environments: [{ id: 456, name: 'preview-cache-ci' }], comment: PRIVATE }],
     jobs: { total_count: 3, jobs: [
-      { id: 101, name: 'Resolve cache PR 2139 @ ' + HEAD, started_at: at(2), completed_at: at(10),
+      { id: 101, name: 'Resolve cache PR 2164 @ ' + HEAD, started_at: at(2), completed_at: at(10),
         steps: [step(1, 'Set up job', 2, 3), step(2, 'Resolve reviewed candidate', 3, 9), step(3, 'Complete job', 9, 10)] },
-      { id: 102, name: 'Verify reviewed cache PR 2139 @ ' + HEAD, started_at: at(15), completed_at: at(40),
+      { id: 102, name: 'Verify reviewed cache PR 2164 @ ' + HEAD, started_at: at(15), completed_at: at(40),
         steps: [step(1, 'Set up job', 15, 16), step(2, 'Authorize reviewed preview', 16, 20),
           step(3, 'Verify response contract', 20, 39), step(4, 'Complete job', 39, 40)] },
       { id: 103, name: 'Cache proof ' + HEAD + ' ' + manifestSha256 + ' ' + DEPLOYMENT, started_at: at(45), completed_at: at(50),
@@ -111,7 +111,7 @@ function fixture() {
     assert.equal(params.per_page, 100); assert.equal(params.page, 1); return state.jobs;
   });
   install('actions', 'getReviewsForRun', params => { assert.equal(params.run_id, state.run.id); return state.reviews; });
-  install('pulls', 'get', params => { assert.equal(params.pull_number, 2139); return state.pr; });
+  install('pulls', 'get', params => { assert.equal(params.pull_number, 2164); return state.pr; });
   install('checks', 'listForRef', params => {
     assert.equal(params.ref, HEAD); assert.equal(params.filter, 'all'); assert.equal(params.per_page, 100); assert.equal(params.page, 1);
     return state.checks;
@@ -234,7 +234,7 @@ test('a full first page still fails when more than 100 runs could hide a newer m
   const f = fixture();
   f.runs = [f.run, ...Array.from({ length: 99 }, (_, i) => ({ ...structuredClone(f.run),
     id: 2000000 + i, run_number: 100 + i, created_at: at(-200 - i),
-    display_title: 'Homepage cache PR 2139 @ ' + OTHER }))];
+    display_title: 'Homepage cache PR 2164 @ ' + OTHER }))];
   f.totalRuns = 101;
   const result = await f.verify(); safe(result); assert.equal(result.code, 'RUN_LIST_INVALID');
   assert.equal(f.counts['actions.getWorkflowRun'], undefined);
@@ -249,13 +249,14 @@ test('same-second matching runs use run_number and never response order to choos
 
 test('newer unrelated candidate does not impersonate this exact display title', async () => {
   const f = fixture(), other = structuredClone(f.run);
-  other.id++; other.run_number++; other.created_at = at(1); other.display_title = 'Homepage cache PR 2139 @ ' + OTHER;
+  other.id++; other.run_number++; other.created_at = at(1); other.display_title = 'Homepage cache PR 2164 @ ' + OTHER;
   other.status = 'in_progress'; other.conclusion = null; f.runs = [other, f.run];
   safe(await f.verify(), true);
 });
 
 test('producer source, first attempt, owner principals, repository and completion all remain mandatory', async () => {
   for (const mutate of [f => { f.run.head_sha = OTHER; }, f => { f.run.run_attempt = 2; },
+    f => { f.run.display_title = 'Homepage cache PR 2139 @ ' + HEAD; },
     f => { f.run.actor.login = 'attacker'; }, f => { f.run.triggering_actor.login = 'attacker'; },
     f => { f.run.head_repository.fork = true; }, f => { f.run.repository.full_name = 'attacker/simplememo'; },
     f => { f.run.path += '@candidate'; }, f => { f.run.conclusion = 'skipped'; }]) {
@@ -270,7 +271,7 @@ test('list/get run disagreement is rejected without treating metadata as a succe
 });
 
 test('fresh PR and official provider binding reject moved heads, forks, closed PRs and fake deployments', async () => {
-  for (const mutate of [f => { f.pr.head.sha = OTHER; }, f => { f.pr.state = 'closed'; },
+  for (const mutate of [f => { f.pr.number = 2139; }, f => { f.pr.head.sha = OTHER; }, f => { f.pr.state = 'closed'; },
     f => { f.pr.head.repo.fork = true; }, f => { f.pr.user.login = 'attacker'; },
     f => { f.checks.check_runs[0].app.id = 1; }, f => { f.checks.check_runs[0].details_url = 'https://evil.example/' + PRIVATE; },
     f => { f.checks.check_runs[0].head_sha = OTHER; }]) {
