@@ -37,7 +37,7 @@ function createWorkflowRunner({ readApproval = readEnvironmentApproval,
       // The capability is process-local and cannot be supplied as JSON input.
       const resolved = await resolve({ github, context: source,
         checkoutSha: source.checkoutSha,
-        request: { pullRequestNumber: 2164, approvedHeadSha: headSha },
+        request: { pullRequestNumber: 2175, approvedHeadSha: headSha },
         validUntil, now: clock, approval });
       return resolved.authorization;
     } catch { fail(); }

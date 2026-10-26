@@ -18,15 +18,15 @@ function fixture() {
     context: { repository: 'simplememofast/simplememo', eventName: 'workflow_dispatch', ref: 'refs/heads/main',
       workflowRef: 'simplememofast/simplememo/.github/workflows/home-perf-cache-approved.yml@refs/heads/main',
       workflowSha: MAIN, sha: MAIN, checkoutSha: MAIN, runAttempt: '1', actor: 'simplememofast', triggeringActor: 'simplememofast' },
-    request: { pullRequestNumber: '2164', approvedHeadSha: HEAD },
-    pullRequest: { number: 2164, state: 'open', merged: false, user: { login: 'simplememofast' },
+    request: { pullRequestNumber: '2175', approvedHeadSha: HEAD },
+    pullRequest: { number: 2175, state: 'open', merged: false, user: { login: 'simplememofast' },
       base: { ref: 'main', repo: { full_name: 'simplememofast/simplememo', fork: false } },
       head: { sha: HEAD, repo: { full_name: 'simplememofast/simplememo', fork: false } } },
     checkRun: { name: 'Cloudflare Pages', status: 'completed', conclusion: 'success', head_sha: HEAD,
       app: { id: 85455, slug: 'cloudflare-workers-and-pages' },
       details_url: `https://dash.cloudflare.com/?to=/${ACCOUNT}/pages/view/simplememo/${DEPLOYMENT}`,
       output: { summary: `Preview: [deployment](${PREVIEW}/)` } },
-    policy: { approvedPullRequestNumber: 2164, approvedHeadSha: HEAD, validUntil: '2026-10-22T12:00:00Z',
+    policy: { approvedPullRequestNumber: 2175, approvedHeadSha: HEAD, validUntil: '2026-10-22T12:00:00Z',
       cloudflareAppId: 85455, cloudflareAppSlug: 'cloudflare-workers-and-pages', cloudflareAccountId: ACCOUNT,
       cloudflareProjectName: 'simplememo', expectedManifestSha256: digest(reviewedManifest) },
     reviewedManifest, now: Date.parse('2026-10-22T11:00:00Z'),
@@ -51,7 +51,7 @@ test('an independently reviewed main dispatch authorizes only the bound preview 
   assert.equal(result.headSha, HEAD);
   assert.equal(result.trustedCheckoutSha, MAIN);
   assert.equal(result.deploymentId, DEPLOYMENT);
-  assert.equal(result.pullRequestNumber, 2164);
+  assert.equal(result.pullRequestNumber, 2175);
   assert.deepEqual(input, before);
   assert.ok(Object.isFrozen(result) && Object.isFrozen(result.manifest) && Object.isFrozen(result.manifest.assets));
   for (const row of Object.values(result.manifest.assets)) assert.ok(Object.isFrozen(row));
@@ -62,7 +62,7 @@ test('an independently reviewed main dispatch authorizes only the bound preview 
 test('third-party actors, triggers, repositories, dispatch branches and reruns fail closed', () => {
   for (const [field, values] of Object.entries({ repository: ['other/simplememo', 'simplememofast/simplememo-api'],
     eventName: ['pull_request', 'pull_request_target', 'push', 'repository_dispatch', 'workflow_run'],
-    ref: ['refs/pull/2164/merge', 'refs/heads/candidate', 'refs/tags/main'],
+    ref: ['refs/pull/2175/merge', 'refs/heads/candidate', 'refs/tags/main'],
     actor: ['contributor', 'SimpleMemoFast'], triggeringActor: ['contributor', 'github-actions[bot]'],
     runAttempt: [2, '2', 0, '01', undefined] })) {
     for (const value of values) rejected(input => { input.context[field] = value; });
@@ -82,7 +82,7 @@ test('workflow identity and all three trusted execution SHAs are independently r
 });
 
 test('owner approval is fixed in trusted policy, not selected by manual input', () => {
-  for (const number of [2136, 2139]) {
+  for (const number of [2136, 2139, 2164]) {
     for (const value of [number, String(number)]) rejected(input => { input.request.pullRequestNumber = value; });
     rejected(input => { input.policy.approvedPullRequestNumber = number; input.request.pullRequestNumber = String(number); input.pullRequest.number = number; });
   }

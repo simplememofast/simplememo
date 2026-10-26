@@ -111,7 +111,7 @@ function checkRun(run, expected) {
   record(run.actor); record(run.triggering_actor);
   need(run.actor.login === OWNER && run.triggering_actor.login === OWNER);
   identity(run.repository); identity(run.head_repository);
-  need(run.display_title === 'Homepage cache PR 2164 @ ' + expected.candidateHeadSha);
+  need(run.display_title === 'Homepage cache PR 2175 @ ' + expected.candidateHeadSha);
 }
 
 function checkJobs(envelope, run, expected) {
@@ -121,8 +121,8 @@ function checkJobs(envelope, run, expected) {
   const jobs = list(envelope.data.jobs, 3);
   need(envelope.data.total_count === 3 && jobs.length === 3);
   const specs = [
-    ['Resolve cache PR 2164 @ ' + expected.candidateHeadSha, ['Resolve reviewed candidate']],
-    ['Verify reviewed cache PR 2164 @ ' + expected.candidateHeadSha, ['Authorize reviewed preview', 'Verify response contract']],
+    ['Resolve cache PR 2175 @ ' + expected.candidateHeadSha, ['Resolve reviewed candidate']],
+    ['Verify reviewed cache PR 2175 @ ' + expected.candidateHeadSha, ['Authorize reviewed preview', 'Verify response contract']],
     ['Cache proof ' + expected.candidateHeadSha + ' ' + expected.manifestSha256 + ' ' + expected.deploymentId, ['Seal successful proof']],
   ];
   const ids = new Set(), names = new Map();
