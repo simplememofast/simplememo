@@ -630,8 +630,10 @@ const PAGE_PATH = /^\/(?:[A-Za-z0-9_-][A-Za-z0-9._-]*\/)*(?:[A-Za-z0-9_-][A-Za-z
 
 // autopilot-runs.mjs normalizeArtifact(), which --check applies to both sides: an absolute URL's pathname, else the text.
 const comparedForm = value => { try { return new URL(value).pathname; } catch { return value; } };
-// Model-written text a ledger row may carry: a request field's limits (plain, 300) and no bidi control either.
-const rowText = value => plain(value, 300) && value.replace(CONTROL, '') === value;
+// Model-written text a ledger row may carry: a request field's limits (plain, 300) and no control (C0, DEL, C1), format
+// (bidi controls and marks, zero-width characters, BOM) or line/paragraph separator character either.
+const ROW_UNSAFE = /[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u;
+const rowText = value => plain(value, 300) && !ROW_UNSAFE.test(value);
 
 /**
  * Is a file (relative to tree) a public page? data/i18n/pages.json lists them, every locale of every group: it is the
@@ -680,7 +682,8 @@ export function artifactSitePath(value, tree, isPublic = publicPages(tree)) {
   if (!text) return null;
   let url = null;
   try { url = new URL(text); } catch { /* not absolute */ }
-  if (url) return SITE_ORIGINS.has(url.origin) ? url.pathname : null;
+  // http(s) only: 'blob:https://simplememofast.com/x/' has this site's origin, and its pathname is the whole inner URL.
+  if (url) return ['http:', 'https:'].includes(url.protocol) && SITE_ORIGINS.has(url.origin) ? url.pathname : null;
   if (!text.startsWith('/')) return pageFile(tree, `/${text}`, isPublic) ? `/${text}` : null;
   try { url = new URL(text, SITE_ORIGIN); } catch { return null; }
   return url.origin === SITE_ORIGIN ? url.pathname : null;
@@ -709,7 +712,8 @@ export function ledgerArtifact(artifact, { tree, statusUrl = null, actions = [] 
     const form = comparedForm(status);
     const statusKey = artifactSitePath(status, tree, isPublic);
     const same = form === comparedForm(artifact) || (key && statusKey === key) || (page && pageFile(tree, statusKey, isPublic) === page);
-    if (same && rowText(form)) return { artifact: form, omitted: null };
+    // Kept only if --check reads the kept form as itself: 'urn:isbn:1' reads as 'isbn:1', which reads as '1'.
+    if (same && rowText(form) && comparedForm(form) === form) return { artifact: form, omitted: null };
   }
   if (!status && !actions.some(action => ARTICLE_ACTIONS.has(action))) return { artifact: null, omitted: 'no_article_day' };
   if (page) return { artifact: `/${page.replace(/(^|\/)index\.html$/, '$1').replace(/\.html$/, '')}`, omitted: null };
@@ -1105,7 +1109,9 @@ function selftest() {
     // An article day (refresh) without a status article: what the artifact names decides.
     for (const value of [described, 'scripts/x.mjs', 'obsidian/missing/', 'growth/experiments/experiments.json', 'fixtures/x.html',
       'https://evil.example/obsidian/getting-started/', '//evil.example/obsidian/getting-started/', 'https://simplememofast.com.evil.example/x/',
-      'C:/x', 'mailto:a@simplememofast.com', '', '   ', '.', './', 'obsidian/getting-started/?q=1']) {
+      'C:/x', 'mailto:a@simplememofast.com', '', '   ', '.', './', 'obsidian/getting-started/?q=1',
+      // This site's origin on another scheme: the pathname of 'blob:' is the whole inner URL.
+      `blob:${SITE_ORIGIN}${PAGE}`, `view-source:${SITE_ORIGIN}${PAGE}`]) {
       t(same(kept(value), null, 'not_a_site_path'), `not a site path: ${JSON.stringify(value)}`);
     }
     for (const value of ['/growth/experiments/experiments.json', '/data/x.json', '/docs/obsidian/AUTOPILOT_LOG.md', '/obsidian/missing/',
@@ -1152,13 +1158,21 @@ function selftest() {
       t(same(kept(described, '/blog/memo', actions), null, 'not_a_site_path'), `a description the status article does not name ${actions}`);
     }
     // A status article.url that is not text a row may carry is no article, and is never copied.
-    for (const statusUrl of [`${PAGE}\n`, `${PAGE}\u0007`, `${PAGE}\u202e`, `${PAGE}\u0000`, `${PAGE}?${'x'.repeat(300)}`, 42, { url: PAGE }, '']) {
+    for (const statusUrl of [`${PAGE}\n`, `${PAGE}\u0007`, `${PAGE}\u202e`, `${PAGE}\u0000`, `${PAGE}?${'x'.repeat(300)}`, 42, { url: PAGE }, '',
+      // C1 controls, line/paragraph separators, bidi marks, zero-width characters, BOM and the soft hyphen.
+      ...['\u0085', '\u009b', '\u2028', '\u2029', '\u200e', '\u200f', '\u061c', '\u200b', '\u200d', '\u2060', '\ufeff', '\u00ad'].map(c => `${PAGE}?${c}`)]) {
       t(same(kept(PAGE, statusUrl), PAGE, null), `unusable status article, article day: ${JSON.stringify(statusUrl)}`);
       t(same(kept(PAGE, statusUrl, ['maintenance']), null, 'no_article_day'), `unusable status article, no article day: ${JSON.stringify(statusUrl)}`);
       t(same(kept(String(statusUrl), statusUrl, ['maintenance']), null, 'no_article_day'), `unusable status article, same text: ${JSON.stringify(statusUrl)}`);
     }
     // The same text whose compared form a row cannot carry ('foo:' reads as '').
     t(same(kept('foo:', 'foo:'), null, 'not_a_site_path'), 'an empty compared form is not kept');
+    // The same text whose compared form --check would read again as something else ('urn:isbn:123' → 'isbn:123' → '123').
+    for (const value of ['urn:isbn:123', `x:y:${PAGE}`, `blob:${SITE_ORIGIN}${PAGE}`, `view-source:${SITE_ORIGIN}${PAGE}`, 'a:foo:bar']) {
+      for (const actions of [['refresh'], ['maintenance']]) {
+        t(same(kept(value, value, actions), null, 'not_a_site_path'), `a compared form --check reads differently ${JSON.stringify(actions)}: ${value}`);
+      }
+    }
     // Without a readable registry, every HTML file counts (the stricter row); the path and file checks still hold.
     fs.rmSync(registry);
     t(same(kept('/fixtures/x.html'), '/fixtures/x', null), 'unreadable registry: every HTML file is a page');

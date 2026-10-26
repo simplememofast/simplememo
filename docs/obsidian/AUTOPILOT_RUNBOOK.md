@@ -1234,8 +1234,10 @@ node scripts/autopilot-runs.mjs --append \
   `article.url`（§5-2）と同じページにする。記事の無い日（`article` が null の日。既存ページを直した
   保守の日も含む）は付けない（作業の説明は PR 本文と LOG へ）。`--check` は当日の出荷行の `artifact` を
   `article.url` と突き合わせ、食い違えば落ちる。Actions経路の依頼の `run.artifact` も同じで、記帳は
-  記事の無い日の `run.artifact` を行に書かない（2026-10-26、保守の日の依頼が作業の説明をここに書き、
-  台帳に入って PR が SEO Validation で落ちた）
+  `article` が null で、依頼の `action` も status JSON の `action` も new・refresh でない日の
+  `run.artifact` を行に書かない（2026-10-26、保守の日の依頼が作業の説明をここに書き、台帳に入って
+  PR が SEO Validation で落ちた）。new・refresh の日は `article` が null でも公開ページを行に残すので、
+  従来どおり `--check` で落ちる（2026-08-14）
 - **実行IDも必ず残す。**主系Actionsの中で `--route actions` を指定すると、記帳コマンドが `GITHUB_RUN_ID` を `external_ref` に引き継ぐ。副系は `--external-ref <CCRのsession id>` を明示する。別ワークフローやローカル実行では推測せず、対象の実行IDを明示する。
 - 主系の終了検査は、モデル開始前のブランチと、今回の実行IDを持つPR上の新しい記録を照合する。宣言だけのブランチや当日statusは成果物の証明にならない。PR待ちは本番出荷と区別する。取得失敗や照合中の更新は「確認不能」として調査へ残し、「成果物ゼロ」と断定しない。再実行で以前のPRを更新する場合も、今回の結果を記帳する（以前と全く同じ記録は新しい結果にならない）。
 - **失敗の回にも必ず1行残す。** `--outcome` と `--failure-reason` を書く。
