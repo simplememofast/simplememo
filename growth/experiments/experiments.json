@@ -2844,7 +2844,7 @@
       },
       "started_at": "2026-09-22",
       "evaluation_at": "2026-10-23",
-      "status": "running",
+      "status": "evaluated",
       "target_metric": "ctr",
       "baseline": {
         "metric": "ctr",
@@ -2896,14 +2896,67 @@
         "end": "2026-10-20",
         "days": 28
       },
-      "decision": null,
-      "evaluated_at": null,
-      "notes": [],
+      "decision": "inconclusive",
+      "evaluated_at": "2026-10-26",
+      "notes": [
+        "2026-10-26: Exact-page WEB GSC /obsidian/getting-started/, no country/device filter. Baseline 2026-08-23..2026-09-19: 9 clicks / 1371 imp / CTR 0.66% / pos 8.41. Post 2026-09-26..2026-10-23 (snapshot 2026-10-26): 17 clicks / 2039 imp / CTR 0.83% / pos 7.47. CTR rose +0.18pp, short of the pre-registered +0.30pp retain bar; impressions grew +49% over baseline, a registered demand/mix confounder (guardrails), so the small CTR gain cannot be isolated from that shift. No interim retitling or other edits since the 2026-09-22 launch. Position and clicks both moved favorably but not enough to clear the keep threshold; not a drop, so revert does not apply either."
+      ],
       "company_measurement": {
         "schema_version": 1,
         "plan_sha256": "12fc083d72538555230c4e49a24f3dbb06df77317a9626b25172be94720be908",
         "company_run_id": "6b41f9e5-79d6-425d-92f8-d8da34cbf523",
         "decision_sha256": "8d23d6f90cf592f67e85c0c048705bbcf50d684b4f30dd7fbd83fe0fc6b4d749"
+      },
+      "evidence": {
+        "schema_version": 1,
+        "kind": "gsc_comparison",
+        "source": "gsc",
+        "target_metric": "ctr",
+        "scope": {
+          "kind": "page",
+          "page": "/obsidian/getting-started/"
+        },
+        "gsc_snapshots": [
+          "2026-10-26"
+        ],
+        "baseline": {
+          "start": "2026-08-23",
+          "end": "2026-09-19",
+          "days": 28,
+          "value": 0.006564551422319475,
+          "registered_baseline_sha256": "709fb837157fdd080d3196bf5d38af23d3f73879559c525bb5d5d2cc64967025"
+        },
+        "post": {
+          "start": "2026-09-26",
+          "end": "2026-10-23",
+          "days": 28,
+          "value": 0.008337420304070623,
+          "clicks": 17,
+          "impressions": 2039,
+          "position": 7.46542422756253
+        },
+        "artifacts": [
+          {
+            "name": "2026-10-26/meta.json",
+            "sha256": "dbd24bfb43d1814422031e083d616605fbb5ca33aa3ab73bbec45420de0ff74a"
+          },
+          {
+            "name": "2026-10-26/dates.json",
+            "sha256": "a7a56aeb1c0b2c19a7cae648bfdce2e702c99f50c6787b9e19bd00f7b678baef"
+          },
+          {
+            "name": "2026-10-26/pages.json",
+            "sha256": "9e902286358325556a4dae07a160af2060189961af67008ddbfad0b88fcb01d0"
+          }
+        ],
+        "validation": "metric, exact row, numeric values, complete post dates and comparable windows; decision interpretation is manual",
+        "limitations": [
+          "Baseline values are those registered in the ledger; their original extraction is not revalidated here.",
+          "Daily coverage is snapshot-wide, not per page. No test of significance, minimum sample adequacy or causality is performed.",
+          "Legacy snapshot has no search-type metadata; WEB is the store convention and must be checked against the export filters.",
+          "Legacy snapshot has no timezone metadata; verify Pacific dates in the source export."
+        ],
+        "rationale": "Exact-page WEB GSC /obsidian/getting-started/, no country/device filter. Baseline 2026-08-23..2026-09-19: 9 clicks / 1371 imp / CTR 0.66% / pos 8.41. Post 2026-09-26..2026-10-23 (snapshot 2026-10-26): 17 clicks / 2039 imp / CTR 0.83% / pos 7.47. CTR rose +0.18pp, short of the pre-registered +0.30pp retain bar; impressions grew +49% over baseline, a registered demand/mix confounder (guardrails), so the small CTR gain cannot be isolated from that shift. No interim retitling or other edits since the 2026-09-22 launch. Position and clicks both moved favorably but not enough to clear the keep threshold; not a drop, so revert does not apply either."
       }
     },
     {
