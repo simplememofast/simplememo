@@ -74,12 +74,13 @@ jobs:
     outputs:
       needed: ${{ steps.observe.outputs.needed }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24.22.1'
+          package-manager-cache: false
       - name: Check whether routine observation reached intake
         id: observe
         env:
@@ -114,10 +115,10 @@ jobs:
     outputs:
       needed: ${{ steps.observe.outputs.needed }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         id: observe
         with:
           script: |
@@ -148,7 +149,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
           # GH_PAT が要る理由は seo-daily.yml / obsidian-autopilot.yml と同じ:
@@ -157,9 +158,10 @@ jobs:
           token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24.22.1'
+          package-manager-cache: false
 
       # 【緊急停止】主系と同じ位置・同じ理由。停止中はこの経路も動かない。
       # 台帳の同期は無害に見えるが、**止めたい状況で唯一動き続ける経路**を
