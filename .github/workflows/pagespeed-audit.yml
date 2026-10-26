@@ -80,11 +80,11 @@ jobs:
           python scripts/perf/build_home.py --check
           python scripts/perf/verify_home.py --selftest
           python scripts/perf/verify_home.py
-          node --test scripts/perf/inline_styles.test.mjs scripts/perf/verify_production.test.cjs scripts/perf/browser_checks.test.cjs
+          node --test scripts/perf/inline_styles.test.mjs scripts/perf/verify_production.test.cjs scripts/perf/browser_checks.test.cjs scripts/perf/lighthouse_runtime.test.cjs
           python scripts/perf/test_summarize.py
       - name: Install pinned browser measurement tools
         timeout-minutes: 2
-        run: npm install --prefix "$RUNNER_TEMP/perf-tools" --no-save lighthouse@12.8.2 playwright@1.55.0
+        run: npm install --prefix "$RUNNER_TEMP/perf-tools" --no-save lighthouse@12.8.2 chrome-launcher@1.2.2 playwright@1.55.0
       - name: Verify production deployment after a main push
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/verify_production.cjs --require
@@ -104,7 +104,7 @@ jobs:
             sleep 1
           done
           measure() {
-            "$RUNNER_TEMP/perf-tools/node_modules/.bin/lighthouse" "$1" --only-categories=performance,accessibility,best-practices,seo --output=json --output=html --output-path="$PERF_RESULTS/$2" --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --quiet
+            NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/lighthouse_runtime.cjs "$1" "$PERF_RESULTS/$2"
           }
           for run in 1 2 3; do
             measure http://127.0.0.1:8765/ "local-ja-$run"
