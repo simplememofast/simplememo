@@ -143,7 +143,7 @@ export function checkWiring(source) {
   assert(upload, 'audit upload must be wired');
   assert.match(upload, /if: always\(\) && steps.audit.outputs.saved == 'true'/);
   assert.match(upload, /\n        continue-on-error: true\n/);
-  assert.match(upload, /uses: actions\/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02/);
+  assert.match(upload, /uses: actions\/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9/);
   assert.match(upload, /path: \$\{\{ runner.temp \}\}\/autopilot-audit\n/);
   assert.match(upload, /retention-days: 7\n/);
   // The audit runs before checkpoint/diagnostics touch the workspace's git state.
