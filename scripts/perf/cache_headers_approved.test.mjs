@@ -9,8 +9,8 @@ import { spawnSync } from 'node:child_process';
 const workflow = fs.readFileSync(new URL('../../.github/workflows/home-perf-cache.yml', import.meta.url), 'utf8');
 const candidate = workflow.split('  candidate-regressions:\n')[1]?.split('\n  cache-contract:')[0];
 const consumer = workflow.split('\n  cache-contract:\n')[1];
-const approved = "github.event_name == 'pull_request' && github.event.pull_request.number == 2164";
-const ordinary = "github.event_name != 'pull_request' || github.event.pull_request.number != 2164";
+const approved = "github.event_name == 'pull_request' && github.event.pull_request.number == 2175";
+const ordinary = "github.event_name != 'pull_request' || github.event.pull_request.number != 2175";
 function step(name) {
   const start = consumer.indexOf('      - name: ' + name + '\n');
   assert.ok(start >= 0, name);
@@ -55,7 +55,7 @@ test('the approved consumer checks out measured immutable main and has no fallba
   assert.doesNotMatch(step('Verify approved preview proof'), /inputs\.|head\.ref|download-artifact/);
 });
 
-test('production and other PRs retain real response checks; PR 2164 requires complete successful proof', () => {
+test('production and other PRs retain real response checks; PR 2175 requires complete successful proof', () => {
   for (const name of ['Resolve the exact successful deployment', 'Install pinned browser client', 'Verify real response bodies and cache policies']) {
     assert.ok(step(name).includes('if: ' + ordinary));
   }

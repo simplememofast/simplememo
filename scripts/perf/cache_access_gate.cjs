@@ -58,7 +58,7 @@ function instant(value) {
 function validatePolicy(policy, now) {
   record(policy, 'trusted policy', ['approvedPullRequestNumber', 'approvedHeadSha', 'validUntil',
     'cloudflareAppId', 'cloudflareAppSlug', 'cloudflareAccountId', 'cloudflareProjectName', 'expectedManifestSha256']);
-  requireThat(policy.approvedPullRequestNumber === 2164, 'trusted policy must approve PR 2164');
+  requireThat(policy.approvedPullRequestNumber === 2175, 'trusted policy must approve PR 2175');
   requireThat(typeof policy.approvedHeadSha === 'string' && SHA.test(policy.approvedHeadSha), 'trusted policy needs an approved head SHA');
   requireThat(Number.isSafeInteger(now) && now >= 0, 'an explicit current time in milliseconds is required');
   requireThat(Number.isFinite(instant(policy.validUntil)) && now < instant(policy.validUntil), 'trusted policy is missing a valid unexpired deadline');
@@ -84,7 +84,7 @@ function validateDispatch(context) {
 
 function validatePullRequest(pr, request, policy) {
   record(request, 'manual request', ['pullRequestNumber', 'approvedHeadSha']);
-  requireThat(request.pullRequestNumber === 2164 || request.pullRequestNumber === '2164', 'only PR 2164 is approved');
+  requireThat(request.pullRequestNumber === 2175 || request.pullRequestNumber === '2175', 'only PR 2175 is approved');
   requireThat(request.approvedHeadSha === policy.approvedHeadSha, 'manual head does not match the trusted review');
   record(pr, 'GitHub PR');
   record(pr.user, 'PR author');
@@ -189,7 +189,7 @@ function authorizeCacheCheck(input) {
   validatePullRequest(input.pullRequest, input.request, input.policy);
   const deployment = validateDeployment(input.checkRun, input.policy);
   const manifest = validateManifest(input.reviewedManifest, input.policy);
-  return Object.freeze({ repository: REPOSITORY, pullRequestNumber: 2164,
+  return Object.freeze({ repository: REPOSITORY, pullRequestNumber: 2175,
     headSha: input.policy.approvedHeadSha, trustedCheckoutSha: input.context.checkoutSha,
     previewOrigin: deployment.origin, deploymentId: deployment.deploymentId,
     validUntil: input.policy.validUntil, manifest });
