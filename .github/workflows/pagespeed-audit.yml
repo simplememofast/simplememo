@@ -119,6 +119,22 @@ jobs:
           if [[ ( "$GITHUB_EVENT_NAME" == "push" || "$GITHUB_EVENT_NAME" == "schedule" ) && "$GITHUB_REF" == "refs/heads/main" ]]; then
             PERF_BASE_URL=https://simplememofast.com PERF_RESULTS="$PERF_RESULTS/production-browser" NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/browser_checks.cjs 2>&1 | tee "$PERF_RESULTS/production-browser-output.txt"
           fi
+      - name: Capture bounded renderer comparison and negative audit controls
+        if: github.event_name == 'workflow_dispatch'
+        timeout-minutes: 7
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -I -m http.server 8766 --bind 127.0.0.1 --directory scripts/perf/fixtures/render-document > "$RUNNER_TEMP/render-fixture-server.log" 2>&1 &
+          fixture_pid=$!
+          trap 'kill "$fixture_pid" || true' EXIT
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:8766/dbw-minimal-negative.html > /dev/null; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8766/dbw-minimal-negative.html --output "$RUNNER_TEMP/render-fixture.html"
+          cmp scripts/perf/fixtures/render-document/dbw-minimal-negative.html "$RUNNER_TEMP/render-fixture.html"
+          NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/diagnose_render_document.cjs --capture
       - name: Report all runs and check mobile regression budgets
         if: always()
         run: python scripts/perf/summarize.py

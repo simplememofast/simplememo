@@ -1,0 +1,61 @@
+<!doctype html>
+<!--
+  Copyright 2016 Google LLC
+  SPDX-License-Identifier: Apache-2.0
+  Reduced from Lighthouse v12.8.2 dbw_tester.html at
+  8dc40bb0e13a71b1c58aaf891810ac9360b86ac9.
+  This is a diagnostic fixture, not the unmodified upstream smoke test.
+  No external resources. Do not grant the permission requests.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="icon" href="data:,">
+  <title>Lighthouse 12.8.2 four negative audit fixture</title>
+</head>
+<body>
+  <h1>Four known negative audit cases</h1>
+  <section id="touchmove-section">touchmove section</section>
+  <script>
+    if (location.origin !== 'http://127.0.0.1:8766') {
+      throw new Error('This negative fixture runs only on the diagnostic loopback server.');
+    }
+    function documentWriteTest() {
+      document.write('Hi');
+      document.write('There');
+      document.write('2.0!');
+    }
+
+    function passiveEventsListenerTest() {
+      const el = document.querySelector('#touchmove-section');
+      el.addEventListener('touchmove', function(e) {
+        console.log('touchmove');
+      });
+    }
+
+    function geolocationOnStartTest() {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        // noop: no location is read, stored or transmitted.
+      });
+      const watchID = navigator.geolocation.watchPosition(function(position) {
+        navigator.geolocation.clearWatch(watchID);
+      });
+    }
+
+    function notificationOnStartTest() {
+      Notification.requestPermission().then(function() {
+        // noop: no notification is created.
+      });
+    }
+
+    documentWriteTest();
+    passiveEventsListenerTest();
+    geolocationOnStartTest();
+    notificationOnStartTest();
+    document.documentElement.dataset.fixtureCallsCompleted = 'true';
+    console.warn('SIMPLEMEMO_DIAGNOSTIC_FIXTURE_CALLS_COMPLETED');
+  </script>
+</body>
+</html>
