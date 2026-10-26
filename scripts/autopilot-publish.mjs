@@ -350,6 +350,8 @@ export function validateRequest(raw, day) {
   if (!OUTCOMES.includes(run.outcome) || !['shipped', 'no_artifact', 'failed'].includes(run.outcome)) return { code: 'request_outcome' };
   if (run.lane != null && !/^[A-F]$/.test(run.lane)) return { code: 'request_lane' };
   if (run.action != null && !/^[a-z0-9][a-z0-9_-]{0,63}$/.test(run.action)) return { code: 'request_run_action' };
+  // Only the shape is checked here, not what the artifact names: refusing discards the day's committed work (nothing
+  // pushed) over a field only the ledger reads. record() decides what the row records (ledgerArtifact).
   if (run.artifact != null && !plain(run.artifact, 300)) return { code: 'request_artifact' };
   if (run.failure_reason != null && !plain(run.failure_reason, 500)) return { code: 'request_failure_reason' };
   if (run.failure_class != null && !FAILURE_CLASS.test(run.failure_class)) return { code: 'request_failure_class' };
@@ -613,6 +615,110 @@ export async function openPr({ request, day, token, fetchImpl = fetch }) {
 
 // ── record (no credential): trusted code over the pushed branch's data ─────
 const OVERLAY = ['scripts', 'growth/scripts', 'growth/lib'];
+export const SITE_ORIGIN = 'https://simplememofast.com';
+// The same site on http and on the www host (www answers with a 301 to SITE_ORIGIN, same path: _redirects and
+// functions/_middleware.js step 0). --check compares pathnames whatever the origin, so a URL on any of them names the page.
+const SITE_ORIGINS = new Set([SITE_ORIGIN, 'http://simplememofast.com', 'https://www.simplememofast.com', 'http://www.simplememofast.com']);
+// Runbook §5-2: the actions whose status JSON names an article (its streak counts 記事(new/refresh)); on the others
+// (wiring, maintenance, skip, repair) article may be null.
+const ARTICLE_ACTIONS = new Set(['new', 'refresh']);
+// Why record() leaves run.artifact out of the row: the only part of it the job log prints.
+export const ARTIFACT_OMITTED = ['no_article_day', 'not_a_site_path', 'not_a_page'];
+// The characters the site's page paths use, in segments that never start with a dot: no '.', '..', hidden
+// directory or empty segment, so the file a path names stays inside the tree.
+const PAGE_PATH = /^\/(?:[A-Za-z0-9_-][A-Za-z0-9._-]*\/)*(?:[A-Za-z0-9_-][A-Za-z0-9._-]*)?$/;
+
+// autopilot-runs.mjs normalizeArtifact(), which --check applies to both sides: an absolute URL's pathname, else the text.
+const comparedForm = value => { try { return new URL(value).pathname; } catch { return value; } };
+// Model-written text a ledger row may carry: a request field's limits (plain, 300) and no control (C0, DEL, C1), format
+// (bidi controls and marks, zero-width characters, BOM) or line/paragraph separator character either.
+const ROW_UNSAFE = /[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u;
+const rowText = value => plain(value, 300) && !ROW_UNSAFE.test(value);
+
+/**
+ * Is a file (relative to tree) a public page? data/i18n/pages.json lists them, every locale of every group: it is the
+ * repository's own list, and build_site_translations.py --check (SEO Validation) fails any HTML outside admin/, docs/,
+ * fixtures/, scripts/, tools/, growth/, assets/, screenshots/ and dot directories that it does not list. So the branch's
+ * registry can only add a page (a row CI holds to the status JSON) or drop one CI already fails. Unreadable: every
+ * file counts, the stricter row (CI fails that tree anyway).
+ */
+export function publicPages(tree) {
+  try {
+    const file = path.join(tree, 'data/i18n/pages.json');
+    if (fs.lstatSync(file).isFile()) {
+      const listed = new Set(JSON.parse(fs.readFileSync(file, 'utf8')).pages.flatMap(group => Object.values(group.pages)));
+      return candidate => listed.has(candidate);
+    }
+  } catch { /* unreadable */ }
+  return () => true;
+}
+
+/**
+ * The public page under tree that serves a site path ('/x/' → x/index.html, '/x' → x.html or x/index.html), or null:
+ * listed by isPublic (publicPages()), and a regular file reached without a symlink, in this case.
+ */
+export function pageFile(tree, sitePath, isPublic = publicPages(tree)) {
+  if (typeof sitePath !== 'string' || !PAGE_PATH.test(sitePath)) return null;
+  const rel = sitePath.slice(1);
+  const candidates = sitePath.endsWith('/') ? [`${rel}index.html`] : rel.endsWith('.html') ? [rel] : [`${rel}.html`, `${rel}/index.html`];
+  const root = fs.realpathSync.native(tree);
+  for (const candidate of candidates.filter(isPublic)) {
+    const file = path.join(root, candidate);
+    // A regular file reached without a symlink anywhere on the way (and, on a case-insensitive disk, in this case).
+    try { if (fs.lstatSync(file).isFile() && fs.realpathSync.native(file) === file) return candidate; } catch { /* absent */ }
+  }
+  return null;
+}
+
+/**
+ * The site path a value names, or null. Trimmed; an absolute URL of this site (http or https, with or without www), or
+ * a path from the site root ('//host/x' is another site); its pathname, so a query and a fragment are dropped and dot
+ * segments resolved. Without the leading '/', only a public page ('obsidian/x/' → '/obsidian/x/'): a description or a
+ * repository path ('scripts/x.mjs') is null.
+ */
+export function artifactSitePath(value, tree, isPublic = publicPages(tree)) {
+  if (typeof value !== 'string') return null;
+  const text = value.trim();
+  if (!text) return null;
+  let url = null;
+  try { url = new URL(text); } catch { /* not absolute */ }
+  // http(s) only: 'blob:https://simplememofast.com/x/' has this site's origin, and its pathname is the whole inner URL.
+  if (url) return ['http:', 'https:'].includes(url.protocol) && SITE_ORIGINS.has(url.origin) ? url.pathname : null;
+  if (!text.startsWith('/')) return pageFile(tree, `/${text}`, isPublic) ? `/${text}` : null;
+  try { url = new URL(text, SITE_ORIGIN); } catch { return null; }
+  return url.origin === SITE_ORIGIN ? url.pathname : null;
+}
+
+/**
+ * What the appended ledger row records for a present run.artifact (model-written), or why nothing (ARTIFACT_OMITTED).
+ * autopilot-runs.mjs --check holds the latest day's shipped rows with an artifact to the status JSON's article.url,
+ * which Runbook §5-2 leaves null on a day without an article. The status article is used only when it is text a row
+ * may carry (rowText); otherwise the day has no usable article and the text is never copied.
+ *   1. The same page or path as the status article: kept, in the form --check reads the article, so the two agree.
+ *   2. No usable status article and no article action (actions: the request's run.action and the status JSON's
+ *      action, §5-2): left out. The action decides, not the artifact: the same existing page is a refresh day's
+ *      article and a maintenance day's edit, and only the first is one the status JSON names (PR #2168).
+ *   3. A public page: kept as its canonical path ('/x/', '/x'), so an article day whose status article is null or
+ *      names another page still fails CI (2026-08-14). Anything else (a description, a file that is not a public
+ *      page) is left out.
+ * Never refused: the PR body carries what the request said.
+ */
+export function ledgerArtifact(artifact, { tree, statusUrl = null, actions = [] }) {
+  const isPublic = publicPages(tree);
+  const key = artifactSitePath(artifact, tree, isPublic);
+  const page = pageFile(tree, key, isPublic);
+  const status = rowText(statusUrl) ? statusUrl : null;
+  if (status) {
+    const form = comparedForm(status);
+    const statusKey = artifactSitePath(status, tree, isPublic);
+    const same = form === comparedForm(artifact) || (key && statusKey === key) || (page && pageFile(tree, statusKey, isPublic) === page);
+    // Kept only if --check reads the kept form as itself: 'urn:isbn:1' reads as 'isbn:1', which reads as '1'.
+    if (same && rowText(form) && comparedForm(form) === form) return { artifact: form, omitted: null };
+  }
+  if (!status && !actions.some(action => ARTICLE_ACTIONS.has(action))) return { artifact: null, omitted: 'no_article_day' };
+  if (page) return { artifact: `/${page.replace(/(^|\/)index\.html$/, '$1').replace(/\.html$/, '')}`, omitted: null };
+  return { artifact: null, omitted: key ? 'not_a_page' : 'not_a_site_path' };
+}
 
 export function record({ repo, trusted, sha, day, pr, request, runId, work, runner = defaultRunner }) {
   assert(sha40(sha) && Number.isInteger(pr) && pr > 0, 'sha and PR number required');
@@ -629,6 +735,7 @@ export function record({ repo, trusted, sha, day, pr, request, runId, work, runn
   const runsFile = path.join(work, 'data/autopilot-runs.json');
   const doc = JSON.parse(fs.readFileSync(runsFile, 'utf8'));
   const existing = (doc.runs ?? []).find(row => row.run_id === run.run_id);
+  let artifactOmitted = null;
   if (existing) {
     // The session recorded its row itself: bind it to this PR (and to the requested repair_of), nothing else.
     if (existing.route !== 'actions' || existing.date_jst !== dash || String(existing.external_ref) !== runId) fail('record_foreign_row');
@@ -639,10 +746,20 @@ export function record({ repo, trusted, sha, day, pr, request, runId, work, runn
     if (run.outcome !== 'shipped' && !(typeof existing.failure_class === 'string' && FAILURE_CLASS.test(existing.failure_class))) fail('record_row_failure_class');
     existing.pr = pr;
   } else {
+    // 2026-10-26 (run 40249667656, PR #2168): a maintenance day's request described its work in run.artifact, the
+    // row took the text, and the PR failed SEO Validation against the status JSON's article (null that day). The row
+    // gets what ledgerArtifact() keeps, decided on this tree's pages and status JSON.
+    let status = null;
+    try { status = JSON.parse(fs.readFileSync(path.join(work, 'data/autopilot-status.json'), 'utf8')); }
+    catch { /* unreadable: --write-status and autopilot-runs.mjs --check report it */ }
+    const kept = run.artifact == null ? { artifact: null, omitted: null }
+      : ledgerArtifact(run.artifact, { tree: work, statusUrl: status?.article?.url, actions: [run.action, status?.action] });
+    artifactOmitted = kept.omitted;
+    const fields = { ...run, artifact: kept.artifact };
     const args = ['scripts/autopilot-runs.mjs', '--append', '--run-id', run.run_id, '--date', dash, '--route', 'actions',
       '--outcome', run.outcome, '--pr', String(pr), '--external-ref', runId];
     for (const [key, flag] of [['lane', '--lane'], ['action', '--action'], ['artifact', '--artifact'],
-      ['failure_reason', '--failure-reason'], ['failure_class', '--failure-class']]) if (run[key] != null) args.push(flag, run[key]);
+      ['failure_reason', '--failure-reason'], ['failure_class', '--failure-class']]) if (fields[key] != null) args.push(flag, fields[key]);
     runner(work, 'node', args);
   }
   if (existing || run.repair_of) {
@@ -684,11 +801,11 @@ export function record({ repo, trusted, sha, day, pr, request, runId, work, runn
     const mode = st.isSymbolicLink() ? '120000' : st.isFile() ? ((st.mode & 0o111) ? '100755' : '100644') : 'other';
     if (hardDenyReason(file, { mode, size: st.isFile() ? st.size : null })) fail('record_unexpected_change');
   }
-  if (!changed.length) return { sha, changed: 0 };
+  if (!changed.length) return { sha, changed: 0, artifact_omitted: artifactOmitted };
   git(work, ['add', '--', ...changed]);
   git(work, ['-c', `user.name=${RECORD_IDENTITY.name}`, '-c', `user.email=${RECORD_IDENTITY.email}`, 'commit', '--no-verify', '--quiet',
     '-m', `chore(autopilot): record PR #${pr} for ${run.run_id}`]);
-  return { sha: git(work, ['rev-parse', 'HEAD']).trim(), changed: changed.length };
+  return { sha: git(work, ['rev-parse', 'HEAD']).trim(), changed: changed.length, artifact_omitted: artifactOmitted };
 }
 
 function defaultRunner(cwd, command, args) {
@@ -966,6 +1083,103 @@ function selftest() {
   t(repairOfCode(repair.run, new Set(['ap-20261018-actions'])) === 'repair_of_unknown', 'unknown target refused');
   t(repairOfCode(repair.run, new Set(['ap-20261019-actions'])) === null, 'known target accepted');
   t(repairOfCode(repair.run, null) === 'repair_of_base_unreadable', 'unreadable base refused');
+  // 2026-10-26 (run 40249667656): a maintenance day described its work in run.artifact. The day is not refused;
+  // the ledger row records a public page (or the status article's form of it), nothing else.
+  const described = 'growth/experiments/experiments.json: gsc-obsidian-install-20260922-r2 evaluated as inconclusive';
+  t(validateRequest({ ...request, run: { ...request.run, action: 'maintenance', artifact: described } }, '20261020').request?.run.artifact === described,
+    'a described artifact does not refuse the day');
+  const siteDir = fs.mkdtempSync(path.join(os.tmpdir(), 'autopilot-artifact-'));
+  try {
+    for (const file of ['index.html', 'obsidian/getting-started/index.html', 'blog/memo.html', 'data/voice-shift/index.html', 'data/x.json',
+      'growth/experiments/experiments.json', '.hidden/index.html', 'fixtures/x.html', 'docs/preview.html', 'admin/index.html']) {
+      fs.mkdirSync(path.dirname(path.join(siteDir, file)), { recursive: true });
+      fs.writeFileSync(path.join(siteDir, file), '{}');
+    }
+    fs.symlinkSync(path.join(siteDir, 'blog/memo.html'), path.join(siteDir, 'linked.html'));
+    fs.symlinkSync(path.join(siteDir, 'obsidian'), path.join(siteDir, 'linkdir'));
+    // The registry lists the public pages (and, here, a hidden one and a link: the path and file checks still refuse them).
+    const registry = path.join(siteDir, 'data/i18n/pages.json');
+    fs.mkdirSync(path.dirname(registry), { recursive: true });
+    fs.writeFileSync(registry, JSON.stringify({ pages: [{ pages: { ja: 'index.html' } }, { pages: { ja: 'obsidian/getting-started/index.html' } },
+      { pages: { ja: 'blog/memo.html' } }, { pages: { ja: 'data/voice-shift/index.html' } },
+      { pages: { ja: '.hidden/index.html', en: 'linked.html', ko: 'linkdir/getting-started/index.html' } }] }));
+    const kept = (artifact, statusUrl = null, actions = ['refresh']) => ledgerArtifact(artifact, { tree: siteDir, statusUrl, actions });
+    const same = (actual, artifact, omitted) => actual.artifact === artifact && actual.omitted === omitted;
+    const PAGE = '/obsidian/getting-started/';
+    // An article day (refresh) without a status article: what the artifact names decides.
+    for (const value of [described, 'scripts/x.mjs', 'obsidian/missing/', 'growth/experiments/experiments.json', 'fixtures/x.html',
+      'https://evil.example/obsidian/getting-started/', '//evil.example/obsidian/getting-started/', 'https://simplememofast.com.evil.example/x/',
+      'C:/x', 'mailto:a@simplememofast.com', '', '   ', '.', './', 'obsidian/getting-started/?q=1',
+      // This site's origin on another scheme: the pathname of 'blob:' is the whole inner URL.
+      `blob:${SITE_ORIGIN}${PAGE}`, `view-source:${SITE_ORIGIN}${PAGE}`]) {
+      t(same(kept(value), null, 'not_a_site_path'), `not a site path: ${JSON.stringify(value)}`);
+    }
+    for (const value of ['/growth/experiments/experiments.json', '/data/x.json', '/docs/obsidian/AUTOPILOT_LOG.md', '/obsidian/missing/',
+      '/../etc/passwd', '/obsidian/%2e%2e/%2e%2e/etc/passwd', '/blog%2Fmemo', '/.hidden/', '/obsidian//getting-started/', '/linked.html',
+      '/fixtures/x.html', '/docs/preview.html', '/admin/', '/OBSIDIAN/getting-started/', '/obsidian/getting-started/ (refresh)',
+      '/linkdir/getting-started/']) {
+      t(same(kept(value), null, 'not_a_page'), `not a public page: ${value}`);
+    }
+    for (const [value, artifact] of [[PAGE, PAGE], ['/', '/'], ['/index.html', '/'], [`${SITE_ORIGIN}${PAGE}`, PAGE],
+      [`http://simplememofast.com${PAGE}`, PAGE], [`https://www.simplememofast.com${PAGE}`, PAGE], [`http://www.simplememofast.com${PAGE}`, PAGE],
+      [` ${PAGE}?q=1#a `, PAGE], ['/obsidian/getting-started', PAGE], [`${PAGE}index.html`, PAGE], ['obsidian/getting-started/', PAGE],
+      ['obsidian/getting-started', PAGE], ['blog/memo', '/blog/memo'], ['/blog/memo', '/blog/memo'], ['/blog/memo.html', '/blog/memo'],
+      ['/data/voice-shift/', '/data/voice-shift/']]) {
+      t(same(kept(value), artifact, null), `a public page, as its canonical path: ${value}`);
+    }
+    // A day without an article (§5-2 article null, no new/refresh): nothing, even a page it edited (PR #2168).
+    for (const actions of [['maintenance'], ['wiring', 'wiring'], ['repair'], ['skip'], [], [undefined, null], ['new-article', 'maintenance']]) {
+      for (const value of [PAGE, described, '/growth/experiments/experiments.json']) {
+        t(same(kept(value, null, actions), null, 'no_article_day'), `no article day ${JSON.stringify(actions)}: ${value}`);
+      }
+    }
+    // Either action naming an article day keeps the page (CI then fails the null article, as on 2026-08-14).
+    for (const actions of [['new'], ['maintenance', 'refresh'], ['new-article', 'new']]) {
+      t(same(kept(PAGE, null, actions), PAGE, null), `article day ${JSON.stringify(actions)}`);
+    }
+    // The status article's page or path: kept as --check reads the article, on any day (2026-09-13: a data file).
+    for (const [value, statusUrl, artifact] of [['/data/x.json', `${SITE_ORIGIN}/data/x.json`, '/data/x.json'],
+      [PAGE, `${SITE_ORIGIN}${PAGE}index.html`, `${PAGE}index.html`], [PAGE, `${PAGE}#a`, `${PAGE}#a`], ['obsidian/getting-started/', PAGE, PAGE],
+      [`https://www.simplememofast.com${PAGE}`, `http://simplememofast.com${PAGE}`, PAGE],
+      // Pairs --check passes on main as text: the same compared form stays the same.
+      ['/obsidian/getting-started', 'http://www.simplememofast.com/obsidian/getting-started', '/obsidian/getting-started'],
+      [described, described, described], ['/data/x.json', 'https://evil.example/data/x.json', '/data/x.json'],
+      // The same path that is not a page, in another form: the status article's form.
+      ['/data/x.json#a', `${SITE_ORIGIN}/data/x.json`, '/data/x.json'], [' /data/./x.json ', '/data/x.json', '/data/x.json']]) {
+      for (const actions of [['refresh'], ['maintenance']]) {
+        t(same(kept(value, statusUrl, actions), artifact, null), `the status article's form ${JSON.stringify(actions)}: ${value} / ${statusUrl}`);
+      }
+    }
+    // A status article that names something else: a public page is kept (CI fails it); anything else is left out.
+    for (const actions of [['refresh'], ['maintenance']]) {
+      t(same(kept(PAGE, `${SITE_ORIGIN}/blog/memo`, actions), PAGE, null), `a page the status article does not name ${actions}`);
+      t(same(kept(`https://www.simplememofast.com${PAGE}`, '/blog/memo', actions), PAGE, null), `a www page the status article does not name ${actions}`);
+      t(same(kept('/growth/x.json', '/blog/memo', actions), null, 'not_a_page'), `a file the status article does not name ${actions}`);
+      t(same(kept(described, '/blog/memo', actions), null, 'not_a_site_path'), `a description the status article does not name ${actions}`);
+    }
+    // A status article.url that is not text a row may carry is no article, and is never copied.
+    for (const statusUrl of [`${PAGE}\n`, `${PAGE}\u0007`, `${PAGE}\u202e`, `${PAGE}\u0000`, `${PAGE}?${'x'.repeat(300)}`, 42, { url: PAGE }, '',
+      // C1 controls, line/paragraph separators, bidi marks, zero-width characters, BOM and the soft hyphen.
+      ...['\u0085', '\u009b', '\u2028', '\u2029', '\u200e', '\u200f', '\u061c', '\u200b', '\u200d', '\u2060', '\ufeff', '\u00ad'].map(c => `${PAGE}?${c}`)]) {
+      t(same(kept(PAGE, statusUrl), PAGE, null), `unusable status article, article day: ${JSON.stringify(statusUrl)}`);
+      t(same(kept(PAGE, statusUrl, ['maintenance']), null, 'no_article_day'), `unusable status article, no article day: ${JSON.stringify(statusUrl)}`);
+      t(same(kept(String(statusUrl), statusUrl, ['maintenance']), null, 'no_article_day'), `unusable status article, same text: ${JSON.stringify(statusUrl)}`);
+    }
+    // The same text whose compared form a row cannot carry ('foo:' reads as '').
+    t(same(kept('foo:', 'foo:'), null, 'not_a_site_path'), 'an empty compared form is not kept');
+    // The same text whose compared form --check would read again as something else ('urn:isbn:123' → 'isbn:123' → '123').
+    for (const value of ['urn:isbn:123', `x:y:${PAGE}`, `blob:${SITE_ORIGIN}${PAGE}`, `view-source:${SITE_ORIGIN}${PAGE}`, 'a:foo:bar']) {
+      for (const actions of [['refresh'], ['maintenance']]) {
+        t(same(kept(value, value, actions), null, 'not_a_site_path'), `a compared form --check reads differently ${JSON.stringify(actions)}: ${value}`);
+      }
+    }
+    // Without a readable registry, every HTML file counts (the stricter row); the path and file checks still hold.
+    fs.rmSync(registry);
+    t(same(kept('/fixtures/x.html'), '/fixtures/x', null), 'unreadable registry: every HTML file is a page');
+    for (const value of ['/.hidden/', '/linked.html', '/linkdir/getting-started/', '/OBSIDIAN/getting-started/']) {
+      t(same(kept(value), null, 'not_a_page'), `unreadable registry: path and file checks: ${value}`);
+    }
+  } finally { fs.rmSync(siteDir, { recursive: true, force: true }); }
   const session = 'bf8acc9e-2dec-4cca-8674-f9d04adcd74a';
   t(validSessionId(session), 'a session id is a lowercase UUID');
   for (const bad of ['', 'BF8ACC9E-2DEC-4CCA-8674-F9D04ADCD74A', `${session} --allowedTools WebFetch`, `${session}\n`, `"${session}"`,
@@ -1270,7 +1484,9 @@ async function main(argv = process.argv.slice(2)) {
       sha: arg(argv, '--sha'), day, pr: Number(arg(argv, '--pr')), request: checked.request, runId: process.env.GITHUB_RUN_ID,
       work: path.join(process.env.RUNNER_TEMP, 'record-work') });
     output({ record_sha: result.sha, record_changed: result.changed });
-    console.log(`run record prepared: changed_files=${result.changed}`);
+    // A fixed code only: the omitted artifact is model-written text (the PR body carries it).
+    const omitted = ARTIFACT_OMITTED.includes(result.artifact_omitted) ? ` artifact=omitted_${result.artifact_omitted}` : '';
+    console.log(`run record prepared: changed_files=${result.changed}${omitted}`);
     return;
   }
   throw Error('Use --inspect-handoff, --pack, --verify, --push, --open-pr, --record, --check or --selftest');

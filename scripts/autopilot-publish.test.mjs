@@ -33,6 +33,8 @@ function write(dir, file, text) {
 
 const request = (extra = {}) => ({ action: 'pr', title: '記事: Obsidian の新しい比較', body: '本文',
   run: { run_id: `ap-${DAY}-actions-123`, outcome: 'shipped', lane: 'A', action: 'new-article', artifact: '/obsidian/x/' }, ...extra });
+// 2026-10-26 (run 40249667656, PR #2168): a maintenance day's run.artifact, a description instead of a site path.
+const DESCRIBED = 'growth/experiments/experiments.json: gsc-obsidian-install-20260922-r2 evaluated as inconclusive';
 
 // A failure already on main, as Act's reconcile writes it (valid under autopilot-runs.mjs validate()).
 const failedRow = (run_id, date_jst = '2026-10-19') => ({ run_id, date_jst, route: 'actions', attempted: true, outcome: 'failed',
@@ -139,6 +141,9 @@ test('request schema', () => {
     [[`ap-${DAY}-actions-123`], 'request_repair_of_self']]) {
     assert.equal(validateRequest(repair(value), DAY).code, code, JSON.stringify(value));
   }
+  // run.artifact is checked for shape only: what it names decides the ledger row in record(), not the day.
+  const described = request({ run: { ...request().run, action: 'maintenance', artifact: DESCRIBED } });
+  assert.equal(validateRequest(described, DAY).request?.run.artifact, DESCRIBED, 'a described artifact does not refuse the day');
   const payload = prPayload(validateRequest(request({ body: 'a\u0000b‮c' }), DAY).request, DAY);
   assert.equal(payload.body, 'abc', 'the PR body is the request body, nothing appended');
   assert.equal(payload.head, BRANCH); assert.equal(payload.base, 'main');
@@ -458,15 +463,57 @@ test('record recounts the status JSON from the ledger, so the CI ledger checks p
   const day = dash.replaceAll('-', '');
   const { validate: selfheal } = await import('./autopilot-selfheal.mjs');
   const matrix = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/authority-matrix.json'), 'utf8'));
-  for (const [name, run] of [
+  const SITE = 'https://simplememofast.com';
+  const PAGE = '/obsidian/getting-started/';
+  const shipped = (artifact, action = 'refresh') => ({ run_id: `ap-${day}-actions-123`, outcome: 'shipped', lane: 'A', action, artifact });
+  const CONTROLS = `${PAGE}\u0000\n\u0007\u202e`;
+  // [name, request run, the status JSON's article (and action), the row's artifact, the omitted code, --check passes]
+  for (const [name, run, article, artifact, omitted, passes] of [
     ['no_artifact', { run_id: `ap-${day}-actions-123`, outcome: 'no_artifact', lane: 'E', action: 'skip',
-      failure_reason: '基準を満たす候補が無かった', failure_class: 'no_artifact' }],
-    ['shipped', { run_id: `ap-${day}-actions-123`, outcome: 'shipped', lane: 'A', action: 'refresh', artifact: '/obsidian/x/' }]]) {
+      failure_reason: '基準を満たす候補が無かった', failure_class: 'no_artifact' }, { url: '/obsidian/x/' }, null, null, true],
+    ['shipped', shipped('/obsidian/x/'), { url: '/obsidian/x/' }, '/obsidian/x/', null, true],
+    // 2026-10-26 (PR #2168): a day without an article (§5-2 article null, no new/refresh) records no artifact and passes,
+    // whatever its request wrote there: a description, a repository file, or an existing page it edited.
+    ['described', shipped(DESCRIBED, 'maintenance'), null, null, 'no_article_day', true],
+    ['repository file', shipped('/growth/experiments/experiments.json', 'maintenance'), null, null, 'no_article_day', true],
+    ['traversal', shipped('/../etc/passwd', 'maintenance'), null, null, 'no_article_day', true],
+    ['maintenance, edited page', shipped(PAGE, 'maintenance'), null, null, 'no_article_day', true],
+    ['wiring, edited page URL', shipped(`https://www.simplememofast.com${PAGE}`, 'wiring'), null, null, 'no_article_day', true],
+    // An article day: a public page is kept and compared; a status JSON naming an older page, or none, fails (2026-08-14).
+    ['page', shipped(PAGE), { url: `${SITE}${PAGE}` }, PAGE, null, true],
+    ['page URL', shipped(`${SITE}${PAGE}`), { url: `${SITE}${PAGE}` }, PAGE, null, true],
+    ['bare page', shipped('obsidian/getting-started/'), { url: `${SITE}${PAGE}` }, PAGE, null, true],
+    ['page, null status', shipped(PAGE), null, PAGE, null, false],
+    ['page URL, null status', shipped(`${SITE}${PAGE}`), null, PAGE, null, false],
+    ['page, stale status', shipped(PAGE), { url: `${SITE}/obsidian/x/` }, PAGE, null, false],
+    ['www page, stale status', shipped(`https://www.simplememofast.com${PAGE}`), { url: `${SITE}/obsidian/x/` }, PAGE, null, false],
+    ['http page, stale status', shipped(`http://simplememofast.com${PAGE}`), { url: `${SITE}/obsidian/x/` }, PAGE, null, false],
+    ['bare page, stale status', shipped('obsidian/getting-started/'), { url: `${SITE}/obsidian/x/` }, PAGE, null, false],
+    // The request's action is free text; the status JSON's action (§5-2) naming an article day keeps the page too.
+    ['status action refresh, null status', shipped(PAGE, 'maintenance'), { action: 'refresh', article: null }, PAGE, null, false],
+    // A maintenance day whose status JSON still names another page: kept, and fails.
+    ['maintenance, stale status', shipped(PAGE, 'maintenance'), { url: `${SITE}/obsidian/x/` }, PAGE, null, false],
+    // Not a public page (a fixture, a docs preview): left out on an article day too.
+    ['fixture', shipped('/fixtures/x.html'), { url: '/obsidian/x/' }, null, 'not_a_page', true],
+    ['docs preview', shipped('/docs/preview.html'), { url: '/obsidian/x/' }, null, 'not_a_page', true],
+    ['refresh, described', shipped(DESCRIBED), { url: '/obsidian/x/' }, null, 'not_a_site_path', true],
+    // A status article.url with control characters is no article and never reaches the row (or spawnSync's arguments).
+    ['control characters, maintenance', shipped(PAGE, 'maintenance'), { url: CONTROLS }, null, 'no_article_day', true],
+    ['control characters, refresh', shipped(PAGE), { url: CONTROLS }, PAGE, null, false],
+    // 2026-09-13: a data file the status article names too.
+    ['status file', shipped('/data/x.json', 'wiring'), { url: `${SITE}/data/x.json` }, '/data/x.json', null, true]]) {
     const f = fixture({ trustedFiles: RUNS_CLI, runs: [failedRow('ap-20261019-actions-77')] });
     try {
-      // The session: today's status JSON (its runs block counted before today's row exists) and an article.
-      write(f.work, 'data/autopilot-status.json', JSON.stringify({ date_jst: dash, article: { url: '/obsidian/x/' },
+      // The session: today's status JSON (its runs block counted before today's row exists) and a commit.
+      // `article` is the status JSON's article, or { action, article } when the case sets the status action too.
+      const status = article && 'action' in article ? article : { article };
+      write(f.work, 'data/autopilot-status.json', JSON.stringify({ date_jst: dash, ...status,
         runs: { window: { days: 1 }, totals: { runs: 1, attempted: 1, shipped: 0, failed: 1, no_run: 0 } } }, null, 2) + '\n');
+      for (const file of ['obsidian/getting-started/index.html', 'fixtures/x.html', 'docs/preview.html']) write(f.work, file, '<p>page</p>\n');
+      for (const file of ['data/x.json', 'growth/experiments/experiments.json']) write(f.work, file, '{}\n');
+      // The registry of public pages (data/i18n/pages.json): fixtures/ and docs/ are not in it.
+      write(f.work, 'data/i18n/pages.json', JSON.stringify({ pages: ['obsidian/index.html', 'obsidian/x/index.html', `${PAGE.slice(1)}index.html`]
+        .map(file => ({ source: file, pages: { ja: file } })) }));
       commitPage(f, BOT, 'feat: page', 'obsidian/x/index.html');
       sh(f.tools, ['fetch', '-q', f.work, BRANCH]);
       const sha = sh(f.work, ['rev-parse', 'HEAD']);
@@ -484,7 +531,14 @@ test('record recounts the status JSON from the ledger, so the CI ledger checks p
         return { out, check, runs: JSON.parse(fs.readFileSync(path.join(head, 'data/autopilot-runs.json'), 'utf8')) };
       };
       const synced = ledgerCheck(false, `record-${name}`);
-      assert.equal(synced.check.status, 0, `${name}: ${synced.check.stderr}`);
+      assert.equal(synced.runs.runs.find(r => r.run_id === run.run_id).artifact, artifact, `${name}: the row's artifact`);
+      assert(synced.runs.runs.every(r => !/[\u0000-\u001f\u007f\u202e]/.test(r.artifact ?? '')), `${name}: no control character in a row`);
+      assert.equal(synced.out.artifact_omitted, omitted, `${name}: the omitted artifact's code`);
+      if (passes) assert.equal(synced.check.status, 0, `${name}: ${synced.check.stderr}`);
+      else {
+        assert.equal(synced.check.status, 1, `${name}: a page day whose status JSON does not name the page fails`);
+        assert.match(synced.check.stderr, /を出荷した記録なのに、status JSON の article は/, name);
+      }
       assert.deepEqual(sh(f.tools, ['diff', '--name-only', sha, synced.out.sha]).split('\n').sort(),
         ['data/autopilot-runs.json', 'data/autopilot-status.json'], 'the record commit carries the recounted status JSON');
       assert.deepEqual(selfheal(synced.runs, matrix), [], `${name}: Self-repair boundary`);
