@@ -16,6 +16,12 @@ validity and rejection by the existing metric budgets must be demonstrated.
 Observed and simulated metrics are recorded separately; missing evidence is
 not a passing control.
 
+The `performance-controls` mode runs only the two performance-negative captures;
+positive controls are explicitly unmeasured in that mode. The layout shift waits
+1,250 ms after actual FCP, outside the initial viewport-emulation interval that
+Chromium can mark as recent input. The earlier 100 ms fixture failed its strict
+completion condition and remains a failed experiment; no oracle is relaxed.
+
 The image is an unchanged copy of the existing project asset
 `assets/home-perf/voice-airpods-pro-bright-1536-600-d31cc9b57999.avif`:
 18,304 bytes, SHA256

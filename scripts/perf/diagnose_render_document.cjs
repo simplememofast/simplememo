@@ -6,6 +6,7 @@
 // hash-checked one-byte CDP-reporting repair, then restores the installed source.
 // --capture-validation-controls checks two positive and two performance-negative
 // loopback controls under the same temporary repair, without public navigations.
+// --capture-performance-controls checks only the two performance-negative controls.
 // --self-test exercises only pure validation; it never imports browser tools.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -36,6 +37,7 @@ const VALIDATION_ORDER = Object.freeze([
   ...['default', 'restored'].map(arm => ({kind: 'positive', arm, url: VALIDATION_ORIGIN + '/positive.html'})),
   ...['default', 'restored'].map(arm => ({kind: 'performance-negative', arm, url: VALIDATION_ORIGIN + '/performance-negative.html'})),
 ]);
+const PERFORMANCE_ORDER = Object.freeze(VALIDATION_ORDER.filter(item => item.kind === 'performance-negative'));
 const CONSOLE_ORIGINAL_SHA256 = '512cb67e34e30672ec872a4fc8f846904a5b77006426186c6bf7819993a1191a';
 const CONSOLE_ORIGINAL_TEXT = "config: [{name: 'discouragedAPIUse', threshold: -1}]";
 const CONSOLE_REPAIRED_TEXT = "config: [{name: 'discouragedAPIUse', threshold: -2}]";
@@ -370,19 +372,22 @@ function validateReport(file, item, expectation) {
     tbtMs: report.audits['total-blocking-time'].numericValue};
 }
 
-async function capture(repairMode = false, validationMode = false) {
+async function capture(repairMode = false, validationMode = false, performanceOnly = false) {
+  validationMode = validationMode || performanceOnly;
   repairMode = repairMode || validationMode;
-  const deadline = Date.now() + (validationMode ? 230000 : 390000);
-  const order = validationMode ? VALIDATION_ORDER : repairMode ? REPAIR_ORDER : ORDER;
+  const deadline = Date.now() + (performanceOnly ? 150000 : validationMode ? 230000 : 390000);
+  const order = performanceOnly ? PERFORMANCE_ORDER : validationMode ? VALIDATION_ORDER : repairMode ? REPAIR_ORDER : ORDER;
   need(process.platform === 'linux', 'LINUX_PROC_ATTESTATION_REQUIRED');
   need(process.env.PERF_RESULTS && path.isAbsolute(process.env.PERF_RESULTS), 'PERF_RESULTS_REQUIRED');
   need(!process.env.HEADLESS, 'HEADLESS_ENV_OVERRIDE_UNSUPPORTED');
   const base = fs.realpathSync(process.env.PERF_RESULTS), output = path.join(base,
-    validationMode ? 'diagnostic-validation-controls' : repairMode ? 'diagnostic-negative-repair' : 'diagnostic');
+    performanceOnly ? 'diagnostic-performance-controls' : validationMode ? 'diagnostic-validation-controls'
+      : repairMode ? 'diagnostic-negative-repair' : 'diagnostic');
   fs.mkdirSync(output); // Refuse to overwrite/reuse any previous experiment.
   const summary = {diagnosticOnly: true, acceptanceGate: false, adoptionApproved: false,
     url: validationMode ? VALIDATION_ORIGIN : repairMode ? FIXTURE : TARGET, order,
     startedAt: new Date().toISOString(), driverSha256: sha256(fs.readFileSync(__filename)), captures: [], complete: false};
+  if (performanceOnly) Object.assign(summary, {positiveControlsPassed: null, positiveControlsStatus: 'not-measured'});
   const summaryPath = path.join(output, 'experiment.json');
   jsonFile(summaryPath, summary, true);
   let repair;
@@ -499,9 +504,10 @@ async function capture(repairMode = false, validationMode = false) {
     summary.complete = summary.captures.length === order.length && summary.captures.every(item => item.complete);
     need(summary.complete, 'EXPERIMENT_INCOMPLETE');
     if (validationMode) {
-      summary.positiveControlsPassed = summary.captures.filter(item => item.kind === 'positive').every(item => item.report.controlValid);
+      summary.positiveControlsPassed = performanceOnly ? null
+        : summary.captures.filter(item => item.kind === 'positive').every(item => item.report.controlValid);
       summary.performanceNegativeControlsPassed = summary.captures.filter(item => item.kind === 'performance-negative').every(item => item.report.controlValid);
-      need(summary.positiveControlsPassed && summary.performanceNegativeControlsPassed, 'VALIDATION_CONTROL_FAILED');
+      need((performanceOnly || summary.positiveControlsPassed) && summary.performanceNegativeControlsPassed, 'VALIDATION_CONTROL_FAILED');
     } else {
       summary.negativeControlsPassed = summary.captures.filter(item => item.kind === 'fixture')
         .every(item => item.report.negativeControlsPassed);
@@ -518,7 +524,8 @@ async function capture(repairMode = false, validationMode = false) {
       jsonFile(summaryPath, summary);
     }
   }
-  console.log(validationMode ? 'Diagnostic capture complete; four loopback validation controls retained and source restored. This is not a PR gate result.'
+  console.log(performanceOnly ? 'Diagnostic capture complete; two loopback performance controls retained and source restored. Positive controls were not measured. This is not a PR gate result.'
+    : validationMode ? 'Diagnostic capture complete; four loopback validation controls retained and source restored. This is not a PR gate result.'
     : repairMode ? 'Diagnostic capture complete; two loopback negative controls retained and source restored. This is not a PR gate result.'
     : 'Diagnostic capture complete; six public samples and two negative controls retained. This is not a PR gate result.');
 }
@@ -574,6 +581,10 @@ function selfTest() {
   assert.deepEqual(VALIDATION_ORDER.map(item => [item.kind, item.arm]), [
     ['positive', 'default'], ['positive', 'restored'], ['performance-negative', 'default'], ['performance-negative', 'restored'],
   ]);
+  assert.deepEqual(PERFORMANCE_ORDER, VALIDATION_ORDER.slice(2));
+  assert.equal(PERFORMANCE_ORDER.length, 2);
+  assert(PERFORMANCE_ORDER.every(item => item.kind === 'performance-negative'
+    && item.url === VALIDATION_ORIGIN + '/performance-negative.html'));
   const positiveItem = VALIDATION_ORDER[0], performanceItem = VALIDATION_ORDER[2];
   const markerMessages = (item, marker) => [{source: 'console.warn', url: item.url,
     text: VALIDATION_MARKER + JSON.stringify({schema: 1, kind: item.kind, ...marker})}];
@@ -642,10 +653,11 @@ function selfTest() {
 module.exports = {buildArms, attestArguments, negativeControls, positiveControls, performanceNegativeControl, repairBytes, relativeModulePath};
 if (require.main === module) {
   if (process.argv.length === 3 && process.argv[2] === '--self-test') selfTest();
-  else if (process.argv.length === 3 && ['--capture', '--capture-negative-repair', '--capture-validation-controls'].includes(process.argv[2])) capture(
-    process.argv[2] === '--capture-negative-repair', process.argv[2] === '--capture-validation-controls').catch(() => {
+  else if (process.argv.length === 3 && ['--capture', '--capture-negative-repair', '--capture-validation-controls', '--capture-performance-controls'].includes(process.argv[2])) capture(
+    process.argv[2] === '--capture-negative-repair', process.argv[2] === '--capture-validation-controls',
+    process.argv[2] === '--capture-performance-controls').catch(() => {
     console.error('Diagnostic failed; retained experiment.json contains the bounded status. No automatic retry.');
     process.exitCode = 1;
   });
-  else { console.error('Choose --self-test (no browser), --capture, --capture-negative-repair, or --capture-validation-controls (Linux diagnostic only).'); process.exitCode = 2; }
+  else { console.error('Choose --self-test (no browser), --capture, --capture-negative-repair, --capture-validation-controls, or --capture-performance-controls (Linux diagnostic only).'); process.exitCode = 2; }
 }

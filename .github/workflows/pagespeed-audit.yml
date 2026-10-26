@@ -33,7 +33,7 @@ on:
       diagnostic_mode:
         description: Isolated diagnostic selection; does not satisfy a candidate gate
         type: choice
-        options: [standard, negative-repair, validation-controls]
+        options: [standard, negative-repair, validation-controls, performance-controls]
         default: standard
 permissions:
   contents: read
@@ -42,7 +42,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   mobile-audit:
-    if: github.event_name != 'workflow_dispatch' || (inputs.diagnostic_mode != 'negative-repair' && inputs.diagnostic_mode != 'validation-controls')
+    if: github.event_name != 'workflow_dispatch' || (inputs.diagnostic_mode != 'negative-repair' && inputs.diagnostic_mode != 'validation-controls' && inputs.diagnostic_mode != 'performance-controls')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -153,7 +153,7 @@ jobs:
           retention-days: 14
           if-no-files-found: error
   validation-controls:
-    if: github.event_name == 'workflow_dispatch' && inputs.diagnostic_mode == 'validation-controls'
+    if: github.event_name == 'workflow_dispatch' && (inputs.diagnostic_mode == 'validation-controls' || inputs.diagnostic_mode == 'performance-controls')
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -192,7 +192,13 @@ jobs:
           kill -0 "$fixture_pid"
           curl --fail --silent http://127.0.0.1:8766/positive.html --output "$RUNNER_TEMP/validation-positive.html"
           cmp scripts/perf/fixtures/render-document-validation/positive.html "$RUNNER_TEMP/validation-positive.html"
-          NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/diagnose_render_document.cjs --capture-validation-controls
+          if [[ "$DIAGNOSTIC_MODE" == "performance-controls" ]]; then
+            NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/diagnose_render_document.cjs --capture-performance-controls
+          else
+            NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/diagnose_render_document.cjs --capture-validation-controls
+          fi
+        env:
+          DIAGNOSTIC_MODE: ${{ inputs.diagnostic_mode }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
