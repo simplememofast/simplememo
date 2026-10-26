@@ -30,23 +30,67 @@ const OPERATIONAL_PATHS = new Set([
   'docs/obsidian/NATIVE_RECOVERY_ONE_USE.md',
 ]);
 
-export function routineScopeForPaths(paths) {
-  if (!Array.isArray(paths)) throw new Error('Missing complete changed-path inventory');
+// Changes to a waiting counter, its mirror producer, or the checker require the
+// waiting counters to still be moving. This list is deliberately separate from
+// OPERATIONAL_PATHS: the revenue mirror is synced by hand from simplememo-ios and
+// the GSC snapshot is a weekly ingest; neither is a routine operation. One list
+// would make routine repairs wait for a revenue re-sync, and revenue syncs wait
+// for fresh routine observations. Additions under WAITING_APPEND_ONLY_DIRS are
+// not in it; deletions there are (see below). Main/daily still checks every wait.
+const WAITING_PROGRESS_PATHS = new Set([
+  'data/waiting-progress.json',
+  'data/revenue-series.json',
+  'data/financial-policy.json',
+  'growth/scripts/revenue-series.mjs',
+  'growth/REVENUE_OBSERVATIONS.md',
+  'scripts/check-waiting-progress.mjs',
+]);
+
+// Dated snapshot directories that a wait reads only through its newest date label
+// (latestLabel() in check-waiting-progress.mjs). Adding a date directory can only
+// move that label forward, so additions are not waiting inputs: including them
+// would gate the weekly GSC ingest on the hand-synced revenue mirror. Deleting or
+// renaming anything under them can move the label back (for example a revert of
+// the latest ingest), so every deletion there is a waiting input. --no-renames
+// reports the old side of a rename as a deletion.
+const WAITING_APPEND_ONLY_DIRS = ['growth/data/gsc'];
+
+function assertPaths(paths, missing) {
+  if (!Array.isArray(paths)) throw new Error(missing);
   for (const file of paths) {
     if (typeof file !== 'string' || file.length === 0 || file.startsWith('/')
         || file.split('/').includes('..') || file.includes('\0')) {
       throw new Error('Invalid changed path');
     }
   }
+}
+
+// deletedPaths is the complete deletion inventory of the same comparison. Without
+// it, a change under an append-only directory might be a deletion, so it counts as
+// one: a caller cannot narrow the waiting scope by omitting the inventory.
+export function routineScopeForPaths(paths, { deletedPaths } = {}) {
+  assertPaths(paths, 'Missing complete changed-path inventory');
+  const appendOnly = file => WAITING_APPEND_ONLY_DIRS.some(dir => file.startsWith(dir + '/'));
+  let deletions = paths.filter(appendOnly);
+  if (deletedPaths !== undefined) {
+    assertPaths(deletedPaths, 'Missing complete deleted-path inventory');
+    const changed = new Set(paths);
+    if (!deletedPaths.every(file => changed.has(file))) throw new Error('Inconsistent deleted-path inventory');
+    deletions = deletedPaths.filter(appendOnly);
+  }
   const matched = paths.filter(file => OPERATIONAL_PATHS.has(file));
-  return { required: matched.length > 0, changedCount: paths.length, operationalCount: matched.length };
+  const waiting = paths.filter(file => WAITING_PROGRESS_PATHS.has(file));
+  return { required: matched.length > 0, changedCount: paths.length, operationalCount: matched.length,
+    waitingRequired: waiting.length + deletions.length > 0, waitingCount: waiting.length,
+    waitingDeletionCount: deletions.length };
 }
 
 export function routineCiScope({ eventName, event, repo = process.cwd() }) {
   // Non-PR contexts never infer a site-only exemption. The workflow runs their
   // real checks in an independent monitor job, including the existing daily call.
   if (eventName !== 'pull_request') {
-    return { required: true, mode: 'operational-monitor', changedCount: null, operationalCount: null };
+    return { required: true, waitingRequired: true, mode: 'operational-monitor',
+      changedCount: null, operationalCount: null, waitingCount: null, waitingDeletionCount: null };
   }
   const pr = event?.pull_request;
   const base = pr?.base?.sha;
@@ -58,9 +102,13 @@ export function routineCiScope({ eventName, event, repo = process.cwd() }) {
   // The checked-out HEAD is GitHub's merge tree. Compare the actual PR head
   // from its merge base instead. NUL output has no API pagination/truncation;
   // --no-renames retains both sides when an operational file moves away.
-  const raw = execFileSync('git', ['diff', '--name-only', '--no-renames', '-z', base + '...' + head, '--'],
-    { cwd: repo, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'] });
-  if (raw !== '' && !raw.endsWith('\0')) throw new Error('Incomplete git path inventory');
-  const paths = raw === '' ? [] : raw.slice(0, -1).split('\0');
-  return { ...routineScopeForPaths(paths), mode: 'pull-request', base, head };
+  const inventory = (...filter) => {
+    const raw = execFileSync('git', ['diff', '--name-only', '--no-renames', ...filter, '-z', base + '...' + head, '--'],
+      { cwd: repo, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'] });
+    if (raw !== '' && !raw.endsWith('\0')) throw new Error('Incomplete git path inventory');
+    return raw === '' ? [] : raw.slice(0, -1).split('\0');
+  };
+  const paths = inventory();
+  const deletedPaths = inventory('--diff-filter=D');
+  return { ...routineScopeForPaths(paths, { deletedPaths }), mode: 'pull-request', base, head };
 }

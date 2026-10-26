@@ -6,6 +6,7 @@
  *   node scripts/autopilot-runs.mjs --json     # 機械可読（status JSON / 日報用）
  *   node scripts/autopilot-runs.mjs --write-status # 同じ内容を status JSON の runs へ書く
  *   node scripts/autopilot-runs.mjs --check    # CI: 台帳の形と整合を検証（壊れていたら exit 1）
+ *   node scripts/autopilot-runs.mjs --integrity # PR: 形・費用台帳・status JSON との突き合わせだけを検証（鮮度は判定しない）
  *   node scripts/autopilot-runs.mjs --selftest # 検査そのものの自己検査（台帳を読まない）
  *   node scripts/autopilot-runs.mjs --since 2026-08-15
  *   node scripts/autopilot-runs.mjs --append --run-id ... --date ... --route ... --outcome ...
@@ -274,6 +275,26 @@ export function statusAgreement(doc, statusDoc) {
     status_article: statusDoc.article?.url ?? null,
     problems,
   };
+}
+
+/**
+ * `--check` / `--integrity` が落とす理由を、**落とす順に**並べる。
+ *
+ * 【2026-10-19 提案、2026-10-26 オーナー承認】（docs/routine-ci-scope.md）
+ * 運転に触れないPRでは鮮度（staleness）だけを公開条件から外し、
+ * **status JSON との突き合わせは全PRで残す。**statusAgreement() は時計を読まない ——
+ * 台帳の最終記入・記事・数値ブロックを status JSON と比べるだけなので、
+ * 時間が経っても新しく食い違わない。食い違いはPRの中身が作ったものとして止める。
+ *
+ * 旧来は staleness で先に exit していたので、陳腐化した日は突き合わせが
+ * **一度も評価されていなかった。**鮮度を外す側では、ここで独立に評価する。
+ * 鮮度を判定しなかったことは「健全」とは書かない（呼び出し側が明示する）。
+ */
+export function checkFailures(s, { freshness = true } = {}) {
+  const out = [];
+  if (freshness && s.staleness.stale) out.push('staleness');
+  if (s.status_agreement.problems.length > 0) out.push('status_agreement');
+  return out;
 }
 
 /** 絶対URLでも相対パスでも同じものとして比べる（どちらの書き方も実在する）。 */
@@ -1199,6 +1220,26 @@ function selftest() {
   eq(probs(shippedToday, null), 1, '**status JSON が読めないのは「問題なし」ではない**');
   eq(statusAgreement({ runs: [] }, null).checked, false, '空の台帳は staleness の担当・ここでは二重に鳴らさない');
 
+  // --- 鮮度を判定しない --integrity（2026-10-19 提案・docs/routine-ci-scope.md）---
+  // 外すのは staleness だけ。**突き合わせは時計を読まないので、鮮度を外しても残る。**
+  // 旧来は陳腐化で先に exit していたので、ここで独立に評価されることを固定する。
+  {
+    const agreeing = ledger('2026-08-23', { outcome: 'shipped', artifact: '/obsidian/pricing/' });
+    const agreeStatus = st('2026-08-23', '/obsidian/pricing/', agreeing);
+    const staleAgree = summarize(agreeing, { statusDoc: agreeStatus, today: '2026-08-30' });
+    eq(checkFailures(staleAgree).join(), 'staleness', '--check は陳腐化した台帳を落とす（従来どおり）');
+    eq(checkFailures(staleAgree, { freshness: false }).join(), '',
+       '--integrity は鮮度だけを判定しない（形と突き合わせが合っていれば通す）');
+    eq(checkFailures(summarize(agreeing, { statusDoc: agreeStatus, today: '2026-08-23' })).join(), '',
+       '前提: 当日なら --check も通る');
+    const staleDisagree = summarize(agreeing, { statusDoc: st('2026-08-22', '/obsidian/plugins/dataview/'), today: '2026-08-30' });
+    eq(checkFailures(staleDisagree).join(), 'staleness,status_agreement', '--check は陳腐化を先に、食い違いも落とす');
+    eq(checkFailures(staleDisagree, { freshness: false }).join(), 'status_agreement',
+       '**--integrity でも status JSON との食い違いは落とす**（陳腐化に隠れて評価されない形にしない）');
+    eq(checkFailures(summarize(agreeing, { statusDoc: null, today: '2026-08-23' }), { freshness: false }).join(),
+       'status_agreement', '--integrity でも status JSON が読めないのは「問題なし」ではない');
+  }
+
   // JST 換算。UTC 21:00 は JST では翌日の 06:00。
   eq(todayJst(new Date('2026-08-22T21:18:07Z')), '2026-08-23', '主系の起動時刻(UTC 21:18)は JST では 08-23');
   eq(todayJst(new Date('2026-08-22T14:59:59Z')), '2026-08-22', 'JST 23:59 はまだ当日');
@@ -1579,22 +1620,30 @@ if (isMain) {
   }
 
   console.log(render(s, doc));
-  if (has('check')) {
+  // --integrity は運転に触れないPR用（docs/routine-ci-scope.md）。両方渡されたら厳しいほう（--check）。
+  const integrityOnly = has('integrity') && !has('check');
+  if (has('check') || integrityOnly) {
     // 形の検査（validate）はすでに上で通っている。ここで見るのは**書かれ続けているか**。
     // validate() に入れていないのは、--append が validate を先に通すため。
     // 陳腐化で validate が落ちると、それを直す唯一の手段（追記）まで塞がる。
-    if (s.staleness.stale) {
+    const failures = checkFailures(s, { freshness: !integrityOnly });
+    if (failures.includes('staleness')) {
       console.error(`\n台帳が ${s.staleness.days_behind ?? '?'} 日書かれていない（許容 ${s.staleness.max_days} 日）。`);
       console.error('**行の形が正しいことと、行が在ることは別。** 上の追記コマンドで埋めること。');
       process.exit(1);
     }
     // 台帳が書かれていても、日報が読む status JSON が古ければ出荷は無かったことになる。
-    if (s.status_agreement.problems.length) {
+    if (failures.includes('status_agreement')) {
       console.error('\n運転台帳と data/autopilot-status.json が食い違っている:');
       for (const p of s.status_agreement.problems) console.error(`  - ${p}`);
       console.error('\n**日報が読むのは status JSON のほう。** 台帳だけ正しくても報告は嘘になる。');
       process.exit(1);
     }
-    console.log('\n台帳の形と整合に問題なし。');
+    if (integrityOnly) {
+      console.log(`\n台帳の形と整合に問題なし。鮮度（最終記入 ${s.staleness.latest ?? 'なし'} / 許容 ${s.staleness.max_days} 日）`
+        + 'はこの実行では判定していない — 健全とは言わない。');
+    } else {
+      console.log('\n台帳の形と整合に問題なし。');
+    }
   }
 }
