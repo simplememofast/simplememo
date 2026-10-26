@@ -4,7 +4,9 @@
 // NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/diagnose_render_document.cjs --capture
 // --capture-negative-repair runs only two loopback controls with a temporary,
 // hash-checked one-byte CDP-reporting repair, then restores the installed source.
-// --self-test exercises only pure flag validation; it never imports browser tools.
+// --capture-validation-controls checks two positive and two performance-negative
+// loopback controls under the same temporary repair, without public navigations.
+// --self-test exercises only pure validation; it never imports browser tools.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
@@ -24,6 +26,16 @@ const ORDER = Object.freeze([
   ...['default', 'restored'].map(arm => ({kind: 'fixture', arm, url: FIXTURE})),
 ]);
 const REPAIR_ORDER = Object.freeze(ORDER.filter(item => item.kind === 'fixture'));
+const VALIDATION_ORIGIN = 'http://127.0.0.1:8766';
+const VALIDATION_DIR = path.join(__dirname, 'fixtures/render-document-validation');
+const VALIDATION_MARKER = 'fixture-validation:';
+const DELAYED_HERO_URL = VALIDATION_ORIGIN + '/delayed-hero.avif';
+const DELAYED_HERO_SHA256 = 'd31cc9b57999fa8f50eb24bb0d6213747bf1f269425f7d37b1c37aa931cf70fe';
+const DELAYED_HERO_BYTES = 18304;
+const VALIDATION_ORDER = Object.freeze([
+  ...['default', 'restored'].map(arm => ({kind: 'positive', arm, url: VALIDATION_ORIGIN + '/positive.html'})),
+  ...['default', 'restored'].map(arm => ({kind: 'performance-negative', arm, url: VALIDATION_ORIGIN + '/performance-negative.html'})),
+]);
 const CONSOLE_ORIGINAL_SHA256 = '512cb67e34e30672ec872a4fc8f846904a5b77006426186c6bf7819993a1191a';
 const CONSOLE_ORIGINAL_TEXT = "config: [{name: 'discouragedAPIUse', threshold: -1}]";
 const CONSOLE_REPAIRED_TEXT = "config: [{name: 'discouragedAPIUse', threshold: -2}]";
@@ -209,8 +221,9 @@ async function runCli(args, output, timeout) {
 }
 
 function artifacts(output, kind) {
-  const names = kind === 'fixture' ? ['page.report.json', 'page.report.html', 'artifacts/artifacts.json']
+  const names = ['fixture', 'positive'].includes(kind) ? ['page.report.json', 'page.report.html', 'artifacts/artifacts.json']
     : ['page.report.json', 'page.report.html', 'page-0.trace.json', 'page-0.devtoolslog.json'];
+  if (kind === 'performance-negative') names.push('artifacts/artifacts.json');
   return names.map(name => {
     const file = path.join(output, name), stat = fs.lstatSync(file);
     need(stat.isFile() && !stat.isSymbolicLink() && stat.size > 0 && stat.size <= LIMIT, 'ARTIFACT_SIZE_OR_TYPE');
@@ -233,6 +246,95 @@ function negativeControls(report, messages, expectation) {
       checks, negativeControlsPassed: !report.runtimeError && completed && Object.values(checks).every(check => check.detected)};
 }
 
+function validationMarker(messages, item) {
+  if (!Array.isArray(messages)) return null;
+  const matches = messages.filter(entry => entry.source === 'console.warn' && entry.url === item.url
+    && typeof entry.text === 'string' && entry.text.startsWith(VALIDATION_MARKER));
+  if (matches.length !== 1 || matches[0].text.length > 65536) return null;
+  try {
+    const value = JSON.parse(matches[0].text.slice(VALIDATION_MARKER.length));
+    return value?.schema === 1 && value.kind === item.kind ? value : null;
+  } catch { return null; }
+}
+
+function cleanApiAudits(report, expectation) {
+  return Object.fromEntries(AUDITS.map(id => {
+    const audit = report.audits[id], items = audit?.details?.items;
+    return [id, {score: audit?.score ?? null, scoreDisplayMode: audit?.scoreDisplayMode ?? null,
+      details: audit?.details ?? null, clean: audit?.score === 1 && !audit.errorMessage
+        && audit.scoreDisplayMode === expectation.audits[id].scoreDisplayMode
+        && audit.details?.type === 'table' && Array.isArray(items) && items.length === 0}];
+  }));
+}
+
+function positiveControls(report, messages, item, expectation) {
+  const marker = validationMarker(messages, item);
+  const checks = cleanApiAudits(report, expectation);
+  const violationCount = Array.isArray(messages) ? messages.filter(entry => entry.source === 'violation').length : null;
+  const exceptionCount = Array.isArray(messages) ? messages.filter(entry => ['exception', 'console.error'].includes(entry.source) || entry.eventType === 'exception').length : null;
+  return {marker, checks, violationCount, exceptionCount,
+    controlValid: !report.runtimeError && marker?.phase === 'ready' && violationCount === 0 && exceptionCount === 0
+      && Object.values(checks).every(check => check.clean)};
+}
+
+function performanceNegativeControl(report, messages, devtoolsLog, item, expectation) {
+  const marker = validationMarker(messages, item);
+  const apiAudits = cleanApiAudits(report, expectation);
+  const finite = Number.isFinite;
+  const observedLcpMs = report.audits.metrics?.details?.items?.[0]?.observedLargestContentfulPaint;
+  const simulatedLcpMs = report.audits['largest-contentful-paint']?.numericValue;
+  const simulatedTbtMs = report.audits['total-blocking-time']?.numericValue;
+  const cls = report.audits['cumulative-layout-shift']?.numericValue;
+  const lcpEntries = Array.isArray(marker?.lcpEntries) ? marker.lcpEntries : [];
+  const lastLcp = lcpEntries.at(-1);
+  const shifts = Array.isArray(marker?.layoutShiftEntries) ? marker.layoutShiftEntries : [];
+  const shiftValue = shifts.filter(entry => entry.hadRecentInput === false && finite(entry.value) && entry.value > 0)
+    .reduce((total, entry) => total + entry.value, 0);
+  const longtasks = Array.isArray(marker?.longtaskEntries) ? marker.longtaskEntries : [];
+  const events = Array.isArray(devtoolsLog) ? devtoolsLog : [];
+  const responses = events.filter(event => event.method === 'Network.responseReceived'
+    && event.params?.response?.url === DELAYED_HERO_URL);
+  const response = responses.length === 1 ? responses[0].params.response : null;
+  const headers = Object.fromEntries(Object.entries(response?.headers || {}).map(([key, value]) => [key.toLowerCase(), String(value)]));
+  const headerDelayMs = response?.timing?.receiveHeadersEnd - response?.timing?.sendEnd;
+  const requestId = responses.length === 1 ? responses[0].params.requestId : null;
+  const finished = events.some(event => event.method === 'Network.loadingFinished' && event.params?.requestId === requestId);
+  const requests = events.filter(event => event.method === 'Network.requestWillBeSent');
+  const unexpectedRequests = requests.filter(event => {
+    const url = event.params?.request?.url;
+    return typeof url !== 'string' || (!url.startsWith('data:') && ![item.url, DELAYED_HERO_URL].includes(url));
+  });
+  const checks = {
+    markerComplete: marker?.phase === 'complete',
+    noRuntimeError: !report.runtimeError,
+    noPageException: Array.isArray(messages) && !messages.some(entry => ['exception', 'console.error'].includes(entry.source) || entry.eventType === 'exception'),
+    fourApiAuditsClean: Object.values(apiAudits).every(check => check.clean),
+    simulatedLcpBreachesBudget: finite(simulatedLcpMs) && simulatedLcpMs > 3500,
+    simulatedTbtBreachesBudget: finite(simulatedTbtMs) && simulatedTbtMs > 200,
+    clsBreachesBudget: finite(cls) && cls > 0.1,
+    observedLcpIsDelayed: finite(observedLcpMs) && observedLcpMs > 3500,
+    actualHeroIsLastLcp: lastLcp?.elementId === 'delayed-hero' && lastLcp.url === DELAYED_HERO_URL
+      && finite(lastLcp.startTime) && lastLcp.startTime > 3500 && finite(lastLcp.size) && lastLcp.size > 0,
+    heroDecoded: finite(marker?.heroNaturalWidth) && marker.heroNaturalWidth > 0
+      && finite(marker?.heroNaturalHeight) && marker.heroNaturalHeight > 0 && finite(marker?.heroLoadedAt) && marker.heroLoadedAt > 3500,
+    delayedResponseVerified: responses.length === 1 && response?.status === 200 && response?.mimeType === 'image/avif'
+      && headers['content-length'] === String(DELAYED_HERO_BYTES) && finite(headerDelayMs) && headerDelayMs >= 3900
+      && response.fromDiskCache !== true && response.fromServiceWorker !== true && finished,
+    boundedLoopbackSources: requests.some(event => event.params?.request?.url === item.url)
+      && requests.some(event => event.params?.request?.url === DELAYED_HERO_URL) && unexpectedRequests.length === 0,
+    cpuWorkAfterFcp: finite(marker?.fcpAt) && finite(marker?.cpuStart) && finite(marker?.cpuEnd)
+      && marker.cpuStart > marker.fcpAt && marker.cpuEnd - marker.cpuStart >= 700
+      && marker.cpuDuration === marker.cpuEnd - marker.cpuStart,
+    actualLongTaskOverlapsWork: longtasks.some(task => finite(task.startTime) && finite(task.duration)
+      && task.startTime >= marker?.fcpAt && task.duration >= 650
+      && Math.min(task.startTime + task.duration, marker?.cpuEnd) - Math.max(task.startTime, marker?.cpuStart) >= 600),
+    actualUnpromptedLayoutShift: finite(marker?.shiftAt) && marker.shiftAt > marker?.fcpAt && shiftValue > 0.1,
+  };
+  return {marker, checks, apiAudits, metrics: {observedLcpMs: observedLcpMs ?? null, simulatedLcpMs: simulatedLcpMs ?? null,
+    simulatedTbtMs: simulatedTbtMs ?? null, cls: cls ?? null, markerShiftTotal: shiftValue, heroHeaderDelayMs: finite(headerDelayMs) ? headerDelayMs : null},
+  controlValid: Object.values(checks).every(Boolean)};
+}
+
 function validateReport(file, item, expectation) {
   const report = JSON.parse(fs.readFileSync(file, 'utf8'));
   need(report.lighthouseVersion === '12.8.2' && !report.runtimeError, 'REPORT_RUNTIME_INVALID');
@@ -244,8 +346,21 @@ function validateReport(file, item, expectation) {
     return {fetchTime: report.fetchTime, lighthouseVersion: report.lighthouseVersion, configSettings: report.configSettings,
       environment: report.environment, ...negativeControls(report, raw.ConsoleMessages, expectation)};
   }
+  if (item.kind === 'positive') {
+    need(JSON.stringify([...report.configSettings.onlyAudits].sort()) === JSON.stringify([...AUDITS].sort()), 'REPORT_AUDITS_CHANGED');
+    const raw = JSON.parse(fs.readFileSync(path.join(path.dirname(file), 'artifacts/artifacts.json'), 'utf8'));
+    return {fetchTime: report.fetchTime, lighthouseVersion: report.lighthouseVersion, configSettings: report.configSettings,
+      environment: report.environment, ...positiveControls(report, raw.ConsoleMessages, item, expectation)};
+  }
   need(JSON.stringify([...report.configSettings.onlyCategories].sort())
     === JSON.stringify(['accessibility', 'best-practices', 'performance', 'seo']), 'REPORT_CATEGORIES_CHANGED');
+  if (item.kind === 'performance-negative') {
+    const directory = path.dirname(file);
+    const raw = JSON.parse(fs.readFileSync(path.join(directory, 'artifacts/artifacts.json'), 'utf8'));
+    const devtoolsLog = JSON.parse(fs.readFileSync(path.join(directory, 'page-0.devtoolslog.json'), 'utf8'));
+    return {fetchTime: report.fetchTime, lighthouseVersion: report.lighthouseVersion, configSettings: report.configSettings,
+      environment: report.environment, ...performanceNegativeControl(report, raw.ConsoleMessages, devtoolsLog, item, expectation)};
+  }
   // No score threshold or filtering here: every outcome, including slow samples, is retained.
   return {fetchTime: report.fetchTime, lighthouseVersion: report.lighthouseVersion,
     userAgent: report.userAgent, environment: report.environment, configSettings: report.configSettings,
@@ -255,15 +370,18 @@ function validateReport(file, item, expectation) {
     tbtMs: report.audits['total-blocking-time'].numericValue};
 }
 
-async function capture(repairMode = false) {
-  const deadline = Date.now() + 390000;
-  const order = repairMode ? REPAIR_ORDER : ORDER;
+async function capture(repairMode = false, validationMode = false) {
+  repairMode = repairMode || validationMode;
+  const deadline = Date.now() + (validationMode ? 230000 : 390000);
+  const order = validationMode ? VALIDATION_ORDER : repairMode ? REPAIR_ORDER : ORDER;
   need(process.platform === 'linux', 'LINUX_PROC_ATTESTATION_REQUIRED');
   need(process.env.PERF_RESULTS && path.isAbsolute(process.env.PERF_RESULTS), 'PERF_RESULTS_REQUIRED');
   need(!process.env.HEADLESS, 'HEADLESS_ENV_OVERRIDE_UNSUPPORTED');
-  const base = fs.realpathSync(process.env.PERF_RESULTS), output = path.join(base, repairMode ? 'diagnostic-negative-repair' : 'diagnostic');
+  const base = fs.realpathSync(process.env.PERF_RESULTS), output = path.join(base,
+    validationMode ? 'diagnostic-validation-controls' : repairMode ? 'diagnostic-negative-repair' : 'diagnostic');
   fs.mkdirSync(output); // Refuse to overwrite/reuse any previous experiment.
-  const summary = {diagnosticOnly: true, acceptanceGate: false, adoptionApproved: false, url: repairMode ? FIXTURE : TARGET, order,
+  const summary = {diagnosticOnly: true, acceptanceGate: false, adoptionApproved: false,
+    url: validationMode ? VALIDATION_ORIGIN : repairMode ? FIXTURE : TARGET, order,
     startedAt: new Date().toISOString(), driverSha256: sha256(fs.readFileSync(__filename)), captures: [], complete: false};
   const summaryPath = path.join(output, 'experiment.json');
   jsonFile(summaryPath, summary, true);
@@ -305,6 +423,14 @@ async function capture(repairMode = false) {
     need(expectation.lighthouseVersion === '12.8.2' && AUDITS.every(id => expectation.audits[id]), 'FIXTURE_EXPECTATION_INVALID');
     summary.fixture = {url: FIXTURE, sha256: sha256(fixtureBytes), expectationSha256: sha256(expectationBytes),
       marker: MARKER, upstreamCommit: expectation.upstreamCommit};
+    if (validationMode) {
+      const sourceFiles = ['positive.html', 'performance-negative.html', 'delayed-hero.avif', 'bounded-server.mjs', 'manifest.json'];
+      summary.validationFixtures = Object.fromEntries(sourceFiles.map(name => {
+        const bytes = fs.readFileSync(path.join(VALIDATION_DIR, name));
+        if (name === 'delayed-hero.avif') need(bytes.length === DELAYED_HERO_BYTES && sha256(bytes) === DELAYED_HERO_SHA256, 'VALIDATION_HERO_CHANGED');
+        return [name, {bytes: bytes.length, sha256: sha256(bytes)}];
+      }));
+    }
     summary.tools = {node: process.version, lighthouse: lh.version, chromeLauncher: launcherPackage.version,
       chromeVersion: version.stdout.trim(), chromeExecutable: path.basename(chromePath),
       lighthousePackageSha256: sha256(fs.readFileSync(lhPackagePath)), launcherPackageSha256: sha256(fs.readFileSync(launcherPackagePath)),
@@ -335,9 +461,10 @@ async function capture(repairMode = false) {
         if (firstExecutable === null) firstExecutable = identity;
         need(firstExecutable === identity, 'BROWSER_EXECUTABLE_CHANGED');
         sample.actualExecutable = path.basename(executable);
-        const selection = kind === 'fixture' ? [`--only-audits=${AUDITS.join(',')}`,
-          `--gather-mode=${path.join(directory, 'artifacts')}`, `--audit-mode=${path.join(directory, 'artifacts')}`]
+        const selection = ['fixture', 'positive'].includes(kind) ? [`--only-audits=${AUDITS.join(',')}`]
           : ['--only-categories=performance,accessibility,best-practices,seo'];
+        if (kind === 'fixture' || validationMode) selection.push(
+          `--gather-mode=${path.join(directory, 'artifacts')}`, `--audit-mode=${path.join(directory, 'artifacts')}`);
         const args = [cli, url, `--port=${chrome.port}`, '--hostname=127.0.0.1',
           ...selection, '--output=json', '--output=html',
           `--output-path=${path.join(directory, 'page')}`, '--save-assets', `--additional-trace-categories=${CATEGORIES}`, '--quiet'];
@@ -371,9 +498,15 @@ async function capture(repairMode = false) {
     }
     summary.complete = summary.captures.length === order.length && summary.captures.every(item => item.complete);
     need(summary.complete, 'EXPERIMENT_INCOMPLETE');
-    summary.negativeControlsPassed = summary.captures.filter(item => item.kind === 'fixture')
-      .every(item => item.report.negativeControlsPassed);
-    need(summary.negativeControlsPassed, 'NEGATIVE_CONTROL_DETECTION_FAILED');
+    if (validationMode) {
+      summary.positiveControlsPassed = summary.captures.filter(item => item.kind === 'positive').every(item => item.report.controlValid);
+      summary.performanceNegativeControlsPassed = summary.captures.filter(item => item.kind === 'performance-negative').every(item => item.report.controlValid);
+      need(summary.positiveControlsPassed && summary.performanceNegativeControlsPassed, 'VALIDATION_CONTROL_FAILED');
+    } else {
+      summary.negativeControlsPassed = summary.captures.filter(item => item.kind === 'fixture')
+        .every(item => item.report.negativeControlsPassed);
+      need(summary.negativeControlsPassed, 'NEGATIVE_CONTROL_DETECTION_FAILED');
+    }
   } catch (error) {
     summary.error = /^[A-Z_]+$/.test(error.message) ? error.message : 'EXPERIMENT_FAILED';
     throw error;
@@ -385,7 +518,8 @@ async function capture(repairMode = false) {
       jsonFile(summaryPath, summary);
     }
   }
-  console.log(repairMode ? 'Diagnostic capture complete; two loopback negative controls retained and source restored. This is not a PR gate result.'
+  console.log(validationMode ? 'Diagnostic capture complete; four loopback validation controls retained and source restored. This is not a PR gate result.'
+    : repairMode ? 'Diagnostic capture complete; two loopback negative controls retained and source restored. This is not a PR gate result.'
     : 'Diagnostic capture complete; six public samples and two negative controls retained. This is not a PR gate result.');
 }
 
@@ -437,15 +571,81 @@ function selfTest() {
   assert.equal(REPAIR_ORDER.length, 2);
   assert(REPAIR_ORDER.every(item => item.url === FIXTURE && item.kind === 'fixture'));
   assert.equal(ORDER.length, 8);
-  console.log('PASS: flags, process attestation, negative controls and repair input/path rejection; no browser executed.');
+  assert.deepEqual(VALIDATION_ORDER.map(item => [item.kind, item.arm]), [
+    ['positive', 'default'], ['positive', 'restored'], ['performance-negative', 'default'], ['performance-negative', 'restored'],
+  ]);
+  const positiveItem = VALIDATION_ORDER[0], performanceItem = VALIDATION_ORDER[2];
+  const markerMessages = (item, marker) => [{source: 'console.warn', url: item.url,
+    text: VALIDATION_MARKER + JSON.stringify({schema: 1, kind: item.kind, ...marker})}];
+  const positiveReport = {audits: Object.fromEntries(AUDITS.map(id => [id, {score: 1,
+    scoreDisplayMode: expectation.audits[id].scoreDisplayMode, details: {type: 'table', items: []}}]))};
+  const positiveMessages = markerMessages(positiveItem, {phase: 'ready'});
+  assert.equal(positiveControls(positiveReport, positiveMessages, positiveItem, expectation).controlValid, true);
+  for (const invalidMessages of [[], [...positiveMessages, ...positiveMessages],
+    [...positiveMessages, {source: 'violation'}], [...positiveMessages, {source: 'console.error'}]]) {
+    assert.equal(positiveControls(positiveReport, invalidMessages, positiveItem, expectation).controlValid, false);
+  }
+  const dirtyPositive = structuredClone(positiveReport); dirtyPositive.audits['no-document-write'].score = 0;
+  assert.equal(positiveControls(dirtyPositive, positiveMessages, positiveItem, expectation).controlValid, false);
+  const performanceReport = {audits: {
+    ...structuredClone(positiveReport.audits),
+    metrics: {details: {items: [{observedLargestContentfulPaint: 4100}]}},
+    'largest-contentful-paint': {numericValue: 4200}, 'total-blocking-time': {numericValue: 650},
+    'cumulative-layout-shift': {numericValue: 0.2},
+  }};
+  const performanceMarker = {phase: 'complete', fcpAt: 100, cpuStart: 350, cpuEnd: 1050, cpuDuration: 700,
+    shiftAt: 200, heroLoadedAt: 4050, heroNaturalWidth: 600, heroNaturalHeight: 400,
+    lcpEntries: [{elementId: 'delayed-hero', url: DELAYED_HERO_URL, startTime: 4100, size: 86400}],
+    layoutShiftEntries: [{startTime: 200, value: 0.2, hadRecentInput: false}],
+    longtaskEntries: [{startTime: 350, duration: 702}]};
+  const performanceLog = [
+    ...[performanceItem.url, DELAYED_HERO_URL].map(url => ({method: 'Network.requestWillBeSent', params: {request: {url}}})),
+    {method: 'Network.responseReceived', params: {requestId: 'hero', response: {url: DELAYED_HERO_URL,
+      status: 200, mimeType: 'image/avif', headers: {'Content-Length': String(DELAYED_HERO_BYTES)},
+      timing: {sendEnd: 1, receiveHeadersEnd: 4001}}}},
+    {method: 'Network.loadingFinished', params: {requestId: 'hero'}},
+  ];
+  const evaluatePerformance = (reportValue = performanceReport, markerValue = performanceMarker, logValue = performanceLog) =>
+    performanceNegativeControl(reportValue, markerMessages(performanceItem, markerValue), logValue, performanceItem, expectation).controlValid;
+  assert.equal(evaluatePerformance(), true);
+  assert.equal(performanceNegativeControl(performanceReport, [], performanceLog, performanceItem, expectation).controlValid, false);
+  for (const id of AUDITS) {
+    for (const change of [audit => { audit.score = 0; }, audit => { audit.details.items = [{}]; },
+      audit => { audit.errorMessage = 'Synthetic audit failure'; }]) {
+      const invalid = structuredClone(performanceReport); change(invalid.audits[id]);
+      assert.equal(evaluatePerformance(invalid), false);
+    }
+    const missing = structuredClone(performanceReport); delete missing.audits[id];
+    assert.equal(evaluatePerformance(missing), false);
+  }
+  for (const change of [value => { value.lcpEntries[0].elementId = 'early-text'; },
+    value => { value.lcpEntries[0].url = VALIDATION_ORIGIN + '/other.avif'; },
+    value => { value.longtaskEntries[0].startTime = 0; }, value => { value.layoutShiftEntries[0].hadRecentInput = true; },
+    value => { value.phase = 'invalid'; }]) {
+    const invalid = structuredClone(performanceMarker); change(invalid);
+    assert.equal(evaluatePerformance(performanceReport, invalid), false);
+  }
+  for (const [id, value] of [['largest-contentful-paint', 3500], ['total-blocking-time', 200], ['cumulative-layout-shift', 0.1]]) {
+    const invalid = structuredClone(performanceReport); invalid.audits[id].numericValue = value;
+    assert.equal(evaluatePerformance(invalid), false);
+  }
+  const missingObserved = structuredClone(performanceReport); missingObserved.audits.metrics.details.items = [];
+  assert.equal(evaluatePerformance(missingObserved), false);
+  const fastResponse = structuredClone(performanceLog); fastResponse[2].params.response.timing.receiveHeadersEnd = 3001;
+  assert.equal(evaluatePerformance(performanceReport, performanceMarker, fastResponse), false);
+  const external = [...performanceLog, {method: 'Network.requestWillBeSent', params: {request: {url: 'https://other.invalid/'}}}];
+  assert.equal(evaluatePerformance(performanceReport, performanceMarker, external), false);
+  assert.equal(evaluatePerformance(performanceReport, performanceMarker, []), false);
+  console.log('PASS: flags, process attestation, negative/positive/performance controls and repair input/path rejection; no browser executed.');
 }
 
-module.exports = {buildArms, attestArguments, negativeControls, repairBytes, relativeModulePath};
+module.exports = {buildArms, attestArguments, negativeControls, positiveControls, performanceNegativeControl, repairBytes, relativeModulePath};
 if (require.main === module) {
   if (process.argv.length === 3 && process.argv[2] === '--self-test') selfTest();
-  else if (process.argv.length === 3 && ['--capture', '--capture-negative-repair'].includes(process.argv[2])) capture(process.argv[2] === '--capture-negative-repair').catch(() => {
+  else if (process.argv.length === 3 && ['--capture', '--capture-negative-repair', '--capture-validation-controls'].includes(process.argv[2])) capture(
+    process.argv[2] === '--capture-negative-repair', process.argv[2] === '--capture-validation-controls').catch(() => {
     console.error('Diagnostic failed; retained experiment.json contains the bounded status. No automatic retry.');
     process.exitCode = 1;
   });
-  else { console.error('Choose --self-test (no browser), --capture, or --capture-negative-repair (Linux diagnostic only).'); process.exitCode = 2; }
+  else { console.error('Choose --self-test (no browser), --capture, --capture-negative-repair, or --capture-validation-controls (Linux diagnostic only).'); process.exitCode = 2; }
 }

@@ -1,0 +1,98 @@
+<!doctype html>
+<!-- New synthetic control; intentionally slow and unstable; not production code. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Local diagnostic control with intentional performance defects.">
+  <link rel="icon" href="data:,">
+  <title>Intentional performance defects</title>
+  <style>
+    body{margin:0;padding:16px;font:16px/1.5 Arial,sans-serif;color:#152133;background:#fff}
+    #shift-space{height:0}main{width:100%;max-width:360px}
+    h1{font-size:20px;margin:0 0 8px}p{margin:8px 0}
+    #delayed-hero{display:block;width:100%;height:auto;aspect-ratio:3/2}
+    #shift-text{font-size:20px;line-height:1.6;padding:8px;background:#eef4ff}
+  </style>
+</head>
+<body>
+  <div id="shift-space"></div>
+  <main><h1>Intentional performance defects</h1>
+    <p>Early text provides an actual first contentful paint.</p>
+    <img id="delayed-hero" src="/delayed-hero.avif" width="360" height="240" loading="eager" fetchpriority="high" alt="Representative homepage photograph">
+    <p id="shift-text">This visible paragraph moves down after the first paint.<br>The movement is intentional.<br>It is not caused by a user gesture.<br>The image dimensions remain reserved.</p>
+  </main>
+  <script>
+    const state = {kind:'performance-negative',phase:'running',schema:1,
+      fcpAt:null,cpuStart:null,cpuEnd:null,cpuDuration:null,shiftAt:null,
+      heroLoadedAt:null,lcpEntries:[],layoutShiftEntries:[],longtaskEntries:[]};
+    window.__fixtureControl = state;
+    let finished = false;
+    let started = false;
+    function emit(phase, reason) {
+      if (finished) return;
+      finished = true;
+      state.phase = phase;
+      if (reason) state.reason = reason;
+      document.documentElement.dataset.fixtureCallsCompleted = phase;
+      performance.mark('fixture.performance.' + phase);
+      console.warn('fixture-validation:' + JSON.stringify(state));
+    }
+    function maybeComplete() {
+      if (state.cpuEnd !== null && state.heroLoadedAt !== null &&
+          state.lcpEntries.some(e => e.url.endsWith('/delayed-hero.avif')) &&
+          state.layoutShiftEntries.some(e => !e.hadRecentInput) && state.longtaskEntries.length) {
+        emit('complete');
+      }
+    }
+    function observe(type, callback) {
+      if (!PerformanceObserver.supportedEntryTypes.includes(type)) {
+        emit('invalid', 'Unsupported observer: ' + type); return;
+      }
+      new PerformanceObserver(list => { callback(list.getEntries()); maybeComplete(); })
+        .observe({type,buffered:true});
+    }
+    observe('largest-contentful-paint', entries => {
+      for (const e of entries) state.lcpEntries.push({startTime:e.startTime,size:e.size,url:e.url,id:e.id,elementId:e.element?.id ?? null,renderTime:e.renderTime,loadTime:e.loadTime});
+    });
+    observe('layout-shift', entries => {
+      for (const e of entries) state.layoutShiftEntries.push({startTime:e.startTime,value:e.value,hadRecentInput:e.hadRecentInput});
+    });
+    observe('longtask', entries => {
+      for (const e of entries) state.longtaskEntries.push({startTime:e.startTime,duration:e.duration});
+    });
+    observe('paint', entries => {
+      const fcp = entries.find(e => e.name === 'first-contentful-paint');
+      if (!fcp || started || finished) return;
+      started = true;
+      state.fcpAt = fcp.startTime;
+      performance.mark('fixture.performance.fcp-observed');
+      setTimeout(() => {
+        state.shiftAt = performance.now();
+        document.getElementById('shift-space').style.height = '220px';
+        performance.mark('fixture.performance.shift');
+      }, 100);
+      setTimeout(() => {
+        state.cpuStart = performance.now();
+        performance.mark('fixture.performance.cpu-start');
+        while (performance.now() - state.cpuStart < 700) { /* Bounded intentional long task. */ }
+        state.cpuEnd = performance.now();
+        state.cpuDuration = state.cpuEnd - state.cpuStart;
+        performance.mark('fixture.performance.cpu-end');
+        setTimeout(maybeComplete, 0);
+      }, 250);
+    });
+    const hero = document.getElementById('delayed-hero');
+    function loaded() {
+      state.heroLoadedAt = performance.now();
+      state.heroNaturalWidth = hero.naturalWidth;
+      state.heroNaturalHeight = hero.naturalHeight;
+      performance.mark('fixture.performance.hero-loaded');
+      maybeComplete();
+    }
+    hero.addEventListener('load', loaded, {once:true});
+    hero.addEventListener('error', () => emit('invalid', 'Hero load failed'), {once:true});
+    if (hero.complete && hero.naturalWidth > 0) loaded();
+    setTimeout(() => emit('invalid', 'Fixture did not complete within 12 seconds'), 12000);
+  </script>
+</body></html>

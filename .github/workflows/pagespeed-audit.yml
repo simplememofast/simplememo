@@ -33,7 +33,7 @@ on:
       diagnostic_mode:
         description: Isolated diagnostic selection; does not satisfy a candidate gate
         type: choice
-        options: [standard, negative-repair]
+        options: [standard, negative-repair, validation-controls]
         default: standard
 permissions:
   contents: read
@@ -42,7 +42,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   mobile-audit:
-    if: github.event_name != 'workflow_dispatch' || inputs.diagnostic_mode != 'negative-repair'
+    if: github.event_name != 'workflow_dispatch' || (inputs.diagnostic_mode != 'negative-repair' && inputs.diagnostic_mode != 'validation-controls')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -150,6 +150,54 @@ jobs:
         with:
           name: pagespeed-mobile-reports
           path: ${{ runner.temp }}/perf-results/
+          retention-days: 14
+          if-no-files-found: error
+  validation-controls:
+    if: github.event_name == 'workflow_dispatch' && inputs.diagnostic_mode == 'validation-controls'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24.22.1'
+          package-manager-cache: false
+      - name: Initialize isolated validation output
+        run: |
+          mkdir -p "$RUNNER_TEMP/validation-controls-results"
+          echo "PERF_RESULTS=$RUNNER_TEMP/validation-controls-results" >> "$GITHUB_ENV"
+      - name: Install exact existing measurement versions
+        timeout-minutes: 2
+        run: npm install --prefix "$RUNNER_TEMP/perf-tools" --no-save lighthouse@12.8.2 chrome-launcher@1.2.2
+      - name: Test diagnostic guards without a browser
+        run: |
+          node --check scripts/perf/diagnose_render_document.cjs
+          node scripts/perf/diagnose_render_document.cjs --self-test
+          node --check scripts/perf/fixtures/render-document-validation/bounded-server.mjs
+      - name: Validate positive and performance negative controls on loopback
+        timeout-minutes: 4
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/perf/fixtures/render-document-validation/bounded-server.mjs > "$PERF_RESULTS/validation-server.log" 2>&1 &
+          fixture_pid=$!
+          trap 'kill "$fixture_pid" || true' EXIT
+          for attempt in $(seq 1 10); do
+            kill -0 "$fixture_pid"
+            if curl --fail --silent http://127.0.0.1:8766/positive.html > /dev/null; then break; fi
+            sleep 1
+          done
+          kill -0 "$fixture_pid"
+          curl --fail --silent http://127.0.0.1:8766/positive.html --output "$RUNNER_TEMP/validation-positive.html"
+          cmp scripts/perf/fixtures/render-document-validation/positive.html "$RUNNER_TEMP/validation-positive.html"
+          NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/diagnose_render_document.cjs --capture-validation-controls
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: validation-controls
+          path: ${{ runner.temp }}/validation-controls-results/
           retention-days: 14
           if-no-files-found: error
   negative-repair-controls:
