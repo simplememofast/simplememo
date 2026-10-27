@@ -1512,6 +1512,24 @@
       "expr": "handoff",
       "disposition": "前提",
       "note": "2026-10-22（監査 F94）: save の経路の振り分け。publish ジョブは --handoff を渡し、詰め込まれた要約だけを読む（無い・改変・壊れは明示の不明）。渡さない経路はファイルを持つランナー（テスト・手元）用で、publish のランナーには実行ファイルが無いので値はすべて不明になる。配線は checkWiring が固定する。"
+    },
+    {
+      "file": "scripts/autopilot-approval-check.mjs",
+      "expr": "text",
+      "disposition": "検体の生成",
+      "note": "2026-10-27: selftest のモック（mockGithub の getContent）。台帳の中身を null と指定した側を、GitHub の 404（ファイルが無い）として返すための分岐。auto-merge.yml の読み出しは 404 を null にし、ledgerChange は片側だけ無い台帳を unreadable にする。この分岐が無いと「台帳が消えた PR は承認待ち」の検体が作れない。判定ではない。"
+    },
+    {
+      "file": "scripts/autopilot-publish.test.mjs",
+      "expr": "cost",
+      "disposition": "検体の生成",
+      "note": "2026-10-27: テストの fixture。cost を渡した検体だけ main に data/autopilot-cost.json を置く分岐。渡さない既存の検体は今までどおり費用の台帳が無い main で動く（両側に無い台帳は ledgerChange が変更なしと読む）。判定ではない。"
+    },
+    {
+      "file": "scripts/autopilot-approval-check.mjs",
+      "expr": "before",
+      "disposition": "読めないときは止める側",
+      "note": "2026-10-27: ledgerReasons。ファイル一覧で変わったとされた台帳が、マージの土台でも head でも読めない（両方 null）なら、一覧と読み出しが食い違っているので unreadable を返して承認待ちにする（点検の指摘）。片側だけ null は ledgerChange が unreadable を返す。両側とも無い台帳を「変更なし」と読むのは publish 側（一覧に出ていない台帳）だけ。"
     }
   ]
 }

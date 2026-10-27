@@ -104,6 +104,13 @@ mainへのマージ＝本番デプロイなので、検証を通ったコミッ�
   ずれるので、ジョブはマージせず、生成物を作り直して push し直す必要がある。判定は
   `scripts/autopilot-approval-check.mjs`。ほかのブランチ（オーナーのセッション、Act の
   `claude/autopilot-act-*`、`Codex/*` など）の自動マージは変わらない。
+  **封じ込めと予算を決める2つの台帳（`autopilot-runs.json`・`autopilot-cost.json`）は、
+  ファイル名だけでなく中身も見る**（2026-10-26 オーナー判断）。マージの土台と検証済みの head を
+  API で読み比べ、Runbook どおりの形（runs は当日の1行の追記で `repair_of` なし、cost は §5-3 の形の
+  行の追記（`cap_review`・`cost_expectation` なし）と欠けた結果の補完）でなければ、台帳だけの PR でも
+  承認待ちにする。読めないときも承認待ち。
+  publish ジョブもモデルのコミットに同じ規則を当て、外れたら `rejected_ledger_<理由>` で何も
+  公開しない。規則は `scripts/lib/ledger-append-only.mjs`。
 - **ワークフローファイルを触る PR は、head の blob がマージ結果の blob と一致しないと
   マージできない（読み。GitHubの仕様としては未確認）** —— 2026-09-05、PR #938
   （`seo-check.yml` に2行追加）で auto-merge が2回 `403 refusing to allow a GitHub App
@@ -134,9 +141,36 @@ mainへのマージ＝本番デプロイなので、検証を通ったコミッ�
   **直し方:** main を取り込んで押し直す（rebase でも merge でもよい）。head の
   ワークフローファイルがマージ結果と同一になれば、次の検証成功で auto-merge が拾う。
   **反証条件:** 同一にしてもなお 403 なら、この読みは外れている。
-  **失敗は PR 側に何も出ない**（PR は `mergeable_state: clean` のまま open で残り、
-  チェックは全部緑に見える）ので、**開いたままの PR を見たら auto-merge.yml の
-  run 一覧で `failure` を探す。**
+  **この 403 は、もとは PR 側に何も出なかった**（PR は `mergeable_state: clean` のまま
+  open で残り、チェックは全部緑に見える）。今は auto-merge がその PR に `needs-main-sync` を
+  付ける（下の段落）。ただし反証条件に当たったとき・main と比べられないとき・ラベルを付けられ
+  なかったときは run が落ちるので、**開いたままの PR を見たら、ラベルと auto-merge.yml の run
+  一覧の `failure` の両方を見る。**
+
+  **2026-10-26 に同じ形で再現した（#2179）。**head の `obsidian-autopilot.yml` は
+  2e109ff、squash の結果は 3b635d8 で、403 が2回。PR の土台（45cd6fd）より後に
+  #2175 が同じファイルを変えていた。それまでに GITHUB_TOKEN でマージできた、
+  ワークフローを触る PR（#2132・#2156・#2163・#2175）は、どれも head とマージ結果の
+  blob が同一だった。**この読みと矛盾するデータ点はまだ無い**（GitHub の仕様としては
+  未確認のまま）。最初は「同じ日に #2175 が Actions の版を上げたから」と読んで誤った
+  —— 時期が重なることを原因の証明に使った。**ここでも、推測を書く前に blob を測る。**
+
+  **2026-10-27 の点検で、リポジトリ全体を数え直した。**auto-merge の run がこの 403 で
+  落ちたのは 08-26 から 10-26 までに 20 回（10 本の PR、11 個の head）で、どれも head の blob と
+  squash の結果の blob が違った。GITHUB_TOKEN でマージされた、ワークフローを触る PR（211 本、
+  279 ファイルの変更）は、どれも head と結果の blob が同一だった。#647（08-26）は #938 と同じ
+  形の2つ目の例で、403 のとき head は 4992cea・結果は 3fdb79a、main を取り込んで 3fdb79a を
+  持った head が4分後にマージされた。#1753（09-30）は土台より後に main が同じファイルを変えて
+  いたのに、head と結果が同じ 74a16ae で、そのままマージされた —— **main より古いこと自体は
+  条件ではない。**（件数は点検が数えた。#647 と #1753 は blob を測り直した。）ただし「head が
+  結果の blob を持たない」と「どのコミットもその blob を持たない」は、このデータでは区別
+  できない（11 回とも、結果の blob が最初に現れたのは 403 の後）。
+
+  auto-merge はこの 403 を受けると、その PR に `needs-main-sync` を付けて要約を書き、
+  run は落とさずに終える。マージできたときにラベルを外す。次のときは run を落とす:
+  head が main を全部含む（`behind_by` が 0。squash の結果が head と同じになる）のに 403
+  —— **反証条件に当たった**。main と比べられない。ラベルを付けられない。それ以外の
+  失敗も今までどおり落とす。
 
 `workflow_run` で起動するワークフローは常にデフォルトブランチの定義が
 使われるため、auto-merge.yml 自体を変更した場合、その変更はmainに
@@ -144,6 +178,16 @@ mainへのマージ＝本番デプロイなので、検証を通ったコミッ�
 
 
 ## /autopilot/ の自律スコアは日付で動く（2026-09-19）
+
+> **【2026-10-27 提案、同日オーナー承認（選択肢「Claudeにマージを任せる」）】**
+> main に `scripts/lib/routine-ci-scope.mjs` の `AUTOPILOT_PAGE_PATHS` があれば、この変更は入っている。
+> そのとき全PRは `check-autopilot-page.mjs --as-stamped` で照合する。自律スコアはページの
+> `data-decision-date` の日付で計算するので、**暦が進むだけでは落ちない。**
+> 今日の値かどうか（`--check`）を公開条件にするのは、運用に触るPR（日次の Act PR）と、
+> `/autopilot/` のページ・検査器・スコア・公開器に触るPRだけ。main と日次は routine-health で
+> `--check` を回し、古ければ赤くなる。
+> 以下は導入前の記録。**「全PRが同じ6件で落ちる」は、この変更が無い main でだけ起きる。**
+> 変更が入った main では、まず routine-health の「Autopilot page freshness health」を見る。
 
 **公開ページを1日更新しないと、main も全PRも同じ6件で落ちる。**
 PR側の変更が無関係でも落ちるので、原因がPRに出ない。
