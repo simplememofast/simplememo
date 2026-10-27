@@ -60,13 +60,16 @@ const WAITING_APPEND_ONLY_DIRS = ['growth/data/gsc'];
 // at the page's own stamped date (check-autopilot-page --as-stamped). Whether the
 // page is today's value (--check) is a publication gate only for a PR that changes
 // routine operations (the daily Act PR regenerates the page) or one of these files:
-// the compared pages, the checker, the score it recomputes, and the publisher that
-// writes the stamp. Main/daily still runs --check in routine-health.
+// the page that carries the clock-driven score and its stamp, the checker, the
+// score it recomputes, and the publisher that writes the stamp. Main/daily still
+// runs --check in routine-health.
+// The checker's other compared files (the homepage and the two delivered PR
+// texts) are deliberately not here. Every number on them reads no clock and is
+// compared exactly on every PR; the checker refuses a score or stamp on them, so
+// a clock-driven number cannot sit outside this list. Including them would block
+// every homepage PR whenever the autopilot page is stale, which the PR did not cause.
 const AUTOPILOT_PAGE_PATHS = new Set([
   'autopilot/index.html',
-  'index.html',
-  'docs/pr-autopilot-2026-09-body.md',
-  'docs/pr-autopilot-2026-09-final.md',
   'scripts/check-autopilot-page.mjs',
   'scripts/autonomy-score.mjs',
   'scripts/decision-monitor.mjs',

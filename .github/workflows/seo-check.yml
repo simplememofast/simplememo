@@ -73,7 +73,7 @@ jobs:
                   : 'This PR does not change waiting-progress inputs. Waiting progress freshness is not assessed by this PR and is not a site publication gate; waiting configuration and counter readability still run. See the main/daily routine-health job; this is not a healthy observation.\n')
                 + (scope.pageRequired
                   ? 'This PR changes routine operations or the autopilot page, its checker, score or publisher. The page freshness check (today\'s ledger values) is required for publication.\n'
-                  : 'This PR does not change the autopilot page or its inputs. Page freshness is not assessed by this PR and is not a site publication gate; the page is still compared with the ledgers at its own stamped date. See the main/daily routine-health job; this is not a healthy observation.\n'))
+                  : 'This PR does not change routine operations or the autopilot page, its checker, score or publisher (the homepage is not in this scope). Page freshness is not assessed by this PR and is not a site publication gate; the page is still compared with the ledgers at its own stamped date. See the main/daily routine-health job; this is not a healthy observation.\n'))
               .addCodeBlock(JSON.stringify(scope, null, 2), 'json').write();
 
       - name: Auto-merge identity guard regression
