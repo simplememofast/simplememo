@@ -1419,7 +1419,16 @@ export async function ensureDevtoDisclosure(id, headers, url, { known = undefine
  * 「最新から minIntervalHours」（force で越えられる）を見る。同題の採用（応答が失われた前回の投稿）はこれより先に判定する。
  */
 export function publishGuard(items, now, { minIntervalHours, force = false }) {
-  const times = items.filter((a) => a.published === true).map((a) => new Date(a.published_at).getTime()).filter(Number.isFinite);
+  const times = [];
+  for (const a of items) {
+    // 日時の無い既知の下書きは間隔に数えない。状態や日時が読めない記事は、
+    // 「公開記事が無い」に変換しない（古い公開一覧の見落としをここで止める）。
+    if (a.published === false) continue;
+    if (a.published !== true) return { ok: false, reason: '記事の公開状態を読めない — 間隔を確かめられないので投稿しない' };
+    const time = watchPublishedTime(a.published_at);
+    if (time === null) return { ok: false, reason: '公開記事の日時を読めない — 間隔を確かめられないので投稿しない' };
+    times.push(time);
+  }
   const last24 = times.filter((t) => now.getTime() - t < 24 * 3600000);
   if (last24.length) return { ok: false, reason: `直近24時間に ${last24.length} 本ある（1日1本まで。force でも越えない）` };
   const latest = times.length ? Math.max(...times) : null;
@@ -1510,7 +1519,7 @@ export async function publishHatena(cfg, article, key, body, { now = new Date(),
     if (!e.url) throw new Error(`同じ題名の記事があるが公開URLを読めない（二重投稿を避けて止める）: ${e.title}`);
     return { url: e.url, reused: true };
   }
-  const guard = publishGuard(entries.map((e) => ({ ...e, published: e.draft === false })), now,
+  const guard = publishGuard(entries.map((e) => ({ ...e, published: e.draft === null ? null : !e.draft })), now,
     { minIntervalHours: cfg.minIntervalHours, force });
   if (!guard.ok) throw new Error(`投稿の直前の確認（AtomPub の一覧）で止めた: ${guard.reason} — 門が読んだ公開フィードが古かった可能性。続けて出さない`);
   const xml = hatenaEntryXml({ title: article.title, body, categories: article.tags, author: cfg.hatenaId });
@@ -1781,7 +1790,7 @@ export function classifyAge(hours, { warnHours = WATCH.warnHours, alertHours = W
   return 'ok';
 }
 
-/** 見張りの公開日時だけを読む。Date の型変換・暦日補正を、公開時刻の証拠にしない。 */
+/** 投稿前の門と見張りが使う公開日時。Date の型変換・暦日補正を、公開時刻の証拠にしない。 */
 function watchPublishedTime(publishedIso) {
   if (typeof publishedIso !== 'string') return null;
   const parts = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/.exec(publishedIso);
@@ -2382,6 +2391,86 @@ export async function selftest() {
       current = [{ ...post(1, 20), missingBody: true }, post(2, 336, true)];
       const missingBody = await watchPlatform('hatena', now, opts, go);
       assert(missingBody.status === 'unreadable' && missingBody.pipeline_age_status === 'unknown' && missingBody.pipeline_age_hours === null, 'はてな本文の欠測を別経路の記事として数えた');
+    } finally {
+      globalThis.fetch = orig;
+    }
+  });
+  await t('投稿の門: 公開状態・日時の欠測と暦日補正を許可にしない（既知の下書きは除く）', () => {
+    const old = { published: true, published_at: hoursAgo(70) };
+    for (const published_at of [undefined, null, true, false, 123, '', 'not-a-date',
+      '2026-02-31T00:00:00Z', '2026-09-01T25:00:00Z', '2026-09-01T00:00:00', '2026-09-01T00:00:00+24:00']) {
+      for (const force of [false, true]) {
+        const r = publishGuard([old, { published: true, published_at }], now, { minIntervalHours: 66, force });
+        assert(r.ok === false, `読めない日時を許可した: ${String(published_at)} / force=${force}`);
+        assert(r.reason.includes('日時'), `日時の欠測を理由にしていない: ${JSON.stringify(r)}`);
+      }
+    }
+    for (const published of [undefined, null, 'true', 'false', 0, 1]) {
+      const r = publishGuard([old, { published, published_at: hoursAgo(2) }], now, { minIntervalHours: 66, force: true });
+      assert(r.ok === false, `読めない公開状態を許可した: ${String(published)}`);
+      assert(r.reason.includes('公開状態'), `公開状態の欠測を理由にしていない: ${JSON.stringify(r)}`);
+    }
+    const due = publishGuard([old, { published: false, published_at: null }], now, { minIntervalHours: 66 });
+    assert(due.ok === true, `既知の下書きが正常な間隔を妨げた: ${JSON.stringify(due)}`);
+    assert(due.hours === 70, `既知の下書きを間隔に数えた: ${JSON.stringify(due)}`);
+    const offset = publishGuard([{ published: true, published_at: '2026-09-20T21:00:00+09:00' }], now, { minIntervalHours: 66 });
+    assert(offset.ok === true, `時差のある正しい日時を読めない: ${JSON.stringify(offset)}`);
+    assert(offset.hours === 96, `時差のある日時の間隔が違う: ${JSON.stringify(offset)}`);
+  });
+  await t('投稿: 公開日時・状態を読めない認証済み一覧では POST しない（正常な投稿と下書きは維持）', async () => {
+    const orig = globalThis.fetch;
+    const art = { title: '今回の記事', tags: [] };
+    const noWait = async () => {};
+    let posts = 0;
+    const publishedState = '<app:control><app:draft>no</app:draft></app:control>';
+    const draftState = '<app:control><app:draft>yes</app:draft></app:control>';
+    const entry = (published, stateXml) => `<entry><title>前の記事</title><published>${published}</published>${stateXml}</entry>`;
+    const threw = async (fn) => { try { await fn(); return null; } catch (e) { return e.message; } };
+    const setDevto = (items) => {
+      posts = 0;
+      globalThis.fetch = async (u, o) => {
+        if (String(u).includes('/api/articles/me/all')) return new Response(JSON.stringify(items));
+        if (o?.method === 'POST') {
+          posts++;
+          return new Response(JSON.stringify({ id: 9, url: 'https://dev.to/simple_memo/new-9', ai_disclosure_level: 'fully_autonomous' }), { status: 201 });
+        }
+        throw new Error(`想定外の取得: ${u}`);
+      };
+    };
+    const setHatena = (entries) => {
+      posts = 0;
+      globalThis.fetch = async (u, o) => {
+        if (u !== PLATFORMS.hatena.atomUrl) throw new Error(`想定外の取得: ${u}`);
+        if (o?.method === 'POST') {
+          posts++;
+          return new Response('<entry><link href="https://simplememofast.hatenablog.com/entry/new"/></entry>', { status: 201 });
+        }
+        return new Response(`<feed>${entries}</feed>`);
+      };
+    };
+    try {
+      for (const force of [false, true]) {
+        for (const published_at of [null, 'not-a-date', '2026-02-31T00:00:00Z']) {
+          setDevto([{ title: '前の記事', published: true, published_at }]);
+          const failure = await threw(() => publishDevto(art, 'k', 'b', { now, force, wait: noWait }));
+          assert(failure?.includes('日時') && posts === 0, `dev.to: 日時の欠測で投稿した（${failure} / POST ${posts} 回）`);
+          setHatena(entry(published_at ?? '', publishedState));
+          const hFailure = await threw(() => publishHatena(PLATFORMS.hatena, art, 'k', 'b', { now, force }));
+          assert(hFailure?.includes('日時') && posts === 0, `はてな: 日時の欠測で投稿した（${hFailure} / POST ${posts} 回）`);
+        }
+        setDevto([{ title: '前の記事', published_at: hoursAgo(2) }]);
+        const state = await threw(() => publishDevto(art, 'k', 'b', { now, force, wait: noWait }));
+        assert(state?.includes('公開状態') && posts === 0, `dev.to: 状態の欠測で投稿した（${state} / POST ${posts} 回）`);
+        for (const stateXml of ['', '<app:control><app:draft>unknown</app:draft></app:control>']) {
+          setHatena(entry(hoursAgo(2), stateXml));
+          const hState = await threw(() => publishHatena(PLATFORMS.hatena, art, 'k', 'b', { now, force }));
+          assert(hState?.includes('公開状態') && posts === 0, `はてな: 状態の欠測で投稿した（${hState} / POST ${posts} 回）`);
+        }
+      }
+      setDevto([{ title: '前の記事', published: true, published_at: hoursAgo(70) }, { title: '下書き', published: false, published_at: null }]);
+      assert((await publishDevto(art, 'k', 'b', { now, wait: noWait })).reused === false && posts === 1, 'dev.to: 既知の下書きが正常な投稿を妨げた');
+      setHatena(entry(hoursAgo(70), publishedState) + entry('', draftState));
+      assert((await publishHatena(PLATFORMS.hatena, art, 'k', 'b', { now })).reused === false && posts === 1, 'はてな: 既知の下書きが正常な投稿を妨げた');
     } finally {
       globalThis.fetch = orig;
     }
