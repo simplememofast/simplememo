@@ -33,6 +33,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { OUTCOMES, validate as validateRuns } from './autopilot-runs.mjs';
 import { hardDenyReason, MAX_COMMITS, MAX_TOTAL_BYTES, RECORD_PATHS } from './lib/autopilot-paths.mjs';
+import { GATED_LEDGERS, ledgerChange } from './lib/ledger-append-only.mjs';
 
 const require = createRequire(import.meta.url);
 const { findUnapprovedPrincipals } = require('./merge-identity-check.js');
@@ -576,6 +577,14 @@ export async function verifyHandoff({ handoff, repo, day, takeover = false, forc
 
   // A forbidden identity must never reach a public branch (same rule as auto-merge).
   if (findUnapprovedPrincipals(commitPrincipals(repo, commits)).length) fail('rejected_identity');
+
+  // The ledgers that gate the Autopilot (containment, budget) change only the way the runbook asks for
+  // (scripts/lib/ledger-append-only.mjs), compared with the merge base. Checked on push_only days too: the branch is public.
+  for (const file of GATED_LEDGERS) {
+    const code = ledgerChange(file, git(repo, ['show', `${base}:${file}`], { allowFail: true }),
+      git(repo, ['show', `${head}:${file}`], { allowFail: true }), { day: dash });
+    if (code) fail(`rejected_ledger_${code}`);
+  }
 
   if (modelOutcome === 'failure') return { verdict: 'push_only', head, commit_count: commits.length };
   const raw = readJson(path.join(handoff, 'request.json'));

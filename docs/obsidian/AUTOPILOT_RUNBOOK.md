@@ -1262,6 +1262,22 @@ node scripts/autopilot-runs.mjs --append \
 **費用はここに書かない。** 実費は `data/autopilot-cost.json` が正で、
 `external_ref`（GitHub の run id）で結合する。同じ数字の出所を2つ作らない。
 
+**当日ブランチ（`claude/obsidian-auto-<YYYYMMDD>`）では、2つの台帳の既存の行を書き換えない**
+（2026-10-26 オーナー判断）。運転台帳は封じ込め（`autopilot-selfheal`）を、実費台帳は予算の関所を
+決めるので、行を消す・`failure_class` を変える・修理済みの行を足す・上限を上げる・超過を自分で
+認める、のどれも自分の関所を外す操作になる（2026-10-26、点検中の実験で `failure_class` を
+書き換えると修理の回数が数え直しになる形が見つかった）。許される形は次のとおりで、ほかは
+publish が `rejected_ledger_<理由>` で拒み、何も公開しない（`push_only` の日も同じ）。
+承認の関所も PR 全体に同じ規則を当て、外れた PR は台帳だけでも承認待ちになる。
+
+- **運転台帳:** Actions 経路では書かない（記帳は publish の仕事）。書くなら当日の自分の1行だけで、
+  `repair_of` は付けない（修理は依頼の `run.repair_of` に書く。レーンF）。
+- **実費台帳:** §5-3 の行の追記と、`--append --enrich-missing-metadata` が欠けた結果
+  （`outcome`・`task_kind` とその出典）を埋めることだけ。`--ack-overrun` と `budget` の変更は、
+  このブランチではしない（当日ブランチの外で行う。[費用委任の手順](../cost-delegation.md)）。
+- 規則と理由のコードは `scripts/lib/ledger-append-only.mjs`。status JSON と LOG は毎日書き換える
+  もので、関所を決めないので対象外。
+
 ### 5-5. 配信の種（distribution seed・2026-08-26追加・記事/一次データを出荷した回は必須）
 
 **なぜ要るか。** 2026-08-11 以降に新設した `/obsidian/` 配下 9 ページ（自動運転のレーンE 6本を含む）について、X・note・Reddit・PR TIMES への展開記録はゼロだった（AUTOPILOT_LOG 全文に配信の記録が無い）。第三者言及は AlternativeTo の1件のみ。記事は「書いたら終わり」になっており、勝ち筋クラスタの露出を作る作業が他チャネルに接続されていない。Ahrefs の75,000ブランド調査（2025-12）では AI 可視性との相関は第三者ウェブ言及 0.66／被リンク 0.2 で、言及を生む配信は記事と同じ資産である。

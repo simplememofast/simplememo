@@ -12,7 +12,9 @@
  * .github/workflows/auto-merge.yml loads this file from main (trusted code):
  *   - job auto-merge: a validated Autopilot PR still auto-merges when every
  *     changed path is a run ledger (LEDGER, or a newly added decision intent or
- *     rejection file). Anything else is class 'approval', GENERATED outputs
+ *     rejection file) and the two ledgers that gate the Autopilot (runs, cost)
+ *     changed only as the runbook asks (ledgerReasons; the workflow reads them at
+ *     the merge base and the head). Anything else is class 'approval', GENERATED outputs
  *     (/autopilot/, its translations, sitemaps) included until a regeneration
  *     verifier exists. The PR stays open and labelled, and the run hands it to
  *     the job below. Any error in this evaluation withholds that PR only.
@@ -33,6 +35,7 @@ import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { DAY_BRANCH, GENERATED, LEDGER, hardDenyReason, isAutopilotBranch, isLedgerPath } from './lib/autopilot-paths.mjs';
+import { COST_LEDGER, GATED_LEDGERS, RUNS_LEDGER, ledgerChange } from './lib/ledger-append-only.mjs';
 
 export { isAutopilotBranch };
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -68,6 +71,26 @@ export function autoMergeClass(files, changedFiles) {
     if (moved || !appended || !isLedgerPath(file, status === 'added' ? 'A' : 'M')) reasons.push(`approval:${file}`);
   }
   return { class: reasons.length === 0 ? 'ledger' : 'approval', reasons };
+}
+
+/** The ledgers that gate the Autopilot (scripts/lib/ledger-append-only.mjs) a PR's file list touches. */
+export function gatedLedgers(files) {
+  return Array.isArray(files)
+    ? GATED_LEDGERS.filter(file => files.some(entry => entry?.filename === file || entry?.previous_filename === file)) : [];
+}
+
+/**
+ * changes: [{ file, before, after }], a gated ledger's text at the merge base and at the validated head (null when
+ * absent). Reasons to hold the PR for the owner when a ledger changed other than as the runbook asks, else none.
+ */
+export function ledgerReasons(changes, branch) {
+  const day = DAY_BRANCH.exec(branch ?? '')?.[1];
+  if (!day || !Array.isArray(changes)) return ['ledger:unreadable_input'];
+  const dash = `${day.slice(0, 4)}-${day.slice(4, 6)}-${day.slice(6, 8)}`;
+  return changes.flatMap(({ file, before, after }) => {
+    const code = ledgerChange(file, before, after, { day: dash });
+    return code ? [`ledger:${file}:${code}`] : [];
+  });
 }
 
 /** Order-independent fingerprint of the PR's file list (what the owner is asked to approve). */
@@ -136,7 +159,8 @@ export function escapeText(text) {
 export function approvalSummary({ pr, reasons }) {
   const list = Array.isArray(reasons) ? reasons : [];
   const lines = [
-    `PR #${escapeText(pr)} は無人の自律運転ブランチで、台帳以外のパスを変えるため自動マージしなかった（2026-10-20 オーナー判断）。`,
+    `PR #${escapeText(pr)} は無人の自律運転ブランチで、台帳以外のパスを変えるか、台帳を追記と補完以外の形で変えるため、`
+      + '自動マージしなかった（2026-10-20・10-26 オーナー判断）。',
     `出荷するなら、この run の <b>merge-after-approval</b>（Environment <code>${APPROVAL_ENVIRONMENT}</code>）を`
       + '<b>検証と同じ JST の日のうちに</b>承認する。または PR を読んで手でマージする。',
     '',
@@ -183,6 +207,7 @@ const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 const OWNER = 'simplememofast';
 const REPO_NAME = 'simplememo';
 const SHA = 'a'.repeat(40);
+const MERGE_BASE = 'd'.repeat(40);
 
 function fixturePr(over = {}) {
   return { number: 123, state: 'open', draft: false, base: { ref: 'main' },
@@ -190,8 +215,10 @@ function fixturePr(over = {}) {
     user: { login: OWNER }, commits: 1, changed_files: over.files?.length ?? 1, ...over.pr };
 }
 
-function mockGithub({ pr, files, environment, extraOpen = [], fail = {} }) {
-  const calls = { merged: [], labels: [], listFiles: 0, listArgs: [] };
+// ledgers: { base: { path: text }, head: { path: text } }; a path left out reads the same small ledger on both sides,
+// null reads as absent (404).
+function mockGithub({ pr, files, environment, extraOpen = [], fail = {}, ledgers = {} }) {
+  const calls = { merged: [], labels: [], listFiles: 0, listArgs: [], contents: [] };
   const commits = [{ sha: SHA, commit: {
     author: { name: fail.authorName ?? 'SimpleMemo Developer', email: 'simplememo.com@gmail.com' },
     committer: { name: 'GitHub', email: 'noreply@github.com' }, message: 'Safe fixture' } }];
@@ -204,6 +231,22 @@ function mockGithub({ pr, files, environment, extraOpen = [], fail = {} }) {
   };
   const github = {
     rest: { pulls,
+      repos: {
+        compareCommitsWithBasehead: async ({ basehead }) => {
+          assert.equal(basehead, `main...${SHA}`);
+          return { data: { merge_base_commit: { sha: fail.mergeBase ?? MERGE_BASE } } };
+        },
+        getContent: async ({ path: file, ref, mediaType }) => {
+          calls.contents.push(`${ref}:${file}`);
+          if (fail.content) throw Object.assign(new Error('server error'), { status: 500 });
+          assert.equal(mediaType?.format, 'raw');
+          // Like GitHub, an empty ref reads the default branch: here the same text as the merge base, so a gate that
+          // reads there sees no change.
+          assert(!ref || ref === MERGE_BASE || ref === SHA, `unexpected ref ${ref}`);
+          const text = (ref === SHA ? ledgers.head : ledgers.base)?.[file];
+          if (text === null) throw Object.assign(new Error('Not Found'), { status: 404 });
+          return { data: text ?? '{"runs":[]}\n' };
+        } },
       users: { getByUsername: async () => ({ data: { login: OWNER, name: 'SimpleMemo Developer', email: 'simplememo.com@gmail.com' } }) },
       issues: { addLabels: async args => { if (fail.label) throw new Error('label'); calls.labels.push(args); return { data: [] }; } } },
     paginate: async (fn, args) => {
@@ -337,9 +380,9 @@ async function selftest() {
     Object.assign(process.env, savedEnv);
   };
   const runAutoMerge = async ({ branch = 'claude/obsidian-auto-20261020', files = [file('index.html')], pr: prOver = {},
-    extraOpen = [], fail = {}, workspace = ROOT } = {}) => {
+    extraOpen = [], fail = {}, ledgers = {}, workspace = ROOT } = {}) => {
     const pr = fixturePr({ branch, files, pr: prOver });
-    const { github, calls } = mockGithub({ pr, files, extraOpen, fail });
+    const { github, calls } = mockGithub({ pr, files, extraOpen, fail, ledgers });
     const { core, out } = mockCore(fail);
     process.env.GITHUB_WORKSPACE = workspace;
     try {
@@ -370,6 +413,93 @@ async function selftest() {
   t(r.calls.merged.length === 0 && r.out.failed.length === 0 && r.out.outputs.approval_pr === '123', 'unloadable policy withholds');
   r = await runAutoMerge({ pr: { changed_files: MAX_LISTED_FILES + 1 } });
   t(r.calls.merged.length === 0 && r.calls.listFiles === 0 && r.out.outputs.approval_pr === '123', 'over 3000 files: approval without listing');
+
+  // The ledgers that gate the Autopilot (owner decision 2026-10-26): the gate reads runs and cost at the merge base and
+  // the validated head, and holds a PR whose ledgers changed other than as the runbook asks.
+  const runsDoc = rows => `${JSON.stringify({ $comment: 'c', seeded: true, runs: rows, retracted_observations: [] }, null, 2)}\n`;
+  const costDoc = (rows, cap = 280) => `${JSON.stringify({ $comment: 'c', budget: { monthly_usd_cap: cap }, runs: rows }, null, 2)}\n`;
+  const failure = { run_id: 'ap-20261019-actions-77', date_jst: '2026-10-19', route: 'actions', outcome: 'no_artifact',
+    failure_class: 'no_artifact' };
+  const today = { run_id: 'ap-20261020-actions-123', date_jst: '2026-10-20', route: 'actions', outcome: 'no_artifact',
+    failure_class: 'no_artifact', pr: 123 };
+  const spent = { run_id: 'ap-20261019-actions-77', date_jst: '2026-10-19', route: 'actions', total_cost_usd: 1.5 };
+  const ledgerBase = { [RUNS_LEDGER]: runsDoc([failure]), [COST_LEDGER]: costDoc([spent]) };
+  const ledgerPr = (head, files = ledgerOnly) => runAutoMerge({ files, ledgers: { base: ledgerBase, head } });
+  r = await ledgerPr({ [RUNS_LEDGER]: runsDoc([failure, today]),
+    [COST_LEDGER]: costDoc([{ ...spent, outcome: 'no_artifact', task_kind: 'article' }, { ...spent, run_id: today.run_id, date_jst: today.date_jst }]) });
+  t(r.calls.merged.length === 1 && !r.out.outputs.approval_pr && r.out.failed.length === 0, 'the day row, cost rows and fills auto-merge');
+  t([RUNS_LEDGER, COST_LEDGER].every(f => r.calls.contents.includes(`${MERGE_BASE}:${f}`) && r.calls.contents.includes(`${SHA}:${f}`))
+    && r.calls.contents.length === 4, 'both ledgers read at the merge base and the validated head');
+  for (const [head, reason] of [
+    [{ [RUNS_LEDGER]: runsDoc([{ ...failure, failure_class: 'no_artifact_v2' }, today]) }, `ledger:${RUNS_LEDGER}:row_rewritten`],
+    [{ [RUNS_LEDGER]: runsDoc([failure, { ...today, outcome: 'shipped', repair_of: [failure.run_id] }]) }, `ledger:${RUNS_LEDGER}:row_repair_of`],
+    [{ [RUNS_LEDGER]: runsDoc([today]) }, `ledger:${RUNS_LEDGER}:row_removed`],
+    [{ [RUNS_LEDGER]: runsDoc([failure, today, { ...today, run_id: 'ap-20261020-actions-124' }]) }, `ledger:${RUNS_LEDGER}:rows_added`],
+    [{ [COST_LEDGER]: costDoc([spent], 2800) }, `ledger:${COST_LEDGER}:header_changed`],
+    [{ [COST_LEDGER]: costDoc([{ ...spent, cap_review: { by: 'ai', at: '2026-10-20', why: 'reviewed' } }]) }, `ledger:${COST_LEDGER}:row_rewritten`],
+    [{ [COST_LEDGER]: costDoc([{ ...spent, total_cost_usd: 0.1 }]) }, `ledger:${COST_LEDGER}:row_rewritten`],
+    [{ [COST_LEDGER]: null }, `ledger:${COST_LEDGER}:unreadable`]]) {
+    r = await ledgerPr(head);
+    t(r.calls.merged.length === 0 && r.out.failed.length === 0 && r.out.outputs.approval_pr === '123'
+      && r.out.outputs.approval_files === fileListHash(ledgerOnly) && r.out.summaries[0]?.includes(escapeText(reason)), `held for approval: ${reason}`);
+  }
+  r = await ledgerPr({ [RUNS_LEDGER]: runsDoc([]) }, [file('index.html'), file(RUNS_LEDGER)]);
+  t(r.out.outputs.approval_pr === '123' && r.out.summaries[0]?.includes('approval:index.html')
+    && r.out.summaries[0]?.includes(escapeText(`ledger:${RUNS_LEDGER}:row_removed`)), 'an approval-class PR also lists its ledger reasons');
+  for (const fail of [{ content: true }, { mergeBase: '' }]) {
+    r = await runAutoMerge({ files: ledgerOnly, fail });
+    t(r.calls.merged.length === 0 && r.out.failed.length === 0 && r.out.outputs.approval_pr === '123'
+      && r.out.outputs.approval_files === fileListHash(ledgerOnly) && r.out.summaries[0]?.includes('ledger:unreadable'),
+    `unreadable ledgers hold the PR and keep its file fingerprint: ${Object.keys(fail)[0]}`);
+  }
+  r = await runAutoMerge({ files: [file('data/autopilot-status.json'), file('docs/obsidian/AUTOPILOT_LOG.md')] });
+  t(r.calls.merged.length === 1 && r.calls.contents.length === 0, 'no gated ledger changed: nothing read');
+  r = await runAutoMerge({ branch: 'claude/some-fix', files: [file(RUNS_LEDGER)], ledgers: { head: { [RUNS_LEDGER]: runsDoc([]) } } });
+  t(r.calls.merged.length === 1 && r.calls.contents.length === 0, 'other branches keep their auto-merge');
+
+  // The rules themselves (scripts/lib/ledger-append-only.mjs).
+  const lc = (file, before, after) => ledgerChange(file, before, after, { day: '2026-10-20' });
+  const runsBase = runsDoc([failure]);
+  for (const [after, code, why] of [
+    [runsBase, null, 'unchanged'],
+    [JSON.stringify(JSON.parse(runsBase)), null, 'reformatted only'],
+    [runsDoc([today, failure]), null, 'order is not compared'],
+    [runsDoc([failure, { ...today, repair_of: null }]), null, 'repair_of null is no repair'],
+    [runsDoc([failure, { ...today, date_jst: '2026-10-19' }]), 'row_other_day', 'a new row for another day'],
+    [runsDoc([failure, { ...today, run_id: undefined }]), 'row_without_run_id', 'a new row without run_id'],
+    [runsDoc([failure, failure]), 'duplicate_run_id', 'a repeated run_id'],
+    [runsDoc([{ ...failure, outcome: undefined }]), 'row_rewritten', 'a key removed from a row'],
+    [runsDoc([{ ...failure, ['__proto__']: {} }]), 'row_rewritten', 'a __proto__ key added to a row'],
+    [runsBase.replace('"seeded": true', '"seeded": false'), 'header_changed', 'seeded'],
+    [runsBase.replace('"retracted_observations": []', '"retracted_observations": [{}]'), 'header_changed', 'retracted observations'],
+    [`${String.fromCharCode(0xfeff)}${runsBase}`, 'unreadable', 'a BOM'],
+    ['{"runs": {}}', 'unreadable', 'runs not a list'],
+    ['{"runs": [1]}', 'unreadable', 'a row not an object'],
+    [null, 'unreadable', 'the ledger removed']]) {
+    t(lc(RUNS_LEDGER, runsBase, after) === code, `runs ledger: ${why}`);
+  }
+  t(lc(RUNS_LEDGER, null, runsBase) === 'unreadable' && lc(RUNS_LEDGER, null, null) === null, 'runs ledger: added, or absent on both sides');
+  const costBase = costDoc([{ ...spent, outcome: null }, { date_jst: '2026-10-01', route: 'ccr', total_cost_usd: 2 }]);
+  const loose = { date_jst: '2026-10-01', route: 'ccr', total_cost_usd: 2 };
+  for (const [after, code, why] of [
+    [costDoc([{ ...spent, outcome: 'failed' }, loose]), null, 'a missing result filled'],
+    [costDoc([{ ...spent, outcome: null }, loose, { ...spent, run_id: 'x' }, { ...spent, run_id: 'y' }, { ...loose }]), null, 'rows appended'],
+    [costDoc([{ ...spent, outcome: null }, loose, { ...spent, run_id: 'x', cap_review: { by: 'ai' } }]), 'row_cap_review', 'a new row with cap_review'],
+    [costDoc([{ ...spent, outcome: null, cap_review: { by: 'ai' } }, loose]), 'row_rewritten', 'an overrun acknowledged'],
+    [costDoc([{ ...spent, outcome: null, note: 'x' }, loose]), 'row_rewritten', 'a note added'],
+    [costDoc([{ ...spent, outcome: null }, { ...loose, total_cost_usd: 1 }]), 'row_removed', 'a row without run_id changed'],
+    [costDoc([{ ...spent, outcome: null }, loose], 281), 'header_changed', 'the cap raised']]) {
+    t(lc(COST_LEDGER, costBase, after) === code, `cost ledger: ${why}`);
+  }
+  t(lc(COST_LEDGER, costDoc([{ ...spent, outcome: 'shipped' }]), costDoc([{ ...spent, outcome: 'failed' }])) === 'row_rewritten',
+    'cost ledger: a recorded result is not replaced');
+  const unavailable = { ...spent, task_kind_unavailable: { reason: 'no_log' } };
+  t(lc(COST_LEDGER, costDoc([unavailable]), costDoc([{ ...spent, task_kind: 'article' }])) === null,
+    'cost ledger: filling task_kind drops task_kind_unavailable');
+  t(lc(COST_LEDGER, costDoc([unavailable]), costDoc([spent])) === 'row_rewritten', 'cost ledger: dropping it alone is no fill');
+  t(lc('data/autopilot-status.json', '{}', '{"runs":[]}') === 'not_a_gated_ledger', 'only the gated ledgers');
+  t(JSON.stringify(ledgerReasons([{ file: RUNS_LEDGER, before: runsBase, after: runsDoc([]) }], 'claude/some-fix'))
+    === '["ledger:unreadable_input"]', 'ledgerReasons needs a day branch');
   r = await runAutoMerge({ fail: { label: true, summary: true } });
   t(r.calls.merged.length === 0 && r.out.failed.length === 0 && r.out.outputs.approval_pr === '123', 'label/summary failures are display only');
   for (const branch of ['claude/autopilot-act-20261020', 'claude/obsidian-auto-20261020-owner-recovery', 'claude/obsidian-auto-test',
