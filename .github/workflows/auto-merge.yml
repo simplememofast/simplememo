@@ -14,7 +14,8 @@
 #
 # 【無人の自律運転ブランチはオーナーの承認つき（2026-10-20 オーナー判断・監査 F2/F3）】
 # claude/obsidian-auto-<YYYYMMDD> の PR は、台帳（scripts/lib/autopilot-paths.mjs の LEDGER と、
-# 新しく足した宣言・却下のファイル）だけを変えるときに限って、ここで自動マージする。
+# 新しく足した宣言・却下のファイル）だけを変えるときに限って、ここで自動マージする。ただし封じ込めと予算を
+# 決める runs・cost の台帳は中身も読み比べ、Runbook どおりの追記と補完でなければ承認待ちにする（2026-10-26）。
 # 台帳以外（ページ・スクリプト・/autopilot/ と翻訳・sitemap の生成物を含む）を変える PR は
 # 開いたまま残し、同じ run の merge-after-approval ジョブが Environment autopilot-approval で
 # オーナーの承認を待つ。判定は main の scripts/autopilot-approval-check.mjs。
@@ -238,7 +239,7 @@ jobs:
                   } catch {
                     core.info('ジョブサマリを書けなかった（判定には影響しない）');
                   }
-                  core.notice(`#${pr.number} は台帳以外を変えるため自動マージしない（承認待ち: merge-after-approval）`);
+                  core.notice(`#${pr.number} は台帳以外を変えるか、台帳を追記と補完以外の形で変えるため自動マージしない（承認待ち: merge-after-approval）`);
                   continue;
                 }
               }

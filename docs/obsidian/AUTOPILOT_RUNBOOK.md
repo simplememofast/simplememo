@@ -683,7 +683,8 @@ node scripts/autopilot-selfheal.mjs
    `required_ci_checks` の実在と `forbidden_permissions` の不在を見ている）
 4. 通常どおり §4 の全チェックを通してPRを出す
 5. **`data/autopilot-runs.json` の自分の行に `repair_of: ["<直した run_id>"]` を書く。**
-   書かない限り、その故障は翌日も「未修理」として上がってくる
+   書かない限り、その故障は翌日も「未修理」として上がってくる。Actions 経路の当日ブランチでは、台帳に
+   直接書かず、依頼の `run.repair_of` に書く（publish が記帳する行に書く。§5-4 の台帳の規則）
 
 **⛔ が出ている対象は直さない。** 同じ `failure_class` を3回修理しても再発している
 ということなので、**修理をやめて `owner_requests` に上げる**。直せないものを毎日
@@ -1272,7 +1273,8 @@ publish が `rejected_ledger_<理由>` で拒み、何も公開しない（`push
 
 - **運転台帳:** Actions 経路では書かない（記帳は publish の仕事）。書くなら当日の自分の1行だけで、
   `repair_of` は付けない（修理は依頼の `run.repair_of` に書く。レーンF）。
-- **実費台帳:** §5-3 の行の追記と、`--append --enrich-missing-metadata` が欠けた結果
+- **実費台帳:** §5-3 の行の追記（前回の run の実費。route は actions、日付は当日まで、金額は正、
+  `cap_review`・`cost_expectation` なし）と、`--append --enrich-missing-metadata` が欠けた結果
   （`outcome`・`task_kind` とその出典）を埋めることだけ。`--ack-overrun` と `budget` の変更は、
   このブランチではしない（当日ブランチの外で行う。[費用委任の手順](../cost-delegation.md)）。
 - 規則と理由のコードは `scripts/lib/ledger-append-only.mjs`。status JSON と LOG は毎日書き換える

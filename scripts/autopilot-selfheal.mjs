@@ -695,7 +695,7 @@ if (isMain) {
     console.log('  やってはいけない変更:');
     for (const f of a.must_not) console.log(`    ✗ ${f}`);
     console.log('');
-    console.log('  修理したら data/autopilot-runs.json の自分の行に repair_of を書く。');
+    console.log('  修理したら data/autopilot-runs.json の自分の行に repair_of を書く（Actions 経路の当日ブランチでは、依頼の run.repair_of に書く。Runbook §5-4）。');
     console.log('  書かない限り、その故障は翌日も「未修理」として上がってくる。');
   }
   if (problems.length) {

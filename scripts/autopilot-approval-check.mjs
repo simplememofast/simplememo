@@ -88,7 +88,8 @@ export function ledgerReasons(changes, branch) {
   if (!day || !Array.isArray(changes)) return ['ledger:unreadable_input'];
   const dash = `${day.slice(0, 4)}-${day.slice(4, 6)}-${day.slice(6, 8)}`;
   return changes.flatMap(({ file, before, after }) => {
-    const code = ledgerChange(file, before, after, { day: dash });
+    // Listed as changed but absent on both sides: the reads disagree with the file list.
+    const code = before == null && after == null ? 'unreadable' : ledgerChange(file, before, after, { day: dash });
     return code ? [`ledger:${file}:${code}`] : [];
   });
 }
@@ -483,7 +484,18 @@ async function selftest() {
   const loose = { date_jst: '2026-10-01', route: 'ccr', total_cost_usd: 2 };
   for (const [after, code, why] of [
     [costDoc([{ ...spent, outcome: 'failed' }, loose]), null, 'a missing result filled'],
-    [costDoc([{ ...spent, outcome: null }, loose, { ...spent, run_id: 'x' }, { ...spent, run_id: 'y' }, { ...loose }]), null, 'rows appended'],
+    [costDoc([{ ...spent, outcome: null }, loose, { ...spent, run_id: 'x' }, { ...spent, run_id: 'y', date_jst: '2026-10-20' }]), null, 'rows appended'],
+    [costDoc([{ ...spent, outcome: null }, loose, { ...loose }]), 'row_not_a_cost', 'a new row off the Actions route'],
+    [costDoc([{ ...spent, outcome: null }, loose, { ...spent, run_id: 'x', total_cost_usd: -500 }]), 'row_not_a_cost', 'a negative amount'],
+    [costDoc([{ ...spent, outcome: null }, loose, { ...spent, run_id: 'x', total_cost_usd: 0 }]), 'row_not_a_cost', 'a zero amount'],
+    [costDoc([{ ...spent, outcome: null }, loose, { ...spent, run_id: 'x', date_jst: '2026-10-21' }]), 'row_not_a_cost', 'a later day'],
+    [costDoc([{ ...spent, outcome: null }, loose, { ...spent, run_id: 'x', cost_expectation: { expected_usd: 99 } }]), 'row_cost_expectation',
+      'a new row with cost_expectation'],
+    [costDoc([{ ...spent, outcome: 'bogus' }, loose]), 'row_rewritten', 'an outcome outside OUTCOMES'],
+    [costDoc([{ ...spent, outcome: null, task_kind: 'other' }, loose]), 'row_rewritten', 'a task kind outside appendRun'],
+    [costDoc([{ ...spent, outcome: null, task_kind_source: { job_id: '1' } }, loose]), 'row_rewritten', 'a source without a task kind'],
+    [costDoc([{ ...spent, outcome: null }, loose]).replace('"total_cost_usd": 2', '"total_cost_usd": 1e999'), 'unreadable',
+      'a number JSON cannot hold'],
     [costDoc([{ ...spent, outcome: null }, loose, { ...spent, run_id: 'x', cap_review: { by: 'ai' } }]), 'row_cap_review', 'a new row with cap_review'],
     [costDoc([{ ...spent, outcome: null, cap_review: { by: 'ai' } }, loose]), 'row_rewritten', 'an overrun acknowledged'],
     [costDoc([{ ...spent, outcome: null, note: 'x' }, loose]), 'row_rewritten', 'a note added'],
@@ -498,6 +510,10 @@ async function selftest() {
     'cost ledger: filling task_kind drops task_kind_unavailable');
   t(lc(COST_LEDGER, costDoc([unavailable]), costDoc([spent])) === 'row_rewritten', 'cost ledger: dropping it alone is no fill');
   t(lc('data/autopilot-status.json', '{}', '{"runs":[]}') === 'not_a_gated_ledger', 'only the gated ledgers');
+  t(JSON.stringify(ledgerReasons([{ file: COST_LEDGER, before: null, after: null }], 'claude/obsidian-auto-20261020'))
+    === `["ledger:${COST_LEDGER}:unreadable"]`, 'listed as changed but absent on both sides');
+  t(lc(RUNS_LEDGER, runsBase, runsBase.replace('"route": "actions"', '"route": "actions", "pr": 1e999')) === 'unreadable',
+    'runs ledger: Infinity is not null');
   t(JSON.stringify(ledgerReasons([{ file: RUNS_LEDGER, before: runsBase, after: runsDoc([]) }], 'claude/some-fix'))
     === '["ledger:unreadable_input"]', 'ledgerReasons needs a day branch');
   r = await runAutoMerge({ fail: { label: true, summary: true } });

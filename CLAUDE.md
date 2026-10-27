@@ -106,8 +106,9 @@ mainへのマージ＝本番デプロイなので、検証を通ったコミッ�
   `claude/autopilot-act-*`、`Codex/*` など）の自動マージは変わらない。
   **封じ込めと予算を決める2つの台帳（`autopilot-runs.json`・`autopilot-cost.json`）は、
   ファイル名だけでなく中身も見る**（2026-10-26 オーナー判断）。マージの土台と検証済みの head を
-  API で読み比べ、Runbook どおりの形（runs は当日の1行の追記で `repair_of` なし、cost は行の追記と
-  欠けた結果の補完）でなければ、台帳だけの PR でも承認待ちにする。読めないときも承認待ち。
+  API で読み比べ、Runbook どおりの形（runs は当日の1行の追記で `repair_of` なし、cost は §5-3 の形の
+  行の追記（`cap_review`・`cost_expectation` なし）と欠けた結果の補完）でなければ、台帳だけの PR でも
+  承認待ちにする。読めないときも承認待ち。
   publish ジョブもモデルのコミットに同じ規則を当て、外れたら `rejected_ledger_<理由>` で何も
   公開しない。規則は `scripts/lib/ledger-append-only.mjs`。
 - **ワークフローファイルを触る PR は、head の blob がマージ結果の blob と一致しないと

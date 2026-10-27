@@ -12,20 +12,22 @@
 //     on the Actions route; the publish job records the day's row after its checks (or binds the row a session
 //     wrote itself) and writes repair_of from the request. A day that names repairs changes more than ledgers, so
 //     its PR waits for the owner's approval anyway.
-//   - the cost ledger: new rows (Runbook §5-3: the previous run's cost), without cap_review, and the result metadata
-//     that autopilot-budget.mjs --append --enrich-missing-metadata fills into a row that lacks it.
+//   - the cost ledger: new rows in the shape of Runbook §5-3 (the previous run's cost: route actions, a date up to the
+//     branch's day, a positive amount, no cap_review or cost_expectation), and the result metadata that
+//     autopilot-budget.mjs --append --enrich-missing-metadata fills into a row that lacks it, with the same values.
 // Everything else is refused: the other top-level keys (the budget block, notes), an existing row's values, a
-// removed row, two rows with one run_id. Rows are matched by run_id, so their order is not compared (the ledgers'
-// readers group rows by date). data/autopilot-status.json and the log are rewritten every day and gate nothing,
-// so they are not checked here.
+// removed row, two rows with one run_id, a number JSON cannot hold (1e999 reads as Infinity and would compare equal
+// to null). Rows are matched by run_id, so their order is not compared (the ledgers' readers group rows by date).
+// data/autopilot-status.json and the log are rewritten every day and gate nothing, so they are not checked here.
+
+import { OUTCOMES } from '../autopilot-runs.mjs';
 
 export const RUNS_LEDGER = 'data/autopilot-runs.json';
 export const COST_LEDGER = 'data/autopilot-cost.json';
 export const GATED_LEDGERS = Object.freeze([RUNS_LEDGER, COST_LEDGER]);
 
-// autopilot-budget.mjs appendRun({ enrichMissing }): keys it fills into a cost row where they are null or absent.
-// Filling task_kind also drops task_kind_unavailable.
-const COST_FILL = new Set(['outcome', 'task_kind', 'task_kind_source', 'task_kind_unavailable']);
+// autopilot-budget.mjs appendRun({ enrichMissing }) and its task kinds.
+const TASK_KINDS = ['article', 'repair', 'analysis'];
 
 const isObject = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const own = (object, key) => (Object.hasOwn(object, key) ? object[key] : undefined);
@@ -36,24 +38,44 @@ const canonical = value => JSON.stringify(value, (_, v) => (isObject(v)
 function parse(text) {
   if (typeof text !== 'string') return null;
   try {
-    const doc = JSON.parse(text);
+    let finite = true;
+    const doc = JSON.parse(text, (_, v) => { if (typeof v === 'number' && !Number.isFinite(v)) finite = false; return v; });
+    if (!finite) return null;
     return isObject(doc) && Array.isArray(doc.runs) && doc.runs.every(isObject) ? doc : null;
   } catch { return null; }
 }
 
 const runId = row => (typeof own(row, 'run_id') === 'string' && own(row, 'run_id') ? own(row, 'run_id') : null);
 
-// A cost row whose only changes are what an enrich run fills in.
+// A cost row whose only changes are what appendRun({ enrichMissing }) writes: a missing outcome or task kind (one of
+// its values), the source with a newly filled task kind (which drops task_kind_unavailable), or task_kind_unavailable
+// on a row with no task kind or source.
 function filledOnly(before, after) {
-  const filledKind = own(before, 'task_kind') == null && own(after, 'task_kind') != null;
+  const filledKind = own(before, 'task_kind') == null && TASK_KINDS.includes(own(after, 'task_kind'));
+  const allowed = {
+    outcome: (was, now) => was == null && OUTCOMES.includes(now),
+    task_kind: () => filledKind,
+    task_kind_source: (was, now) => filledKind && was == null && now != null,
+    task_kind_unavailable: (was, now) => (filledKind ? now === undefined
+      : was == null && now != null && own(before, 'task_kind') == null && own(before, 'task_kind_source') == null),
+  };
   for (const key of new Set([...Object.keys(before), ...Object.keys(after)])) {
     const was = own(before, key), now = own(after, key);
     if (canonical(was) === canonical(now)) continue;
-    if (COST_FILL.has(key) && was == null && now != null) continue;
-    if (key === 'task_kind_unavailable' && filledKind && now === undefined) continue;
+    if (Object.hasOwn(allowed, key) && allowed[key](was, now)) continue;
     return false;
   }
   return true;
+}
+
+// A new cost row in the shape of Runbook §5-3: the previous run's cost, measured, booked by the next session.
+function costRowCode(row, day) {
+  if (own(row, 'cap_review') !== undefined) return 'row_cap_review';
+  if (own(row, 'cost_expectation') !== undefined) return 'row_cost_expectation';
+  const cost = own(row, 'total_cost_usd'), date = own(row, 'date_jst');
+  if (own(row, 'route') !== 'actions' || typeof cost !== 'number' || !(cost > 0)
+    || typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !(typeof day === 'string' && date <= day)) return 'row_not_a_cost';
+  return null;
 }
 
 /**
@@ -94,7 +116,7 @@ export function ledgerChange(file, before, after, { day = null } = {}) {
     return 'row_rewritten';
   }
   const added = [...[...now].filter(([id]) => !was.has(id)).map(([, rows]) => rows[0]), ...looseAfter.map(row => JSON.parse(row))];
-  if (file === COST_LEDGER) return added.some(row => own(row, 'cap_review') !== undefined) ? 'row_cap_review' : null;
+  if (file === COST_LEDGER) return added.map(row => costRowCode(row, day)).find(Boolean) ?? null;
   if (added.length > 1) return 'rows_added';
   if (!added.length) return null;
   const [row] = added;

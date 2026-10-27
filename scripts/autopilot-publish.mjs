@@ -778,8 +778,8 @@ export function record({ repo, trusted, sha, day, pr, request, runId, work, runn
     const row = (ledger.runs ?? []).find(r => r.run_id === run.run_id);
     if (!row) fail('record_row_missing');
     if (run.repair_of) row.repair_of = [...run.repair_of];
-    // Re-checked here: this step reads the request again from the handoff, and a row the session
-    // wrote itself may carry its own repair_of. Targets must be on main and in this ledger.
+    // Re-checked here: this step reads the request again from the handoff. (A row the session wrote itself
+    // with its own repair_of is refused earlier, by verifyHandoff's ledger rule.) Targets must be on main and in this ledger.
     if (row.repair_of != null) {
       const ids = new Set(ledger.runs.map(r => r.run_id));
       if (!Array.isArray(row.repair_of) || repairOfCode(row, baseRunIds(repo)) || row.repair_of.some(target => !ids.has(target))) {
