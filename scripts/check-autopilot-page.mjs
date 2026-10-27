@@ -3,7 +3,8 @@
  * 公開ページ /autopilot/ の数字が、台帳の現在値と一致することを検査する。
  *
  *   node scripts/check-autopilot-page.mjs           # 表示
- *   node scripts/check-autopilot-page.mjs --check   # CI
+ *   node scripts/check-autopilot-page.mjs --check        # 台帳の現在値（今日の日付で計算した自律スコア）と照合
+ *   node scripts/check-autopilot-page.mjs --as-stamped   # 自律スコアだけ、ページに刻まれた計算日で計算して照合
  *   node scripts/check-autopilot-page.mjs --selftest
  *
  * 【なぜ要るか】
@@ -125,6 +126,55 @@ export function classifyFile(text, { allowed = false, today = null, live }) {
     found: r.found,
     frozen: fz.frozen, at: fz.at ?? null, note: fz.note ?? '',
   };
+}
+
+/**
+ * ページに刻まれた自律スコアの計算日（`<span data-decision-date>`）を読む。
+ *
+ * 【2026-10-27 提案。オーナーがマージを決めた時点で承認（docs/routine-ci-scope.md）】
+ * 自律スコアは 28 日の滑る窓で数えるので、**台帳が1行も変わらなくても、暦が進むだけで
+ * 今日の計算値はページから離れていく。**日次の Act が止まると約2日で全 PR が落ちていた
+ * （2026-10-17〜19 の詰まりと同じ型）。--as-stamped はスコアを「ページが自分で名乗る計算日」
+ * で計算し直して照合する。台帳と照合することはやめない。やめるのは時計を入力にすることだけ。
+ *
+ * **読めない刻みは、読めたことにしない。**ページにスコアが出ているのに刻みが無い、
+ * 刻みどうしが食い違う、日付として読めない、未来の日付 —— どれも問題として返す。
+ */
+export const DECISION_STAMP_RE = /<span data-decision-date>([^<]*)<\/span>/g;
+// 形が合っていても存在しない日（2026-13-01）は日付ではない。例外にせず false を返す。
+const isIsoDate = (d) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
+  const t = Date.parse(`${d}T00:00:00Z`);
+  return Number.isFinite(t) && new Date(t).toISOString().slice(0, 10) === d;
+};
+
+export function readDecisionStamp(html, { today }) {
+  const stamps = [...String(html).matchAll(DECISION_STAMP_RE)].map((m) => m[1].trim());
+  const showsScore = /<span data-score-total>/.test(html) || /<tr data-score="/.test(html);
+  const problems = [];
+  if (!stamps.length) {
+    if (showsScore) problems.push('自律スコアが出ているのに計算日（data-decision-date）が無い'
+      + ' — **いつの値かを名乗らない数字は、時点を決めて照合できない**');
+    return { stamp: null, problems };
+  }
+  const distinct = [...new Set(stamps)];
+  if (distinct.length > 1) {
+    problems.push(`計算日（data-decision-date）が食い違う: ${distinct.join(' / ')}`
+      + ' — **1枚のページに2つの時点を置かない**');
+    return { stamp: null, problems };
+  }
+  const stamp = distinct[0];
+  if (!isIsoDate(stamp)) {
+    problems.push(`計算日（data-decision-date）が日付として読めない: ${stamp}`);
+    return { stamp: null, problems };
+  }
+  if (!isIsoDate(today)) throw new Error('today must be a YYYY-MM-DD date');
+  if (stamp > today) {
+    problems.push(`計算日（data-decision-date）が未来: ${stamp}（今日 ${today}）`
+      + ' — **まだ来ていない日の値は照合できない**');
+    return { stamp: null, problems };
+  }
+  return { stamp, problems };
 }
 
 export const COVERAGE_PATH = path.join(ROOT, 'data/automation-coverage.json');
@@ -514,6 +564,27 @@ function selftest() {
   t('範囲表記（87〜100%）は率として読まない',
     compare('月次ではコミットの87〜100%が続いています', cr).problems.length === 0);
 
+  // 計算日の刻み（--as-stamped）— 読めない刻みを読めたことにしない
+  const stampPage = (d1, d2 = d1) => `<p><span data-decision-date>${d1}</span>時点</p>`
+    + `<b>自律スコアは<span data-score-total>43.7</span>点（<span data-decision-date>${d2}</span>時点）</b>`;
+  t('刻みが1つの日付にそろっていれば、その日で計算する',
+    readDecisionStamp(stampPage('2026-10-26'), { today: '2026-10-27' }).stamp === '2026-10-26');
+  t('**今日の刻みも読める**（Act が今朝書いたページ）',
+    readDecisionStamp(stampPage('2026-10-27'), { today: '2026-10-27' }).problems.length === 0);
+  t('**スコアが出ているのに刻みが無いと落ちる**',
+    readDecisionStamp('<span data-score-total>43.7</span>', { today: '2026-10-27' }).problems.length === 1);
+  t('スコアも刻みも無いページは問題にしない（照合する数字が無い）',
+    readDecisionStamp('自律スコアの話はしていない', { today: '2026-10-27' }).problems.length === 0);
+  t('**刻みどうしが食い違うと落ちる**',
+    readDecisionStamp(stampPage('2026-10-26', '2026-10-27'), { today: '2026-10-27' }).problems.some((p) => p.includes('食い違う')));
+  t('**日付として読めない刻みは落ちる**（2026-13-01 も）',
+    readDecisionStamp(stampPage('2026-13-01'), { today: '2026-10-27' }).problems.some((p) => p.includes('読めない'))
+    && readDecisionStamp(stampPage('10/26'), { today: '2026-10-27' }).stamp === null);
+  t('**未来の刻みは落ちる**（まだ来ていない日の値は照合できない）',
+    readDecisionStamp(stampPage('2026-10-28'), { today: '2026-10-27' }).problems.some((p) => p.includes('未来')));
+  t('刻みが読めないときは stamp を返さない（呼び出し側は今日で計算する）',
+    readDecisionStamp(stampPage('2026-10-26', '2026-10-27'), { today: '2026-10-27' }).stamp === null);
+
   if (failures.length) { console.log(`\nselftest: ${total}件中 ${failures.length}件 失敗`); return 1; }
   console.log(`\nselftest: 全${total}件 通過`);
   return 0;
@@ -522,6 +593,19 @@ function selftest() {
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(selftest());
+  // **--check が両方あれば --check（厳しいほう）。**--as-stamped は --check で始めない
+  // （check-authority は文字列の部分一致で必須の検査を探すので、紛らわしい名前にしない）。
+  const asStamped = process.argv.includes('--as-stamped') && !process.argv.includes('--check');
+  const today = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+  const stampProblems = [];
+  let scoreDay = today;
+  if (asStamped) {
+    const pageText = fs.existsSync(PAGE_PATH) ? fs.readFileSync(PAGE_PATH, 'utf8') : '';
+    const st = readDecisionStamp(pageText, { today });
+    stampProblems.push(...st.problems.map((x) => `${path.relative(ROOT, PAGE_PATH)}: ${x}`));
+    // 刻みが読めないときは今日で計算する（＝ --check と同じ厳しさ）。問題は別に落とす。
+    if (st.stamp) scoreDay = st.stamp;
+  }
 
   const doc = JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf8'));
   const summary = summarize(doc);
@@ -545,7 +629,7 @@ if (isMain) {
   // compare 側が「ページに出ているのに正が無い」で落とす。ここで 0 を捏造すると、
   // 計算できない日にページの数字が「合っている」ことになる。
   let autonomy = null, failureStages = null;
-  try { autonomy = autonomyScore(loadScoreContext()); }
+  try { autonomy = autonomyScore(loadScoreContext({ today: scoreDay })); }
   catch (e) { console.error(`自律スコアが計算できない（${e.message}）— §5 は照合できない`); }
   try {
     failureStages = {};
@@ -558,9 +642,8 @@ if (isMain) {
     lane_b: appReleases?.summary ?? null, streaks, code_rates: codeDoc ? knownRates(codeDoc) : null,
     autonomy_score: autonomy, failure_stages: failureStages };
   const targets = [PAGE_PATH, ...EXTRA_PATHS].filter((f) => fs.existsSync(f));
-  const problems = [];
+  const problems = [...stampProblems];
   const found = [];
-  const today = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
   const drifted = [];
   for (const f of targets) {
     const label = path.relative(ROOT, f);
@@ -584,6 +667,9 @@ if (isMain) {
   }
 
   console.log(`公開ページ /autopilot/ と配信本文 × 台帳 — 突き合わせた数字 ${found.length} 件`);
+  console.log(asStamped
+    ? `  自律スコアは、ページの計算日 ${scoreDay} で計算して照合した。**ページが今日の値かどうか（鮮度）はこの実行では判定していない — 健全とは言わない。**`
+    : `  自律スコアは、今日（${today}）の台帳の値で照合した。`);
   console.log(`  対象: ${targets.map((f) => path.relative(ROOT, f)).join(' / ')}\n`);
   for (const f of found) {
     const mark = f.got === f.want ? '一致' : (f.frozen ? '時点差' : '不一致');
@@ -609,4 +695,5 @@ if (isMain) {
     process.exit(1);
   }
   if (process.argv.includes('--check')) console.log('\n公開ページの数字は台帳の現在値と一致。');
+  else if (asStamped) console.log(`\n公開ページの数字は、計算日 ${scoreDay} の台帳の値と一致（鮮度は判定していない）。`);
 }

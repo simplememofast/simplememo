@@ -61,6 +61,7 @@ jobs:
             const scope = routineCiScope({ eventName: context.eventName, event: context.payload });
             core.setOutput('required', String(scope.required));
             core.setOutput('waiting_required', String(scope.waitingRequired));
+            core.setOutput('page_required', String(scope.pageRequired));
             await core.summary.addHeading('Routine observation scope')
               .addRaw(scope.mode !== 'pull-request'
                 ? 'Operational health and ledger freshness run in the independent routine-health job. Its failure remains visible and does not stop site tests.\n'
@@ -69,7 +70,10 @@ jobs:
                   : 'This PR does not change routine operations. Observation health and autopilot run ledger freshness are not assessed by this PR and are not site publication gates; ledger shape and status agreement still run. See the main/daily routine-health job; this is not a healthy observation.\n')
                 + (scope.waitingRequired
                   ? 'This PR changes waiting-progress inputs. The waiting progress freshness check is required for publication.\n'
-                  : 'This PR does not change waiting-progress inputs. Waiting progress freshness is not assessed by this PR and is not a site publication gate; waiting configuration and counter readability still run. See the main/daily routine-health job; this is not a healthy observation.\n'))
+                  : 'This PR does not change waiting-progress inputs. Waiting progress freshness is not assessed by this PR and is not a site publication gate; waiting configuration and counter readability still run. See the main/daily routine-health job; this is not a healthy observation.\n')
+                + (scope.pageRequired
+                  ? 'This PR changes routine operations or the autopilot page, its checker, score or publisher. The page freshness check (today\'s ledger values) is required for publication.\n'
+                  : 'This PR does not change the autopilot page or its inputs. Page freshness is not assessed by this PR and is not a site publication gate; the page is still compared with the ledgers at its own stamped date. See the main/daily routine-health job; this is not a healthy observation.\n'))
               .addCodeBlock(JSON.stringify(scope, null, 2), 'json').write();
 
       - name: Auto-merge identity guard regression
@@ -1213,10 +1217,18 @@ jobs:
           node growth/scripts/check-stoploss.mjs --selftest
           node growth/scripts/check-stoploss.mjs --check
 
+      # 2026-10-27 提案（オーナーがマージを決めた時点で承認。docs/routine-ci-scope.md）:
+      # 全PRでは、自律スコアをページに刻まれた計算日で計算して照合する（--as-stamped）。
+      # 台帳との照合はやめない。やめるのは時計を入力にすることだけ。今日の値かどうか
+      # （--check）は、運用かページ・検査器・スコア・公開器に触るPRと routine-health で見る。
       - name: Autopilot page vs ledger
         run: |
           node scripts/check-autopilot-page.mjs --selftest
-          node scripts/check-autopilot-page.mjs --check
+          node scripts/check-autopilot-page.mjs --as-stamped
+
+      - name: Required autopilot page freshness
+        if: github.event_name == 'pull_request' && steps.routine_scope.outputs.page_required == 'true'
+        run: node scripts/check-autopilot-page.mjs --check
 
       # PR実験の評価期限の導出。**回さなければ手元でしか走っていない。**
       # 実データの「9/16 は0件・9/17 は1件」も自己テストが固定しているので、
@@ -1612,6 +1624,10 @@ jobs:
         id: waiting_progress_health
         if: always() && github.event_name != 'pull_request'
         run: node scripts/check-waiting-progress.mjs --check
+      - name: Autopilot page freshness health
+        id: autopilot_page_health
+        if: always() && github.event_name != 'pull_request'
+        run: node scripts/check-autopilot-page.mjs --check
       - name: Record actual observation health outcomes
         if: always()
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -1620,6 +1636,7 @@ jobs:
           CODEX_OUTCOME: ${{ steps.codex_health.outcome }}
           AUTOPILOT_RUNS_OUTCOME: ${{ steps.autopilot_runs_health.outcome }}
           WAITING_PROGRESS_OUTCOME: ${{ steps.waiting_progress_health.outcome }}
+          AUTOPILOT_PAGE_OUTCOME: ${{ steps.autopilot_page_health.outcome }}
         with:
           script: |
             await core.summary.addHeading('Routine observation and ledger freshness health')
@@ -1629,4 +1646,5 @@ jobs:
                 ['Codex snapshot', process.env.CODEX_OUTCOME || 'not run'],
                 ['Autopilot run ledger', process.env.AUTOPILOT_RUNS_OUTCOME || 'not run'],
                 ['Waiting progress', process.env.WAITING_PROGRESS_OUTCOME || 'not run'],
+                ['Autopilot page vs ledger', process.env.AUTOPILOT_PAGE_OUTCOME || 'not run'],
               ]).addRaw('\nFailure remains a failed job/workflow. See checker output for the actual diagnostic; failure is not automatically classified as staleness. No observation or ledger was collected, refreshed or modified.\n').write();

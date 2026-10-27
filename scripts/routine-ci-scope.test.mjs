@@ -249,6 +249,7 @@ test('every scope-gated step runs only checkers that are themselves in that scop
   const gates = [
     ["steps.routine_scope.outputs.required == 'true'", file => routineScopeForPaths([file]).required],
     ["steps.routine_scope.outputs.waiting_required == 'true'", file => routineScopeForPaths([file]).waitingRequired],
+    ["steps.routine_scope.outputs.page_required == 'true'", file => routineScopeForPaths([file]).pageRequired],
   ];
   let gated = 0;
   for (const step of jobSteps(site)) {
@@ -260,7 +261,7 @@ test('every scope-gated step runs only checkers that are themselves in that scop
       for (const file of scripts) assert.equal(inScope(file), true, step.name + ': ' + file);
     }
   }
-  assert.equal(gated, 4, 'Claude, Codex, autopilot run ledger and waiting progress freshness steps');
+  assert.equal(gated, 5, 'Claude, Codex, autopilot run ledger, waiting progress and autopilot page freshness steps');
 });
 
 test('ledger freshness steps: integrity on every PR, full check only when in scope, health stays independent', () => {
@@ -283,7 +284,8 @@ test('ledger freshness steps: integrity on every PR, full check only when in sco
   }
   for (const [name, condition, command] of [
     ['Required autopilot run ledger freshness', "steps.routine_scope.outputs.required == 'true'", 'node scripts/autopilot-runs.mjs --check'],
-    ['Required waiting progress freshness', "steps.routine_scope.outputs.waiting_required == 'true'", 'node scripts/check-waiting-progress.mjs --check']]) {
+    ['Required waiting progress freshness', "steps.routine_scope.outputs.waiting_required == 'true'", 'node scripts/check-waiting-progress.mjs --check'],
+    ['Required autopilot page freshness', "steps.routine_scope.outputs.page_required == 'true'", 'node scripts/check-autopilot-page.mjs --check']]) {
     const gated = step(name);
     assert.equal(gated.cond, "github.event_name == 'pull_request' && " + condition, name);
     assert.doesNotMatch(gated.block, /continue-on-error|\|\|\s*true/);
@@ -292,11 +294,19 @@ test('ledger freshness steps: integrity on every PR, full check only when in sco
   // The scope outputs are exact strings of the helper's booleans.
   assert.match(site, /core\.setOutput\('required', String\(scope\.required\)\);/);
   assert.match(site, /core\.setOutput\('waiting_required', String\(scope\.waitingRequired\)\);/);
+  assert.match(site, /core\.setOutput\('page_required', String\(scope\.pageRequired\)\);/);
+  // The page step compares at the page's stamped date on every PR; it never drops the comparison.
+  const page = step('Autopilot page vs ledger');
+  assert.equal(page.cond, null);
+  assert.match(page.block, /^          node scripts\/check-autopilot-page\.mjs --selftest$/m);
+  assert.match(page.block, /^          node scripts\/check-autopilot-page\.mjs --as-stamped$/m);
+  assert.doesNotMatch(page.block, /check-autopilot-page\.mjs --check/);
 
   const healthSteps = jobSteps(health);
   for (const [name, id, command] of [
     ['Autopilot run ledger health', 'autopilot_runs_health', 'node scripts/autopilot-runs.mjs --check'],
-    ['Waiting progress health', 'waiting_progress_health', 'node scripts/check-waiting-progress.mjs --check']]) {
+    ['Waiting progress health', 'waiting_progress_health', 'node scripts/check-waiting-progress.mjs --check'],
+    ['Autopilot page freshness health', 'autopilot_page_health', 'node scripts/check-autopilot-page.mjs --check']]) {
     const found = healthSteps.filter(s => s.name === name);
     assert.equal(found.length, 1, name);
     assert.equal(found[0].cond, "always() && github.event_name != 'pull_request'", name);
@@ -308,14 +318,15 @@ test('ledger freshness steps: integrity on every PR, full check only when in sco
 
   // check-authority matches required commands as substrings of the whole file.
   // The literal must only occur as real run lines, never in comments or summary text.
-  for (const command of ['node scripts/autopilot-runs.mjs --check', 'node scripts/check-waiting-progress.mjs --check']) {
+  for (const command of ['node scripts/autopilot-runs.mjs --check', 'node scripts/check-waiting-progress.mjs --check',
+    'node scripts/check-autopilot-page.mjs --check']) {
     const lines = workflow.split('\n').filter(line => line.includes(command));
     assert.equal(lines.length, 2, command);
     for (const line of lines) assert.equal(line.trim(), 'run: ' + command, command);
     assert.equal(site.split('\n').filter(line => line.trim() === 'run: ' + command).length, 1, command);
     assert.equal(health.split('\n').filter(line => line.trim() === 'run: ' + command).length, 1, command);
   }
-  const extended = workflow.split('\n').filter(line => /(?:autopilot-runs|check-waiting-progress)\.mjs --check[\w-]/.test(line));
+  const extended = workflow.split('\n').filter(line => /(?:autopilot-runs|check-waiting-progress|check-autopilot-page)\.mjs --check[\w-]/.test(line));
   assert.deepEqual(extended, [], 'no flag of these checkers may extend --check and satisfy the substring guard');
 });
 
@@ -362,14 +373,16 @@ async function runScopeScript(eventName, payload, outputs = {}) {
 test('the main/daily health summary records each actual outcome and does not classify failures', async () => {
   const { health } = workflowJobs();
   for (const [name, id] of [['CLAUDE_OUTCOME', 'claude_health'], ['CODEX_OUTCOME', 'codex_health'],
-    ['AUTOPILOT_RUNS_OUTCOME', 'autopilot_runs_health'], ['WAITING_PROGRESS_OUTCOME', 'waiting_progress_health']]) {
+    ['AUTOPILOT_RUNS_OUTCOME', 'autopilot_runs_health'], ['WAITING_PROGRESS_OUTCOME', 'waiting_progress_health'],
+    ['AUTOPILOT_PAGE_OUTCOME', 'autopilot_page_health']]) {
     assert.match(health, new RegExp('^          ' + name + ': \\$\\{\\{ steps\\.' + id + '\\.outcome \\}\\}$', 'm'), name);
   }
   const { tables, text } = await runGithubScript('- name: Record actual observation health outcomes', { env: {
-    CLAUDE_OUTCOME: 'success', CODEX_OUTCOME: 'failure', AUTOPILOT_RUNS_OUTCOME: 'failure', WAITING_PROGRESS_OUTCOME: '' } });
+    CLAUDE_OUTCOME: 'success', CODEX_OUTCOME: 'failure', AUTOPILOT_RUNS_OUTCOME: 'failure', WAITING_PROGRESS_OUTCOME: '',
+    AUTOPILOT_PAGE_OUTCOME: 'failure' } });
   assert.equal(tables.length, 1);
   assert.deepEqual(tables[0].slice(1), [['Claude snapshot', 'success'], ['Codex snapshot', 'failure'],
-    ['Autopilot run ledger', 'failure'], ['Waiting progress', 'not run']]);
+    ['Autopilot run ledger', 'failure'], ['Waiting progress', 'not run'], ['Autopilot page vs ledger', 'failure']]);
   assert.match(text, /Failure remains a failed job\/workflow/);
   assert.match(text, /failure is not automatically classified as staleness/);
 });
@@ -392,7 +405,7 @@ test('the real workflow scope script fails closed and never emits a scope for in
   }
   for (const eventName of ['push', 'schedule', 'workflow_call']) {
     const { outputs, text } = await runScopeScript(eventName, {});
-    assert.deepEqual(outputs, { required: 'true', waiting_required: 'true' });
+    assert.deepEqual(outputs, { required: 'true', waiting_required: 'true', page_required: 'true' });
     assert.match(text, /routine-health/);
   }
   // A PR whose base and head are the same commit changes nothing: both freshness
@@ -400,7 +413,8 @@ test('the real workflow scope script fails closed and never emits a scope for in
   const head = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
   const { outputs, text } = await runScopeScript('pull_request',
     { pull_request: { base: { ref: 'main', sha: head }, head: { sha: head } } });
-  assert.deepEqual(outputs, { required: 'false', waiting_required: 'false' });
+  assert.deepEqual(outputs, { required: 'false', waiting_required: 'false', page_required: 'false' });
+  assert.match(text, /Page freshness is not assessed/);
   assert.match(text, /autopilot run ledger freshness are not assessed/);
   assert.match(text, /Waiting progress freshness is not assessed/);
   assert.match(text, /this is not a healthy observation/);
@@ -594,4 +608,30 @@ test('waiting progress: --integrity ignores only stalls; configuration and reada
   save(new Date(Date.now() - 60000).toISOString().replace(/\.\d{3}Z$/, 'Z'));
   assert.equal(cli(dir, script, '--check'), 0, 'moving counter passes the full check');
   assert.equal(cli(dir, script, '--integrity'), 0, 'moving counter passes integrity');
+});
+
+test('autopilot page freshness: required for operations and for the page, checker, score and publisher only', () => {
+  for (const file of ['autopilot/index.html', 'index.html', 'docs/pr-autopilot-2026-09-body.md',
+    'docs/pr-autopilot-2026-09-final.md', 'scripts/check-autopilot-page.mjs', 'scripts/autonomy-score.mjs',
+    'scripts/decision-monitor.mjs']) {
+    const scope = routineScopeForPaths([file]);
+    assert.equal(scope.pageRequired, true, file);
+    assert.equal(scope.pageCount, 1, file);
+  }
+  // The daily Act PR changes the run ledger and regenerates the page: it owns page freshness.
+  const act = routineScopeForPaths(['data/autopilot-runs.json']);
+  assert.equal(act.pageRequired, true);
+  assert.equal(act.pageCount, 0);
+  // A site-only change, a translated copy the checker does not read, and a waiting input do not.
+  for (const file of ['blog/obsidian-iphone-memo/index.html', 'ar/autopilot/index.html', 'data/revenue-series.json']) {
+    assert.equal(routineScopeForPaths([file]).pageRequired, false, file);
+  }
+  // The checker must list exactly the page files it compares; otherwise a compared file could escape the gate.
+  const checker = fs.readFileSync('scripts/check-autopilot-page.mjs', 'utf8');
+  const extra = [...checker.matchAll(/path\.join\(ROOT, '([^']+)'\)/g)].map(m => m[1])
+    .filter(f => /\.(?:html|md)$/.test(f));
+  assert.ok(extra.includes('autopilot/index.html') && extra.includes('index.html'));
+  for (const file of extra) assert.equal(routineScopeForPaths([file]).pageRequired, true, file);
+  // Non-PR contexts always run the full page check in routine-health.
+  assert.equal(routineCiScope({ eventName: 'push' }).pageRequired, true);
 });

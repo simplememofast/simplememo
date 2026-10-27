@@ -55,6 +55,23 @@ const WAITING_PROGRESS_PATHS = new Set([
 // reports the old side of a rename as a deletion.
 const WAITING_APPEND_ONLY_DIRS = ['growth/data/gsc'];
 
+// Proposed 2026-10-27 in a draft PR (docs/routine-ci-scope.md); in force on a main
+// that contains it. Every PR compares the public autopilot page with the ledgers
+// at the page's own stamped date (check-autopilot-page --as-stamped). Whether the
+// page is today's value (--check) is a publication gate only for a PR that changes
+// routine operations (the daily Act PR regenerates the page) or one of these files:
+// the compared pages, the checker, the score it recomputes, and the publisher that
+// writes the stamp. Main/daily still runs --check in routine-health.
+const AUTOPILOT_PAGE_PATHS = new Set([
+  'autopilot/index.html',
+  'index.html',
+  'docs/pr-autopilot-2026-09-body.md',
+  'docs/pr-autopilot-2026-09-final.md',
+  'scripts/check-autopilot-page.mjs',
+  'scripts/autonomy-score.mjs',
+  'scripts/decision-monitor.mjs',
+]);
+
 function assertPaths(paths, missing) {
   if (!Array.isArray(paths)) throw new Error(missing);
   for (const file of paths) {
@@ -80,17 +97,19 @@ export function routineScopeForPaths(paths, { deletedPaths } = {}) {
   }
   const matched = paths.filter(file => OPERATIONAL_PATHS.has(file));
   const waiting = paths.filter(file => WAITING_PROGRESS_PATHS.has(file));
+  const page = paths.filter(file => AUTOPILOT_PAGE_PATHS.has(file));
   return { required: matched.length > 0, changedCount: paths.length, operationalCount: matched.length,
     waitingRequired: waiting.length + deletions.length > 0, waitingCount: waiting.length,
-    waitingDeletionCount: deletions.length };
+    waitingDeletionCount: deletions.length,
+    pageRequired: matched.length + page.length > 0, pageCount: page.length };
 }
 
 export function routineCiScope({ eventName, event, repo = process.cwd() }) {
   // Non-PR contexts never infer a site-only exemption. The workflow runs their
   // real checks in an independent monitor job, including the existing daily call.
   if (eventName !== 'pull_request') {
-    return { required: true, waitingRequired: true, mode: 'operational-monitor',
-      changedCount: null, operationalCount: null, waitingCount: null, waitingDeletionCount: null };
+    return { required: true, waitingRequired: true, pageRequired: true, mode: 'operational-monitor',
+      changedCount: null, operationalCount: null, waitingCount: null, waitingDeletionCount: null, pageCount: null };
   }
   const pr = event?.pull_request;
   const base = pr?.base?.sha;
