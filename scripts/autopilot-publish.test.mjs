@@ -244,6 +244,8 @@ test('a PR is opened only with its translations: checked before anything is push
     calls.length = 0;
     assert.equal(await verdictOf(f, { outcome: 'failure', translations: stub('incomplete') }), 'push_only');
     assert.equal(await verdictOf(f, { req: request({ action: 'none' }), translations: stub('incomplete') }), 'none');
+    assert.equal(await verdictOf(f, { req: request({ action: 'push_only' }), translations: stub('incomplete') }), 'push_only',
+      'a push_only request after a successful model step');
     assert.equal(calls.length, 0, 'only a day that opens a PR is checked');
     // The real check: a work tree of the head with the workflow commit's scripts, removed afterwards.
     const result = await handoff(f);

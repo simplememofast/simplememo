@@ -171,10 +171,14 @@ export function verifyLocal({ cwd = ROOT, baseRef = 'origin/main', translations 
   // (2026-10-27 review). The PR carries HEAD only, so the check runs on committed work (about five minutes).
   if (translations && needsTranslationCheck(touched)) {
     const uncommitted = pending.filter(p => needsTranslationCheck([p]));
-    if (uncommitted.length) problems.push(`translations not checked: commit the work first (the PR carries HEAD only): ${uncommitted.join(', ')}`);
+    if (uncommitted.length) problems.push(`translations not checked: commit or remove the uncommitted work first (the PR carries HEAD only): ${uncommitted.join(', ')}`);
     else {
       const code = translations(cwd);
-      if (code) problems.push(`translations ${code} (build_site_translations.py --check): translate the edited pages, then --write, --check and commit (prompt step 4)`);
+      const hint = { unregistered: 'add the new page to data/i18n/pages.json, then --write and --check',
+        failed: 'the check itself failed: run python3 scripts/build_site_translations.py --check and read its error',
+        unchecked: 'the check did not finish: run it again in the foreground (about five minutes)' }[code]
+        ?? 'translate the edited pages, then --write, --check and commit (prompt step 4)';
+      if (code) problems.push(`translations ${code} (build_site_translations.py --check): ${hint}`);
     }
   }
   return { branch, base, head, problems };
@@ -396,7 +400,7 @@ async function selftest() {
     // Uncommitted work is not checked (the PR carries HEAD only): the session is told to commit first.
     fs.writeFileSync(path.join(dir, 'index.html'), 'uncommitted\n');
     translationCalls.length = 0;
-    assert(local('incomplete').problems.some(p => p === 'translations not checked: commit the work first (the PR carries HEAD only): index.html'),
+    assert(local('incomplete').problems.some(p => p === 'translations not checked: commit or remove the uncommitted work first (the PR carries HEAD only): index.html'),
       'uncommitted page work is named');
     assert.equal(translationCalls.length, 0, 'and not checked');
     g('checkout', '-q', '--', 'index.html');

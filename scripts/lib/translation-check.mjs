@@ -43,8 +43,7 @@ const CHILD_ENV_DROP = /TOKEN|SECRET|PASSWORD|CREDENTIAL|^ACTIONS_|^GITHUB_(?:EN
 export function runTranslationCheck(cwd, runner = spawnSync) {
   const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !CHILD_ENV_DROP.test(key)));
   return translationsVerdict(runner('python3', ['-E', '-s', 'scripts/build_site_translations.py', '--check'], {
-    cwd, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, timeout: 9 * 60_000,
     // python3 -E -s ignores PYTHON* variables and the user site, as the record step runs it.
-    env: { ...env, PYTHONDONTWRITEBYTECODE: '1' },
+    cwd, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, timeout: 9 * 60_000, env,
   }));
 }
