@@ -33,6 +33,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { OUTCOMES, validate as validateRuns } from './autopilot-runs.mjs';
 import { hardDenyReason, MAX_COMMITS, MAX_TOTAL_BYTES, RECORD_PATHS } from './lib/autopilot-paths.mjs';
+import { GATED_LEDGERS, ledgerChange } from './lib/ledger-append-only.mjs';
 import { needsTranslationCheck, runTranslationCheck } from './lib/translation-check.mjs';
 
 const require = createRequire(import.meta.url);
@@ -579,6 +580,14 @@ export async function verifyHandoff({ handoff, repo, day, takeover = false, forc
   // A forbidden identity must never reach a public branch (same rule as auto-merge).
   if (findUnapprovedPrincipals(commitPrincipals(repo, commits)).length) fail('rejected_identity');
 
+  // The ledgers that gate the Autopilot (containment, budget) change only the way the runbook asks for
+  // (scripts/lib/ledger-append-only.mjs), compared with the merge base. Checked on push_only days too: the branch is public.
+  for (const file of GATED_LEDGERS) {
+    const code = ledgerChange(file, git(repo, ['show', `${base}:${file}`], { allowFail: true }),
+      git(repo, ['show', `${head}:${file}`], { allowFail: true }), { day: dash });
+    if (code) fail(`rejected_ledger_${code}`);
+  }
+
   if (modelOutcome === 'failure') return { verdict: 'push_only', head, commit_count: commits.length };
   const raw = readJson(path.join(handoff, 'request.json'));
   if (!raw.value) fail(`rejected_request_${raw.reason}`);
@@ -803,8 +812,8 @@ export function record({ repo, trusted, sha, day, pr, request, runId, work, runn
     const row = (ledger.runs ?? []).find(r => r.run_id === run.run_id);
     if (!row) fail('record_row_missing');
     if (run.repair_of) row.repair_of = [...run.repair_of];
-    // Re-checked here: this step reads the request again from the handoff, and a row the session
-    // wrote itself may carry its own repair_of. Targets must be on main and in this ledger.
+    // Re-checked here: this step reads the request again from the handoff. (A row the session wrote itself
+    // with its own repair_of is refused earlier, by verifyHandoff's ledger rule.) Targets must be on main and in this ledger.
     if (row.repair_of != null) {
       const ids = new Set(ledger.runs.map(r => r.run_id));
       if (!Array.isArray(row.repair_of) || repairOfCode(row, baseRunIds(repo)) || row.repair_of.some(target => !ids.has(target))) {

@@ -45,7 +45,7 @@ const RUNS_CLI = ['scripts/autopilot-runs.mjs', 'scripts/lib/read-ledger.mjs', '
   'scripts/lib/intervention-observation.mjs'];
 
 /** origin (bare) + model workspace + trusted tools clone, all under one temp directory. */
-function fixture({ stopped = false, statusDate = '2026-10-19', runs = [], trustedFiles = [] } = {}) {
+function fixture({ stopped = false, statusDate = '2026-10-19', runs = [], cost = null, trustedFiles = [] } = {}) {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'autopilot-publish-')));
   const origin = path.join(root, 'origin.git');
   const seed = path.join(root, 'seed');
@@ -54,6 +54,7 @@ function fixture({ stopped = false, statusDate = '2026-10-19', runs = [], truste
   write(seed, 'data/emergency-stop.json', JSON.stringify({ stopped, agents: { actions: { stopped: false } } }));
   write(seed, 'data/autopilot-status.json', JSON.stringify({ date_jst: statusDate }));
   write(seed, 'data/autopilot-runs.json', JSON.stringify({ runs }, null, 2) + '\n');
+  if (cost !== null) write(seed, 'data/autopilot-cost.json', cost);
   write(seed, 'obsidian/index.html', '<p>hub</p>\n');
   write(seed, 'scripts/trusted-marker.txt', 'trusted\n');
   for (const file of trustedFiles) write(seed, file, fs.readFileSync(path.join(ROOT, file)));
@@ -195,6 +196,51 @@ test('forbidden identities are never published', async () => {
     sh(f.work, ['add', '-A']);
     sh(f.work, ['commit', '-q', '-m', 'x'], BOT, { GIT_COMMITTER_NAME: 'Someone', GIT_COMMITTER_EMAIL: 'someone@example.com' });
     assert.equal(await verdictOf(f), 'rejected_identity');
+  } finally { f.cleanup(); }
+});
+
+test('the ledgers that gate the Autopilot change only as the runbook asks, push_only days included', async () => {
+  // Owner decision 2026-10-26: a model commit that rewrites the run or cost ledger is not published
+  // (scripts/lib/ledger-append-only.mjs; the approval gate applies the same rules to the whole PR).
+  const target = 'ap-20261019-actions-77';
+  const spent = { run_id: target, date_jst: '2026-10-19', route: 'actions', total_cost_usd: 1.5, outcome: null };
+  const cost = (rows, cap = 280) => JSON.stringify({ budget: { monthly_usd_cap: cap }, runs: rows }, null, 2) + '\n';
+  const runs = rows => JSON.stringify({ runs: rows }, null, 2) + '\n';
+  const dayRow = { run_id: `ap-${DAY}-actions-123`, date_jst: '2026-10-20', route: 'actions', attempted: true, outcome: 'shipped',
+    pr: null, external_ref: '123', source: 'session', interventions: [] };
+  const RUNS = 'data/autopilot-runs.json', COST = 'data/autopilot-cost.json';
+  for (const [why, files, outcome, expected] of [
+    ['a cost row appended and a missing result filled', { [COST]: cost([{ ...spent, outcome: 'failed' },
+      { ...spent, run_id: 'ap-20261020-actions-1', date_jst: '2026-10-20' }]) }, 'success', 'publish'],
+    ["the session's own row for the day", { [RUNS]: runs([failedRow(target), dayRow]) }, 'success', 'publish'],
+    ['a failure relabelled', { [RUNS]: runs([{ ...failedRow(target), failure_class: 'ci_red_v2' }]) }, 'success', 'rejected_ledger_row_rewritten'],
+    ['a failure removed', { [RUNS]: runs([]) }, 'success', 'rejected_ledger_row_removed'],
+    ['a repair named in the ledger', { [RUNS]: runs([failedRow(target), { ...dayRow, repair_of: [target] }]) }, 'success',
+      'rejected_ledger_row_repair_of'],
+    ['a row for another day', { [RUNS]: runs([failedRow(target), { ...dayRow, date_jst: '2026-10-19' }]) }, 'success',
+      'rejected_ledger_row_other_day'],
+    ['the monthly cap raised', { [COST]: cost([spent], 2800) }, 'success', 'rejected_ledger_header_changed'],
+    ['an overrun acknowledged', { [COST]: cost([{ ...spent, cap_review: { by: 'ai', at: '2026-10-20', why: 'within five times' } }]) },
+      'success', 'rejected_ledger_row_rewritten'],
+    ['a recorded cost lowered', { [COST]: cost([{ ...spent, total_cost_usd: 0.1 }]) }, 'success', 'rejected_ledger_row_rewritten'],
+    ['push_only: a failure relabelled', { [RUNS]: runs([{ ...failedRow(target), failure_class: 'ci_red_v2' }]) }, 'failure',
+      'rejected_ledger_row_rewritten'],
+    ['push_only: ledgers untouched', {}, 'failure', 'push_only']]) {
+    const f = fixture({ runs: [failedRow(target)], cost: cost([spent]) });
+    try {
+      for (const [file, text] of Object.entries(files)) write(f.work, file, text);
+      commitPage(f);
+      assert.equal(await verdictOf(f, { outcome }), expected, why);
+    } finally { f.cleanup(); }
+  }
+  // Rewritten in one commit and put back in the next: compared with the merge base, nothing changed.
+  const f = fixture({ runs: [failedRow(target)] });
+  try {
+    write(f.work, RUNS, runs([{ ...failedRow(target), failure_class: 'ci_red_v2' }]));
+    commitPage(f);
+    write(f.work, RUNS, runs([failedRow(target)]));
+    commitPage(f, BOT, 'restore', 'obsidian/other/index.html');
+    assert.equal(await verdictOf(f), 'publish');
   } finally { f.cleanup(); }
 });
 

@@ -14,7 +14,8 @@
 #
 # 【無人の自律運転ブランチはオーナーの承認つき（2026-10-20 オーナー判断・監査 F2/F3）】
 # claude/obsidian-auto-<YYYYMMDD> の PR は、台帳（scripts/lib/autopilot-paths.mjs の LEDGER と、
-# 新しく足した宣言・却下のファイル）だけを変えるときに限って、ここで自動マージする。
+# 新しく足した宣言・却下のファイル）だけを変えるときに限って、ここで自動マージする。ただし封じ込めと予算を
+# 決める runs・cost の台帳は中身も読み比べ、Runbook どおりの追記と補完でなければ承認待ちにする（2026-10-26）。
 # 台帳以外（ページ・スクリプト・/autopilot/ と翻訳・sitemap の生成物を含む）を変える PR は
 # 開いたまま残し、同じ run の merge-after-approval ジョブが Environment autopilot-approval で
 # オーナーの承認を待つ。判定は main の scripts/autopilot-approval-check.mjs。
@@ -182,6 +183,40 @@ jobs:
                     });
                   verdict = { ...policy.autoMergeClass(files, pr.changed_files),
                     files: Array.isArray(files) ? policy.fileListHash(files) : '' };
+                  // 封じ込めと予算を決める台帳（runs・cost）は、マージの土台と検証済みの head の中身を読み比べ、
+                  // Runbook どおりの追記と補完でなければ承認待ちにする（scripts/lib/ledger-append-only.mjs）。
+                  // 読めないときも承認待ち。ファイル一覧の指紋は残すので、承認すればマージできる。
+                  const ledgers = policy.gatedLedgers(files);
+                  if (ledgers.length) {
+                    let ledger;
+                    try {
+                      const { data: compare } = await github.rest.repos.compareCommitsWithBasehead({
+                        owner, repo, basehead: `main...${validatedSha}`, per_page: 1,
+                      });
+                      const mergeBase = compare?.merge_base_commit?.sha;
+                      if (!/^[0-9a-f]{40}$/.test(mergeBase ?? '')) throw new Error('merge base unavailable');
+                      const read = async (path, ref) => {
+                        try {
+                          const { data } = await github.rest.repos.getContent({
+                            owner, repo, path, ref, mediaType: { format: 'raw' },
+                          });
+                          if (typeof data !== 'string') throw new Error('ledger is not raw text');
+                          return data;
+                        } catch (error) {
+                          if (error?.status === 404) return null;
+                          throw error;
+                        }
+                      };
+                      const changes = [];
+                      for (const file of ledgers) {
+                        changes.push({ file, before: await read(file, mergeBase), after: await read(file, validatedSha) });
+                      }
+                      ledger = policy.ledgerReasons(changes, branch);
+                    } catch {
+                      ledger = ['ledger:unreadable'];
+                    }
+                    if (ledger.length) verdict = { ...verdict, class: 'approval', reasons: [...verdict.reasons, ...ledger] };
+                  }
                 } catch {
                   verdict = { class: 'approval', reasons: ['policy_error'], files: '' };
                 }
@@ -204,7 +239,7 @@ jobs:
                   } catch {
                     core.info('ジョブサマリを書けなかった（判定には影響しない）');
                   }
-                  core.notice(`#${pr.number} は台帳以外を変えるため自動マージしない（承認待ち: merge-after-approval）`);
+                  core.notice(`#${pr.number} は台帳以外を変えるか、台帳を追記と補完以外の形で変えるため自動マージしない（承認待ち: merge-after-approval）`);
                   continue;
                 }
               }
