@@ -394,13 +394,14 @@ async function selftest() {
   r = await runAutoMerge({ branch: 'claude/some-fix', fail: { merge: workflow403, summary: true } });
   t(r.out.failed.length === 0 && r.calls.labels.length === 1 && r.out.outputs.merged_count === '0', 'workflow 403: a summary failure is display-only');
   r = await runAutoMerge({ branch: 'claude/some-fix', fail: { merge: workflow403, label: true } });
-  t(r.out.failed.length === 1 && r.out.outputs.merged_count === '0' && r.out.outputs.merged_sha === undefined,
-    'workflow 403: a label that cannot be added fails the run');
+  t(r.out.failed.length === 1 && r.out.outputs.merged_count === '0' && r.out.outputs.merged_sha === undefined
+    && r.out.summaries.length === 0, 'workflow 403: a label that cannot be added fails the run and writes no summary');
   for (const [behindBy, compare, why] of [[0, false, 'the head already contains main'], [1, true, 'main cannot be compared']]) {
     r = await runAutoMerge({ branch: 'claude/some-fix', behindBy, fail: { merge: workflow403, compare } });
     t(r.out.failed.length === 1 && r.calls.labels.length === 0 && r.out.outputs.merged_sha === undefined, `workflow 403 fails the run when ${why}`);
   }
   for (const error of [Object.assign(new Error('Resource not accessible by integration'), { status: 403 }),
+    Object.assign(new Error('Resource not accessible by integration: the workflow scope is required'), { status: 403 }),
     Object.assign(new Error('Head branch was modified. Review and try the merge again.'), { status: 409 }),
     Object.assign(new Error('create or update workflow'), { status: 422 })]) {
     r = await runAutoMerge({ branch: 'claude/some-fix', fail: { merge: error }, catchError: true });

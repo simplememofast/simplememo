@@ -225,11 +225,13 @@ jobs:
                 // PR と main の両方が、マージの土台より後に同じ .github/workflows/ のファイルを変えていると、
                 // squash の結果の blob を head のコミットがまだ持っていない。そのとき GitHub は GITHUB_TOKEN
                 // （workflows の権限なし）でのマージを HTTP 403 で拒む（読み。CLAUDE.md「自動マージの挙動」、
-                // 2026-09-05 #938・2026-10-26 #2179）。この PR だけを main の取り込み待ちにして次の PR へ進む。
+                // 2026-09-05 #938・2026-10-26 #2179）。この PR を main の取り込み待ちにして終える（一覧は1件まで）。
                 // main を取り込んで push し直せば、次の検証の後にここでマージされる。ほかの失敗は今までどおり落とす。
                 if (error?.status !== 403 || !/create or update workflow/.test(String(error?.message ?? ''))) throw error;
                 // 反証条件: head が main を全部含む（squash の結果が head と同じになる）のに 403 なら、この読みは
                 // 外れている。取り込みでは直らないので、待たせずに run を落とす。main と比べられないときも落とす。
+                // 比べるのは今の main なので、403 から比べるまでの間に main が進むと反証の形でも待たせるが、
+                // 取り込んだ後の次の 403 で behind_by が 0 になり、run が落ちる。
                 let behind = null;
                 try {
                   ({ data: { behind_by: behind } } = await github.rest.repos.compareCommitsWithBasehead({
@@ -239,8 +241,9 @@ jobs:
                   core.info(`#${pr.number}: main との差を読めなかった`);
                 }
                 if (!Number.isInteger(behind) || behind === 0) {
-                  core.setFailed(`#${pr.number}: workflow-file 403 although the head ${behind === 0
-                    ? 'already contains main' : 'could not be compared with main'}; merge withheld`);
+                  core.setFailed(behind === 0
+                    ? `#${pr.number}: workflow-file 403 although the head already contains main (the reading is falsified); merge withheld`
+                    : `#${pr.number}: workflow-file 403 and the head could not be compared with main; merge withheld`);
                   continue;
                 }
                 // ラベルは PR の側に届くただ1つの合図。付けられなければ、前と同じく run を落として知らせる。
