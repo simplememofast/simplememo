@@ -381,8 +381,8 @@ async function selftest() {
   // GitHub refuses a GITHUB_TOKEN merge (403) when a PR and main both changed a .github/workflows/ file since the
   // merge base, so the head commit does not have the squash result's blob (the reading in CLAUDE.md; 2026-09-05
   // #938, 2026-10-26 #2179). That PR waits for a main sync (label + summary, no setFailed). Any other merge
-  // failure, the reading's falsification condition (a 403 on a head that already contains main) and a label that
-  // cannot be added still fail the run.
+  // failure, the reading's falsification condition (a 403 on a head that already contains main), a compare with
+  // main that fails, and a label that cannot be added still fail the run.
   const workflow403 = Object.assign(new Error('refusing to allow a GitHub App to create or update workflow `.github/workflows/x.yml` without `workflows` permission'), { status: 403 });
   for (const branch of ['claude/some-fix', 'Codex/some-fix']) {
     r = await runAutoMerge({ branch, files: [file('.github/workflows/x.yml')], fail: { merge: workflow403 } });
@@ -396,9 +396,11 @@ async function selftest() {
   r = await runAutoMerge({ branch: 'claude/some-fix', fail: { merge: workflow403, label: true } });
   t(r.out.failed.length === 1 && r.out.outputs.merged_count === '0' && r.out.outputs.merged_sha === undefined
     && r.out.summaries.length === 0, 'workflow 403: a label that cannot be added fails the run and writes no summary');
-  for (const [behindBy, compare, why] of [[0, false, 'the head already contains main'], [1, true, 'main cannot be compared']]) {
+  for (const [behindBy, compare, why, says] of [[0, false, 'the head already contains main', 'the reading is falsified'],
+    [1, true, 'main cannot be compared', 'could not be compared with main']]) {
     r = await runAutoMerge({ branch: 'claude/some-fix', behindBy, fail: { merge: workflow403, compare } });
-    t(r.out.failed.length === 1 && r.calls.labels.length === 0 && r.out.outputs.merged_sha === undefined, `workflow 403 fails the run when ${why}`);
+    t(r.out.failed.length === 1 && r.out.failed[0].includes(says) && r.calls.labels.length === 0 && r.out.outputs.merged_sha === undefined,
+      `workflow 403 fails the run when ${why}, and says so`);
   }
   for (const error of [Object.assign(new Error('Resource not accessible by integration'), { status: 403 }),
     Object.assign(new Error('Resource not accessible by integration: the workflow scope is required'), { status: 403 }),
