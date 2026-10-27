@@ -60,6 +60,10 @@ function completeCommitList(reportedCount, commits) {
     Array.isArray(commits) && commits.length === reportedCount;
 }
 
+// An approved co-author value is short (the longest is about 110 characters). A longer one is refused before the
+// value regex reads it: a long run of spaces makes that regex backtrack for seconds (2026-10-27 review).
+const MAX_COAUTHOR_VALUE = 256;
+
 function findUnapprovedPrincipals(commits) {
   if (!Array.isArray(commits) || commits.length === 0) {
     return [{ sha: 'unknown', field: 'commit-list' }];
@@ -88,13 +92,17 @@ function findUnapprovedPrincipals(commits) {
     // line that starts with a space or tab and is not blank continues the value (git folds it in).
     // git's whitespace is ASCII only, so a line of a space and a NBSP or U+3000 is not blank to it.
     // A co-author line is judged on its value with those lines folded in; a folded line belongs to
-    // that value (git reads it so), and the loop goes on after it, so each line is read once.
+    // that value (git reads it so), and the loop goes on after it, so each line is read once. A line
+    // that starts with Unicode whitespace (a NBSP, U+3000) is folded too: git does not, but how GitHub
+    // reads it is unmeasured, and folding it only refuses more.
     const lines = message.split(/\r?\n/);
     for (let i = 0; i < lines.length; i++) {
       if (!/^\s*Co-authored-by\s*:/i.test(lines[i])) continue;
       let value = lines[i];
-      while (i + 1 < lines.length && /^[ \t]+[^ \t]/.test(lines[i + 1])) value += ` ${lines[++i].trim()}`;
-      const match = /^\s*Co-authored-by\s*:\s*(.+?)\s*<([^<>]+)>\s*$/i.exec(value);
+      while (i + 1 < lines.length && (/^[ \t]+[^ \t]/.test(lines[i + 1]) || /^\s+\S/.test(lines[i + 1]))) {
+        value += ` ${lines[++i].trim()}`;
+      }
+      const match = value.length <= MAX_COAUTHOR_VALUE && /^\s*Co-authored-by\s*:\s*(.+?)\s*<([^<>]+)>\s*$/i.exec(value);
       if (!match || !approvedPrincipal({ name: match[1], email: match[2] })) {
         problems.push({ sha, field: 'co-author' });
       }
@@ -178,6 +186,12 @@ function selftest() {
     assert.deepEqual(findUnapprovedPrincipals(withMessage(`fix\r\n\r\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\r\n\t${space}\r\n Private Person <person@example.invalid>\r\n`))
       .map(p => p.field), ['co-author'], `${tag}, a line that only looks blank`);
   }
+  // A line that starts with a NBSP is folded as well (how GitHub reads it is unmeasured).
+  assert.deepEqual(findUnapprovedPrincipals(withMessage('fix\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\n\u00a0Private Person <person@example.invalid>'))
+    .map(p => p.field), ['co-author'], 'U+00a0 at the start of a line');
+  // A value longer than any approved one is refused before the regex reads it, even with an approved name in it.
+  assert.deepEqual(findUnapprovedPrincipals(withMessage(`fix\n\nCo-Authored-By: Claude Sonnet 5${' '.repeat(300)}<noreply@anthropic.com>`))
+    .map(p => p.field), ['co-author'], 'an overlong co-author value');
   // A folded line is read as part of the value it continues, once.
   assert.deepEqual(findUnapprovedPrincipals(withMessage(`fix\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\n${
     ' Co-authored-by: Private Person <person@example.invalid>\n'.repeat(3)}`)).map(p => p.field), ['co-author']);
