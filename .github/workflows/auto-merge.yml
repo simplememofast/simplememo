@@ -209,21 +209,75 @@ jobs:
                 }
               }
 
-              const { data: merged } = await github.rest.pulls.merge({
-                owner, repo,
-                pull_number: pr.number,
-                merge_method: 'squash',
-                sha: validatedSha,
-                // Do not copy unverified PR or source-commit prose into the
-                // public squash message. The PR remains the review record.
-                commit_title: `Merge validated PR #${pr.number}`,
-                commit_message: `Source PR: https://github.com/${owner}/${repo}/pull/${pr.number}\nValidated head: ${validatedSha}`,
-              });
+              let merged;
+              try {
+                ({ data: merged } = await github.rest.pulls.merge({
+                  owner, repo,
+                  pull_number: pr.number,
+                  merge_method: 'squash',
+                  sha: validatedSha,
+                  // Do not copy unverified PR or source-commit prose into the
+                  // public squash message. The PR remains the review record.
+                  commit_title: `Merge validated PR #${pr.number}`,
+                  commit_message: `Source PR: https://github.com/${owner}/${repo}/pull/${pr.number}\nValidated head: ${validatedSha}`,
+                }));
+              } catch (error) {
+                // PR と main の両方が、マージの土台より後に同じ .github/workflows/ のファイルを変えていると、
+                // squash の結果の blob を head のコミットがまだ持っていない。そのとき GitHub は GITHUB_TOKEN
+                // （workflows の権限なし）でのマージを HTTP 403 で拒む（読み。CLAUDE.md「自動マージの挙動」、
+                // 2026-09-05 #938・2026-10-26 #2179）。この PR を main の取り込み待ちにして終える（一覧は1件まで）。
+                // main を取り込んで push し直せば、次の検証の後にここでマージされる。ほかの失敗は今までどおり落とす。
+                if (error?.status !== 403 || !/create or update workflow/.test(String(error?.message ?? ''))) throw error;
+                // 反証条件: head が main を全部含む（squash の結果が head と同じになる）のに 403 なら、この読みは
+                // 外れている。取り込みでは直らないので、待たせずに run を落とす。main と比べられないときも落とす。
+                // 比べるのは今の main なので、403 から比べるまでの間に main が進むと反証の形でも待たせるが、
+                // 取り込んだ後の次の 403 で behind_by が 0 になり、run が落ちる。
+                let behind = null;
+                try {
+                  ({ data: { behind_by: behind } } = await github.rest.repos.compareCommitsWithBasehead({
+                    owner, repo, basehead: `main...${validatedSha}`, per_page: 1,
+                  }));
+                } catch {
+                  core.info(`#${pr.number}: main との差を読めなかった`);
+                }
+                if (!Number.isInteger(behind) || behind === 0) {
+                  core.setFailed(behind === 0
+                    ? `#${pr.number}: workflow-file 403 although the head already contains main (the reading is falsified); merge withheld`
+                    : `#${pr.number}: workflow-file 403 and the head could not be compared with main; merge withheld`);
+                  continue;
+                }
+                // ラベルは PR の側に届くただ1つの合図。付けられなければ、前と同じく run を落として知らせる。
+                try {
+                  await github.rest.issues.addLabels({
+                    owner, repo, issue_number: pr.number, labels: ['needs-main-sync'],
+                  });
+                } catch {
+                  core.setFailed(`#${pr.number}: workflow-file 403 (main sync needed) and the label could not be added; merge withheld`);
+                  continue;
+                }
+                try {
+                  await core.summary.addHeading('ワークフローを変える PR は main の取り込み待ち')
+                    .addRaw(`#${pr.number} と main が同じ .github/workflows/ のファイルを変えていて、GitHub が GITHUB_TOKEN での`
+                      + `マージを拒んだ。main を取り込んで push し直すと、次の検証の後に自動マージされる。`
+                      + `head が main を全部含んでもなお 403 なら、この読みは外れている（CLAUDE.md の反証条件）。\n`).write();
+                } catch {
+                  core.info('ジョブサマリを書けなかった（判定には影響しない）');
+                }
+                core.notice(`#${pr.number} はワークフローのファイルを main と両方で変えているため自動マージしない（main を取り込んで push し直す）`);
+                continue;
+              }
               mergedCount++;
               // merged.sha は main に積まれた squash コミット。後続の IndexNow
               // 通知ステップがこの SHA を checkout して首親差分を通知する。
               core.setOutput('merged_sha', merged.sha);
               core.notice(`#${pr.number} を ${validatedSha.slice(0, 7)} でマージした`);
+              if (pr.labels?.some(label => label?.name === 'needs-main-sync')) {
+                try {
+                  await github.rest.issues.removeLabel({ owner, repo, issue_number: pr.number, name: 'needs-main-sync' });
+                } catch {
+                  core.info(`#${pr.number}: needs-main-sync を外せなかった（マージには影響しない）`);
+                }
+              }
             }
             core.setOutput('merged_count', String(mergedCount));
 

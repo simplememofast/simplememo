@@ -190,8 +190,8 @@ function fixturePr(over = {}) {
     user: { login: OWNER }, commits: 1, changed_files: over.files?.length ?? 1, ...over.pr };
 }
 
-function mockGithub({ pr, files, environment, extraOpen = [], fail = {} }) {
-  const calls = { merged: [], labels: [], listFiles: 0, listArgs: [] };
+function mockGithub({ pr, files, environment, extraOpen = [], fail = {}, behindBy = 1 }) {
+  const calls = { merged: [], labels: [], unlabeled: [], compare: [], listFiles: 0, listArgs: [] };
   const commits = [{ sha: SHA, commit: {
     author: { name: fail.authorName ?? 'SimpleMemo Developer', email: 'simplememo.com@gmail.com' },
     committer: { name: 'GitHub', email: 'noreply@github.com' }, message: 'Safe fixture' } }];
@@ -200,12 +200,15 @@ function mockGithub({ pr, files, environment, extraOpen = [], fail = {} }) {
     get: async () => ({ data: pr }),
     listCommits: async () => ({}),
     listFiles: async () => ({}),
-    merge: async args => { calls.merged.push(args); return { data: { sha: 'b'.repeat(40) } }; },
+    merge: async args => { calls.merged.push(args); if (fail.merge) throw fail.merge; return { data: { sha: 'b'.repeat(40) } }; },
   };
   const github = {
     rest: { pulls,
       users: { getByUsername: async () => ({ data: { login: OWNER, name: 'SimpleMemo Developer', email: 'simplememo.com@gmail.com' } }) },
-      issues: { addLabels: async args => { if (fail.label) throw new Error('label'); calls.labels.push(args); return { data: [] }; } } },
+      repos: { compareCommitsWithBasehead: async args => {
+        calls.compare.push(args); if (fail.compare) throw new Error('compare'); return { data: { behind_by: behindBy } }; } },
+      issues: { addLabels: async args => { if (fail.label) throw new Error('label'); calls.labels.push(args); return { data: [] }; },
+        removeLabel: async args => { calls.unlabeled.push(args); if (fail.unlabel) throw new Error('unlabel'); return { data: [] }; } } },
     paginate: async (fn, args) => {
       if (fn === pulls.listCommits) return commits;
       if (fn === pulls.listFiles) { calls.listFiles++; if (fail.listFiles) throw new Error('listFiles'); return files; }
@@ -336,19 +339,24 @@ async function selftest() {
     for (const key of Object.keys(process.env)) if (!(key in savedEnv)) delete process.env[key];
     Object.assign(process.env, savedEnv);
   };
+  // catchError: return what the body threw (with the calls made before it) instead of throwing.
   const runAutoMerge = async ({ branch = 'claude/obsidian-auto-20261020', files = [file('index.html')], pr: prOver = {},
-    extraOpen = [], fail = {}, workspace = ROOT } = {}) => {
+    extraOpen = [], fail = {}, behindBy = 1, workspace = ROOT, catchError = false } = {}) => {
     const pr = fixturePr({ branch, files, pr: prOver });
-    const { github, calls } = mockGithub({ pr, files, extraOpen, fail });
+    const { github, calls } = mockGithub({ pr, files, extraOpen, fail, behindBy });
     const { core, out } = mockCore(fail);
     process.env.GITHUB_WORKSPACE = workspace;
+    let thrown = null;
     try {
       await new AsyncFunction('context', 'github', 'core', 'require', autoMerge)(
         { repo: { owner: OWNER, repo: REPO_NAME }, payload: { workflow_run: {
           head_branch: branch, head_sha: SHA, event: 'pull_request', created_at: '2026-10-20T01:02:03Z' } } },
         github, core, requireIdentity);
+    } catch (error) {
+      if (!catchError) throw error;
+      thrown = error;
     } finally { restoreEnv(); }
-    return { calls, out };
+    return { calls, out, thrown };
   };
 
   let r = await runAutoMerge({ files: ledgerOnly });
@@ -370,6 +378,46 @@ async function selftest() {
   t(r.calls.merged.length === 0 && r.out.failed.length === 0 && r.out.outputs.approval_pr === '123', 'unloadable policy withholds');
   r = await runAutoMerge({ pr: { changed_files: MAX_LISTED_FILES + 1 } });
   t(r.calls.merged.length === 0 && r.calls.listFiles === 0 && r.out.outputs.approval_pr === '123', 'over 3000 files: approval without listing');
+  // GitHub refuses a GITHUB_TOKEN merge (403) when a PR and main both changed a .github/workflows/ file since the
+  // merge base, so the head commit does not have the squash result's blob (the reading in CLAUDE.md; 2026-09-05
+  // #938, 2026-10-26 #2179). That PR waits for a main sync (label + summary, no setFailed). Any other merge
+  // failure, the reading's falsification condition (a 403 on a head that already contains main), a compare with
+  // main that fails, and a label that cannot be added still fail the run.
+  const workflow403 = Object.assign(new Error('refusing to allow a GitHub App to create or update workflow `.github/workflows/x.yml` without `workflows` permission'), { status: 403 });
+  for (const branch of ['claude/some-fix', 'Codex/some-fix']) {
+    r = await runAutoMerge({ branch, files: [file('.github/workflows/x.yml')], fail: { merge: workflow403 } });
+    t(r.calls.merged.length === 1 && r.out.failed.length === 0 && r.out.outputs.merged_count === '0'
+      && r.out.outputs.merged_sha === undefined && r.out.outputs.approval_pr === undefined
+      && r.calls.compare[0]?.basehead === `main...${SHA}`
+      && r.calls.labels[0]?.labels?.[0] === 'needs-main-sync' && r.out.summaries.length === 1, `${branch}: workflow 403 waits for a main sync`);
+  }
+  r = await runAutoMerge({ branch: 'claude/some-fix', fail: { merge: workflow403, summary: true } });
+  t(r.out.failed.length === 0 && r.calls.labels.length === 1 && r.out.outputs.merged_count === '0', 'workflow 403: a summary failure is display-only');
+  r = await runAutoMerge({ branch: 'claude/some-fix', fail: { merge: workflow403, label: true } });
+  t(r.out.failed.length === 1 && r.out.outputs.merged_count === '0' && r.out.outputs.merged_sha === undefined
+    && r.out.summaries.length === 0, 'workflow 403: a label that cannot be added fails the run and writes no summary');
+  for (const [behindBy, compare, why, says] of [[0, false, 'the head already contains main', 'the reading is falsified'],
+    [1, true, 'main cannot be compared', 'could not be compared with main']]) {
+    r = await runAutoMerge({ branch: 'claude/some-fix', behindBy, fail: { merge: workflow403, compare } });
+    t(r.out.failed.length === 1 && r.out.failed[0].includes(says) && r.calls.labels.length === 0 && r.out.outputs.merged_sha === undefined,
+      `workflow 403 fails the run when ${why}, and says so`);
+  }
+  for (const error of [Object.assign(new Error('Resource not accessible by integration'), { status: 403 }),
+    Object.assign(new Error('Resource not accessible by integration: the workflow scope is required'), { status: 403 }),
+    Object.assign(new Error('Head branch was modified. Review and try the merge again.'), { status: 409 }),
+    Object.assign(new Error('create or update workflow'), { status: 422 })]) {
+    r = await runAutoMerge({ branch: 'claude/some-fix', fail: { merge: error }, catchError: true });
+    t(r.thrown === error && r.calls.merged.length === 1 && r.calls.compare.length === 0 && r.calls.labels.length === 0,
+      `other merge failures still fail the run: ${error.status} ${error.message}`);
+  }
+  // After the sync, the merge takes the label off; that is display-only too.
+  r = await runAutoMerge({ branch: 'claude/some-fix', pr: { labels: [{ name: 'needs-main-sync' }] } });
+  t(r.calls.merged.length === 1 && r.calls.unlabeled[0]?.name === 'needs-main-sync' && r.out.outputs.merged_sha === 'b'.repeat(40),
+    'a merge takes needs-main-sync off');
+  r = await runAutoMerge({ branch: 'claude/some-fix', pr: { labels: [{ name: 'needs-main-sync' }] }, fail: { unlabel: true } });
+  t(r.calls.merged.length === 1 && r.out.failed.length === 0 && r.out.outputs.merged_count === '1', 'a label left on does not fail the merge');
+  r = await runAutoMerge({ branch: 'claude/some-fix' });
+  t(r.calls.merged.length === 1 && r.calls.unlabeled.length === 0, 'no needs-main-sync, nothing to take off');
   r = await runAutoMerge({ fail: { label: true, summary: true } });
   t(r.calls.merged.length === 0 && r.out.failed.length === 0 && r.out.outputs.approval_pr === '123', 'label/summary failures are display only');
   for (const branch of ['claude/autopilot-act-20261020', 'claude/obsidian-auto-20261020-owner-recovery', 'claude/obsidian-auto-test',
