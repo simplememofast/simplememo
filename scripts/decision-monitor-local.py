@@ -142,7 +142,7 @@ class Tests(unittest.TestCase):
 
     def test_structural_scan_detects_each_banned_shape(self):
         # Source snippets for ast.parse only; none of them is ever executed.
-        samples =['import ' + m for m in sorted(BANNED_MODULES)] + ['from os.path import join', 'x.system(1)',
+        samples = ['import ' + m for m in sorted(BANNED_MODULES)] + ['from os.path import join', 'x.system(1)',
                    'x.Popen(1)', 'x.execv(1)', 'x.spawnv(1)', 'x.fork()', 'y = ' + 'eval(1)', '__import__(1)']
         samples += ['h = ' + repr(n) for n in NEEDLES] + ['h = ' + repr(n.encode()) for n in NEEDLES]
         for sample in samples:
