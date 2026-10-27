@@ -281,6 +281,11 @@ async function selftest() {
   assert(body, 'auto-merge workflow script required');
   const executeMerge = new (Object.getPrototypeOf(async function () {}).constructor)('context', 'github', 'core', 'require', body);
   const identityGuard = createRequire(import.meta.url)('./merge-identity-check.js');
+  // Newer open PRs from the same branch. Anyone can open them into other
+  // bases; they must neither hide the PR into main nor block it. GitHub never
+  // lists two open PRs into main for one head, so such a listing must withhold.
+  const others = (count, base, opener = 'simplememofast') =>
+    Array.from({ length: count }, (_, i) => ({ number: 1000 + i, base, opener }));
   for (const [branch, event, expected, overrides = {}] of [
     ['claude/obsidian-auto-test', 'push', 0], ['claude/obsidian-auto-test', undefined, 0],
     ['claude/obsidian-auto-test', 'pull_request', 1], ['Codex/user-directed', 'push', 0],
@@ -288,23 +293,42 @@ async function selftest() {
     ['untrusted/branch', 'pull_request', 0],
     ['Codex/user-directed', 'pull_request', 0, { draft: true }],
     ['Codex/user-directed', 'pull_request', 0, { sha: 'c'.repeat(40) }],
+    // Since the listing filters by base, this one is dropped by the listing; listingIgnoresBase below
+    // reaches the per-PR base check.
     ['Codex/user-directed', 'pull_request', 0, { base: 'other' }],
     ['Codex/user-directed', 'pull_request', 0, { repo: 'other/repo' }],
-    ['Codex/user-directed', 'pull_request', 0, { authorName: 'Private Person' }],
-    ['Codex/user-directed', 'pull_request', 0, { openerName: 'SimpleMemo Developer (Private Person)' }],
-    ['Codex/user-directed', 'pull_request', 0, { commitCount: 2 }],
-    ['Codex/user-directed', 'pull_request', 0, { commitCount: 251 }],
+    ['Codex/user-directed', 'pull_request', 0, { authorName: 'Private Person', failed: 1 }],
+    ['Codex/user-directed', 'pull_request', 0, { openerName: 'SimpleMemo Developer (Private Person)', failed: 1 }],
+    ['Codex/user-directed', 'pull_request', 0, { commitCount: 2, failed: 1 }],
+    ['Codex/user-directed', 'pull_request', 0, { commitCount: 251, failed: 1 }],
+    ['Codex/user-directed', 'pull_request', 0, { base: 'other', listingIgnoresBase: true }],
+    ['Codex/user-directed', 'pull_request', 1, { others: others(31, 'other', 'outsider') }],
+    ['Codex/user-directed', 'pull_request', 0, { others: others(1, 'main'), failed: 1 }],
+    // 31 open PRs into main; like GitHub, the listing returns the first 30.
+    ['Codex/user-directed', 'pull_request', 0, { others: others(30, 'main'), failed: 1 }],
   ]) {
-    let merged = 0;
+    let merged = 0, failed = 0;
     const sha = 'a'.repeat(40);
     const pr = { number: 123, draft: overrides.draft ?? false,
       base: { ref: overrides.base ?? 'main' },
       head: { sha: overrides.sha ?? sha, repo: { full_name: overrides.repo ?? REPO } },
       user: { login: 'simplememofast' }, commits: overrides.commitCount ?? 1 };
+    const open = [pr, ...(overrides.others ?? []).map(o =>
+      ({ ...pr, number: o.number, base: { ref: o.base }, user: { login: o.opener } }))];
     await executeMerge({ repo: { owner: 'simplememofast', repo: 'simplememo' }, payload: { workflow_run: { head_branch: branch, head_sha: sha, event } } },
       { rest: { pulls: {
-        list: async () => ({ data: [pr] }),
-        get: async () => ({ data: pr }),
+        // Like GitHub: every fixture PR has this head; filter by base when given,
+        // newest first, one page (30 by default). listingIgnoresBase returns a PR
+        // into another base anyway, so the per-PR base check still runs.
+        list: async args => {
+          // The lookup itself: this repository owner's branch, open PRs only.
+          assert.equal(args.head, `simplememofast:${branch}`, 'auto-merge must list by owner:branch');
+          assert.equal(args.state, 'open', 'auto-merge must list open PRs only');
+          return { data: open
+          .filter(p => !args.base || overrides.listingIgnoresBase || p.base.ref === args.base)
+          .sort((a, b) => b.number - a.number).slice(0, args.per_page ?? 30) };
+        },
+        get: async ({ pull_number }) => ({ data: open.find(p => p.number === pull_number) }),
         listCommits: async () => ({}),
         merge: async args => { assert.equal(args.sha, sha); merged++; return { data: { sha: 'b'.repeat(40) } }; },
       }, users: { getByUsername: async () => ({ data: { login: 'simplememofast',
@@ -313,9 +337,12 @@ async function selftest() {
         author: { name: overrides.authorName ?? 'SimpleMemo Developer', email: 'simplememo.com@gmail.com' },
         committer: { name: 'GitHub', email: 'noreply@github.com' }, message: 'Safe fixture',
       } }],
-      }, { info() {}, notice() {}, setOutput() {}, setFailed() {} },
+      }, { info() {}, notice() {}, setOutput() {}, setFailed() { failed++; } },
       source => { assert(source.endsWith('/scripts/merge-identity-check.js')); return identityGuard; });
     assert.equal(merged, expected, `auto-merge must respect declaration/PR boundary: ${branch} ${event}`);
+    // Every fixture pins whether the run fails: refused identities and an unexpected listing into main fail
+    // closed; the rest neither merge with a red run nor fail without a reason.
+    assert.equal(failed, overrides.failed ?? 0, `auto-merge must fail exactly when expected: ${branch} ${event} ${JSON.stringify(overrides).slice(0, 80)}`);
   }
 
   // Use real declaration/implementation commits and the production verifier.
