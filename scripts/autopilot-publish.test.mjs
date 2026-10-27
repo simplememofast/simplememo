@@ -7,11 +7,12 @@ import os from 'node:os';
 import path from 'node:path';
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { pack, verifyHandoff, pushBranch, record, validateRequest, prPayload, openPr, checkWiring, gitEnv,
+import { pack, verifyHandoff, pushBranch, record, validateRequest, prPayload, openPr, checkWiring, gitEnv, checkTranslations,
   PublishError, RECORD_IDENTITY, MAX_REPAIR_TARGETS, handoffFileState, MAIN_EXECUTION_COPY } from './autopilot-publish.mjs';
 import { save as saveDiagnostics } from './autopilot-diagnostics.mjs';
 import { classifyAutopilotChange, hardDenyReason, isAutopilotBranch, RECORD_PATHS } from './lib/autopilot-paths.mjs';
 import { validate as validateRuns } from './autopilot-runs.mjs';
+import { translationsVerdict } from './lib/translation-check.mjs';
 
 process.env.GIT_CONFIG_GLOBAL = '/dev/null'; // the developer's global git config must not shape the result
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -73,11 +74,13 @@ function commitPage(f, who = BOT, message = 'feat: page', file = 'obsidian/new/i
   sh(f.work, ['add', '-A']); sh(f.work, ['commit', '-q', '-m', message], who);
 }
 
-async function handoff(f, { req = request(), takeover = false, outcome = 'success', listPrs = async () => [], force = false } = {}) {
+async function handoff(f, { req = request(), takeover = false, outcome = 'success', listPrs = async () => [], force = false,
+  translations = () => null } = {}) {
   if (req) fs.writeFileSync(path.join(f.temp, 'autopilot-pr-request.json'), JSON.stringify(req));
   const out = path.join(f.temp, `handoff-${Math.random().toString(36).slice(2)}`);
   pack({ workspace: f.work, out, day: DAY, takeover, runnerTemp: f.temp });
-  return verifyHandoff({ handoff: out, repo: f.tools, day: DAY, takeover, force, modelOutcome: outcome, remote: f.origin, listPrs })
+  return verifyHandoff({ handoff: out, repo: f.tools, day: DAY, takeover, force, modelOutcome: outcome, remote: f.origin, listPrs,
+    translations })
     .then(result => ({ ...result, out }));
 }
 
@@ -192,6 +195,58 @@ test('forbidden identities are never published', async () => {
     sh(f.work, ['add', '-A']);
     sh(f.work, ['commit', '-q', '-m', 'x'], BOT, { GIT_COMMITTER_NAME: 'Someone', GIT_COMMITTER_EMAIL: 'someone@example.com' });
     assert.equal(await verdictOf(f), 'rejected_identity');
+  } finally { f.cleanup(); }
+});
+
+test('a PR is opened only with its translations: checked before anything is pushed, with trusted code', async () => {
+  // 2026-10-27 (run 40433175978): a refresh day changed eight text units of a translated page without translations;
+  // the PR was opened and the record step failed on "8 incomplete translations".
+  for (const [status, stdout, stderr, code] of [[0, '2161 translations; 0 stale', '', null],
+    [1, '', 'x\n8 incomplete translations; no HTML written.\n', 'incomplete'],
+    [1, '', '3 untranslated dates; no HTML written.\n', 'dates'],
+    [1, '2161 translations; 4 stale\n', '', 'stale'],
+    [1, '', 'coverage: a page outside data/i18n/pages.json\n', 'unchecked'],
+    [null, '', '', 'unchecked']]) {
+    assert.equal(translationsVerdict({ status, stdout, stderr }), code, JSON.stringify({ status, stdout, stderr }));
+  }
+  assert.equal(translationsVerdict({ status: 0, error: new Error('ETIMEDOUT') }), 'unchecked', 'a run that errored is not a pass');
+  const f = fixture();
+  try {
+    commitPage(f);
+    const calls = [];
+    const stub = code => args => { calls.push(args); return code; };
+    assert.equal(await verdictOf(f, { translations: stub('incomplete') }), 'rejected_translations_incomplete');
+    assert.equal(sh(f.origin, ['for-each-ref', '--format=%(refname)', 'refs/heads/']).split('\n').filter(r => r.includes('obsidian-auto')).length, 0,
+      'nothing is pushed by the verification');
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].repo, f.tools);
+    assert.equal(sh(f.tools, ['merge-base', calls[0].head, 'refs/remotes/origin/main']), calls[0].base, 'compared from the merge base');
+    assert.equal(await verdictOf(f, { translations: stub(null) }), 'publish');
+    calls.length = 0;
+    assert.equal(await verdictOf(f, { outcome: 'failure', translations: stub('incomplete') }), 'push_only');
+    assert.equal(await verdictOf(f, { req: request({ action: 'none' }), translations: stub('incomplete') }), 'none');
+    assert.equal(calls.length, 0, 'only a day that opens a PR is checked');
+    // The real check: a work tree of the head with the workflow commit's scripts, removed afterwards.
+    const result = await handoff(f);
+    const seen = [];
+    const runner = (command, args, options) => {
+      seen.push({ command, args, cwd: options.cwd, trusted: fs.readFileSync(path.join(options.cwd, 'scripts/trusted-marker.txt'), 'utf8'),
+        page: fs.existsSync(path.join(options.cwd, 'obsidian/new/index.html')) });
+      return { status: 1, stdout: '', stderr: '8 incomplete translations; no HTML written.\n' };
+    };
+    const base = sh(f.tools, ['merge-base', result.head, 'refs/remotes/origin/main']);
+    assert.equal(checkTranslations({ repo: f.tools, base, head: result.head, runner }), 'incomplete');
+    assert.equal(seen.length, 1);
+    assert.equal(seen[0].command, 'python3');
+    assert.deepEqual(seen[0].args, ['-E', '-s', 'scripts/build_site_translations.py', '--check']);
+    assert.equal(seen[0].trusted, 'trusted\n', 'the trusted overlay is in place');
+    assert.equal(seen[0].page, true, 'the head is checked out');
+    assert(!fs.existsSync(seen[0].cwd), 'the work tree is removed');
+    assert(!sh(f.tools, ['worktree', 'list', '--porcelain']).includes(seen[0].cwd), 'and unregistered');
+    // Nothing translatable changed: no tree, no run.
+    seen.length = 0;
+    assert.equal(checkTranslations({ repo: f.tools, base: result.head, head: result.head, runner }), null);
+    assert.equal(seen.length, 0);
   } finally { f.cleanup(); }
 });
 
@@ -596,7 +651,8 @@ async function modelJobTail(f, { outcome = 'success', mainWrites = {}, resumeWri
   const out = path.join(f.temp, 'autopilot-handoff');
   pack({ workspace: f.work, out, day: DAY, runnerTemp: f.temp });
   let verified;
-  try { verified = await verifyHandoff({ handoff: out, repo: f.tools, day: DAY, modelOutcome: outcome, remote: f.origin, listPrs: async () => [] }); }
+  try { verified = await verifyHandoff({ handoff: out, repo: f.tools, day: DAY, modelOutcome: outcome, remote: f.origin, listPrs: async () => [],
+    translations: () => null }); }
   catch (error) { if (!(error instanceof PublishError)) throw error; verified = { verdict: error.code }; }
   const receipt = saveDiagnostics(path.join(f.temp, 'autopilot-diagnostic'), { RUNNER_TEMP: f.temp, MODEL_OUTCOME: outcome }, { handoff: out });
   return { checked, resumed: resumeOutcome !== 'skipped', verified, receipt, out };
@@ -884,31 +940,35 @@ async function endToEnd(kind) {
   ok(run(work, process.execPath, ['scripts/autopilot-runs.mjs', '--write-status']), 'session --write-status');
   fs.appendFileSync(path.join(work, 'docs/obsidian/AUTOPILOT_LOG.md'), `\n## ${dash} (e2e ${kind})\n`);
   sh(work, ['add', '-A']); sh(work, ['commit', '-q', '-m', 'status and log']);
-  ok(run(work, process.execPath, ['scripts/decision-ci.mjs', '--verify-local']), 'verify-local');
+  const local = run(work, process.execPath, ['scripts/decision-ci.mjs', '--verify-local']);
+  if (kind === 'shipped_untranslated') {
+    // The session is told before the PR (2026-10-27).
+    assert.equal(local.status, 1, 'verify-local names the stale translations');
+    assert.match(local.stdout, /translations stale/);
+  } else ok(local, 'verify-local');
   fs.writeFileSync(path.join(temp, 'autopilot-pr-request.json'), JSON.stringify({ action: 'pr', title: `e2e ${kind}`, body: 'e2e', run: requestRun }));
   // The publish job (GitHub reads stubbed; the remote is local).
   const handoffDir = path.join(temp, 'handoff');
   pack({ workspace: work, out: handoffDir, day, runnerTemp: temp });
-  const verified = await verifyHandoff({ handoff: handoffDir, repo: tools, day, force: true, modelOutcome: 'success', remote: origin,
+  const verify = () => verifyHandoff({ handoff: handoffDir, repo: tools, day, force: true, modelOutcome: 'success', remote: origin,
     listPrs: async () => [], prodStatusDate: async () => null });
+  if (kind === 'shipped_untranslated') {
+    // The publish job opens no PR: the real translation check on the head, with the trusted scripts.
+    await assert.rejects(verify(), error => error instanceof PublishError && error.code === 'rejected_translations_stale');
+    return;
+  }
+  const verified = await verify();
   assert.equal(verified.verdict, 'publish');
   assert(pushBranch({ repo: tools, sha: verified.head, day, token: TOKEN, remote: origin }));
   const recordWork = path.join(root, `record-${kind}`);
   let prHead = verified.head;
   try {
-    if (kind === 'shipped_untranslated') {
-      // The record step does not publish translations of the session's page: its generators would rewrite
-      // them, which is outside the record paths, so it fails closed and pushes nothing more.
-      assert.throws(() => record({ repo: tools, trusted: tools, sha: verified.head, day, pr, request: verified.request, runId: String(pr),
-        work: recordWork }), error => error.code === 'record_unexpected_change');
-    } else {
-      const recorded = record({ repo: tools, trusted: tools, sha: verified.head, day, pr, request: verified.request, runId: String(pr), work: recordWork });
-      for (const file of sh(tools, ['diff', '--name-only', verified.head, recorded.sha]).split('\n')) {
-        assert(RECORD_PATHS.includes(file), `the record commit changes only record paths: ${file}`);
-      }
-      assert(pushBranch({ repo: tools, sha: recorded.sha, day, token: TOKEN, remote: origin }));
-      prHead = recorded.sha;
+    const recorded = record({ repo: tools, trusted: tools, sha: verified.head, day, pr, request: verified.request, runId: String(pr), work: recordWork });
+    for (const file of sh(tools, ['diff', '--name-only', verified.head, recorded.sha]).split('\n')) {
+      assert(RECORD_PATHS.includes(file), `the record commit changes only record paths: ${file}`);
     }
+    assert(pushBranch({ repo: tools, sha: recorded.sha, day, token: TOKEN, remote: origin }));
+    prHead = recorded.sha;
   } finally { spawnSync('git', ['worktree', 'remove', '--force', recordWork], { cwd: tools }); }
   // SEO Validation checks out the PR merged into main.
   sh(check, ['reset', '-q', '--hard']); sh(check, ['clean', '-fdq']);
@@ -919,13 +979,6 @@ async function endToEnd(kind) {
   fs.writeFileSync(path.join(temp, 'event.json'), JSON.stringify({ pull_request: { number: pr,
     head: { ref: branch, sha: prHead, repo }, base: { ref: 'main', sha: sh(check, ['rev-parse', 'HEAD^1']), repo } } }));
   const decision = () => run(check, process.execPath, ['scripts/decision-ci.mjs', '--check'], { GITHUB_EVENT_PATH: path.join(temp, 'event.json') });
-  if (kind === 'shipped_untranslated') {
-    // The PR is left on the session's head, which SEO Validation does not pass (no bound run, stale translations).
-    const result = decision();
-    assert.notEqual(result.status, 0, 'decision-ci refuses the unrecorded head');
-    assert.match(result.stderr, /bind exactly one run/);
-    return;
-  }
   const python = ['scripts/build_site_translations.py', 'scripts/generate_sitemap.py']
     .map(script => runAsync(check, 'python3', ['-E', '-s', script, '--check']).then(result => [script, result]));
   for (const args of [['scripts/autopilot-runs.mjs', '--check'], ['scripts/autopilot-selfheal.mjs', '--check'],
@@ -956,7 +1009,7 @@ async function endToEnd(kind) {
 
 for (const [kind, what] of [['no_artifact', 'a no_artifact day: the regenerated report is bookkeeping'],
   ['shipped_translated', 'a shipped day with a contract that edits a translated page and its translations'],
-  ['shipped_untranslated', 'a shipped day that edits a translated page without translations fails closed']]) {
+  ['shipped_untranslated', 'a shipped day that edits a translated page without translations opens no PR']]) {
   test(`end to end (${kind}): ${what}`, { skip: E2E_SKIP, timeout: 90 * 60_000 }, () => endToEnd(kind));
 }
 
