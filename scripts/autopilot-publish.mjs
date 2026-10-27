@@ -34,6 +34,7 @@ import { fileURLToPath } from 'node:url';
 import { OUTCOMES, validate as validateRuns } from './autopilot-runs.mjs';
 import { hardDenyReason, MAX_COMMITS, MAX_TOTAL_BYTES, RECORD_PATHS } from './lib/autopilot-paths.mjs';
 import { GATED_LEDGERS, ledgerChange } from './lib/ledger-append-only.mjs';
+import { needsTranslationCheck, runTranslationCheck } from './lib/translation-check.mjs';
 
 const require = createRequire(import.meta.url);
 const { findUnapprovedPrincipals } = require('./merge-identity-check.js');
@@ -504,7 +505,8 @@ function commitPrincipals(repo, commits) {
  * listPrs(branch) -> [{number}] (GitHub read, state=all); prodStatusDate() -> 'YYYY-MM-DD' | null.
  */
 export async function verifyHandoff({ handoff, repo, day, takeover = false, force = false, modelOutcome,
-  remote = 'origin', readToken = null, listPrs, prodStatusDate = async () => null, gscDay = null }) {
+  remote = 'origin', readToken = null, listPrs, prodStatusDate = async () => null, gscDay = null,
+  translations = checkTranslations }) {
   const branch = dayBranch(day);
   const dash = `${day.slice(0, 4)}-${day.slice(4, 6)}-${day.slice(6, 8)}`;
   if (!['success', 'failure'].includes(modelOutcome)) fail('rejected_model_outcome');
@@ -595,6 +597,12 @@ export async function verifyHandoff({ handoff, repo, day, takeover = false, forc
   const repairCode = checked.request.run?.repair_of ? repairOfCode(checked.request.run, baseRunIds(repo)) : null;
   if (repairCode) fail(`rejected_request_${repairCode}`);
   const verdict = checked.request.action === 'pr' ? 'publish' : checked.request.action;
+  // A PR's pages carry their translations (prompt step 4). Checked here, before anything is pushed: the record step
+  // cannot translate, and found it only after the PR was open (2026-10-27, scripts/lib/translation-check.mjs).
+  if (verdict === 'publish') {
+    const code = translations({ repo, base, head });
+    if (code) fail(`rejected_translations_${code}`);
+  }
   return { verdict, head, commit_count: commits.length, request: checked.request };
 }
 
@@ -624,6 +632,37 @@ export async function openPr({ request, day, token, fetchImpl = fetch }) {
 
 // ── record (no credential): trusted code over the pushed branch's data ─────
 const OVERLAY = ['scripts', 'growth/scripts', 'growth/lib'];
+
+// A work tree of sha with the trusted scripts over the branch's own (record() and the translation check).
+function trustedTree({ repo, trusted, sha, work, code }) {
+  git(repo, ['worktree', 'add', '--detach', '--quiet', work, sha]);
+  if (fs.existsSync(path.join(work, 'node_modules'))) fail(code);
+  for (const dir of OVERLAY) {
+    fs.rmSync(path.join(work, dir), { recursive: true, force: true });
+    if (fs.existsSync(path.join(trusted, dir))) fs.cpSync(path.join(trusted, dir), path.join(work, dir), { recursive: true, verbatimSymlinks: true });
+  }
+}
+
+/**
+ * Before the PR: SEO Validation's translation check on the handoff head, with the workflow commit's scripts (repo's
+ * work tree), when the branch changed more than the run ledgers. null when it passes or there is nothing to check,
+ * else a reason code (scripts/lib/translation-check.mjs). CI runs the branch's own scripts on the PR merge instead,
+ * so a branch that edits the translation scripts, or races a change on main, can still differ there; the record
+ * step then still binds its row.
+ */
+export function checkTranslations({ repo, base, head, runner }) {
+  const changed = git(repo, ['diff', '--name-only', '-z', '--no-renames', base, head]).split('\0').filter(Boolean);
+  if (!needsTranslationCheck(changed)) return null;
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'autopilot-translations-'));
+  const work = path.join(root, 'tree');
+  try {
+    trustedTree({ repo, trusted: repo, sha: head, work, code: 'rejected_translations_node_modules' });
+    return runTranslationCheck(work, runner);
+  } finally {
+    git(repo, ['worktree', 'remove', '--force', work], { allowFail: true });
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+}
 export const SITE_ORIGIN = 'https://simplememofast.com';
 // The same site on http and on the www host (www answers with a 301 to SITE_ORIGIN, same path: _redirects and
 // functions/_middleware.js step 0). --check compares pathnames whatever the origin, so a URL on any of them names the page.
@@ -733,12 +772,7 @@ export function record({ repo, trusted, sha, day, pr, request, runId, work, runn
   assert(sha40(sha) && Number.isInteger(pr) && pr > 0, 'sha and PR number required');
   assert(/^[1-9]\d*$/.test(runId ?? ''), 'run id required');
   assert(path.isAbsolute(work) && !fs.existsSync(work), 'fresh absolute work tree required');
-  git(repo, ['worktree', 'add', '--detach', '--quiet', work, sha]);
-  if (fs.existsSync(path.join(work, 'node_modules'))) fail('record_node_modules');
-  for (const dir of OVERLAY) {
-    fs.rmSync(path.join(work, dir), { recursive: true, force: true });
-    if (fs.existsSync(path.join(trusted, dir))) fs.cpSync(path.join(trusted, dir), path.join(work, dir), { recursive: true, verbatimSymlinks: true });
-  }
+  trustedTree({ repo, trusted, sha, work, code: 'record_node_modules' });
   const dash = `${day.slice(0, 4)}-${day.slice(4, 6)}-${day.slice(6, 8)}`;
   const run = request.run;
   const runsFile = path.join(work, 'data/autopilot-runs.json');

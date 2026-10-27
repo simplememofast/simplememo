@@ -307,7 +307,7 @@
       "script": "scripts/autopilot-publish.mjs",
       "state": "demonstrated",
       "at": "2026-10-20",
-      "broke": "隔離した写しで6通り壊し、node --test scripts/autopilot-publish.test.mjs（本物のgit・ローカルのbareリポジトリ・通信なし）か --selftest が落ちることを実測。(1) コミット名義の照合を外す → 未承認の著者・共著者・committer を拒否する検体が落ちる。(2) .github を拒否リストから外す → ワークフロー追加と「足して消した」コミットの検体が落ちる。(3) push に --force を足す → 非fast-forwardの更新を拒否する検体が落ちる。(4) publish段の名前とActの読む語の衝突検査を外す → --selftest の改名変異が落ちる。(5) 記帳時の scripts/ の差し替えで先に消すのをやめる → 仕込んだ scripts/json.py が信頼側の実行中に残り記帳の検体が落ちる。(6) 緊急停止の再確認を外す → 停止中に公開する検体が落ちる。元実装は全件成功。--check は実際の obsidian-autopilot.yml を読み、モデルのジョブに GH_PAT・書き込み権限・id-token が無いこと、publish が $GITHUB_SHA の道具だけを実行すること、GH_PAT が3段にしか無いことを確かめる。翻訳・sitemap の再生成（実スクリプト）は単体テストでは置き換えており、本番の1回で確認する。"
+      "broke": "隔離した写しで6通り壊し、node --test scripts/autopilot-publish.test.mjs（本物のgit・ローカルのbareリポジトリ・通信なし）か --selftest が落ちることを実測。(1) コミット名義の照合を外す → 未承認の著者・共著者・committer を拒否する検体が落ちる。(2) .github を拒否リストから外す → ワークフロー追加と「足して消した」コミットの検体が落ちる。(3) push に --force を足す → 非fast-forwardの更新を拒否する検体が落ちる。(4) publish段の名前とActの読む語の衝突検査を外す → --selftest の改名変異が落ちる。(5) 記帳時の scripts/ の差し替えで先に消すのをやめる → 仕込んだ scripts/json.py が信頼側の実行中に残り記帳の検体が落ちる。(6) 緊急停止の再確認を外す → 停止中に公開する検体が落ちる。元実装は全件成功。--check は実際の obsidian-autopilot.yml を読み、モデルのジョブに GH_PAT・書き込み権限・id-token が無いこと、publish が $GITHUB_SHA の道具だけを実行すること、GH_PAT が3段にしか無いことを確かめる。翻訳・sitemap の再生成（実スクリプト）は単体テストでは置き換えており、本番の1回で確認する。\n\n**[2026-10-27 追記]** PR を開く前の訳の検査（scripts/lib/translation-check.mjs、オーナー判断 2026-10-27）。verifyHandoff は PR を出す日に限り、ページか訳の台帳が変わっていれば、handoff の head にワークフローのコミットのスクリプトを重ねた写しで build_site_translations.py --check を走らせ、外れたら rejected_translations_<理由> で何も push しない。隔離した写しで次の8通りを壊し、どれでも node --test scripts/autopilot-publish.test.mjs（訳の検体）が落ちることを実測: 判定を無視する、どの判定でも検査する、変更が無くても検査する、信頼側のスクリプトを重ねない、写しを消さない、incomplete を読み分けない、実行に失敗した回を通す、知らない失敗を通す。E2E（AUTOPILOT_PUBLISH_E2E=1）の訳の無い日は、本物の検査で rejected_translations_stale になる。\n\n**[2026-10-27 追記・2]** 点検（検証・反証が REJECT）の指摘で直した。検査を走らせる条件を「ページか data/i18n/」から「台帳と宣言だけの日以外のすべて」に広げた（生成器は data/i18n/dynamic-text.json の JS・data/i18n/diagrams.json の図・assets/ の参照データも読む。SVG・JS・JSON の変更でそれぞれ --check が落ちるのに、前の条件では飛ばしていた）。未登録のページを unregistered、知らない失敗を failed に分け、unchecked は終わらなかった回だけにした。子プロセスにトークンとワークフローの書き込み先を渡さず、上限は9分（publish ジョブは25分）。検体の分岐の「信頼側のスクリプトを重ねない」は、ブランチ側の印を書き換えて本当に検出できるようにした。隔離した写しで16通りの壊し方のどれでも、このテストか decision-ci --selftest が落ちることを実測。\n\n**[2026-10-27 追記・3]** 2回目の点検の指摘: モデルが成功したうえで push_only を依頼した日に検査を足しても、テストが落ちなかった（既存の push_only の検体はモデルの失敗の日で、検査の手前で返る）。その日の検体を足し、push_only の日も検査する形で落ちることを実測。"
     },
     {
       "script": "scripts/autopilot-runs.mjs",
@@ -709,7 +709,7 @@
       "script": "scripts/decision-ci.mjs",
       "state": "demonstrated",
       "at": "2026-09-04",
-      "broke": "自律ブランチの契約必須判定を常時falseにする変異で自己テストが失敗。"
+      "broke": "自律ブランチの契約必須判定を常時falseにする変異で自己テストが失敗。\n\n**[2026-10-27 追記]** --verify-local に訳の検査（ページか訳の台帳を変えた日だけ build_site_translations.py --check）を足した。selftest では検査を差し替え、検査を外す・変更が無くても検査する、のどちらでも --selftest が非0終了することを実測。\n\n**[2026-10-27 追記・2]** verifyLocal は既定では訳の検査をしない（--verify-local の CLI だけが渡す）。信頼側のモデル後の照合（autopilot-audit）も verifyLocal を呼ぶので、既定で検査するとモデルの作業ツリーの python を動かしてしまう（点検の指摘）。コミットしていない作業がある日は検査せず、先にコミットするよう伝える（PR に載るのは HEAD だけ）。既定で検査する・検査しない・条件なしで検査する・コミット前でも検査する、のどれでも --selftest が非0終了することを実測。\n\n**[2026-10-27 追記・3]** 検査を走らせる条件は publish と同じ needsTranslationCheck（台帳と宣言だけの日以外のすべて）。2回目の点検（検証・反証とも PASS）の指摘で、コミットしていない作業への案内を「コミットするか消す」にし、unregistered・failed・unchecked にはそれぞれの直し方を出すようにした。"
     },
     {
       "script": "scripts/decision-monitor-local.py",

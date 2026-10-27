@@ -13,6 +13,7 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { contractProblems, approvedMetric, METRICS, verifyHistory, historyBookkeeping, lastmodOnlySitemaps, selectContract, predictionFeedback, retireIntent } from './value-contracts.mjs';
 import { REPORT_PAGE, reportTranslationsAt } from './lib/report-publication.mjs';
+import { needsTranslationCheck, runTranslationCheck } from './lib/translation-check.mjs';
 import { renderPublishedReport } from './decision-monitor.mjs';
 import { loadContext as loadScoreContext } from './autonomy-score.mjs';
 
@@ -130,7 +131,7 @@ function verifySupportRegistration(e,base,head,files,git) {
  * Run the same declaration checks on the local branch, uncommitted work included,
  * and name every path. CI still owns the verdict; this only reports earlier.
  */
-export function verifyLocal({ cwd = ROOT, baseRef = 'origin/main' } = {}) {
+export function verifyLocal({ cwd = ROOT, baseRef = 'origin/main', translations = null } = {}) {
   const git = gitAt(cwd);
   const head = git('rev-parse', 'HEAD');
   const branch = git('rev-parse', '--abbrev-ref', 'HEAD');
@@ -163,6 +164,22 @@ export function verifyLocal({ cwd = ROOT, baseRef = 'origin/main' } = {}) {
     if (untrackedOutside.length) problems.push(`untracked files outside the declaration (fail once added): ${untrackedOutside.join(', ')}`);
   } else if (required(branch, touched, JSON.parse(git('show', `${base}:data/value-metrics.json`)))) {
     problems.push(`a prospective contract is required for: ${touched.filter(p => !contractExempt(p)).join(', ')}`);
+  }
+  // Prompt step 4: a day that changes more than its run ledgers commits its translations. The publish job runs the
+  // same check and opens no PR without them (scripts/lib/translation-check.mjs, 2026-10-27). Only the --verify-local
+  // CLI passes the check: the trusted post-model audit calls verifyLocal too, and must not run the model's scripts
+  // (2026-10-27 review). The PR carries HEAD only, so the check runs on committed work (about five minutes).
+  if (translations && needsTranslationCheck(touched)) {
+    const uncommitted = pending.filter(p => needsTranslationCheck([p]));
+    if (uncommitted.length) problems.push(`translations not checked: commit or remove the uncommitted work first (the PR carries HEAD only): ${uncommitted.join(', ')}`);
+    else {
+      const code = translations(cwd);
+      const hint = { unregistered: 'add the new page to data/i18n/pages.json, then --write and --check',
+        failed: 'the check itself failed: run python3 scripts/build_site_translations.py --check and read its error',
+        unchecked: 'the check did not finish: run it again in the foreground (about five minutes)' }[code]
+        ?? 'translate the edited pages, then --write, --check and commit (prompt step 4)';
+      if (code) problems.push(`translations ${code} (build_site_translations.py --check): ${hint}`);
+    }
   }
   return { branch, base, head, problems };
 }
@@ -349,30 +366,54 @@ async function selftest() {
     const pr = { number: 123, base: { ref: 'main', repo: { full_name: REPO } }, head: { ref: branch, sha: head, repo: { full_name: REPO } } };
     assert.equal((await verifyDecision({ ...options, head, pr })).state, 'bound');
     assert.equal((await verifyDecision({ ...options, head })).state, 'awaiting_pr_validation');
-    // Local pre-PR check on the same branch: clean, then the 2026-10-06 shape, then stray work.
-    assert.deepEqual(verifyLocal({ cwd: dir, baseRef }).problems, [], 'a declared, in-scope branch has no local problems');
+    // Local pre-PR check on the same branch: clean, then the 2026-10-06 shape, then stray work. The translation
+    // check (five minutes on the real site) is left out here and checked with a stub below.
+    const translationCalls = [];
+    // local() runs no check (as the audit calls it); local(code) passes a stubbed check that answers code.
+    const local = code => verifyLocal({ cwd: dir, baseRef, ...(code === undefined ? {}
+      : { translations: at => { translationCalls.push(at); return code; } }) });
+    assert.deepEqual(local().problems, [], 'a declared, in-scope branch has no local problems');
     save('data/autopilot-actions.json', { actions: [] }); g('add', '.'); g('commit', '-m', 'health intake after declaration');
-    assert.match(verifyLocal({ cwd: dir, baseRef }).problems.join(' | '), /undeclared path: data\/autopilot-actions\.json/);
+    assert.match(local().problems.join(' | '), /undeclared path: data\/autopilot-actions\.json/);
     g('reset', '-q', '--hard', head);
     fs.writeFileSync(path.join(dir, 'stray.txt'), 'not declared\n');
     fs.writeFileSync(path.join(dir, 'index.html'), 'uncommitted but declared\n');
-    assert.deepEqual(verifyLocal({ cwd: dir, baseRef }).problems, ['untracked files outside the declaration (fail once added): stray.txt'],
+    assert.deepEqual(local().problems, ['untracked files outside the declaration (fail once added): stray.txt'],
       'untracked work is checked against touches and bookkeeping, and named as untracked');
     fs.rmSync(path.join(dir, 'stray.txt')); g('checkout', '-q', '--', 'index.html');
     // A committed declaration edited in place is immutable, not "not committed yet".
     const live = `data/decision-intents/${c.id}.json`;
     save(live, { ...c, touches: [...c.touches, 'extra.html'] });
-    assert.deepEqual(verifyLocal({ cwd: dir, baseRef }).problems, [`intent is immutable (uncommitted edit): ${live}`]);
+    assert.deepEqual(local().problems, [`intent is immutable (uncommitted edit): ${live}`]);
     g('checkout', '-q', '--', live);
     // A staged move shows its undeclared source, not only the declared destination.
     g('mv', 'index.html', 'moved.html');
-    assert.match(verifyLocal({ cwd: dir, baseRef }).problems.join(' | '), /outside the declaration: index\.html|outside the declaration: moved\.html/);
+    assert.match(local().problems.join(' | '), /outside the declaration: index\.html|outside the declaration: moved\.html/);
     g('mv', 'moved.html', 'index.html');
     g('checkout', '-q', '-b', 'claude/obsidian-auto-20260904');
     fs.writeFileSync(path.join(dir, 'scripts/value-contracts.mjs'), '// edited gate\n');
-    assert.match(verifyLocal({ cwd: dir, baseRef }).problems.join(' | '), /cannot change its gate or policy: scripts\/value-contracts\.mjs/,
+    assert.match(local().problems.join(' | '), /cannot change its gate or policy: scripts\/value-contracts\.mjs/,
       'an autonomous branch is told before the PR that it cannot edit its gate');
     g('checkout', '-q', '--', 'scripts/value-contracts.mjs'); g('checkout', '-q', '-');
+    // The trusted post-model audit calls verifyLocal without the check: it never runs the model's scripts.
+    assert(!verifyLocal({ cwd: dir, baseRef }).problems.some(p => p.startsWith('translations')), 'verifyLocal runs no check by default');
+    // Uncommitted work is not checked (the PR carries HEAD only): the session is told to commit first.
+    fs.writeFileSync(path.join(dir, 'index.html'), 'uncommitted\n');
+    translationCalls.length = 0;
+    assert(local('incomplete').problems.some(p => p === 'translations not checked: commit or remove the uncommitted work first (the PR carries HEAD only): index.html'),
+      'uncommitted page work is named');
+    assert.equal(translationCalls.length, 0, 'and not checked');
+    g('checkout', '-q', '--', 'index.html');
+    // A day beyond the run ledgers without its translations is named before the PR (2026-10-27); a day that only
+    // declares (bookkeeping) runs nothing.
+    assert.deepEqual(local('incomplete').problems.filter(p => p.startsWith('translations ')).map(p => p.split(' ')[1]), ['incomplete'],
+      'a page edit with incomplete translations is a local problem');
+    assert(translationCalls.every(at => at === dir) && translationCalls.length > 0, 'the check runs in the work tree');
+    g('checkout', '-q', '--detach', declared);
+    translationCalls.length = 0;
+    assert.deepEqual(local('incomplete').problems, [], 'only a declaration changed: the check does not run');
+    assert.equal(translationCalls.length, 0, 'the five-minute check is skipped on a bookkeeping-only day');
+    g('checkout', '-q', '-');
     for (const change of [{ number: 124 }, { head: { ...pr.head, sha: implemented } }, { head: { ...pr.head, ref: 'other' } },
       { head: { ...pr.head, repo: { full_name: 'other/repo' } } }, { base: { ...pr.base, ref: 'other' } }]) {
       await assert.rejects(verifyDecision({ ...options, head, pr: { ...pr, ...change } }));
@@ -540,7 +581,7 @@ async function main() {
   if (process.argv.includes('--selftest')) return selftest();
   if (process.argv.includes('--verify-local')) {
     const at = process.argv.indexOf('--base');
-    const result = verifyLocal(at > 0 ? { baseRef: process.argv[at + 1] } : {});
+    const result = verifyLocal({ ...(at > 0 ? { baseRef: process.argv[at + 1] } : {}), translations: runTranslationCheck });
     console.log(JSON.stringify(result, null, 2));
     if (result.problems.length) {
       console.error('decision-ci --verify-local: the PR would fail decision-ci. Before opening it (Runbook §2-1 step 6-1):\n'
@@ -551,6 +592,9 @@ async function main() {
         + '    then re-implement (git cherry-pick). Re-declaring on top of the old commits fails "implementation preceded declaration".\n'
         + '  - data/autopilot-actions.json: do not commit the health-intake rows; Autopilot Act ingests them. Only a day that\n'
         + '    files an owner request (Runbook §7-1) declares this path in touches.\n'
+        + '  - translations: follow docs/site-localization.md (--extract, translate, import into the catalogs), then\n'
+        + '    build_site_translations.py --write and --check, and commit. Without them the publish job opens no PR.\n'
+        + '    "translations unregistered": add the new page to data/i18n/pages.json first.\n'
         + '  - nothing can ship today: retire the declaration and open the status/LOG-only PR (no run ledger, no report page).');
       process.exitCode = 1;
     }
