@@ -8,7 +8,8 @@ import path from 'node:path';
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { pack, verifyHandoff, pushBranch, record, validateRequest, prPayload, openPr, checkWiring, gitEnv, checkTranslations,
-  PublishError, RECORD_IDENTITY, MAX_REPAIR_TARGETS, handoffFileState, MAIN_EXECUTION_COPY } from './autopilot-publish.mjs';
+  PublishError, RECORD_IDENTITY, MAX_REPAIR_TARGETS, handoffFileState, MAIN_EXECUTION_COPY,
+  recordStepDiagnostic, defaultRunner } from './autopilot-publish.mjs';
 import { save as saveDiagnostics } from './autopilot-diagnostics.mjs';
 import { classifyAutopilotChange, hardDenyReason, isAutopilotBranch, RECORD_PATHS } from './lib/autopilot-paths.mjs';
 import { validate as validateRuns } from './autopilot-runs.mjs';
@@ -433,6 +434,36 @@ test('claim, duplicate and emergency stop are re-checked at publish time', async
   } finally { f.cleanup(); }
 });
 
+test('record failures expose typed diagnostics without child output, paths or exception text', () => {
+  const secret = 'private-title /private/path ghp_SENTINEL';
+  const result = { status: 1, stdout: Buffer.from(secret), stderr: Buffer.from(secret + '\n8 incomplete translations; no HTML written.\n') };
+  const diagnostic = recordStepDiagnostic(result);
+  assert.equal(diagnostic.incomplete_translations, 8);
+  assert.equal(diagnostic.exit_status, 1);
+  assert.equal(diagnostic.stdout_bytes, Buffer.byteLength(secret));
+  assert.equal(recordStepDiagnostic({ stderr: 'private/path → ko: ja:ed9210ee05e32a3a8155: missing; en:62b2f340ef14cbccff44: stale source' }).reported_missing_units, 1);
+  assert.equal(recordStepDiagnostic({ stderr: 'private/path → ko: en:62b2f340ef14cbccff44: stale source' }).reported_stale_units, 1);
+  assert(!JSON.stringify(diagnostic).includes(secret));
+  for (const code of ['ETIMEDOUT', 'ENOBUFS', 'ENOENT', 'EACCES', secret]) {
+    const d = recordStepDiagnostic({ status: null, signal: secret, error: { code, message: secret } });
+    assert.equal(d.process_error, code === secret ? 'other' : code);
+    assert.equal(d.exit_status, null);
+    assert.equal(d.signal, null);
+    assert.equal(d.incomplete_translations, null);
+    assert(!JSON.stringify(d).includes(secret));
+  }
+  assert.equal(recordStepDiagnostic({ stderr: '8 incomplete translations; no HTML written.\n9 incomplete translations; no HTML written.\n' }).incomplete_translations, null);
+  const messages = [], original = console.error;
+  console.error = message => messages.push(message);
+  try {
+    assert.throws(() => defaultRunner(ROOT, process.execPath, ['-e',
+      `process.stdout.write(${JSON.stringify(secret)}); process.stderr.write('8 incomplete translations; no HTML written.\\n'); process.exit(1)`]), PublishError);
+  } finally { console.error = original; }
+  assert.equal(messages.length, 1);
+  assert.equal(JSON.parse(messages[0].split('record step diagnostic: ')[1]).incomplete_translations, 8);
+  assert(!messages.join('').includes(secret));
+});
+
 test('record runs trusted code over the branch data and commits only record paths', async () => {
   const f = fixture();
   try {
@@ -484,6 +515,21 @@ test('record runs trusted code over the branch data and commits only record path
           if (args.includes('--publish-report')) { fs.mkdirSync(path.join(cwd, 'ko'), { recursive: true }); mutate(cwd); } } });
       if (ok) assert.equal(run().changed, 1); else assert.throws(run, error => error.code === 'record_unexpected_change');
     }
+  } finally { f.cleanup(); }
+});
+
+test('record refuses a reconciled observation of the same execution under another row ID', () => {
+  const f = fixture();
+  try {
+    const row = { run_id: `ap-${DAY}-actions`, date_jst: '2026-10-20', route: 'actions', attempted: true,
+      outcome: 'no_artifact', external_ref: '123', source: 'act-reconcile' };
+    write(f.work, 'data/autopilot-runs.json', JSON.stringify({ runs: [row] }) + '\n');
+    commitPage(f);
+    let calls = 0;
+    assert.throws(() => record({ repo: f.work, trusted: f.tools, sha: sh(f.work, ['rev-parse', 'HEAD']), day: DAY, pr: 9,
+      request: validateRequest(request(), DAY).request, runId: '123', work: path.join(f.temp, 'record-duplicate'),
+      runner: () => { calls++; } }), error => error.code === 'record_duplicate_external_ref');
+    assert.equal(calls, 0, 'refused before append or regeneration');
   } finally { f.cleanup(); }
 });
 
