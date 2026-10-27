@@ -4189,3 +4189,55 @@ p=0.20。`publishing_day_rate` は5件の決済のうち p=0.70/0.55/0.35/0.25 �
 **検証していないこと:** 本文HTML・画像は1行も変えていないため、ブラウザを使う動的な `check-viewport-overflow --check` は対象外。`autopilot-runs.mjs --check` はこのセッションでは台帳append（publishジョブの仕事）を行わないため、台帳最終記入とstatus JSONのdate_jstの食い違いで非0終了する想定どおりの状態（publish側が記帳すれば解消）。
 
 `ROUTINE_MCP_PROBE: not_applicable Actions経路のためCCRのMCPは対象外`
+
+
+## 2026-10-27 — GitHub Actions主系・レーンC。`/obsidian/plugins/` の公式レジストリを53日ぶりに再計測
+
+### 判定
+
+`data/emergency-stop.json` は全体・経路とも `stopped: false`。当日ブランチ `claude/obsidian-auto-20261027` は origin に無く、本番 `data/autopilot-status.json` の `date_jst` は 2026-10-26 だったため冪等チェックを通過。`node scripts/autopilot-selfheal.mjs` はレーンF対象なし（過去の `usage_limit` 系は `owner` 判断で既知の制約・5件の `no_artifact`（10-05・10-06・10-22・10-24・10-25）は修理上限3回超で人に上げたまま、TRIAL_RUNの指示どおり今回も直さず `repair_of` も書かない）。
+
+### レーンA〜Eの走査
+
+`coverage-queue.json` の唯一の pending（C29 `/obsidian/compare/craft/`）は `collides_with: /vs/craft/`（既存サイトに実在）で不適格、他に pending 無し。`AUTOPILOT_DATA_REPORT`（`ready`・`newest_data_date` 2026-10-24・28日窓・lag 3日）で `growth/scripts/analyze.mjs --only unanswered` を再実行し、上位から順に不適格理由を確定した:
+
+- 「好习惯，每天一次优化」（`/zh/blog/memo-habit`・533imp・pos5.6・期待16.4クリック損失）— Obsidianハブ範囲外。`growth/lib/clusters.mjs` の分類器でも win（brand/obsidian/voice）側に入らず、10-26ログの「範囲外」判定を継続
+- 「ラインキープメモ どこ」等LINE Keep系4クエリ（`/blog/line-keep-alternative`・計約22クリック相当）— `docs/SEO_AIO_PLAN_2026-08.md` P0-2で既にCTR改善対象から除外済み。確認型クエリで、タイトル「LINE Keepは終了・Keepメモは継続中｜…」がSERPスニペット内で答えを完結させている（3度目の実験で `title-2026-07-01-002` が `abandoned` になった構造的回収不能パターン）
+- `/fastest-voice-memo/`（192imp・pos7.6）— 10-01ログで「baseline変更後」と確認済みのstale候補
+- 「自分にメールを送る」（`/note-to-email/`）— 実験 `gsc-note-to-email-20260923` が実行中（exclusive scope、4日overdueだが評価条件は今日のBQ窓では別候補）
+- 「pkmとは」（`/glossary/pkm/`・72imp・pos4.2・期待3.2クリック損失）— 唯一ノイズフロアを超えて残った候補だが、ページ自身のタイトル「PKM（個人知識管理）とは — Obsidian連携シンプルメモ用語集」が質問文の答えをSERPスニペット内で既に完結させており、line-keep-alternativeと同じ構造的パターンと判断。実装前の価値契約比較でも次点として評価し、`--select` では不選択
+
+レーンA/B/Eに適格案件が無いため、前回レーンC実施（2026-09-04・テーマ明暗内訳）から53日が経過（Runbook §2「前回レーンCから7日以上経っている→その日の優先レーン」）し、今日の優先レーンをCとした。
+
+### 実装
+
+Obsidian公式配布元リポジトリ（GitHub: `obsidianmd/obsidian-releases`）の3ファイルを `raw.githubusercontent.com` 経由で2026-10-27に直接取得し、スクリプトで集計:
+
+```
+community-plugins.json       9,520件（9月4日7,242件から+2,278件・53日で1日あたり約43個）
+community-css-themes.json      943件（729件から+214件）
+community-plugin-stats.json  9,521件（ダウンロード数データ）
+```
+
+`/obsidian/plugins/` の「実測 — 公式レジストリの推移」表に2026-10-27の行を追加し、footnoteの増加率を更新。「実測トップ10」をdownloadsで再計算した結果、8位にAIエージェント系プラグイン「Copilot」（公式一行説明で「Claude Code・Codex・OpenCodeなどのAIエージェントを保管庫内で動かす」と明記）が新規参入し、旧10位のIconize（228万件まで伸びたが及ばず）が初めて10位から外れた。1〜7位・9〜10位のダウンロード数も実測値に更新し、参考資料節の計測日リスト・JSON-LDの`dateModified`を2026-10-27に更新した。FAQ構造化データ（6,812個の初回記述・旧トップ10のIconize言及等）は2026-09-04の更新時と同じ方針で今回も更新していない（過去の計測回を固定した設問として扱う既存の運用を維持）。他言語版（en/zh/zh-Hant/ko/es/pt-BR/id/ar/tr）は過去のレーンC・レーンA更新と同じく今回も更新していない（`methods/second-brain/index.html` のtitle更新（PR #1959・2026-10-04）と同じ前例に従い、JA本文のみを対象とした）。
+
+### 価値契約
+
+`plugins-registry-refresh-20261027` を実装より先に別コミットでpush（push自体はこのセッションでは行わず、publishに依頼）。`publishing_day_rate`・p=0.35・horizon 1日。次点候補 `pkm-answer-clarity-20261027`（`/glossary/pkm/`、p=0.15）は上記の理由で不選択。較正根拠: `publishing_day_rate` は決済10件・平均Brier 0.3915で、p=0.55〜0.70帯は過信（event=0が多い）、p=0.15〜0.35帯はevent=1が複数回出ている。直近の2026-10-22・10-24・10-25は同じpublish経路で3日連続no_artifactの後、10-26が成功しておりボラティリティが残るため、p=0.35に抑えた。
+
+### 台帳
+
+- run_id: `ap-20261027-actions-40433175978`
+- 変更ファイル: `obsidian/plugins/index.html`（本文）、`data/decision-intents/plugins-registry-refresh-20261027.json`（宣言）、`data/distribution-queue.json`（配信の種・先頭に1件）、`data/autopilot-status.json`、本ログ
+- このセッションには書き込み資格情報が無いため、push・PR作成・記帳・公開運転表再生成・sitemap再生成はpublishジョブへ依頼する（StructuredOutput）。宣言した `touches` に `sitemap-ja.xml` を含めたが、lastmodのみの変更はpublish側が生成するため、このセッション自身はsitemapを書き換えていない
+- owner_requests: 繰り返し no_artifact 5件（10-05・10-06・10-22・10-24・10-25）はレーンFの修理上限（同種故障3回）を超えて人に上げたまま変化なし
+
+### 検証
+
+ローカルで exit 0: `seo-check`（0 errors・2652 warnings、変化なし）・`check-css-version`・`check-benchmark`・`check-url-normalization`・`check-internal-redirects`・`sync_constants --check`・`tag-cta-placements --check`・`check-experiments`（overdue 2件・いずれも今回の変更と無関係なページ）・`autopilot-budget --check`・`check-authority --check`・`autopilot-selfheal --check`・`autopilot-drill --check`・`automation-rate --check`・`check-pr-facts --check`・`check-landing-freshness --check`・`check-viewport-overflow --static`・`d-score --check`・`generate_sitemap.py --dry-run`。`decision-ci.mjs --verify-local` は `problems: []`。
+
+`check-viewport-overflow --check --no-sweep`（Chromium深い3面×14幅・WebKit 320px）を実行: Chromiumは42/42・failures 0。WebKitは `webkit2gtk-driver` が未導入で、`apt-get install` が280秒で打ち切り（Runbookの「apt が数分たっても返らない場合は深追いしない」指示に従い再試行せず省略）。本文は表の数値置き換えのみでCSS/共有コンポーネントは変更していないため、横漏れのリスクは低いと判断した。
+
+**検証していないこと:** WebKitでの動的viewport確認（上記の理由で省略）。FAQ構造化データと本文の数値の不一致（6,812個の初回記述・旧トップ10のIconize言及）は2026-09-04から継続する既存の設計（過去の計測回を固定した設問として扱う）で、今回新たに広げていない。
+
+`ROUTINE_MCP_PROBE: not_applicable Actions経路のためCCRのMCPは対象外`

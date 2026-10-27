@@ -1,36 +1,39 @@
 {
-  "date_jst": "2026-10-26",
-  "generated_at": "2026-10-26T00:50:00.000000+00:00",
-  "action": "maintenance",
-  "article": null,
+  "date_jst": "2026-10-27",
+  "generated_at": "2026-10-27T02:05:20.000000+00:00",
+  "action": "refresh",
+  "article": {
+    "url": "/obsidian/plugins/",
+    "title": "Obsidianプラグイン入門 — 6,812個から実測トップ10【2026】"
+  },
   "pr": null,
   "streak": {
-    "consecutive_no_article_days": 21,
+    "consecutive_no_article_days": 22,
     "last_article_date_jst": "2026-10-05",
-    "last_production_change_date_jst": "2026-10-05",
-    "days_since_production_change": 21
+    "last_production_change_date_jst": "2026-10-27",
+    "days_since_production_change": 0
   },
   "data_freshness": {
-    "bq_export_last_data_date": "2026-10-23",
+    "bq_export_last_data_date": "2026-10-24",
     "bq_export_days_accumulated": 28,
     "bq_checked": true,
-    "manual_snapshot_label": "2026-10-21 (growth/data/gsc/); BQ ready snapshot 2026-10-26 used for today's evaluation, not committed to the repo (temporary)"
+    "manual_snapshot_label": "2026-10-21 (growth/data/gsc/); BQ ready snapshot 2026-10-27 used for today's evaluation, not committed to the repo (temporary)"
   },
   "cost": {
     "month": "2026-10",
     "cap_usd": 280,
-    "spent_usd": 45.4965,
+    "spent_usd": 52.4593,
     "remaining_usd": null,
-    "remaining_usd_upper_bound": 234.5035,
+    "remaining_usd_upper_bound": 227.5407,
     "spent_usd_is_lower_bound": true,
     "over": false,
-    "runs": 5,
-    "shipped": 0,
-    "usd_per_shipped": null,
+    "runs": 6,
+    "shipped": 1,
+    "usd_per_shipped": 52.4593,
     "by_route": {
       "actions": {
-        "runs": 5,
-        "spent": 45.49651539999999
+        "runs": 6,
+        "spent": 52.45927879999999
       },
       "ccr": {
         "runs": 0,
@@ -46,13 +49,13 @@
     "models": {
       "counts": {},
       "runs_with_models": 0,
-      "runs_without_models": 5
+      "runs_without_models": 6
     },
     "anomaly": {
       "enabled": true,
       "judged": true,
-      "median": 5.67639,
-      "threshold": 22.70556,
+      "median": 6.400745500000001,
+      "threshold": 25.602982000000004,
       "samples": 14,
       "anomalies": []
     },
@@ -494,17 +497,18 @@
       ]
     }
   },
-  "reason": "【保守：レーンA〜Eは適格案件なし・レーンF対象なし・連続無記事21日目・本番最終変更2026-10-05・BQ 28/28日】自己修復は対象なし。カバレッジキューの唯一の pending(C29 /obsidian/compare/craft/)は既存の /vs/craft/ と collides_with で不適格。データ駆動キュー(refresh-queue.json)の queued 項目はObsidianハブ範囲外(zh/memo-habit, fastest-voice-memo)か、やらないことリストで明示除外(会議/議事録クラスタ)のため見送り。新鮮なGSC分析(--only unanswered)でObsidianハブの強い未回答意図を検出: 「obsidian ダウンロード」250imp/pos6.5/0クリック(期待7.5クリック損失)、着地先は/obsidian/getting-started/で、ここは評価期限超過(2026-10-23)の実験 gsc-obsidian-install-20260922-r2 の対象ページと一致(exclusive scope)。新しい施策よりも先にこの実験を評価する必要があったため、本日のアクションは実験評価とした。",
-  "verified": "gsc-obsidian-install-20260922-r2を今回のBQスナップショット(2026-10-26, 期間2026-09-26..2026-10-23)で評価: /obsidian/getting-started/のCTRが0.66%→0.83%(+0.18pp, 事前登録のretainライン+0.30pp未達)、position 8.41→7.47、imp 1371→2039(+49%, 需要/ミックスの交絡)。decision=inconclusive。seo-check 0 errors(既存2652 warningsから変化なし)、check-experiments/autopilot-budget/autopilot-runs/check-authority/autopilot-selfheal/autopilot-drill/automation-rate/check-pr-facts/check-landing-freshness/check-viewport-overflow --static/d-score/generate_sitemap --dry-run はすべて通過。decision-ci --verify-local は problems:[] 。本文HTML・画像は変更していないためブラウザ動的QA(viewport --check)は対象外。",
+  "reason": "【レーンC・連続無記事22日目(本更新は編集的新規記事ではない)・本番最終変更2026-10-27(本PR)・BQ 28/28日】自己修復は対象なし。カバレッジキューの唯一の pending(C29 /obsidian/compare/craft/)は既存の /vs/craft/ と collides_with で不適格、レーンEは枯渇。growth/scripts/analyze.mjs --only unanswered を再走査: 「好习惯，每天一次优化」(/zh/blog/memo-habit, Obsidianハブ範囲外)、LINE Keep系4件(/blog/line-keep-alternative, SEO_AIO_PLAN P0-2で既にCTR改善対象から除外済み・確認型クエリでタイトルが答えを完結)、/fastest-voice-memo/(stale baseline)、/note-to-email/(実験gsc-note-to-email-20260923が実行中・exclusive scope)を除外すると、/glossary/pkm/の「pkmとは」だけが残ったが、同ページのタイトルも「PKM（個人知識管理）とは」で質問文の答えをSERPスニペット内に既に完結させており、line-keep-alternativeと同じ構造的に回収不能なパターンと判断。レーンA/B/Eに適格案件が無いため、前回レーンC実施(2026-09-04)から53日経過(Runbook §2「7日以上→優先レーン」)のレーンCへ切替え、/obsidian/plugins/の公式レジストリ(community-plugins.json・community-css-themes.json・community-plugin-stats.json)を再計測した。",
+  "verified": "raw.githubusercontent.com経由でobsidianmd/obsidian-releasesの3ファイルを2026-10-27に直接取得し、配列要素数のカウントとdownloadsでの並べ替えをスクリプトで実行: community-plugins.json 9,520件(9月4日7,242件から+2,278件・53日で1日あたり約43個)、community-css-themes.json 943件(729件から+214件)、community-plugin-stats.json 9,521件。ダウンロード数トップ10を再計算し、8位にAIエージェント系プラグイン「Copilot」(公式説明文でClaude Code/Codex/OpenCodeを名指し)が新規参入、旧10位のIconizeは入れ替わりで10位から外れたことを確認。プラグイン・テーマの実インストール動作検証は今回も実施していない。本文中のFAQ(登録数6,812個の初回記述・旧トップ10のIconize言及等)は過去の計測回も同様に更新しておらず、今回も本文の成長テーブル・トップ10表・references節のみを更新し既存の方針を維持した。seo-check 0 errors(既存2652 warningsから変化なし)、check-css-version/check-benchmark/check-url-normalization/check-internal-redirects/sync_constants/tag-cta-placements/check-experiments/autopilot-budget/check-authority/autopilot-selfheal/autopilot-drill/automation-rate/check-pr-facts/check-landing-freshness/check-viewport-overflow --static/d-score/generate_sitemap --dry-run はすべて通過。check-viewport-overflow --check --no-sweep(Chromium深い3面×14幅)は42/42・failures 0。WebKitはWebKitWebDriver未導入(apt-get install webkit2gtk-driver xvfbが4分超で打ち切り)のため今回も未検証。decision-ci --verify-local は problems:[] 。",
   "checks": {
     "seo_check": "0 errors, 2652 warnings (pre-existing baseline, unchanged by this PR)",
-    "check_experiments": "pass; overdue count 3 -> 2 after today's evaluation",
+    "check_experiments": "pass; 2 overdue (link-2026-08-28-feed-strongest-page 15d, gsc-note-to-email-20260923 4d), both unrelated to today's touches",
+    "check_viewport_overflow_check_no_sweep": "Chromium blink_deep 42/42 failures 0; WebKit not verified (webkit2gtk-driver apt install timed out, skipped per Runbook guidance rather than risk eating the job budget)",
     "decision_ci_verify_local": "problems: []",
-    "mobile_qa": "not applicable; no HTML/CSS changed this run"
+    "mobile_qa": "static-only (table/text content edit); dynamic Chromium deep check passed, WebKit unverified"
   },
   "owner_requests": [
     "繰り返し no_artifact (5件: ap-20261005-actions-37249907984, ap-20261006-actions, ap-20261022-actions, ap-20261024-actions, ap-20261025-actions) — レーンFの自己修復が同種故障3回超で修理停止中。PR成果物とrun idの紐付けが取れない/decision-ciの宣言外パス拒否が繰り返しており、Actionsの書き込み権限分離後のpublish経路そのものの点検が必要。"
   ],
-  "next": "もう1件の overdue 実験 gsc-note-to-email-20260923 (/note-to-email/, 評価期限2026-10-23) も同じ2026-10-26スナップショットで評価可能(due候補として確認済み)。次回セッションで評価するか、Obsidianハブ範囲内の施策が優先であれば後回しにする。「obsidian ダウンロード」の未回答意図(7.5クリック相当)は、今回の実験評価がinconclusiveで終わったため、/obsidian/getting-started/のダウンロード導線強化は依然open — 次の変更の前にはこの実験が評価済み(exclusive scopeの制約が外れた)であることを確認してから着手する。",
-  "observation_scope": "Actions route, no write credentials. Work ends at local commit; a separate non-model publish job validates and pushes, opens the PR and updates the run ledger/public report/sitemap. Declared value contract: obsidian-install-r2-evaluate-20261026 (publishing_day_rate, p=0.5)."
+  "next": "overdue実験2件(link-2026-08-28-feed-strongest-page 15日・gsc-note-to-email-20260923 4日)はいずれも今日のレーンC候補とは別ページで、今日の変更と無関係。次回セッションでどちらかを2026-10-26と同じ要領で評価する候補にする。レーンCの次の資産は、今回使った「総数・トップ10の再計測」以外(例: プラグインのダウンロード分布の中央値・作者の重複・キャプチャ系キーワード比率の再測定)を検討する(前回同様の資産を連続で使わない申し送りに合わせる)。",
+  "observation_scope": "Actions route, no write credentials. Work ends at local commit; a separate non-model publish job validates and pushes, opens the PR and updates the run ledger/public report/sitemap. Declared value contract: plugins-registry-refresh-20261027 (publishing_day_rate, p=0.35)."
 }
