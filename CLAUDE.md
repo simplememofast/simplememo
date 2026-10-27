@@ -145,7 +145,7 @@ mainへのマージ＝本番デプロイなので、検証を通ったコミッ�
 
 ## /autopilot/ の自律スコアは日付で動く（2026-09-19）
 
-> **【2026-10-27 の提案。下書き PR で出し、オーナーがマージを決めた時点で承認】**
+> **【2026-10-27 提案、同日オーナー承認（選択肢「Claudeにマージを任せる」）】**
 > main に `scripts/lib/routine-ci-scope.mjs` の `AUTOPILOT_PAGE_PATHS` があれば、この変更は入っている。
 > そのとき全PRは `check-autopilot-page.mjs --as-stamped` で照合する。自律スコアはページの
 > `data-decision-date` の日付で計算するので、**暦が進むだけでは落ちない。**

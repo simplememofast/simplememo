@@ -55,8 +55,7 @@ const WAITING_PROGRESS_PATHS = new Set([
 // reports the old side of a rename as a deletion.
 const WAITING_APPEND_ONLY_DIRS = ['growth/data/gsc'];
 
-// Proposed 2026-10-27 in a draft PR (docs/routine-ci-scope.md); in force on a main
-// that contains it. Every PR compares the public autopilot page with the ledgers
+// Proposed 2026-10-27, owner-approved 2026-10-27 (docs/routine-ci-scope.md). Every PR compares the public autopilot page with the ledgers
 // at the page's own stamped date (check-autopilot-page --as-stamped). Whether the
 // page is today's value (--check) is a publication gate only for a PR that changes
 // routine operations (the daily Act PR regenerates the page) or one of these files:

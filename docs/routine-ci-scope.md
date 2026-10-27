@@ -33,8 +33,8 @@ disagree with the score. Measured on 2026-10-24 with a Node clock shift: it pass
 ## Status of the 2026-10-27 autopilot page extension
 
 **Proposed on 2026-10-27 in a draft PR after the owner chose, on 2026-10-26, to
-propose it separately. It is in force only on a main that contains it, and the owner's
-decision to merge that PR is its approval.** The comparison is not dropped: every PR
+propose it separately, and approved by the owner on 2026-10-27 (multiple choice), who
+delegated the merge to Claude.** The comparison is not dropped: every PR
 still compares the page with the ledgers. What changes is the date the autonomy score
 is computed for.
 

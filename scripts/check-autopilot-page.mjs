@@ -131,7 +131,7 @@ export function classifyFile(text, { allowed = false, today = null, live }) {
 /**
  * ページに刻まれた自律スコアの計算日（`<span data-decision-date>`）を読む。
  *
- * 【2026-10-27 提案。オーナーがマージを決めた時点で承認（docs/routine-ci-scope.md）】
+ * 【2026-10-27 提案、同日オーナー承認（docs/routine-ci-scope.md）】
  * 自律スコアは 28 日の滑る窓で数えるので、**台帳が1行も変わらなくても、暦が進むだけで
  * 今日の計算値はページから離れていく。**日次の Act が止まると約2日で全 PR が落ちていた
  * （2026-10-17〜19 の詰まりと同じ型）。--as-stamped はスコアを「ページが自分で名乗る計算日」
