@@ -68,13 +68,22 @@ function filledOnly(before, after) {
   return true;
 }
 
-// A new cost row in the shape of Runbook §5-3: the previous run's cost, measured, booked by the next session.
+// A new cost row in the shape of Runbook §5-3: the previous run's cost, measured, booked by the next session. Its
+// result metadata takes appendRun's values too (a task kind decides which per-run cap applies), and its day is a real
+// day within the last month (older costs are Act's backfill, not a day branch's).
+const DAY_MS = 86_400_000;
+const dayTime = value => {
+  const time = typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) ? Date.parse(`${value}T00:00:00Z`) : NaN;
+  return Number.isFinite(time) && new Date(time).toISOString().slice(0, 10) === value ? time : null;
+};
 function costRowCode(row, day) {
   if (own(row, 'cap_review') !== undefined) return 'row_cap_review';
   if (own(row, 'cost_expectation') !== undefined) return 'row_cost_expectation';
-  const cost = own(row, 'total_cost_usd'), date = own(row, 'date_jst');
+  const cost = own(row, 'total_cost_usd'), date = dayTime(own(row, 'date_jst')), today = dayTime(day);
   if (own(row, 'route') !== 'actions' || typeof cost !== 'number' || !(cost > 0)
-    || typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !(typeof day === 'string' && date <= day)) return 'row_not_a_cost';
+    || date === null || today === null || date > today || date < today - 31 * DAY_MS) return 'row_not_a_cost';
+  if (own(row, 'task_kind') != null && !TASK_KINDS.includes(own(row, 'task_kind'))) return 'row_not_a_cost';
+  if (own(row, 'outcome') != null && !OUTCOMES.includes(own(row, 'outcome'))) return 'row_not_a_cost';
   return null;
 }
 

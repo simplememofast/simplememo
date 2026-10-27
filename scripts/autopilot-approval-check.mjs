@@ -494,6 +494,16 @@ async function selftest() {
     [costDoc([{ ...spent, outcome: 'bogus' }, loose]), 'row_rewritten', 'an outcome outside OUTCOMES'],
     [costDoc([{ ...spent, outcome: null, task_kind: 'other' }, loose]), 'row_rewritten', 'a task kind outside appendRun'],
     [costDoc([{ ...spent, outcome: null, task_kind_source: { job_id: '1' } }, loose]), 'row_rewritten', 'a source without a task kind'],
+    [costDoc([{ ...spent, outcome: null }, loose, { ...spent, run_id: 'x', task_kind: 'article', outcome: 'shipped' }]), null,
+      'a new row with a known task kind and outcome'],
+    [costDoc([{ ...spent, outcome: null }, loose, { ...spent, run_id: 'x', task_kind: 'bogus' }]), 'row_not_a_cost', 'a new row with an unknown task kind'],
+    [costDoc([{ ...spent, outcome: null }, loose, { ...spent, run_id: 'x', outcome: 'bogus' }]), 'row_not_a_cost', 'a new row with an unknown outcome'],
+    [costDoc([{ ...spent, outcome: null }, loose, { ...spent, run_id: 'x', date_jst: '2026-00-00' }]), 'row_not_a_cost', 'a date that is no day'],
+    [costDoc([{ ...spent, outcome: null }, loose, { ...spent, run_id: 'x', date_jst: '2026-09-31' }]), 'row_not_a_cost',
+      'a day JS would roll over (September 31 reads as October 1)'],
+    [costDoc([{ ...spent, outcome: null }, loose, { ...spent, run_id: 'x', date_jst: '2026-09-01' }]), 'row_not_a_cost', 'more than 31 days back'],
+    [costDoc([{ ...spent, outcome: null }, loose, { ...spent, run_id: 'x' }, { ...spent, run_id: 'y', total_cost_usd: -1 }]), 'row_not_a_cost',
+      'every new row is checked, not only the first'],
     [costDoc([{ ...spent, outcome: null }, loose]).replace('"total_cost_usd": 2', '"total_cost_usd": 1e999'), 'unreadable',
       'a number JSON cannot hold'],
     [costDoc([{ ...spent, outcome: null }, loose, { ...spent, run_id: 'x', cap_review: { by: 'ai' } }]), 'row_cap_review', 'a new row with cap_review'],
@@ -509,6 +519,15 @@ async function selftest() {
   t(lc(COST_LEDGER, costDoc([unavailable]), costDoc([{ ...spent, task_kind: 'article' }])) === null,
     'cost ledger: filling task_kind drops task_kind_unavailable');
   t(lc(COST_LEDGER, costDoc([unavailable]), costDoc([spent])) === 'row_rewritten', 'cost ledger: dropping it alone is no fill');
+  t(lc(COST_LEDGER, costDoc([spent]), costDoc([{ ...spent, task_kind: 'article', task_kind_source: { job_id: '1' } }])) === null,
+    'cost ledger: a source comes with a newly filled task kind');
+  t(lc(COST_LEDGER, costDoc([spent]), costDoc([unavailable])) === null, 'cost ledger: task_kind_unavailable on a row with no kind or source');
+  t(lc(COST_LEDGER, costDoc([{ ...spent, task_kind: 'article' }]), costDoc([{ ...unavailable, task_kind: 'article' }])) === 'row_rewritten',
+    'cost ledger: not on a classified row');
+  t(lc(COST_LEDGER, costDoc([{ ...spent, task_kind_source: { job_id: '1' } }]), costDoc([{ ...unavailable, task_kind_source: { job_id: '1' } }]))
+    === 'row_rewritten', 'cost ledger: not on a row with a source');
+  t(lc(COST_LEDGER, costDoc([unavailable]), costDoc([{ ...spent, task_kind_unavailable: { reason: 'other' } }])) === 'row_rewritten',
+    'cost ledger: a recorded task_kind_unavailable is not replaced');
   t(lc('data/autopilot-status.json', '{}', '{"runs":[]}') === 'not_a_gated_ledger', 'only the gated ledgers');
   t(JSON.stringify(ledgerReasons([{ file: COST_LEDGER, before: null, after: null }], 'claude/obsidian-auto-20261020'))
     === `["ledger:${COST_LEDGER}:unreadable"]`, 'listed as changed but absent on both sides');
