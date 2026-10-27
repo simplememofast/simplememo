@@ -162,8 +162,9 @@ LOGは必要な直近範囲、当日typed action reportがあるときはそのr
 Runbookの最小成果物・配信の種・公開品質検査は省略しない。
 
 通常のPR経路を使い、マージ前に実run ID・PR番号・lane・actionを共有runs台帳へ記帳する。
-記事のbaselineを取り、必要な生成物・検証を揃えて、最終HEADのSEO Validation成功後に
-auto-mergeする。マージ後はlatest mainの実内容、本番statusと記事本文を照合する。
+記事のbaselineを取り、必要な生成物・検証を揃える。最終HEADのSEO Validation成功後、台帳だけのPRは
+auto-mergeされ、記事・`/autopilot/` の生成物など台帳以外を含むPRはオーナーの承認（Environment
+autopilot-approval、2026-10-27 #2125。Runbook §0 原則6）の後にマージされる。マージ後はlatest mainの実内容、本番statusと記事本文を照合する。
 closed-unmerged、PR待ち、保守のみ、新記事公開、未確認を分ける。
 古い失敗runをshippedに書き換えたり、実行成功を公開成功へ読み替えたりしない。
 
