@@ -94,7 +94,8 @@ function findUnapprovedPrincipals(commits) {
     // A co-author line is judged on its value with those lines folded in; a folded line belongs to
     // that value (git reads it so), and the loop goes on after it, so each line is read once. A line
     // that starts with Unicode whitespace (a NBSP, U+3000) is folded too: git does not, but how GitHub
-    // reads it is unmeasured, and folding it only refuses more.
+    // reads it is unmeasured. Folding it can only refuse more, or accept a value made only of approved
+    // strings split across lines (no other name can come out of it).
     const lines = message.split(/\r?\n/);
     for (let i = 0; i < lines.length; i++) {
       if (!/^\s*Co-authored-by\s*:/i.test(lines[i])) continue;
@@ -186,9 +187,14 @@ function selftest() {
     assert.deepEqual(findUnapprovedPrincipals(withMessage(`fix\r\n\r\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\r\n\t${space}\r\n Private Person <person@example.invalid>\r\n`))
       .map(p => p.field), ['co-author'], `${tag}, a line that only looks blank`);
   }
-  // A line that starts with a NBSP is folded as well (how GitHub reads it is unmeasured).
-  assert.deepEqual(findUnapprovedPrincipals(withMessage('fix\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\n\u00a0Private Person <person@example.invalid>'))
-    .map(p => p.field), ['co-author'], 'U+00a0 at the start of a line');
+  // A line that starts with Unicode whitespace is folded as well (how GitHub reads it is unmeasured).
+  for (const space of ['\u00a0', '\u3000', '\u2003', '\u202f', '\ufeff']) {
+    assert.deepEqual(findUnapprovedPrincipals(withMessage(`fix\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\n${space}Private Person <person@example.invalid>`))
+      .map(p => p.field), ['co-author'], `U+${space.codePointAt(0).toString(16).padStart(4, '0')} at the start of a line`);
+  }
+  // The cap leaves room for the longest approved value (the github-actions noreply trailer, 91 characters).
+  assert.deepEqual(findUnapprovedPrincipals(withMessage('fix\n\nCo-authored-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>')), [],
+    'the longest approved co-author value');
   // A value longer than any approved one is refused before the regex reads it, even with an approved name in it.
   assert.deepEqual(findUnapprovedPrincipals(withMessage(`fix\n\nCo-Authored-By: Claude Sonnet 5${' '.repeat(300)}<noreply@anthropic.com>`))
     .map(p => p.field), ['co-author'], 'an overlong co-author value');
