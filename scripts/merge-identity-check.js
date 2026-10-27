@@ -60,6 +60,10 @@ function completeCommitList(reportedCount, commits) {
     Array.isArray(commits) && commits.length === reportedCount;
 }
 
+// An approved co-author value is short (the longest is about 110 characters). A longer one is refused before the
+// value regex reads it: a long run of spaces makes that regex backtrack for seconds (2026-10-27 review).
+const MAX_COAUTHOR_VALUE = 256;
+
 function findUnapprovedPrincipals(commits) {
   if (!Array.isArray(commits) || commits.length === 0) {
     return [{ sha: 'unknown', field: 'commit-list' }];
@@ -75,9 +79,31 @@ function findUnapprovedPrincipals(commits) {
     for (const field of ['author', 'committer']) {
       if (!approvedPrincipal(commit[field])) problems.push({ sha, field });
     }
-    for (const line of String(commit.message || '').split(/\r?\n/)) {
-      if (!/^\s*Co-authored-by:/i.test(line)) continue;
-      const match = /^\s*Co-authored-by:\s*(.+?)\s*<([^<>]+)>\s*$/i.exec(line);
+    const message = String(commit.message || '');
+    // A line break other than LF/CRLF (a bare CR, VT, FF, NEL, U+2028, U+2029) splits lines differently
+    // for git, a renderer and this check, so a co-author line can hide behind one, or an approved
+    // trailer can carry another name after one. NUL, ESC and the other C0 controls (TAB, LF and the CR
+    // of CRLF aside), DEL and the C1 controls change what a reader sees in the same way. Such messages
+    // are refused outright (none on main as of 2026-10-27).
+    if (/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f-\u009f\u2028\u2029]|\r(?!\n)/.test(message)) {
+      problems.push({ sha, field: 'message-control' });
+    }
+    // Co-author lines as git reads trailers: whitespace may come before the colon, and a following
+    // line that starts with a space or tab and is not blank continues the value (git folds it in).
+    // git's whitespace is ASCII only, so a line of a space and a NBSP or U+3000 is not blank to it.
+    // A co-author line is judged on its value with those lines folded in; a folded line belongs to
+    // that value (git reads it so), and the loop goes on after it, so each line is read once. A line
+    // that starts with Unicode whitespace (a NBSP, U+3000) is folded too: git does not, but how GitHub
+    // reads it is unmeasured. Folding it can only refuse more, or accept a value made only of approved
+    // strings split across lines (no other name can come out of it).
+    const lines = message.split(/\r?\n/);
+    for (let i = 0; i < lines.length; i++) {
+      if (!/^\s*Co-authored-by\s*:/i.test(lines[i])) continue;
+      let value = lines[i];
+      while (i + 1 < lines.length && (/^[ \t]+[^ \t]/.test(lines[i + 1]) || /^\s+\S/.test(lines[i + 1]))) {
+        value += ` ${lines[++i].trim()}`;
+      }
+      const match = value.length <= MAX_COAUTHOR_VALUE && /^\s*Co-authored-by\s*:\s*(.+?)\s*<([^<>]+)>\s*$/i.exec(value);
       if (!match || !approvedPrincipal({ name: match[1], email: match[2] })) {
         problems.push({ sha, field: 'co-author' });
       }
@@ -121,6 +147,66 @@ function selftest() {
   const trialCommit = { ...good, commit: { author: dailyRun, committer: dailyRun,
     message: 'fix\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>' } };
   assert.deepEqual(findUnapprovedPrincipals([trialCommit]), []);
+  // Any other line break is refused: a co-author line hidden behind one, an approved trailer that
+  // carries another name after one, and even an approved trailer after one (2026-10-25 audit note).
+  const withMessage = message => [{ ...trialCommit, commit: { ...trialCommit.commit, message } }];
+  for (const separator of ['\r', '\u2028', '\u2029', '\u0085', '\v', '\f']) {
+    const tag = `U+${separator.codePointAt(0).toString(16).padStart(4, '0')}`;
+    assert.deepEqual(findUnapprovedPrincipals(withMessage(`fix${separator}Co-authored-by: Private Person <person@example.invalid>`))
+      .map(p => p.field), ['message-control'], tag);
+    assert.deepEqual(findUnapprovedPrincipals(withMessage(`fix\n\nCo-authored-by: Claude <noreply@anthropic.com>${separator}Private Person <p@example.invalid>`))
+      .map(p => p.field), ['message-control', 'co-author'], tag);
+    assert.deepEqual(findUnapprovedPrincipals(withMessage(`fix${separator}Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>`))
+      .map(p => p.field), ['message-control'], tag);
+  }
+  assert.deepEqual(findUnapprovedPrincipals(withMessage('fix\r\n\r\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\r\n')), [],
+    'CRLF line endings are ordinary');
+  // NUL, ESC, the separators FS/GS/RS, the other C0 controls, DEL and the C1 controls (CSI is the
+  // 8-bit ESC [) are refused too; TAB is ordinary.
+  for (const code of [0x00, 0x01, 0x08, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x7f, 0x80, 0x9b, 0x9f]) {
+    assert.deepEqual(findUnapprovedPrincipals(withMessage(`fix${String.fromCharCode(code)}\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>`))
+      .map(p => p.field), ['message-control'], `U+${code.toString(16).padStart(4, '0')}`);
+  }
+  assert.deepEqual(findUnapprovedPrincipals(withMessage('fix\n\n\tindented body\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>')), [],
+    'a TAB is ordinary');
+  // git reads these as co-author trailers too (git interpret-trailers): whitespace before the colon, and a
+  // continuation line that folds another name into an approved trailer.
+  for (const message of ['fix\n\nCo-authored-by : Private Person <person@example.invalid>',
+    'fix\n\nCo-authored-by\t: Private Person <person@example.invalid>',
+    'fix\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\n Private Person <person@example.invalid>',
+    'fix\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\n\tPrivate Person <person@example.invalid>',
+    'fix\n\nCo-Authored-By: Claude Sonnet 5\n <noreply@anthropic.com> Private Person <person@example.invalid>']) {
+    assert.deepEqual(findUnapprovedPrincipals(withMessage(message)).map(p => p.field), ['co-author'], JSON.stringify(message));
+  }
+  // git's whitespace is ASCII only: a continuation line that starts with a space or tab and goes on
+  // with a NBSP, U+3000 or another Unicode space is folded in too, and so is a line that only looks blank.
+  for (const space of ['\u00a0', '\u3000', '\u2003', '\u202f', '\ufeff']) {
+    const tag = `U+${space.codePointAt(0).toString(16).padStart(4, '0')}`;
+    assert.deepEqual(findUnapprovedPrincipals(withMessage(`fix\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\n ${space}Private Person <person@example.invalid>`))
+      .map(p => p.field), ['co-author'], tag);
+    assert.deepEqual(findUnapprovedPrincipals(withMessage(`fix\r\n\r\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\r\n\t${space}\r\n Private Person <person@example.invalid>\r\n`))
+      .map(p => p.field), ['co-author'], `${tag}, a line that only looks blank`);
+  }
+  // A line that starts with Unicode whitespace is folded as well (how GitHub reads it is unmeasured).
+  for (const space of ['\u00a0', '\u3000', '\u2003', '\u202f', '\ufeff']) {
+    assert.deepEqual(findUnapprovedPrincipals(withMessage(`fix\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\n${space}Private Person <person@example.invalid>`))
+      .map(p => p.field), ['co-author'], `U+${space.codePointAt(0).toString(16).padStart(4, '0')} at the start of a line`);
+  }
+  // The cap leaves room for the longest approved value (the github-actions noreply trailer, 91 characters).
+  assert.deepEqual(findUnapprovedPrincipals(withMessage('fix\n\nCo-authored-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>')), [],
+    'the longest approved co-author value');
+  // A value longer than any approved one is refused before the regex reads it, even with an approved name in it.
+  assert.deepEqual(findUnapprovedPrincipals(withMessage(`fix\n\nCo-Authored-By: Claude Sonnet 5${' '.repeat(300)}<noreply@anthropic.com>`))
+    .map(p => p.field), ['co-author'], 'an overlong co-author value');
+  // A folded line is read as part of the value it continues, once.
+  assert.deepEqual(findUnapprovedPrincipals(withMessage(`fix\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\n${
+    ' Co-authored-by: Private Person <person@example.invalid>\n'.repeat(3)}`)).map(p => p.field), ['co-author']);
+  for (const message of ['fix\n\nCo-Authored-By : Claude Sonnet 5 <noreply@anthropic.com>',
+    'fix\n\nCo-Authored-By: Claude Sonnet 5\n <noreply@anthropic.com>',
+    'fix\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\n\n  indented text after a blank line',
+    'fix\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\n   \n  indented text after a line of spaces']) {
+    assert.deepEqual(findUnapprovedPrincipals(withMessage(message)), [], JSON.stringify(message));
+  }
   for (const near of [{ name: 'Claude Sonnet 5', email: 'person@example.invalid' },
     { name: 'Claude Sonnet 5', email: 'someone@anthropic.com' },
     { name: 'Claude Sonnet 5 Private Person', email: 'noreply@anthropic.com' },
