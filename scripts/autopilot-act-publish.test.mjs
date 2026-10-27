@@ -59,7 +59,7 @@ gh() {
     'api --method')
       if [ "$LIST_EXIT" != 0 ]; then return "$LIST_EXIT"; fi
       case "$*" in
-        "api --method GET repos/$GITHUB_REPOSITORY/pulls -f state=open -f head=$GITHUB_REPOSITORY_OWNER:"*" --jq .[].number") printf '%s\n' "$OPEN_PR" ;;
+        "api --method GET repos/$GITHUB_REPOSITORY/pulls -f state=open -f head=$GITHUB_REPOSITORY_OWNER:"*" -f base=main --jq "*) printf '%s\n' "$OPEN_PR" ;;
         *) printf 'unexpected gh api request\n' >&2; return 94 ;;
       esac ;;
     'pr create') return 0 ;;
@@ -262,12 +262,28 @@ test('a fork PR with the predictable branch name is not taken as the ledger PR',
   assert.deepEqual(callsOf(own, 'git', 'checkout')[0], ['git', 'checkout', '-B', branch, 'FETCH_HEAD']);
 });
 
+const OWN_PR_FILTER = '.[] | select(.base.ref == "main" and .head.repo.full_name == env.GITHUB_REPOSITORY and .base.repo.full_name == env.GITHUB_REPOSITORY and (.user.login == env.GITHUB_REPOSITORY_OWNER or .user.login == "github-actions[bot]")) | .number';
 test('both PR lookups are scoped to this repository owner and the prepared branch', () => {
-  const lookup = ['gh', 'api', '--method', 'GET', 'repos/o/r/pulls', '-f', 'state=open', '-f', `head=o:${branch}`, '--jq', '.[].number'];
+  const lookup = ['gh', 'api', '--method', 'GET', 'repos/o/r/pulls', '-f', 'state=open', '-f', `head=o:${branch}`, '-f', 'base=main',
+    '--jq', OWN_PR_FILTER];
   assert.deepEqual(ghCalls(run(prepare, { CLOCK_DAY: '20260917' })), [lookup]);
   const published = run(publish, { CLOCK_DAY: '20260918', OPEN_PR: '1447' });
   assert.equal(published.status, 0, published.stderr);
   assert.deepEqual(ghCalls(published), [lookup]);
+});
+
+// The filter itself, on the shapes GitHub returns (2026-10-27 review: anyone can open a PR from this repository's
+// day branch into another base, or their own PR into main after a squash merge).
+test('only an open PR into main, from this repository, opened by the owner or its workflows, is the ledger PR', () => {
+  const pr = (number, over = {}) => ({ number, base: { ref: 'main', repo: { full_name: 'o/r' } }, head: { repo: { full_name: 'o/r' } },
+    user: { login: 'o' }, ...over });
+  const rows = [pr(1), pr(2, { user: { login: 'github-actions[bot]' } }), pr(3, { base: { ref: 'old-branch', repo: { full_name: 'o/r' } } }),
+    pr(4, { user: { login: 'someone' } }), pr(5, { head: { repo: { full_name: 'someone/r' } } }), pr(6, { base: { ref: 'main', repo: { full_name: 'x/r' } } }),
+    pr(7, { user: { login: 'o-bot' } })];
+  const out = spawnSync('jq', [OWN_PR_FILTER], { input: JSON.stringify(rows), encoding: 'utf8',
+    env: { ...process.env, GITHUB_REPOSITORY: 'o/r', GITHUB_REPOSITORY_OWNER: 'o' } });
+  assert.equal(out.status, 0, out.stderr);
+  assert.deepEqual(out.stdout.trim().split('\n'), ['1', '2']);
 });
 
 test('a failed PR lookup remains a failure, not an empty successful lookup', () => {
