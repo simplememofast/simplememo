@@ -351,13 +351,13 @@
       },
       {
         "id": "google_cloud",
-        "liability_cap": "unreviewed",
-        "ip": "unreviewed",
-        "personal_data": "unreviewed",
-        "governing_law": "unreviewed",
+        "liability_cap": "risk",
+        "ip": "ok",
+        "personal_data": "risk",
+        "governing_law": "risk",
         "source": "https://cloud.google.com/terms",
         "body_scope": "main",
-        "reviewed_at": null,
+        "reviewed_at": "2026-10-27",
         "$liability_cap": "**GCP Terms §12。firebase の欄と同一の条項。**上限は責任原因の直前12か月に当該 Services へ支払った Fees、**無料提供分は別枠で USD 5,000**（「支払0→上限0」ではない）。§12.1 は間接・結果的・特別・付随・懲罰的損害に加えて lost revenues / profits / savings / goodwill を除外。§12.3 の無制限は詐欺・§13 の補償義務・知財侵害・支払義務・法令上排除できない責任で、**重過失・故意・人身損害は入っていない**（探した上で無かった）。\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
         "$ip": "**GCP Terms §5.1。ライセンスを渡していない。**Customer Data と Customer Applications の全 IP 権が Customer に残り、**Google に与える IP ライセンス条項が本文に見つからない。**§5.2 は逆向きで、Google は Cloud DPA に従ってのみ処理し、それ以外の目的では処理しない。「改善のため利用できる」という権利も見つからなかった。Feedback は `without restriction` で、**過去版の『assign』ではない。**§14.14 が Section 5 全体を存続させる。\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
         "$personal_data": "**Cloud DPA が §5.2 経由で組み込まれる。**Google が processor、こちらが controller または processor。渡しているのは pseudonymous。\n\n**役割構造は分かったが DPA本文（サブプロセッサ・越境移転・削除）は読んでいない。**cloudflare・firebase と同じ理由で risk。\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
@@ -366,14 +366,9 @@
         "fingerprint": "4e09d30f8af1",
         "fingerprint_scope": "main",
         "fetched_at": "2026-10-22",
-        "reset_reason": "本文が改定された（de8000039069 → 4e09d30f8af1・2026-10-22） — **前の判定は前の本文に対するもの。**読み直すまで unreviewed",
-        "reset_at": "2026-10-22",
-        "reset_clauses": [
-          "liability_cap",
-          "ip",
-          "personal_data",
-          "governing_law"
-        ]
+        "reviewed_by": "ai_draft",
+        "risk_note": "この行は BigQuery。判定は firebase と同じ GCP Terms による。上限は責任原因の直前12か月に支払った Fees（GCP Terms §12.2）、無料提供分は USD 5,000。lost revenues / profits / savings / goodwill は種類として除外（§12.1）。上限の効かないもの（§12.3）に重過失・故意・人身損害は入っていない。紛争はカリフォルニア州法・Santa Clara County 専属管轄（§14.12(c)）で、Regional Modifications の APAC 仲裁は Japan を除外。2026-10-27 に、これらの条項の字句が 2026-09-24 の判定時と同一であることを確かめた（ai_draft）。ただし重さは違う。ベンダー台帳は google_cloud を critical: false（計測が止まる。出荷は続く）と記録している。",
+        "draft_note": "[2026-10-27] **AIの読み直し（ai_draft）。人はこの読みを確認していない。**オーナー判断（2026-10-27、選択肢「Claudeがai_draftで付け直す」）。同じ GCP Terms の改定で 2026-10-22 に戻されており、このままだと 2026-11-06 に猶予（14日）を過ぎて全PRが落ちるため、firebase と同じ読みで付け直した。\n\n読んだもの: (1) この行の出所 cloud.google.com/terms そのもの。指紋 de8000039069 → 4e09d30f8af1（2026-10-22 に戻された）は、下の 2026-10-12 の改定。\n(2) cloud.google.com/terms（最終更新 2026-10-12）と 2026-09-02 版（Wayback 2026-10-05 取得）を節ごとに比べた。変わったのは §3.3（制限の対象に AI Agent を追加）、§13.2（顧客の補償義務の対象に AI Agents の使用を追加）、§14.19（\"AI Agent\" の定義を追加し、Export Control Laws に sanctions を追加）だけ。**§5.1・§5.2・§12.1〜12.3・§14.12 は字句が同一。**(3) Cloud Data Processing Addendum は最終更新 2026-06-08 で、前回の判定より前。(4) Regional Modifications は最終更新 2025-11-25 で、APAC の仲裁置換は Japan を除外したまま。\n\n判定: 4観点とも 2026-09-24 の判定（liability_cap risk / ip ok / personal_data risk / governing_law risk）を、根拠の条項の字句が同一であることを理由に引き継いだ。**新しい法的評価ではない。**\n\n読めていないもの・確かめていないもの: 実際に適用される契約・請求地域・Service Specific Terms（AI Agent の定義の中身を含む）。§13.2 の拡張は AI Agents を使っていなければ効かない見込みだが、使っているかは確かめていない。§12.3(b) により顧客側の補償義務は上限の外なので、AI Agents を使い始めるときは読み直す。"
       },
       {
         "id": "search_console",
@@ -404,13 +399,13 @@
       },
       {
         "id": "firebase",
-        "liability_cap": "unreviewed",
-        "ip": "unreviewed",
-        "personal_data": "unreviewed",
-        "governing_law": "unreviewed",
+        "liability_cap": "risk",
+        "ip": "ok",
+        "personal_data": "risk",
+        "governing_law": "risk",
         "source": "https://firebase.google.com/terms",
         "body_scope": "main",
-        "reviewed_at": null,
+        "reviewed_at": "2026-10-27",
         "$liability_cap": "**実体規定は Firebase の規約に無い。**Firebase Terms のサービス別表がApp Check と Authentication の Terms of Service 欄に**Google Cloud Platform Terms of Service** を指しており、責任制限は GCP Terms §12。\n\n**上限は責任原因の直前12か月に当該 Services について支払った Fees**（§12.2）。「固定額と12か月分の低いほう」ではない。\n\n**無料提供分は別枠で USD 5,000。**したがって**「無料利用 → 支払額0 → 上限も0」という構造ではない。**上限額を確かめずに0と決めつけていたら、この欄は間違って重く書かれていた。\n\n**§12.1 の除外:** 間接・結果的・特別・付随・懲罰的損害に加えて、lost revenues / profits / savings / goodwill。\n**§12.3 の無制限（上限が効かない）:** 詐欺・虚偽表示、§13 の補償義務、相手方の知財侵害、支払義務、法令上制限できない責任。\n\n**無制限リストに無いもの**（リサーチャーが探した上で「見つからなかった」と報告）: **重過失・故意・人身損害。**§12.1 の除外列挙にも data loss / business interruption は独立項目として無い。**無いことを確かめた記録として残す。**\n\n**この欄が効くのは、代替が無いから。**ベンダー台帳は firebase を critical / fallback **無し** と記録し、App Check のキルスイッチについて「**代替ではなく回避策。**外している間は検証が効かない」と明記している。USD 5,000 は、代替の無いものが止まったときに回復できる額ではない。",
         "$governing_law": "**カリフォルニア州法・Santa Clara County 専属管轄**（GCP Terms §14.12(c)、米国政府機関以外の All Other Entities に適用される区分）。\n\n**日本は APAC の仲裁置換から明示的に除外されている。**Regional Terms の APAC 仲裁条項は対象を「all regions excluding Australia, **Japan**, India, New Zealand, Singapore」としており、**日本は基礎規約のまま＝米国の裁判所**に行く。強制仲裁・class action waiver・仲裁 opt-out はいずれも日本向けには確認できなかった。\n\n**これは調べないと出てこない形。**「APACだから仲裁だろう」と一般論で埋めていたら逆になっていた。",
         "$personal_data": "**Cloud Data Processing Addendum が対象契約に組み込まれる**（GCP Terms §5.2 が接続）。役割は Google が processor、こちらが controller または processor。渡しているのは pseudonymous（ベンダー台帳）。\n\n**Cloudflare と同じ理由で risk。**分かったのは役割構造だけで、DPA本文（サブプロセッサ・越境移転・削除）は読んでいない。",
@@ -434,14 +429,9 @@
             "note": "Authentication / App Checkの共通4条項を参照。固有条件・DPA本文の読み合わせと未確認事項は根拠文書に保持。契約適用・承認は未確認。"
           }
         ],
-        "reset_reason": "本文が改定された（683aed5b3b3a → dd3de87afc9a・2026-10-12） — **前の判定は前の本文に対するもの。**読み直すまで unreviewed",
-        "reset_at": "2026-10-12",
-        "reset_clauses": [
-          "liability_cap",
-          "ip",
-          "personal_data",
-          "governing_law"
-        ]
+        "reviewed_by": "ai_draft",
+        "risk_note": "**金額では回復しない相手に、代替が無い。**上限は責任原因の直前12か月に支払った Fees（GCP Terms §12.2）、無料提供分は USD 5,000。lost revenues / profits / savings / goodwill は種類として除外（§12.1）。上限の効かないもの（§12.3）に重過失・故意・人身損害は入っていない。紛争はカリフォルニア州法・Santa Clara County 専属管轄（§14.12(c)）で、Regional Modifications の APAC 仲裁は Japan を除外。2026-10-27 に、これらの条項の字句が 2026-09-24 の判定時と同一であることを確かめた（ai_draft）。ベンダー台帳は firebase を critical / fallback 無しと記録している（App Check が落ちると送信が弾かれうる）。",
+        "draft_note": "[2026-10-27] **AIの読み直し（ai_draft）。人はこの読みを確認していない。**オーナー判断（2026-10-27、選択肢「Claudeがai_draftで付け直す」）。改定で戻されたまま 14 日を過ぎ、Corporate obligations が全PRで落ちていたため。\n\n読んだもの: (1) firebase.google.com/terms の本文（main）。指紋 683aed5b3b3a → dd3de87afc9a の改定は 2026-09-24 版（最終更新 2026-09-02 → 2026-09-24）で、差分は「Important」の見出し、「Accept Firebase Terms」、Firebase を使い始めるには規約への同意が要るという案内の1文だけ（Wayback 2026-09-21 版と現行を、vendor-terms と同じ本文抽出で比べた）。**App Check と Authentication の規約欄は Google Cloud Platform Terms of Service のまま。**\n(2) cloud.google.com/terms（最終更新 2026-10-12）と 2026-09-02 版（Wayback 2026-10-05 取得）を節ごとに比べた。変わったのは §3.3（制限の対象に AI Agent を追加）、§13.2（顧客の補償義務の対象に AI Agents の使用を追加）、§14.19（\"AI Agent\" の定義を追加し、Export Control Laws に sanctions を追加）だけ。**§5.1・§5.2・§12.1〜12.3・§14.12 は字句が同一。**(3) Cloud Data Processing Addendum は最終更新 2026-06-08 で、前回の判定より前。(4) Regional Modifications は最終更新 2025-11-25 で、APAC の仲裁置換は Japan を除外したまま。\n\n判定: 4観点とも 2026-09-24 の判定（liability_cap risk / ip ok / personal_data risk / governing_law risk）を、根拠の条項の字句が同一であることを理由に引き継いだ。**新しい法的評価ではない。**\n\n読めていないもの・確かめていないもの: 実際に適用される契約・請求地域・Service Specific Terms（AI Agent の定義の中身を含む）。§13.2 の拡張は AI Agents を使っていなければ効かない見込みだが、使っているかは確かめていない。§12.3(b) により顧客側の補償義務は上限の外なので、AI Agents を使い始めるときは読み直す。"
       },
       {
         "id": "appsflyer",
