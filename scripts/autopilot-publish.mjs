@@ -33,7 +33,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { OUTCOMES, validate as validateRuns } from './autopilot-runs.mjs';
 import { hardDenyReason, MAX_COMMITS, MAX_TOTAL_BYTES, RECORD_PATHS } from './lib/autopilot-paths.mjs';
-import { runTranslationCheck, translationInput } from './lib/translation-check.mjs';
+import { needsTranslationCheck, runTranslationCheck } from './lib/translation-check.mjs';
 
 const require = createRequire(import.meta.url);
 const { findUnapprovedPrincipals } = require('./merge-identity-check.js');
@@ -636,12 +636,14 @@ function trustedTree({ repo, trusted, sha, work, code }) {
 
 /**
  * Before the PR: SEO Validation's translation check on the handoff head, with the workflow commit's scripts (repo's
- * work tree), when the branch changed a page or the translation data. null when it passes or there is nothing to
- * check, else a reason code (scripts/lib/translation-check.mjs).
+ * work tree), when the branch changed more than the run ledgers. null when it passes or there is nothing to check,
+ * else a reason code (scripts/lib/translation-check.mjs). CI runs the branch's own scripts on the PR merge instead,
+ * so a branch that edits the translation scripts, or races a change on main, can still differ there; the record
+ * step then still binds its row.
  */
 export function checkTranslations({ repo, base, head, runner }) {
   const changed = git(repo, ['diff', '--name-only', '-z', '--no-renames', base, head]).split('\0').filter(Boolean);
-  if (!changed.some(translationInput)) return null;
+  if (!needsTranslationCheck(changed)) return null;
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'autopilot-translations-'));
   const work = path.join(root, 'tree');
   try {

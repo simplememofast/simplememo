@@ -12,7 +12,7 @@ import { pack, verifyHandoff, pushBranch, record, validateRequest, prPayload, op
 import { save as saveDiagnostics } from './autopilot-diagnostics.mjs';
 import { classifyAutopilotChange, hardDenyReason, isAutopilotBranch, RECORD_PATHS } from './lib/autopilot-paths.mjs';
 import { validate as validateRuns } from './autopilot-runs.mjs';
-import { translationsVerdict } from './lib/translation-check.mjs';
+import { runTranslationCheck, translationsVerdict } from './lib/translation-check.mjs';
 
 process.env.GIT_CONFIG_GLOBAL = '/dev/null'; // the developer's global git config must not shape the result
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -205,13 +205,32 @@ test('a PR is opened only with its translations: checked before anything is push
     [1, '', 'x\n8 incomplete translations; no HTML written.\n', 'incomplete'],
     [1, '', '3 untranslated dates; no HTML written.\n', 'dates'],
     [1, '2161 translations; 4 stale\n', '', 'stale'],
-    [1, '', 'coverage: a page outside data/i18n/pages.json\n', 'unchecked'],
+    [1, '', 'Public page is absent from the translation registry: obsidian/x/index.html\n', 'unregistered'],
+    [1, '', 'Traceback (most recent call last):\n', 'failed'],
     [null, '', '', 'unchecked']]) {
     assert.equal(translationsVerdict({ status, stdout, stderr }), code, JSON.stringify({ status, stdout, stderr }));
   }
   assert.equal(translationsVerdict({ status: 0, error: new Error('ETIMEDOUT') }), 'unchecked', 'a run that errored is not a pass');
+  // The check reads model-written data: no token and no workflow-command file reach it, and it ends in nine minutes.
+  const saved = { ...process.env };
+  try {
+    Object.assign(process.env, { GH_TOKEN: 'sentinel', GITHUB_TOKEN: 'sentinel', ACTIONS_RUNTIME_TOKEN: 'sentinel',
+      GITHUB_OUTPUT: '/tmp/out', GITHUB_ENV: '/tmp/env', GITHUB_STEP_SUMMARY: '/tmp/summary', PATH: process.env.PATH });
+    let options;
+    assert.equal(runTranslationCheck('/nowhere', (command, args, o) => { options = o; return { status: 0, stdout: '', stderr: '' }; }), null);
+    for (const key of ['GH_TOKEN', 'GITHUB_TOKEN', 'ACTIONS_RUNTIME_TOKEN', 'GITHUB_OUTPUT', 'GITHUB_ENV', 'GITHUB_STEP_SUMMARY']) {
+      assert(!(key in options.env), `${key} is not passed to the check`);
+    }
+    assert.equal(options.env.PATH, process.env.PATH);
+    assert(options.timeout > 0 && options.timeout <= 9 * 60_000, 'the check ends within nine minutes');
+  } finally {
+    for (const key of Object.keys(process.env)) if (!(key in saved)) delete process.env[key];
+    Object.assign(process.env, saved);
+  }
   const f = fixture();
   try {
+    // The branch rewrites a script: the check must run the workflow commit's copy, not this one.
+    write(f.work, 'scripts/trusted-marker.txt', 'model\n');
     commitPage(f);
     const calls = [];
     const stub = code => args => { calls.push(args); return code; };
@@ -243,10 +262,26 @@ test('a PR is opened only with its translations: checked before anything is push
     assert.equal(seen[0].page, true, 'the head is checked out');
     assert(!fs.existsSync(seen[0].cwd), 'the work tree is removed');
     assert(!sh(f.tools, ['worktree', 'list', '--porcelain']).includes(seen[0].cwd), 'and unregistered');
-    // Nothing translatable changed: no tree, no run.
+    // Nothing changed: no tree, no run.
     seen.length = 0;
     assert.equal(checkTranslations({ repo: f.tools, base: result.head, head: result.head, runner }), null);
     assert.equal(seen.length, 0);
+    // What runs it: anything beyond the run ledgers and declarations. The builder also reads diagrams, scripts and
+    // reference data (2026-10-27 review: an SVG, a JS file and a JSON file each failed --check).
+    const commitWith = file => {
+      const env = { GIT_INDEX_FILE: path.join(f.temp, `index-${file.replace(/\W/g, '_')}`) };
+      sh(f.tools, ['read-tree', base], BOT, env);
+      const blob = execFileSync('git', ['hash-object', '-w', '--stdin'], { cwd: f.tools, input: 'changed\n', encoding: 'utf8' }).trim();
+      sh(f.tools, ['update-index', '--add', '--cacheinfo', `100644,${blob},${file}`], BOT, env);
+      return sh(f.tools, ['commit-tree', sh(f.tools, ['write-tree'], BOT, env), '-p', base, '-m', `only ${file}`], BOT, env);
+    };
+    for (const [file, runs] of [['data/autopilot-status.json', false], ['docs/obsidian/AUTOPILOT_LOG.md', false],
+      ['data/decision-intents/x-20261020.json', false], ['assets/img/autopilot/x.svg', true], ['js/contact-form.js', true],
+      ['assets/data/x.json', true], ['data/i18n/catalogs/es.json', true]]) {
+      seen.length = 0;
+      checkTranslations({ repo: f.tools, base, head: commitWith(file), runner });
+      assert.equal(seen.length, runs ? 1 : 0, `${file}: ${runs ? 'checked' : 'not checked'}`);
+    }
   } finally { f.cleanup(); }
 });
 
