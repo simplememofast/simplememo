@@ -189,7 +189,16 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
         run: |
           DAY="claude/autopilot-act-$(TZ=Asia/Tokyo date +%Y%m%d)"
-          OPEN="$(gh pr list --head "$DAY" --state open --json number --jq '.[].number')"
+          # Own PRs only. `gh pr list --head` matches the branch name in any fork, so
+          # anyone could open claude/autopilot-act-<date> and stall the ledger sync.
+          # REST head=<owner>:<branch> is filtered server-side to this owner's branch.
+          # Into main, opened by the owner (GH_PAT) or this repository's workflows (the
+          # GITHUB_TOKEN fallback): anyone can open a PR from this branch into another
+          # base, or their own PR into main after a squash merge (2026-10-27 review). An
+          # outsider's open PR from this branch into main makes `gh pr create` below fail
+          # (a red run), never a merge of someone else's PR.
+          OPEN="$(gh api --method GET "repos/$GITHUB_REPOSITORY/pulls" -f state=open -f "head=$GITHUB_REPOSITORY_OWNER:$DAY" -f base=main \
+            --jq '.[] | select(.base.ref == "main" and .head.repo.full_name == env.GITHUB_REPOSITORY and .base.repo.full_name == env.GITHUB_REPOSITORY and (.user.login == env.GITHUB_REPOSITORY_OWNER or .user.login == "github-actions[bot]")) | .number')"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if [ -n "$OPEN" ]; then
@@ -336,7 +345,10 @@ jobs:
           # **必要なときに限って届かない。**緑のまま何も出ないという、この運用が
           # 繰り返し踏んできた形そのもの。
           # A failed lookup is unknown, not proof that no PR exists.
-          OPEN="$(gh pr list --head "$DAY" --state open --json number --jq '.[].number')"
+          # Same scoped lookup as the preparation step: a fork PR, a PR into another base and a
+          # PR opened by someone else are not ours.
+          OPEN="$(gh api --method GET "repos/$GITHUB_REPOSITORY/pulls" -f state=open -f "head=$GITHUB_REPOSITORY_OWNER:$DAY" -f base=main \
+            --jq '.[] | select(.base.ref == "main" and .head.repo.full_name == env.GITHUB_REPOSITORY and .base.repo.full_name == env.GITHUB_REPOSITORY and (.user.login == env.GITHUB_REPOSITORY_OWNER or .user.login == "github-actions[bot]")) | .number')"
           if [ -z "$OPEN" ]; then
             gh pr create --base main --head "$DAY" \
               --title "日次アクチュエータの同期（$(TZ=Asia/Tokyo date +%Y-%m-%d)）" \

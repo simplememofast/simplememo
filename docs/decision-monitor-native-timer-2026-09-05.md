@@ -1,5 +1,11 @@
 # Decision Monitorの独立した定時起動
 
+> **2026-10-20 退役。** このMacのlaunchdタイマーは、セキュリティ監査（F7）を受けたオーナー判断で退役した。
+> Decision MonitorはGitHub（`.github/workflows/decision-monitor.yml`）からだけ動く。
+> `scripts/decision-monitor-local.py` は、旧フラグを副作用なしで拒否する墓標になった。
+> 以下は2026-09-05〜10-20の記録で、導入・更新の手順は実行しない。
+> 理由・残るもの・失うもの・撤去と戻し方は、末尾の「2026-10-20: 退役」節にある。
+
 2026-09-05。GitHub側は15分間隔の定義でも、実際のscheduled runは
 05:43:50 UTC（33947963249）→09:28:45（33958089720）→13:00:15
 （33967627428）と、3時間44分55秒・3時間31分30秒空いていた。
@@ -52,10 +58,14 @@ checksumは記録の整合性検査であり、外部の署名や改ざん不能
 
 ## 導入・停止・更新
 
+**（退役済み。この節の導入・更新は実行しない。`--install` は exit 2 で拒否される。
+撤去は末尾の「2026-10-20: 退役」節を使う。）**
+
 検証済みPRがmainへ着地してから、そのmainの作業ディレクトリで実行する。
 `--install`はファイルを配置するだけでサービスを起動しない。
 
 ```sh
+# （退役済み。実行しない）
 python3 scripts/decision-monitor-local.py --install
 launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.simplememo.decision-monitor.plist"
 ```
@@ -128,3 +138,60 @@ PR #1470 の実際のmerge SHAには42件のcheck runがあり、Cloudflare Page
 この修正の読み取り検証では元の配信時刻が2026-09-19 02:35:22 UTCと確認できた。
 元の1日評価窓は9月20日のJST全日で、9月21日0時より前はpendingのまま。
 宣言・台帳・評価期間・算式は変更せず、元のmonitorによる期間満了後の実測決済を待つ。
+
+## 2026-10-20: 退役（セキュリティ監査 F7・オーナー判断）
+
+セキュリティ監査の指摘（F7）を受け、オーナーがこのMacの定時起動を止めると決めた。
+Decision Monitorの無人実行はGitHub Actions上の1系統に集約し、
+使う資格情報はそのworkflowのsecret（`GH_PAT`。無い場合は読み取りだけの `GITHUB_TOKEN`）だけになる。
+
+### 残るもの（GitHub側）
+
+- 定時起動 `7,22,37,52 * * * *`（15分間隔）と、`Auto-merge Claude PRs` 成功後の `workflow_run`。
+  どちらも同じ自己検査3本と `decision-monitor.mjs --apply` を実行する。
+  台帳・公開ブランチ名・公開待ち・停滞判定・緊急停止の扱いは変わらない。
+- 手動の実行は `gh workflow run decision-monitor.yml -f dry_run=false`（以前の手動kickstartの代わり）。
+  起動元は `workflow_dispatch` と記録され、無人起動の実績には数えない。
+- 報告ページの2つ目の書き手として、Autopilot Actの `decision-monitor.mjs --publish-report`
+  （`.github/workflows/autopilot-act.yml`）が残る。公開の共有クレームは変えない。
+- 定時起動の欠落は従来どおり `cron-health.yml` が検知する（`scripts/lib/cron-silence.mjs`、180分）。
+
+### 失うもの
+
+2つ目の時計。GitHubのscheduleが遅れる日は、決済・復旧・公開がその分遅れる。
+遅れの実測は、このページ冒頭の09-05が3時間44分55秒と3時間31分30秒、
+[ロードマップ](zero-preneur-autonomy-roadmap-2026-09-24.md)のB-03が1時間41分〜2時間27分（5回）。
+オーナーはこの遅れを受け入れた。
+なお監査時（2026-10-20）のMac側の実行記録では、10-07以降の夜間公開（JST 0時）は
+Mac側が時間切れで完了しておらず、すでにGitHub側だけが行っていた。
+
+### Macからの撤去（オーナーが実行。リポジトリのコードは使わない）
+
+実行中の回が無い（`launchctl print "gui/$(id -u)/com.simplememo.decision-monitor"` に
+`pid =` の行が無い）ことを確かめてから実行する。パスは下の完全一致だけを使い、
+同じMacの他の `com.simplememo.*` ジョブとそのファイルには触れない。
+
+```sh
+L=com.simplememo.decision-monitor
+launchctl bootout "gui/$(id -u)/$L"
+launchctl disable "gui/$(id -u)/$L"
+rm -f "$HOME/Library/LaunchAgents/$L.plist" "$HOME/.local/libexec/simplememo-decision-monitor.py"
+rm -rf "$HOME/Library/Caches/$L"
+```
+
+確認: `launchctl print "gui/$(id -u)/$L"` がサービス無しで失敗し、
+`launchctl print-disabled "gui/$(id -u)"` でこのラベルが無効と表示されること。
+
+### 墓標と戻し方
+
+`scripts/decision-monitor-local.py` は `--once` / `--probe` / `--install` を、
+ファイル・git・gh・node・サービス管理のどれにも触れずに拒否する。
+`{"state":"retired",...}` を1行出してexit 2で終わる。
+CIは従来どおり `--selftest` だけを実行する。
+
+戻す場合は、まずこの変更をrevertするPRをmainへ入れ、その検証済みmainから導入し直す。
+旧launcherはmain上の同名ファイルと自分のハッシュの一致を要求し、墓標は `--install` を拒否するため。
+戻すと、退役の理由（F7）もそのまま戻る。
+
+`scripts/lib/decision-origin.mjs` などにあるlaunchd起動元の判定は、意図して休眠のまま残す
+（この時計が無い限り到達しない）。削除は後日の任意の整理とする。
