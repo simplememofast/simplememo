@@ -3,7 +3,8 @@
  * 公開ページ /autopilot/ の数字が、台帳の現在値と一致することを検査する。
  *
  *   node scripts/check-autopilot-page.mjs           # 表示
- *   node scripts/check-autopilot-page.mjs --check   # CI
+ *   node scripts/check-autopilot-page.mjs --check        # 台帳の現在値（今日の日付で計算した自律スコア）と照合
+ *   node scripts/check-autopilot-page.mjs --as-stamped   # 自律スコアだけ、ページに刻まれた計算日で計算して照合
  *   node scripts/check-autopilot-page.mjs --selftest
  *
  * 【なぜ要るか】
@@ -125,6 +126,137 @@ export function classifyFile(text, { allowed = false, today = null, live }) {
     found: r.found,
     frozen: fz.frozen, at: fz.at ?? null, note: fz.note ?? '',
   };
+}
+
+/**
+ * ページに刻まれた自律スコアの計算日（`<span data-decision-date>`）を読む。
+ *
+ * 【2026-10-27 提案、同日オーナー承認（docs/routine-ci-scope.md）】
+ * 自律スコアは 28 日の滑る窓で数えるので、**台帳が1行も変わらなくても、暦が進むだけで
+ * 今日の計算値はページから離れていく。**日次の Act が止まると約2日で全 PR が落ちていた
+ * （2026-10-17〜19 の詰まりと同じ型）。--as-stamped はスコアを「ページが自分で名乗る計算日」
+ * で計算し直して照合する。台帳と照合することはやめない。やめるのは時計を入力にすることだけ。
+ *
+ * **読めない刻みは、読めたことにしない。**ページにスコアが出ているのに刻みが無い、
+ * 刻みどうしが食い違う、日付として読めない、未来の日付 —— どれも問題として返す。
+ */
+export const DECISION_STAMP_RE = /<span data-decision-date>([^<]*)<\/span>/g;
+// 形が合っていても存在しない日（2026-13-01）は日付ではない。例外にせず false を返す。
+const isIsoDate = (d) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
+  const t = Date.parse(`${d}T00:00:00Z`);
+  return Number.isFinite(t) && new Date(t).toISOString().slice(0, 10) === d;
+};
+
+/** 自律スコア（合計か成分の行）が出ているか。**時計で動く数字はこれだけ。** */
+const showsScore = (html) => /<span data-score-total>/.test(html) || /<tr data-score="/.test(html);
+
+export function readDecisionStamp(html, { today }) {
+  const stamps = [...String(html).matchAll(DECISION_STAMP_RE)].map((m) => m[1].trim());
+  const problems = [];
+  if (!stamps.length) {
+    if (showsScore(String(html))) problems.push('自律スコアが出ているのに計算日（data-decision-date）が無い'
+      + ' — **いつの値かを名乗らない数字は、時点を決めて照合できない**');
+    return { stamp: null, problems };
+  }
+  const distinct = [...new Set(stamps)];
+  if (distinct.length > 1) {
+    problems.push(`計算日（data-decision-date）が食い違う: ${distinct.join(' / ')}`
+      + ' — **1枚のページに2つの時点を置かない**');
+    return { stamp: null, problems };
+  }
+  const stamp = distinct[0];
+  if (!isIsoDate(stamp)) {
+    problems.push(`計算日（data-decision-date）が日付として読めない: ${stamp}`);
+    return { stamp: null, problems };
+  }
+  if (!isIsoDate(today)) throw new Error('today must be a YYYY-MM-DD date');
+  if (stamp > today) {
+    problems.push(`計算日（data-decision-date）が未来: ${stamp}（今日 ${today}）`
+      + ' — **まだ来ていない日の値は照合できない**');
+    return { stamp: null, problems };
+  }
+  return { stamp, problems };
+}
+
+/**
+ * 引数から照合のモードを決める。**--check が両方あれば --check（厳しいほう）。**
+ * --as-stamped は --check で始めない（check-authority は文字列の部分一致で必須の
+ * 検査を探すので、紛らわしい名前にしない）。
+ *   check      … 自律スコアを今日の日付で計算して照合する（鮮度も見る）
+ *   as-stamped … 自律スコアをページに刻まれた計算日で計算して照合する（鮮度は見ない）
+ *   show       … 表示だけ。数字は今日の日付で計算する（--check と同じ）
+ */
+export function pageCheckMode(argv) {
+  if (argv.includes('--check')) return 'check';
+  if (argv.includes('--as-stamped')) return 'as-stamped';
+  return 'show';
+}
+
+/**
+ * 照合の本体。**main() はファイルと台帳を読んでこれを呼ぶだけにする。**
+ *
+ * [2026-10-27] 最初の版は「どの日で自律スコアを計算するか」を main() に書いていた。
+ * レビューの変異試験で、**--check も刻みの日で計算する／刻みを読まずに今日で計算する／
+ * 刻みの問題を捨てる**のどれに書き換えても、自己テストもスコープのテストも1件も落ちなかった
+ * （自己テストは readDecisionStamp() の読み取りしか見ていなかった）。前の2つは、
+ * 鮮度の門を黙って時点照合に変える形と、全 PR の時計による詰まりを黙って戻す形である。
+ * ここへ切り出して、日付の選び方と問題の行き先を自己テストで固定する。
+ *
+ *   pages    … [{ label, text, allowed, primary }]。primary は計算日を刻む /autopilot/。
+ *              allowed は numbers-frozen を置ける配信済みの記録（docs/ の .md）。
+ *   baseLive … 自律スコア以外の正。**時計を読まない**（率・タスク数・Lane B・連続・著者率・失敗の層）。
+ *   scoreAt  … scoreAt(day) がその日を「今日」として計算した自律スコアを返す。
+ *              例外は「計算できない」として null のまま compare に渡す（0 を捏造しない）。
+ *
+ * **時計で動く数字（自律スコアと計算日）は primary にだけ置ける。**ほかの照合対象は
+ * 計算日を持たず、鮮度の範囲（routine-ci-scope.mjs の AUTOPILOT_PAGE_PATHS）の外に
+ * ある。そこへ点数を置くと、古くなっても PR では誰も見ない。置いたこと自体を落とす。
+ */
+export function checkPages({ mode, today, pages, baseLive, scoreAt }) {
+  if (!['check', 'as-stamped', 'show'].includes(mode)) throw new Error(`unknown mode: ${mode}`);
+  if (!isIsoDate(today)) throw new Error('today must be a YYYY-MM-DD date');
+  const problems = [];
+  const primary = pages.find((p) => p.primary) ?? null;
+  let scoreDay = today;
+  if (mode === 'as-stamped' && primary) {
+    const st = readDecisionStamp(primary.text, { today });
+    problems.push(...st.problems.map((x) => `${primary.label}: ${x}`));
+    // 刻みが読めないときは今日で計算する（＝ --check と同じ厳しさ）。問題は別に落とす。
+    if (st.stamp) scoreDay = st.stamp;
+  }
+  for (const p of pages) {
+    if (p.primary) continue;
+    // 属性の名前だけで見る（書き方を変えた点数が照合の正規表現を外れても、ここでは外れない）。
+    if (/data-score-total|data-score=|data-decision-date/.test(p.text)) {
+      problems.push(`${p.label}: 自律スコアか計算日（data-score / data-score-total / data-decision-date）がある`
+        + ` — **時計で動く数字は、計算日を刻む ${primary?.label ?? 'autopilot/index.html'} にだけ置ける。**`
+        + 'ほかの照合対象は計算日を持たず鮮度の範囲の外にあるので、ここに置いた点数は古くなっても PR で見えない');
+    }
+  }
+  let autonomy = null, scoreError = null;
+  try { autonomy = scoreAt(scoreDay); } catch (e) { scoreError = e.message; }
+  const live = { ...baseLive, autonomy_score: autonomy };
+  const found = [], drifted = [];
+  for (const p of pages) {
+    // **凍結してよいのは docs/ の .md（配信済みの記録）だけ。**
+    // .html は生きた公開面なので、宣言を置いたこと自体が問題になる。
+    const r = classifyFile(p.text, { allowed: p.allowed, today, live });
+    problems.push(...r.problems.map((x) => `${p.label}: ${x}`));
+    // **落とさないが、見えなくもしない。**ズレは毎回印字する。
+    if (r.frozen) drifted.push({ label: p.label, at: r.at, note: r.note, lines: r.drift });
+    found.push(...r.found.map((x) => ({ ...x, frozen: r.frozen, file: p.label })));
+    // **一覧に入れたのに1つも照合していない、を落とす。**
+    // 表記が変わって正規表現に当たらなくなると、検査は黙って通る ——
+    // それは「一致した」ではなく「見ていない」。網に入れた文書には
+    // 少なくとも1つ照合対象があることを求める（PAGE_PATH も同じ）。
+    if (r.found.length === 0) {
+      problems.push(`${p.label}: 突き合わせられる数字が1つも見つからない`
+        + ' — **表記が変わって検査が素通りしている可能性。**'
+        + '網から外すなら EXTRA_PATHS から消すこと（黙って通さない）');
+    }
+  }
+  return { problems, found, drifted, scoreDay, scoreError };
 }
 
 export const COVERAGE_PATH = path.join(ROOT, 'data/automation-coverage.json');
@@ -514,6 +646,112 @@ function selftest() {
   t('範囲表記（87〜100%）は率として読まない',
     compare('月次ではコミットの87〜100%が続いています', cr).problems.length === 0);
 
+  // 計算日の刻み（--as-stamped）— 読めない刻みを読めたことにしない
+  const stampPage = (d1, d2 = d1) => `<p><span data-decision-date>${d1}</span>時点</p>`
+    + `<b>自律スコアは<span data-score-total>43.7</span>点（<span data-decision-date>${d2}</span>時点）</b>`;
+  t('刻みが1つの日付にそろっていれば、その日で計算する',
+    readDecisionStamp(stampPage('2026-10-26'), { today: '2026-10-27' }).stamp === '2026-10-26');
+  t('**今日の刻みも読める**（Act が今朝書いたページ）',
+    readDecisionStamp(stampPage('2026-10-27'), { today: '2026-10-27' }).problems.length === 0);
+  t('**スコアが出ているのに刻みが無いと落ちる**',
+    readDecisionStamp('<span data-score-total>43.7</span>', { today: '2026-10-27' }).problems.length === 1);
+  t('スコアも刻みも無いページは問題にしない（照合する数字が無い）',
+    readDecisionStamp('自律スコアの話はしていない', { today: '2026-10-27' }).problems.length === 0);
+  t('**刻みどうしが食い違うと落ちる**',
+    readDecisionStamp(stampPage('2026-10-26', '2026-10-27'), { today: '2026-10-27' }).problems.some((p) => p.includes('食い違う')));
+  t('**日付として読めない刻みは落ちる**（2026-13-01 も）',
+    readDecisionStamp(stampPage('2026-13-01'), { today: '2026-10-27' }).problems.some((p) => p.includes('読めない'))
+    && readDecisionStamp(stampPage('10/26'), { today: '2026-10-27' }).stamp === null);
+  t('**未来の刻みは落ちる**（まだ来ていない日の値は照合できない）',
+    readDecisionStamp(stampPage('2026-10-28'), { today: '2026-10-27' }).problems.some((p) => p.includes('未来')));
+  t('刻みが読めないときは stamp を返さない（呼び出し側は今日で計算する）',
+    readDecisionStamp(stampPage('2026-10-26', '2026-10-27'), { today: '2026-10-27' }).stamp === null);
+
+  // --- 照合の本体（checkPages）— **どの日で計算するか、刻みの問題がどこへ行くか** ---
+  // [2026-10-27] 上の8件は刻みの読み取りしか見ておらず、レビューの変異試験で
+  // 「--check も刻みの日で計算する」「刻みを読まずに今日で計算する」「刻みの問題を捨てる」
+  // のどれに書き換えても1件も落ちなかった。ここでは日ごとに違う点数を返す正を渡し、
+  // **どの日の点数で照合したか**を結果で確かめる。
+  t('モード: --as-stamped だけなら as-stamped、--check があれば check（厳しいほう）、無ければ show',
+    pageCheckMode(['node', 'x', '--as-stamped']) === 'as-stamped'
+    && pageCheckMode(['node', 'x', '--as-stamped', '--check']) === 'check'
+    && pageCheckMode(['node', 'x', '--check']) === 'check'
+    && pageCheckMode(['node', 'x']) === 'show');
+  const S = '2026-10-24', D = '2026-10-27', OTHER = '2026-10-23';
+  const comps = (vdc, umr, ra, ep, tuc) => ({ vdc: { points: vdc, max: 30 }, umr: { points: umr, max: 25 },
+    ra: { points: ra, max: 20 }, ep: { points: ep, max: 15 }, tuc: { points: tuc, max: 10 } });
+  const byDay = {
+    [OTHER]: { total: 44.9, components: comps(0, 20.1, 6.0, 9.4, 9.4) },
+    [S]: { total: 43.7, components: comps(0, 19.7, 6.0, 8.6, 9.4) },
+    [D]: { total: 41.2, components: comps(0, 19.7, 4.0, 8.1, 9.4) },
+  };
+  const asked = [];
+  const scoreAt = (day) => {
+    asked.push(day);
+    if (!byDay[day]) throw new Error(`fixture has no score for ${day}`);
+    return byDay[day];
+  };
+  const page = (s, stamps) => stamps.map((d) => `<p><span data-decision-date>${d}</span>時点</p>`).join('')
+    + `<b>自律スコアは<span data-score-total>${s.total.toFixed(1)}</span>点</b>`
+    + Object.entries(s.components).map(([id, c]) => scoreRow(id, c.points.toFixed(1), c.max)).join('');
+  const check = (mode, today, text, extra = []) => {
+    asked.length = 0;
+    const r = checkPages({ mode, today, baseLive: live, scoreAt,
+      pages: [{ label: 'autopilot/index.html', text, allowed: false, primary: true }, ...extra] });
+    return { ...r, asked: asked.join(',') };
+  };
+  const stale = page(byDay[S], [S, S]);
+  const fresh = page(byDay[D], [D, D]);
+  t('**古いが正しいページは as-stamped で通る**（刻みの日 S の点数で照合し、今日 D では計算しない）',
+    (() => { const r = check('as-stamped', D, stale);
+      return r.problems.length === 0 && r.scoreDay === S && r.asked === S; })());
+  t('**時計が30日進んでも、古いが正しいページは as-stamped で通る**（時計を入力にしない）',
+    check('as-stamped', '2026-11-26', stale).problems.length === 0);
+  t('**同じ古いページは check で落ちる**（今日 D の点数で照合する。鮮度の門を時点照合に変えない）',
+    (() => { const r = check('check', D, stale);
+      return r.scoreDay === D && r.asked === D && r.problems.some((p) => p.includes('自律スコア（合計）'))
+        && r.problems.some((p) => p.includes('ra（得点）')); })());
+  t('表示だけ（show）も今日の点数で照合する',
+    (() => { const r = check('show', D, stale); return r.scoreDay === D && r.problems.length > 0; })());
+  t('今日の値のページは as-stamped でも check でも通る',
+    check('as-stamped', D, fresh).problems.length === 0 && check('check', D, fresh).problems.length === 0);
+  t('**刻みの日の台帳と1か所でも違えば as-stamped で落ちる**（成分を1つだけ直したページ）',
+    (() => { const r = check('as-stamped', D, stale.replace('<b>6.0</b>', '<b>5.0</b>'));
+      return r.scoreDay === S && r.problems.length === 1 && r.problems[0].includes('ra（得点）'); })());
+  t('**刻みだけ別の日に動かすと落ちる**（S の点数に OTHER の刻み — OTHER で計算すると合わない）',
+    (() => { const r = check('as-stamped', D, page(byDay[S], [OTHER, OTHER]));
+      return r.scoreDay === OTHER && r.problems.some((p) => p.includes('自律スコア（合計）')); })());
+  // 刻みが壊れたページには、**今日の値**を載せておく。こうすると、刻みの問題が結果に
+  // 届かない変異（問題を捨てる）だけがこの4件を通してしまう。
+  for (const [name, stamps, word] of [
+    ['無い', [], '無い'], ['日付でない', ['garbled', 'garbled'], '読めない'],
+    ['食い違う', [S, D], '食い違う'], ['未来の', ['2026-10-28', '2026-10-28'], '未来']]) {
+    t(`**刻みが${name}ページは、数字が今日の値でも as-stamped で落ちる**（読めない刻みを読めたことにしない）`,
+      (() => { const r = check('as-stamped', D, page(byDay[D], stamps));
+        return r.scoreDay === D && r.problems.length === 1
+          && r.problems[0].startsWith('autopilot/index.html: ') && r.problems[0].includes(word); })());
+  }
+  t('**正が計算できない日の刻みは落ちる**（0 を捏造して合わせない）',
+    (() => { const r = check('as-stamped', D, page(byDay[S], ['2026-10-22', '2026-10-22']));
+      return String(r.scoreError).includes('fixture has no score for 2026-10-22')
+        && r.problems.some((p) => p.includes('計算できない')); })());
+  const other = (text) => [{ label: 'index.html', text, allowed: false, primary: false }];
+  t('**/autopilot/ 以外に自律スコアを置くと落ちる**（計算日も鮮度の範囲も無い場所に、時計で動く数字を置かない）',
+    ['as-stamped', 'check'].every((mode) => check(mode, D, fresh,
+      other('総合自動化率58.6%<span data-score-total>41.2</span>')).problems
+      .some((p) => p.startsWith('index.html: ') && p.includes('autopilot/index.html にだけ置ける'))));
+  t('**/autopilot/ 以外に成分の行や計算日だけを置いても落ちる**',
+    check('as-stamped', D, fresh, other(`総合自動化率58.6%${scoreRow('umr', '19.7', 25)}`)).problems.length === 1
+    && check('as-stamped', D, fresh, other(`総合自動化率58.6%（<span data-decision-date>${D}</span>時点）`)).problems.length === 1);
+  t('**/autopilot/ 以外では、書き方を変えた点数や計算日も落ちる**（照合の正規表現を外れても見逃さない）',
+    check('as-stamped', D, fresh, other('総合自動化率58.6%<span class="x" data-score-total>41.2</span>')).problems.length === 1
+    && check('check', D, fresh, other('総合自動化率58.6%<time data-decision-date="2026-10-27">')).problems.length === 1);
+  t('/autopilot/ 以外の、時計を読まない数字はそのまま照合する',
+    check('as-stamped', D, fresh, other('総合自動化率58.6%')).problems.length === 0
+    && check('as-stamped', D, fresh, other('総合自動化率61.3%')).problems.length === 1);
+  t('今日が日付でなければ例外（黙って何かの日で計算しない）',
+    (() => { try { check('as-stamped', 'today', fresh); return false; } catch { return true; } })());
+
   if (failures.length) { console.log(`\nselftest: ${total}件中 ${failures.length}件 失敗`); return 1; }
   console.log(`\nselftest: 全${total}件 通過`);
   return 0;
@@ -522,6 +760,8 @@ function selftest() {
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(selftest());
+  const mode = pageCheckMode(process.argv);
+  const today = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
 
   const doc = JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf8'));
   const summary = summarize(doc);
@@ -541,12 +781,9 @@ if (isMain) {
     console.error(`運転台帳が読めない（${e.message}）— 連続稼働は照合できない`);
   }
   const codeDoc = readLedger(CODE_LEDGER, { onMissing: null, why: 'コード著者率が突き合わせられない' });
-  // 自律スコアと失敗の層。**読めなかったら null のまま渡す** ——
-  // compare 側が「ページに出ているのに正が無い」で落とす。ここで 0 を捏造すると、
-  // 計算できない日にページの数字が「合っている」ことになる。
-  let autonomy = null, failureStages = null;
-  try { autonomy = autonomyScore(loadScoreContext()); }
-  catch (e) { console.error(`自律スコアが計算できない（${e.message}）— §5 は照合できない`); }
+  // 失敗の層。**読めなかったら null のまま渡す** —— compare 側が「ページに出ているのに
+  // 正が無い」で落とす。ここで 0 を捏造すると、計算できない日にページの数字が「合っている」ことになる。
+  let failureStages = null;
   try {
     failureStages = {};
     for (const r of loadRuns().runs || []) {
@@ -554,36 +791,22 @@ if (isMain) {
       failureStages[r.failure_stage] = (failureStages[r.failure_stage] ?? 0) + 1;
     }
   } catch (e) { failureStages = null; console.error(`失敗の層が数えられない（${e.message}）`); }
-  const live = { ...summary.overall, by_area: summary.by_area, counts_total: doc.tasks.length,
+  const baseLive = { ...summary.overall, by_area: summary.by_area, counts_total: doc.tasks.length,
     lane_b: appReleases?.summary ?? null, streaks, code_rates: codeDoc ? knownRates(codeDoc) : null,
-    autonomy_score: autonomy, failure_stages: failureStages };
+    failure_stages: failureStages };
   const targets = [PAGE_PATH, ...EXTRA_PATHS].filter((f) => fs.existsSync(f));
-  const problems = [];
-  const found = [];
-  const today = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
-  const drifted = [];
-  for (const f of targets) {
-    const label = path.relative(ROOT, f);
-    const text = fs.readFileSync(f, 'utf8');
-    // **凍結してよいのは docs/ の .md（配信済みの記録）だけ。**
-    // .html は生きた公開面なので、宣言を置いたこと自体が問題になる。
-    const r = classifyFile(text, { allowed: f.endsWith('.md'), today, live });
-    problems.push(...r.problems.map((x) => `${label}: ${x}`));
-    // **落とさないが、見えなくもしない。**ズレは毎回印字する。
-    if (r.frozen) drifted.push({ label, at: r.at, note: r.note, lines: r.drift });
-    found.push(...r.found.map((x) => ({ ...x, frozen: r.frozen, file: label })));
-    // **一覧に入れたのに1つも照合していない、を落とす。**
-    // 表記が変わって正規表現に当たらなくなると、検査は黙って通る ——
-    // それは「一致した」ではなく「見ていない」。網に入れた文書には
-    // 少なくとも1つ照合対象があることを求める（PAGE_PATH も同じ）。
-    if (r.found.length === 0) {
-      problems.push(`${label}: 突き合わせられる数字が1つも見つからない`
-        + ' — **表記が変わって検査が素通りしている可能性。**'
-        + '網から外すなら EXTRA_PATHS から消すこと（黙って通さない）');
-    }
-  }
+  const pages = targets.map((f) => ({ label: path.relative(ROOT, f), text: fs.readFileSync(f, 'utf8'),
+    allowed: f.endsWith('.md'), primary: f === PAGE_PATH }));
+  // 自律スコアは**渡された日を「今日」として**計算する。どの日を渡すかは checkPages() が決める。
+  const r = checkPages({ mode, today, pages, baseLive,
+    scoreAt: (day) => autonomyScore(loadScoreContext({ today: day })) });
+  if (r.scoreError) console.error(`自律スコアが計算できない（${r.scoreError}）— §5 は照合できない`);
+  const { problems, found, drifted, scoreDay } = r;
 
   console.log(`公開ページ /autopilot/ と配信本文 × 台帳 — 突き合わせた数字 ${found.length} 件`);
+  console.log(mode === 'as-stamped'
+    ? `  自律スコアは、ページの計算日 ${scoreDay} で計算して照合した。**ページが今日の値かどうか（鮮度）はこの実行では判定していない — 健全とは言わない。**`
+    : `  自律スコアは、今日（${today}）の台帳の値で照合した。`);
   console.log(`  対象: ${targets.map((f) => path.relative(ROOT, f)).join(' / ')}\n`);
   for (const f of found) {
     const mark = f.got === f.want ? '一致' : (f.frozen ? '時点差' : '不一致');
@@ -608,5 +831,6 @@ if (isMain) {
     for (const p of problems) console.error(`  - ${p}`);
     process.exit(1);
   }
-  if (process.argv.includes('--check')) console.log('\n公開ページの数字は台帳の現在値と一致。');
+  if (mode === 'check') console.log('\n公開ページの数字は台帳の現在値と一致。');
+  else if (mode === 'as-stamped') console.log(`\n公開ページの数字は、計算日 ${scoreDay} の台帳の値と一致（鮮度は判定していない）。`);
 }
