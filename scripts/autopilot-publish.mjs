@@ -734,6 +734,12 @@ export function record({ repo, trusted, sha, day, pr, request, runId, work, runn
   const run = request.run;
   const runsFile = path.join(work, 'data/autopilot-runs.json');
   const doc = JSON.parse(fs.readFileSync(runsFile, 'utf8'));
+  // A reconciler may already have observed this Actions execution under a
+  // different row ID. Do not count the same execution again or overwrite the
+  // earlier failure observation without explicit reconciliation.
+  if ((doc.runs ?? []).some(row => row.route === 'actions' && String(row.external_ref) === runId && row.run_id !== run.run_id)) {
+    fail('record_duplicate_external_ref');
+  }
   const existing = (doc.runs ?? []).find(row => row.run_id === run.run_id);
   let artifactOmitted = null;
   if (existing) {
@@ -808,11 +814,33 @@ export function record({ repo, trusted, sha, day, pr, request, runId, work, runn
   return { sha: git(work, ['rev-parse', 'HEAD']).trim(), changed: changed.length, artifact_omitted: artifactOmitted };
 }
 
-function defaultRunner(cwd, command, args) {
-  const result = spawnSync(command, args, { cwd, stdio: ['ignore', 'ignore', 'ignore'],
+// Child output may contain model-authored text or local paths. Keep the raw bytes
+// private; report only bounded, typed observations, including the translation
+// builder's aggregate failure count. A missing summary remains unknown.
+export function recordStepDiagnostic(result) {
+  const stderr = String(result.stderr ?? '');
+  const counts = [...stderr.matchAll(/^(\d{1,6}) incomplete translations; no HTML written\.$/gm)];
+  return {
+    exit_status: Number.isInteger(result.status) ? result.status : null,
+    signal: ['SIGTERM', 'SIGKILL', 'SIGABRT', 'SIGSEGV'].includes(result.signal) ? result.signal : null,
+    process_error: ['ETIMEDOUT', 'ENOBUFS', 'ENOENT', 'EACCES'].includes(result.error?.code) ? result.error.code : result.error ? 'other' : null,
+    incomplete_translations: counts.length === 1 ? Number(counts[0][1]) : null,
+    // The builder truncates detailed errors; these count only reported entries.
+    reported_missing_units: [...stderr.matchAll(/\b(?:ja|en):[a-f0-9]{20}: missing\b/g)].length,
+    reported_stale_units: [...stderr.matchAll(/\b(?:ja|en):[a-f0-9]{20}: stale source\b/g)].length,
+    stdout_bytes: Buffer.byteLength(result.stdout ?? ''),
+    stderr_bytes: Buffer.byteLength(result.stderr ?? ''),
+  };
+}
+
+export function defaultRunner(cwd, command, args) {
+  const result = spawnSync(command, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 1024 * 1024,
     // The script directory is the trusted overlay; python3 -E -s ignores PYTHON* variables and user site.
     env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' }, timeout: 15 * 60_000 });
-  if (result.status !== 0) fail(`record_step_failed_${path.basename(args.find(a => a.endsWith('.mjs') || a.endsWith('.py')) ?? command).replace(/\W/g, '_')}`);
+  if (result.status !== 0 || result.error) {
+    console.error('record step diagnostic: ' + JSON.stringify(recordStepDiagnostic(result)));
+    fail(`record_step_failed_${path.basename(args.find(a => a.endsWith('.mjs') || a.endsWith('.py')) ?? command).replace(/\W/g, '_')}`);
+  }
 }
 
 // ── workflow wiring guard ──────────────────────────────────────────────────
