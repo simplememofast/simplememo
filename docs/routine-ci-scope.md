@@ -22,34 +22,78 @@ ledger stale, so the daily Act sync stopped and the autopilot run ledger became 
 too. The hand-synced revenue mirror passed its four-day budget at the same time. From
 then on every site PR failed both freshness gates for reasons it did not cause.
 
-**This proposal does not remove every clock-driven gate on every PR.** The site job
-step `Autopilot page vs ledger` (`check-autopilot-page.mjs --check`) still runs on
-every PR and is outside this proposal. It compares `/autopilot/` with an autonomy
-score whose 28-day window ends today (`windowOf()` in `autonomy-score.mjs`). The
-daily Act run regenerates that page. When the daily pipeline stops, the clock alone
-can therefore make the page disagree with the score, and every PR fails this step.
-Measured on 2026-10-24 with a Node clock shift, on main at 561b3283a and on this
-branch alike (ledger last synced 2026-10-23T01:33Z, page 2026-10-23T17:00Z): it
-passed at 2026-10-25 and failed at 2026-10-26 (total 47.5 vs 45.4, `ra` 4.0 vs 2.5,
-`ep` 8.7 vs 8.1). The run ledger freshness check had already failed at 2026-10-25.
-Whether it fails depends on the data: on the 2026-10-17 to 10-19 deadlock snapshot
-(0bdae2130) it passed at 10-17T15Z, 10-18T03Z and 10-19T03Z, so that deadlock came
-only from the two gates above. Before this proposal, `Autopilot run ledger` failed
-first and the job skipped every later step. With it, a site PR passes that step and
-can stop at `Autopilot page vs ledger` about one day later. The same sweep over the
-site job's other unconditional `--check` and `--integrity` commands on this branch
-found no other result that changed between 2026-10-24 and 10-26. It ran without Git
-history and shifted only the Node clock, so Python checks and checks that need Git
-history were not assessed. Whether to scope this gate is a separate owner decision;
-this proposal does not change it.
+**The 2026-10-19 extension did not remove every clock-driven gate on every PR.** The
+site job step `Autopilot page vs ledger` compared `/autopilot/` with an autonomy score
+whose 28-day window ends today (`windowOf()` in `autonomy-score.mjs`). The daily Act run
+regenerates that page. When the daily pipeline stops, the clock alone makes the page
+disagree with the score. Measured on 2026-10-24 with a Node clock shift: it passed at
+2026-10-25 and failed at 2026-10-26 (total 47.5 vs 45.4, `ra` 4.0 vs 2.5, `ep` 8.7 vs
+8.1), about one day after the run ledger freshness gate.
+
+## Status of the 2026-10-27 autopilot page extension
+
+**Proposed on 2026-10-27 in a draft PR after the owner chose, on 2026-10-26, to
+propose it separately, and approved by the owner on 2026-10-27 (multiple choice), who
+delegated the merge to Claude.** The comparison is not dropped: every PR
+still compares the page with the ledgers. What changes is the date the autonomy score
+is computed for.
+
+- Every PR runs `check-autopilot-page --as-stamped`. It reads the date the page says
+  its numbers were computed for (`<span data-decision-date>`, written by
+  `decision-monitor --publish-report`) and recomputes the score as of that date. All
+  other numbers on the page (automation rates, task counts, Lane B, streaks, code
+  authorship, failure stages) do not read the clock and are compared exactly as
+  before. Without new ledger rows the result does not move with the clock: a Node
+  clock shift of +1, +2, +5 and +30 days on 2026-10-27 kept `--as-stamped` passing,
+  while `--check` failed from +2 days.
+- A page that shows a score but no stamp, stamps that disagree, a stamp that is not
+  a date, or a future stamp fails `--as-stamped`.
+- Only `autopilot/index.html` may carry the score or a stamp. The checker's other
+  compared files (the homepage `index.html` and the two delivered PR texts
+  `docs/pr-autopilot-2026-09-body.md` and `-final.md`) fail in every mode if they show
+  a score row, a score total or a stamp. Every number they do show reads no clock and
+  is compared on every PR (the two delivered texts are frozen with `numbers-frozen`,
+  so their drift is printed, not failed, as before).
+- `--check` (the score as of today) is a publication gate only for a PR that changes
+  routine operations (the daily Act PR regenerates the page), `autopilot/index.html`,
+  the checker, the score module, or the publisher that writes the stamp
+  (`AUTOPILOT_PAGE_PATHS` in `scripts/lib/routine-ci-scope.mjs`).
+- **The homepage and the two delivered PR texts are deliberately outside that list.**
+  They carry no clock-driven number, so a freshness gate on them would check nothing
+  about them. It would only block every homepage PR whenever `/autopilot/` is stale,
+  which is the 2026-10-17 to 10-19 pattern this proposal removes. Since 2026-09-27
+  about 30 main commits touched `index.html`. If the owner wants homepage PRs to stay
+  freshness-gated, adding `index.html` to the list is the whole change.
+- A change to a score input that is not an operational path (for example
+  `data/decision-recovery.json`, `data/value-contracts.json`,
+  `data/check-selftests.json` or `data/autonomy-score-history.json`) fails
+  `--as-stamped` only if it changes the score at the stamped date. A change that only
+  affects later dates, such as a recovery incident detected after the stamp, leaves
+  the page stale but correct as of its stamp. Such a PR passes and does not run
+  `--check`; the staleness is seen by `--check` in an in-scope PR and in
+  `routine-health`, and the next daily Act run regenerates the page.
+- Main push and Main Daily Validation run `--check` in the independent `routine-health`
+  job, which stays failed while the page is stale.
+- Which date the score is computed for, and where stamp problems go, is decided in
+  `checkPages()` and fixed by its selftests. `scripts/routine-ci-scope.test.mjs` also
+  runs the real CLI on a temporary copy with a fixture run ledger: a page written by
+  the publisher three days before today passes `--as-stamped` at clock shifts of 0, 1,
+  2, 5 and 30 days and fails `--check`, and a page with today's numbers but a missing,
+  garbled, future or conflicting stamp fails `--as-stamped`.
+- `CLAUDE.md` (section `/autopilot/ の自律スコアは日付で動く`, 2026-09-19) describes the
+  behaviour before this proposal: every PR failing when the page is one day old, and a
+  checker that ignores `data-decision-date`. On a main that contains this proposal, PRs
+  compare the score at the stamped date, and only operational or page PRs and
+  `routine-health` check that the page is today's value.
 
 | Context | Required checks | Meaning of an observation failure |
 | --- | --- | --- |
-| Every PR | All existing site checks; all routine observer selftests; CI scope regression tests; `autopilot-runs --selftest` and `--integrity` (ledger shape, cost-ledger readability, status JSON agreement); `check-waiting-progress --selftest` and `--integrity` (waiting configuration such as a missing `stale_budget_days`, and readable counters) | A failing mandatory check still blocks publication |
+| Every PR | All existing site checks; all routine observer selftests; CI scope regression tests; `autopilot-runs --selftest` and `--integrity` (ledger shape, cost-ledger readability, status JSON agreement); `check-waiting-progress --selftest` and `--integrity` (waiting configuration such as a missing `stale_budget_days`, and readable counters); `check-autopilot-page --selftest` and `--as-stamped` (every page number against the ledgers, the score at the page's stamped date) | A failing mandatory check still blocks publication |
 | PR changing routine operations | Both actual Claude and Codex ledger checks, and the full `autopilot-runs --check` (one-day ledger freshness), in addition to the above | Blocks this operational change |
 | PR changing waiting-progress inputs (including any deletion under `growth/data/gsc/`) | The full `check-waiting-progress --check` (unacknowledged or expired stalls), in addition to the above | Blocks this change to the waiting inputs |
-| PR changing neither | No live-health or ledger-freshness publication requirement; the summary explicitly says observation health and ledger freshness were not assessed | Does not claim the routines are healthy or the ledgers are fresh |
-| Main push and existing Main Daily Validation schedule/manual run | Independent `routine-health` job runs all four actual checks (Claude, Codex, autopilot run ledger, waiting progress), even when site checks fail | Job and workflow stay failed; site checks still run independently |
+| PR changing routine operations, `autopilot/index.html`, `check-autopilot-page.mjs`, `autonomy-score.mjs` or `decision-monitor.mjs` (2026-10-27 proposal; not the homepage) | The full `check-autopilot-page --check` (page equals today's score), in addition to the above | Blocks this change until the page is regenerated |
+| PR changing neither | No live-health or ledger-freshness publication requirement; the page is still compared at its stamped date (`--as-stamped`); the summary explicitly says observation health, ledger freshness and page freshness were not assessed | Does not claim the routines are healthy, the ledgers are fresh or the page is today's value |
+| Main push and existing Main Daily Validation schedule/manual run | Independent `routine-health` job runs all actual checks (Claude, Codex, autopilot run ledger, waiting progress, and with the 2026-10-27 proposal the autopilot page `--check`), even when site checks fail | Job and workflow stay failed; site checks still run independently |
 
 Operational paths are explicitly enumerated in `scripts/lib/routine-ci-scope.mjs`:
 the routine/run/action/cost/stop ledgers; observation producers and consumers;
@@ -119,7 +163,8 @@ file or directory, or a future rolling timestamp). If both `--check` and
 `--integrity` are given, `--check` wins. The thresholds and acknowledgement rules are
 unchanged: one day of ledger lag, `stale_budget_days` 4 and 9, and `review_by` expiry.
 Other freshness gates in `seo-check.yml`, such as the app release ledger and
-prior-art, are untouched, and so is `Autopilot page vs ledger` (see the status section).
+prior-art, are untouched. The 2026-10-19 extension also left `Autopilot page vs
+ledger` untouched; the 2026-10-27 section above changes it.
 `autopilot-act.yml` still runs the full ledger check before it writes.
 
 CI routing (`seo-check.yml`, the scope helper and regression tests, and this policy)
@@ -135,10 +180,11 @@ its existing successful PR-validation and exact-commit requirements. Main/daily
 monitoring failures are not converted to success or treated as repaired.
 
 `preflight.mjs` retains the unconditional regression tests and explicitly lists
-the actual observation commands and both full ledger freshness checks
-(`autopilot-runs --check`, `check-waiting-progress --check`) as conditional, not
-executed locally. It runs the `--integrity` forms. To check ledger freshness
-locally, run those two commands directly. A local preflight pass is not a substitute
-for the PR's scope decision and required CI checks. Neither CI path reads private
-Codex stores: actual health checks only validate the committed public ledger. They
-do not collect or refresh evidence.
+the actual observation commands and the full freshness checks
+(`autopilot-runs --check`, `check-waiting-progress --check`, and with the 2026-10-27
+proposal `check-autopilot-page --check`) as conditional, not executed locally. It
+runs the `--integrity` forms and `check-autopilot-page --as-stamped`. To check
+ledger or page freshness locally, run those three commands directly. A local
+preflight pass is not a substitute for the PR's scope decision and required CI
+checks. Neither CI path reads private Codex stores: actual health checks only
+validate the committed public ledger. They do not collect or refresh evidence.

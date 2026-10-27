@@ -4,10 +4,12 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 import { routineCiScope, routineScopeForPaths } from './lib/routine-ci-scope.mjs';
 import { runsFacts, todayJst } from './autopilot-runs.mjs';
 import { extractCommands, auditExtraction } from './preflight.mjs';
 import { gatingChecks } from './check-selftests.mjs';
+import { PAGE_PATH, EXTRA_PATHS, checkPages } from './check-autopilot-page.mjs';
 
 test('site assets and CI routing do not claim operational health', () => {
   for (const file of ['index.html', 'js/app-store-tracking.js', 'growth/queries/web-to-app.sql',
@@ -249,6 +251,7 @@ test('every scope-gated step runs only checkers that are themselves in that scop
   const gates = [
     ["steps.routine_scope.outputs.required == 'true'", file => routineScopeForPaths([file]).required],
     ["steps.routine_scope.outputs.waiting_required == 'true'", file => routineScopeForPaths([file]).waitingRequired],
+    ["steps.routine_scope.outputs.page_required == 'true'", file => routineScopeForPaths([file]).pageRequired],
   ];
   let gated = 0;
   for (const step of jobSteps(site)) {
@@ -260,7 +263,7 @@ test('every scope-gated step runs only checkers that are themselves in that scop
       for (const file of scripts) assert.equal(inScope(file), true, step.name + ': ' + file);
     }
   }
-  assert.equal(gated, 4, 'Claude, Codex, autopilot run ledger and waiting progress freshness steps');
+  assert.equal(gated, 5, 'Claude, Codex, autopilot run ledger, waiting progress and autopilot page freshness steps');
 });
 
 test('ledger freshness steps: integrity on every PR, full check only when in scope, health stays independent', () => {
@@ -283,7 +286,8 @@ test('ledger freshness steps: integrity on every PR, full check only when in sco
   }
   for (const [name, condition, command] of [
     ['Required autopilot run ledger freshness', "steps.routine_scope.outputs.required == 'true'", 'node scripts/autopilot-runs.mjs --check'],
-    ['Required waiting progress freshness', "steps.routine_scope.outputs.waiting_required == 'true'", 'node scripts/check-waiting-progress.mjs --check']]) {
+    ['Required waiting progress freshness', "steps.routine_scope.outputs.waiting_required == 'true'", 'node scripts/check-waiting-progress.mjs --check'],
+    ['Required autopilot page freshness', "steps.routine_scope.outputs.page_required == 'true'", 'node scripts/check-autopilot-page.mjs --check']]) {
     const gated = step(name);
     assert.equal(gated.cond, "github.event_name == 'pull_request' && " + condition, name);
     assert.doesNotMatch(gated.block, /continue-on-error|\|\|\s*true/);
@@ -292,11 +296,19 @@ test('ledger freshness steps: integrity on every PR, full check only when in sco
   // The scope outputs are exact strings of the helper's booleans.
   assert.match(site, /core\.setOutput\('required', String\(scope\.required\)\);/);
   assert.match(site, /core\.setOutput\('waiting_required', String\(scope\.waitingRequired\)\);/);
+  assert.match(site, /core\.setOutput\('page_required', String\(scope\.pageRequired\)\);/);
+  // The page step compares at the page's stamped date on every PR; it never drops the comparison.
+  const page = step('Autopilot page vs ledger');
+  assert.equal(page.cond, null);
+  assert.match(page.block, /^          node scripts\/check-autopilot-page\.mjs --selftest$/m);
+  assert.match(page.block, /^          node scripts\/check-autopilot-page\.mjs --as-stamped$/m);
+  assert.doesNotMatch(page.block, /check-autopilot-page\.mjs --check/);
 
   const healthSteps = jobSteps(health);
   for (const [name, id, command] of [
     ['Autopilot run ledger health', 'autopilot_runs_health', 'node scripts/autopilot-runs.mjs --check'],
-    ['Waiting progress health', 'waiting_progress_health', 'node scripts/check-waiting-progress.mjs --check']]) {
+    ['Waiting progress health', 'waiting_progress_health', 'node scripts/check-waiting-progress.mjs --check'],
+    ['Autopilot page freshness health', 'autopilot_page_health', 'node scripts/check-autopilot-page.mjs --check']]) {
     const found = healthSteps.filter(s => s.name === name);
     assert.equal(found.length, 1, name);
     assert.equal(found[0].cond, "always() && github.event_name != 'pull_request'", name);
@@ -308,14 +320,15 @@ test('ledger freshness steps: integrity on every PR, full check only when in sco
 
   // check-authority matches required commands as substrings of the whole file.
   // The literal must only occur as real run lines, never in comments or summary text.
-  for (const command of ['node scripts/autopilot-runs.mjs --check', 'node scripts/check-waiting-progress.mjs --check']) {
+  for (const command of ['node scripts/autopilot-runs.mjs --check', 'node scripts/check-waiting-progress.mjs --check',
+    'node scripts/check-autopilot-page.mjs --check']) {
     const lines = workflow.split('\n').filter(line => line.includes(command));
     assert.equal(lines.length, 2, command);
     for (const line of lines) assert.equal(line.trim(), 'run: ' + command, command);
     assert.equal(site.split('\n').filter(line => line.trim() === 'run: ' + command).length, 1, command);
     assert.equal(health.split('\n').filter(line => line.trim() === 'run: ' + command).length, 1, command);
   }
-  const extended = workflow.split('\n').filter(line => /(?:autopilot-runs|check-waiting-progress)\.mjs --check[\w-]/.test(line));
+  const extended = workflow.split('\n').filter(line => /(?:autopilot-runs|check-waiting-progress|check-autopilot-page)\.mjs --check[\w-]/.test(line));
   assert.deepEqual(extended, [], 'no flag of these checkers may extend --check and satisfy the substring guard');
 });
 
@@ -362,14 +375,16 @@ async function runScopeScript(eventName, payload, outputs = {}) {
 test('the main/daily health summary records each actual outcome and does not classify failures', async () => {
   const { health } = workflowJobs();
   for (const [name, id] of [['CLAUDE_OUTCOME', 'claude_health'], ['CODEX_OUTCOME', 'codex_health'],
-    ['AUTOPILOT_RUNS_OUTCOME', 'autopilot_runs_health'], ['WAITING_PROGRESS_OUTCOME', 'waiting_progress_health']]) {
+    ['AUTOPILOT_RUNS_OUTCOME', 'autopilot_runs_health'], ['WAITING_PROGRESS_OUTCOME', 'waiting_progress_health'],
+    ['AUTOPILOT_PAGE_OUTCOME', 'autopilot_page_health']]) {
     assert.match(health, new RegExp('^          ' + name + ': \\$\\{\\{ steps\\.' + id + '\\.outcome \\}\\}$', 'm'), name);
   }
   const { tables, text } = await runGithubScript('- name: Record actual observation health outcomes', { env: {
-    CLAUDE_OUTCOME: 'success', CODEX_OUTCOME: 'failure', AUTOPILOT_RUNS_OUTCOME: 'failure', WAITING_PROGRESS_OUTCOME: '' } });
+    CLAUDE_OUTCOME: 'success', CODEX_OUTCOME: 'failure', AUTOPILOT_RUNS_OUTCOME: 'failure', WAITING_PROGRESS_OUTCOME: '',
+    AUTOPILOT_PAGE_OUTCOME: 'failure' } });
   assert.equal(tables.length, 1);
   assert.deepEqual(tables[0].slice(1), [['Claude snapshot', 'success'], ['Codex snapshot', 'failure'],
-    ['Autopilot run ledger', 'failure'], ['Waiting progress', 'not run']]);
+    ['Autopilot run ledger', 'failure'], ['Waiting progress', 'not run'], ['Autopilot page vs ledger', 'failure']]);
   assert.match(text, /Failure remains a failed job\/workflow/);
   assert.match(text, /failure is not automatically classified as staleness/);
 });
@@ -392,7 +407,7 @@ test('the real workflow scope script fails closed and never emits a scope for in
   }
   for (const eventName of ['push', 'schedule', 'workflow_call']) {
     const { outputs, text } = await runScopeScript(eventName, {});
-    assert.deepEqual(outputs, { required: 'true', waiting_required: 'true' });
+    assert.deepEqual(outputs, { required: 'true', waiting_required: 'true', page_required: 'true' });
     assert.match(text, /routine-health/);
   }
   // A PR whose base and head are the same commit changes nothing: both freshness
@@ -400,7 +415,8 @@ test('the real workflow scope script fails closed and never emits a scope for in
   const head = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
   const { outputs, text } = await runScopeScript('pull_request',
     { pull_request: { base: { ref: 'main', sha: head }, head: { sha: head } } });
-  assert.deepEqual(outputs, { required: 'false', waiting_required: 'false' });
+  assert.deepEqual(outputs, { required: 'false', waiting_required: 'false', page_required: 'false' });
+  assert.match(text, /Page freshness is not assessed/);
   assert.match(text, /autopilot run ledger freshness are not assessed/);
   assert.match(text, /Waiting progress freshness is not assessed/);
   assert.match(text, /this is not a healthy observation/);
@@ -478,6 +494,14 @@ test('preflight runs both integrity forms and reports both full freshness checks
     assert.ok(conditional.includes('node ' + script + ' --check'), script);
     assert.ok(gatingChecks().includes(script), script);
   }
+  // The page check (2026-10-27 proposal): preflight runs the stamped-date comparison and
+  // reports the today's-value check as conditional, like the two ledgers above.
+  const page = 'scripts/check-autopilot-page.mjs';
+  assert.ok(commands.some(c => c.script === page && c.args.join(' ') === '--as-stamped'), page);
+  assert.ok(commands.some(c => c.script === page && c.args.join(' ') === '--selftest'), page);
+  assert.ok(!commands.some(c => c.script === page && c.args.includes('--check')), page);
+  assert.ok(conditional.includes('node ' + page + ' --check'), page);
+  assert.ok(gatingChecks().includes(page), page);
 });
 
 // --- CLI behaviour under simulated staleness (temporary copies; real ledgers are never written) ---
@@ -594,4 +618,134 @@ test('waiting progress: --integrity ignores only stalls; configuration and reada
   save(new Date(Date.now() - 60000).toISOString().replace(/\.\d{3}Z$/, 'Z'));
   assert.equal(cli(dir, script, '--check'), 0, 'moving counter passes the full check');
   assert.equal(cli(dir, script, '--integrity'), 0, 'moving counter passes integrity');
+});
+
+test('autopilot page freshness: required for operations and for the stamped page, checker, score and publisher only', () => {
+  for (const file of ['autopilot/index.html', 'scripts/check-autopilot-page.mjs', 'scripts/autonomy-score.mjs',
+    'scripts/decision-monitor.mjs']) {
+    const scope = routineScopeForPaths([file]);
+    assert.equal(scope.pageRequired, true, file);
+    assert.equal(scope.pageCount, 1, file);
+  }
+  // The daily Act PR changes the run ledger and regenerates the page: it owns page freshness.
+  const act = routineScopeForPaths(['data/autopilot-runs.json']);
+  assert.equal(act.pageRequired, true);
+  assert.equal(act.pageCount, 0);
+  // A site-only change, the homepage, a translated copy the checker does not read, and a waiting input do not.
+  for (const file of ['blog/obsidian-iphone-memo/index.html', 'index.html', 'ar/autopilot/index.html',
+    'data/revenue-series.json']) {
+    assert.equal(routineScopeForPaths([file]).pageRequired, false, file);
+  }
+  // Non-PR contexts always run the full page check in routine-health.
+  assert.equal(routineCiScope({ eventName: 'push' }).pageRequired, true);
+});
+
+test('autopilot page freshness: every compared file is in scope, or the checker refuses a clock-driven number on it', () => {
+  const rel = file => path.relative(process.cwd(), file);
+  // The page that carries the score and its stamp is in scope.
+  assert.equal(rel(PAGE_PATH), 'autopilot/index.html');
+  assert.equal(routineScopeForPaths([rel(PAGE_PATH)]).pageRequired, true);
+  // The checker must list the files it compares where this test can read them.
+  const checker = fs.readFileSync('scripts/check-autopilot-page.mjs', 'utf8');
+  const listed = [...checker.matchAll(/path\.join\(ROOT, '([^']+)'\)/g)].map(m => m[1]).filter(f => /\.(?:html|md)$/.test(f));
+  assert.deepEqual(listed.sort(), [rel(PAGE_PATH), ...EXTRA_PATHS.map(rel)].sort());
+  const score = { total: 1.0, components: Object.fromEntries(['vdc', 'umr', 'ra', 'ep', 'tuc'].map(id => [id, { points: 0, max: 1 }])) };
+  for (const file of EXTRA_PATHS.map(rel)) {
+    if (routineScopeForPaths([file]).pageRequired) continue;
+    // Out of scope: today it carries no score or stamp, and the checker rejects one there in both modes.
+    const text = fs.readFileSync(file, 'utf8');
+    assert.doesNotMatch(text, /data-score-total|data-score="|data-decision-date/, file);
+    for (const mode of ['as-stamped', 'check']) {
+      for (const marker of ['<span data-score-total>1.0</span>', '<span data-decision-date>2026-10-27</span>',
+        '<tr data-score="vdc"><td>x</td><td class="num"><b>0.0</b></td><td class="num">1</td></tr>']) {
+        const r = checkPages({ mode, today: '2026-10-27', baseLive: {}, scoreAt: () => score,
+          pages: [{ label: file, text: marker, allowed: file.endsWith('.md'), primary: false }] });
+        assert.ok(r.problems.some(p => p.startsWith(file + ': ') && p.includes('にだけ置ける')), file + ' ' + mode + ' ' + marker);
+      }
+    }
+  }
+});
+
+// The real CLI on a temporary copy: which date the score is computed for is decided
+// in checkPages(), but main() supplies the date-to-score function and the mode. A
+// selftest cannot see a main() that ignores the requested date or the mode; this does.
+test('autopilot page: the real CLI compares at the page stamp with --as-stamped and at today with --check', async t => {
+  const dir = tempRoot(t, 'autopilot-page-as-stamped-');
+  const copied = withLocalImports('scripts/check-autopilot-page.mjs');
+  assert.ok(copied.includes('scripts/autonomy-score.mjs'), 'the import walk found the score module');
+  copyInto(dir, copied);
+  // Owner-owned scoring policy and the coverage ledger are copied read-only; runs are a fixture.
+  copyInto(dir, ['data/autonomy-score.json', 'data/escalation-rules.json', 'data/automation-coverage.json']);
+  const shift = (day, n) => new Date(Date.parse(day + 'T00:00:00Z') + n * 864e5).toISOString().slice(0, 10);
+  const today = todayJst();
+  const stamp = shift(today, -3);
+  const runs = [];
+  for (let n = -40; n <= -3; n += 1) {
+    const date = shift(today, n);
+    runs.push({ run_id: 'fixture-' + date, date_jst: date, route: 'owner-session', attempted: true,
+      outcome: n % 5 === 0 ? 'no_run' : 'shipped', failure_stage: n % 5 === 0 ? 'absent' : undefined,
+      lane: 'A', pr: 1, artifact: '/fixture/', source: 'session', interventions: [] });
+  }
+  const json = (file, doc) => fs.writeFileSync(path.join(dir, file), JSON.stringify(doc));
+  json('data/autopilot-runs.json', { runs });
+  json('data/check-selftests.json', { checks: [] });
+  json('data/autopilot-actions.json', { actions: [] });
+  const { score, loadContext } = await import(pathToFileURL(path.join(dir, 'scripts/autonomy-score.mjs')).href);
+  const { renderReport } = await import('./decision-monitor.mjs');
+  const at = day => score(loadContext({ today: day }));
+  const shown = s => [s.total, ...Object.values(s.components).map(c => c.points)].map(x => x.toFixed(1)).join();
+  assert.notEqual(shown(at(stamp)), shown(at(today)), 'the fixture score moves with the clock');
+  const template = '<p><span data-decision-date>-</span>時点</p><b>自律スコアは<span data-score-total>0.0</span>点</b><table>'
+    + Object.entries(at(today).components).map(([id, c]) =>
+      `<tr data-score="${id}"><td>${id}</td><td class="num"><b>0.0</b></td><td class="num">${c.max}</td><td>old</td></tr>`).join('')
+    + '</table>';
+  fs.mkdirSync(path.join(dir, 'autopilot'));
+  const save = html => fs.writeFileSync(path.join(dir, 'autopilot/index.html'), html);
+  const stale = renderReport(template, at(stamp), {});
+  const fresh = renderReport(template, at(today), {});
+  assert.equal([...stale.matchAll(new RegExp('data-decision-date>' + stamp + '<', 'g'))].length, 1, 'the publisher wrote the stamp');
+  // Moves the CLI's clock (Date and Date.now) by whole days, like the manual clock-shift proof.
+  const shiftModule = path.join(dir, 'shift-clock.mjs');
+  fs.writeFileSync(shiftModule, 'const RealDate = Date; const offset = Number(process.env.SHIFT_DAYS) * 864e5;\n'
+    + 'class ShiftedDate extends RealDate { constructor(...a) { if (a.length === 0) super(RealDate.now() + offset); else super(...a); }'
+    + ' static now() { return RealDate.now() + offset; } }\nglobalThis.Date = ShiftedDate;\n');
+  const run = (args, days = 0) => {
+    const result = spawnSync(process.execPath, ['--import', pathToFileURL(shiftModule).href,
+      path.join(dir, 'scripts/check-autopilot-page.mjs'), ...args],
+    { cwd: dir, encoding: 'utf8', env: { ...process.env, SHIFT_DAYS: String(days) }, stdio: ['ignore', 'pipe', 'pipe'] });
+    if (result.status === 0) {
+      // An exit 0 without the verdict would prove nothing.
+      assert.match(result.stdout, args.includes('--check') ? /公開ページの数字は台帳の現在値と一致。/
+        : /公開ページの数字は、計算日 \d{4}-\d{2}-\d{2} の台帳の値と一致（鮮度は判定していない）。/, args.join(' '));
+    }
+    return result;
+  };
+
+  save(stale);
+  for (const days of [0, 1, 2, 5, 30]) {
+    const r = run(['--as-stamped'], days);
+    assert.equal(r.status, 0, 'a stale but correct page passes --as-stamped at +' + days + ' days: ' + r.stderr);
+    assert.match(r.stdout, new RegExp('計算日 ' + stamp + ' の台帳の値と一致'));
+  }
+  assert.equal(run(['--check']).status, 1, 'the same stale page fails --check (today\'s score)');
+  assert.equal(run(['--as-stamped', '--check']).status, 1, 'both flags: the stricter check wins');
+  save(stale.replace(/(<tr data-score="umr">.*?<b>)([\d.]+)(<\/b>)/, (_, a, x, b) => a + (Number(x) + 0.1).toFixed(1) + b));
+  assert.equal(run(['--as-stamped']).status, 1, 'one score cell that disagrees with the ledger at the stamp fails');
+  save(stale.replaceAll('data-decision-date>' + stamp + '<', 'data-decision-date>' + today + '<'));
+  assert.equal(run(['--as-stamped']).status, 1, 'the stamp moved to a date with a different score fails');
+
+  // Broken stamps carry today's numbers, so only the stamp problem itself can fail them.
+  save(fresh);
+  assert.equal(run(['--as-stamped']).status, 0, 'a fresh page passes --as-stamped');
+  assert.equal(run(['--check']).status, 0, 'a fresh page passes --check');
+  for (const [name, html] of [
+    ['missing', fresh.replace(/<p><span data-decision-date>[^<]*<\/span>時点<\/p>/, '')],
+    ['garbled', fresh.replaceAll('data-decision-date>' + today + '<', 'data-decision-date>garbled<')],
+    ['future', fresh.replaceAll('data-decision-date>' + today + '<', 'data-decision-date>' + shift(today, 1) + '<')],
+    ['conflicting', fresh + '<p><span data-decision-date>' + stamp + '</span></p>']]) {
+    save(html);
+    const r = run(['--as-stamped']);
+    assert.equal(r.status, 1, name + ' stamp fails --as-stamped even with today\'s numbers');
+    assert.match(r.stderr, /autopilot\/index\.html: 計算日（data-decision-date）|autopilot\/index\.html: 自律スコアが出ているのに計算日/, name);
+  }
 });

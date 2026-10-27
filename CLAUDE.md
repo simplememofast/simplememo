@@ -145,6 +145,16 @@ mainへのマージ＝本番デプロイなので、検証を通ったコミッ�
 
 ## /autopilot/ の自律スコアは日付で動く（2026-09-19）
 
+> **【2026-10-27 提案、同日オーナー承認（選択肢「Claudeにマージを任せる」）】**
+> main に `scripts/lib/routine-ci-scope.mjs` の `AUTOPILOT_PAGE_PATHS` があれば、この変更は入っている。
+> そのとき全PRは `check-autopilot-page.mjs --as-stamped` で照合する。自律スコアはページの
+> `data-decision-date` の日付で計算するので、**暦が進むだけでは落ちない。**
+> 今日の値かどうか（`--check`）を公開条件にするのは、運用に触るPR（日次の Act PR）と、
+> `/autopilot/` のページ・検査器・スコア・公開器に触るPRだけ。main と日次は routine-health で
+> `--check` を回し、古ければ赤くなる。
+> 以下は導入前の記録。**「全PRが同じ6件で落ちる」は、この変更が無い main でだけ起きる。**
+> 変更が入った main では、まず routine-health の「Autopilot page freshness health」を見る。
+
 **公開ページを1日更新しないと、main も全PRも同じ6件で落ちる。**
 PR側の変更が無関係でも落ちるので、原因がPRに出ない。
 
