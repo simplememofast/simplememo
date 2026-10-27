@@ -62,8 +62,10 @@ export async function confirmCronRecovery({ github, owner, repo, issue, now = Da
   try {
     const comments = await pages(p => github.rest.issues.listComments({ owner, repo, issue_number: issue.number, ...p }),
       data => data, { perPage, maxPages });
-    // 作者を読めない追記は、監視自身の記録を黙って捨てうるので未確認にする（null は削除済みの作者）。
-    if (comments.some(c => typeof c?.body !== 'string' || (c.user !== null && typeof c.user?.login !== 'string'))) {
+    // 作者を読めない追記は、監視自身の記録を黙って捨てうるので未確認にする（null は削除済みの作者）。監視の名前
+    // （[bot] の付く名前は bot しか持てない）なのに型が Bot でない応答も、読めないものとして扱う（2026-10-27 点検）。
+    if (comments.some(c => typeof c?.body !== 'string' || (c.user !== null && typeof c.user?.login !== 'string')
+      || (c.user?.login === MONITOR_LOGIN && c.user.type !== 'Bot'))) {
       return unknown('Issueの追記を読み取れない');
     }
     const bodies = [issue.body, ...comments.filter(monitorComment).map(c => c.body)];
@@ -268,7 +270,12 @@ export async function selftest() {
   await test({ comments: [outsider('+1\n<!-- cron-silence {"owner":"x"} -->')] }, true, '第三者の隠し起動欠落マーカーで閉鎖を止めた');
   await test({ comments: [outsider(`+1\n<!--\n${line(201)}\n-->`)], recent: [failed, recovered, run(201, 1, { workflow_id: 20 })] },
     true, '第三者の追記にある故障runを追跡した');
-  for (const user of [{ login: MONITOR_LOGIN, type: 'User' }, { login: 'github-actions', type: 'User' },
+  // 監視の名前で型が Bot でない作者は、読めない応答として未確認（閉じない側）。
+  for (const user of [{ login: MONITOR_LOGIN, type: 'User' }, { login: MONITOR_LOGIN }]) {
+    await test({ comments: [by(user)(`<!-- cron-silence {"owner":"x"} -->\n${line(201)}`)],
+      recent: [failed, recovered, run(201, 1, { workflow_id: 20 })] }, false, `監視の名前で型の読めない作者（${user.type ?? '型なし'}）の追記を読み飛ばして閉じた`);
+  }
+  for (const user of [{ login: 'github-actions', type: 'User' },
     { login: 'github-actions', type: 'Bot' }, { login: 'other[bot]', type: 'Bot' }, null]) {
     await test({ comments: [by(user)(`<!-- cron-silence {"owner":"x"} -->\n${line(201)}`)],
       recent: [failed, recovered, run(201, 1, { workflow_id: 20 })] }, true, `監視以外の作者（${user?.login ?? 'null'}）の追記を記録として読んだ`);
