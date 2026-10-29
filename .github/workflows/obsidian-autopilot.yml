@@ -370,12 +370,26 @@ jobs:
       # GSC のクエリ・Issue 本文）。だから安全はここで判断せず、ジョブの権限で担保する:
       # このジョブには GH_PAT も書き込みトークンも id-token も無く、push と PR 作成は
       # モデルを動かさない publish ジョブが検証してから行う（2026-10-20）。
+      # Independent of the SDK result file: each finite marker is fsynced locally.
+      # No raw SDK/tool content is read. These are untrusted diagnostic hints only.
+      - name: Start bounded progress journal
+        id: progress_start
+        timeout-minutes: 1
+        if: >-
+          steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'
+          && steps.route.outputs.run_cap_ok == 'true'
+        continue-on-error: true
+        run: |
+          set -o noclobber
+          git -c core.hooksPath=/dev/null -c core.fsmonitor=false show "$GITHUB_SHA:scripts/lib/autopilot-progress.mjs" > "$RUNNER_TEMP/autopilot-progress-tool.mjs"
+          node "$RUNNER_TEMP/autopilot-progress-tool.mjs" --progress-init
+
       - name: Claude Code（Runbook 1イテレーション実行）
         id: claude
         if: >-
           steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'
           && steps.route.outputs.run_cap_ok == 'true'
-        # ジョブ上限（90分）より前に止め、引き渡しの梱包と upload が必ず走るようにする。
+        # ジョブ上限（90分）より前に止め、梱包と upload の時間を残す（完走は保証しない）。
         timeout-minutes: 75
       # 【2026-08-25 SHA pin】フローティングタグ @v1 をやめて版を固定する。
       #
@@ -454,6 +468,7 @@ jobs:
             【この経路の制約 — Runbook より優先】このセッションには書き込みの資格情報が無い（GitHub のトークンは読み取り専用）。**`git push`・`gh pr create`・PR やIssueへの書き込みはしない。**作業はローカルのコミットで終え、手順5の依頼を StructuredOutput で渡す。push・PR作成・運転台帳への PR 番号の記帳・公開運転表と生成物の再生成は、モデルを含まない publish ジョブが検証してから行う。Runbook の push / PR 作成の指示は、この経路ではこの読み替えに従う。
             【この環境の実行のしかた — Runbook より優先】(a) このセッションは1回のターンで、**ターンを終えるとセッションも終わる。**背景タスクの完了通知は届かず、待っても再開されない。「通知を待つ」ためにターンを終えないこと。(b) 背景実行は無効（Bash の `run_in_background` は使えない）。`&`・`nohup`・`setsid` でも処理を残さない。長いコマンドは前景で、Bash の `timeout`（ミリ秒）を明示する。既定は10分、上限は40分で、超えると打ち切られる（exit 143）。(c) 最後の行為は StructuredOutput の呼び出し1回（手順5・8）。**呼ぶとセッションは終わる**ので、コミット・検証・status/LOG を済ませてから呼ぶ。呼ばずにターンを終えると、呼ぶよう求められる。
 
+            【途中の工程記録】工程に入る直前と終えた直後に `node "$RUNNER_TEMP/autopilot-progress-tool.mjs" --progress <工程> start|end` を前景で1回ずつ実行する。工程は context（手順0〜2の読取）・selection（候補選定）・declaration（宣言コミット）・implementation（実装と訳）・validation（検査）・record（status/LOGと最終コミット）・handoff（最後の依頼準備）だけ。実行したコマンドの終了値を観測できた場合だけ end の後に0〜255の整数を足す。未実行・中断・不明は省略し、0にしない。検査はコマンド1本ごとに validation の開始/終了を残す。handoff の end は StructuredOutput の直前に残す。文章・パス・コマンド・SDK内容・秘密値は渡さない。これは自己申告の診断で、検証合格や公開許可の証拠ではない。記録に失敗しても再試行せず通常の作業を続ける。
             0. 【冪等性・最初に必ず】FORCE_RUN=${{ inputs.force == true }} 。FORCE_RUN が true なら本チェックは省略して必ず実行する（手動の検証実行。当日分のstatus JSONは上書きしてよい）。false の場合: `git ls-remote origin refs/heads/claude/obsidian-auto-$(TZ=Asia/Tokyo date +%Y%m%d)` が存在する、または https://simplememofast.com/data/autopilot-status.json の date_jst が当日（JST）なら、本日分は別経路で実行済み。StructuredOutput を `{"request":{"action":"none"},"exit_code":"skipped_already_done"}` で呼んで終了すること。
             0-1. 【死んだ占有の引き継ぎ】GATE_TAKEOVER=${{ steps.gate.outputs.takeover == 'true' }} 。true のときだけ、上の「ブランチが存在する＝実行済み」を**この日は適用しない**。当日ブランチは claim だけ取られて90分以上動いていない（宣言ファイル以外の差分0・PR0）とGateが実測している。Runbook §0-2 の「死んだ占有の引き継ぎ」の手順に従い、**既存のブランチの上に**ローカルで作業を積むこと（`git fetch origin <当日ブランチ> && git checkout -B <当日ブランチ> origin/<当日ブランチ>`）。push はしない（publish ジョブが fast-forward でだけ push し、他経路が先に進めていれば何も push しない）。ブランチを消さない。 GATE_STALE_DECLARATIONS=${{ steps.gate.outputs.stale_declarations }} 。空でなければ、その占有には**死んだ run の価値契約の宣言**が残っている。**その契約は実装しない。**Runbook §0-2 の手順で `node scripts/value-contracts.mjs --retire <宣言ファイル> --reason "declaring run <run_id> failed (<failure_class>); takeover re-declares under a new id"` を実行して data/decision-rejections/ へ移し、コミットしてから 3-1 を新しい候補で最初からやり直す。契約と記帳の run_id は `ap-<YYYYMMDD>-actions-$GITHUB_RUN_ID`（Bash で読める）。
             0-2. 【所有者承認の試運転】TRIAL_RUN=${{ steps.contain.outputs.recovery || 'none' }} 。actions_once なら、今日はオーナーが日付を入れた1回限りの試運転の回で、封じ込めはワークフローが判定済み（docs/obsidian/ACTIONS_RECOVERY_ONE_USE.md）。**`node scripts/autopilot-selfheal.mjs --contain` を実行しない**（停止を書き込んで自分を止めることになる）。`--contain --dry-run` が「止めるべき」と exit 1 を返しても、この環境には許可の値が渡っていないためで、止まる理由ではない。⛔ の 10-05・10-06・10-22・10-24・10-25・10-27 は直さず repair_of も書かず、通常どおりレーンA〜Eの1アクションを行う。none なら通常の回。
@@ -491,6 +506,35 @@ jobs:
       # モデルが書いた値を埋め込まない（埋めるのは検証済みの session_id と予算だけ）。それでも無ければ
       # 何も変えない: publish は従来どおり rejected_request_missing で何も push しない。
       # 段名は Act が読む語（Claude Code・Gate など）と重ねない（scripts/autopilot-publish.mjs --check）。
+      # Export immediately after the main step, before any existing resume/probe.
+      # Re-read the tool from the workflow commit; never upload the raw journal.
+      - name: Preserve bounded progress journal
+        id: progress_finish
+        timeout-minutes: 1
+        if: >-
+          !cancelled() &&
+          (steps.claude.outcome == 'success' || steps.claude.outcome == 'failure')
+        continue-on-error: true
+        env:
+          MODEL_OUTCOME: ${{ steps.claude.outcome }}
+        run: |
+          progress_tool="$(mktemp "$RUNNER_TEMP/progress-export-XXXXXX.mjs")"
+          trap 'rm -f "$progress_tool"' EXIT
+          git -c core.hooksPath=/dev/null -c core.fsmonitor=false show "$GITHUB_SHA:scripts/lib/autopilot-progress.mjs" > "$progress_tool"
+          node "$progress_tool" --progress-finish
+
+      - name: Upload bounded progress journal
+        id: progress_upload
+        timeout-minutes: 1
+        if: always() && steps.progress_finish.outputs.saved == 'true'
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: autopilot-progress-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/autopilot-progress/progress.json
+          retention-days: 7
+          if-no-files-found: error
+
       - name: Check the handoff files after the model
         id: handoff_files
         if: >-
