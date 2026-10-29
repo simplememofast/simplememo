@@ -463,16 +463,22 @@ export function checkWiring(source) {
   assert(checks[3].includes('node scripts/autopilot-budget.mjs --check ') && checks[3].includes('--check-run-cap'), 'collect honours the spend limits');
   const upload = stepById(collectJob, 'gsc_upload');
   assert(upload.includes("if: steps.gsc_collect.outcome == 'success'")
-    && upload.includes('uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02')
+    && upload.includes('uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9')
     && upload.includes(DIGEST_ARTIFACT) && upload.includes(DIGEST_PATH) && upload.includes('\n          retention-days: 1\n'),
   'digest upload: pinned, digest only, one day');
+  // The model job re-applies the rules (NFKC, \p{Cn}): collect runs the same pinned Node, before its first node step.
+  const runtime = job => [...job.matchAll(/\n {6}- uses: (actions\/setup-node@[0-9a-f]{40})[^\n]*\n {8}with:\n {10}node-version: '([^']+)'\n/g)]
+    .map(m => ({ at: m.index, pin: `${m[1]} ${m[2]}` }));
+  const [collectNode, modelNode] = [runtime(collectJob), runtime(model)];
+  assert(collectNode.length === 1 && modelNode.length === 1 && collectNode[0].pin === modelNode[0].pin
+    && collectNode[0].at < collectJob.indexOf(checks[0]), 'collect runs the model job\'s pinned Node before its checks');
   const at = [...checks, step, upload].map(s => collectJob.indexOf(s));
   assert(at.every((v, i) => i === 0 || v > at[i - 1]), 'checks precede collection, collection precedes upload');
   // The model job waits for collect whatever its result, receives only the digest and checks it again.
   assert.match(model, /\n {4}needs: collect\n/, 'model job waits for collect');
   assert.match(model, /\n {4}if: always\(\) && !cancelled\(\)\n/, 'model job runs when collect fails or skips, not after cancellation');
   const download = stepById(model, 'gsc_download');
-  assert(download.includes('uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093')
+  assert(download.includes('uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333')
     && download.includes(DIGEST_ARTIFACT) && download.includes(DIGEST_PATH), 'pinned digest download');
   const use = stepById(model, 'gsc_digest');
   assert(use.includes('\n        run: node scripts/autopilot-data.mjs --use-digest "$RUNNER_TEMP/gsc-digest" --output "$RUNNER_TEMP/autopilot-data.json"'),
@@ -713,7 +719,9 @@ function selftest() {
     ['long-lived artifact', source.replace('          retention-days: 1\n', '          retention-days: 7\n')],
     ['model does not wait', source.replace('    needs: collect\n', '')],
     ['model step can stop the job', inModel('        timeout-minutes: 5\n        continue-on-error: true\n        run: node scripts/autopilot-data.mjs --use-digest', '        timeout-minutes: 5\n        run: node scripts/autopilot-data.mjs --use-digest')],
-    ['floating download tag', source.replace('actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0\n        with:\n          name: autopilot-gsc-digest', 'actions/download-artifact@v4\n        with:\n          name: autopilot-gsc-digest')],
+    ['floating download tag', source.replace('actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2\n        with:\n          name: autopilot-gsc-digest', 'actions/download-artifact@v8\n        with:\n          name: autopilot-gsc-digest')],
+    ['collect on another Node', source.slice(0, modelAt).replace(/node-version: '[^']+'/, "node-version: '0'") + source.slice(modelAt)],
+    ['collect on the runner\'s Node', source.slice(0, modelAt).replace(/\n {6}- uses: actions\/setup-node@[^\n]*\n {8}with:\n {10}node-version: '[^']+'\n {10}package-manager-cache: false\n/, '\n') + source.slice(modelAt)],
   ]) {
     assert.notEqual(mutated, source, `mutation applies: ${label2}`);
     assert.throws(() => checkWiring(mutated), undefined, `wiring must reject: ${label2}`);
