@@ -2806,6 +2806,26 @@
       "eligibility_verdict": "declined_by_design",
       "gate_code": "skip_repair_limit",
       "stage_note": "封じ込めのステップで止まった（通常は同じ故障種別の修理が上限に達した状態。判定そのものの例外でも同じ形になるので、原因は run のログで確かめる。node scripts/autopilot-selfheal.mjs --contain）。解除は実修理の repair_of か、オーナーの判断"
+    },
+    {
+      "run_id": "ap-20261029-actions",
+      "date_jst": "2026-10-29",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "failed",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "failure_reason": "Claude Code ステップが 4512000ms で失敗した一方、**同じトークンでの単独実行（1ターン）は完走している**（ワークフローの切り分けステップ）。**資格情報は通っているので、そこを疑わない。**残る候補は --model の指定（data/model-routing.json の解決結果が実在するモデルか）・MCP・プロンプト・上流の版（自動判定）",
+      "external_ref": "40803103665",
+      "interventions": null,
+      "source": "act-reconcile",
+      "failed_at": "2026-10-29T03:09:24Z",
+      "detected_at": "2026-10-29T03:11:12.589Z",
+      "detected_note": "Actions run 40803103665 を repository_dispatch で照合。監視起動元run 40803103665、自動起動のAPI検証=true。失敗時刻は GitHub step #14「Claude Code（Runbook 1イテレーション実行）」の completed_at。",
+      "needs_triage": true,
+      "failure_stage": "execution"
     }
   ],
   "retracted_observations": [
