@@ -46,12 +46,12 @@ SDK内部の開始・終了時刻や厳密な所要時間ではない。
   候補選択前の静的な依存閉包検査は別件。古い不変の宣言を遡って書き換えず、
   カタログ・registry・生成JS/画像等も含む範囲を決めてから追加する。
 
-## 本番適用前
+## 適用と運用検証
 
-この候補はローカル検証用。push・PR操作・merge・deploy・workflow dispatch、
-外部モデルの起動、費用の発生は行わない。
+通常のPR検査を通してmainへ適用する。設定の適用と実行経路の検証は別であり、
+この修正の配備を理由に workflow dispatch や実モデルの再実行を行わない。
 
-関連する既存PRは先に読み、取り込んでいない。
+関連する既存PRは別の変更として扱う。
 [#2199](https://github.com/simplememofast/simplememo/pull/2199) は同じ workflow の
 プロンプト手順5、[#2126](https://github.com/simplememofast/simplememo/pull/2126) は
 同じ workflow と `autopilot-publish.mjs` を変更するため、適用順で再照合が必要。
