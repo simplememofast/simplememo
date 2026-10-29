@@ -942,9 +942,9 @@
     },
     {
       "file": "scripts/autopilot-data.mjs",
-      "expr": "report.full_window",
+      "expr": "report.bq_checked",
       "disposition": "安全側へ倒れる",
-      "note": "2026-10-20: checkReport（モデルのジョブが collect ジョブの報告を読む）の assert の中の項。ready の報告は full_window とダイジェストの label・行数をすべて持つことを要求し、どれかが欠けると assert が落ちて unavailable（digest_validation）になる。欠けたら通す向きではない。--selftest の報告の改変検体で固定。"
+      "note": "2026-10-29（監査 F6）: checkReport の状態別 assert。ready は bq_checked=true・28日・full_window=true・digest、partial は実測1〜27日、unavailable は bq_checked=false・実測日数と最新日=null を要求する。型検査も先に必須なので、欄を消して照合を飛ばす経路は無い。--selftest の ready-unchecked と unknown-is-not-zero の検体で拒否を固定。"
     },
     {
       "file": "scripts/autopilot-data.mjs",

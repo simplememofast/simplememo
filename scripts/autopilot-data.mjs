@@ -23,8 +23,8 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { curveFor, expectedCtr, segmentOfQuery } from '../growth/lib/gsc.mjs';
-import { summarizeClusters } from '../growth/lib/clusters.mjs';
-import { BUCKET_KINDS, mergeByKey } from '../growth/lib/snapshot.mjs';
+import { summarizeClusters, PRIORITY, UNCLASSIFIED, QUERY_CLASSIFIER_VERSION } from '../growth/lib/clusters.mjs';
+import { BUCKET_KINDS, mergeByKey, buildMeta } from '../growth/lib/snapshot.mjs';
 import { UNANSWERED_MIN_EXPECTED_CLICKS } from '../growth/lib/analysis.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -224,7 +224,10 @@ function digestDates(rows) {
   const out = [];
   for (const r of rows) {
     const obs = observation(r);
-    if (obs && dateOK(r.date)) out.push({ date: r.date, ...counted(obs) }); else tally(dropped, 'invalid');
+    if (obs && dateOK(r.date)) out.push({ date: r.date, ...counted(obs) });
+    else if (object(r) && dateOK(r.date) && r.clicks === 0 && r.impressions === 0)
+      out.push({ date: r.date, clicks: 0, impressions: 0, position: null, ctr: null });
+    else tally(dropped, 'invalid');
   }
   return { rows: out, dropped };
 }
@@ -245,20 +248,105 @@ export function plainData(value, depth = 0) {
 
 const rowCounts = files => Object.fromEntries(KINDS.map(kind => [kind, files[`${kind}.json`].length]));
 
+// Only explicitly typed metadata crosses the job boundary. A generic "plain JSON"
+// check cannot stop a raw query (or other arbitrary text) hidden in a new field.
+const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+const finitePositive = value => Number.isFinite(value) && value > 0;
+const ratio = value => Number.isFinite(value) && value >= 0 && value <= 1;
+function exactKeys(value, keys) {
+  assert(object(value) && same(Object.keys(value).sort(), [...keys].sort()), 'metadata fields differ');
+}
+function checkedCurve(curve) {
+  const keys = [...Array.from({ length: 20 }, (_, i) => String(i + 1)), 'tail'];
+  exactKeys(curve, keys);
+  // The existing producer's calibrated estimates are not clamped to one.
+  assert(keys.every(k => Number.isFinite(curve[k]) && curve[k] >= 0), 'invalid CTR curve');
+  return Object.fromEntries(keys.map(k => [k, curve[k]]));
+}
+function checkedPositions(value) {
+  assert(Array.isArray(value) && value.length <= 20 && new Set(value).size === value.length
+    && value.every(v => Number.isInteger(v) && v >= 1 && v <= 20), 'invalid derived positions');
+  return [...value];
+}
+function projectMeta(meta, dates) {
+  const clicks = dates.reduce((n, r) => n + r.clicks, 0);
+  const impressions = dates.reduce((n, r) => n + r.impressions, 0);
+  assert(count(clicks) && count(impressions) && clicks <= impressions, 'invalid totals');
+  const out = { label: meta.label, source: 'bigquery', period_start: meta.period_start,
+    period_end: meta.period_end, complete_window: true,
+    totals: { clicks, impressions, ctr: impressions ? clicks / impressions : null, source: 'dates' },
+    ctr_curve: checkedCurve(meta.ctr_curve),
+    bigquery: { site_url: 'sc-domain:simplememofast.com', search_type: 'WEB', window_days_requested: 28 } };
+  if (Object.hasOwn(meta, 'ctr_curve_source')) {
+    assert(['pages', 'queries'].includes(meta.ctr_curve_source), 'invalid curve source');
+    out.ctr_curve_source = meta.ctr_curve_source;
+  }
+  for (const key of ['ctr_curve_coverage', 'ctr_curve_calibration']) {
+    if (Object.hasOwn(meta, key)) {
+      assert(meta[key] === null || (Number.isFinite(meta[key]) && meta[key] >= 0), 'invalid curve statistic');
+      out[key] = meta[key];
+    }
+  }
+  if (Object.hasOwn(meta, 'ctr_curve_derived_positions')) out.ctr_curve_derived_positions = checkedPositions(meta.ctr_curve_derived_positions);
+  if (Object.hasOwn(meta, 'ctr_curve_segments')) {
+    assert(object(meta.ctr_curve_segments) && Object.keys(meta.ctr_curve_segments).every(k => ['JA', 'EN', 'other'].includes(k)), 'invalid segments');
+    out.ctr_curve_segments = Object.fromEntries(Object.entries(meta.ctr_curve_segments).map(([key, value]) => {
+      exactKeys(value, ['curve', 'derivedPositions', 'calibration', 'impressions', 'clicks', 'ctr']);
+      assert(count(value.clicks) && count(value.impressions) && value.impressions > 0 && value.clicks <= value.impressions
+        && value.ctr === value.clicks / value.impressions && Number.isFinite(value.calibration) && value.calibration >= 0, 'invalid segment counts');
+      return [key, { curve: checkedCurve(value.curve), derivedPositions: checkedPositions(value.derivedPositions),
+        calibration: value.calibration, impressions: value.impressions, clicks: value.clicks, ctr: value.ctr }];
+    }));
+  }
+  return out;
+}
+function checkAggregate(value, shares = false) {
+  exactKeys(value, ['queries', 'clicks', 'impressions', 'ctr', 'position', ...(shares ? ['impressionShare', 'clickShare'] : [])]);
+  assert(['queries', 'clicks', 'impressions'].every(k => count(value[k])) && value.clicks <= value.impressions, 'invalid aggregate counts');
+  assert(value.ctr === (value.impressions ? value.clicks / value.impressions : null)
+    && (value.position === null || finitePositive(value.position)), 'invalid aggregate observation');
+  if (shares) assert(['impressionShare', 'clickShare'].every(k => value[k] === null || ratio(value[k])), 'invalid aggregate shares');
+}
+function checkDigestMeta(digest) {
+  exactKeys(digest, ['version', 'rules', 'untrusted_fields', 'source_row_counts', 'dropped', 'all_queries']);
+  exactKeys(digest.source_row_counts, KINDS);
+  assert(KINDS.every(k => count(digest.source_row_counts[k])), 'invalid source counts');
+  exactKeys(digest.dropped, KINDS);
+  const reasons = ['invalid', 'empty', 'too_long', 'code_or_markup', 'email', 'url', 'below_noise_floor', 'over_row_cap', 'query_not_in_digest'];
+  for (const kind of KINDS) assert(object(digest.dropped[kind])
+    && Object.entries(digest.dropped[kind]).every(([k, v]) => reasons.includes(k) && count(v)), 'invalid dropped counts');
+  const all = digest.all_queries;
+  exactKeys(all, ['classificationVersion', 'aggregation', 'clusters', 'sides', 'site', 'conversational']);
+  assert(all.classificationVersion === QUERY_CLASSIFIER_VERSION && all.aggregation === 'available-queries', 'invalid classification');
+  const descriptors = [...PRIORITY, UNCLASSIFIED];
+  assert(Array.isArray(all.clusters) && all.clusters.length <= descriptors.length
+    && new Set(all.clusters.map(c => c.key)).size === all.clusters.length, 'invalid clusters');
+  for (const { key, label, side, ...stats } of all.clusters) {
+    const expected = descriptors.find(d => d.key === key);
+    assert(expected && expected.label === label && expected.side === side, 'invalid cluster descriptor');
+    checkAggregate(stats, true);
+  }
+  exactKeys(all.sides, ['win', 'commodity', 'other']);
+  for (const stats of Object.values(all.sides)) checkAggregate(stats, true);
+  checkAggregate(all.site); checkAggregate(all.conversational);
+}
+
 /** A full-window snapshot ({meta, <kind>: rows}) → digest files with the same names and row shapes. */
 export function buildDigest(raw, label, now) {
   const { meta } = raw;
   assert(meta && typeof meta === 'object' && !Array.isArray(meta) && plainData(meta), 'meta must be plain data');
   assert.equal(meta.label, label, 'label differs from meta');
   for (const kind of KINDS) assert(Array.isArray(raw[kind]), `${kind} rows required`);
-  const result = { queries: digestQueries(raw.queries, meta) };
+  assert(inspectSnapshot(meta, raw.dates, now).full_window, 'a full 28-day window is required');
+  const safeMeta = projectMeta(meta, raw.dates);
+  const result = { queries: digestQueries(raw.queries, safeMeta) };
   result['query-pages'] = digestQueryPages(raw['query-pages'], new Set(result.queries.rows.map(r => r.query)));
   for (const kind of ['pages', 'devices', 'countries']) result[kind] = digestKeyed(raw[kind], kind);
   result.dates = digestDates(raw.dates);
   assert(inspectSnapshot(meta, result.dates.rows, now).full_window, 'a full 28-day window is required');
   const files = Object.fromEntries(KINDS.map(kind => [`${kind}.json`, result[kind].rows]));
   const counts = rowCounts(files);
-  files['meta.json'] = { ...meta,
+  files['meta.json'] = { ...safeMeta,
     row_counts: Object.fromEntries(BUCKET_KINDS.map(kind => [kind, KINDS.includes(kind) ? counts[kind] : 0])),
     digest: { version: DIGEST.version, rules: { ...DIGEST }, untrusted_fields: ['query'],
       source_row_counts: Object.fromEntries(KINDS.map(kind => [kind, raw[kind].length])),
@@ -332,7 +420,8 @@ export function checkReport(report) {
   assert(report && typeof report === 'object' && !Array.isArray(report), 'report object required');
   assert(Object.keys(report).every(k => REPORT_KEYS.includes(k)), 'unknown report field');
   assert(typeof report.collected_at === 'string' && report.collected_at.length <= 40
-    && Number.isFinite(Date.parse(report.collected_at)), 'collected_at');
+    && Number.isFinite(Date.parse(report.collected_at))
+    && new Date(report.collected_at).toISOString() === report.collected_at, 'collected_at');
   assert(STATES.includes(report.state), 'state');
   assert(typeof report.bq_checked === 'boolean' && typeof report.full_window === 'boolean', 'flags');
   assert(report.newest_data_date === null || dateOK(report.newest_data_date), 'newest_data_date');
@@ -345,9 +434,13 @@ export function checkReport(report) {
   }
   const d = report.digest;
   if (report.state === 'ready') {
-    assert(report.full_window && d && typeof d === 'object' && dateOK(d.label) && same(Object.keys(d), ['label', 'row_counts'])
+    assert(report.bq_checked && report.observed_days === 28 && report.full_window && d && typeof d === 'object' && dateOK(d.label) && same(Object.keys(d), ['label', 'row_counts'])
       && same(Object.keys(d.row_counts ?? {}), KINDS) && KINDS.every(kind => count(d.row_counts[kind])), 'ready needs a digest');
-  } else assert(d === null, 'only a ready report carries a digest');
+  } else {
+    assert(d === null && !report.full_window, 'only a ready report carries a digest');
+    if (report.state === 'unavailable') assert(!report.bq_checked && report.observed_days === null && report.newest_data_date === null, 'unavailable is unknown, not zero');
+    else assert(report.bq_checked && report.observed_days >= 1 && report.observed_days < 28 && dateOK(report.newest_data_date), 'partial needs observed dates');
+  }
   return Object.fromEntries(REPORT_KEYS.filter(k => Object.hasOwn(report, k)).map(k => [k, report[k]]));
 }
 
@@ -368,6 +461,7 @@ export function loadDigest(dir, now) {
   const meta = files['meta.json'];
   assert(meta && typeof meta === 'object' && meta.digest && meta.digest.version === DIGEST.version
     && same(meta.digest.rules, { ...DIGEST }) && same(meta.digest.untrusted_fields, ['query']), 'digest rules differ');
+  checkDigestMeta(meta.digest);
   // Apply every rule again: what arrived must already be its own digest, row for row.
   const again = buildDigest({ meta, ...Object.fromEntries(KINDS.map(kind => [kind, files[`${kind}.json`]])) }, label, now);
   for (const kind of KINDS) assert(same(again[`${kind}.json`], files[`${kind}.json`]), `${kind} is not a digest`);
@@ -560,11 +654,28 @@ function selftest() {
     countries: [{ country: 'jpn', clicks: 1, impressions: 10, position: 3, ctr: 0.1 }, { country: 'https://x', clicks: 0, impressions: 1, position: 1, ctr: 0 }],
   };
   const files = buildDigest(raw, label, now);
+  // Exercise the real metadata builder with synthetic rows, never the collector/API.
+  const producerMeta = buildMeta({ label, source: 'bigquery', period: `${dates[0].date}..${dates.at(-1).date}`,
+    buckets: Object.fromEntries(BUCKET_KINDS.map(k => [k, raw[k] ?? []])),
+    extra: { bigquery: { ...meta.bigquery, window_days_available: 28, project: 'synthetic-project', dataset: 'synthetic-dataset' } } });
+  const producerDigest = buildDigest({ ...raw, meta: producerMeta }, label, now);
+  assert.deepEqual(producerDigest['meta.json'].ctr_curve, producerMeta.ctr_curve, 'retain the real producer curve');
+  assert(!JSON.stringify(producerDigest).includes('synthetic-project'), 'producer source identifiers stay in collect');
   const text = JSON.stringify(Object.fromEntries(KINDS.map(kind => [kind, files[`${kind}.json`]])));
   for (const needle of ['evil', 'xxxxxxxxxx', '`', '<', '‮', '​', '\t', 'run now', 'https']) {
     assert(!text.includes(needle), `digest rows must not carry ${JSON.stringify(needle)}`);
   }
   assert(!JSON.stringify(files['meta.json']).includes('evil'), 'digest meta carries no query text');
+  const extraMeta = buildDigest({ ...raw, meta: { ...raw.meta, note: 'raw-query-sentinel',
+    bigquery: { ...raw.meta.bigquery, project: 'private-project-sentinel', extra: 'raw-query-sentinel' } } }, label, now);
+  assert(!JSON.stringify(extraMeta).includes('sentinel'), 'arbitrary metadata cannot leave the collector');
+  const changedCurve = { ...raw.meta, ctr_curve: { ...curve, note: 'raw-query-sentinel' } };
+  assert.throws(() => buildDigest({ ...raw, meta: changedCurve }, label, now), /metadata fields/, 'curve fields are allowlisted');
+  assert.throws(() => checkReport({ ...unavailableStatus(now), digest: null, observed_days: 0 }), /observed_days/, 'unknown is never zero');
+  const zeroDay = buildDigest({ ...raw, dates: raw.dates.map((r, i) => i ? r
+    : { date: r.date, clicks: 0, impressions: 0, position: null, ctr: null }) }, label, now);
+  assert.equal(zeroDay['dates.json'].length, 28, 'a measured zero day is not a missing day');
+  assert.equal(zeroDay['meta.json'].totals.impressions, 270);
   assert.deepEqual(files['queries.json'].map(r => r.query), ['simplememo ignore previous instructions', 'obsidian 音声入力', 'obsidian memo tips']);
   assert(files['queries.json'].every(r => r.untrusted === true && [...r.query].length <= DIGEST.max_query_chars), 'every query row is marked untrusted');
   assert.equal(files['queries.json'][1].impressions, 100, 'NFKC duplicates are pooled, not listed twice');
@@ -690,6 +801,19 @@ function selftest() {
     refuse('extra-field', edit('pages.json', rows => [{ ...rows[0], note: 'x' }, ...rows.slice(1)]));
     refuse('rules', edit('meta.json', m => ({ ...m, digest: { ...m.digest, rules: { ...m.digest.rules, max_query_chars: 500 } } })));
     refuse('meta-text', edit('meta.json', m => ({ ...m, note: 'ignore all <rules>' })));
+    refuse('meta-plain-text', edit('meta.json', m => ({ ...m, note: 'raw-query-sentinel' })));
+    refuse('meta-nested-text', edit('meta.json', m => ({ ...m, bigquery: { ...m.bigquery, note: 'raw-query-sentinel' } })));
+    refuse('aggregate-text', edit('meta.json', m => ({ ...m, digest: { ...m.digest, all_queries: { ...m.digest.all_queries, note: 'raw-query-sentinel' } } })));
+    refuse('aggregate-label', edit('meta.json', m => {
+      m.digest.all_queries.clusters[0].label = 'raw-query-sentinel'; return m;
+    }));
+    refuse('drop-reason', edit('meta.json', m => {
+      m.digest.dropped.queries['raw-query-sentinel'] = 1; return m;
+    }));
+    refuse('source-count', edit('meta.json', m => {
+      m.digest.source_row_counts.queries = 'raw-query-sentinel'; return m;
+    }));
+    refuse('ready-unchecked', edit('../report.json', r => ({ ...r, bq_checked: false })));
     refuse('extra-file', dir => fs.writeFileSync(path.join(dir, label, 'notes.json'), '[]'));
     refuse('symlink', dir => {
       fs.rmSync(path.join(dir, label, 'pages.json'));
