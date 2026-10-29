@@ -1016,8 +1016,13 @@ export function checkWiring(source) {
   const inspect = modelSteps.find(step => /\n        id: handoff_files\n/.test(step));
   const resume = modelSteps.find(step => /\n        id: resume\n/.test(step));
   assert(inspect && resume, 'the handoff check and the resume step must be wired');
-  assert(modelSteps.indexOf(claude) + 1 === modelSteps.indexOf(inspect) && modelSteps.indexOf(inspect) + 1 === modelSteps.indexOf(resume),
-    'the handoff check follows the main step, and the resume follows the check');
+  // Only the two nonfatal progress-receipt steps may precede inspection. Inspect
+  // still measures the remaining job time immediately before the existing resume.
+  const afterMain = modelSteps.slice(modelSteps.indexOf(claude) + 1, modelSteps.indexOf(inspect));
+  assert(afterMain.length === 2 && /\n        id: progress_finish\n/.test(afterMain[0])
+    && /\n        id: progress_upload\n/.test(afterMain[1])
+    && modelSteps.indexOf(inspect) + 1 === modelSteps.indexOf(resume),
+    'only progress export precedes the handoff check, and the resume follows the check');
   assert(/git -c core\.hooksPath=\/dev\/null -c core\.fsmonitor=false worktree add --detach "\$RUNNER_TEMP\/handoff-tools" "\$GITHUB_SHA"\n/.test(inspect)
     && /\n {10}node "\$RUNNER_TEMP\/handoff-tools\/scripts\/autopilot-publish\.mjs" --inspect-handoff\n/.test(inspect)
     && /\n        if: >-\n          !cancelled\(\) &&\n          \(steps\.claude\.outcome == 'success' \|\| steps\.claude\.outcome == 'failure'\)\n/.test(inspect)

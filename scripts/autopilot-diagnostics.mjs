@@ -6,6 +6,7 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { checkProgressWiring } from './lib/autopilot-progress.mjs';
 import { readBounded, readJson, handoffFileStates, FILE_STATES, RESUME_DECISIONS, EXECUTION_FILE,
   MAIN_EXECUTION_COPY, SUMMARY_FILE, EXIT_CODES, HANDOFF_SCHEMA, HANDOFF_SOURCES, STRUCTURED_STATES, structuredHandoff } from './autopilot-publish.mjs';
 
@@ -342,6 +343,7 @@ export function save(output, env = process.env, { handoff } = {}) {
 }
 
 export function checkWiring(source) {
+  checkProgressWiring(source);
   // The model job reduces the execution file to a typed summary (trusted tools from the
   // workflow commit) packed into the handoff; the publish job, after the output check,
   // assembles the receipt from it.

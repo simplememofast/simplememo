@@ -9,11 +9,202 @@ import { modelSummary, receipt, save, checkWiring, summarize, fromSummary, readH
 import { pack, MAIN_EXECUTION_COPY, SUMMARY_FILE } from './autopilot-publish.mjs';
 import { VERDICTS } from './autopilot-audit.mjs';
 import { interpretRun } from './autopilot-act.mjs';
+import { appendProgress, readProgress, progressCommand, checkProgressWiring,
+  PROGRESS_FILE, MAX_PROGRESS_BYTES, MAX_PROGRESS_EVENTS } from './lib/autopilot-progress.mjs';
 
 export async function selftest() {
   let tests = 0;
   const test = (name, fn) => { try { fn(); tests++; } catch (error) { error.message = name + ': ' + error.message; throw error; } };
   const secret = 'PRIVATE_SENTINEL_DO_NOT_EXPORT';
+  const progressTemp = fs.mkdtempSync(path.join(os.tmpdir(), 'progress-test-'));
+  const progressTool = fileURLToPath(new URL('./lib/autopilot-progress.mjs', import.meta.url));
+  const journal = path.join(progressTemp, PROGRESS_FILE);
+  const cleanProgress = () => {
+    for (const item of fs.readdirSync(progressTemp)) fs.rmSync(path.join(progressTemp, item), { recursive: true, force: true });
+  };
+  const beginProgress = () => appendProgress(progressTemp, 'model', 'start', null, { initialize: true });
+  const progressCLI = args => spawnSync(process.execPath, [progressTool, ...args], {
+    encoding: 'utf8', env: { RUNNER_TEMP: progressTemp, MODEL_OUTCOME: 'failure' }, timeout: 5000,
+  });
+  try {
+    test('each complete marker is fsynced before the writer returns', () => {
+      const sync = fs.fsyncSync;
+      let filesSynced = 0;
+      fs.fsyncSync = fd => {
+        if (fs.fstatSync(fd).isFile()) {
+          filesSynced++;
+          assert.equal(readProgress(progressTemp).events.length, filesSynced);
+        }
+        return sync(fd);
+      };
+      try {
+        beginProgress();
+        assert.equal(filesSynced, 1);
+        appendProgress(progressTemp, 'context', 'start');
+        assert.equal(filesSynced, 2);
+      } finally { fs.fsyncSync = sync; }
+    });
+    cleanProgress();
+    test('durable milestone remains after abrupt process death without any SDK result', () => {
+      const child = spawnSync(process.execPath, ['--input-type=module', '-e',
+        `import { appendProgress } from ${JSON.stringify(new URL('./lib/autopilot-progress.mjs', import.meta.url).href)};
+         appendProgress(process.env.RUNNER_TEMP, 'selection', 'start', null, { initialize: true });
+         process.kill(process.pid, 'SIGKILL');`], { env: { RUNNER_TEMP: progressTemp }, timeout: 5000 });
+      assert.equal(child.signal, 'SIGKILL');
+      assert.equal(readProgress(progressTemp).events[0].phase, 'selection');
+      assert.equal(fs.existsSync(path.join(progressTemp, 'claude-execution-output.json')), false);
+      const out = progressCLI(['--progress-finish']);
+      assert.equal(out.status, 0, out.stderr);
+      const receipt = JSON.parse(fs.readFileSync(path.join(progressTemp, 'autopilot-progress/progress.json')));
+      assert.equal(receipt.events.length, 2);
+      assert.equal(receipt.events[1].exit_code, null);
+      assert.equal(receipt.model_outcome, 'failure');
+      assert.equal(receipt.production_verified, false);
+      assert.equal(receipt.cost_observation, 'not_collected');
+      assert(!Object.hasOwn(receipt, 'total_cost_usd'));
+    });
+    cleanProgress();
+    test('only observed integer exits may be reported; validation never becomes verified', () => {
+      beginProgress();
+      appendProgress(progressTemp, 'validation', 'start');
+      appendProgress(progressTemp, 'validation', 'end', 0);
+      appendProgress(progressTemp, 'validation', 'end', 1);
+      appendProgress(progressTemp, 'validation', 'end');
+      const rows = readProgress(progressTemp).events;
+      assert.deepEqual(rows.map(r => r.validation), ['unknown', 'unknown', 'reported_passed', 'reported_failed', 'unknown']);
+      assert(rows.every(r => r.provenance === 'untrusted_runner'));
+      assert(rows.every((r, i) => i === 0 || r.at >= rows[i - 1].at));
+      assert.throws(beginProgress, 'initialization must never overwrite earlier evidence');
+    });
+    for (const args of [
+      ['--progress', secret, 'start'], ['--progress', 'context', secret],
+      ['--progress', 'validation', 'end', secret], ['--progress', 'validation', 'end', '256'],
+      ['--progress', 'validation', 'start', '0'], ['--progress', 'model', 'end'],
+      ['--progress', 'validation', 'end', '0', secret],
+    ]) test('invalid progress CLI cannot export arbitrary strings or change the journal', () => {
+      const before = fs.readFileSync(journal);
+      const out = progressCLI(args);
+      assert.equal(out.status, 1);
+      assert(!`${out.stdout}${out.stderr}`.includes(secret));
+      assert.deepEqual(fs.readFileSync(journal), before);
+    });
+    cleanProgress();
+    test('torn last write retains the validated prefix and explicit missingness', () => {
+      beginProgress();
+      fs.appendFileSync(journal, '{"raw":"' + secret);
+      const read = readProgress(progressTemp);
+      assert.equal(read.state, 'truncated'); assert.equal(read.events.length, 1);
+      const out = progressCLI(['--progress-finish']);
+      assert.equal(out.status, 0);
+      const text = fs.readFileSync(path.join(progressTemp, 'autopilot-progress/progress.json'), 'utf8');
+      assert(!text.includes(secret)); assert.equal(JSON.parse(text).journal_state, 'truncated');
+    });
+    cleanProgress();
+    test('extra keys and arbitrary values stop export at the last valid event', () => {
+      const first = beginProgress();
+      fs.appendFileSync(journal, JSON.stringify({ ...first, sequence: 2, raw: secret }) + '\n');
+      assert.deepEqual(readProgress(progressTemp), { state: 'invalid', events: [first] });
+    });
+    for (const [key, value] of [['phase', secret], ['at', secret], ['exit_code', secret],
+      ['validation', 'verified'], ['provenance', 'trusted'], ['sequence', 100], ['schema_version', 2]]) {
+      cleanProgress();
+      test('untrusted journal fields are revalidated: ' + key, () => {
+        const first = beginProgress();
+        fs.writeFileSync(journal, JSON.stringify({ ...first, [key]: value }) + '\n');
+        assert.deepEqual(readProgress(progressTemp), { state: 'invalid', events: [] });
+      });
+    }
+    for (const kind of ['symlink', 'hardlink', 'directory', 'fifo', 'oversized', 'missing']) {
+      cleanProgress();
+      test('unsafe progress source is unavailable without reading secrets: ' + kind, () => {
+        const privateFile = path.join(progressTemp, 'private');
+        fs.writeFileSync(privateFile, secret);
+        if (kind === 'symlink') fs.symlinkSync(privateFile, journal);
+        if (kind === 'hardlink') fs.linkSync(privateFile, journal);
+        if (kind === 'directory') fs.mkdirSync(journal);
+        if (kind === 'fifo') assert.equal(spawnSync('mkfifo', [journal]).status, 0);
+        if (kind === 'oversized') fs.writeFileSync(journal, 'x'.repeat(MAX_PROGRESS_BYTES + 1));
+        assert.deepEqual(readProgress(progressTemp), { state: kind === 'missing' ? 'missing' : 'unavailable', events: [] });
+        const out = progressCLI(['--progress-finish']);
+        assert.equal(out.status, 0, out.stderr);
+        assert(!fs.readFileSync(path.join(progressTemp, 'autopilot-progress/progress.json'), 'utf8').includes(secret));
+      });
+    }
+    cleanProgress();
+    test('bounded journal never evicts its first event; a full journal can still export', () => {
+      beginProgress();
+      for (let i = 1; i < MAX_PROGRESS_EVENTS; i++) appendProgress(progressTemp, 'context', 'start');
+      assert.throws(() => appendProgress(progressTemp, 'context', 'end'));
+      assert.equal(readProgress(progressTemp).events.length, MAX_PROGRESS_EVENTS);
+      assert.equal(progressCLI(['--progress-finish']).status, 0);
+    });
+    cleanProgress();
+    test('existing upload directory or link is never reused', () => {
+      beginProgress();
+      fs.mkdirSync(path.join(progressTemp, 'autopilot-progress'));
+      assert.equal(progressCLI(['--progress-finish']).status, 1);
+      assert.deepEqual(fs.readdirSync(path.join(progressTemp, 'autopilot-progress')), []);
+      fs.rmdirSync(path.join(progressTemp, 'autopilot-progress'));
+      const target = path.join(progressTemp, 'untrusted'); fs.mkdirSync(target);
+      fs.symlinkSync(target, path.join(progressTemp, 'autopilot-progress'));
+      assert.equal(progressCLI(['--progress-finish']).status, 1);
+      assert.deepEqual(fs.readdirSync(target), []);
+    });
+    const workflow = fs.readFileSync(new URL('../.github/workflows/obsidian-autopilot.yml', import.meta.url), 'utf8');
+    cleanProgress();
+    test('real workflow shells export committed tools after a failed model with no execution file', () => {
+      const repo = path.join(progressTemp, 'repo'); fs.mkdirSync(repo);
+      const fixtureEnv = { PATH: process.env.PATH, HOME: progressTemp, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null',
+        RUNNER_TEMP: progressTemp, MODEL_OUTCOME: 'failure', GITHUB_OUTPUT: path.join(progressTemp, 'outputs') };
+      const git = (...args) => {
+        const result = spawnSync('git', ['-c', 'core.hooksPath=/dev/null', ...args], { cwd: repo, env: fixtureEnv, encoding: 'utf8' });
+        assert.equal(result.status, 0, result.stderr);
+        return result.stdout.trim();
+      };
+      git('init', '-q'); git('config', 'user.name', 'Synthetic Test'); git('config', 'user.email', 'test@example.invalid');
+      const file = path.join(repo, 'scripts/lib/autopilot-progress.mjs');
+      fs.mkdirSync(path.dirname(file), { recursive: true }); fs.copyFileSync(progressTool, file);
+      git('add', '.'); git('commit', '-q', '-m', 'fixture'); fixtureEnv.GITHUB_SHA = git('rev-parse', 'HEAD');
+      const body = name => {
+        const block = workflow.split(`      - name: ${name}\n`)[1].split('\n      - name:')[0];
+        const lines = block.split('\n'); const at = lines.indexOf('        run: |');
+        assert(at >= 0);
+        const result = [];
+        for (const line of lines.slice(at + 1)) {
+          if (!line.trim()) continue;
+          if (!line.startsWith('          ')) break;
+          result.push(line.slice(10));
+        }
+        return result.join('\n');
+      };
+      const run = name => spawnSync('bash', ['--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', body(name)], {
+        cwd: repo, env: fixtureEnv, encoding: 'utf8', timeout: 5000,
+      });
+      assert.equal(run('Start bounded progress journal').status, 0);
+      // Model-controlled files must not become the post-model exporter.
+      for (const target of [file, path.join(progressTemp, 'autopilot-progress-tool.mjs')]) fs.writeFileSync(target, `throw new Error('${secret}');`);
+      appendProgress(progressTemp, 'selection', 'start');
+      const finished = run('Preserve bounded progress journal');
+      assert.equal(finished.status, 0, finished.stderr);
+      assert(!`${finished.stdout}${finished.stderr}`.includes(secret));
+      assert.equal(fs.readFileSync(fixtureEnv.GITHUB_OUTPUT, 'utf8'), 'saved=true\n');
+      const receipt = JSON.parse(fs.readFileSync(path.join(progressTemp, 'autopilot-progress/progress.json')));
+      assert.equal(receipt.model_outcome, 'failure'); assert.equal(receipt.events.length, 3);
+      assert.deepEqual(fs.readdirSync(path.join(progressTemp, 'autopilot-progress')), ['progress.json']);
+      assert.equal(fs.existsSync(path.join(progressTemp, 'claude-execution-output.json')), false);
+    });
+    test('progress is exported immediately after the main step from trusted code', () => checkProgressWiring(workflow));
+    for (const [from, to] of [
+      ['--progress-init', '--unwired'], ['--progress-finish', '--unwired'],
+      ['steps.progress_finish.outputs.saved', 'steps.progress_start.outputs.saved'],
+      ['path: ${{ runner.temp }}/autopilot-progress/progress.json\n', 'path: ${{ runner.temp }}/autopilot-progress\n'],
+      ['$GITHUB_SHA:scripts/lib/autopilot-progress.mjs', 'HEAD:scripts/lib/autopilot-progress.mjs'],
+      ['continue-on-error: true\n        run: |\n          set -o noclobber', 'continue-on-error: false\n        run: |\n          set -o noclobber'],
+    ]) test('broken progress wiring is rejected: ' + from, () => {
+      assert(workflow.includes(from));
+      assert.throws(() => checkProgressWiring(workflow.replace(from, to)));
+    });
+  } finally { fs.rmSync(progressTemp, { recursive: true, force: true }); }
   const env = { GITHUB_RUN_ID: '37403744008', GITHUB_RUN_ATTEMPT: '1', GITHUB_SHA: 'a'.repeat(40),
     TODAY_DASH: '2026-10-06', MODEL_OUTCOME: 'success', OUTPUT_VERDICT: 'missing',
     OUTPUT_REASON_CODE: 'no_matching_pr', MATCHING_PR_COUNT: '0', CURRENT_RUN_RECORD_COUNT: '',
