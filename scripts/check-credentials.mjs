@@ -572,10 +572,11 @@ SCENARIOS.push(["モデルの無いジョブでも、'' の形の一括読み取
   assert(bulkSecretProblems(findings).length === 1, '例外なしで通ってしまう');
   assert(bulkSecretProblems(findings, [{ workflow: 'fixture.yml', job: 'audit', reason: '検体' }]).length === 0, '例外が効かない');
 }]);
-SCENARIOS.push(['呼び先がモデルを動かすなら、呼ぶ側のジョブもモデルのジョブとして扱う', () => {
+SCENARIOS.push(['呼び先がモデルを動かすなら、呼ぶ側のジョブもモデルのジョブとして扱う（理由に呼び先のジョブと印を書く）', () => {
   const findings = findingsOf(bulkFiles(CALLEE_RUNS_MODEL));
   assert(findings.length === 1 && findings[0].job === 'call' && findings[0].model, JSON.stringify(findings));
   assert(bulkSecretProblems(findings, ALLOW_MODEL).length === 1, '例外の台帳で通ってしまう');
+  assert(/呼び先 \.\/\.github\/workflows\/callee\.yml（publish: 印「/.test(findings[0].why ?? ''), `呼び先の中のどのジョブの何が理由かを書かない: ${findings[0].why}`);
 }]);
 
 // ── 2026-10-30 の再レビューの残り（モデルの印・needs のつながり・拡張子・実物の例外）──────────
@@ -611,6 +612,17 @@ const MODEL_RUNNERS = [
   ['同じリポジトリの composite action（uses: ./…）', runner('      - uses: ./.github/actions/summarize')],
   ['中身を確かめていない第三者の action', runner('      - uses: example-org/helpful-agent@0123456789abcdef0123456789abcdef01234567')],
   ['docker:// の action', runner('      - uses: docker://ghcr.io/example/agent:1')],
+  // 2026-10-30 の再々レビュー: 中身を読めないイメージ、SDK の導入・読み込み、Azure OpenAI の宛先
+  ['ジョブの container のイメージ', chain(AUDIT_BULK, replace('fixture.yml', '  audit:\n    runs-on: ubuntu-latest\n',
+    '  audit:\n    runs-on: ubuntu-latest\n    container: ghcr.io/example/agent:1\n'))],
+  ['ジョブの services のイメージ（run も uses も無くても起動する）', chain(AUDIT_BULK, replace('fixture.yml', '  audit:\n    runs-on: ubuntu-latest\n',
+    '  audit:\n    runs-on: ubuntu-latest\n    services:\n      helper:\n        image: ghcr.io/example/agent:1\n'))],
+  ['npm で @anthropic-ai/sdk を入れる', runner('      - run: npm install @anthropic-ai/sdk && node summarize.mjs')],
+  ['pip で openai を入れる', runner('      - run: pip install --quiet openai==1.0.0 && python summarize.py')],
+  ['Python で anthropic を読み込む', runner("      - run: python -c 'import anthropic; print(1)'")],
+  ['Node で openai を読み込む（import { … } from）', runner('      - run: node --input-type=module -e "import { OpenAI } from \'openai\'; console.log(1)"')],
+  ['Node で openai を読み込む（require）', runner('      - run: node -e "const c = require(\'openai\'); console.log(1)"')],
+  ['Azure OpenAI の宛先', runner('      - run: curl -s https://example.openai.azure.com/openai/deployments/x/chat/completions')],
 ];
 /** モデルを動かさない書き方（audit はモデルの無いジョブのまま、例外で通る）。 */
 const NOT_RUNNERS = [
@@ -619,6 +631,7 @@ const NOT_RUNNERS = [
     "          TRAILER: 'Co-Authored-By: Claude <noreply@anthropic.com>'", '          PREV: ${{ inputs.claude_branch }}',
     '        run: git log --grep "claude/" --oneline')],
   ['owner/repo の大文字小文字を変えた既知の action（Actions/Checkout）', runner('      - uses: Actions/Checkout@11bd71901bbe5b1630ceea73d27597364c9af683')],
+  ['npm の別の包み（npm install openapi-types・pip install opentelemetry）', runner('      - run: npm install openapi-types && pip install opentelemetry-api')],
   ['既知の action の副パス（actions/cache/restore）', runner('      - uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684')],
 ];
 for (const [name, edit] of MODEL_RUNNERS) {
@@ -664,6 +677,9 @@ const LINKED = [
     'callee.yml#publish', 'feeds'],
   ['再利用ワークフローの呼び先のファイル全体の env', chain(AUTOPILOT_NEEDS_CALL, replace('callee.yml', 'jobs:\n', 'env:\n  ALL: ${{ toJSON(secrets) }}\njobs:\n')),
     'callee.yml#(workflow)', 'feeds'],
+  ['モデルのジョブを待って呼ぶ再利用ワークフローのファイル全体の env（autopilot → call → callee の設定。inputs で値が入る）',
+    chain(replace('fixture.yml', '  call:\n    uses:', '  call:\n    needs: autopilot\n    uses:'),
+      replace('callee.yml', 'jobs:\n', 'env:\n  ALL: ${{ toJSON(secrets) }}\njobs:\n')), 'callee.yml#(workflow)', 'fedBy'],
   ['needs を読めない形で書いたモデルのジョブは、同じファイルの全部のジョブを待つとみなす（audit → autopilot）',
     chain(BULK_OUTSIDE_MODEL, replace('fixture.yml', '    needs: collect\n', '    needs: { job: collect }\n')), 'fixture.yml#audit', 'feeds'],
 ];

@@ -54,14 +54,18 @@
  *     （鍵や設定の名前・導入の仕方・API の宛先）か、MODEL_COMMANDS（モデルの CLI をコマンドとして書いた形）がある。
  *   - 手順の `uses:` が KNOWN_ACTIONS に無い（第三者の action・同じリポジトリの composite action（./…）・
  *     docker://。中身をこの検査が読めないので、エージェントの action かどうか分からない）。
+ *   - ジョブに `container:` か `services:` がある（イメージの中身を読めない。services は run も uses も
+ *     無くても起動する）。
  *   - 呼んでいる再利用ワークフローがモデルを動かすか、中身を確かめられない（外のリポジトリ・見つからない・読めない）。
+ *     理由には呼び先の中のジョブと印も書く。
  * それでも、`run:` が呼ぶリポジトリのスクリプトの中身や、名前に印の無い secret で API を叩く書き方は
  * 見えない。**例外を許すときは、人がジョブと、そこで走るスクリプトを読むこと。**
  *
  * 【例外にできないジョブ（モデルの無いジョブでも）】モデルのジョブと `needs` で（直接・間接に、
  * 再利用ワークフローの呼び出しを通しても）つながっているジョブ。上流なら outputs で値が渡り
  * （base64 などに変えるとマスクも効かない）、下流ならモデルの出力が全部の secret を持つジョブに入る。
- * 同じ実行の中でもつながっていないジョブからの成果物（artifact）・キャッシュ・リポジトリへの書き込みは
+ * 同じ実行の中でもつながっていないジョブからの成果物（artifact）・キャッシュ・リポジトリへの書き込み、
+ * GitHub の API を通した受け渡し（workflow_dispatch の inputs・repository_dispatch・vars）は
  * 見ていない（PR 本文と data/injection-surface.json に残る経路として書いた）。
  *
  * 【GitHub と食い違いうるところ】GitHub は YamlDotNet（5.3.0）で読む。libyaml と YamlDotNet は
@@ -99,8 +103,13 @@ export const MODEL_MARKERS = new RegExp([
   String.raw`\bgh\s+(?:models|copilot)\b`, String.raw`actions\/ai-inference`, String.raw`opencode-ai|sst\/opencode`,
   // API の宛先
   String.raw`api\.anthropic\.com`, String.raw`api\.openai\.com`, String.raw`generativelanguage\.googleapis\.com`, String.raw`aiplatform\.googleapis\.com`,
-  String.raw`bedrock-runtime`, String.raw`models\.github\.ai`, String.raw`models\.inference\.ai\.azure\.com`,
+  String.raw`bedrock-runtime`, String.raw`models\.github\.ai`, String.raw`models\.inference\.ai\.azure\.com`, String.raw`\.openai\.azure\.com`,
   String.raw`api\.(?:mistral\.ai|groq\.com|deepseek\.com|x\.ai|cohere\.(?:ai|com)|together\.(?:ai|xyz)|fireworks\.ai|perplexity\.ai)`,
+  // SDK の導入と読み込み（印の無い名前の鍵を、一括で読んだ JSON から取り出して SDK に渡す形）
+  String.raw`@anthropic-ai\/`, String.raw`\blitellm\b`, String.raw`\blangchain`, String.raw`\bllama[-_]?index\b`,
+  String.raw`\b(?:pip3?|pipx|uv|poetry|conda|npm|pnpm|yarn|bun|npx|gem|cargo)\b[^\n]*?\b(?:install|add|i|run|exec|x)\b[^\n]*?(?:^|[\s'"=])(?:anthropic|openai|google-genai|google-generativeai|mistralai|groq|cohere|ollama)(?=$|[\s'"=<>@~^\[])`,
+  String.raw`\b(?:import|from)\s+(?:anthropic|openai|google\.genai|google\.generativeai|mistralai|groq|cohere|ollama)\b`,
+  String.raw`\brequire\(\s*['"](?:openai|@google\/genai|ollama)['"]`, String.raw`\bfrom\s+['"](?:openai|@google\/genai|ollama)['"]`,
 ].join('|'), 'i');
 
 /**
@@ -566,18 +575,35 @@ export function inspectWorkflows(files, { ruby } = {}) {
       if (!isKey(k, 'uses') || calls.has(v)) continue;
       if (v.t !== 's' || !KNOWN_ACTIONS.test(v.v.trim())) reason = `中身を確かめていない action「${scalarText(v) ?? '(文字列でない uses)'}」`;
     }
+    // ジョブの container・services のイメージも、中身を読めないコード。services は run も uses も無くても
+    // ジョブの始まりにイメージの entrypoint で起動し、ジョブの env・secret を渡せる。
+    for (const name of ['container', 'services']) {
+      if (reason !== null) break;
+      if (fieldValues(job.node, name).length) reason = `中身を確かめていない ${name} のイメージ`;
+    }
     for (const callee of callees(job)) {
       if (reason !== null) break;
       const target = calleeFile(callee);
       // 外のリポジトリ・見つからない・読めない呼び先は中身を確かめられない。動かしうる側に倒す。
       if (!target || target.error) reason = `中身を確かめられない呼び先 ${callee}`;
-      else if (!seen.has(target.name) && fileRunsModel(target, new Set([...seen, file.name]))) reason = `モデルを動かす呼び先 ${callee}`;
+      else if (!seen.has(target.name)) {
+        const inner = fileModelReason(target, new Set([...seen, file.name]));
+        if (inner !== null) reason = `モデルを動かす呼び先 ${callee}（${inner}）`;
+      }
     }
     modelCache.set(key, reason);
     return reason;
   };
   const jobRunsModel = (file, job, seen = new Set()) => modelReason(file, job, seen) !== null;
-  const fileRunsModel = (file, seen = new Set()) => file.jobs.some((job) => jobRunsModel(file, job, seen));
+  /** ファイルのどれかのジョブがモデルを動かしうる理由（「ジョブ名: 理由」。無ければ null）。 */
+  const fileModelReason = (file, seen = new Set()) => {
+    for (const job of file.jobs) {
+      const reason = modelReason(file, job, seen);
+      if (reason !== null) return `${job.id}: ${reason}`;
+    }
+    return null;
+  };
+  const fileRunsModel = (file, seen = new Set()) => fileModelReason(file, seen) !== null;
 
   // ── needs でつながるジョブ（値の流れ）──────────────────────────
   // 節は「ジョブの入口（in）」「出口（out）」「ファイル全体の設定（workflow）」。流れは
