@@ -364,6 +364,17 @@ export function toPath(url) {
 }
 
 /**
+ * Whether a (toPath-normalised) path is one the repo itself publishes. A path it does not publish
+ * came from whoever linked or searched (see toPath), so public output does not repeat it.
+ */
+export function isSitePage(page) {
+  if (typeof page !== 'string' || !page.startsWith('/')) return false;
+  const known = knownPagePaths();
+  const bare = page.endsWith('/') && page.length > 1 ? page.slice(0, -1) : page;
+  return known.has(page) || known.has(bare) || known.has(`${bare}/`);
+}
+
+/**
  * Business relevance by URL — how close a page's readers are to installing.
  *
  * This is the one deliberately hand-maintained input in the scoring model. It
