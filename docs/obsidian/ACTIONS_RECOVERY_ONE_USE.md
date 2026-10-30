@@ -85,6 +85,21 @@ Act はこの run を `ap-20261029-actions`（`failed`・種別は未確定・ne
 マージされれば、修理対象は無くなる。**許可の対象6行・上限・修理回数・`ACTIONS_RECOVERY.targets` は変えていない**
 （10-29 の行は `no_artifact` ではなく、封じ込めの対象に入っていない）。次の日付は、マージの後に模擬で確かめてから決める。
 
+**2026-10-30 の模擬（修理の PR を開く前）:** 作業用の写しで、修理の行の `pr` に仮の番号を入れ、ワークフローと同じ
+環境変数（`schedule`・1回目・`simplememofast/simplememo`・`refs/heads/main`・このワークフロー・当日の JST の日付）で
+`node scripts/autopilot-selfheal.mjs --contain --dry-run` を回した。
+
+- `pr` が null のままだと `repair_pending` で効かない。修理と数えるのは、PR 番号のある `shipped` の行の `repair_of` だけ
+  （`analyze`）。**番号を入れずにマージしても、許可は戻らない。**
+- 仮の番号を入れると `recovery=actions_once` が出た。時計を 10-31・11-01 にずらしても同じ。日付違い・手動起動・再実行・
+  別のブランチ・別のワークフローでは効かない。
+- **10-29 の行の `failure_class` を `no_artifact` にしない。**この修理の `repair_of` が `no_artifact` の6回目の修理に
+  数えられ、許可の対象の修理回数（5）と合わなくなり、`containment_changed` で効かなくなる（`time_box` なら効く）。
+- 許可の対象6行のどれかを書き換えると `target_row_changed`、修理が要る新しい故障が台帳に入ると `repair_pending` で効かない。
+- **試す日は、main の `data/autopilot-status.json` の `date_jst`（この修理では 2026-10-30）より後の日にする。**同じ日だと
+  Gate が `skip_already_shipped` で止め、封じ込めの段（許可の判定）まで進まない（`decide` に同じ状態を渡して確認）。
+- Gate（GitHub API を読む）そのものは模擬していない。予算の段（`--check`・`--check-run-cap --task article`）は手元で通った。
+
 ## 試運転の日にしないこと（2026-10-21 追記）
 
 - **試運転の日は、その日の定時 run が終わるまで、Obsidian Autopilot を手動起動（workflow_dispatch）も再実行もしない。**
