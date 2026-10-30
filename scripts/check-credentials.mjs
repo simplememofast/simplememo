@@ -234,6 +234,10 @@ const BULK_BREAKAGES = [
   ['名前の小文字 secrets.name（同上）', inModel('${{ secrets.claude_code_oauth_token }}')],
   ['YAML の二重引用符のエスケープ（\\x73ecrets）', inModel('"${{ toJSON(\\x73ecrets) }}"')],
   ['YAML の行継ぎ（行末の \\）で分けた字面', inModel('"${{ toJSON(sec\\\n            rets) }}"')],
+  ["YAML の単引用符の '' で式の中に '}}' を作る（切り出しが途中で止まる）",
+    inModel("'${{ ''}}'' && fromJSON(toJSON(secrets)).CLAUDE_CODE_OAUTH_TOKEN }}'")],
+  ["format の書式に '}}' を入れる（同上）", inModel("'${{ format(''{0}}}'', toJSON(secrets)) }}'")],
+  ["単引用符の値を折り返して、secrets を ${{ の無い行に置く", inModel("'${{ ''}}''\n            && toJSON(secrets) }}'")],
   ['複数行の式', (f) => ({ ...f, 'fixture.yml': f['fixture.yml'].replace('id: claude\n',
     'id: claude\n        run: |\n          echo "${{\n            toJSON(secrets)\n          }}"\n') })],
   ['if: の式（${{ }} なし）', (f) => ({ ...f, 'fixture.yml': f['fixture.yml'].replace('id: claude\n',
@@ -256,6 +260,11 @@ SCENARIOS.push(['名前で1つずつ読む検体は通る（文字列の中の s
   const { jobs } = inspectWorkflows(bulkFiles());
   const model = jobs.filter((j) => j.model).map((j) => `${j.file}#${j.id}`);
   assert(model.join(',') === 'fixture.yml#autopilot', `モデルのジョブの判定が違う: ${model}`);
+}]);
+SCENARIOS.push(['モデルの無いジョブの説明文の「, secrets,」は拾わない（字面の拾い直しはモデルの範囲だけ）', () => {
+  const findings = bulkSecretFindings(bulkFiles((f) => ({ ...f, 'fixture.yml': f['fixture.yml'].replace(
+    '        run: node scripts/autopilot-data.mjs', "        env:\n          NOTE: 'No send, secrets, adoption or billing'\n        run: node scripts/autopilot-data.mjs") })));
+  assert(findings.length === 0, `誤検出: ${JSON.stringify(findings)}`);
 }]);
 for (const [name, edit] of BULK_BREAKAGES) {
   SCENARIOS.push([`**モデルのジョブで落ちる（例外を書いても）**: ${name}`, () => {

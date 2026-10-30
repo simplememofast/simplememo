@@ -89,6 +89,33 @@ export function bulkSecretForms(expression) {
   return forms;
 }
 
+/**
+ * 式の切り出しに頼らない拾い直し（位置つき）。YAML の単引用符の中では `'` を `''` と書くので、
+ * `'${{ ''}}'' && toJSON(secrets) }}'` の切り出しは `}}` で止まり、後ろの secrets を見ない
+ * （GitHub は YAML を戻してから式を読むので、全体が1つの式になる）。ここでは引用符を数えずに、
+ * `secrets` が式として使われている形（前後が括弧・区切り・演算子、`.*`・`[…]`）を全部拾う。
+ * 文章の中の語は前後が文字なので拾わない。コメントも飛ばさない（引用符の中の `#` はコメントではない）。
+ */
+export function looseSecretUses(text) {
+  const src = String(text);
+  const uses = [];
+  for (const m of src.matchAll(/(?<![\w.$-])secrets(?![\w-])/gi)) {
+    const rest = src.slice(m.index);
+    if (/^secrets\.[A-Z_][A-Z0-9_]*(?![\w-])/i.test(rest)) continue;
+    if (/^secrets\s*\[\s*(?:'|'')[A-Z_][A-Z0-9_]*(?:'|'')\s*\]/i.test(rest)) continue;
+    const after = rest.slice('secrets'.length);
+    const next = (after.match(/^\s*(\S)/) || [])[1] || '';
+    // YAML の鍵（secrets: inherit は下で別に見る）。
+    if (next === ':') continue;
+    const before = (src.slice(0, m.index).match(/(\S)\s*$/) || [])[1] || '';
+    const listed = next === '.' && /^\s*\.\s*[*[]/.test(after);
+    if (next === '' || ')}],[|&=!<>'.includes(next) || listed || (before !== '' && '({[,|&=!<>'.includes(before))) {
+      uses.push({ index: m.index, form: src.slice(Math.max(0, m.index - 12), m.index + 28).replace(/\s+/g, ' ').trim() });
+    }
+  }
+  return uses;
+}
+
 /** ジョブの範囲。jobs: の外（on:・env: など）は `(workflow)` で、ファイルの全ジョブに効く。 */
 export function workflowJobs(text) {
   const lines = text.split('\n');
@@ -166,6 +193,19 @@ export function inspectWorkflows(files) {
     const count = text => workflowExpressions(text).reduce((n, e) => n + bulkSecretForms(e.text).length, 0);
     if (count(joined) > count(file.text)) {
       findings.push({ file: file.name, line: null, form: '行継ぎ（行末の \\）で分けた式', job: '(workflow)', model: fileRunsModel(file) });
+    }
+    // 切り出しをすり抜ける書き方（YAML の '' など）は、モデルを動かす範囲だけ字面で拾い直す。
+    // モデルの無いジョブは上の式の検査と台帳の例外に任せる（説明文の語を拾って例外が増えるのを避ける）。
+    const lines = new Set(findings.filter(f => f.file === file.name).map(f => f.line));
+    for (const use of looseSecretUses(file.text)) {
+      const at = where(file, use.index);
+      const line = lineOf(file.text, use.index);
+      if (!at.model || lines.has(line)) continue;
+      lines.add(line);
+      findings.push({ file: file.name, line, form: use.form, ...at });
+    }
+    if (fileRunsModel(file) && looseSecretUses(joined).length > looseSecretUses(file.text).length) {
+      findings.push({ file: file.name, line: null, form: '行継ぎ（行末の \\）で分けた字面', job: '(workflow)', model: true });
     }
     let offset = 0;
     for (const line of file.text.split('\n')) {
