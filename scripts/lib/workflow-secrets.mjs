@@ -14,224 +14,499 @@
  * 名前の検査（大文字・小文字を区別する）をすり抜ける。
  *
  * 【規則】式の中の secrets は `secrets.NAME`（NAME は大文字・数字・_）か `secrets['NAME']` の
- * 形でしか読まない。`secrets: inherit` は、同じディレクトリにあってモデルを動かさない
- * ワークフローを呼ぶときだけ認める（呼ばれた側も同じ規則で検査されるので、名前で読むしかない）。
+ * 形でしか読まない。しかも**その形がファイルの字面にそのまま書いてある**こと（YAML のエスケープ・
+ * 行継ぎ・'' やエイリアスで作った名前は、名前の検査から見えない）。`secrets: inherit` は、
+ * 同じディレクトリにあってモデルを動かさないワークフローを呼ぶときだけ認める。
  * それ以外はすべて問題。例外は**モデルを動かさないジョブ**に限り、呼び出し側が理由つきで許す。
  *
- * 【どこまで見るか】
- * 式は生の本文から拾う（`${{ … }}` と `if:` の値）。run: の中の `#` の行も見る —— GitHub は
- * シェルより先に式を展開するので、コメントの行でも鍵がランナーのファイルに書き込まれる。
- * YAML の二重引用符のエスケープ（`\x73ecrets`、行末の `\` での行継ぎ）は戻してから見る。
- * モデルのジョブかどうかは字面（MODEL_MARKERS）と、呼んでいる再利用ワークフローで決める。
- * 一覧に無い新しいモデルの動かし方は見えないので、例外を許すときは人がジョブを読むこと。
+ * 【どう読むか（2026-10-30 に作り直した）】
+ * 最初の版は YAML を字面のまま追っていた。独立したレビューが、それで見落とす書き方を5系統
+ * 見つけた —— 二重引用符のエスケープ（`\t` `\N` `\_` など）、`''` と大文字小文字の組み合わせ、
+ * `secrets: inherit` の書き方の変種、アンカーとエイリアス、`jobs :` や `"jobs":`。
+ * どれも**字面の推測と YAML の意味のずれ**が原因なので、字面を追うのをやめた。
+ *
+ *   1. YAML は Ruby の Psych（libyaml）で読む。GitHub の Ubuntu ランナー（22.04・24.04）と macOS に
+ *      最初から入っていて、追加の依存が要らない。読めないファイルは「問題」にする（飛ばさない）。
+ *      文書が1つでないファイルは GitHub も受け付けない（actions/runner の YamlObjectReader の
+ *      ValidateStart/ValidateEnd）。最上位が対応表でない・ジョブが1つも無いファイルも読めない扱いに
+ *      する（ジョブを見失ったまま、ファイル全体を「モデル無し」として通さないため）。
+ *   2. エイリアスは GitHub と同じく、その時点で最後に定義されたアンカーの中身に置き換える
+ *      （YamlObjectReader の再生）。展開した後のノードが 50000 を超えたら読めない扱い。GitHub の
+ *      上限 c_maxYamlNodes も 50000 だが、あちらは終わりのイベントも数えるので、ここのほうが緩い
+ *      （GitHub が受け付けるファイルを、この上限で落とすことはない）。
+ *   3. ジョブは最上位の `jobs` の鍵の下（引用符や空白の書き方によらない）。それ以外の最上位
+ *      （on・env・defaults など）は `(workflow)` で、全部のジョブに効く。
+ *   4. 式は、すべての文字列（鍵も値も）から GitHub と同じ切り出し方で拾う（`${{ … }}`。式の中の
+ *      '…' の `}}` は閉じとみなさない。WorkflowParser の TemplateReader.ParseScalar）。`if:` の値は
+ *      丸ごと式としても読む。YAML のコメントは GitHub も読まないので見ない。
+ *   5. 式は GitHub の字句解析（actions/runner の LexicalAnalyzer）と同じ規則で区切る。空白は
+ *      .NET の Char.IsWhiteSpace と同じ文字（U+0085・U+00A0・U+3000 などを含む）。
+ *
+ * 字面を追う検査（式の切り出し・字面の拾い直し）は残していない。A〜E の書き方で迂回できると
+ * 分かっていて、残すと説明文の誤検出だけが残るため。
+ *
+ * モデルのジョブかどうかは、ジョブの中身（エイリアスを展開した後）とファイル全体の設定に
+ * MODEL_MARKERS があるかと、呼んでいる再利用ワークフローで決める。一覧に無い新しいモデルの
+ * 動かし方（印の無い第三者の action、同じリポジトリの composite action の中身など）は見えないので、
+ * 例外を許すときは人がジョブを読むこと。
+ *
+ * 【GitHub と食い違いうるところ】GitHub は YamlDotNet で読む。libyaml と YamlDotNet は
+ * 受け付ける範囲が少し違う（例: アンカーの名前に使える文字）。libyaml だけが拒む書き方は
+ * ここで落ちる（安全側）。両方が受け付けて値が違う書き方は、まだ見つけていない（探し切っては
+ * いない）。
  */
+
+import { spawnSync } from 'node:child_process';
 
 /** モデルを動かす印。迷う書き方は「動かす」側に倒す（例外を許せなくなるだけで、検出は減らない）。 */
 export const MODEL_MARKERS = /anthropics\/claude-code-action|claude[-_]code[-_]oauth[-_]token|anthropic[-_]api[-_]key|@anthropic-ai\/claude-code|claude-agent-sdk|openai[-_]api[-_]key|openai\/codex-action|@openai\/codex|gemini[-_]api[-_]key|run-gemini-cli|\bclaude\s+(?:-p|--print)\b|\bcodex\s+exec\b/i;
 
-const unescapeCode = (match, hex) => {
-  const code = parseInt(hex, 16);
-  // 改行は戻さない（行の形が崩れるとジョブの区切りを読み違える）。改行は secrets の字面を作れない。
-  return code === 0x0a || code === 0x0d ? match : String.fromCodePoint(code);
-};
+/**
+ * .NET の Char.IsWhiteSpace が真になる文字（式の字句解析が飛ばす空白）。JS の \s とは違う ——
+ * U+0085 を含み、U+FEFF を含まない。U+180E は今の Unicode では空白ではないが、古い .NET では
+ * 空白だったので空白に入れる（拾う側に倒れるだけ）。
+ */
+export const DOTNET_WHITESPACE = '\t\n\v\f\r \u0085\u00A0\u1680\u180E\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u2028\u2029\u202F\u205F\u3000';
+const isSpace = (c) => c !== undefined && c !== '' && DOTNET_WHITESPACE.includes(c);
+const SPACE_RUN = new RegExp(`[${DOTNET_WHITESPACE}]+`, 'g');
 
 /**
- * YAML の二重引用符の中で効くエスケープを戻す。ブロック（run: |）の中まで戻すのは過剰だが、
- * 見つかる側に倒れるだけ。joinLines は行末の `\` による行継ぎも戻す（行番号は変わる）。
+ * エイリアスを展開した後のノード数の上限。GitHub の YamlObjectReader の c_maxYamlNodes と同じ値。
+ * あちらはイベント（終わりのイベントも含む）を数えるので、同じ値でもここのほうが緩い。
  */
-export function decodeYamlEscapes(text, { joinLines = false } = {}) {
-  let out = String(text)
-    .replace(/\\x([0-9A-Fa-f]{2})/g, unescapeCode)
-    .replace(/\\u([0-9A-Fa-f]{4})/g, unescapeCode)
-    .replace(/\\U([0-9A-Fa-f]{8})/g, unescapeCode);
-  if (joinLines) out = out.replace(/\\\r?\n[ \t]*/g, '');
-  return out;
+export const MAX_YAML_NODES = 50000;
+
+// ── 1. YAML を読む（Ruby の Psych = libyaml）──────────────────────────
+// イベントの列をそのまま返す。値の型は決めない（`on` を true にしたりしない）。
+// 位置は libyaml の行・桁（文字単位）。字面（raw）はその範囲の元の文字列。
+const RUBY_READER = String.raw`
+require 'psych'
+require 'json'
+class Collector < Psych::Handler
+  attr_reader :events
+  BREAKS = ["\n", "\r", "\u0085", "\u2028", "\u2029"]
+  def initialize(src)
+    @chars = src.each_char.to_a
+    @starts = [0]
+    i = 0
+    while i < @chars.length
+      i += @chars[i] == "\r" && @chars[i + 1] == "\n" ? 2 : 1
+      @starts << i if BREAKS.include?(@chars[i - 1])
+    end
+    @events = []
+    @loc = [0, 0, 0, 0]
+  end
+  def event_location(*loc); @loc = loc; end
+  def at(line, col); (@starts[line] || @chars.length) + col; end
+  def start_document(*); @events << ['D']; end
+  def alias(anchor); @events << ['A', anchor, @loc[0], @loc[1]]; end
+  def scalar(value, anchor, tag, plain, quoted, style)
+    @events << ['S', value, anchor, tag, style, @loc[0], @loc[1], (@chars[at(@loc[0], @loc[1])...at(@loc[2], @loc[3])] || []).join]
+  end
+  def start_sequence(anchor, tag, *); @events << ['[', anchor, tag, @loc[0], @loc[1]]; end
+  def end_sequence(*); @events << [']']; end
+  def start_mapping(anchor, tag, *); @events << ['{', anchor, tag, @loc[0], @loc[1]]; end
+  def end_mapping(*); @events << ['}']; end
+end
+out = JSON.parse(STDIN.binmode.read).map do |src|
+  begin
+    collector = Collector.new(src)
+    Psych::Parser.new(collector).parse(src)
+    { 'events' => collector.events }
+  rescue StandardError => e
+    { 'error' => e.message.to_s }
+  end
+end
+STDOUT.binmode.write(JSON.generate(out, ascii_only: true))
+`;
+
+const parseCache = new Map();
+
+/**
+ * 文字列の配列を YAML のイベント列にする（{ events } か { error }）。同じ本文は1回しか読まない。
+ * ruby が無い・落ちた・出力が読めないときは**例外を投げる**（検査を黙って空にしない）。
+ */
+export function readYamlEvents(texts, { ruby = 'ruby' } = {}) {
+  const missing = [...new Set(texts.filter((t) => !parseCache.has(`${ruby}\0${t}`)))];
+  if (missing.length) {
+    // 非 ASCII は \u で渡す（ruby 側のロケールに左右されない）。
+    const input = JSON.stringify(missing).replace(/[\u007f-\uffff]/g, (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`);
+    const env = { ...process.env };
+    delete env.RUBYOPT;
+    delete env.RUBYLIB;
+    const spawn = (args) => spawnSync(ruby, [...args, '-e', RUBY_READER], { input, encoding: 'utf8', env, maxBuffer: 1 << 30, timeout: 120000 });
+    // --disable-gems は起動を速くするだけ。psych / json を読めない環境では外してやり直す。
+    let result = spawn(['--disable-gems']);
+    if (!result.error && result.status !== 0 && /LoadError|cannot load such file/.test(String(result.stderr))) result = spawn([]);
+    if (result.error) throw new Error(`YAML を読む ruby を起動できない（${result.error.code || result.error.message}）`);
+    if (result.status !== 0) {
+      throw new Error(`YAML を読む ruby が失敗した（終了 ${result.status}${result.signal ? ` ${result.signal}` : ''}）: ${String(result.stderr).trim().slice(0, 300)}`);
+    }
+    let out;
+    try { out = JSON.parse(result.stdout); } catch { throw new Error('YAML を読む ruby の出力が JSON として読めない'); }
+    if (!Array.isArray(out) || out.length !== missing.length) throw new Error('YAML を読む ruby の出力の件数が合わない');
+    missing.forEach((t, i) => parseCache.set(`${ruby}\0${t}`, out[i]));
+  }
+  return texts.map((t) => parseCache.get(`${ruby}\0${t}`));
 }
 
 /**
- * Actions が評価する式を、位置つきで拾う。`${{ … }}`（'…' の中の `}}` は閉じとみなさない）と、
- * `if:` の値（`${{ }}` なしでも式。折り返した値は、より深く字下げした行まで続く）。
+ * イベント列から文書の木を作る。エイリアスは GitHub と同じく「その時点で最後に定義された
+ * アンカー」の写しに置き換え、写しには aliasOf（アンカーの名前）と、参照した行を付ける。
+ * ノード: { t: 's', v, style, line, raw } / { t: 'm', pairs: [[鍵, 値]] } / { t: 'q', items }
  */
-export function workflowExpressions(text) {
-  const found = [];
-  for (let at = text.indexOf('${{'); at !== -1; at = text.indexOf('${{', at + 3)) {
-    let i = at + 3, quoted = false;
-    for (; i < text.length && (quoted || !text.startsWith('}}', i)); i++) if (text[i] === "'") quoted = !quoted;
-    found.push({ index: at, text: text.slice(at + 3, i) });
-  }
-  const lines = text.split('\n');
-  let offset = 0;
-  lines.forEach((line, n) => {
-    const key = line.match(/^(\s*(?:-\s+)?)(?:if|'if'|"if")\s*:/);
-    if (key) {
-      let value = line.slice(key[0].length);
-      for (let k = n + 1; k < lines.length && (!lines[k].trim() || lines[k].search(/\S/) > key[1].length); k++) value += '\n' + lines[k];
-      found.push({ index: offset, text: value });
+export function buildYamlDocuments(events) {
+  const IN_PROGRESS = Symbol('in progress');
+  const docs = [];
+  let anchors = new Map();
+  let i = 0;
+  let count = 0;
+  const tick = () => {
+    if (++count > MAX_YAML_NODES) throw new Error(`ノードが ${MAX_YAML_NODES} を超える（エイリアスを展開した後）`);
+  };
+  const copy = (node, aliasOf, line) => {
+    tick();
+    const base = { t: node.t, line, aliasOf };
+    if (node.t === 's') return { ...base, v: node.v, style: null, raw: '' };
+    if (node.t === 'q') return { ...base, items: node.items.map((n) => copy(n, aliasOf, line)) };
+    return { ...base, pairs: node.pairs.map(([k, v]) => [copy(k, aliasOf, line), copy(v, aliasOf, line)]) };
+  };
+  const read = () => {
+    const e = events[i++];
+    if (!e) throw new Error('YAML のイベントが途中で切れている');
+    if (e[0] === 'S') {
+      tick();
+      const node = { t: 's', v: String(e[1]), style: e[4], line: e[5] + 1, col: e[6], raw: String(e[7]) };
+      if (e[2] != null) anchors.set(e[2], node);
+      return node;
     }
-    offset += line.length + 1;
-  });
+    if (e[0] === 'A') {
+      const target = anchors.get(e[1]);
+      if (target === undefined) throw new Error(`定義されていないアンカー *${e[1]}`);
+      if (target === IN_PROGRESS) throw new Error(`自分自身を参照するエイリアス *${e[1]}`);
+      return copy(target, e[1], e[2] + 1);
+    }
+    if (e[0] === '[' || e[0] === '{') {
+      tick();
+      if (e[1] != null) anchors.set(e[1], IN_PROGRESS);
+      const node = e[0] === '[' ? { t: 'q', items: [], line: e[3] + 1, col: e[4] } : { t: 'm', pairs: [], line: e[3] + 1, col: e[4] };
+      const end = e[0] === '[' ? ']' : '}';
+      while (i < events.length && events[i][0] !== end) {
+        if (node.t === 'q') node.items.push(read());
+        else node.pairs.push([read(), read()]);
+      }
+      if (events[i++]?.[0] !== end) throw new Error('YAML のイベントが閉じていない');
+      if (e[1] != null) anchors.set(e[1], node);
+      return node;
+    }
+    throw new Error(`想定外の YAML のイベント ${JSON.stringify(e[0])}`);
+  };
+  while (i < events.length) {
+    const e = events[i++];
+    if (e[0] !== 'D') throw new Error(`文書の外に YAML のイベントがある ${JSON.stringify(e[0])}`);
+    anchors = new Map();
+    docs.push(read());
+  }
+  return docs;
+}
+
+// ── 2. 式（GitHub と同じ切り出し・字句解析）──────────────────────────
+
+/**
+ * 文字列の中の `${{ … }}`。actions/runner の TemplateReader.ParseScalar と同じく、式の中の
+ * '…' を数えて（'' は2回反転するので相殺される）、外側の `}}` で閉じる。閉じていなければ
+ * 残りを全部式として返す（GitHub はエラーにする。拾う側に倒す）。
+ */
+export function templateExpressions(raw) {
+  const found = [];
+  for (let start = raw.indexOf('${{'); start !== -1;) {
+    let end = -1;
+    let inString = false;
+    for (let i = start + 3; i < raw.length; i++) {
+      if (raw[i] === "'") inString = !inString;
+      else if (!inString && raw[i] === '}' && raw[i - 1] === '}') { end = i; break; }
+    }
+    if (end === -1) { found.push({ index: start + 3, text: raw.slice(start + 3) }); break; }
+    found.push({ index: start + 3, text: raw.slice(start + 3, end - 1) });
+    start = raw.indexOf('${{', end + 1);
+  }
   return found;
 }
 
-/**
- * 式の中で、secrets を名前1つで読んでいない箇所（抜粋の配列）。
- * 許すのは `secrets.NAME` と `secrets['NAME']` だけ。'…' の文字列の中は見ない。
- */
-export function bulkSecretForms(expression) {
-  const text = String(expression)
-    .replace(/(?<![\w.-])secrets\['[A-Z_][A-Z0-9_]*'\]/g, '§')
-    .replace(/'(?:[^']|'')*'/g, "''");
-  const forms = [];
-  for (const m of text.matchAll(/(?<![\w.-])secrets(?![\w-])/gi)) {
-    if (/^secrets\.[A-Z_][A-Z0-9_]*(?![\w-])/.test(text.slice(m.index))) continue;
-    forms.push(text.slice(Math.max(0, m.index - 12), m.index + 28).replace(/\s+/g, ' ').trim());
-  }
-  return forms;
-}
+const BOUNDARY = '([)],.!><=&|';
+const isBoundary = (c) => BOUNDARY.includes(c) || isSpace(c);
+const LEGAL_KEYWORD = /^[A-Za-z_][A-Za-z0-9_-]*$/;
+const NUMBER_BEFORE = new Set([undefined, 'separator', 'start-group', 'start-index', 'start-parameters', 'operator']);
 
 /**
- * 式の切り出しに頼らない拾い直し（位置つき）。YAML の単引用符の中では `'` を `''` と書くので、
- * `'${{ ''}}'' && toJSON(secrets) }}'` の切り出しは `}}` で止まり、後ろの secrets を見ない
- * （GitHub は YAML を戻してから式を読むので、全体が1つの式になる）。ここでは引用符を数えずに、
- * `secrets` が式として使われている形（前後が括弧・区切り・演算子、`.*`・`[…]`）を全部拾う。
- * 文章の中の語は前後が文字なので拾わない。コメントも飛ばさない（引用符の中の `#` はコメントではない）。
+ * 式の字句（actions/runner の LexicalAnalyzer.TryGetNextToken を写したもの）。正しい式では
+ * GitHub と同じ区切り・同じ種類になる。正しくない式（GitHub が読み込みで拒む）の扱いは
+ * 合わせていない。種類: named（文脈名）・property（. の後）・function・string・deref・…
  */
-export function looseSecretUses(text) {
-  const src = String(text);
-  const uses = [];
-  for (const m of src.matchAll(/(?<![\w.$-])secrets(?![\w-])/gi)) {
-    const rest = src.slice(m.index);
-    if (/^secrets\.[A-Z_][A-Z0-9_]*(?![\w-])/i.test(rest)) continue;
-    if (/^secrets\s*\[\s*(?:'|'')[A-Z_][A-Z0-9_]*(?:'|'')\s*\]/i.test(rest)) continue;
-    const after = rest.slice('secrets'.length);
-    const next = (after.match(/^\s*(\S)/) || [])[1] || '';
-    // YAML の鍵（secrets: inherit は下で別に見る）。
-    if (next === ':') continue;
-    const before = (src.slice(0, m.index).match(/(\S)\s*$/) || [])[1] || '';
-    const listed = next === '.' && /^\s*\.\s*[*[]/.test(after);
-    if (next === '' || ')}],[|&=!<>'.includes(next) || listed || (before !== '' && '({[,|&=!<>'.includes(before))) {
-      uses.push({ index: m.index, form: src.slice(Math.max(0, m.index - 12), m.index + 28).replace(/\s+/g, ' ').trim() });
+export function expressionTokens(expression) {
+  const s = String(expression);
+  const tokens = [];
+  const open = [];
+  let i = 0;
+  let last;
+  const push = (kind, start, value) => { last = { kind, raw: s.slice(start, i), index: start, value }; tokens.push(last); };
+  for (;;) {
+    while (i < s.length && isSpace(s[i])) i++;
+    if (i >= s.length) break;
+    const c = s[i];
+    const start = i;
+    if (c === '(') {
+      const kind = last?.kind === 'function' ? 'start-parameters' : 'start-group';
+      i++; push(kind, start); open.push(kind);
+    } else if (c === '[') {
+      i++; push('start-index', start); open.push('start-index');
+    } else if (c === ')') {
+      const kind = open.at(-1) === 'start-parameters' ? 'end-parameters' : 'end-group';
+      open.pop(); i++; push(kind, start);
+    } else if (c === ']') {
+      open.pop(); i++; push('end-index', start);
+    } else if (c === ',') {
+      i++; push('separator', start);
+    } else if (c === '*') {
+      i++; push('wildcard', start);
+    } else if (c === "'") {
+      let value = '';
+      let closed = false;
+      i++;
+      while (i < s.length) {
+        const ch = s[i++];
+        if (ch === "'") {
+          if (i >= s.length || s[i] !== "'") { closed = true; break; }
+          i++;
+        }
+        value += ch;
+      }
+      push(closed ? 'string' : 'unexpected', start, value);
+    } else if ('!><=&|'.includes(c)) {
+      i++;
+      if (i < s.length && ['!=', '>=', '<=', '==', '&&', '||'].includes(s.slice(start, start + 2))) { i++; push('operator', start); }
+      else if ('!><'.includes(c)) push('operator', start);
+      else { while (i < s.length && !isBoundary(s[i])) i++; push('unexpected', start); }
+    } else if ((c === '.' && NUMBER_BEFORE.has(last?.kind)) || c === '-' || c === '+' || (c >= '0' && c <= '9')) {
+      do i++; while (i < s.length && (!isBoundary(s[i]) || s[i] === '.'));
+      push('number', start);
+    } else if (c === '.') {
+      i++; push('deref', start);
+    } else {
+      i++;
+      while (i < s.length && !isBoundary(s[i])) i++;
+      const word = s.slice(start, i);
+      let kind = 'unexpected';
+      if (LEGAL_KEYWORD.test(word)) {
+        let ahead = i;
+        while (ahead < s.length && isSpace(s[ahead])) ahead++;
+        if (last?.kind === 'deref') kind = 'property';
+        else if (['null', 'true', 'false', 'NaN', 'Infinity'].includes(word)) kind = 'literal';
+        else if (s[ahead] === '(') kind = 'function';
+        else kind = 'named';
+      }
+      push(kind, start);
     }
   }
+  return tokens;
+}
+
+const SECRET_NAME = /^[A-Z_][A-Z0-9_]*$/;
+const touching = (a, b) => a && b && a.index + a.raw.length === b.index;
+
+/**
+ * 式の中の secrets 文脈の使い方。名前1つの読み方なら { canonical: 'secrets.NAME' }、
+ * それ以外は { form: 抜粋 }。文脈名も名前も大文字小文字を区別して比べる（GitHub は区別しない
+ * ので、違う書き方は名前の検査をすり抜ける）。間に空白を入れた形も認めない。
+ */
+export function secretUses(expression) {
+  const s = String(expression);
+  const tokens = expressionTokens(s);
+  const uses = [];
+  tokens.forEach((t, k) => {
+    if (t.kind !== 'named' || t.raw.toLowerCase() !== 'secrets') return;
+    const [a, b, c] = [tokens[k + 1], tokens[k + 2], tokens[k + 3]];
+    if (t.raw === 'secrets' && a?.kind === 'deref' && b?.kind === 'property' && touching(t, a) && touching(a, b) && SECRET_NAME.test(b.raw)) {
+      uses.push({ index: t.index, canonical: `secrets.${b.raw}` });
+    } else if (t.raw === 'secrets' && a?.kind === 'start-index' && b?.kind === 'string' && c?.kind === 'end-index'
+      && touching(t, a) && touching(a, b) && touching(b, c) && SECRET_NAME.test(b.value) && b.raw === `'${b.value}'`) {
+      uses.push({ index: t.index, canonical: `secrets['${b.value}']` });
+    } else {
+      uses.push({ index: t.index, form: s.slice(Math.max(0, t.index - 12), t.index + 28).replace(SPACE_RUN, ' ').trim() });
+    }
+  });
   return uses;
 }
 
-/** ジョブの範囲。jobs: の外（on:・env: など）は `(workflow)` で、ファイルの全ジョブに効く。 */
-export function workflowJobs(text) {
-  const lines = text.split('\n');
-  const starts = [];
-  let offset = 0, inJobs = false, indent = null;
-  lines.forEach((line) => {
-    if (/^jobs:\s*(?:#.*)?$/.test(line)) inJobs = true;
-    else if (/^\S/.test(line) && !/^#/.test(line)) inJobs = false;
-    else if (inJobs) {
-      const m = line.match(/^( +)([A-Za-z_][\w-]*)\s*:\s*(?:#.*)?$/);
-      if (m && (indent === null || m[1].length === indent)) {
-        indent = m[1].length;
-        starts.push({ id: m[2], start: offset, indent });
-      }
-    }
-    offset += line.length + 1;
-  });
-  return starts.map((job, i) => {
-    const end = i + 1 < starts.length ? starts[i + 1].start : text.length;
-    // jobs: の後ろに別の最上位キーがあっても、本文はそこで切る。
-    const rest = text.slice(job.start, end);
-    const top = rest.search(/\n(?=[^\s#])/);
-    return { ...job, end: top === -1 ? end : job.start + top, body: top === -1 ? rest : rest.slice(0, top) };
-  });
+/** 名前1つの読み方が、その字面に何回そのまま書いてあるか（名前の検査が読めるのはこの数だけ）。 */
+function literalCount(raw, canonical) {
+  let n = 0;
+  for (let at = raw.indexOf(canonical); at !== -1; at = raw.indexOf(canonical, at + 1)) {
+    if (canonical.endsWith(']') || !/[A-Za-z0-9_-]/.test(raw[at + canonical.length] ?? '')) n++;
+  }
+  return n;
 }
 
-/** そのジョブが呼ぶ再利用ワークフロー（ジョブ直下の uses:）。 */
-function calledWorkflow(job) {
-  const m = job.body.match(new RegExp(`\\n {${job.indent + 2}}uses:\\s*['"]?([^\\s'"#]+)`));
-  return m ? m[1] : null;
+// ── 3. ワークフロー ──────────────────────────────────────────────
+
+const scalarText = (node) => (node && node.t === 's' ? node.v : null);
+const isKey = (node, name) => {
+  const v = scalarText(node);
+  return v !== null && v.replace(SPACE_RUN, '').toLowerCase() === name;
+};
+
+/** 木の中のすべての文字列（鍵も値も）。parentKey は、その値が直接ぶら下がっている鍵。 */
+function* strings(node, parentKey = null) {
+  if (!node) return;
+  if (node.t === 's') { yield { node, parentKey }; return; }
+  if (node.t === 'q') { for (const item of node.items) yield* strings(item, null); return; }
+  for (const [k, v] of node.pairs) {
+    yield* strings(k, null);
+    yield* strings(v, scalarText(k));
+  }
+}
+const textOf = (nodes) => nodes.flatMap((n) => [...strings(n)].map(({ node }) => node.v)).join('\n');
+
+/** ジョブの直下の鍵の値（`<<` で混ぜた先も見る。GitHub は `<<` を混ぜないが、安全側に倒す）。 */
+function fieldValues(job, name, seen = new Set()) {
+  if (!job || job.t !== 'm' || seen.has(job)) return [];
+  seen.add(job);
+  const out = [];
+  for (const [k, v] of job.pairs) {
+    if (isKey(k, name)) out.push({ key: k, value: v });
+    else if (scalarText(k) === '<<') for (const m of v.t === 'q' ? v.items : [v]) out.push(...fieldValues(m, name, seen));
+  }
+  return out;
+}
+
+const LOCAL_WORKFLOW = /^\.\/\.github\/workflows\/([^/@]+)$/;
+
+/** 1つのファイルを読んで、ジョブとファイル全体の設定に分ける。読めなければ { error }。 */
+function analyzeFile(name, text, parsed) {
+  if (typeof text !== 'string') return { name, error: 'UTF-8 として読めない' };
+  if (parsed.error) return { name, error: parsed.error };
+  let docs;
+  try { docs = buildYamlDocuments(parsed.events); } catch (e) { return { name, error: e.message }; }
+  // GitHub も文書は1つしか受け付けない（YamlObjectReader.ValidateStart / ValidateEnd）。
+  if (docs.length !== 1) return { name, error: `文書が ${docs.length} 個ある（GitHub はワークフローとして受け付けない）` };
+  const root = docs[0];
+  // 最上位が対応表でない・jobs が無い・ジョブが1つも無いファイルも読めない扱いにする。どれも
+  // ワークフローとしては使えない形で、この読み方と GitHub の読み方がずれたとき（ジョブを見失った
+  // とき）に、ファイル全体を「モデル無し」として通さないため。
+  if (root.t !== 'm') return { name, error: '最上位が対応表でない' };
+  const workflowNodes = [];
+  const jobs = [];
+  for (const [k, v] of root.pairs) {
+    workflowNodes.push(k);
+    if (!isKey(k, 'jobs')) { workflowNodes.push(v); continue; }
+    if (v.t !== 'm') return { name, error: `jobs の値が対応表でない（${k.line}行）` };
+    for (const [jk, jv] of v.pairs) {
+      jobs.push({ id: scalarText(jk) ?? `(鍵が文字列でない: ${jk.line}行)`, key: jk, node: jv, line: jk.line, column: jk.col ?? 0 });
+    }
+  }
+  if (!jobs.length) return { name, error: 'jobs にジョブが1つも無い' };
+  return { name, root, workflowNodes, workflowText: textOf(workflowNodes), jobs };
 }
 
 /**
  * 1つのディレクトリのワークフロー群を読んで、名前で読んでいない箇所（findings）と、
- * ジョブごとのモデルの有無（jobs）を返す。files: [{ name, text }]。model は「モデルを動かしうる」。
+ * ジョブごとのモデルの有無（jobs）を返す。files: [{ name, text }]（text が null なら読めない）。
+ * finding: { file, line, form, job, model, kind? }。kind: 'parse' は読めないファイル。
  */
-export function inspectWorkflows(files) {
-  const parsed = new Map(files.map(({ name, text }) => {
-    const decoded = decodeYamlEscapes(text);
-    return [name, { name, text: decoded, raw: text, jobs: workflowJobs(decoded) }];
-  }));
+export function inspectWorkflows(files, { ruby } = {}) {
+  const texts = files.map((f) => (typeof f.text === 'string' ? f.text.replace(/^\uFEFF/, '') : null));
+  const parsed = readYamlEvents(texts.filter((t) => t !== null), { ruby });
+  let p = 0;
+  const analyzed = new Map(files.map((f, n) => [f.name, analyzeFile(f.name, texts[n], texts[n] === null ? null : parsed[p++])]));
+
   const modelCache = new Map();
+  const callees = (job) => fieldValues(job.node, 'uses').map(({ value }) => scalarText(value) ?? '(文字列でない uses)');
   const jobRunsModel = (file, job, seen = new Set()) => {
-    const key = `${file.name}#${job.id}`;
+    const key = `${file.name}#${job.id}#${job.line}`;
     if (modelCache.has(key)) return modelCache.get(key);
-    let result = MODEL_MARKERS.test(job.body);
-    const callee = calledWorkflow(job);
-    if (!result && callee) {
-      const local = callee.match(/^\.\/\.github\/workflows\/([^/]+)$/);
-      const target = local ? parsed.get(local[1]) : null;
-      // 外のリポジトリや見つからない呼び先は中身を確かめられない。動かしうる側に倒す。
-      if (!target || seen.has(target.name)) result = !target;
-      else result = fileRunsModel(target, new Set([...seen, file.name]));
+    let result = MODEL_MARKERS.test(`${textOf([job.key, job.node])}\n${file.workflowText}`);
+    for (const callee of callees(job)) {
+      if (result) break;
+      const local = callee.match(LOCAL_WORKFLOW);
+      const target = local ? analyzed.get(local[1]) : null;
+      // 外のリポジトリ・見つからない・読めない呼び先は中身を確かめられない。動かしうる側に倒す。
+      if (!target || target.error) result = true;
+      else if (!seen.has(target.name)) result = fileRunsModel(target, new Set([...seen, file.name]));
     }
     modelCache.set(key, result);
     return result;
   };
-  const fileRunsModel = (file, seen = new Set()) => file.jobs.some(job => jobRunsModel(file, job, seen));
-  const where = (file, index) => {
-    const job = file.jobs.find(j => index >= j.start && index < j.end);
-    return { job: job ? job.id : '(workflow)', model: job ? jobRunsModel(file, job) : fileRunsModel(file) };
-  };
-  const lineOf = (text, index) => text.slice(0, index).split('\n').length;
+  const fileRunsModel = (file, seen = new Set()) => file.jobs.some((job) => jobRunsModel(file, job, seen));
 
   const findings = [];
-  for (const file of parsed.values()) {
-    for (const expression of workflowExpressions(file.text)) {
-      for (const form of bulkSecretForms(expression.text)) {
-        findings.push({ file: file.name, line: lineOf(file.text, expression.index), form, ...where(file, expression.index) });
+  const seenFinding = new Set();
+  const add = (f) => {
+    const key = `${f.file}|${f.job}|${f.line}|${f.form}`;
+    if (!seenFinding.has(key)) { seenFinding.add(key); findings.push(f); }
+  };
+  const scan = (file, nodes, scope) => {
+    for (const { node, parentKey } of nodes.flatMap((n) => [...strings(n)])) {
+      // `if:` の値は、${{ }} の中と、値を丸ごと式として読んだものの両方を見る（GitHub は ${{ }} だけで
+      // 書いた値はその中身を、それ以外は値そのものを条件として読む）。名前1つの読み方の数は、
+      // 二重に数えないよう読み方ごとに数えて大きいほうを使う。
+      const readings = [templateExpressions(node.v)];
+      if (parentKey !== null && parentKey.replace(SPACE_RUN, '').toLowerCase() === 'if') readings.push([{ index: 0, text: node.v }]);
+      const named = new Map();
+      for (const expressions of readings) {
+        const counts = new Map();
+        for (const expression of expressions) {
+          for (const use of secretUses(expression.text)) {
+            if (use.canonical) { counts.set(use.canonical, (counts.get(use.canonical) || 0) + 1); continue; }
+            // ブロック（run: |）の中は、式のある行を数える。それ以外は値の始まりの行。
+            const line = node.style === 4 ? node.line + 1 + (node.v.slice(0, expression.index + use.index).match(/\n/g) || []).length : node.line;
+            add({ file: file.name, line, form: use.form, ...scope });
+          }
+        }
+        for (const [canonical, n] of counts) named.set(canonical, Math.max(named.get(canonical) || 0, n));
       }
-    }
-    // 行継ぎ（行末の \）で字面を分けた式は、行をつないでから数え直す。増えた分は場所を決められないので
-    // ファイル全体の問題にする。
-    const joined = decodeYamlEscapes(file.raw, { joinLines: true });
-    const count = text => workflowExpressions(text).reduce((n, e) => n + bulkSecretForms(e.text).length, 0);
-    if (count(joined) > count(file.text)) {
-      findings.push({ file: file.name, line: null, form: '行継ぎ（行末の \\）で分けた式', job: '(workflow)', model: fileRunsModel(file) });
-    }
-    // 切り出しをすり抜ける書き方（YAML の '' など）は、モデルを動かす範囲だけ字面で拾い直す。
-    // モデルの無いジョブは上の式の検査と台帳の例外に任せる（説明文の語を拾って例外が増えるのを避ける）。
-    const lines = new Set(findings.filter(f => f.file === file.name).map(f => f.line));
-    for (const use of looseSecretUses(file.text)) {
-      const at = where(file, use.index);
-      const line = lineOf(file.text, use.index);
-      if (!at.model || lines.has(line)) continue;
-      lines.add(line);
-      findings.push({ file: file.name, line, form: use.form, ...at });
-    }
-    if (fileRunsModel(file) && looseSecretUses(joined).length > looseSecretUses(file.text).length) {
-      findings.push({ file: file.name, line: null, form: '行継ぎ（行末の \\）で分けた字面', job: '(workflow)', model: true });
-    }
-    let offset = 0;
-    for (const line of file.text.split('\n')) {
-      if (/^\s*secrets\s*:\s*(['"]?)inherit\1\s*(?:#.*)?$/.test(line)) {
-        const job = file.jobs.find(j => offset >= j.start && offset < j.end);
-        const callee = job ? calledWorkflow(job) : null;
-        const local = callee ? callee.match(/^\.\/\.github\/workflows\/([^/]+)$/) : null;
-        const target = local ? parsed.get(local[1]) : null;
-        // 同じディレクトリでモデルを動かさない呼び先は、呼ばれた側も名前でしか読めない（この検査が見る）。
-        if (!target || fileRunsModel(target, new Set([file.name]))) {
-          findings.push({ file: file.name, line: lineOf(file.text, offset), form: `secrets: inherit → ${callee ?? '(呼び先なし)'}`,
-            ...where(file, offset) });
+      for (const [canonical, n] of named) {
+        if (node.aliasOf !== undefined) {
+          add({ file: file.name, line: node.line, form: `${canonical}（エイリアス *${node.aliasOf} で持ち込んだ。このジョブの字面に名前が無い）`, ...scope });
+        } else if (literalCount(node.raw, canonical) < n) {
+          add({ file: file.name, line: node.line, form: `${canonical}（YAML のエスケープ・行継ぎ・'' などで書いてあり、字面に名前がそのまま無い）`, ...scope });
         }
       }
-      offset += line.length + 1;
+    }
+  };
+
+  for (const file of analyzed.values()) {
+    if (file.error) {
+      add({ file: file.name, line: null, form: `YAML として読めない: ${file.error}`, job: '(file)', model: true, kind: 'parse' });
+      continue;
+    }
+    scan(file, file.workflowNodes, { job: '(workflow)', model: fileRunsModel(file) });
+    for (const job of file.jobs) {
+      const scope = { job: job.id, model: jobRunsModel(file, job) };
+      scan(file, [job.key, job.node], scope);
+      // secrets: inherit（値が文字列なら書き方によらず inherit とみなす）。同じディレクトリで
+      // モデルを動かさない呼び先だけ通す（呼ばれた側も名前でしか読めない。この検査が見る）。
+      for (const { key, value } of fieldValues(job.node, 'secrets')) {
+        if (value.t !== 's') continue;
+        const targets = callees(job);
+        const safe = targets.length > 0 && targets.every((callee) => {
+          const local = callee.match(LOCAL_WORKFLOW);
+          const target = local ? analyzed.get(local[1]) : null;
+          return target && !target.error && !fileRunsModel(target, new Set([file.name]));
+        });
+        if (!safe) add({ file: file.name, line: key.line, form: `secrets: ${value.v} → ${targets.join(', ') || '(呼び先なし)'}`, ...scope });
+      }
     }
   }
-  const jobs = [...parsed.values()].flatMap(file => file.jobs.map(job => ({ file: file.name, id: job.id, model: jobRunsModel(file, job) })));
+  const jobs = [...analyzed.values()].filter((f) => !f.error)
+    .flatMap((file) => file.jobs.map((job) => ({ file: file.name, id: job.id, model: jobRunsModel(file, job), line: job.line, column: job.column })));
   return { findings, jobs };
 }
 
-export const bulkSecretFindings = files => inspectWorkflows(files).findings;
+export const bulkSecretFindings = (files, options) => inspectWorkflows(files, options).findings;
 
 /**
  * 問題の文言。allow は [{ workflow, job, reason }]（台帳の $bulk_secret_access）。
- * **モデルを動かしうるジョブは例外にできない。**理由の無い例外も認めない。
+ * **モデルを動かしうるジョブと、読めないファイルは例外にできない。**理由の無い例外も認めない。
  */
 export function bulkSecretProblems(findings, allow = []) {
   const problems = [];
@@ -244,13 +519,15 @@ export function bulkSecretProblems(findings, allow = []) {
   }
   for (const f of findings) {
     const at = `${f.file}${f.line ? `:${f.line}` : ''}（ジョブ ${f.job}）`;
-    const allowed = entries.some(e => e && e.workflow === f.file && e.job === f.job && typeof e.reason === 'string' && e.reason.trim());
-    if (f.model) {
+    const allowed = entries.some((e) => e && e.workflow === f.file && e.job === f.job && typeof e.reason === 'string' && e.reason.trim());
+    if (f.kind === 'parse') {
+      problems.push(`${f.file}: ${f.form} — **読めないファイルは検査できないので通さない**（例外にできない）`);
+    } else if (f.model) {
       problems.push(`${at}: モデルを動かすジョブが secret を名前で読んでいない「${f.form}」`
-        + ' — **全部の secret がモデルに渡る。**`secrets.NAME` で1つずつ書く（このジョブは例外にできない）');
+        + ' — **全部の secret がモデルに渡るか、名前の検査から見えない。**`secrets.NAME` を字面のまま1つずつ書く（このジョブは例外にできない）');
     } else if (!allowed) {
       problems.push(`${at}: secret を名前で読んでいない「${f.form}」`
-        + ' — 名前の検査（台帳・モデルのジョブの検査）をすり抜ける。`secrets.NAME` で1つずつ書くか、'
+        + ' — 名前の検査（台帳・モデルのジョブの検査）をすり抜ける。`secrets.NAME` を字面のまま1つずつ書くか、'
         + 'モデルを動かさないジョブなら data/credential-expiry.json の $bulk_secret_access に理由つきで書く');
     }
   }
