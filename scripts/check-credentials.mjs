@@ -34,7 +34,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 import {
   DOTNET_WHITESPACE, WORKFLOW_FILE, buildYamlDocuments, bulkSecretFindings, bulkSecretProblems, inspectWorkflows, readYamlEvents,
@@ -623,6 +624,13 @@ const MODEL_RUNNERS = [
   ['Node で openai を読み込む（import { … } from）', runner('      - run: node --input-type=module -e "import { OpenAI } from \'openai\'; console.log(1)"')],
   ['Node で openai を読み込む（require）', runner('      - run: node -e "const c = require(\'openai\'); console.log(1)"')],
   ['Azure OpenAI の宛先', runner('      - run: curl -s https://example.openai.azure.com/openai/deployments/x/chat/completions')],
+  // f7615b2f7 のレビュー: 次の3つの印は、外しても全件通っていた（固定する検体が無かった）。
+  ['pip で litellm を入れる', runner('      - run: pip install litellm && python summarize.py')],
+  ['pip で langchain-core を入れる', runner('      - run: pip install langchain-core && python summarize.py')],
+  ['pip で llama-index を入れる', runner('      - run: pip install llama-index && python summarize.py')],
+  // run: | の中で行継ぎして、包みの名前を次の行に置く（ブロックの字下げは値に残らないので、名前は行頭に来る）。
+  ['run: | の中で行継ぎした次の行の包みの名前（pip install \\ → openai）', runner('      - run: |', '          pip install --quiet \\',
+    '          openai', '          python summarize.py')],
 ];
 /** モデルを動かさない書き方（audit はモデルの無いジョブのまま、例外で通る）。 */
 const NOT_RUNNERS = [
@@ -632,6 +640,9 @@ const NOT_RUNNERS = [
     '        run: git log --grep "claude/" --oneline')],
   ['owner/repo の大文字小文字を変えた既知の action（Actions/Checkout）', runner('      - uses: Actions/Checkout@11bd71901bbe5b1630ceea73d27597364c9af683')],
   ['npm の別の包み（npm install openapi-types・pip install opentelemetry）', runner('      - run: npm install openapi-types && pip install opentelemetry-api')],
+  // 包みの名前の前後の区切り（f7615b2f7 のレビュー: 上の検体には印の語で始まる名前が無く、前後の守りを外しても通った）。
+  ['語の途中にある包みの名前（pip install philanthropic。前の区切り）', runner('      - run: pip install philanthropic && python report.py')],
+  ['語の続きがある包みの名前（npm install groqd・pip install coherent。後ろの区切り）', runner('      - run: npm install groqd && pip install coherent')],
   ['既知の action の副パス（actions/cache/restore）', runner('      - uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684')],
 ];
 for (const [name, edit] of MODEL_RUNNERS) {
@@ -653,6 +664,44 @@ for (const [name, edit] of NOT_RUNNERS) {
       `例外で通らない: ${JSON.stringify(findings)}`);
   }]);
 }
+
+/**
+ * 1行が長いワークフローでも、検査が終わること（f7615b2f7 のレビュー）。f7615b2f7 の SDK の導入の印は、
+ * 遅延の `[^\n]*?` を2段重ねた1つの正規表現で、当たらない長い1行で O(n³) だった（`npm i ` の繰り返しで
+ * 20KB 26 秒・英文風の 1MB は2分でも終わらない）。CI の手順には上限時間が無く、止まると既定の360分まで待つ。
+ * **この自己テスト自身が止まらないよう、別のプロセスで時間を区切って走らせる**（同じプロセスで回すと、
+ * 遅い形に戻ったときに自己テストも終わらなくなる）。線形なら1秒前後で終わる。
+ */
+const LONG_LINE_BYTES = 1 << 20;
+const LONG_LINE_TIMEOUT_MS = 30000;
+const LONG_LINE_CHILD = `
+const lib = await import(process.argv[1]);
+const N = ${LONG_LINE_BYTES};
+const fill = (unit) => unit.repeat(Math.ceil(N / unit.length)).slice(0, N);
+const shapes = { npmi: 'npm i ', english: 'I install the tool and run it with npm when I can. ',
+  minified: 'for(var i=0;i<n;i++){x[i]=npm.install(i)||run(x)}', pipx: 'pipx run --spec x y ' };
+const markers = Object.fromEntries(Object.entries(shapes).map(([k, unit]) => [k, lib.modelMarker(fill(unit))]));
+const tail = lib.modelMarker(fill('npm i ') + ' openai');
+const jobs = Array.from({ length: 20 }, (_, n) => '  j' + n + ':\\n    runs-on: x\\n    steps:\\n      - run: echo ' + n + '\\n').join('');
+const text = 'on: push\\nenv:\\n  BIG: \\'' + fill(shapes.npmi) + '\\'\\njobs:\\n  long:\\n    runs-on: x\\n    steps:\\n'
+  + '      - run: \\'' + fill(shapes.english) + '\\'\\n' + jobs;
+const { findings, jobs: judged } = lib.inspectWorkflows([{ name: 'long.yml', text }]);
+console.log(JSON.stringify({ markers, tail: tail && [tail.slice(0, 5), tail.slice(-6), tail.length],
+  judged: judged.length, model: judged.filter((j) => j.model).length, findings: findings.length }));
+`;
+SCENARIOS.push([`**1行が ${LONG_LINE_BYTES / (1 << 20)}MB のワークフローでも、検査が ${LONG_LINE_TIMEOUT_MS / 1000} 秒以内に終わる**（印の正規表現が長い1行で破滅的なバックトラックをしない）`, () => {
+  const lib = pathToFileURL(path.join(ROOT, 'scripts/lib/workflow-secrets.mjs')).href;
+  const started = Date.now();
+  const r = spawnSync(process.execPath, ['--input-type=module', '-e', LONG_LINE_CHILD, lib],
+    { encoding: 'utf8', timeout: LONG_LINE_TIMEOUT_MS, maxBuffer: 1 << 26 });
+  const took = Date.now() - started;
+  assert(!r.error && r.status === 0, `${took}ms で終わらない・失敗した（${r.error?.code || r.signal || r.status}）: ${String(r.stderr).trim().slice(0, 300)}`);
+  const got = JSON.parse(r.stdout);
+  assert(Object.values(got.markers).every((m) => m === null), `印の無い長い1行で印を拾った: ${JSON.stringify(got.markers)}`);
+  assert(JSON.stringify(got.tail) === JSON.stringify(['npm i', 'openai', LONG_LINE_BYTES + 7]),
+    `長い1行の終わりの包みの名前を、行の始まりのパッケージマネージャからの範囲で拾わない: ${JSON.stringify(got.tail)}`);
+  assert(got.judged === 21 && got.model === 0 && got.findings === 0, `長い1行のワークフローの判定が違う: ${r.stdout.trim()}`);
+}]);
 
 /**
  * モデルのジョブと needs でつながるジョブは、モデルが無くても例外にできない。上流なら outputs で値が

@@ -51,7 +51,9 @@
  * 【モデルのジョブ】次のどれかに当たるジョブは「モデルを動かしうる」とし、例外にできない
  * （2026-10-30 の再レビューで広げた。迷う書き方は「動かす」側に倒す）。
  *   - ジョブの中身（エイリアスを展開した後）かファイル全体の設定に MODEL_MARKERS がある
- *     （鍵や設定の名前・導入の仕方・API の宛先）か、MODEL_COMMANDS（モデルの CLI をコマンドとして書いた形）がある。
+ *     （鍵や設定の名前・導入の仕方・API の宛先）か、SDK_INSTALL（パッケージマネージャで SDK を入れる形）か、
+ *     MODEL_COMMANDS（モデルの CLI をコマンドとして書いた形）がある。どれも長い1行で線形時間に収まる形で書く
+ *     （CI の手順に上限時間が無いので、止まらない検査は「通らない」ではなく「終わらない」になる）。
  *   - 手順の `uses:` が KNOWN_ACTIONS に無い（第三者の action・同じリポジトリの composite action（./…）・
  *     docker://。中身をこの検査が読めないので、エージェントの action かどうか分からない）。
  *   - ジョブに `container:` か `services:` がある（イメージの中身を読めない。services は run も uses も
@@ -105,12 +107,62 @@ export const MODEL_MARKERS = new RegExp([
   String.raw`api\.anthropic\.com`, String.raw`api\.openai\.com`, String.raw`generativelanguage\.googleapis\.com`, String.raw`aiplatform\.googleapis\.com`,
   String.raw`bedrock-runtime`, String.raw`models\.github\.ai`, String.raw`models\.inference\.ai\.azure\.com`, String.raw`\.openai\.azure\.com`,
   String.raw`api\.(?:mistral\.ai|groq\.com|deepseek\.com|x\.ai|cohere\.(?:ai|com)|together\.(?:ai|xyz)|fireworks\.ai|perplexity\.ai)`,
-  // SDK の導入と読み込み（印の無い名前の鍵を、一括で読んだ JSON から取り出して SDK に渡す形）
+  // SDK の導入と読み込み（印の無い名前の鍵を、一括で読んだ JSON から取り出して SDK に渡す形）。
+  // パッケージマネージャで入れる形は SDK_INSTALL（下）。1つの正規表現にすると、長い1行で止まらなくなる。
   String.raw`@anthropic-ai\/`, String.raw`\blitellm\b`, String.raw`\blangchain`, String.raw`\bllama[-_]?index\b`,
-  String.raw`\b(?:pip3?|pipx|uv|poetry|conda|npm|pnpm|yarn|bun|npx|gem|cargo)\b[^\n]*?\b(?:install|add|i|run|exec|x)\b[^\n]*?(?:^|[\s'"=])(?:anthropic|openai|google-genai|google-generativeai|mistralai|groq|cohere|ollama)(?=$|[\s'"=<>@~^\[])`,
   String.raw`\b(?:import|from)\s+(?:anthropic|openai|google\.genai|google\.generativeai|mistralai|groq|cohere|ollama)\b`,
   String.raw`\brequire\(\s*['"](?:openai|@google\/genai|ollama)['"]`, String.raw`\bfrom\s+['"](?:openai|@google\/genai|ollama)['"]`,
 ].join('|'), 'i');
+
+/**
+ * パッケージマネージャでモデルの SDK を入れる・動かす形（大文字小文字を区別しない）。パッケージマネージャ →
+ * 動詞 → 包みの名前 の順に、パッケージマネージャと動詞は**同じ行に**並ぶ形（`pip install --quiet openai==1.0.0`・
+ * `npm i anthropic`・`uv run --with openai`）。包みの名前は前が空白・引用符・`=`、後ろが行末・空白・引用符・
+ * `=<>@~^[` のときだけ拾う（`openapi-types`・`philanthropic`・`groqd` は拾わない）。前の文字には改行も入るので、
+ * 包みの名前は同じ行か、**次の行の行頭**（0桁目）にあれば拾う（字下げした次の行は拾わない）。
+ *
+ * 【なぜ1つの正規表現にしないか】f7615b2f7 はこれを `\b(?:pip3?|…)\b[^\n]*?\b(?:install|…)\b[^\n]*?…` の
+ * 1つの正規表現で書いていた。遅延の `[^\n]*?` を2段重ねると、当たらない長い1行で O(n³) のバックトラックに
+ * なる（`npm i ` の繰り返しで 10KB 3.3 秒・20KB 26 秒。1MB は数十日の見込み。f7615b2f7 のレビューが実測）。
+ * CI の手順には上限時間が無いので、1行が長いワークフローが1本入るだけで、検査は「通らない」ではなく
+ * 「終わらない」になる。いまは行ごとに、いちばん左のパッケージマネージャ・その後ろでいちばん左の動詞・
+ * その後ろでいちばん左の包みの名前を、それぞれ1回ずつ探す（O(n)）。パッケージマネージャと動詞は語の単位
+ * （前後が \b）で重ならないので、左から1つずつ決めても、元の正規表現が当たる文字列では必ず当たり、範囲
+ * （始まりと終わり）も同じになる。f7615b2f7 の正規表現と、乱数で作った文字列で読み比べて確かめた。
+ */
+const SDK_PACKAGES = String.raw`(?:anthropic|openai|google-genai|google-generativeai|mistralai|groq|cohere|ollama)(?=$|[\s'"=<>@~^\[])`;
+export const SDK_INSTALL = {
+  manager: /\b(?:pip3?|pipx|uv|poetry|conda|npm|pnpm|yarn|bun|npx|gem|cargo)\b/i,
+  verb: /\b(?:install|add|i|run|exec|x)\b/gi,
+  package: new RegExp(String.raw`[\s'"=]${SDK_PACKAGES}`, 'gi'),
+  /** 次の行の行頭の包みの名前（前の文字は行末の改行）。ファイル全体の文字列の上で、改行の位置から試す。 */
+  packageAfterNewline: new RegExp(String.raw`\n${SDK_PACKAGES}`, 'iy'),
+};
+
+/** SDK_INSTALL に当たる、いちばん左の範囲（{ index, text }）。無ければ null。文字列の長さに対して線形時間。 */
+export function sdkInstallMarker(text) {
+  const s = String(text);
+  for (let start = 0; ;) {
+    const newline = s.indexOf('\n', start);
+    const line = s.slice(start, newline === -1 ? s.length : newline);
+    const manager = line.match(SDK_INSTALL.manager);
+    if (manager) {
+      const { verb, package: pkg, packageAfterNewline: next } = SDK_INSTALL;
+      verb.lastIndex = manager.index + manager[0].length;
+      const v = verb.exec(line);
+      if (v) {
+        pkg.lastIndex = v.index + v[0].length;
+        const p = pkg.exec(line);
+        if (p) return { index: start + manager.index, text: line.slice(manager.index, p.index + p[0].length) };
+        next.lastIndex = newline;
+        const n = newline === -1 ? null : next.exec(s);
+        if (n) return { index: start + manager.index, text: s.slice(start + manager.index, newline + n[0].length) };
+      }
+    }
+    if (newline === -1) return null;
+    start = newline + 1;
+  }
+}
 
 /**
  * モデルの CLI を**コマンドとして**書いた形（大文字小文字を区別する。コマンド名は小文字で、
@@ -493,11 +545,17 @@ function* allPairs(node) {
   }
 }
 
-/** 文字列の中のモデルの印（MODEL_MARKERS か MODEL_COMMANDS）。無ければ null。 */
+/**
+ * 文字列の中のモデルの印（MODEL_MARKERS か SDK_INSTALL。どちらも無ければ MODEL_COMMANDS）。無ければ null。
+ * MODEL_MARKERS と SDK_INSTALL は f7615b2f7 では1つの正規表現だったので、いちばん左で当たったほうを返す
+ * （同じ位置では MODEL_MARKERS。パッケージマネージャの語で始まる MODEL_MARKERS の印は無いので、実際には並ばない）。
+ */
 export function modelMarker(text) {
   const s = String(text);
-  const m = s.match(MODEL_MARKERS) || s.match(MODEL_COMMANDS);
-  return m ? m[0].replace(/^[\s;&|(`'"=/]+/, '').trim() : null;
+  const m = s.match(MODEL_MARKERS);
+  const sdk = sdkInstallMarker(s);
+  const hit = m && (!sdk || m.index <= sdk.index) ? m[0] : sdk ? sdk.text : s.match(MODEL_COMMANDS)?.[0];
+  return hit ? hit.replace(/^[\s;&|(`'"=/]+/, '').trim() : null;
 }
 
 /** ジョブの直下の鍵の値（`<<` で混ぜた先も見る。GitHub は `<<` を混ぜないが、安全側に倒す）。 */
@@ -561,12 +619,18 @@ export function inspectWorkflows(files, { ruby } = {}) {
     const local = callee.match(LOCAL_WORKFLOW);
     return local ? analyzed.get(local[1]) : undefined;
   };
+  // ファイル全体の設定の印は、ファイルごとに1回だけ探す（ジョブの数だけ全文を読み直さない）。
+  const sharedMarkers = new Map();
+  const sharedMarker = (file) => {
+    if (!sharedMarkers.has(file.name)) sharedMarkers.set(file.name, modelMarker(file.workflowText));
+    return sharedMarkers.get(file.name);
+  };
   /** ジョブがモデルを動かしうる理由（動かさないなら null）。 */
   const modelReason = (file, job, seen = new Set()) => {
     const key = `${file.name}#${job.id}#${job.line}`;
     if (modelCache.has(key)) return modelCache.get(key);
     const own = modelMarker(textOf([job.key, job.node]));
-    const shared = own === null ? modelMarker(file.workflowText) : null;
+    const shared = own === null ? sharedMarker(file) : null;
     let reason = own !== null ? `印「${own}」` : shared !== null ? `ワークフロー全体の設定の印「${shared}」` : null;
     // 手順の uses（ジョブの直下の uses は再利用ワークフローの呼び出しなので、下で呼び先を読む）。
     const calls = new Set(fieldValues(job.node, 'uses').map(({ value }) => value));
@@ -763,7 +827,7 @@ export function bulkSecretProblems(findings, allow = []) {
     if (f.kind === 'parse') {
       problems.push(`${f.file}: ${f.form} — **読めないファイルは検査できないので通さない**（例外にできない）`);
     } else if (f.model) {
-      problems.push(`${at}: モデルを動かすジョブが secret を名前で読んでいない「${f.form}」`
+      problems.push(`${at}: モデルを動かしうるジョブが secret を名前で読んでいない「${f.form}」`
         + ' — **全部の secret がモデルに渡るか、名前の検査から見えない。**`secrets.NAME` を字面のまま1つずつ書く（このジョブは例外にできない）'
         + `${f.why ? `。モデルを動かしうると判定した理由: ${f.why}` : ''}`);
     } else if (f.feeds?.length || f.fedBy?.length) {
