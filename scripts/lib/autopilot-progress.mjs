@@ -237,6 +237,10 @@ export function checkTimeBoxWiring(source) {
   assert.match(box, /^        id: timebox\n/m, 'the prompt reads the time box as steps.timebox');
   assert.match(box, /steps\.gate\.outputs\.run == 'true' && steps\.budget\.outputs\.within == 'true'\s+&& steps\.route\.outputs\.run_cap_ok == 'true'/,
     'the time box is set on every day the model runs');
+  // The same condition as the model step, word for word: an added clause (`&& false`) would skip only the time box.
+  const condition = text => text?.match(/\n        if: >-\n((?: {10}\S.*\n)+)/)?.[1];
+  assert(condition(box) && condition(box) === condition(step('Claude Code（Runbook 1イテレーション実行）')),
+    'the time box is set on exactly the days the model runs');
   assert.match(box, /\n        continue-on-error: true\n/, 'a missing time box must not stop the model');
   assert.match(box, /\n        timeout-minutes: 1\n/);
   assert(box.includes('\n          JOB_STARTED_EPOCH: ${{ steps.gate.outputs.job_started_epoch }}\n'), 'the time box reads the Gate step\'s clock');
@@ -251,11 +255,28 @@ export function checkTimeBoxWiring(source) {
   assert(prompt, 'the prompt must tell the session its deadlines');
   // The rules the stages carry: no public-page work that cannot finish before wrap-up (translations and checks take
   // about 25 minutes), no command timeout past the handoff, a fallback clock, and a class for days the box stopped.
+  // Since 2026-10-31 the prompt keeps only these (it sits near GitHub's expression limit,
+  // scripts/lib/workflow-expression-length.mjs); Runbook §5-1a holds the rest (checkTimeBoxRunbook).
   for (const part of ['${{ steps.timebox.outputs.wrap_up_at', '${{ steps.timebox.outputs.handoff_at', '--time-left', 'AUTOPILOT_TIME',
-    '`wrap_up_in_s` が1500を切っていれば選ばない', 'Bash の `timeout` は `handoff_in_s`', 'failure_class を time_box', 'UTC の期限と `date -u` を比べる',
-    '最初に `date -u` を記録し',
+    '`wrap_up_in_s` が1500未満なら選ばない', 'Bash の `timeout` は `handoff_in_s` 以内', 'failure_class を time_box', 'UTC の期限と `date -u` を比べる',
+    '最初の `date -u` から55・65分', '4-1 未了なら push_only', 'Runbook §5-1a', 'ゲートは緩めない',
     ...TIME_STAGES]) {
     assert(prompt.includes(part), `the deadline instructions must mention ${part}`);
+  }
+}
+
+/**
+ * Runbook §5-1a carries the stage rules the prompt only points to: each stage, the 25-minute rule, the handoff
+ * request, the fallback clock, the class, and the two ledger rows a day that meets the deadline can leave.
+ */
+export function checkTimeBoxRunbook(text) {
+  const section = String(text).split('\n### 5-1a.')[1]?.split('\n### ')[0];
+  assert(section, 'the Runbook needs §5-1a');
+  const box = section.split('\n- **時間の期限')[1]?.split('\n- ')[0];
+  assert(box, 'Runbook §5-1a must explain the time box');
+  for (const part of ['--time-left', 'AUTOPILOT_TIME', '1500', '`push_only`', '`date -u`', '55分後・65分後', '`time_box`',
+    '長いコマンド', '`repair_pending`', '`containment_changed`', ...TIME_STAGES.map(stage => `\`${stage}\``)]) {
+    assert(box.includes(part), `Runbook §5-1a must explain ${part}`);
   }
 }
 

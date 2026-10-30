@@ -340,12 +340,20 @@ export async function selftest() {
           ['        continue-on-error: true\n        env:\n          JOB_STARTED_EPOCH', '        env:\n          JOB_STARTED_EPOCH'],
           ['        env:\n          JOB_STARTED_EPOCH', '        env:\n          TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}\n          JOB_STARTED_EPOCH'],
           ["${{ steps.timebox.outputs.handoff_at || 'unknown' }}", 'unknown'],
-          ['Bash の `timeout` は `handoff_in_s` の秒数', 'Bash の `timeout` は残りの秒数'],
-          ['`wrap_up_in_s` が1500を切っていれば選ばない', '`wrap_up_in_s` を見て選ぶ'],
-          ['最初に `date -u` を記録し', '最初に時刻を記録し'],
-          ['上の UTC の期限と `date -u` を比べる', '上の UTC の期限を見る'],
-          ['failure_class を time_box にする', 'failure_class を書く'],
+          ['Bash の `timeout` は `handoff_in_s` 以内', 'Bash の `timeout` は残りの秒数以内'],
+          ['`wrap_up_in_s` が1500未満なら選ばない', '`wrap_up_in_s` を見て選ぶ'],
+          ['最初の `date -u` から55・65分', '最初の時刻から'],
+          ['UTC の期限と `date -u` を比べる', 'UTC の期限を見る'],
+          ['failure_class を time_box に', 'failure_class を書く'],
+          ['（4-1 未了なら push_only）', ''],
+          ['詳細は Runbook §5-1a。', ''],
+          ['ゲートは緩めない。', ''],
           ['【時間の期限】', '【時間】'],
+          // 2026-10-31 review: a clause that skips only the time box (the model step keeps running).
+          ["        id: timebox\n        timeout-minutes: 1\n        if: >-\n          steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'\n          && steps.route.outputs.run_cap_ok == 'true'\n",
+            "        id: timebox\n        timeout-minutes: 1\n        if: >-\n          steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'\n          && steps.route.outputs.run_cap_ok == 'true' && false\n"],
+          ["        id: timebox\n        timeout-minutes: 1\n        if: >-\n          steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'\n          && steps.route.outputs.run_cap_ok == 'true'\n",
+            "        id: timebox\n        timeout-minutes: 1\n        if: >-\n          steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'\n          && steps.route.outputs.run_cap_ok == 'true'\n          && inputs.force == true\n"],
         ].map(([from, to]) => {
           assert(workflow.includes(from), `time box mutation applies: ${from}`);
           return [from, workflow.replace(from, to)];
