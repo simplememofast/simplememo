@@ -10,7 +10,8 @@ import { pack, MAIN_EXECUTION_COPY, SUMMARY_FILE } from './autopilot-publish.mjs
 import { VERDICTS } from './autopilot-audit.mjs';
 import { interpretRun } from './autopilot-act.mjs';
 import { appendProgress, readProgress, progressCommand, checkProgressWiring,
-  PROGRESS_FILE, MAX_PROGRESS_BYTES, MAX_PROGRESS_EVENTS } from './lib/autopilot-progress.mjs';
+  PROGRESS_FILE, MAX_PROGRESS_BYTES, MAX_PROGRESS_EVENTS, TIME_BOX, TIME_BOX_FILE, TIME_STAGES,
+  timeBox, writeTimeBox, readTimeBox, timeLeft, isoSecond, checkTimeBoxWiring } from './lib/autopilot-progress.mjs';
 
 export async function selftest() {
   let tests = 0;
@@ -204,6 +205,156 @@ export async function selftest() {
       assert(workflow.includes(from));
       assert.throws(() => checkProgressWiring(workflow.replace(from, to)));
     });
+    // 2026-10-30 time box (run 40803103665 ran into the 75-minute action limit with no status, LOG or handoff).
+    cleanProgress();
+    test('time box: stages from the Gate step\'s clock, at each boundary', () => {
+      const start = 1793334742;
+      const box = timeBox(String(start), start * 1000);
+      assert.deepEqual(box, { schema_version: 1, job_started_epoch: start,
+        wrap_up_epoch: start + TIME_BOX.wrap_up_minutes * 60, handoff_epoch: start + TIME_BOX.handoff_minutes * 60 });
+      const at = minutes => timeLeft(box, (start + minutes * 60) * 1000);
+      for (const [minutes, stage] of [[0, 'work'], [59.99, 'work'], [60, 'wrap_up'], [69.99, 'wrap_up'], [70, 'handoff_now'], [90, 'handoff_now']]) {
+        assert.equal(at(minutes).stage, stage, `${minutes} minutes`);
+      }
+      assert.deepEqual(at(65), { stage: 'wrap_up', wrap_up_in_s: -300, handoff_in_s: 300 });
+      assert.deepEqual(timeLeft(null), { stage: 'unknown', wrap_up_in_s: null, handoff_in_s: null });
+      assert.deepEqual([...TIME_STAGES], ['work', 'wrap_up', 'handoff_now', 'unknown']);
+      assert.equal(isoSecond(start), '2026-10-30T04:32:22Z');
+    });
+    test('time box: only this job\'s clock is accepted', () => {
+      const now = 1793334742;
+      for (const bad of [undefined, '', '179333474', '17933347420', '1793334742 ', ' 1793334742', '1.7e9', '0793334742', 1793334742, '1793334742\n']) {
+        assert.throws(() => timeBox(bad, now * 1000), undefined, JSON.stringify(bad));
+      }
+      assert.throws(() => timeBox(String(now + 61), now * 1000), undefined, 'a clock from the future');
+      assert.throws(() => timeBox(String(now - TIME_BOX.job_minutes * 60 - 1), now * 1000), undefined, 'a clock older than the job');
+      assert.doesNotThrow(() => timeBox(String(now - TIME_BOX.job_minutes * 60), now * 1000));
+      assert.doesNotThrow(() => timeBox(String(now + 60), now * 1000));
+    });
+    test('time box: written once; altered, linked, oversized or inconsistent files read as unknown', () => {
+      const box = timeBox(String(Math.floor(Date.now() / 1000) - 600));
+      writeTimeBox(progressTemp, box);
+      assert.deepEqual(readTimeBox(progressTemp), box);
+      assert.throws(() => writeTimeBox(progressTemp, box), undefined, 'a second write');
+      const file = path.join(progressTemp, TIME_BOX_FILE);
+      const rewrite = text => { fs.rmSync(file, { force: true }); fs.writeFileSync(file, text); };
+      for (const text of ['', 'not json', '[]', 'null', JSON.stringify({ ...box, extra: 1 }),
+        JSON.stringify({ ...box, handoff_epoch: box.handoff_epoch + 1 }), JSON.stringify({ ...box, wrap_up_epoch: box.wrap_up_epoch - 60 }),
+        JSON.stringify({ ...box, wrap_up_epoch: String(box.wrap_up_epoch) }), JSON.stringify({ ...box, schema_version: 2 }),
+        JSON.stringify(box) + ' '.repeat(600)]) {
+        rewrite(text);
+        assert.equal(readTimeBox(progressTemp), null, text.slice(0, 60));
+      }
+      fs.rmSync(file, { force: true });
+      const real = path.join(progressTemp, 'elsewhere.json');
+      fs.writeFileSync(real, JSON.stringify(box));
+      fs.symlinkSync(real, file);
+      assert.equal(readTimeBox(progressTemp), null, 'a link');
+      fs.rmSync(file, { force: true }); fs.rmSync(real, { force: true });
+      assert.equal(readTimeBox(progressTemp), null, 'missing');
+      assert.equal(readTimeBox(undefined), null);
+      assert.equal(readTimeBox('relative/temp'), null);
+    });
+    cleanProgress();
+    test('CLI: every phase marker and --time-left report the time left, journal or not, as numbers and a fixed word', () => {
+      writeTimeBox(progressTemp, timeBox(String(Math.floor(Date.now() / 1000) - 65 * 60)));
+      const line = out => out.stdout.split('\n').find(l => l.startsWith('AUTOPILOT_TIME '));
+      const parse = out => JSON.parse(line(out).slice('AUTOPILOT_TIME '.length));
+      const left = progressCLI(['--time-left']);
+      assert.equal(left.status, 0, left.stderr);
+      assert.equal(parse(left).stage, 'wrap_up');
+      assert.deepEqual(Object.keys(parse(left)), ['stage', 'wrap_up_in_s', 'handoff_in_s']);
+      // No journal yet: the marker fails, the time is still reported.
+      const failed = progressCLI(['--progress', 'selection', 'start']);
+      assert.equal(failed.status, 1);
+      assert.equal(parse(failed).stage, 'wrap_up');
+      beginProgress();
+      const ok = progressCLI(['--progress', 'selection', 'end', '0']);
+      assert.equal(ok.status, 0, ok.stderr);
+      assert.equal(parse(ok).stage, 'wrap_up');
+      const rejected = progressCLI(['--progress', secret, 'start']);
+      assert.equal(rejected.status, 1);
+      assert(!`${rejected.stdout}${rejected.stderr}`.includes(secret));
+      // The trusted steps before and after the model print no time line; a missing box reads as unknown.
+      assert(!line(progressCLI(['--progress-finish'])));
+      fs.rmSync(path.join(progressTemp, TIME_BOX_FILE));
+      assert.equal(parse(progressCLI(['--time-left'])).stage, 'unknown');
+      assert.equal(progressCLI(['--time-left']).status, 0);
+    });
+    cleanProgress();
+    test('real workflow shell sets the time box once, from the workflow commit and the Gate step\'s clock', () => {
+      const repo = path.join(progressTemp, 'repo-time'); fs.mkdirSync(repo);
+      const outputs = path.join(progressTemp, 'time-outputs');
+      const started = Math.floor(Date.now() / 1000) - 10 * 60;
+      const fixtureEnv = { PATH: process.env.PATH, HOME: progressTemp, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: '/dev/null',
+        RUNNER_TEMP: progressTemp, GITHUB_OUTPUT: outputs, JOB_STARTED_EPOCH: String(started) };
+      const git = (...args) => {
+        const result = spawnSync('git', ['-c', 'core.hooksPath=/dev/null', ...args], { cwd: repo, env: fixtureEnv, encoding: 'utf8' });
+        assert.equal(result.status, 0, result.stderr);
+        return result.stdout.trim();
+      };
+      git('init', '-q'); git('config', 'user.name', 'Synthetic Test'); git('config', 'user.email', 'test@example.invalid');
+      const file = path.join(repo, 'scripts/lib/autopilot-progress.mjs');
+      fs.mkdirSync(path.dirname(file), { recursive: true }); fs.copyFileSync(progressTool, file);
+      git('add', '.'); git('commit', '-q', '-m', 'fixture'); fixtureEnv.GITHUB_SHA = git('rev-parse', 'HEAD');
+      // The checkout's copy is not what runs.
+      fs.writeFileSync(file, `throw new Error('${secret}');`);
+      const block = workflow.split('      - name: Set the model time box\n')[1].split('\n      - name:')[0];
+      const lines = block.split('\n');
+      const body = lines.slice(lines.indexOf('        run: |') + 1).filter(l => l.startsWith('          ')).map(l => l.slice(10)).join('\n');
+      const run = () => spawnSync('bash', ['--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', body], {
+        cwd: repo, env: fixtureEnv, encoding: 'utf8', timeout: 5000,
+      });
+      const first = run();
+      assert.equal(first.status, 0, first.stderr);
+      assert(!`${first.stdout}${first.stderr}`.includes(secret));
+      assert.equal(fs.readFileSync(outputs, 'utf8'),
+        `wrap_up_at=${isoSecond(started + TIME_BOX.wrap_up_minutes * 60)}\nhandoff_at=${isoSecond(started + TIME_BOX.handoff_minutes * 60)}\n`);
+      assert.deepEqual(readTimeBox(progressTemp), timeBox(String(started)));
+      // Once per job: a second run does not rewrite the box.
+      assert.notEqual(run().status, 0);
+      assert.deepEqual(readTimeBox(progressTemp), timeBox(String(started)));
+      // An unreadable clock sets nothing; the session then falls back to its own clock.
+      for (const name of [TIME_BOX_FILE, 'autopilot-time-box-tool.mjs', 'time-outputs']) fs.rmSync(path.join(progressTemp, name));
+      fixtureEnv.JOB_STARTED_EPOCH = '';
+      assert.notEqual(run().status, 0);
+      assert.equal(fs.existsSync(outputs), false);
+      assert.equal(readTimeBox(progressTemp), null);
+    });
+    test('the time box is set before the model from the Gate step\'s clock, and the prompt explains it', () => checkTimeBoxWiring(workflow));
+    {
+      const at = workflow.indexOf('      - name: Set the model time box\n');
+      const end = workflow.indexOf('      - name: Claude Code（Runbook 1イテレーション実行）\n');
+      const stepText = workflow.slice(at, end);
+      const moved = workflow.slice(0, at) + workflow.slice(end).replace('      - name: Preserve bounded progress journal\n',
+        stepText + '      - name: Preserve bounded progress journal\n');
+      for (const [label, mutated] of [
+        ['the step after the model', moved],
+        ...[
+          ['--time-box\n', '--unwired\n'],
+          ['        id: timebox\n', '        id: time_box\n'],
+          ['"$GITHUB_SHA:scripts/lib/autopilot-progress.mjs" > "$RUNNER_TEMP/autopilot-time-box-tool.mjs"',
+            '"HEAD:scripts/lib/autopilot-progress.mjs" > "$RUNNER_TEMP/autopilot-time-box-tool.mjs"'],
+          ['          JOB_STARTED_EPOCH: ${{ steps.gate.outputs.job_started_epoch }}\n        run: |\n          set -o noclobber',
+            '        run: |\n          set -o noclobber'],
+          ['        continue-on-error: true\n        env:\n          JOB_STARTED_EPOCH', '        env:\n          JOB_STARTED_EPOCH'],
+          ['        env:\n          JOB_STARTED_EPOCH', '        env:\n          TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}\n          JOB_STARTED_EPOCH'],
+          ["${{ steps.timebox.outputs.handoff_at || 'unknown' }}", 'unknown'],
+          ['Bash の `timeout` は `handoff_in_s` の秒数', 'Bash の `timeout` は残りの秒数'],
+          ['`wrap_up_in_s` が1500を切っていれば選ばない', '`wrap_up_in_s` を見て選ぶ'],
+          ['最初に `date -u` を記録し', '最初に時刻を記録し'],
+          ['上の UTC の期限と `date -u` を比べる', '上の UTC の期限を見る'],
+          ['failure_class を time_box にする', 'failure_class を書く'],
+          ['【時間の期限】', '【時間】'],
+        ].map(([from, to]) => {
+          assert(workflow.includes(from), `time box mutation applies: ${from}`);
+          return [from, workflow.replace(from, to)];
+        }),
+      ]) test('broken time box wiring is rejected: ' + label, () => {
+        assert.throws(() => checkTimeBoxWiring(mutated));
+        assert.throws(() => checkProgressWiring(mutated));
+      });
+    }
   } finally { fs.rmSync(progressTemp, { recursive: true, force: true }); }
   const env = { GITHUB_RUN_ID: '37403744008', GITHUB_RUN_ATTEMPT: '1', GITHUB_SHA: 'a'.repeat(40),
     TODAY_DASH: '2026-10-06', MODEL_OUTCOME: 'success', OUTPUT_VERDICT: 'missing',
