@@ -27,7 +27,11 @@ const hash = x => createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const read = f => JSON.parse(fs.readFileSync(path.join(ROOT, f), 'utf8'));
 const save = (f, x) => fs.writeFileSync(path.join(ROOT, f), JSON.stringify(x, null, 2) + '\n');
 const git = (...args) => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }).trim();
-const gh = (...args) => JSON.parse(execFileSync('gh', args, { cwd: ROOT, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }));
+// PR lists carry bodies that anyone opening a PR writes, so their size is not
+// ours to bound either: 100 bodies of 65,536 characters, each escaped to six
+// bytes, are about 40 MiB. Above the buffer gh's output throws (ENOBUFS) and the
+// run exits before settlement, recovery and the report (re-audit 2026-10-30).
+const gh = (...args) => JSON.parse(execFileSync('gh', args, { cwd: ROOT, encoding: 'utf8', maxBuffer: 128 * 1024 * 1024 }));
 const api = route => gh('api', `repos/${REPO}/${route}`);
 const shaOK = s => /^[a-f0-9]{40}$/.test(s ?? '');
 const stop = () => { const s = read('data/emergency-stop.json'); return s.stopped || s.agents?.act?.stopped; };
@@ -92,8 +96,9 @@ export function reportTranslationChange(file, files) {
 // branches, so how many there are is not ours to bound. Read every page rather
 // than assert that one was enough: 100 open PRs used to stop every --apply run
 // (re-audit 2026-10-30). Fail closed when GitHub's answer is broken: not a list,
-// a page above the requested size, an entry without a PR number, or a full page
-// with nothing new (the page was not advanced). PR_INVENTORY_PAGES only stops a
+// a page above the requested size, an entry without a PR number or head branch
+// (a deleted fork keeps its head branch name), or a full page with nothing new
+// (the page was not advanced). PR_INVENTORY_PAGES only stops a
 // list that never ends: 10,000 PRs, where 17 were open into main on 2026-10-30.
 // A list really that long also fails closed. A PR opened between two reads
 // repeats an entry and is read once. One closed between two reads can move an
@@ -106,7 +111,7 @@ export function pullRequestInventory(route, what, request = api) {
     assert(Array.isArray(batch) && batch.length <= 100, `${what} is incomplete`);
     let added = 0;
     for (const p of batch) {
-      assert(Number.isSafeInteger(p?.number) && p.number > 0, `${what} has an unknown entry`);
+      assert(Number.isSafeInteger(p?.number) && p.number > 0 && typeof p.head?.ref === 'string', `${what} has an unknown entry`);
       if (seen.has(p.number)) continue;
       seen.add(p.number); rows.push(p); added++;
     }
@@ -129,9 +134,8 @@ export function pendingPublication(request = api, ignored = reportIgnoredPublica
   const listed = pullRequestInventory('pulls?state=open&base=main', 'pending decision PR inventory', request);
   const candidates = [], others = [];
   for (const p of listed) {
-    const named = typeof p.head?.ref === 'string' && p.head.ref.startsWith('Codex/decision-observe-');
-    if (p.head?.repo?.full_name !== REPO) { if (named) others.push(p.number); continue; }
-    assert(typeof p.head.ref === 'string', 'pending decision PR inventory has an unknown entry');
+    const named = p.head.ref.startsWith('Codex/decision-observe-');
+    if (p.head.repo?.full_name !== REPO) { if (named) others.push(p.number); continue; }
     if (!named) continue;
     if (p.user?.login !== MONITOR_OPENER || p.base?.ref !== 'main' || p.base.repo?.full_name !== REPO) { others.push(p.number); continue; }
     candidates.push(p);
@@ -682,7 +686,11 @@ function selftest() {
     assert.deepEqual(result, expected === 'own' ? [{ pr: 321, head: publication.head.sha, draft: false }] : []);
     return { routes, ignored, pages: routes.filter(r => r.startsWith('pulls?')).map(r => Number(new URL(r, 'https://api.github.test/').searchParams.get('page'))) };
   };
-  const foreignOnly = watch({ list: [...foreignNamed, ...unreadable], detail: foreignNamed[0] }, 'none');
+  for (const row of unreadable) {
+    assert.throws(() => pendingPublication(publicationApi({ list: [publication, row] }), () => {}), /unknown entry/,
+      `a list row without a head branch is a broken answer, not a foreign PR: ${JSON.stringify(row)}`);
+  }
+  const foreignOnly = watch({ list: foreignNamed, detail: foreignNamed[0] }, 'none');
   assert.deepEqual(foreignOnly.ignored, [400, 401, 402, 403, 404], 'a PR named like a publication but not the monitor\'s own is reported by number');
   assert(foreignOnly.routes.every(r => r.startsWith('pulls?')), 'a fork or foreign PR is never read or asserted on');
   assert.deepEqual(watch({ list: [foreignNamed[0], publication, foreignNamed[2]] }, 'own').ignored, [400, 402], 'the own publication still waits beside them');
