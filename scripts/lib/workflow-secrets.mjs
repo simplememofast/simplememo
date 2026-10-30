@@ -48,10 +48,21 @@
  * 字面を追う検査（式の切り出し・字面の拾い直し）は残していない。A〜E の書き方で迂回できると
  * 分かっていて、残すと説明文の誤検出だけが残るため。
  *
- * モデルのジョブかどうかは、ジョブの中身（エイリアスを展開した後）とファイル全体の設定に
- * MODEL_MARKERS があるかと、呼んでいる再利用ワークフローで決める。一覧に無い新しいモデルの
- * 動かし方（印の無い第三者の action、同じリポジトリの composite action の中身など）は見えないので、
- * 例外を許すときは人がジョブを読むこと。
+ * 【モデルのジョブ】次のどれかに当たるジョブは「モデルを動かしうる」とし、例外にできない
+ * （2026-10-30 の再レビューで広げた。迷う書き方は「動かす」側に倒す）。
+ *   - ジョブの中身（エイリアスを展開した後）かファイル全体の設定に MODEL_MARKERS がある
+ *     （鍵や設定の名前・導入の仕方・API の宛先）か、MODEL_COMMANDS（モデルの CLI をコマンドとして書いた形）がある。
+ *   - 手順の `uses:` が KNOWN_ACTIONS に無い（第三者の action・同じリポジトリの composite action（./…）・
+ *     docker://。中身をこの検査が読めないので、エージェントの action かどうか分からない）。
+ *   - 呼んでいる再利用ワークフローがモデルを動かすか、中身を確かめられない（外のリポジトリ・見つからない・読めない）。
+ * それでも、`run:` が呼ぶリポジトリのスクリプトの中身や、名前に印の無い secret で API を叩く書き方は
+ * 見えない。**例外を許すときは、人がジョブと、そこで走るスクリプトを読むこと。**
+ *
+ * 【例外にできないジョブ（モデルの無いジョブでも）】モデルのジョブと `needs` で（直接・間接に、
+ * 再利用ワークフローの呼び出しを通しても）つながっているジョブ。上流なら outputs で値が渡り
+ * （base64 などに変えるとマスクも効かない）、下流ならモデルの出力が全部の secret を持つジョブに入る。
+ * 同じ実行の中でもつながっていないジョブからの成果物（artifact）・キャッシュ・リポジトリへの書き込みは
+ * 見ていない（PR 本文と data/injection-surface.json に残る経路として書いた）。
  *
  * 【GitHub と食い違いうるところ】GitHub は YamlDotNet（5.3.0）で読む。libyaml と YamlDotNet は
  * 受け付ける範囲が少し違いうる（アンカーの名前に使える文字は、どちらも英数字・`_`・`-` で同じ）。
@@ -62,8 +73,51 @@
 
 import { spawnSync } from 'node:child_process';
 
-/** モデルを動かす印。迷う書き方は「動かす」側に倒す（例外を許せなくなるだけで、検出は減らない）。 */
-export const MODEL_MARKERS = /anthropics\/claude-code-action|claude[-_]code[-_]oauth[-_]token|anthropic[-_]api[-_]key|@anthropic-ai\/claude-code|claude-agent-sdk|openai[-_]api[-_]key|openai\/codex-action|@openai\/codex|gemini[-_]api[-_]key|run-gemini-cli|\bclaude\s+(?:-p|--print)\b|\bcodex\s+exec\b/i;
+/**
+ * ワークフローのファイル。GitHub の文書は「.yml か .yaml」としか書いておらず、大文字の拡張子（.YML）を
+ * GitHub が読むかどうかは確かめていない。読む前提で検査する（検査が増えるだけで、見落としは減る）。
+ */
+export const WORKFLOW_FILE = /\.ya?ml$/i;
+
+/**
+ * モデルを動かす印（大文字小文字を区別しない）。迷う書き方は「動かす」側に倒す（例外を許せなくなる
+ * だけで、検出は減らない）。鍵・設定の名前、導入の仕方、API の宛先。
+ */
+export const MODEL_MARKERS = new RegExp([
+  // Anthropic / Claude Code（API の鍵・OAuth・Bedrock・Vertex・Foundry・導入スクリプト・SDK）
+  String.raw`anthropics\/claude-code`, String.raw`claude[-_]code[-_]oauth[-_]token`, String.raw`claude[-_]code[-_]use[-_]`,
+  String.raw`\banthropic[-_]`, String.raw`claude[-_]agent[-_]sdk`, String.raw`claude\.ai\/install`, String.raw`claude-code-dist`,
+  String.raw`cloud[-_]ml[-_]region`, String.raw`\bbedrock\b`,
+  // OpenAI / Codex / Azure OpenAI / OpenRouter
+  String.raw`\bopenai[-_]`, String.raw`openai\/codex`, String.raw`@openai\/`, String.raw`\bazure[-_]openai`, String.raw`openrouter`,
+  // Google（Gemini CLI は GOOGLE_API_KEY でも動く。GOOGLE_API_KEY は他の Google API にも使うが、動かす側に倒す）
+  String.raw`\bgemini[-_]`, String.raw`gemini-cli`, String.raw`@google\/genai`, String.raw`\bgoogle[-_]genai`, String.raw`google[-_]generativeai`,
+  String.raw`\bgoogle[-_]api[-_]key`, String.raw`vertex[-_ ]?ai\b`,
+  // ほかの API の鍵・CLI の導入・GitHub Models
+  String.raw`\b(?:mistral|groq|deepseek|xai|cohere|together|fireworks|perplexity|replicate|dashscope|moonshot)[-_]api[-_](?:key|token)`,
+  String.raw`\b(?:hf|hugging[-_]?face(?:[-_]hub)?)[-_](?:api[-_])?token`, String.raw`aider-chat|aider-install`, String.raw`@github\/copilot`,
+  String.raw`\bgh\s+(?:models|copilot)\b`, String.raw`actions\/ai-inference`, String.raw`opencode-ai|sst\/opencode`,
+  // API の宛先
+  String.raw`api\.anthropic\.com`, String.raw`api\.openai\.com`, String.raw`generativelanguage\.googleapis\.com`, String.raw`aiplatform\.googleapis\.com`,
+  String.raw`bedrock-runtime`, String.raw`models\.github\.ai`, String.raw`models\.inference\.ai\.azure\.com`,
+  String.raw`api\.(?:mistral\.ai|groq\.com|deepseek\.com|x\.ai|cohere\.(?:ai|com)|together\.(?:ai|xyz)|fireworks\.ai|perplexity\.ai)`,
+].join('|'), 'i');
+
+/**
+ * モデルの CLI を**コマンドとして**書いた形（大文字小文字を区別する。コマンド名は小文字で、
+ * 文章の「Claude Code」「Codex」は拾わない）。前に何のオプションがあっても拾う（`claude --model x -p`）。
+ * 前後は空白・行の始まり・シェルの区切り・引用符・パスの / だけ。`claude/` のブランチ名は拾わない。
+ */
+export const MODEL_COMMANDS = /(?:^|[\s;&|(`'"=/])(?:claude|codex|gemini|aider|llm|ollama|opencode|copilot|cursor-agent|qwen|goose)(?:\.exe|\.cmd)?(?=$|[\s;&|)`'"])/;
+
+/**
+ * モデルを動かさないと分かっている action（3リポジトリが使っているものだけ。どれも広く使われる定番で、
+ * 2026-10-30 に中身を読み直してはいない）。これ以外の手順の `uses:`（第三者の action・./… の composite
+ * action・docker://）は、中身をこの検査が読めないので「モデルを動かしうる」とする。足すときは action の
+ * 中身を読むこと（actions/ai-inference は actions の下でもモデルを動かす）。owner/repo の大文字小文字は
+ * GitHub が区別しないので、区別しない。
+ */
+export const KNOWN_ACTIONS = /^(?:actions\/(?:checkout|setup-node|setup-python|upload-artifact|download-artifact|github-script|cache(?:\/(?:restore|save))?)|ruby\/setup-ruby|peter-evans\/create-pull-request)@[^\s@/]+$/i;
 
 /**
  * .NET の Char.IsWhiteSpace が真になる文字（式の字句解析が飛ばす空白）。JS の \s とは違う ——
@@ -419,6 +473,24 @@ function* strings(node, parentKey = null) {
 }
 const textOf = (nodes) => nodes.flatMap((n) => [...strings(n)].map(({ node }) => node.v)).join('\n');
 
+/** 木の中のすべての対応表の組 [鍵, 値]（入れ子も）。 */
+function* allPairs(node) {
+  if (!node || node.t === 's') return;
+  if (node.t === 'q') { for (const item of node.items) yield* allPairs(item); return; }
+  for (const [k, v] of node.pairs) {
+    yield [k, v];
+    yield* allPairs(k);
+    yield* allPairs(v);
+  }
+}
+
+/** 文字列の中のモデルの印（MODEL_MARKERS か MODEL_COMMANDS）。無ければ null。 */
+export function modelMarker(text) {
+  const s = String(text);
+  const m = s.match(MODEL_MARKERS) || s.match(MODEL_COMMANDS);
+  return m ? m[0].replace(/^[\s;&|(`'"=/]+/, '').trim() : null;
+}
+
 /** ジョブの直下の鍵の値（`<<` で混ぜた先も見る。GitHub は `<<` を混ぜないが、安全側に倒す）。 */
 function fieldValues(job, name, seen = new Set()) {
   if (!job || job.t !== 'm' || seen.has(job)) return [];
@@ -463,7 +535,10 @@ function analyzeFile(name, text, parsed) {
 /**
  * 1つのディレクトリのワークフロー群を読んで、名前で読んでいない箇所（findings）と、
  * ジョブごとのモデルの有無（jobs）を返す。files: [{ name, text }]（text が null なら読めない）。
- * finding: { file, line, form, job, model, kind? }。kind: 'parse' は読めないファイル。
+ * finding: { file, line, form, job, model, kind?, why?, feeds?, fedBy? }。kind: 'parse' は読めないファイル。
+ * why はモデルを動かしうると判定した理由。feeds / fedBy は、モデルの無いジョブが needs でつながる
+ * モデルのジョブ（feeds: このジョブの出力を受け取りうる / fedBy: 出力がこのジョブに入ってくる）。
+ * jobs: [{ file, id, model, why, line, column, feeds, fedBy }]。
  */
 export function inspectWorkflows(files, { ruby } = {}) {
   const texts = files.map((f) => (typeof f.text === 'string' ? f.text.replace(/^\uFEFF/, '') : null));
@@ -473,22 +548,103 @@ export function inspectWorkflows(files, { ruby } = {}) {
 
   const modelCache = new Map();
   const callees = (job) => fieldValues(job.node, 'uses').map(({ value }) => scalarText(value) ?? '(文字列でない uses)');
-  const jobRunsModel = (file, job, seen = new Set()) => {
+  const calleeFile = (callee) => {
+    const local = callee.match(LOCAL_WORKFLOW);
+    return local ? analyzed.get(local[1]) : undefined;
+  };
+  /** ジョブがモデルを動かしうる理由（動かさないなら null）。 */
+  const modelReason = (file, job, seen = new Set()) => {
     const key = `${file.name}#${job.id}#${job.line}`;
     if (modelCache.has(key)) return modelCache.get(key);
-    let result = MODEL_MARKERS.test(`${textOf([job.key, job.node])}\n${file.workflowText}`);
-    for (const callee of callees(job)) {
-      if (result) break;
-      const local = callee.match(LOCAL_WORKFLOW);
-      const target = local ? analyzed.get(local[1]) : null;
-      // 外のリポジトリ・見つからない・読めない呼び先は中身を確かめられない。動かしうる側に倒す。
-      if (!target || target.error) result = true;
-      else if (!seen.has(target.name)) result = fileRunsModel(target, new Set([...seen, file.name]));
+    const own = modelMarker(textOf([job.key, job.node]));
+    const shared = own === null ? modelMarker(file.workflowText) : null;
+    let reason = own !== null ? `印「${own}」` : shared !== null ? `ワークフロー全体の設定の印「${shared}」` : null;
+    // 手順の uses（ジョブの直下の uses は再利用ワークフローの呼び出しなので、下で呼び先を読む）。
+    const calls = new Set(fieldValues(job.node, 'uses').map(({ value }) => value));
+    for (const [k, v] of allPairs(job.node)) {
+      if (reason !== null) break;
+      if (!isKey(k, 'uses') || calls.has(v)) continue;
+      if (v.t !== 's' || !KNOWN_ACTIONS.test(v.v.trim())) reason = `中身を確かめていない action「${scalarText(v) ?? '(文字列でない uses)'}」`;
     }
-    modelCache.set(key, result);
-    return result;
+    for (const callee of callees(job)) {
+      if (reason !== null) break;
+      const target = calleeFile(callee);
+      // 外のリポジトリ・見つからない・読めない呼び先は中身を確かめられない。動かしうる側に倒す。
+      if (!target || target.error) reason = `中身を確かめられない呼び先 ${callee}`;
+      else if (!seen.has(target.name) && fileRunsModel(target, new Set([...seen, file.name]))) reason = `モデルを動かす呼び先 ${callee}`;
+    }
+    modelCache.set(key, reason);
+    return reason;
   };
+  const jobRunsModel = (file, job, seen = new Set()) => modelReason(file, job, seen) !== null;
   const fileRunsModel = (file, seen = new Set()) => file.jobs.some((job) => jobRunsModel(file, job, seen));
+
+  // ── needs でつながるジョブ（値の流れ）──────────────────────────
+  // 節は「ジョブの入口（in）」「出口（out）」「ファイル全体の設定（workflow）」。流れは
+  //   上流の out → needs で待つジョブの in（outputs・needs の文脈で値が渡る）、ジョブの in → out、
+  //   ファイル全体の設定 → 全部のジョブの in、
+  //   再利用ワークフローを呼ぶジョブの in → 呼び先の全部のジョブの in と、呼び先の設定（inputs）、
+  //   呼び先の全部のジョブの out → 呼ぶジョブの out（workflow_call の outputs）。
+  // needs を読めない（文字列でも文字列の列でもない）ジョブは、同じファイルの全部のジョブを待つとみなす。
+  // ジョブの名前は大文字小文字・空白を区別せずに合わせる（つながる側に倒す）。同じ呼び先を2か所から
+  // 呼ぶと、呼び出しをまたいでつながったことになる（実際より広い。例外にできない側に倒れるだけ）。
+  const readable = [...analyzed.values()].filter((f) => !f.error);
+  const jobNode = (file, job, side) => `${file.name}\0${file.jobs.indexOf(job)}\0${side}`;
+  const workflowNode = (file) => `${file.name}\0workflow`;
+  const forward = new Map();
+  const backward = new Map();
+  const link = (a, b) => {
+    if (!forward.has(a)) forward.set(a, new Set());
+    if (!backward.has(b)) backward.set(b, new Set());
+    forward.get(a).add(b);
+    backward.get(b).add(a);
+  };
+  const modelNodes = new Map(); // 節 → 'file#job'
+  const sameJob = (a, b) => String(a).replace(SPACE_RUN, '').toLowerCase() === String(b).replace(SPACE_RUN, '').toLowerCase();
+  const needsOf = (job) => {
+    const out = [];
+    for (const { value } of fieldValues(job.node, 'needs')) {
+      const items = value.t === 'q' ? value.items : [value];
+      if (!items.every((item) => item.t === 's')) return null;
+      out.push(...items.map((item) => item.v));
+    }
+    return out;
+  };
+  for (const file of readable) {
+    for (const job of file.jobs) {
+      const [enter, leave] = [jobNode(file, job, 'in'), jobNode(file, job, 'out')];
+      link(enter, leave);
+      link(workflowNode(file), enter);
+      if (jobRunsModel(file, job)) for (const n of [enter, leave]) modelNodes.set(n, `${file.name}#${job.id}`);
+      const needs = needsOf(job);
+      const upstream = needs === null ? file.jobs.filter((other) => other !== job)
+        : file.jobs.filter((other) => needs.some((name) => sameJob(name, other.id)));
+      for (const up of upstream) link(jobNode(file, up, 'out'), enter);
+      for (const callee of callees(job)) {
+        const target = calleeFile(callee);
+        if (!target || target.error) continue;
+        link(enter, workflowNode(target));
+        for (const inner of target.jobs) {
+          link(enter, jobNode(target, inner, 'in'));
+          link(jobNode(target, inner, 'out'), leave);
+        }
+      }
+    }
+  }
+  /** start から edges をたどって届くモデルのジョブ（'file#job'）。 */
+  const modelsReached = (start, edges) => {
+    const seen = new Set([start]);
+    const todo = [start];
+    const found = new Set();
+    while (todo.length) {
+      const n = todo.pop();
+      if (modelNodes.has(n)) found.add(modelNodes.get(n));
+      for (const m of edges.has(n) ? edges.get(n) : []) if (!seen.has(m)) { seen.add(m); todo.push(m); }
+    }
+    return [...found];
+  };
+  /** モデルの無いジョブ（か、ファイル全体の設定）が、needs でつながるモデルのジョブ。 */
+  const linksOf = (enter, leave) => ({ feeds: modelsReached(leave, forward), fedBy: modelsReached(enter, backward) });
 
   const findings = [];
   const seenFinding = new Set();
@@ -531,9 +687,13 @@ export function inspectWorkflows(files, { ruby } = {}) {
       add({ file: file.name, line: null, form: `YAML として読めない: ${file.error}`, job: '(file)', model: true, kind: 'parse' });
       continue;
     }
-    scan(file, file.workflowNodes, { job: '(workflow)', model: fileRunsModel(file) });
+    const fileModel = fileRunsModel(file);
+    scan(file, file.workflowNodes, { job: '(workflow)', model: fileModel,
+      ...(fileModel ? { why: 'このファイルのジョブがモデルを動かしうる（ファイル全体の設定は全部のジョブに効く）' }
+        : linksOf(workflowNode(file), workflowNode(file))) });
     for (const job of file.jobs) {
-      const scope = { job: job.id, model: jobRunsModel(file, job) };
+      const model = jobRunsModel(file, job);
+      const scope = { job: job.id, model, ...(model ? { why: modelReason(file, job) } : linksOf(jobNode(file, job, 'in'), jobNode(file, job, 'out'))) };
       scan(file, [job.key, job.node], scope);
       // secrets: inherit（値が文字列なら書き方によらず inherit とみなす）。同じディレクトリで
       // モデルを動かさない呼び先だけ通す（呼ばれた側も名前でしか読めない。この検査が見る）。
@@ -541,16 +701,17 @@ export function inspectWorkflows(files, { ruby } = {}) {
         if (value.t !== 's') continue;
         const targets = callees(job);
         const safe = targets.length > 0 && targets.every((callee) => {
-          const local = callee.match(LOCAL_WORKFLOW);
-          const target = local ? analyzed.get(local[1]) : null;
+          const target = calleeFile(callee);
           return target && !target.error && !fileRunsModel(target, new Set([file.name]));
         });
         if (!safe) add({ file: file.name, line: key.line, form: `secrets: ${value.v} → ${targets.join(', ') || '(呼び先なし)'}`, ...scope });
       }
     }
   }
-  const jobs = [...analyzed.values()].filter((f) => !f.error)
-    .flatMap((file) => file.jobs.map((job) => ({ file: file.name, id: job.id, model: jobRunsModel(file, job), line: job.line, column: job.column })));
+  const jobs = readable.flatMap((file) => file.jobs.map((job) => ({
+    file: file.name, id: job.id, model: jobRunsModel(file, job), why: modelReason(file, job), line: job.line, column: job.column,
+    ...linksOf(jobNode(file, job, 'in'), jobNode(file, job, 'out')),
+  })));
   return { findings, jobs };
 }
 
@@ -558,7 +719,8 @@ export const bulkSecretFindings = (files, options) => inspectWorkflows(files, op
 
 /**
  * 問題の文言。allow は [{ workflow, job, reason }]（台帳の $bulk_secret_access）。
- * **モデルを動かしうるジョブと、読めないファイルは例外にできない。**理由の無い例外も認めない。
+ * **モデルを動かしうるジョブ・モデルのジョブと needs でつながるジョブ・読めないファイルは例外にできない。**
+ * 理由の無い例外も認めない。
  */
 export function bulkSecretProblems(findings, allow = []) {
   const problems = [];
@@ -576,7 +738,15 @@ export function bulkSecretProblems(findings, allow = []) {
       problems.push(`${f.file}: ${f.form} — **読めないファイルは検査できないので通さない**（例外にできない）`);
     } else if (f.model) {
       problems.push(`${at}: モデルを動かすジョブが secret を名前で読んでいない「${f.form}」`
-        + ' — **全部の secret がモデルに渡るか、名前の検査から見えない。**`secrets.NAME` を字面のまま1つずつ書く（このジョブは例外にできない）');
+        + ' — **全部の secret がモデルに渡るか、名前の検査から見えない。**`secrets.NAME` を字面のまま1つずつ書く（このジョブは例外にできない）'
+        + `${f.why ? `。モデルを動かしうると判定した理由: ${f.why}` : ''}`);
+    } else if (f.feeds?.length || f.fedBy?.length) {
+      const route = [f.feeds?.length ? `出力を受け取りうるモデルのジョブ ${f.feeds.join(', ')}` : '',
+        f.fedBy?.length ? `出力が入ってくるモデルのジョブ ${f.fedBy.join(', ')}` : ''].filter(Boolean).join('・');
+      problems.push(`${at}: secret を名前で読んでいない「${f.form}」`
+        + ` — **モデルのジョブと needs でつながっているので例外にできない**（${route}）。`
+        + 'outputs で値が渡り、base64 などに変えるとマスクも効かない。逆向きなら、モデルの出力が全部の secret を持つジョブに入る。'
+        + '`secrets.NAME` を字面のまま1つずつ書くか、モデルのジョブとつながらないジョブに分ける');
     } else if (!allowed) {
       problems.push(`${at}: secret を名前で読んでいない「${f.form}」`
         + ' — 名前の検査（台帳・モデルのジョブの検査）をすり抜ける。`secrets.NAME` を字面のまま1つずつ書くか、'
