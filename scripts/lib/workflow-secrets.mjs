@@ -30,10 +30,13 @@
  *      文書が1つでないファイルは GitHub も受け付けない（actions/runner の YamlObjectReader の
  *      ValidateStart/ValidateEnd）。最上位が対応表でない・ジョブが1つも無いファイルも読めない扱いに
  *      する（ジョブを見失ったまま、ファイル全体を「モデル無し」として通さないため）。
- *   2. エイリアスは GitHub と同じく、その時点で最後に定義されたアンカーの中身に置き換える
- *      （YamlObjectReader の再生）。展開した後のノードが 50000 を超えたら読めない扱い。GitHub の
- *      上限 c_maxYamlNodes も 50000 だが、あちらは終わりのイベントも数えるので、ここのほうが緩い
- *      （GitHub が受け付けるファイルを、この上限で落とすことはない）。
+ *   2. エイリアスは、actions/runner の YamlObjectReader.MoveNext の手順を写して展開する
+ *      （buildYamlDocuments）。アンカーは**開始のイベント**を読んだ時点で登録し、エイリアスは
+ *      **イベントを再生しながら、その時点のアンカー表で**解く。「定義した時点の木の写し」で
+ *      置き換えると、同じ名前を定義し直したときに GitHub と違う値になる（2026-10-30 の再レビュー）。
+ *      展開した後のイベントが 50000 を超えたら読めない扱い。GitHub の上限 c_maxYamlNodes も 50000
+ *      だが、あちらは文書と流れの始まり・終わりの4つも数えるので、ここのほうが緩い（GitHub が
+ *      受け付けるファイルを、この上限で落とすことはない）。
  *   3. ジョブは最上位の `jobs` の鍵の下（引用符や空白の書き方によらない）。それ以外の最上位
  *      （on・env・defaults など）は `(workflow)` で、全部のジョブに効く。
  *   4. 式は、すべての文字列（鍵も値も）から GitHub と同じ切り出し方で拾う（`${{ … }}`。式の中の
@@ -50,10 +53,11 @@
  * 動かし方（印の無い第三者の action、同じリポジトリの composite action の中身など）は見えないので、
  * 例外を許すときは人がジョブを読むこと。
  *
- * 【GitHub と食い違いうるところ】GitHub は YamlDotNet で読む。libyaml と YamlDotNet は
- * 受け付ける範囲が少し違う（例: アンカーの名前に使える文字）。libyaml だけが拒む書き方は
- * ここで落ちる（安全側）。両方が受け付けて値が違う書き方は、まだ見つけていない（探し切っては
- * いない）。
+ * 【GitHub と食い違いうるところ】GitHub は YamlDotNet（5.3.0）で読む。libyaml と YamlDotNet は
+ * 受け付ける範囲が少し違いうる（アンカーの名前に使える文字は、どちらも英数字・`_`・`-` で同じ）。
+ * libyaml だけが拒む書き方はここで落ちる（安全側）。両方が受け付けて値が違う書き方は、まだ
+ * 見つけていない（探し切ってはいない）。エイリアスの展開の手順は actions/runner のソースを読んで
+ * 写したもので、GitHub の上では試していない。
  */
 
 import { spawnSync } from 'node:child_process';
@@ -71,8 +75,9 @@ const isSpace = (c) => c !== undefined && c !== '' && DOTNET_WHITESPACE.includes
 const SPACE_RUN = new RegExp(`[${DOTNET_WHITESPACE}]+`, 'g');
 
 /**
- * エイリアスを展開した後のノード数の上限。GitHub の YamlObjectReader の c_maxYamlNodes と同じ値。
- * あちらはイベント（終わりのイベントも含む）を数えるので、同じ値でもここのほうが緩い。
+ * エイリアスを展開した後のイベント数の上限。GitHub の YamlObjectReader の c_maxYamlNodes と同じ値。
+ * どちらも再生したイベント（終わりのイベントを含む）を数えるが、あちらは流れと文書の始まり・終わりの
+ * 4つも数えるので、同じ値でもここのほうが緩い。
  */
 export const MAX_YAML_NODES = 50000;
 
@@ -151,63 +156,110 @@ export function readYamlEvents(texts, { ruby = 'ruby' } = {}) {
 }
 
 /**
- * イベント列から文書の木を作る。エイリアスは GitHub と同じく「その時点で最後に定義された
- * アンカー」の写しに置き換え、写しには aliasOf（アンカーの名前）と、参照した行を付ける。
+ * 1つの文書のイベントを、GitHub と同じ順に再生する（actions/runner の
+ * src/Sdk/WorkflowParser/Conversion/YamlObjectReader.cs の MoveNext を写したもの）。
+ *
+ *   - アンカーは、元の列から**開始のイベント**（スカラー・対応表の始まり・列の始まり）を読んだ時点で
+ *     登録する。同じ名前は後の登録が上書きする。だから対応表の中で同じ名前を定義し直すと、その対応表を
+ *     閉じた後も内側の定義が残る。再生の中のアンカーは登録し直さない。
+ *   - エイリアスは、アンカーのイベントから元の列を再生して展開する。再生の中で出会ったエイリアスは、
+ *     **その時点の**アンカー表で解く（アンカーを定義した時点ではない）。
+ *   - 閉じていない対応表・列（エイリアス自身を含むもの）へのエイリアスは、GitHub では再生が自分に戻って
+ *     終わらず、上限で落ちる。ここでは先に「自分自身を参照する」として落とす。
+ *
+ * 返すのは { e: イベント, alias }。alias は、再生しているときの**一番外側の**エイリアス（字面に書いて
+ * あるもの）の { name, line }。再生していなければ null。
+ */
+function* replayDocument(events) {
+  const anchors = new Map();
+  const open = [];
+  const closed = new Set();
+  const replay = [];
+  let next = 0;
+  let current = null;
+  let count = 0;
+  const isStart = (e) => e[0] === '{' || e[0] === '[';
+  const isEnd = (e) => e[0] === '}' || e[0] === ']';
+  for (;;) {
+    // 再生中なら、直前のイベントで深さを調整し、終わったら1段戻る。
+    if (replay.length) {
+      const top = replay.at(-1);
+      if (current[0] === 'S') { if (top.depth === 0) replay.pop(); }
+      else if (isStart(current)) top.depth++;
+      else if (isEnd(current)) { top.depth--; if (top.depth === 0) replay.pop(); }
+    }
+    if (replay.length) {
+      const top = replay.at(-1);
+      top.index++;
+      current = events[top.index];
+      if (!current) throw new Error('YAML のエイリアスの再生が文書の外に出た');
+    } else {
+      if (next >= events.length) return;
+      const at = next++;
+      current = events[at];
+      if (isStart(current)) open.push(at);
+      else if (isEnd(current)) closed.add(open.pop());
+      const anchor = current[0] === 'S' ? current[2] : isStart(current) ? current[1] : null;
+      if (anchor != null) anchors.set(anchor, at);
+    }
+    if (current[0] === 'A') {
+      const at = anchors.get(current[1]);
+      if (at === undefined) throw new Error(`定義されていないアンカー *${current[1]}`);
+      if (isStart(events[at]) && !closed.has(at)) throw new Error(`自分自身を参照するエイリアス *${current[1]}（GitHub でも展開が終わらない）`);
+      const alias = replay.length ? replay[0].alias : { name: current[1], line: current[2] + 1 };
+      replay.push({ index: at, depth: 0, alias });
+      current = events[at];
+    }
+    if (++count > MAX_YAML_NODES) throw new Error(`イベントが ${MAX_YAML_NODES} を超える（エイリアスを展開した後）`);
+    yield { e: current, alias: replay.length ? replay[0].alias : null };
+  }
+}
+
+/**
+ * イベント列から文書の木を作る。エイリアスは replayDocument（GitHub の YamlObjectReader の再生）で
+ * 展開する。再生した値のノードには aliasOf（字面に書いてある一番外側のエイリアスの名前）と、
+ * そのエイリアスの行を付ける。
  * ノード: { t: 's', v, style, line, raw } / { t: 'm', pairs: [[鍵, 値]] } / { t: 'q', items }
  */
 export function buildYamlDocuments(events) {
-  const IN_PROGRESS = Symbol('in progress');
   const docs = [];
-  let anchors = new Map();
-  let i = 0;
-  let count = 0;
-  const tick = () => {
-    if (++count > MAX_YAML_NODES) throw new Error(`ノードが ${MAX_YAML_NODES} を超える（エイリアスを展開した後）`);
+  for (let start = 0; start < events.length;) {
+    if (events[start][0] !== 'D') throw new Error(`文書の外に YAML のイベントがある ${JSON.stringify(events[start][0])}`);
+    let end = start + 1;
+    while (end < events.length && events[end][0] !== 'D') end++;
+    docs.push(buildDocument(events.slice(start + 1, end)));
+    start = end;
+  }
+  return docs;
+}
+
+function buildDocument(events) {
+  const stream = replayDocument(events);
+  const take = () => {
+    const r = stream.next();
+    if (r.done) throw new Error('YAML のイベントが途中で切れている');
+    return r.value;
   };
-  const copy = (node, aliasOf, line) => {
-    tick();
-    const base = { t: node.t, line, aliasOf };
-    if (node.t === 's') return { ...base, v: node.v, style: null, raw: '' };
-    if (node.t === 'q') return { ...base, items: node.items.map((n) => copy(n, aliasOf, line)) };
-    return { ...base, pairs: node.pairs.map(([k, v]) => [copy(k, aliasOf, line), copy(v, aliasOf, line)]) };
-  };
-  const read = () => {
-    const e = events[i++];
-    if (!e) throw new Error('YAML のイベントが途中で切れている');
+  const read = ({ e, alias }) => {
     if (e[0] === 'S') {
-      tick();
-      const node = { t: 's', v: String(e[1]), style: e[4], line: e[5] + 1, col: e[6], raw: String(e[7]) };
-      if (e[2] != null) anchors.set(e[2], node);
-      return node;
-    }
-    if (e[0] === 'A') {
-      const target = anchors.get(e[1]);
-      if (target === undefined) throw new Error(`定義されていないアンカー *${e[1]}`);
-      if (target === IN_PROGRESS) throw new Error(`自分自身を参照するエイリアス *${e[1]}`);
-      return copy(target, e[1], e[2] + 1);
+      return alias ? { t: 's', v: String(e[1]), style: null, line: alias.line, raw: '', aliasOf: alias.name }
+        : { t: 's', v: String(e[1]), style: e[4], line: e[5] + 1, col: e[6], raw: String(e[7]) };
     }
     if (e[0] === '[' || e[0] === '{') {
-      tick();
-      if (e[1] != null) anchors.set(e[1], IN_PROGRESS);
-      const node = e[0] === '[' ? { t: 'q', items: [], line: e[3] + 1, col: e[4] } : { t: 'm', pairs: [], line: e[3] + 1, col: e[4] };
+      const at = alias ? { line: alias.line, aliasOf: alias.name } : { line: e[3] + 1, col: e[4] };
+      const node = e[0] === '[' ? { t: 'q', items: [], ...at } : { t: 'm', pairs: [], ...at };
       const end = e[0] === '[' ? ']' : '}';
-      while (i < events.length && events[i][0] !== end) {
-        if (node.t === 'q') node.items.push(read());
-        else node.pairs.push([read(), read()]);
+      for (let n = take(); n.e[0] !== end; n = take()) {
+        if (node.t === 'q') node.items.push(read(n));
+        else node.pairs.push([read(n), read(take())]);
       }
-      if (events[i++]?.[0] !== end) throw new Error('YAML のイベントが閉じていない');
-      if (e[1] != null) anchors.set(e[1], node);
       return node;
     }
     throw new Error(`想定外の YAML のイベント ${JSON.stringify(e[0])}`);
   };
-  while (i < events.length) {
-    const e = events[i++];
-    if (e[0] !== 'D') throw new Error(`文書の外に YAML のイベントがある ${JSON.stringify(e[0])}`);
-    anchors = new Map();
-    docs.push(read());
-  }
-  return docs;
+  const root = read(take());
+  if (!stream.next().done) throw new Error('文書の根の後ろに YAML のイベントがある');
+  return root;
 }
 
 // ── 2. 式（GitHub と同じ切り出し・字句解析）──────────────────────────

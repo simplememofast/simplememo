@@ -35,7 +35,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
-import { DOTNET_WHITESPACE, bulkSecretFindings, bulkSecretProblems, inspectWorkflows, readYamlEvents } from './lib/workflow-secrets.mjs';
+import { DOTNET_WHITESPACE, buildYamlDocuments, bulkSecretFindings, bulkSecretProblems, inspectWorkflows, readYamlEvents } from './lib/workflow-secrets.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CRED_PATH = path.join(ROOT, 'data/credential-expiry.json');
@@ -327,6 +327,32 @@ const MODEL_BYPASSES = [
     replace('fixture.yml', COLLECT_ENV, '          GOOGLE_SERVICE_ACCOUNT_JSON: &gcp ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}\n'), modelEnv('G: *gcp'))],
   ['(D) 同じ名前のアンカーを定義し直す（GitHub は最後の定義を使う）', chain(
     collectEnv('A1: &x harmless', `A2: &x \${{ toJSON(secrets) }}`), modelEnv('X: *x'))],
+  // 2026-10-30 の再レビュー: GitHub（YamlObjectReader.MoveNext）はアンカーを開始のイベントで登録し、
+  // エイリアスを再生の時点のアンカー表で解く。「定義した時点の木の写し」で読んだ前の版は、次の最初の
+  // 4つを台帳の例外が空のまま0件で通した。5つ目はモデルのジョブと判定せず（例外を書けば通る）、
+  // 6つ目はファイルを読めない扱いにしていた（安全側だが GitHub と違う）。どれも値が文字列であることに
+  // 意味がある所（secrets: inherit・${{ }} なしの if:・uses・jobs の鍵）で効く。
+  ['(D) 対応表の中で同じ名前を定義し直す: env: &x { MODE: &x inherit } → secrets: *x', chain(modelCallee,
+    replace('fixture.yml', 'env:\n  PLAIN:', 'env: &x\n  MODE: &x inherit\n  PLAIN:'),
+    replace('fixture.yml', INHERIT, '    secrets: *x\n')), 'fixture.yml#call', 'secrets: inherit'],
+  ['(D) 再生の中のエイリアスは再生の時点で解く: call: *x（x の中の secrets: *y を、後で inherit に定義し直す）', chain(modelCallee,
+    replace('fixture.yml', '  collect:\n    runs-on: ubuntu-latest\n', '  collect:\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n'
+      + '        a: [&y {n: 1}]\n        b: [&x {uses: ./.github/workflows/callee.yml, secrets: *y}]\n        c: [&y inherit]\n'),
+    replace('fixture.yml', `  call:\n    uses: ./.github/workflows/callee.yml\n${INHERIT}`, '  call: *x\n')), 'fixture.yml#call', 'secrets: inherit'],
+  ['(D) 鍵を対応表の中で定義し直したアンカーで書く: env: &s { KEYNAME: &s secrets } → *s : inherit', chain(modelCallee,
+    replace('fixture.yml', 'env:\n  PLAIN:', 'env: &s\n  KEYNAME: &s secrets\n  PLAIN:'),
+    replace('fixture.yml', INHERIT, '    *s : inherit\n')), 'fixture.yml#call', 'secrets: inherit'],
+  ['(D) ${{ }} なしの if: を対応表の中で定義し直したアンカーで書く: env: &c { COND: &c … } → if: *c', chain(
+    replace('fixture.yml', 'env:\n  PLAIN:', "env: &c\n  COND: &c \"contains(toJSON(secrets), 'x')\"\n  PLAIN:"),
+    replace('fixture.yml', 'id: claude\n', 'id: claude\n        if: *c\n')), 'fixture.yml#autopilot', 'toJSON(secrets)'],
+  ['(D) モデルの印を、再生の時点で解くエイリアスで持ち込む: sneaky: *tmpl（tmpl の uses: *act を後で claude-code-action に定義し直す）', chain(
+    replace('fixture.yml', '      - name: Collect\n', '      - uses: &act actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683\n      - name: Collect\n'),
+    (f) => ({ ...f, 'fixture.yml': `${f['fixture.yml']}  tmpl: &tmpl\n    runs-on: ubuntu-latest\n    steps:\n      - uses: *act\n        with:\n`
+      + '          all: ${{ toJSON(secrets) }}\n  redefine:\n    runs-on: ubuntu-latest\n    steps:\n'
+      + '      - uses: &act anthropics/claude-code-action@925afb53776cf1a2b738c6bdbed37b4d4000ef13\n  sneaky: *tmpl\n' })),
+    'fixture.yml#sneaky', 'toJSON(secrets)'],
+  ['(E) jobs の鍵を、対応表の中で定義し直したアンカーで書く: env: &k { X: &k jobs } → *k :（GitHub は内側の定義で読む）', chain(
+    replace('fixture.yml', 'env:\n  PLAIN:', 'env: &k\n  X: &k jobs\n  PLAIN:'), jobsAs('*k :'), toModelTrick)],
   ['(D) モデルの印をエイリアスで持ち込んだジョブも、モデルのジョブとして扱う', chain(
     replace('fixture.yml', 'uses: anthropics/claude-code-action@', 'uses: &act anthropics/claude-code-action@'),
     (f) => ({ ...f, 'fixture.yml': `${f['fixture.yml']}  sneaky:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: *act\n        with:\n          all: \${{ toJSON(secrets) }}\n` })),
@@ -374,6 +400,10 @@ const BULK_PASSES = [
   ['BOM・CRLF・絵文字・U+0085・U+2028 の後ろでも、字面の位置を取り違えない', chain(
     modelEnv("N: 'a\u0085b'", "S: 'c\u2028d'", 'J: "日本語の説明🙂"', "T: '${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}'"),
     (f) => ({ ...f, 'fixture.yml': `\uFEFF${f['fixture.yml'].replace(/\n/g, '\r\n')}` }))],
+  ['アンカーとエイリアス（ジョブをまたぐ・定義し直す・${{ }} を含む）で secret 以外の値を使い回す', chain(
+    replace('fixture.yml', '  collect:\n    runs-on: ubuntu-latest\n', '  collect:\n    runs-on: &ro ubuntu-latest\n'),
+    replace('fixture.yml', '    needs: collect\n    runs-on: ubuntu-latest\n', '    needs: collect\n    runs-on: *ro\n'),
+    collectEnv('R1: &v one', 'R2: &w { V: *v }', 'R3: &v ${{ github.token }}'), modelEnv('R4: *v', 'R5: *w'))],
   ['if: の値を2通り（${{ }} の中と、値そのもの）に読んでも、名前1つの読み方を二重に数えない',
     replace('fixture.yml', 'id: claude\n', "id: claude\n        if: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}\n")],
 ];
@@ -385,7 +415,9 @@ const PARSE_FAILURES = [
   ['空のファイル', { 'empty.yml': '' }, '文書が 0 個'],
   ['定義されていないアンカーへのエイリアス', { 'alias.yml': 'jobs:\n  a:\n    env: *nope\n' }, '定義されていないアンカー'],
   ['自分自身を参照するエイリアス', { 'loop.yml': 'jobs: &j\n  a: *j\n' }, '自分自身を参照する'],
-  ['展開すると GitHub の上限（50000 ノード）を超えるエイリアス', { 'bomb.yml': bomb }, 'ノードが 50000 を超える'],
+  ['展開すると GitHub の上限（50000 イベント）を超えるエイリアス', { 'bomb.yml': bomb }, 'イベントが 50000 を超える'],
+  ['再生の中のエイリアスが、閉じていない列を指す（GitHub でも展開が終わらない）',
+    { 'replayloop.yml': 'a: &y 1\nb: &x [*y]\nc: &y [*x]\njobs:\n  a: { runs-on: x }\n' }, '自分自身を参照する'],
   ['jobs の鍵が無い（ワークフロー全体の env だけ）', { 'nojobs.yml': 'on: push\nenv:\n  X: ${{ toJSON(secrets) }}\n' }, 'ジョブが1つも無い'],
   ['jobs が空', { 'emptyjobs.yml': 'on: push\njobs: {}\n' }, 'ジョブが1つも無い'],
   ['jobs の値が対応表でない', { 'seqjobs.yml': 'on: push\njobs: [a]\n' }, 'jobs の値が対応表でない'],
@@ -428,6 +460,31 @@ SCENARIOS.push(['(A) .NET が空白とみなす文字はどれも空白として
     assert(findings.some((f) => f.job === 'autopilot' && f.model), `U+${code} を空白として読まない`);
   }
 }]);
+/**
+ * エイリアスの展開を GitHub（actions/runner の YamlObjectReader.MoveNext）の手順に合わせているか。
+ * [YAML, 鍵, 期待する値（GitHub の読み方）, 定義した時点の写しで読んだときの値（以前の誤り）]
+ */
+const REPLAY_CASES = [
+  ['a: &x {b: &x 1}\nc: *x\n', 'c', '1', { b: '1' }],
+  ['a: &x [&x 1]\nc: *x\n', 'c', '1', ['1']],
+  ['a: &y 1\nb: &x [*y]\nc: &y 2\nd: *x\n', 'd', ['2'], ['1']],
+  ['a: &y 1\nb: &x {k: *y}\nc: &y {z: &y 3}\nd: *x\n', 'd', { k: '3' }, { k: '1' }],
+  // 再生の中のアンカーは登録し直さない（x を再生しても y は 2 のまま）。
+  ['a: &x {k: &y 1}\nb: &y 2\nc: *x\nd: *y\n', 'd', '2', '2'],
+  ['a: &x {k: v}\nb: *x\n', 'b', { k: 'v' }, { k: 'v' }],
+];
+const plainYaml = (node) => (node.t === 's' ? node.v : node.t === 'q' ? node.items.map(plainYaml)
+  : Object.fromEntries(node.pairs.map(([k, v]) => [plainYaml(k), plainYaml(v)])));
+SCENARIOS.push(['YAML のエイリアスは GitHub と同じ手順で展開する（アンカーは開始のイベントで登録し、エイリアスは再生の時点で解く）', () => {
+  const parsed = readYamlEvents(REPLAY_CASES.map(([text]) => text));
+  REPLAY_CASES.forEach(([text, key, expected, eager], n) => {
+    assert(!parsed[n].error, `${JSON.stringify(text)} が読めない: ${parsed[n].error}`);
+    const [root] = buildYamlDocuments(parsed[n].events);
+    const got = plainYaml(root)[key];
+    assert(JSON.stringify(got) === JSON.stringify(expected), `${JSON.stringify(text)} の ${key} が ${JSON.stringify(got)}`
+      + `（GitHub は ${JSON.stringify(expected)}。定義した時点の写しで読むと ${JSON.stringify(eager)}）`);
+  });
+}]);
 const ANCHOR_FROM_ALLOWED = chain(collectEnv('BULK_LIST: &all ${{ toJSON(secrets) }}'), modelEnv('ALL: *all'));
 const ESCAPED_NAME_OUTSIDE_MODEL = replace('fixture.yml', COLLECT_ENV, '          GOOGLE_SERVICE_ACCOUNT_JSON: "${{ secrets.GCP_SERVICE_ACCOUNT_JSO\\x4e }}"\n');
 const BULK_OUTSIDE_MODEL = replace('fixture.yml', '${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}', '${{ toJSON(secrets) }}');
@@ -437,6 +494,14 @@ const CALLEE_RUNS_MODEL = chain(replace('fixture.yml', INHERIT, '    secrets:\n 
 SCENARIOS.push(['(D) エイリアスで持ち込んだ名前1つの読み方は、エイリアスと名指しして落とす', () => {
   const findings = findingsOf(bulkFiles(MODEL_BYPASSES.find(([name]) => name.startsWith('(D) 名前1つの読み方でも'))[1]));
   assert(findings.some((f) => f.job === 'autopilot' && f.model && f.form.includes('エイリアス *gcp')), JSON.stringify(findings));
+}]);
+SCENARIOS.push(['(D) 入れ子のエイリアスで持ち込んだ名前は、ジョブの字面に書いてある外側のエイリアスの名前と行で名指しする', () => {
+  const files = bulkFiles(chain(replace('fixture.yml', COLLECT_ENV, '          GOOGLE_SERVICE_ACCOUNT_JSON: &gcp ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}\n'
+    + '          WRAP: &wrap { G2: *gcp }\n'), modelEnv('X: *wrap')));
+  const line = files.find((f) => f.name === 'fixture.yml').text.split('\n').findIndex((l) => l.includes('X: *wrap')) + 1;
+  const findings = findingsOf(files);
+  assert(findings.some((f) => f.job === 'autopilot' && f.model && f.line === line && f.form.includes('エイリアス *wrap')),
+    `外側のエイリアス *wrap（${line}行）で名指ししていない: ${JSON.stringify(findings)}`);
 }]);
 SCENARIOS.push(['(D) 例外を書いたモデルの無いジョブのアンカーでも、モデルのジョブで参照すれば落ちる', () => {
   const findings = findingsOf(bulkFiles(ANCHOR_FROM_ALLOWED));
