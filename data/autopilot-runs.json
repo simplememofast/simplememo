@@ -2848,6 +2848,31 @@
       "eligibility_verdict": "declined_by_design",
       "gate_code": "skip_repair_limit",
       "stage_note": "封じ込めのステップで止まった（通常は同じ故障種別の修理が上限に達した状態。判定そのものの例外でも同じ形になるので、原因は run のログで確かめる。node scripts/autopilot-selfheal.mjs --contain）。解除は実修理の repair_of か、オーナーの判断"
+    },
+    {
+      "run_id": "ap-20261030-owner-session-actions-time-box",
+      "date_jst": "2026-10-30",
+      "route": "owner-session",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "F",
+      "action": "repair",
+      "pr": null,
+      "artifact": null,
+      "failure_reason": null,
+      "external_ref": null,
+      "interventions": [
+        {
+          "kind": "infra",
+          "note": "オーナー判断（2026-10-30）で、封じ込め中の Actions 経路の外から修理の PR を出した。修理は AI のセッションが書き、マージはオーナーが決める（draft）。自然な定期運転の出荷や自律の復旧としては数えない。"
+        }
+      ],
+      "source": "session",
+      "repair_of": [
+        "ap-20261029-actions"
+      ],
+      "repair_note": "10-29 の試運転（run 40803103665）は、モデルの段が75分の上限で切られ、status・LOG・引き渡しが残らなかった（単独実行の切り分けは通り資格情報は無事、モデル後の照合は clean、コミット済みの6コミットは push_only で当日ブランチに残った）。最初の宣言は段の開始から約65分後で、生成ロケールを含まない宣言が --verify-local で落ち、宣言し直した後の検査の途中で切られた。セッションには残り時間を知る手段が無かった。修理: モデルより前の段が Gate の時刻から60分で切り上げ・70分で引き渡しの期限を決めてプロンプトで伝え、工程記録の道具が残り時間を返す。期限が75分の上限より5分以上前で再開の時間の規則の内側にあることを autopilot-publish --check が、段とプロンプトの配線を autopilot-diagnostics --check が検査する。75分の上限・予算・権限・検証のゲート、10-29 の行、修理上限、修理回数、許可の対象6行は変えていない。最初の約65分の内訳は記録が無く原因は確定していない。期限が実際の run で効くか（モデルが従うか）は未確認で、次の試運転で確かめる。",
+      "evidence": "docs/obsidian/ACTIONS_RECOVERY_ONE_USE.md"
     }
   ],
   "retracted_observations": [
