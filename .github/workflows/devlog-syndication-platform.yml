@@ -81,16 +81,21 @@ jobs:
           HAS_KEY: ${{ (inputs.platform == 'devto' && secrets.DEVTO_API_KEY != '') || ((inputs.platform == 'hatena' || inputs.platform == 'hatenadiary') && secrets.HATENA_API_KEY != '') || (inputs.platform == 'livedoor' && secrets.LIVEDOOR_API_KEY != '') }}
         run: echo "has_key=$HAS_KEY" >> "$GITHUB_OUTPUT"
 
-      - name: 門（緊急停止・鍵・公開面の最新投稿からの間隔）
+      # 名前一覧（IDENTITY_DENYLIST）も値は渡さず、真偽だけ。一覧が無ければ、投稿する番に門が no_identity_denylist で
+      # 落とす（書かせる前に止める）。真偽では「値はあるが使える語が無い」を見分けられないので、最後の錠前は投稿の段
+      # （publish が値を読んで、使える語が無ければ通信の前に止まる）。dry_run は一覧を見ない。
+      - name: 門（緊急停止・鍵・名前一覧・公開面の最新投稿からの間隔）
         id: gate
         if: steps.select.outputs.on == 'true'
         env:
           HAS_KEY: ${{ steps.key.outputs.has_key }}
+          HAS_DENYLIST: ${{ secrets.IDENTITY_DENYLIST != '' }}
         run: |
           ARGS=(gate --platform "$PLATFORM" --github-output "$GITHUB_OUTPUT")
           if [ "$FORCE" = "true" ]; then ARGS+=(--force); fi
           if [ "$MODE" != "publish" ]; then ARGS+=(--dry-run); fi
           if [ "$MODE" = "publish" ] && [ "$HAS_KEY" != "true" ]; then ARGS+=(--key-missing); fi
+          if [ "$MODE" = "publish" ] && [ "$HAS_DENYLIST" != "true" ]; then ARGS+=(--identity-missing); fi
           node scripts/devlog-syndication.mjs "${ARGS[@]}"
 
       - name: 文脈（記事ネタ台帳・既存記事・リンク候補）
@@ -203,7 +208,9 @@ jobs:
             .syndication/metrics.txt
           include-hidden-files: true
           if-no-files-found: error
-          retention-days: 30
+          # モデルの書いた生の記事（実名の照合の前）。公開リポジトリの成果物はサインインした誰でも読めるので、
+          # 同じ run の受け渡しに足りる1日だけ残す（2026-10-30）
+          retention-days: 1
 
   validate:
     needs: [prepare, draft]
@@ -344,7 +351,9 @@ jobs:
             .syndication/metrics.txt
           include-hidden-files: true
           if-no-files-found: error
-          retention-days: 30
+          # モデルの書いた生の記事（実名の照合の前）。公開リポジトリの成果物はサインインした誰でも読めるので、
+          # 同じ run の受け渡しに足りる1日だけ残す（2026-10-30）
+          retention-days: 1
 
   publish:
     needs: [prepare, validate, fix]
@@ -385,6 +394,7 @@ jobs:
             --article .syndication/article.json --context .syndication/context.json \
             --report .syndication/validation-2.txt
 
+      # 名前一覧が無い・使える語が無いと、publish は通信の前に止まる（--dry-run のときは注意だけ）。
       - name: 投稿
         id: publish
         if: needs.prepare.outputs.due == 'true'
@@ -411,8 +421,8 @@ jobs:
         if: always() && needs.prepare.outputs.due == 'true'
         with:
           name: devlog-syndication-${{ inputs.platform }}-${{ github.run_id }}
+          # 記事（article.json）は残さない。受け渡しには使わず、実名に当たって止まった記事がそのまま30日残るため（2026-10-30）
           path: |
-            .syndication/article.json
             .syndication/validation-2.txt
             .syndication/published.json
           include-hidden-files: true

@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { importArticle, MAX_ARTICLE_BYTES } from './syndication-input.mjs';
 
 const read = (name) => fs.readFileSync(new URL('../' + name, import.meta.url), 'utf8');
@@ -44,6 +45,13 @@ test('models and credentialed validators/publishers never share jobs or checkout
   assert.match(jobs.publish, /--force/);
   assert.doesNotMatch(jobs.publish, /continue-on-error/);
   assert.match(jobs.prepare, /github.ref == 'refs\/heads\/main'/);
+  // The name list never reaches the prepare job (it feeds the model); only its presence does, and the gate stops on it.
+  assert.doesNotMatch(jobs.prepare, /secrets\.IDENTITY_DENYLIST \}\}/);
+  assert.match(jobs.prepare, /HAS_DENYLIST: \$\{\{ secrets.IDENTITY_DENYLIST != '' \}\}/);
+  assert.match(jobs.prepare, /if \[ "\$MODE" = "publish" \] && \[ "\$HAS_DENYLIST" != "true" \]; then ARGS\+=\(--identity-missing\); fi/);
+  const publishStep = jobs.publish.split('- name: 投稿\n')[1].split('\n      - ')[0];
+  assert.match(publishStep, /IDENTITY_DENYLIST: \$\{\{ secrets.IDENTITY_DENYLIST \}\}/);
+  assert.match(publishStep, /ARGS=\(publish/);
   const ceiling = ['prepare', 'draft', 'validate', 'fix', 'publish'].reduce((n, name) => n + Number(jobs[name].match(/    timeout-minutes: (\d+)/)[1]), 0);
   assert.ok(ceiling <= 90, 'Preserve the prior per-platform runner-minute ceiling');
 });
@@ -129,4 +137,96 @@ test('security-sensitive actions use immutable revisions and supported Node; aud
   const check = read('.github/workflows/seo-check.yml');
   assert.match(check, /permissions:\n  contents: read/);
   assert.match(check, /npm ci --ignore-scripts --no-audit\n          npm audit --omit=dev --audit-level=moderate/);
+});
+
+// Devlog Syndication: the real-name check uses only the IDENTITY_DENYLIST secret. Without it nothing is sent,
+// and a hit is reported as a fixed marker. Fictional words only; the real secret is never needed here.
+const DEVLOG = fileURLToPath(new URL('../scripts/devlog-syndication.mjs', import.meta.url));
+function devlogFixture(dir, { description = 'Why a safe default can hide a stuck ledger.', extra = '' } = {}) {
+  const para = 'A close condition that nobody feeds returns cannot determine every day, and that answer never turns red. ';
+  const article = {
+    platform: 'devto', title: 'A close condition nobody feeds never closes', tags: ['devops', 'automation'], description, series: null,
+    basis: 'S-20260903-issue-closed-same-day', sources: ['docs/story-seeds.md'],
+    body_markdown: `${para.repeat(20)}\n\n## What happened\n\n${para.repeat(15)}${extra}\n\n## Why it stayed quiet\n\n${para.repeat(15)}\n\n`
+      + `## What changed\n\nThe method is described in [the benchmark methodology](https://simplememofast.com/blog/benchmark-methodology). ${para.repeat(12)}`,
+  };
+  const context = {
+    platform: 'devto', used_bases: [], existing_posts: [], sibling_posts: [],
+    seeds_available: [{ id: 'S-20260903-issue-closed-same-day', claim: 'x' }],
+    allowed_site_links: [{ url: 'https://simplememofast.com/blog/benchmark-methodology', file: 'blog/benchmark-methodology.html' }],
+  };
+  const files = { article: path.join(dir, 'article.json'), context: path.join(dir, 'context.json'), out: path.join(dir, 'published.json'),
+    report: path.join(dir, 'validation.txt'), log: path.join(dir, 'fetch.log'), preload: path.join(dir, 'no-network.mjs') };
+  fs.writeFileSync(files.article, JSON.stringify(article));
+  fs.writeFileSync(files.context, JSON.stringify(context));
+  // Every request is recorded and answered locally; nothing leaves the machine.
+  fs.writeFileSync(files.preload, `import fs from 'node:fs';
+globalThis.fetch = async (url, opts = {}) => { fs.appendFileSync(process.env.FETCH_LOG, (opts.method || 'GET') + ' ' + url + '\\n'); return new Response('', { status: 200 }); };\n`);
+  return files;
+}
+function runDevlog(files, args, extraEnv = {}) {
+  // A minimal environment: the parent's IDENTITY_DENYLIST, API keys or NODE_OPTIONS are never inherited.
+  const env = { PATH: process.env.PATH, FETCH_LOG: files.log, DEVTO_API_KEY: 'test-sentinel', ...extraEnv };
+  return spawnSync(process.execPath, ['--import', pathToFileURL(files.preload).href, DEVLOG, ...args], { encoding: 'utf8', env });
+}
+const fetched = (files) => (fs.existsSync(files.log) ? fs.readFileSync(files.log, 'utf8').trim().split('\n') : []);
+
+test('devlog publish refuses to send anything without a usable IDENTITY_DENYLIST', (t) => {
+  for (const [label, extraEnv] of [['unset', {}], ['empty', { IDENTITY_DENYLIST: '' }], ['separators only', { IDENTITY_DENYLIST: ' ,\n' }],
+    ['single characters only', { IDENTITY_DENYLIST: 'q, 鴇' }]]) {
+    const files = devlogFixture(scratch(t));
+    const r = runDevlog(files, ['publish', '--platform', 'devto', '--article', files.article, '--context', files.context, '--out', files.out], extraEnv);
+    assert.equal(r.status, 1, label);
+    assert.match(r.stderr, /IDENTITY_DENYLIST/, label);
+    assert.doesNotMatch(r.stderr + r.stdout, /鴇/, label);
+    assert.deepEqual(fetched(files), [], `${label}: no request (not even link checks) before the lock`);
+    assert.equal(fs.existsSync(files.out), false, label);
+  }
+});
+
+test('devlog check modes keep working without the secret and only warn', (t) => {
+  const files = devlogFixture(scratch(t));
+  const dry = runDevlog(files, ['publish', '--platform', 'devto', '--article', files.article, '--context', files.context, '--out', files.out, '--dry-run']);
+  assert.match(dry.stdout, /::warning title=Devlog syndication identity::.*IDENTITY_DENYLIST/);
+  assert.doesNotMatch(dry.stderr, /IDENTITY_DENYLIST/, 'the dry run is not stopped by the lock');
+  assert.ok(fetched(files).every((line) => /^(HEAD|GET) /.test(line)), 'dry run only checks links');
+  // The route's own emergency stop (data/emergency-stop.json) also stops a dry run; that is not this test's subject.
+  if (dry.status !== 0) assert.match(dry.stderr, /停止中のため投稿しない/, dry.stderr);
+  else assert.equal(JSON.parse(fs.readFileSync(files.out, 'utf8')).dry_run, true);
+  const validate = runDevlog(files, ['validate', '--platform', 'devto', '--article', files.article, '--context', files.context, '--offline']);
+  assert.equal(validate.status, 0, validate.stdout + validate.stderr);
+  assert.match(validate.stdout, /検証: 通過/);
+});
+
+test('devlog validation reports a real-name hit as a fixed marker without any character of it', (t) => {
+  const files = devlogFixture(scratch(t), { description: 'Notes by Zzexample.',
+    extra: ' The open rate Zzexample said 83 percent, and 鵺鶫 agreed. See [notes](http://notes.test/zzexample).' });
+  const r = runDevlog(files, ['validate', '--platform', 'devto', '--article', files.article, '--context', files.context,
+    '--report', files.report, '--offline'], { IDENTITY_DENYLIST: 'Zzexample, 鵺鶫' });
+  assert.equal(r.status, 1, r.stdout + r.stderr);
+  const report = fs.readFileSync(files.report, 'utf8');
+  for (const out of [report, r.stdout + r.stderr]) {
+    assert.match(out, /「実名（伏せ字）」が 4 件/);
+    // Quotes are cut 14 characters before a number; quoting the unmasked body would start mid-word ("zexample said 83").
+    assert.match(out, /said 83/, 'the number problem quotes the body');
+    assert.match(out, /http:\/\/notes\.test\/実名（伏せ字）/, 'the link problem quotes the URL with the hit masked');
+    // No character of a hit: not the word, not a fragment cut by a quote, not the former "first character + …" form.
+    assert.doesNotMatch(out, /zz|xampl|[鵺鶫]|[zZ鵺]…/i);
+  }
+});
+
+test('devlog-syndication commits neither names nor hashes of them', () => {
+  const src = read('scripts/devlog-syndication.mjs');
+  assert.doesNotMatch(src, /\b[0-9a-f]{64}\b/, 'a 64-hex constant is back in the public repository');
+  assert.doesNotMatch(src, /IDENTITY_HASHES/);
+});
+
+// The per-platform send locks and the gate's no_identity_denylist are covered only by the script's own self-test,
+// which otherwise runs just before a real post. Run it on every PR too (it uses fictional words and a fake fetch).
+test('devlog-syndication self-test passes', () => {
+  const env = { ...process.env };
+  for (const name of ['IDENTITY_DENYLIST', 'DEVTO_API_KEY', 'HATENA_API_KEY', 'LIVEDOOR_API_KEY']) delete env[name];
+  const result = spawnSync(process.execPath, [DEVLOG, '--selftest'], { encoding: 'utf8', env, timeout: 60_000 });
+  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`.slice(-2000));
+  assert.match(result.stdout, /自己テスト: \d+ 件すべて通過/);
 });
