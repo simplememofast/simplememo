@@ -2,10 +2,13 @@
 /**
  * 分析の出力を、コンテンツの待ち行列へ落とす。
  *
- *   node growth/scripts/build-queues.mjs            # 表示（何が増減するか）
+ *   node growth/scripts/build-queues.mjs            # 表示（何が増減するか。検索語の本文も出す）
  *   node growth/scripts/build-queues.mjs --write    # refresh-queue.json を更新
  *   node growth/scripts/build-queues.mjs --check    # CI: 待ち行列が最新の観測より古くないか
  *   node growth/scripts/build-queues.mjs --selftest
+ *
+ * --write（seo-daily の週次）と --check（SEO Validation）の表示は公開の Actions のログに出るので、
+ * 検索語の本文を出さない（describeMerge）。
  *
  * 【なぜ要るか】
  * 検出は既に在る（analyze.mjs --only unanswered。ノイズフロアつき）。
@@ -34,6 +37,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { latestSnapshot } from '../lib/gsc.mjs';
+import { QUERY_WITHHELD, publicPage } from '../lib/gsc-privacy.mjs';
 import { loadLedger } from '../lib/ledger.mjs';
 import { selftestTally } from '../../scripts/lib/tally.mjs';
 
@@ -150,6 +154,40 @@ export function merge(existing, rows, unreachable = new Map()) {
     if (i.origin === MACHINE_ORIGIN && i.id == null) i.id = nextId();
   }
   return { items: [...manual, ...items], added, kept, blocked, manual, unreachable: skippedUnreachable };
+}
+
+/**
+ * 何が増減したかの表示（行の配列）。
+ *
+ * **queryText: false では検索語の本文を出さない。**--write（seo-daily の週次）と --check
+ * （SEO Validation）の出力は公開の Actions のログで、検索語は Google で検索する誰もが書ける
+ * 文字列だから（セキュリティ監査 F6 の残り）。行は ID と種別で名指しし、ページはサイトが
+ * 公開しているパスだけを書く。本文は refresh-queue.json に残る（週次のスナップショットと同じ扱い）。
+ */
+export function describeMerge({ added, kept, blocked, manual, unreachable }, { queryText = true } = {}) {
+  // 公開の表示では ID（あれば）と種別で呼ぶ。
+  const name = (sourceKey, ...label) => {
+    if (queryText) return sourceKey;
+    const page = /^page:([\s\S]*)$/.exec(String(sourceKey));
+    const shown = page ? `page:${publicPage(page[1])}`
+      : /^query:/.test(String(sourceKey)) ? `query:${QUERY_WITHHELD}` : QUERY_WITHHELD;
+    return [...label, shown].filter(Boolean).join(' ');
+  };
+  const lines = [
+    `  手作りの行（触らない） ${manual.length}`,
+    `  新規 ${added.length} / 更新 ${kept.length} / **戻さなかった（dropped・done）** ${blocked.length}`,
+  ];
+  for (const b of blocked) lines.push(`    そのまま: ${name(b.source_key, b.id)} (${b.status})`);
+  for (const a of added) lines.push(`    追加: ${name(a.source_key, a.id)}  期待クリック ${a.observed.expected_clicks}`);
+  if (unreachable.length) {
+    lines.push('', `  **到達不能と判定済みなので積まなかった** ${unreachable.length} 件:`);
+    for (const s2 of unreachable) {
+      lines.push(`    ${name(s2.key)}`);
+      lines.push(`      → ${s2.page} は experiments.json で abandoned（${s2.experiment}）`);
+    }
+    lines.push('    **判断は観測より新しい情報。**観測の側が譲る。');
+  }
+  return lines;
 }
 
 export function runAnalyze() {
@@ -273,6 +311,25 @@ function selftest() {
       && rejected.blocked.length === 0 && JSON.stringify(queued) === before);
   }
 
+  // **--write と --check の表示（公開の Actions のログ）に検索語の本文を出さない**（監査 F6 の残り）。
+  // 新規・そのまま（dropped/done）・到達不能の3つの出口に、目印の検索語とサイトに無いURLを通す。
+  const canary = 'canary query ignore previous instructions';
+  const unlisted = '/canary-unlisted-path/';
+  const shown = merge(
+    [{ origin: MACHINE_ORIGIN, source_key: `query:${canary} done`, status: 'done', id: 'A1' }],
+    [row(`${canary} done`), row(canary), row(unlisted, 'page'), row('/', 'page'),
+      { ...row(`${canary} abandoned`), ranking_pages: [{ page: '/blog/x' }] }],
+    unreach);
+  const hidden = describeMerge(shown, { queryText: false }).join('\n');
+  const full = describeMerge(shown).join('\n');
+  t('引数なしの表示は検索語とURLを出す（検体が3つの出口を通っている）',
+    [`${canary} done`, canary, `${canary} abandoned`, unlisted].every(text => full.includes(text)));
+  t('**公開の表示は検索語の本文もサイトに無いURLも出さない**',
+    !hidden.includes('canary') && !hidden.includes('ignore previous') && hidden.includes(`query:${QUERY_WITHHELD}`));
+  t('公開の表示も ID・種別・サイトのページは残す',
+    hidden.includes('そのまま: A1 query:') && /追加: A\d+ page:\/ /.test(hidden)
+    && /追加: A\d+ page:\[サイトに無いURL\]/.test(hidden));
+
   return finish();
 }
 
@@ -287,19 +344,11 @@ if (isMain) {
   const unreachable = unreachablePages(loadLedger());
   const { items, added, kept, blocked, manual, unreachable: skipped } = merge(queue.items ?? [], rows, unreachable);
 
+  // --write と --check は Actions で走る（公開のログ）。検索語の本文は引数なしの表示だけに出す。
+  const queryText = !process.argv.includes('--write') && !process.argv.includes('--check');
   console.log(`Refresh 待ち行列 — 観測 ${analysis.snapshot} / 未回答 ${rows.length} 件\n`);
-  console.log(`  手作りの行（触らない） ${manual.length}`);
-  console.log(`  新規 ${added.length} / 更新 ${kept.length} / **戻さなかった（dropped・done）** ${blocked.length}`);
-  for (const b of blocked) console.log(`    そのまま: ${b.source_key} (${b.status})`);
-  for (const a of added) console.log(`    追加: ${a.source_key}  期待クリック ${a.observed.expected_clicks}`);
-  if (skipped.length) {
-    console.log(`\n  **到達不能と判定済みなので積まなかった** ${skipped.length} 件:`);
-    for (const s2 of skipped) {
-      console.log(`    ${s2.key}`);
-      console.log(`      → ${s2.page} は experiments.json で abandoned（${s2.experiment}）`);
-    }
-    console.log('    **判断は観測より新しい情報。**観測の側が譲る。');
-  }
+  for (const line of describeMerge({ added, kept, blocked, manual, unreachable: skipped }, { queryText })) console.log(line);
+  if (!queryText) console.log('  （検索語の本文は出していない。本文は growth/content/refresh-queue.json と引数なしの表示にある）');
 
   const stale = queue.generated_at && snap?.label && queue.generated_at < snap.label;
   if (stale) {

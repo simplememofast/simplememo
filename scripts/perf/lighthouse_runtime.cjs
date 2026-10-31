@@ -12,6 +12,12 @@ const {pathToFileURL} = require('node:url');
 const {spawn, spawnSync} = require('node:child_process');
 
 const GUARD_SOURCE_COMMIT = 'bc374916c9d72eb994d6ef1aebcf3a131082437c';
+const CHROME = Object.freeze({
+  version: 'Google Chrome for Testing 155.0.8059.39',
+  sourceUrl: 'https://storage.googleapis.com/chrome-for-testing-public/155.0.8059.39/linux64/chrome-linux64.zip',
+  archiveSha256: '55672d1f392fd3e7b7a08621b6e804e6bcb39d40cf155504abb74b3a021ea8ea',
+  executableSha256: 'ed05e73a2cdf875326fcfa438b31c71a6a885a353610731dd52090dfc476f778',
+});
 const CONSOLE_ORIGINAL_SHA256 = '512cb67e34e30672ec872a4fc8f846904a5b77006426186c6bf7819993a1191a';
 const CONSOLE_ORIGINAL_TEXT = "config: [{name: 'discouragedAPIUse', threshold: -1}]";
 const CONSOLE_REPAIRED_TEXT = "config: [{name: 'discouragedAPIUse', threshold: -2}]";
@@ -217,11 +223,99 @@ function ordinaryPlan(url, outputPrefix, resultsDirectory) {
     receiptPath: outputPrefix + '.runtime.json'};
 }
 
+function browserPaths(temp, configuredPath) {
+  need(typeof temp === 'string' && path.isAbsolute(temp) && temp === path.resolve(temp), 'RUNNER_TEMP_REQUIRED');
+  const directory = path.join(temp, 'perf-browser');
+  const executable = path.join(directory, 'chrome-linux64/chrome');
+  need(configuredPath === executable, 'CHROME_PATH_NOT_PINNED');
+  checkedModulePath(temp, executable);
+  fs.accessSync(executable, fs.constants.X_OK);
+  return {executable, archive: path.join(directory, 'chrome-linux64.zip')};
+}
+
+function browserFileHash(file) {
+  const fd = fs.openSync(file, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW);
+  try {
+    const before = fs.fstatSync(fd);
+    need(before.isFile() && before.nlink === 1 && before.size > 0 && before.size < 512 * 1024 * 1024,
+      'CHROME_FILE_INVALID');
+    const hash = createHash('sha256'), chunk = Buffer.alloc(1024 * 1024);
+    let bytes = 0, count;
+    while ((count = fs.readSync(fd, chunk, 0, chunk.length, null)) > 0) {
+      bytes += count;
+      need(bytes <= before.size, 'CHROME_FILE_CHANGED');
+      hash.update(chunk.subarray(0, count));
+    }
+    const after = fs.fstatSync(fd), named = fs.lstatSync(file);
+    need(bytes === before.size && before.dev === named.dev && before.ino === named.ino
+      && before.size === after.size && before.mtimeMs === after.mtimeMs
+      && before.ctimeMs === after.ctimeMs && !named.isSymbolicLink(), 'CHROME_FILE_CHANGED');
+    return hash.digest('hex');
+  } finally { fs.closeSync(fd); }
+}
+
+function recordBrowserVersion(receipt, version, persist) {
+  receipt.browser.version = {stdout: typeof version.stdout === 'string' ? version.stdout.trim() : '',
+    stderr: typeof version.stderr === 'string' ? version.stderr.trim() : '',
+    status: version.status, signal: version.signal, errorCode: version.error?.code || null};
+  // Keep the actual output even when a new runner/browser combination fails the guard.
+  persist();
+  need(version.status === 0 && version.signal === null && !version.error, 'CHROME_VERSION_UNAVAILABLE');
+  need(receipt.browser.version.stdout === CHROME.version, 'CHROME_VERSION_CHANGED');
+}
+
+function verifyPinnedBrowser(receipt, persist) {
+  receipt.browser = {sourceUrl: CHROME.sourceUrl, reviewedArchiveSha256: CHROME.archiveSha256,
+    expectedVersion: CHROME.version, expectedExecutableSha256: CHROME.executableSha256};
+  persist();
+  const {executable} = browserPaths(process.env.RUNNER_TEMP, process.env.CHROME_PATH);
+  const identity = fs.statSync(executable);
+  receipt.browser.executable = path.relative(process.env.RUNNER_TEMP, executable);
+  receipt.browser.executableSha256 = browserFileHash(executable);
+  persist();
+  need(receipt.browser.executableSha256 === CHROME.executableSha256, 'CHROME_BINARY_CHANGED');
+  const version = spawnSync(executable, ['--version'], {encoding: 'utf8', timeout: 10000, maxBuffer: 65536});
+  recordBrowserVersion(receipt, version, persist);
+  const after = fs.statSync(executable);
+  need(identity.dev === after.dev && identity.ino === after.ino && identity.size === after.size
+    && identity.mtimeMs === after.mtimeMs && identity.ctimeMs === after.ctimeMs, 'CHROME_FILE_CHANGED');
+  return {executable, identity};
+}
+
+function verifyBrowserInstallation() {
+  const directory = process.env.PERF_RESULTS;
+  need(typeof directory === 'string' && path.isAbsolute(directory)
+    && fs.realpathSync(directory) === directory, 'RESULTS_DIRECTORY_INVALID');
+  const file = path.join(directory, 'browser-install.json');
+  const receipt = {schema: 1, startedAt: new Date().toISOString(), complete: false,
+    sourceUrl: CHROME.sourceUrl, expectedArchiveSha256: CHROME.archiveSha256};
+  jsonFile(file, receipt, true);
+  const persist = () => jsonFile(file, receipt);
+  try {
+    need(process.platform === 'linux' && process.arch === 'x64', 'LINUX_X64_BROWSER_REQUIRED');
+    const {archive} = browserPaths(process.env.RUNNER_TEMP, process.env.CHROME_PATH);
+    checkedModulePath(process.env.RUNNER_TEMP, archive);
+    receipt.archiveSha256 = browserFileHash(archive);
+    persist();
+    need(receipt.archiveSha256 === CHROME.archiveSha256, 'CHROME_ARCHIVE_CHANGED');
+    verifyPinnedBrowser(receipt, persist);
+    receipt.complete = true;
+    return receipt;
+  } catch (error) {
+    receipt.error = errorCode(error);
+    throw error;
+  } finally {
+    receipt.finishedAt = new Date().toISOString();
+    persist();
+  }
+}
+
 function requireVersions(tools) {
   need(tools.node === 'v24.22.1', 'NODE_VERSION_CHANGED');
   need(tools.lighthouse === '12.8.2', 'LIGHTHOUSE_VERSION_CHANGED');
   need(tools.chromeLauncher === '1.2.2', 'LAUNCHER_VERSION_CHANGED');
-  need(tools.chromeVersion === 'Google Chrome 155.0.8059.39', 'CHROME_VERSION_CHANGED');
+  need(tools.chromeVersion === CHROME.version, 'CHROME_VERSION_CHANGED');
+  need(tools.chromeSha256 === CHROME.executableSha256, 'CHROME_BINARY_CHANGED');
 }
 
 function buildCliArguments(cli, url, port, outputPrefix) {
@@ -249,7 +343,7 @@ async function withRestoration(repair, operation, cleanup) {
 
 // Shared internal boundary for the ordinary entry and reviewed loopback harnesses.
 // The callback may select their audits; it cannot alter this browser/collector setup.
-async function withPinnedRuntime(receipt, operation) {
+async function withPinnedRuntime(receipt, operation, persist = () => {}) {
   need(process.platform === 'linux', 'LINUX_PROC_ATTESTATION_REQUIRED');
   need(!process.env.HEADLESS, 'HEADLESS_ENV_OVERRIDE_UNSUPPORTED');
   const temp = process.env.RUNNER_TEMP;
@@ -265,21 +359,20 @@ async function withPinnedRuntime(receipt, operation) {
   for (const file of [lhPackagePath, launcherPackagePath, launcherEntry, cli]) checkedModulePath(root, file);
   need(lh.version === '12.8.2' && launcherPackage.version === '1.2.2', 'MEASUREMENT_TOOLS_CHANGED');
   const launcher = await import(pathToFileURL(launcherEntry).href);
-  need(typeof launcher.Launcher?.defaultFlags === 'function'
-    && typeof launcher.getChromePath === 'function', 'LAUNCHER_INTERFACE_CHANGED');
+  need(typeof launcher.Launcher?.defaultFlags === 'function', 'LAUNCHER_INTERFACE_CHANGED');
   const arms = buildArms(launcher.Launcher.defaultFlags()), flags = arms.restored;
-  const chromePath = launcher.getChromePath();
-  const version = spawnSync(chromePath, ['--version'], {encoding: 'utf8', timeout: 10000, maxBuffer: 65536});
-  need(version.status === 0, 'CHROME_VERSION_UNAVAILABLE');
+  const {executable: chromePath, identity: checkedExecutable} = verifyPinnedBrowser(receipt, persist);
   const tools = {node: process.version, lighthouse: lh.version, chromeLauncher: launcherPackage.version,
-    chromeVersion: version.stdout.trim(), chromeExecutable: path.basename(chromePath),
+    chromeVersion: receipt.browser.version.stdout, chromeExecutable: path.basename(chromePath),
+    chromeSha256: receipt.browser.executableSha256,
     lighthousePackageSha256: sha256(fs.readFileSync(lhPackagePath)),
     launcherPackageSha256: sha256(fs.readFileSync(launcherPackagePath)),
     launcherEntrySha256: sha256(fs.readFileSync(launcherEntry)),
     lighthouseCliSha256: sha256(fs.readFileSync(cli))};
-  requireVersions(tools);
   Object.assign(receipt, {tools, flags, guardSourceCommit: GUARD_SOURCE_COMMIT,
     runtimeSha256: sha256(fs.readFileSync(__filename))});
+  persist();
+  requireVersions(tools);
   const consolePath = path.join(path.dirname(lhPackagePath), 'core/gather/gatherers/console-messages.js');
   const repair = prepareRepair(root, consolePath);
   receipt.repair = repair.metadata;
@@ -292,6 +385,10 @@ async function withPinnedRuntime(receipt, operation) {
     receipt.commandLineBefore = commandLine(chrome, flags, profile);
     const executable = fs.readlinkSync('/proc/' + chrome.pid + '/exe');
     const stat = fs.statSync(executable);
+    need(executable === chromePath && stat.dev === checkedExecutable.dev && stat.ino === checkedExecutable.ino
+      && stat.size === checkedExecutable.size && stat.mtimeMs === checkedExecutable.mtimeMs
+      && stat.ctimeMs === checkedExecutable.ctimeMs,
+      'BROWSER_EXECUTABLE_NOT_PINNED');
     const identity = JSON.stringify([executable, stat.dev, stat.ino, stat.size, stat.mtimeMs]);
     receipt.actualExecutable = path.basename(executable);
     const result = await operation({cli, port: chrome.port});
@@ -344,7 +441,8 @@ async function measure(url, outputPrefix) {
   jsonFile(plan.receiptPath, receipt, true);
   try {
     receipt.cli = await withPinnedRuntime(receipt, ({cli, port}) =>
-      runCli(buildCliArguments(cli, plan.url, port, plan.outputPrefix), plan.logDirectory, 60000));
+      runCli(buildCliArguments(cli, plan.url, port, plan.outputPrefix), plan.logDirectory, 60000),
+    () => jsonFile(plan.receiptPath, receipt));
     requireCliSuccess(receipt.cli);
     receipt.artifacts = readMeasurementArtifacts(plan);
     receipt.complete = true;
@@ -360,10 +458,17 @@ async function measure(url, outputPrefix) {
 
 module.exports = {measure, withPinnedRuntime, ordinaryPlan, buildCliArguments, requireVersions,
   requireCliSuccess, withRestoration, readMeasurementArtifacts, requireNewOutput,
+  browserPaths, browserFileHash, recordBrowserVersion, verifyBrowserInstallation, CHROME,
   _guards: {repairBytes, relativeModulePath, checkedModulePath, readRepairFd, prepareRepair,
     buildArms, attestArguments, commandLine, stopChrome, runCli}};
 if (require.main === module) {
-  if (process.argv.length !== 4) {
+  if (process.argv.length === 3 && process.argv[2] === '--verify-browser') {
+    try { verifyBrowserInstallation(); }
+    catch (error) {
+      console.error('Browser installation failed: ' + errorCode(error) + '.');
+      process.exitCode = 1;
+    }
+  } else if (process.argv.length !== 4) {
     console.error('Usage: node scripts/perf/lighthouse_runtime.cjs <ordinary URL> <PERF_RESULTS/prefix>');
     process.exitCode = 2;
   } else {

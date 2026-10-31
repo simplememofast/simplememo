@@ -40,7 +40,8 @@ function fixture(t) {
 const defaults = Object.freeze(['--disable-background-networking',
   '--disable-features=Translate,RenderDocument,MediaRouter']);
 const versions = Object.freeze({node: 'v24.22.1', lighthouse: '12.8.2',
-  chromeLauncher: '1.2.2', chromeVersion: 'Google Chrome 155.0.8059.39'});
+  chromeLauncher: '1.2.2', chromeVersion: 'Google Chrome for Testing 155.0.8059.39',
+  chromeSha256: 'ed05e73a2cdf875326fcfa438b31c71a6a885a353610731dd52090dfc476f778'});
 
 test('all extracted guards exactly match the reviewed diagnostic source', () => {
   assert.equal(sha256(ORIGINAL), ORIGINAL_HASH);
@@ -262,6 +263,90 @@ test('known versions and every non-success CLI outcome fail closed', () => {
     {code: null, signal: 'SIGKILL', errorCode: null}, {code: 0, signal: null, errorCode: 'SPAWN_FAILED'}]) {
     assert.throws(() => runtime.requireCliSuccess(result), /LIGHTHOUSE_CLI_FAILED/);
   }
+});
+
+test('exact CfT branding, version and binary digest are all required', () => {
+  for (const chromeVersion of ['Google Chrome 155.0.8059.39', 'Chromium 155.0.8059.39',
+    'Google Chrome for Testing 155.0.8059.40', 'Google Chrome for Testing 155.0.8059.39 beta',
+    'Google Chrome for Testing 155.0.8059.39 extra']) {
+    assert.throws(() => runtime.requireVersions({...versions, chromeVersion}), /CHROME_VERSION_CHANGED/);
+  }
+  for (const chromeSha256 of [undefined, '', '0'.repeat(64)]) {
+    assert.throws(() => runtime.requireVersions({...versions, chromeSha256}), /CHROME_BINARY_CHANGED/);
+  }
+});
+
+test('browser selection requires the exact owned executable and rejects fallback or symlink paths', t => {
+  const {root} = fixture(t), chrome = path.join(root, 'perf-browser/chrome-linux64/chrome');
+  fs.mkdirSync(path.dirname(chrome), {recursive: true});
+  fs.writeFileSync(chrome, 'fixture', {mode: 0o700});
+  assert.equal(runtime.browserPaths(root, chrome).executable, chrome);
+  for (const selected of [undefined, '/usr/bin/google-chrome', chrome + '-headless-shell',
+    path.join(root, 'other/chrome'), root + '/perf-browser/../perf-browser/chrome-linux64/chrome']) {
+    assert.throws(() => runtime.browserPaths(root, selected), /CHROME_PATH_NOT_PINNED/);
+  }
+  fs.renameSync(chrome, chrome + '.real');
+  fs.symlinkSync(chrome + '.real', chrome);
+  assert.throws(() => runtime.browserPaths(root, chrome), /REPAIR_MODULE_SYMLINK_OR_TYPE/);
+  fs.unlinkSync(chrome);
+  fs.renameSync(chrome + '.real', chrome);
+  const directory = path.dirname(chrome);
+  fs.renameSync(directory, directory + '.real');
+  fs.symlinkSync(directory + '.real', directory);
+  assert.throws(() => runtime.browserPaths(root, chrome), /REPAIR_MODULE_SYMLINK_OR_TYPE/);
+});
+
+test('binary hashing detects changed bytes and rejects linked, empty or non-file inputs', t => {
+  const {root} = fixture(t), file = path.join(root, 'chrome');
+  fs.writeFileSync(file, 'original');
+  assert.equal(runtime.browserFileHash(file), sha256(Buffer.from('original')));
+  fs.writeFileSync(file, 'different');
+  assert.notEqual(runtime.browserFileHash(file), sha256(Buffer.from('original')));
+  fs.linkSync(file, file + '.hardlink');
+  assert.throws(() => runtime.browserFileHash(file), /CHROME_FILE_INVALID/);
+  fs.unlinkSync(file + '.hardlink');
+  fs.symlinkSync(file, file + '.symlink');
+  assert.throws(() => runtime.browserFileHash(file + '.symlink'));
+  fs.writeFileSync(file, '');
+  assert.throws(() => runtime.browserFileHash(file), /CHROME_FILE_INVALID/);
+  assert.throws(() => runtime.browserFileHash(root), /CHROME_FILE_INVALID/);
+});
+
+test('actual version output and process failure are durably recorded before version validation', t => {
+  const {root} = fixture(t), file = path.join(root, 'browser-install.json');
+  for (const result of [
+    {stdout: 'Google Chrome 156.0.0.0\n', stderr: '', status: 0, signal: null},
+    {stdout: '', stderr: 'missing shared library\n', status: 127, signal: null},
+    {stdout: '', stderr: '', status: null, signal: 'SIGTERM', error: {code: 'ETIMEDOUT'}},
+  ]) {
+    const receipt = {browser: {}};
+    assert.throws(() => runtime.recordBrowserVersion(receipt, result,
+      () => fs.writeFileSync(file, JSON.stringify(receipt))), /CHROME_VERSION_(CHANGED|UNAVAILABLE)/);
+    const recorded = JSON.parse(fs.readFileSync(file, 'utf8')).browser.version;
+    assert.equal(recorded.stdout, result.stdout.trim());
+    assert.equal(recorded.stderr, result.stderr.trim());
+    assert.equal(recorded.status, result.status);
+    assert.equal(recorded.signal, result.signal);
+    assert.equal(recorded.errorCode, result.error?.code || null);
+  }
+  const receipt = {browser: {}};
+  runtime.recordBrowserVersion(receipt, {stdout: versions.chromeVersion + '\n', stderr: '', status: 0, signal: null},
+    () => fs.writeFileSync(file, JSON.stringify(receipt)));
+  assert.equal(JSON.parse(fs.readFileSync(file, 'utf8')).browser.version.stdout, versions.chromeVersion);
+});
+
+test('workflow installs the reviewed archive and exports one browser before any browser-based check', () => {
+  const workflow = fs.readFileSync(path.join(__dirname, '../../.github/workflows/pagespeed-audit.yml'), 'utf8');
+  const install = workflow.indexOf('- name: Install and attest exact Chrome for Testing');
+  const observe = workflow.indexOf('- name: Verify production deployment after a main push');
+  assert(install > 0 && observe > install);
+  const block = workflow.slice(install, observe);
+  assert(block.includes("'" + runtime.CHROME.sourceUrl + "'"));
+  assert(block.includes(runtime.CHROME.archiveSha256 + '  $browser_dir/chrome-linux64.zip'));
+  assert(block.indexOf('sha256sum --check --strict') < block.indexOf('unzip -q'));
+  assert(block.includes('export CHROME_PATH="$browser_dir/chrome-linux64/chrome"'));
+  assert(block.indexOf('--verify-browser') < block.indexOf('>> "$GITHUB_ENV"'));
+  assert(!block.includes('headless-shell') && !block.includes('latest'));
 });
 
 test('runtime, redirect, category and artifact failures cannot become valid measurements', t => {

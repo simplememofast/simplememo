@@ -25,6 +25,9 @@ import { loadEdgeMiddleware, edgeResult } from "./lib/edge-middleware.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ORIGIN = "https://simplememofast.com";
+// The bare Cloudflare Pages production alias (functions/_middleware.js
+// HOST_ALIASES). Previews live on `<hash>.` / `<branch>.` subdomains of it.
+const PAGES_ALIAS = "https://simplememo-596.pages.dev";
 
 // data: URL 経由でロードする理由は lib/edge-middleware.mjs 参照
 // （package.json が無いので .js の bare import は CJS 扱いになる）。
@@ -179,6 +182,73 @@ await redirects("https://www.simplememofast.com/vs/notion/", "/vs/notion/");
 await servesDirectly("https://www.simplememofast.com/admin/");
 // Preview/other hosts are untouched — the match is exact, not a suffix.
 await servesDirectly("https://claude-branch.simplememo.pages.dev/vs/notion/");
+
+// ── 0a. Bare Pages production alias → apex, same single 301 ─────────────
+// Owner decision 2026-10-31. `simplememo-596.pages.dev` served the production
+// HTML with 200 (canonical → apex, robots index,follow) and a web search for
+// the brand returned two URLs on the alias host. Only the exact host moves;
+// path and query are kept.
+await redirects(PAGES_ALIAS + "/", "/");
+await redirects(PAGES_ALIAS + "/obsidian/", "/obsidian/");
+// Analytics params survive the host move, as they do on the apex.
+await redirects(
+  PAGES_ALIAS + "/obsidian/?utm_source=search&gclid=abc123",
+  "/obsidian/?utm_source=search&gclid=abc123",
+);
+// Host + another fix still cost ONE hop: .html, ?lang=, a referral param, a
+// retired path, duplicate slashes and the /en directory alias.
+await redirects(PAGES_ALIAS + "/faq.html?lang=ja&utm_medium=email", "/faq?utm_medium=email");
+await redirects(PAGES_ALIAS + "/obsidian/index.html?ref=search", "/obsidian/");
+await redirects(PAGES_ALIAS + "/vs/trello/?lang=en", "/vs/");
+await redirects(PAGES_ALIAS + "//blog///instant-capture-workflow", "/blog/instant-capture-workflow");
+await redirects(PAGES_ALIAS + "/en", "/en/");
+// `URL` lowercases the host, so letter case cannot walk around the exact match.
+await redirects("https://SIMPLEMEMO-596.Pages.Dev/obsidian/", "/obsidian/");
+// The fully qualified spelling (trailing dot) and a non-default port reach
+// Functions with that part kept in request.url (both observed on the alias,
+// 2026-10-31). Neither may walk around the match, and neither may survive
+// into the Location — the canonical URL has no dot and no port.
+await redirects(PAGES_ALIAS + "./obsidian/", "/obsidian/");
+await redirects(PAGES_ALIAS + ":8443/faq.html?lang=ja", "/faq");
+await redirects(PAGES_ALIAS + ".:8443/obsidian/?utm_source=search", "/obsidian/?utm_source=search");
+await redirects("https://www.simplememofast.com.:8443/vs/notion/", "/vs/notion/");
+// The apex's own trailing-dot / port forms are not aliases: left as they were.
+await servesDirectly(ORIGIN + "./obsidian/");
+await servesDirectly(ORIGIN + ":8443/obsidian/");
+// /admin/* keeps the terminal retirement path on the alias too. Cloudflare
+// Access answers there before Functions; an authenticated request reaches the
+// same 410 as on the apex, so no redirect is added.
+await servesDirectly(PAGES_ALIAS + "/admin");
+await servesDirectly(PAGES_ALIAS + "/admin/");
+await servesDirectly(PAGES_ALIAS + "/admin/api/upload?lang=en");
+// Internal paths stay 404 and GONE slugs stay 410 on the alias itself, with
+// no redirect first (the host move must not walk around the block).
+await notFound(PAGES_ALIAS + "/docs/seo/FULL-AUDIT-REPORT-2026-07-07.md");
+await notFound(PAGES_ALIAS + "//growth//experiments/experiments.json");
+await notFound(PAGES_ALIAS + "/CLAUDE.md");
+await gone(PAGES_ALIAS + "/blog/energy-budget-field-notes.html?lang=ja");
+// Every other host is untouched — hashed previews and branch aliases
+// (Access-protected; the preview-cache CI measures the hashed ones), the
+// dashboard project name used as a host (`simplememo.pages.dev` is not our
+// assigned suffix), look-alikes, and production itself. They keep their own
+// host even when a path fix applies.
+for (const host of [
+  "https://1234abcd.simplememo-596.pages.dev",
+  // Dropping the trailing dot must not turn the match into a suffix match.
+  "https://1234abcd.simplememo-596.pages.dev.",
+  "https://claude-pages-dev-alias.simplememo-596.pages.dev",
+  "https://main.simplememo-596.pages.dev",
+  "https://simplememo.pages.dev",
+  "https://evil-simplememo-596.pages.dev",
+  "https://simplememo-596-pages.dev",
+  "https://simplememo-596.pages.dev.evil.test",
+  ORIGIN,
+]) {
+  const kept = host === ORIGIN ? "" : host;
+  await servesDirectly(host + "/obsidian/");
+  await servesDirectly(host + "/obsidian/?utm_source=search");
+  await redirects(host + "/faq.html?lang=ja", kept + "/faq");
+}
 
 // ── 1. Duplicate slashes ─────────────────────────────────────────────────
 // GSC 2026-08-05, "Alternate page with proper canonical tag" (5 of 7 rows).
@@ -344,6 +414,12 @@ await notFound("/growth/");
     if (r.kind !== "pass") {
       fail(`/data/${f} は配信する分類なのに middleware が止めた（${JSON.stringify(r)}）`);
     }
+  }
+  // Pages の素の別名ホストでも同じ線引き: 配信しないものはその場で404、
+  // 配信するものは他のページと同じく apex へ1回の301で移る。
+  for (const f of unserved) await notFound(`${PAGES_ALIAS}/data/${f}`);
+  for (const f of served) {
+    await redirects(`${PAGES_ALIAS}/data/${f}`, `/data/${f}`, { checkStaticDestination: false });
   }
 }
 

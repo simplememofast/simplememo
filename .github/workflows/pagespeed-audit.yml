@@ -85,6 +85,23 @@ jobs:
       - name: Install pinned browser measurement tools
         timeout-minutes: 2
         run: npm install --prefix "$RUNNER_TEMP/perf-tools" --no-save lighthouse@12.8.2 chrome-launcher@1.2.2 playwright@1.55.0
+      - name: Install and attest exact Chrome for Testing
+        timeout-minutes: 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          browser_dir="$RUNNER_TEMP/perf-browser"
+          mkdir "$browser_dir"
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 \
+            --connect-timeout 15 --max-time 150 \
+            'https://storage.googleapis.com/chrome-for-testing-public/155.0.8059.39/linux64/chrome-linux64.zip' \
+            --output "$browser_dir/chrome-linux64.zip"
+          echo "55672d1f392fd3e7b7a08621b6e804e6bcb39d40cf155504abb74b3a021ea8ea  $browser_dir/chrome-linux64.zip" | sha256sum --check --strict
+          unzip -q "$browser_dir/chrome-linux64.zip" -d "$browser_dir"
+          export CHROME_PATH="$browser_dir/chrome-linux64/chrome"
+          # Save actual --version output before the strict product/version assertion.
+          node scripts/perf/lighthouse_runtime.cjs --verify-browser
+          echo "CHROME_PATH=$CHROME_PATH" >> "$GITHUB_ENV"
       - name: Verify production deployment after a main push
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/verify_production.cjs --require

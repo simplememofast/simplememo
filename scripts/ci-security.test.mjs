@@ -17,43 +17,12 @@ function scratch(t) {
   return dir;
 }
 
-test('models and credentialed validators/publishers never share jobs or checkout paths', () => {
-  for (const name of ['prepare', 'draft', 'validate', 'fix', 'publish']) assert.ok(jobs[name], name);
-  for (const name of ['draft', 'fix']) {
-    assert.match(jobs[name], /uses: anthropics\/claude-code-action@[a-f0-9]{40}/);
-    assert.doesNotMatch(jobs[name], /secrets\.(?:DEVTO_API_KEY|HATENA_API_KEY|LIVEDOOR_API_KEY|IDENTITY_DENYLIST)/);
-    // Only data outputs can leave the model VM; no tree or context export.
-    const uploaded = jobs[name].slice(jobs[name].lastIndexOf('- uses: actions/upload-artifact@'));
-    assert.match(uploaded, /\.syndication\/article\.json/);
-    assert.doesNotMatch(uploaded, /\.syndication\/context|path: \.syndication\/$/m);
-  }
-  for (const name of ['prepare', 'validate', 'publish']) {
-    assert.doesNotMatch(jobs[name], /claude-code-action|id-token: write/);
-    assert.match(jobs[name], /ref: \$\{\{ github.sha \}\}/);
-    assert.match(jobs[name], /persist-credentials: false/);
-  }
-  for (const name of ['validate', 'publish']) {
-    assert.match(jobs[name], /node scripts\/syndication-input\.mjs/);
-    assert.match(jobs[name], /path: \$\{\{ runner.temp \}\}\//);
-    assert.match(jobs[name], /IDENTITY_DENYLIST: \$\{\{ secrets.IDENTITY_DENYLIST \}\}/);
-  }
-  assert.match(jobs.publish, /needs.validate.result == 'success'/);
-  assert.match(jobs.publish, /needs.fix.result == 'success'/);
-  assert.match(jobs.publish, /node scripts\/devlog-syndication.mjs validate/);
-  assert.match(jobs.publish, /ARGS=\(publish/);
-  assert.match(jobs.publish, /--dry-run/);
-  assert.match(jobs.publish, /--force/);
-  assert.doesNotMatch(jobs.publish, /continue-on-error/);
-  assert.match(jobs.prepare, /github.ref == 'refs\/heads\/main'/);
-  // The name list never reaches the prepare job (it feeds the model); only its presence does, and the gate stops on it.
-  assert.doesNotMatch(jobs.prepare, /secrets\.IDENTITY_DENYLIST \}\}/);
-  assert.match(jobs.prepare, /HAS_DENYLIST: \$\{\{ secrets.IDENTITY_DENYLIST != '' \}\}/);
-  assert.match(jobs.prepare, /if \[ "\$MODE" = "publish" \] && \[ "\$HAS_DENYLIST" != "true" \]; then ARGS\+=\(--identity-missing\); fi/);
-  const publishStep = jobs.publish.split('- name: 投稿\n')[1].split('\n      - ')[0];
-  assert.match(publishStep, /IDENTITY_DENYLIST: \$\{\{ secrets.IDENTITY_DENYLIST \}\}/);
-  assert.match(publishStep, /ARGS=\(publish/);
-  const ceiling = ['prepare', 'draft', 'validate', 'fix', 'publish'].reduce((n, name) => n + Number(jobs[name].match(/    timeout-minutes: (\d+)/)[1]), 0);
-  assert.ok(ceiling <= 90, 'Preserve the prior per-platform runner-minute ceiling');
+test('syndication is explicitly blocked without model, secrets, network or public artifacts', () => {
+  assert.deepEqual(Object.keys(jobs).filter((k) => k !== 'workflow_call'), ['blocked']);
+  assert.match(workflow, /permissions: \{\}/);
+  assert.match(jobs.blocked, /PRIVATE_HANDOFF_REQUIRED/);
+  assert.match(jobs.blocked, /exit 1/);
+  assert.doesNotMatch(jobs.blocked, /uses:|secrets\.|upload-artifact|download-artifact|node |curl|wget/);
 });
 
 test('executable artifacts cannot replace trusted code; JSON stays inert', (t) => {
@@ -70,33 +39,6 @@ test('executable artifacts cannot replace trusted code; JSON stays inert', (t) =
   assert.deepEqual(fs.readdirSync(trusted), ['article.json']);
   assert.equal(fs.existsSync(marker), false);
   assert.throws(() => importArticle(path.join(incoming, 'article.json'), output)); // no overwrite of trusted paths
-});
-
-test('actual publisher import shell ignores a poisoned script and changed stop/context files', (t) => {
-  const dir = scratch(t);
-  const runner = path.join(dir, 'runner');
-  const trusted = path.join(dir, 'trusted');
-  const marker = path.join(dir, 'executed');
-  for (const rel of ['runner/article/scripts', 'runner/context', 'trusted/scripts', 'trusted/data']) fs.mkdirSync(path.join(dir, rel), { recursive: true });
-  const poison = path.join(runner, 'article/scripts/devlog-syndication.mjs');
-  fs.writeFileSync(poison, `import fs from 'node:fs';fs.writeFileSync(${JSON.stringify(marker)},process.env.DEVTO_API_KEY);`);
-  // Reproduce the old same-workspace shape using a fake key and no network.
-  assert.equal(spawnSync(process.execPath, [poison], { env: { DEVTO_API_KEY: 'test-sentinel' } }).status, 0);
-  assert.equal(fs.readFileSync(marker, 'utf8'), 'test-sentinel'); fs.unlinkSync(marker);
-  fs.writeFileSync(path.join(runner, 'article/article.json'), '{"title":"Untrusted article"}');
-  fs.writeFileSync(path.join(runner, 'article/context.json'), '{"poison":true}');
-  fs.writeFileSync(path.join(runner, 'context/context.json'), '{"trusted":true}');
-  fs.writeFileSync(path.join(trusted, 'data/emergency-stop.json'), '{"stopped":true}');
-  fs.writeFileSync(path.join(trusted, 'scripts/syndication-input.mjs'), read('scripts/syndication-input.mjs'));
-  fs.writeFileSync(path.join(trusted, 'scripts/devlog-syndication.mjs'), `import fs from 'node:fs';if(!JSON.parse(fs.readFileSync('data/emergency-stop.json')).stopped)throw Error('stop changed');console.log('trusted publisher');`);
-  const shell = jobs.publish.match(/- name: Import article data;[^\n]*\n        run: \|\n([\s\S]*?)(?=\n      -)/)[1].replace(/^          /gm, '');
-  const result = spawnSync('bash', ['-euc', shell + '\nnode scripts/devlog-syndication.mjs'], {
-    cwd: trusted, encoding: 'utf8', env: { ...process.env, RUNNER_TEMP: runner, DEVTO_API_KEY: 'test-sentinel' },
-  });
-  assert.equal(result.status, 0, result.stderr);
-  assert.equal(result.stdout.trim(), 'trusted publisher');
-  assert.equal(fs.existsSync(marker), false);
-  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(trusted, '.syndication/context.json'))), { trusted: true });
 });
 
 test('import rejects symlinks, oversized files, invalid JSON and executable-shaped fields', (t) => {
@@ -191,7 +133,7 @@ test('devlog check modes keep working without the secret and only warn', (t) => 
   assert.doesNotMatch(dry.stderr, /IDENTITY_DENYLIST/, 'the dry run is not stopped by the lock');
   assert.ok(fetched(files).every((line) => /^(HEAD|GET) /.test(line)), 'dry run only checks links');
   // The route's own emergency stop (data/emergency-stop.json) also stops a dry run; that is not this test's subject.
-  if (dry.status !== 0) assert.match(dry.stderr, /停止中のため投稿しない/, dry.stderr);
+  if (dry.status !== 0) assert.match(dry.stderr, /DEVLOG_COMMAND_FAILED/, dry.stderr);
   else assert.equal(JSON.parse(fs.readFileSync(files.out, 'utf8')).dry_run, true);
   const validate = runDevlog(files, ['validate', '--platform', 'devto', '--article', files.article, '--context', files.context, '--offline']);
   assert.equal(validate.status, 0, validate.stdout + validate.stderr);
@@ -224,9 +166,120 @@ test('devlog-syndication commits neither names nor hashes of them', () => {
 // The per-platform send locks and the gate's no_identity_denylist are covered only by the script's own self-test,
 // which otherwise runs just before a real post. Run it on every PR too (it uses fictional words and a fake fetch).
 test('devlog-syndication self-test passes', () => {
-  const env = { ...process.env };
+  const env = { PATH: process.env.PATH, NODE_OPTIONS: process.env.NODE_OPTIONS };
   for (const name of ['IDENTITY_DENYLIST', 'DEVTO_API_KEY', 'HATENA_API_KEY', 'LIVEDOOR_API_KEY']) delete env[name];
   const result = spawnSync(process.execPath, [DEVLOG, '--selftest'], { encoding: 'utf8', env, timeout: 60_000 });
   assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`.slice(-2000));
   assert.match(result.stdout, /自己テスト: \d+ 件すべて通過/);
+});
+
+
+// Regression inputs below are deliberately fictional and require no real secret.
+import { identityMatcher, identityHits, maskIdentity, validateArticle, publishDevto,
+  publishHatena, publishLivedoor, PLATFORMS } from './devlog-syndication.mjs';
+
+test('unsupported denylist serialization fails closed instead of becoming an opaque identifier', () => {
+  for (const value of ['["Qqsynthetic"]', 'Qqsynthetic;Rrfictional', '{"names":"Qqsynthetic"}', 'Qqsynthetic, ["Rrfictional"]']) {
+    assert.equal(identityMatcher({ IDENTITY_DENYLIST: value }).size, 0);
+  }
+  for (const value of ['Qqsynthetic,Rrfictional', 'Qqsynthetic\nRrfictional']) {
+    const m = identityMatcher({ IDENTITY_DENYLIST: value });
+    assert.equal(identityHits('Qqsynthetic Rrfictional', m).length, 2);
+  }
+});
+
+test('identifier matching covers width, invisibles and nested percent encodings', () => {
+  const m = identityMatcher({ IDENTITY_DENYLIST: '@qq_handle77, qq.person@example.test, 鵺鶫' });
+  for (const value of ['ＱＱ＿ＨＡＮＤＬＥ７７', 'qq_\u200bhandle77', 'https://example.test/%71%71%5Fhandle77',
+    'qq&#95;handle77', 'qq&#x5f;handle77', 'qq_&#104;andle77', 'qq&lowbar;handle77', 'qq&amp;#95;handle77', 'qq&UnknownEntity;handle77', '%2571%2571%255Fhandle77', '％７１％７１％５Ｆhandle77', '%EF%BC%8571%EF%BC%8571%EF%BC%855Fhandle77', '%FF%71%71%5Fhandle77', '%E9%B5%BA%E9%B6%AB', 'ＱＱ．ＰＥＲＳＯＮ＠ＥＸＡＭＰＬＥ．ＴＥＳＴ']) {
+    assert.ok(identityHits(value, m).length > 0);
+    assert.doesNotMatch(maskIdentity(value, m), /qq|handle77|[鵺鶫]/i);
+  }
+  assert.equal(identityHits('SimpleMemo https://simplememofast.com/blog/example', m).length, 0);
+});
+
+test('encoded hits suppress even mocked validator link checks', async (t) => {
+  const files = devlogFixture(scratch(t), { extra: ' [notes](https://example.test/%71%71%5Fhandle77)' });
+  let calls = 0;
+  const r = await validateArticle(JSON.parse(fs.readFileSync(files.article)), JSON.parse(fs.readFileSync(files.context)), {
+    identity: identityMatcher({ IDENTITY_DENYLIST: 'qq_handle77' }),
+    network: { linkStatus: async () => { calls++; return 200; } },
+  });
+  assert.equal(r.ok, false); assert.equal(calls, 0);
+});
+
+test('missing identity gate stops before public feed access, including force and dry run', (t) => {
+  const files = devlogFixture(scratch(t));
+  const r = runDevlog(files, ['gate', '--platform', 'devto', '--identity-missing', '--force', '--dry-run']);
+  assert.equal(r.status, 1); assert.deepEqual(fetched(files), []);
+});
+
+test('malformed JSON and platform mismatches never echo input on stdout or stderr', (t) => {
+  for (const kind of ['json', 'article-platform', 'context-platform']) {
+    const files = devlogFixture(scratch(t));
+    if (kind === 'json') fs.writeFileSync(files.article, '{"QqprivateSentinel": broken}');
+    else {
+      const target = kind === 'article-platform' ? files.article : files.context;
+      const obj = JSON.parse(fs.readFileSync(target)); obj.platform = 'QqprivateSentinel';
+      fs.writeFileSync(target, JSON.stringify(obj));
+    }
+    const r = runDevlog(files, ['validate', '--platform', 'devto', '--article', files.article, '--context', files.context, '--report', files.report, '--offline']);
+    assert.equal(r.status, 1); assert.match(r.stderr, /DEVLOG_COMMAND_FAILED/);
+    assert.doesNotMatch(r.stdout + r.stderr, /QqprivateSentinel|broken/);
+    assert.equal(fs.existsSync(files.report), false); assert.deepEqual(fetched(files), []);
+  }
+});
+
+test('dry-run output has metadata only and never checks links on every platform', (t) => {
+  for (const platform of ['devto', 'hatena', 'hatenadiary', 'livedoor']) {
+    const files = devlogFixture(scratch(t));
+    const article = JSON.parse(fs.readFileSync(files.article));
+    const ctx = JSON.parse(fs.readFileSync(files.context));
+    article.platform = ctx.platform = platform;
+    if (platform !== 'devto') {
+      const para = 'メモは書いた直後に一つの受信箱へ集まり、あとで見返すときに迷わない形にしておくと続きやすい。';
+      article.title = '受信箱を一つにすると、メモは見返される';
+      article.body_markdown = `${para.repeat(14)}\n\n## なぜ受信箱を一つにするのか\n\n${para.repeat(16)}\n\n## 向かない場面\n\n${para.repeat(16)}\n\n## 確かめ方\n\n仕組みは[メモを確かめる方法](https://simplememofast.com/blog/benchmark-methodology)にまとめてある。${para.repeat(14)}`;
+    }
+    fs.writeFileSync(files.article, JSON.stringify(article));
+    fs.writeFileSync(files.context, JSON.stringify(ctx));
+    const r = runDevlog(files, ['publish', '--platform', platform, '--article', files.article, '--context', files.context, '--out', files.out, '--dry-run']);
+    assert.equal(r.status, 0, platform + ': ' + r.stdout + r.stderr);
+    assert.deepEqual(fetched(files), []);
+    assert.deepEqual(JSON.parse(fs.readFileSync(files.out)), { platform, dry_run: true, identity_checked: false });
+  }
+});
+
+test('all publisher entry points reject missing, malformed and matching identities before fetch', async () => {
+  const saved = globalThis.fetch; let calls = 0;
+  globalThis.fetch = async () => { calls++; throw Error('unexpected fetch'); };
+  try {
+    for (const value of ['', '["Qqsynthetic"]', 'Qqsynthetic;Rrfictional', 'qq_handle77']) {
+      const identity = identityMatcher({ IDENTITY_DENYLIST: value });
+      const art = { title: 'ＱＱ＿ＨＡＮＤＬＥ７７', body_markdown: 'synthetic body' };
+      for (const send of [() => publishDevto(art, 'fake', 'body', { identity }),
+        () => publishHatena(PLATFORMS.hatena, art, 'fake', 'body', { identity }),
+        () => publishHatena(PLATFORMS.hatenadiary, art, 'fake', 'body', { identity }),
+        () => publishLivedoor(PLATFORMS.livedoor, art, 'fake', 'body', { identity })]) await assert.rejects(send);
+    }
+    assert.equal(calls, 0);
+  } finally { globalThis.fetch = saved; }
+});
+
+test('missing-list validation withholds raw article diagnostics from report and log', (t) => {
+  const files = devlogFixture(scratch(t));
+  fs.writeFileSync(files.article, JSON.stringify({ skip: true, reason: 'QqprivateSentinel' }));
+  const r = runDevlog(files, ['validate', '--platform', 'devto', '--article', files.article, '--context', files.context, '--report', files.report, '--offline']);
+  assert.equal(r.status, 1);
+  assert.doesNotMatch(r.stdout + r.stderr + fs.readFileSync(files.report), /QqprivateSentinel/);
+  assert.match(fs.readFileSync(files.report, 'utf8'), /IDENTITY_UNCHECKED/);
+});
+
+
+test('parent workflow also suspends its always-run public watcher', () => {
+  const parent = read('.github/workflows/devlog-syndication.yml');
+  const jobs = parent.slice(parent.indexOf('jobs:'));
+  assert.match(parent, /permissions: \{\}/);
+  assert.match(jobs, /PRIVATE_HANDOFF_REQUIRED/); assert.match(jobs, /exit 1/);
+  assert.doesNotMatch(jobs, /uses:|secrets\.|upload-artifact|download-artifact|node |curl|wget|always\(\)/);
 });

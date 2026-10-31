@@ -1,51 +1,4 @@
-# 開発記録の外部ブログ配信（dev.to / はてなブログ2つ / ライブドアブログ）。
-#
-# 【なぜここに置くか — 2026-09-24】
-# 自社サイトへの dofollow リンクが実測で確認できた投稿先は dev.to（simple_memo）と
-# はてなブログ（simplememofast）だけだった（docs/seo/directory-registration-2026-09.md §5.27）。
-# 両方への投稿は Mac 上のローカル定期タスクに載っていて、dev.to は 9/18 から止まり、
-# はてなも間隔が崩れていた。ローカルの設定とログはクラウドのセッションから読めず、
-# 止まった理由を外から確かめる手段が無かった。**Mac が眠っていても、外から結果が読める経路に移す。**
-#
-# 【媒体を2つ足した — 2026-10-03】
-# はてなブログ「メモの設計図」（simplememofast.hatenadiary.jp）とライブドアブログ（captio.livedoor.blog）も、
-# ローカル定期タスクがブラウザ操作で投稿していた（AI の開示なし・出典の無い数字あり）。オーナーが選択式で
-# 「新しい仕組みに移す（推奨）」を選んだので、開示と事実の機械検査のあるこの経路に載せる。
-# はてなの2つは同じ HATENA_API_KEY。ライブドアの LIVEDOOR_API_KEY はオーナーがこれから登録するので、
-# **登録されるまでは門が key_pending で休む（失敗にしない）**。見張りも鍵の登録前は alert でなく注意にする。
-#
-# 【1回に1媒体1本・状態ファイルを持たない】
-# 門（scripts/devlog-syndication.mjs gate）は**公開面の最新投稿**だけで決める:
-#   - 最新投稿から66時間未満なら何もしない（1日2枠なので、実際の間隔は約3日）
-#   - 直近24時間に1本でもあれば force でも出さない
-#   - data/emergency-stop.json の全体停止・経路 "syndication" の停止で出さない
-# 旧ローカルタスクが同じ媒体へ投稿しても、公開面を見るので二重には出ない。
-# 1枠が落ちても、次の枠（約9〜15時間後）が同じ判定で拾い直す。
-# **公開面はキャッシュを通さずに読む**（2026-09-29、dev.to の公開一覧が25.7時間前のキャッシュを返し、
-# 投稿の10分後も新しい記事が無かった）。古い応答は「読めない」として投稿しない。投稿の直前には、
-# キャッシュの無い認証済みの一覧（dev.to は me/all、はてな・ライブドアは AtomPub）で間隔と上限をもう一度確かめる。
-# 日本語の3媒体（はてな2つ・ライブドア）は「使った題材」を共有する（同じ種で日本語の似た記事を3本出さない）。
-#
-# 【鍵をモデルに渡さない】
-# 執筆・手直しは専用の使い捨てジョブ。検証・投稿は新規ランナーで同じ SHA の信頼コードを使う。
-# 投稿キー・名前一覧とモデルの作業ツリーは同じランナーに置かない。媒体に対応する鍵1本だけを渡す。
-# 門の前の「鍵の有無」は真偽だけを出力にする（値は渡さない）。
-#
-# 【名前一覧が無ければ投稿しない — 2026-10-30】
-# 実名の照合の一覧は Secrets の IDENTITY_DENYLIST だけ（リポジトリには、名前も名前から作った値も置かない）。
-# 一覧が無い・照合に使える語が無いときは、門（投稿する番）と投稿の段が止まる（fail closed）。dry_run は止めない。
-#
-# 【正直さ】DEV は 2026-08-26 から、未開示のAI記事と「合成した内容を本人の体験として出すこと」を
-# アカウント停止の対象にしている。dev.to は ai_disclosure_level=fully_autonomous を API で付け、
-# はてな・ライブドアは本文末尾に固定の開示文を付ける（どれもスクリプト側が付けるので、モデルは消せない）。
-#
-# 【手動実行】workflow_dispatch の既定は dry_run（書いて検査するが投稿しない）。
-# dry_run は門の「間隔」と「24時間に1本」を見ない（停止と読めないときは止める）。いつでも経路全体を試せる。
-#
-# 【時刻】このリポジトリの日次 cron は数時間遅れて配信される（CLAUDE.md・PageSpeed の節は約2時間50分、
-# この workflow の初回 schedule は 2026-09-25 に公称 12:17 JST → 実際 17:52 JST で5時間35分）。
-# 12:17 / 20:47 JST は公称。遅れても門は公開面の時刻で判断するので、間隔は崩れない。
-
+# TEMPORARY SECURITY STOP: no generation, publication, or public-feed watcher.
 name: Devlog Syndication
 
 on:
@@ -60,7 +13,7 @@ on:
         options: [all, devto, hatena, hatenadiary, livedoor]
         default: all
       mode:
-        description: 'dry_run は書いて検査するが投稿しない'
+        description: 'Currently blocked pending private handoff (all modes)'
         type: choice
         options: [dry_run, publish]
         default: dry_run
@@ -69,80 +22,13 @@ on:
         type: boolean
         default: false
 
-permissions:
-  contents: read
+permissions: {}
 jobs:
-  syndicate:
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        platform: [devto, hatena, hatenadiary, livedoor]
-    concurrency:
-      group: devlog-syndication-${{ matrix.platform }}
-      cancel-in-progress: false
-    # Required only by the isolated model jobs in the called workflow.
-    permissions:
-      contents: read
-      id-token: write
-    uses: ./.github/workflows/devlog-syndication-platform.yml
-    with:
-      platform: ${{ matrix.platform }}
-      input_platform: ${{ inputs.platform || 'all' }}
-      mode: ${{ inputs.mode || 'publish' }}
-      force: ${{ inputs.force == true }}
-    secrets:
-      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-      IDENTITY_DENYLIST: ${{ secrets.IDENTITY_DENYLIST }}
-      DEVTO_API_KEY: ${{ matrix.platform == 'devto' && secrets.DEVTO_API_KEY || '' }}
-      HATENA_API_KEY: ${{ (matrix.platform == 'hatena' || matrix.platform == 'hatenadiary') && secrets.HATENA_API_KEY || '' }}
-      LIVEDOOR_API_KEY: ${{ matrix.platform == 'livedoor' && secrets.LIVEDOOR_API_KEY || '' }}
-
-  # 見張り（読むだけ）。投稿の枠のたびに、公開面の最新投稿からの時間・この経路の最新記事の rel と robots・
-  # dev.to の AI 開示を確かめる。**投稿が止まっている（96時間超）か、dofollow・開示が崩れていれば赤くする。**
-  # 投稿の段が黙って出さなくなった場合（門が誤って閉じ続ける、見送りが続く等）も、ここで拾う。
-  # cron そのものが配信されない場合はこのジョブも走らないので、外の見張り（クラウドの毎日の定期タスク）が拾う。
-  watch:
-    needs: syndicate
-    if: always()
+  blocked:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    env:
-      # 鍵の値ではなく「登録されているか」の真偽だけ。ライブドアは鍵の登録前（この経路の投稿がまだ無い間）は
-      # alert でなく注意にする。クラウドの外の見張りはこれを持たないので、未設定も「未登録」と同じ扱い。
-      LIVEDOOR_KEY_SET: ${{ secrets.LIVEDOOR_API_KEY != '' }}
+    timeout-minutes: 1
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.sha }}
-          persist-credentials: false
-
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: '24.22.1'
-
-      # この run の投稿の結果（published.json）。2026-09-29 の初回の本番 run 36561085228 で、見張りが古いキャッシュの
-      # 公開一覧を読み、投稿に成功した直後に「最新は122時間前」として run を赤くした。投稿の結果はこの run 自身の事実なので、
-      # 一覧の新しさに頼らずに数える。投稿しなかった run には成果物が無く、0件のまま進む
-      # （download-artifact は pattern に何も当たらなくても落ちない）。
-      - name: この run の投稿の結果
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
-        continue-on-error: true
-        with:
-          pattern: devlog-syndication-*-${{ github.run_id }}
-          path: .syndication-run
-
-      - name: 見張り（公開面の最新投稿・dofollow・AI 開示）
+      - name: Block all external syndication work pending private handoff
         run: |
-          set +e
-          node scripts/devlog-syndication.mjs watch --json watch.json --published-dir .syndication-run > watch.txt 2>&1
-          code=$?
-          cat watch.txt
-          { echo '### 見張り'; echo; sed 's/^/    /' watch.txt; } >> "$GITHUB_STEP_SUMMARY"
-          if [ "$code" -ge 2 ]; then
-            echo "::error title=Devlog syndication watch::投稿が止まっている疑い、または dofollow・AI 開示が崩れている（要約を参照）"
-            exit 1
-          fi
-          if [ "$code" -eq 1 ]; then
-            echo "::warning title=Devlog syndication watch::注意（期限を過ぎた枠が投稿できていない・公開面を読めない・投稿用の鍵が未登録、のいずれか。要約を参照）"
-          fi
+          echo '::error title=Devlog syndication::PRIVATE_HANDOFF_REQUIRED'
+          exit 1

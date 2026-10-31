@@ -33,6 +33,17 @@
 //      outside Pages (HTTPS settings / the www Worker); verify the deployed
 //      response separately instead of inferring its hop count here.
 //
+//      2026-10-31 (owner decision): the bare Pages production alias
+//      `simplememo-596.pages.dev` joins the same rule. It served the
+//      production HTML with 200 (canonical pointing at the apex, robots
+//      index,follow, no X-Robots-Tag), and a web search for the brand
+//      returned two URLs on the alias host. Nothing is added to `_redirects`
+//      for it: Cloudflare's Pages redirects documentation lists domain-level
+//      redirects as unsupported there. (By the same table the www line in
+//      `_redirects` may not be a working fallback either — not verified.)
+//      See HOST_ALIASES for which hosts are matched and why the match is
+//      exact.
+//
 //   0b. Collapse runs of duplicate slashes (`/en/vs/notion//` → `/en/vs/notion/`).
 //      Pages resolves the extra slashes and serves 200, so these are true
 //      duplicate URLs — the 2026-08-05 GSC snapshot had five of them parked
@@ -145,6 +156,26 @@ function isBlockedDataPath(pathname) {
   return UNSERVED_DATA.has(pathname.slice("/data/".length));
 }
 
+// Hosts that answer with the production site under another name (step 0).
+// Each is folded into the canonical host inside the same single 301.
+//
+// Exact names only — never a suffix match. Hashed previews and branch aliases
+// (`<hash>.simplememo-596.pages.dev`, `<branch>.simplememo-596.pages.dev`)
+// share the bare alias as a suffix and sit behind Cloudflare Access; the
+// hashed ones are what the preview-cache CI measures
+// (scripts/perf/cache_access_*.cjs, PREVIEW_SUFFIX). Redirecting them would
+// send that CI, and anyone reviewing a preview, to production instead.
+// `URL` lowercases the hostname, so letter case cannot dodge the match, and
+// step 0 compares it without a trailing dot (see there). A look-alike such as
+// `simplememo-596.pages.dev.evil.test` is a different host and is left alone.
+const CANONICAL_HOST = "simplememofast.com";
+const HOST_ALIASES = new Set([
+  "www.simplememofast.com",
+  // Cloudflare Pages production alias (owner decision 2026-10-31; see step 0
+  // in the header comment).
+  "simplememo-596.pages.dev",
+]);
+
 // /docs/, /scripts/, /tools/, /growth/ and /CLAUDE.md hold internal working
 // files that live in the repo but must not be publicly served (Cloudflare
 // Pages deploys every tracked file). 2026-07-07 audit: /CLAUDE.md, /scripts/*
@@ -251,16 +282,37 @@ export const onRequest = async (context) => {
   // Preserve the terminal retirement response for /admin/*. On the www host this
   // passes through too — `_redirects` still moves it to the apex afterwards,
   // with the retirement response still taking precedence.
+  //
+  // The bare Pages alias passes through as well, and nothing moves it to the
+  // apex afterwards. That is deliberate: Cloudflare Access answered /admin/
+  // there before Functions ran (302 to the Access login, observed 2026-10-31),
+  // so an anonymous crawler does not get this far, and an authenticated
+  // request gets the same terminal 410 (noindex, nofollow) as on the apex.
+  // Redirecting it would only add a second Access login for that session,
+  // and no indexable duplicate exists under /admin/ to fold away.
   if (path === "/admin" || path.startsWith("/admin/")) {
     return context.next();
   }
 
   let needsRedirect = false;
 
-  // 0. Host: www → apex, folded into the same 301 as every fix below.
-  //    Exact-match so preview deployments (*.pages.dev) are untouched.
-  if (url.hostname === "www.simplememofast.com") {
-    url.hostname = "simplememofast.com";
+  // 0. Host: www and the bare Pages alias → apex, folded into the same 301 as
+  //    every fix below. Exact-match (HOST_ALIASES) so preview deployments
+  //    (`<hash>.` / `<branch>.simplememo-596.pages.dev`) are untouched.
+  //    Internal paths and GONE slugs below still answer 404 / 410 on the
+  //    alias host itself instead of redirecting first.
+  //
+  //    Two spellings of the same alias reach Functions with the extra part
+  //    kept in request.url (both observed on the bare Pages alias,
+  //    2026-10-31): the fully qualified `simplememo-596.pages.dev.` and a
+  //    non-default port such as `:8443`. So the match ignores one trailing
+  //    dot, and the port is cleared — the hostname setter alone keeps it,
+  //    which would land on `https://simplememofast.com:8443/…` instead of the
+  //    canonical URL. The apex's own trailing-dot / port forms are not
+  //    aliases here and are left as they were.
+  if (HOST_ALIASES.has(url.hostname.replace(/\.$/, ""))) {
+    url.hostname = CANONICAL_HOST;
+    url.port = "";
     needsRedirect = true;
   }
 

@@ -88,6 +88,23 @@ test('stray-paren backlink variants supplement, not replace, original row 12', a
   for (const from of ['/)', '/%29', '/)?lang=ja', '/%29?lang=ja']) await redirect(from, '/');
 });
 
+test('the bare Pages production alias is one 301 to the apex document; previews stay', async () => {
+  // Owner decision 2026-10-31: the alias served the production HTML with 200
+  // and surfaced in web search. Only that exact host moves to the apex.
+  const alias = 'https://simplememo-596.pages.dev';
+  await redirect(alias + '/obsidian/', '/obsidian/');
+  await redirect(alias + '/en?lang=en&utm_source=audit', '/en/?utm_source=audit');
+  // Trailing dot and :8443 reach Functions in request.url; neither may leak
+  // into the Location (observed on the alias 2026-10-31).
+  await redirect(alias + '.:8443/obsidian/', '/obsidian/');
+  for (const host of ['https://1234abcd.simplememo-596.pages.dev',
+    'https://1234abcd.simplememo-596.pages.dev.',
+    'https://claude-branch.simplememo-596.pages.dev', 'https://simplememo-596.pages.dev.evil.test']) {
+    assert.deepEqual(await edge(host + '/obsidian/'), { kind: 'pass' }, host);
+  }
+  assert.deepEqual(await edge(alias + '/admin/api/upload?lang=en'), { kind: 'pass' });
+});
+
 test('unknown slugs and authenticated paths are not redirected by the new aliases', async () => {
   for (const from of ['/en-unknown', '/vs/trello-unknown', '/admin/api/upload?lang=en']) {
     assert.deepEqual(await edge(from), { kind: 'pass' });

@@ -4,6 +4,12 @@
  *
  *   node growth/scripts/analyze.mjs [--snapshot 2026-08-09] [--json] [--top 20]
  *   node growth/scripts/analyze.mjs --only clusters|conversational|opportunities|ctr-gap|unanswered|decay|cannibalisation
+ *   node growth/scripts/analyze.mjs --top 10 --no-query-text   # public output (seo-daily's job summary)
+ *
+ * --no-query-text prints the same detectors with every number kept and no search query text: a
+ * query is replaced by a fixed marker and a URL the site does not publish by another. Job summaries
+ * and logs of this repository are public, and query text is chosen by whoever searches (security
+ * audit F6). It cannot be combined with --json, which carries the rows whole.
  *
  * Every number printed here traces to a committed snapshot under
  * growth/data/gsc/. Nothing is typed in by hand, which is the point: the
@@ -16,12 +22,23 @@ import {latestSnapshot, loadSnapshot, previousSnapshot, listSnapshots} from '../
 import {selectComparison} from '../lib/comparison.mjs';
 import {analyzeSnapshot, UNANSWERED_MIN_EXPECTED_CLICKS, UNANSWERED_MAX_POSITION} from '../lib/analysis.mjs';
 import {flagReader} from '../lib/cli.mjs';
+import {QUERY_WITHHELD, publicPage} from '../lib/gsc-privacy.mjs';
 
 const argv = process.argv.slice(2);
 const flag = flagReader(argv);
 const asJson = argv.includes('--json');
 const top = Number(flag('top', 20));
 const only = flag('only');
+const noQueryText = argv.includes('--no-query-text');
+if (asJson && noQueryText) {
+  console.error('--json carries query text; --no-query-text prints the readable report only.');
+  process.exit(2);
+}
+// What a row is called in the output. With --no-query-text: a marker for a query, and a page path
+// only when the site publishes it.
+const queryText = (query) => (noQueryText ? QUERY_WITHHELD : query);
+const pageText = (page) => (noQueryText ? publicPage(page) : page);
+const keyText = (r) => (r.kind === 'page' ? pageText(r.key) : queryText(r.key));
 
 const snapLabel = flag('snapshot');
 const snap = snapLabel ? loadSnapshot(snapLabel) : latestSnapshot();
@@ -46,7 +63,9 @@ const show = (name) => !only || only === name;
 
 console.log(`GSC snapshot ${snap.label}${result.period ? ` (${result.period})` : ''}`);
 console.log(`  ${snap.meta.totals.clicks} clicks · ${snap.meta.totals.impressions} impressions · CTR ${pct(snap.meta.totals.ctr)}`);
-console.log(`  compared to: ${comparison.comparable ? prev.label : `(withheld: ${comparison.reason})`}\n`);
+console.log(`  compared to: ${comparison.comparable ? prev.label : `(withheld: ${comparison.reason})`}`);
+if (noQueryText) console.log(`  query text: not shown (${QUERY_WITHHELD}); pages the site does not publish are not named either.`);
+console.log();
 
 /* Topic shares describe visible query rows, not all site demand or installs. */
 if (show('clusters')) {
@@ -87,7 +106,7 @@ if (show('conversational')) {
   else {
     console.log(`  ${c.queries} queries · ${c.impressions} imp · ${c.clicks} clicks · avg pos ${n1(c.position)}`);
     for (const r of result.conversational) {
-      console.log(`    pos ${n1(r.position).padStart(5)} · ${String(r.impressions).padStart(4)} imp · ${r.clicks} clk  ${r.query}`);
+      console.log(`    pos ${n1(r.position).padStart(5)} · ${String(r.impressions).padStart(4)} imp · ${r.clicks} clk  ${queryText(r.query)}`);
     }
     console.log('\n  Use the dedicated AI report for AI visibility; phrasing does not identify the source.\n');
   }
@@ -97,7 +116,7 @@ if (show('opportunities')) {
   console.log('── Opportunities (impressions × position headroom × CTR gap × business relevance)');
   if (!result.opportunities.length) console.log('   nothing scored above zero\n');
   for (const r of result.opportunities) {
-    console.log(`  ${String(Math.round(r.score)).padStart(6)}  ${r.page}`);
+    console.log(`  ${String(Math.round(r.score)).padStart(6)}  ${pageText(r.page)}`);
     console.log(`          imp ${r.impressions} · CTR ${pct(r.ctr)} vs expected ${pct(r.expected_ctr)} · pos ${n1(r.position)} · relevance ${r.relevance} · upside ≈ +${Math.round(r.upside_clicks)} clicks`);
   }
   console.log();
@@ -107,7 +126,7 @@ if (show('ctr-gap')) {
   console.log('── CTR gap (imp ≥ 100, pos ≤ 10, CTR below 70% of expected)');
   if (!result.ctr_gap.length) console.log('   none\n');
   for (const r of result.ctr_gap) {
-    console.log(`  +${String(Math.round(r.upside_clicks)).padStart(4)} clicks  [${r.kind}] ${r.key}`);
+    console.log(`  +${String(Math.round(r.upside_clicks)).padStart(4)} clicks  [${r.kind}] ${keyText(r)}`);
     console.log(`               imp ${r.impressions} · CTR ${pct(r.ctr)} vs ${pct(r.expected_ctr)} · pos ${n1(r.position)}`);
   }
   console.log();
@@ -117,9 +136,9 @@ if (show('unanswered')) {
   console.log(`── Unanswered intent (0 clicks where ≥ ${UNANSWERED_MIN_EXPECTED_CLICKS} were expected, pos ≤ ${UNANSWERED_MAX_POSITION})`);
   if (!result.unanswered.length) console.log('   none — no row is missing enough clicks to rule out chance\n');
   for (const r of result.unanswered) {
-    console.log(`  −${n1(r.expected_clicks).padStart(4)} clicks  [${r.kind}] ${r.key}`);
+    console.log(`  −${n1(r.expected_clicks).padStart(4)} clicks  [${r.kind}] ${keyText(r)}`);
     console.log(`               imp ${r.impressions} · pos ${n1(r.position)} · expected CTR ${pct(r.expected_ctr)} · got 0`);
-    for (const p of r.ranking_pages) console.log(`               already ranking: ${p.page} (pos ${n1(p.position)}, ${p.impressions} imp)`);
+    for (const p of r.ranking_pages) console.log(`               already ranking: ${pageText(p.page)} (pos ${n1(p.position)}, ${p.impressions} imp)`);
   }
   if (result.unanswered.length && !snap.queryPages.length) {
     console.log('\n  Which page each query lands on needs the query×page export — growth/GSC_OWNER_ACTION.md step 3.');
@@ -136,7 +155,7 @@ if (show('decay')) {
     console.log('   Use complete, equal-length, disjoint windows with the same aggregation.\n');
   } else if (!result.decay.length) console.log('   no page lost meaningful clicks\n');
   else for (const r of result.decay) {
-    console.log(`  ${String(r.delta_clicks).padStart(5)} clicks  ${r.page}`);
+    console.log(`  ${String(r.delta_clicks).padStart(5)} clicks  ${pageText(r.page)}`);
     console.log(`               ${r.clicks_before} → ${r.clicks_now} · Δimp ${r.delta_impressions} · Δpos ${n1(r.delta_position)} · likely: ${r.cause}`);
   }
   console.log();
@@ -147,8 +166,8 @@ if (show('cannibalisation')) {
   if (result.cannibalisation === null) console.log('   needs a query×page export — see growth/GSC_OWNER_ACTION.md step 3\n');
   else if (!result.cannibalisation.length) console.log('   none above the impression floor\n');
   else for (const r of result.cannibalisation) {
-    console.log(`  "${r.query}" — ${r.urls} URLs · ${r.impressions} imp · ${r.clicks} clicks`);
-    for (const p of r.pages) console.log(`               pos ${n1(p.position)}  ${p.page}  (${p.clicks}/${p.impressions})`);
+    console.log(`  ${noQueryText ? QUERY_WITHHELD : `"${r.query}"`} — ${r.urls} URLs · ${r.impressions} imp · ${r.clicks} clicks`);
+    for (const p of r.pages) console.log(`               pos ${n1(p.position)}  ${pageText(p.page)}  (${p.clicks}/${p.impressions})`);
   }
   console.log();
 }

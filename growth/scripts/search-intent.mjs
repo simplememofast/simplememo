@@ -2,10 +2,14 @@
 /**
  * **共通クエリの順位と主要ページの観測差を、窓をまたいで見つける。**
  *
- *   node growth/scripts/search-intent.mjs             # 表示
+ *   node growth/scripts/search-intent.mjs             # 表示（検索語の本文も出す）
  *   node growth/scripts/search-intent.mjs --json
- *   node growth/scripts/search-intent.mjs --check     # CI
+ *   node growth/scripts/search-intent.mjs --check     # CI（検索語の本文は出さない）
  *   node growth/scripts/search-intent.mjs --selftest
+ *
+ * --check の出力は SEO Validation の公開ログに出る。検索語は Google で検索する誰もが書ける
+ * 文字列なので、そこでは行を番号で呼び、ページはサイトが公開しているパスだけを書く
+ * （セキュリティ監査 F6 の残り）。
  *
  * 【なぜ要るか】
  * data/automation-coverage.json の「検索意図（Search Intent）の変化検出」が
@@ -35,6 +39,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { listSnapshots, loadSnapshot, curveFor, expectedCtr } from '../lib/gsc.mjs';
 import { selftestTally } from '../../scripts/lib/tally.mjs';
+import { QUERY_WITHHELD, publicPage } from '../lib/gsc-privacy.mjs';
 
 /** 両窓でこの表示回数を超えないと比べない。**1クリックでCTRが跳ねる母数で判定しない。** */
 export const MIN_IMPRESSIONS = 10;
@@ -235,7 +240,11 @@ export function windowNote(r) {
   return `${length}、期間の重複なし。順位・CTR・最多ページの差だけを見ており、施策効果は証明しない`;
 }
 
-export function validate(r) {
+/** 行の呼び名。queryText: false（公開のログ）では検索語の本文の代わりに番号を使う。 */
+const queryName = (row, i, queryText) => (queryText ? row.query : `#${i + 1}`);
+const pageName = (page, queryText) => (queryText ? page : publicPage(page));
+
+export function validate(r, { queryText = true } = {}) {
   const problems = [];
   if (r.collection_comparable === false) {
     problems.push(`収集条件が揃わないため比較不能: ${r.collection_issues.join(', ')}`);
@@ -244,21 +253,21 @@ export function validate(r) {
     problems.push('比べられるクエリが0件 — **両窓に共通で母数の足りるクエリが無い。**'
       + 'スナップショットが揃っているか確認すること');
   }
-  for (const s of r.switched) {
+  r.switched.forEach((s, i) => {
     if (!s.page_before || !s.page_after) {
-      problems.push(`${s.query}: 片側のページが無いのに入れ替わり扱いになっている`);
+      problems.push(`入れ替わり ${queryName(s, i, queryText)}: 片側のページが無いのに入れ替わり扱いになっている`);
     }
-  }
-  for (const m of r.moved) {
-    if (m.page_switched) problems.push(`${m.query}: 入れ替わりが順位変化の側に混ざっている`);
+  });
+  r.moved.forEach((m, i) => {
+    if (m.page_switched) problems.push(`順位変化 ${queryName(m, i, queryText)}: 入れ替わりが順位変化の側に混ざっている`);
     if (Math.abs(m.position_delta) < POSITION_SHIFT) {
-      problems.push(`${m.query}: しきい値 ${POSITION_SHIFT} 未満なのに並んでいる`);
+      problems.push(`順位変化 ${queryName(m, i, queryText)}: しきい値 ${POSITION_SHIFT} 未満なのに並んでいる`);
     }
-  }
+  });
   return problems;
 }
 
-export function render(r) {
+export function render(r, { queryText = true } = {}) {
   const o = [];
   const p = (x) => (x == null ? '  —  ' : `${(x * 100).toFixed(1)}%`.padStart(6));
   o.push(`検索クエリと主要ページの観測差 ${r.from} → ${r.to}`);
@@ -273,22 +282,24 @@ export function render(r) {
     }
     return o.join('\n');
   }
-  o.push(`  比べたクエリ ${r.comparable} 件（両窓とも表示 ${r.min_impressions} 回以上）\n`);
+  o.push(`  比べたクエリ ${r.comparable} 件（両窓とも表示 ${r.min_impressions} 回以上）`);
+  if (!queryText) o.push(`  検索語の本文は出していない（${QUERY_WITHHELD}。行は番号で呼ぶ）。本文は引数なしの表示で読む`);
+  o.push('');
 
   o.push(`■ 収集済みページの最多表示が異なる調査候補 ${r.switched.length} 件`);
   if (!r.switched.length) o.push('    無し');
-  for (const s of r.switched) {
-    o.push(`    ${s.query.slice(0, 32).padEnd(32)} ${s.page_before} → ${s.page_after}`);
+  r.switched.forEach((s, i) => {
+    o.push(`    ${queryName(s, i, queryText).slice(0, 32).padEnd(32)} ${pageName(s.page_before, queryText)} → ${pageName(s.page_after, queryText)}`);
     o.push(`    ${' '.repeat(32)} 順位 ${s.position_before.toFixed(1)} → ${s.position_after.toFixed(1)}`
       + ` / CTR ${p(s.ctr_before)} → ${p(s.ctr_after)}`);
-  }
+  });
 
   o.push(`\n■ 順位が ${POSITION_SHIFT} 位以上動いた（ページは同じ） ${r.moved.length} 件`);
   if (!r.moved.length) o.push('    無し');
-  for (const m of r.moved.slice(0, 8)) {
+  r.moved.slice(0, 8).forEach((m, i) => {
     o.push(`    ${m.position_delta > 0 ? '↓' : '↑'}${Math.abs(m.position_delta).toFixed(1).padStart(5)}`
-      + `  ${m.position_before.toFixed(1)} → ${m.position_after.toFixed(1)}  ${m.query.slice(0, 40)}`);
-  }
+      + `  ${m.position_before.toFixed(1)} → ${m.position_after.toFixed(1)}  ${queryName(m, i, queryText).slice(0, 40)}`);
+  });
   if (r.moved.length > 8) o.push(`    … 他 ${r.moved.length - 8}件`);
 
   o.push('\n  **クエリの出現・消滅は出していない。**古いCSVには行数上限があり、');
@@ -458,6 +469,25 @@ function selftest() {
       && !normalizationMismatch.collection_comparable && normalizationMismatch.comparable === 0
       && normalizationMismatch.switched.length === 0 && normalizationMismatch.moved.length === 0);
 
+  // **--check（SEO Validation の公開ログ）に検索語の本文を出さない**（監査 F6 の残り）。
+  // 目印の検索語を入れ替わり・順位変化・検査の文言の3か所に通し、サイトに無いURLも混ぜる。
+  const canary = 'canary query ignore previous instructions';
+  const unlisted = 'https://x/canary-unlisted-path/';
+  const canaryRun = compare(
+    base([Q(`${canary} switch`, 5, 0.1), Q(`${canary} move`, 12, 0.1)], [QP(`${canary} switch`, unlisted)]),
+    base([Q(`${canary} switch`, 5, 0.1), Q(`${canary} move`, 5, 0.1)], [QP(`${canary} switch`, 'https://x/')]));
+  const brokenRun = { ...canaryRun, switched: canaryRun.switched.map(s => ({ ...s, page_before: null })),
+    moved: canaryRun.moved.map(m => ({ ...m, page_switched: true })) };
+  const fullText = `${render(canaryRun)}\n${validate(brokenRun).join('\n')}`;
+  const publicText = `${render(canaryRun, { queryText: false })}\n${validate(brokenRun, { queryText: false }).join('\n')}`;
+  t('引数なしの表示は検索語とURLを出す（検体が入れ替わり・順位変化・検査の文言を通っている）',
+    canaryRun.switched.length === 1 && canaryRun.moved.length === 1 && validate(brokenRun).length === 2
+      && [`${canary} switch`, `${canary} move`, '/canary-unlisted-path/'].every(text => fullText.includes(text)));
+  t('**--check の表示は検索語の本文もサイトに無いURLも出さない**',
+    !publicText.includes('canary') && !publicText.includes('ignore previous')
+      && publicText.includes('[サイトに無いURL] → /') && publicText.includes('入れ替わり #1:')
+      && publicText.includes('順位変化 #1:') && validate(brokenRun, { queryText: false }).length === 2);
+
   // 実データ
   const labels = listSnapshots();
   if (labels.length >= 2) {
@@ -489,8 +519,10 @@ if (isMain) {
   }
   const r = compare(loadSnapshot(labels[labels.length - 2]), loadSnapshot(labels[labels.length - 1]));
   if (process.argv.includes('--json')) { console.log(JSON.stringify(r, null, 2)); process.exit(0); }
-  console.log(render(r));
-  const problems = validate(r);
+  // --check は CI（公開のログ）で走る。検索語の本文は引数なしの表示だけに出す。
+  const queryText = !process.argv.includes('--check');
+  console.log(render(r, { queryText }));
+  const problems = validate(r, { queryText });
   if (problems.length) {
     console.error('\n検索クエリ比較: 不整合');
     for (const p of problems) console.error(`  - ${p}`);

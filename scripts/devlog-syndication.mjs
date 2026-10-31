@@ -486,6 +486,10 @@ export async function publicPosts(platform) {
 async function cmdGate(argv) {
   const platform = platformOf(argv);
   const cfg = PLATFORMS[platform];
+  if (argv.includes('--identity-missing')) {
+    writeOutput(argValue(argv, '--github-output'), { due: false, code: 'no_identity_denylist' });
+    throw new Error(IDENTITY_MISSING_MESSAGE);
+  }
   const now = new Date(argValue(argv, '--now', new Date().toISOString()));
   const stop = readStop();
   let posts = [], readError = null;
@@ -871,7 +875,8 @@ const BANNED = [
  * 【無ければ外へ出さない（fail closed）】
  * IDENTITY_DENYLIST が無い・照合に使える語が1つも無いときは、外部へ送る段（publish と publishDevto / publishHatena /
  * publishLivedoor）が通信の前に止まる（requireIdentityDenylist）。門も投稿する番に no_identity_denylist で落とす。
- * 送らない検査（validate・publish --dry-run・自己テスト）は一覧が無くても動き、注意だけ出す。
+ * 送らない検査（validate・publish --dry-run・自己テスト）は一覧が無くても動く。
+ * 一覧なしの検証は詳細を出さず、dry-run は通信せず本文を出力しない。
  * 自己テストと CI は本物の一覧を使わない（架空の語を環境変数で渡す）。
  *
  * 【一覧の書き方と照合の仕方】カンマか改行で区切る。各項目を照合できる形に分けて持つ:
@@ -896,7 +901,7 @@ const LETTER_RUN = /[\p{L}\p{M}\p{N}]+/gu;
 const NOT_LATIN_OR_HAN_LETTER = /(?![\p{Script=Latin}\p{Script=Han}])\p{L}/u;
 const MASK_HOLD = '\uE000'; // 置き換え中の仮の印（私用領域の字。漢字・英字の照合に当たらない）
 // 空白なしの ASCII で、英字以外（記号・数字）と2字以上の英字を含む項目（アカウント名・メールアドレスなど）
-const isIdentifierEntry = (e) => /^[\x21-\x7e]+$/.test(e) && /[^A-Za-z]/.test(e) && (e.match(/[A-Za-z]/g) || []).length >= 2;
+const isIdentifierEntry = (e) => /^[A-Za-z0-9_.+@-]+$/.test(e) && /[^A-Za-z]/.test(e) && (e.match(/[A-Za-z]/g) || []).length >= 2;
 const escapeRegExp = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const latinWords = (s) => String(s).normalize('NFKD').replace(/\p{M}+/gu, '').toLowerCase().match(/[a-z]+/g) || [];
 const hanWindows = (run) => {
@@ -915,7 +920,10 @@ const INVISIBLE = /[\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180B-\u180F\u200
  */
 export function identityMatcher(env = process.env) {
   const m = { words: new Set(), han: new Set(), literals: new Set(), identifiers: new Set(), unusable: 0, size: 0 };
-  for (const raw of String(env?.[IDENTITY_SECRET] ?? '').normalize('NFKC').replace(INVISIBLE, '').split(/[,\r\n]/)) {
+  const input = String(env?.[IDENTITY_SECRET] ?? '').normalize('NFKC').replace(INVISIBLE, '');
+  // Unsupported serialization is not an identifier. Reject the entire configuration.
+  if (/[;\[\]{}"`]/.test(input)) return { ...m, unusable: 1 };
+  for (const raw of input.split(/[,\r\n]/)) {
     // 先頭の @ は外す（「@handle」で登録しても、@ の付かない URL や本文の handle に当たるように）
     const entry = raw.trim().replace(/^@+/, '');
     if (!entry) continue;
@@ -937,7 +945,25 @@ function scanIdentity(text, m) {
   let count = 0;
   let t = String(text ?? '');
   if (!m?.size) return { count, masked: t };
-  t = t.replace(INVISIBLE, '');
+  // Decode transport/HTML representations before matching, including nested forms.
+  // Unknown named entities fail closed; this is deliberately not an HTML renderer.
+  const entities = { amp: '&', lt: '<', gt: '>', quot: '\"', apos: "'", nbsp: ' ',
+    lowbar: '_', UnderBar: '_', commat: '@', period: '.', colon: ':', sol: '/',
+    hyphen: '-', percnt: '%', Tab: '\t', NewLine: '\n' };
+  // Each changed pass shortens the string, so this terminates without a depth bypass.
+  t = t.normalize('NFKC');
+  for (;;) {
+    const decoded = t.replace(/(?:%[0-9a-f]{2})+/gi, (part) => {
+      return Buffer.from(part.replace(/%/g, ''), 'hex').toString('utf8');
+    }).replace(/&#(x[0-9a-f]+|[0-9]+);?/gi, (_, value) => {
+      const cp = /^x/i.test(value) ? parseInt(value.slice(1), 16) : Number(value);
+      return cp > 0 && cp <= 0x10ffff && !(cp >= 0xd800 && cp <= 0xdfff) ? String.fromCodePoint(cp) : '\ufffd';
+    }).replace(/&([A-Za-z][A-Za-z0-9]*);?/g, (raw, name) => entities[name] ?? raw).normalize('NFKC');
+    if (decoded === t) break;
+    t = decoded;
+  }
+  if (/&[A-Za-z][A-Za-z0-9]*;?/.test(t)) return { count: 1, masked: IDENTITY_MASK };
+  t = t.normalize('NFKC').replace(INVISIBLE, '');
   const hit = () => { count++; return MASK_HOLD; };
   for (const id of m.identifiers) t = t.replace(new RegExp(escapeRegExp(id), 'gi'), hit);
   if (m.literals.size) {
@@ -945,7 +971,7 @@ function scanIdentity(text, m) {
   }
   t = t.replace(HAN_RUN, (run) => (hanWindows(run).some((w) => m.han.has(w)) ? hit() : run));
   t = t.replace(LATIN_RUN, (run) => (latinWords(run).some((w) => m.words.has(w)) ? hit() : run));
-  return { count, masked: t.split(MASK_HOLD).join(IDENTITY_MASK) };
+  return { count, masked: count ? t.split(MASK_HOLD).join(IDENTITY_MASK) : String(text ?? '') };
 }
 
 /** 当たりの一覧。**中身は固定の印だけ**で、当たった語の字は1字も入らない（件数を数えるのに使う）。 */
@@ -1210,7 +1236,7 @@ export async function linkStatus(url, { noRedirect }) {
     }
     return res.status;
   } catch (e) {
-    return `error(${e.message.slice(0, 80)})`;
+    return 'error(link_check_failed)';
   }
 }
 
@@ -1233,15 +1259,15 @@ async function cmdValidate(argv) {
   const platform = platformOf(argv);
   const article = JSON.parse(fs.readFileSync(argValue(argv, '--article'), 'utf8'));
   const ctx = JSON.parse(fs.readFileSync(argValue(argv, '--context'), 'utf8'));
-  if (ctx.platform !== platform) throw new Error(`文脈の platform（${ctx.platform}）と --platform（${platform}）が違う`);
-  if (![undefined, null, platform].includes(article.platform)) throw new Error(`記事の platform（${article.platform}）と --platform（${platform}）が違う`);
+  if (ctx.platform !== platform) throw new Error('CONTEXT_PLATFORM_MISMATCH');
+  if (![undefined, null, platform].includes(article.platform)) throw new Error('ARTICLE_PLATFORM_MISMATCH');
   const identity = identityMatcher();
   warnIdentityState(identity, '検証');
   const r = await validateArticle(article, ctx, { network: argv.includes('--offline') ? null : { linkStatus }, identity });
   // 報告（validation.txt）は成果物として公開される。行は validateArticle が実名を伏せたもの。念のためもう一度通す
   const lines = (r.ok
     ? [`検証: 通過（${JSON.stringify(r.stats)}）`]
-    : ['検証: 不合格。次をすべて直すこと（直せない数字は削る）:', ...r.problems.map((p) => `- ${p}`)]).map((l) => maskIdentity(l, identity));
+    : ['検証: 不合格。次をすべて直すこと（直せない数字は削る）:', ...(identity.size ? r.problems.map((p) => `- ${p}`) : [`- IDENTITY_UNCHECKED: ${r.problems.length} problems (details withheld)`])]).map((l) => maskIdentity(l, identity));
   const report = argValue(argv, '--report');
   if (report) fs.writeFileSync(report, lines.join('\n') + '\n');
   console.log(lines.join('\n'));
@@ -1774,21 +1800,19 @@ async function cmdPublish(argv) {
   warnIdentityState(identity, dryRun ? '投稿の試験実行' : '投稿');
   const article = JSON.parse(fs.readFileSync(argValue(argv, '--article'), 'utf8'));
   const ctx = JSON.parse(fs.readFileSync(argValue(argv, '--context'), 'utf8'));
+  if (ctx.platform !== platform) throw new Error('CONTEXT_PLATFORM_MISMATCH');
+  if (![undefined, null, platform].includes(article.platform)) throw new Error('ARTICLE_PLATFORM_MISMATCH');
   const out = argValue(argv, '--out');
   // **検証を通っていない記事は出さない。**ワークフローの順序だけに頼らず、ここでもう一度通す。
-  const r = await validateArticle(article, ctx, { network: { linkStatus }, identity });
+  const r = await validateArticle(article, ctx, { network: dryRun ? null : { linkStatus }, identity });
   if (!r.ok) throw new Error(maskIdentity(`検証を通らない記事は投稿しない:\n- ${r.problems.join('\n- ')}`, identity));
   if (!dryRun && !r.identity_checked) throw new Error(IDENTITY_MISSING_MESSAGE);
   const stop = readStop();
   if (stop.stopped) throw new Error(`停止中のため投稿しない: ${stop.reason}`);
   const body = composeBody(article, platform, { runId: process.env.GITHUB_RUN_ID || 'local' });
   if (dryRun) {
-    const result = { platform, dry_run: true, title: article.title, body_preview: body.slice(0, 500) };
-    // ライブドアは HTML にして送るので、送るはずの HTML と entry をそのまま残す（目で確かめるため）
-    if (cfg.kind === 'livedoor') {
-      result.html = markdownToHtml(body);
-      result.entry_xml = livedoorEntryXml({ title: article.title, html: result.html, categories: cfg.categories });
-    }
+    // Public diagnostic output is metadata only, never an article preview or payload.
+    const result = { platform, dry_run: true, identity_checked: identity.size > 0 };
     if (out) fs.writeFileSync(out, JSON.stringify(result, null, 2));
     console.log(`[${cfg.label}] dry-run: 投稿しない（検証は通過）`);
     return;
@@ -2901,14 +2925,15 @@ export async function selftest() {
       const ps = platformConfigProblems(copy);
       assert(ps.some((p) => expect.test(p)), `「${name}」で落ちない: ${ps.join(' / ')}`);
     }
-    // ワークフローが選べる・回す・鍵を渡す媒体と、この表が一致する（片方だけ足すと、その媒体は回らないか鍵が無いまま回る）
+    // Temporary suspension is an intentional production behavior change.
+    // Restore the per-platform credential/routing contract when private handoff is reviewed.
     const wf = fs.readFileSync(path.join(ROOT, '.github/workflows/devlog-syndication.yml'), 'utf8');
-    for (const [p, c] of Object.entries(PLATFORMS)) {
-      assert(new RegExp(`platform: \\[[^\\]]*\\b${p}\\b[^\\]]*\\]`).test(wf), `ワークフローの matrix に ${p} が無い`);
-      assert(new RegExp(`options: \\[all,[^\\]]*\\b${p}\\b[^\\]]*\\]`).test(wf), `workflow_dispatch の選択肢に ${p} が無い`);
-      assert(new RegExp(`matrix\\.platform == '${p}'[^\\n]*secrets\\.${c.secretEnv}`).test(wf), `ワークフローが ${p} に ${c.secretEnv} を渡していない`);
+    for (const p of Object.keys(PLATFORMS)) {
+      assert(new RegExp(`options: \\[all,[^\\]]*\\b${p}\\b[^\\]]*\\]`).test(wf), `workflow_dispatch selection missing: ${p}`);
     }
-    assert(wf.includes(`${PLATFORMS.livedoor.keySetEnv}: \${{ secrets.${PLATFORMS.livedoor.secretEnv} != '' }}`), '見張りに鍵の登録の有無（真偽）を渡していない');
+    const jobs = wf.slice(wf.indexOf('jobs:'));
+    assert(jobs.includes('PRIVATE_HANDOFF_REQUIRED') && jobs.includes('exit 1'), 'suspension must fail explicitly');
+    assert(!/uses:|secrets\.|node |curl|wget/.test(jobs), 'suspension must not execute model, watcher or publisher');
   });
 
   await t('門: 鍵の無い媒体 — 鍵待ちは休み（key_pending）、鍵のある媒体は投稿する番に落とす（no_key）、試験実行は鍵を見ない', () => {
@@ -3322,5 +3347,6 @@ if (isMain) {
       return;
     }
     await commands[cmd](argv.slice(1));
-  })().catch((e) => { console.error(`エラー: ${e.message}`); process.exitCode = 1; });
+  })().catch((e) => { console.error(e.message === IDENTITY_MISSING_MESSAGE ? IDENTITY_MISSING_MESSAGE : 'DEVLOG_COMMAND_FAILED: details withheld'); process.exitCode = 1; });
 }
+
