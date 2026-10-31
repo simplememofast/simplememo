@@ -92,6 +92,26 @@ Functionsデプロイ失敗時のフォールバックとして残置（RETIRED�
 
 `scripts/check-url-normalization.mjs` に www ケース7件を追加（189→196チェック）。
 
+> 2026-10-31追記（オーナー判断）: Cloudflare Pages の本番別名ホスト
+> `simplememo-596.pages.dev`（ハッシュもブランチ名も付かない素のホスト）を、
+> www と同じ Middleware のホスト正規化（`HOST_ALIASES`）に加えた。パスとクエリを保ったまま、
+> 他の修正と合わせて apex へ1回の301で移す。
+>
+> - 理由: 同日の読み取り確認で、このホストが本番と同じHTMLを200で返していた
+>   （canonical は apex、robots は index,follow、X-Robots-Tag 無し）。ブランド名の
+>   Web検索では、本番ドメインではなくこのホストのURLが2件出た。
+> - 現行の Middleware がこのホストでも動いている根拠（同日・本番）: `/?lang=en` と
+>   `/faq.html` が別名ホストのまま301、`/docs/…` が `X-Robots-Tag: noindex` 付きの404。
+>   どれも Middleware の応答の形。
+> - 判定は完全一致のまま。`<hash>.simplememo-596.pages.dev` とブランチ別名
+>   （Cloudflare Access の内側。preview-cache CI が使う）には触れない。
+> - `/admin/` はこのホストでも素通しにした。Access が Functions より前で302を返し、
+>   認証済みでも410の退役応答になるので、301にしても誰の得にもならない。
+> - www と違い `_redirects` のフォールバックは置いていない。Cloudflare の Pages
+>   リダイレクト文書は、ドメイン単位のリダイレクトを `_redirects` 非対応としている。
+> - **未確認:** マージ後に本番のこのホストが実際に301を返すこと。検索結果から
+>   別名URLが消える時期。
+
 ### 4-2. サイトマップ `<loc>` を CI の直接200保証に追加
 
 `check-internal-redirects.mjs` は href/src（2026-07）と JSON-LD/meta（2026-08-11）を
