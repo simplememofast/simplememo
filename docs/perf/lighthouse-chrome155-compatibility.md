@@ -33,6 +33,34 @@ The wrapper requires the reviewed Lighthouse 12.8.2, chrome-launcher 1.2.2 and
 Chrome 155.0.8059.39 combination. An unknown version or collector hash fails
 instead of downloading another browser or silently continuing.
 
+The workflow downloads the exact `chrome/linux64` artifact listed in the
+[official version metadata](https://googlechromelabs.github.io/chrome-for-testing/155.0.8059.39.json)
+(revision `1697595`) from
+[Google's distribution](https://storage.googleapis.com/chrome-for-testing-public/155.0.8059.39/linux64/chrome-linux64.zip).
+It verifies the archive before extraction and selects that executable with
+`CHROME_PATH` for the production observation, Lighthouse and responsive checks.
+The runtime has no system-browser fallback. The pinned values are:
+
+- Archive SHA256: `55672d1f392fd3e7b7a08621b6e804e6bcb39d40cf155504abb74b3a021ea8ea`.
+- Executable SHA256: `ed05e73a2cdf875326fcfa438b31c71a6a885a353610731dd52090dfc476f778`.
+- Exact trimmed version output: `Google Chrome for Testing 155.0.8059.39`.
+
+The SHA256 values were measured from the official HTTPS download on 2026-10-31;
+the version metadata does not publish SHA256. The archive's MD5 matched Google's
+`x-goog-hash` response and every ZIP member passed its CRC check. CfT has a
+different product name from ordinary installed Google Chrome; the version guard
+accepts only this exact CfT name and version, together with the pinned binary
+hash. Local inspection on macOS cannot execute the Linux binary. The exact
+candidate's Linux CI must confirm the actual output and complete the normal
+twelve measurements before this change can be considered validated.
+
+`browser-install.json` records the source, measured hashes and actual version
+process output before the version assertion, including a mismatch or launch
+failure. Each measurement likewise persists its browser/tool receipt before
+version assertions. The running `/proc/<pid>/exe` must be the selected pinned
+executable, and the existing argument and executable-stability checks still
+apply. A changed archive, binary, product name or patch version fails closed.
+
 Only the ephemeral installed collector is patched. Its original SHA256 is
 `512cb67e34e30672ec872a4fc8f846904a5b77006426186c6bf7819993a1191a`.
 The exact one-byte change, path/file identity and readback are verified. Cleanup
