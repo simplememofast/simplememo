@@ -2,7 +2,7 @@
 /**
  * 開発記録の外部ブログ配信（dev.to / はてなブログ2つ / ライブドアブログ）— 門・文脈・検証・投稿・公開確認。
  *
- *   node scripts/devlog-syndication.mjs gate     --platform devto|hatena|hatenadiary|livedoor [--force] [--dry-run] [--key-missing] [--github-output FILE]
+ *   node scripts/devlog-syndication.mjs gate     --platform devto|hatena|hatenadiary|livedoor [--force] [--dry-run] [--key-missing] [--identity-missing] [--github-output FILE]
  *   node scripts/devlog-syndication.mjs context  --platform P --out FILE
  *   node scripts/devlog-syndication.mjs validate --platform P --article FILE --context FILE [--report FILE] [--offline]
  *   node scripts/devlog-syndication.mjs publish  --platform P --article FILE --context FILE --out FILE [--dry-run]
@@ -37,6 +37,11 @@
  *   - dev.to は ai_disclosure_level=fully_autonomous を API で必ず付ける
  *   - はてな・ライブドアは本文末尾に固定の開示文を付ける（モデルに書かせない＝消されない）
  *   - 本文の数量は、記事が宣言した出典ファイルか一次ファイルに同じ数字があるときだけ通す
+ *
+ * 【名前一覧が無ければ外へ出さない（2026-10-30）】
+ * 実名の照合の一覧は GitHub Secrets の IDENTITY_DENYLIST だけ。**名前も、そのハッシュも、リポジトリに置かない。**
+ * 一覧が無い・照合に使える語が無いときは、門（投稿する番）と publish が通信の前に止まる（fail closed）。
+ * 当たった語は1字も出さない（固定の印と件数だけ）。詳しくは identityMatcher の説明。
  *
  * 【媒体を2つ足す（2026-10-03）】
  * はてなブログ「メモの設計図」（simplememofast.hatenadiary.jp）とライブドアブログ（captio.livedoor.blog）も、
@@ -316,9 +321,16 @@ export function readStop(file = STOP_PATH) {
  *   - それ以外の媒体は、投稿する番（due）のときに no_key で落とす。旧ワークフローの「投稿用の鍵があるか」と同じく、
  *     **黙って休まずに落とす**（間隔待ち・読めないの判定は今までどおり先に出る）
  *   - 試験実行（dry_run）は鍵を見ない。鍵の登録前でも、書いて検査するところまで経路を試せる
+ *
+ * 名前一覧（IDENTITY_DENYLIST）が無いとき（identityMissing。ワークフローが真偽だけを渡す。値は渡さない）:
+ *   - 投稿する番（due）なら no_identity_denylist で落とす（**実名の照合ができないまま書かせない・出さない**）。
+ *     no_key と同じく、間隔待ち・読めない・上限・停止の判定は先に出る。鍵待ちの媒体は鍵待ちのまま休む
+ *   - 試験実行（dry_run）は見ない（送らないので、一覧の登録前でも経路を試せる）
+ *   - ここは早めに止めるための門で、**最後の錠前は publish**（requireIdentityDenylist）。真偽では「値はあるが
+ *     使える語が無い」を見分けられないので、その形は publish が止める
  */
 export function decideGate({ stop, latestIso, postsLast24h, now, minIntervalHours, force = false, dryRun = false, readError = null,
-  keyMissing = false, pendingUntilKey = false, secretEnv = '投稿用の鍵' }) {
+  keyMissing = false, pendingUntilKey = false, secretEnv = '投稿用の鍵', identityMissing = false }) {
   if (stop?.stopped) return { due: false, code: 'stopped', reason: stop.reason };
   if (keyMissing && !dryRun && pendingUntilKey) {
     return { due: false, code: 'key_pending', reason: `${secretEnv} が未登録。登録されるまで投稿しない（オーナー作業）` };
@@ -328,6 +340,10 @@ export function decideGate({ stop, latestIso, postsLast24h, now, minIntervalHour
   // 停止と「公開面を読めない」は本番と同じく止める。投稿しないことは publish --dry-run 側で保証する。
   if (dryRun) return { due: true, code: 'dry_run', reason: '試験実行（投稿しない）: 間隔と24時間の上限は見ない' };
   const d = decideInterval({ latestIso, postsLast24h, now, minIntervalHours, force });
+  if (identityMissing && d.due === true) {
+    return { ...d, due: false, code: 'no_identity_denylist',
+      reason: `${IDENTITY_SECRET} が GitHub Secrets に無い — 実名の照合ができないので投稿しない（投稿する番だった: ${d.reason}）` };
+  }
   if (keyMissing && d.due === true) {
     return { ...d, due: false, code: 'no_key',
       reason: `${secretEnv} が GitHub Secrets に無い（投稿する番だった: ${d.reason}）。黙って休まずに落とす` };
@@ -470,6 +486,10 @@ export async function publicPosts(platform) {
 async function cmdGate(argv) {
   const platform = platformOf(argv);
   const cfg = PLATFORMS[platform];
+  if (argv.includes('--identity-missing')) {
+    writeOutput(argValue(argv, '--github-output'), { due: false, code: 'no_identity_denylist' });
+    throw new Error(IDENTITY_MISSING_MESSAGE);
+  }
   const now = new Date(argValue(argv, '--now', new Date().toISOString()));
   const stop = readStop();
   let posts = [], readError = null;
@@ -481,13 +501,19 @@ async function cmdGate(argv) {
   const postsLast24h = times.filter((t) => now.getTime() - t < 24 * 3600000).length;
   const d = decideGate({ stop, latestIso: latest, postsLast24h, now, minIntervalHours: cfg.minIntervalHours,
     force: argv.includes('--force'), dryRun: argv.includes('--dry-run'), readError,
-    keyMissing: argv.includes('--key-missing'), pendingUntilKey: cfg.pendingUntilKey === true, secretEnv: cfg.secretEnv });
+    keyMissing: argv.includes('--key-missing'), pendingUntilKey: cfg.pendingUntilKey === true, secretEnv: cfg.secretEnv,
+    identityMissing: argv.includes('--identity-missing') });
   console.log(`[${cfg.label}] ${d.due ? '投稿する' : '投稿しない'} — ${d.code}: ${d.reason}（最新: ${latest ?? 'なし'}）`);
   writeOutput(argValue(argv, '--github-output'), { due: d.due, code: d.code, latest: latest ?? '', reason: d.reason });
   // 読めない・鍵が無いのに投稿する番・停止は「異常」なので目立たせる。間隔待ちは正常。鍵待ちはオーナー作業の待ちなので注意だけ。
   if (d.code === 'unreadable') process.exitCode = 1;
   if (d.code === 'no_key') {
     console.log(`::error title=Devlog syndication::${platform} の投稿用の鍵（${cfg.secretEnv}）が GitHub Secrets に無い。黙って休まずに落とす。`);
+    process.exitCode = 1;
+  }
+  if (d.code === 'no_identity_denylist') {
+    console.log(`::error title=Devlog syndication::${platform}: 名前一覧（${IDENTITY_SECRET}）が GitHub Secrets に無いので投稿しない。`
+      + 'オーナーが登録するまで、投稿する番のたびに落とす（値はログに出さない）');
     process.exitCode = 1;
   }
   if (d.code === 'key_pending') console.log(`::warning title=Devlog syndication key pending::${cfg.label}: ${d.reason}`);
@@ -838,50 +864,152 @@ const BANNED = [
 ];
 
 /**
- * 開発者個人の実名・個人アカウント名を検出する。
- * **名前そのものを公開リポジトリに書かない**（CLAUDE.md「対外的な名乗り」）ために、照合は SHA-256 で行う。
- * 英字は単語ごと、漢字は連続する漢字の2字窓ごとに照合する。追加するときも平文をコミットしない。
+ * 開発者個人の実名・個人アカウント名を検出する。**照合の一覧は GitHub Secrets の IDENTITY_DENYLIST だけ**
+ * （CLAUDE.md「対外的な名乗り」と「新しい種類の対外送信は、錠前ができるまで始めない」の『名前一覧はリポジトリの外』）。
+ *
+ * 【2026-10-30 リポジトリの照合表を外した】
+ * 以前は名前から作った照合表をこのファイルに置いていた。公開リポジトリに置くと、名前を書いたのと変わらない。
+ * **名前も、名前から作った値（ハッシュなど）も、リポジトリに書かない（コミットしない）。**一覧はリポジトリの外（Secrets）にだけ置く。
+ * 履歴をどうするかはオーナーの判断。
+ *
+ * 【無ければ外へ出さない（fail closed）】
+ * IDENTITY_DENYLIST が無い・照合に使える語が1つも無いときは、外部へ送る段（publish と publishDevto / publishHatena /
+ * publishLivedoor）が通信の前に止まる（requireIdentityDenylist）。門も投稿する番に no_identity_denylist で落とす。
+ * 送らない検査（validate・publish --dry-run・自己テスト）は一覧が無くても動く。
+ * 一覧なしの検証は詳細を出さず、dry-run は通信せず本文を出力しない。
+ * 自己テストと CI は本物の一覧を使わない（架空の語を環境変数で渡す）。
+ *
+ * 【一覧の書き方と照合の仕方】カンマか改行で区切る。各項目を照合できる形に分けて持つ:
+ *   - 英字 … 単語ごと（空白で区切る）。本文の単語と丸ごと一致したら当たり。全角や「ō」などの補助記号は
+ *            ならしてから比べる（Ｔａｒｏ・Tarō → taro）。**1字の英字は使わない**（"don't" の t などに当たり続ける）
+ *   - 記号や数字を含む英数字の項目（アカウント名・メールアドレスなど。空白なし）… そのままの文字列として探す
+ *            （大文字小文字は区別しない）。語に分けない —— メールアドレスを語に分けると「com」が当たりになり、
+ *            自社リンク（https://simplememofast.com/…）の入った記事がすべて止まる。姓や名は別の項目に書く
+ *   - 漢字 … 連続する漢字（々・﨑・𠮷 なども含む）の2字窓ごと。姓や名だけでも当たる。**1字だけの漢字は使わない**
+ *   - かな等 … かな・ハングルなどを含む項目は、空白・記号で区切った各部分（2字以上）をそのまま文字列として探す。
+ *              ひらがなとカタカナは別の語として扱う（両方書く）
+ * どの形にもならない項目（1字だけ・記号だけ）は照合に使わず、件数だけを注意として出す（値は出さない）。
+ *
+ * 【当たった語は1字も出さない】出力は固定の印 IDENTITY_MASK と件数だけ（2026-10-30 まで先頭1字を出していた。
+ * 検証の報告 validation.txt は成果物として、サインインした誰でも読める）。
  */
-const IDENTITY_HASHES = new Set([
-  '65fc7b149d71ebe0e4e3c6b129e80a3e89ef96a66e8facde749a02ffa20ba0d5',
-  '50ac65592e9838ec07948083ae3066ed28b4c4b628921ccd618dca0dd0ed2d47',
-  'e4449d8188a43557bf233fd3acea2fcb84846f9c318e7f93d7f2efefa82f728f',
-  '590d190f5b5fe92a23d513a3f57ae3bd8876a439f7f33ff892955fef30b82233',
-  'f394653a63520ab55dbb371b12d7c06e9eab1e9b418d36ba0f88e1caaa8d01c0',
-]);
-const sha256 = (s) => crypto.createHash('sha256').update(s).digest('hex');
+export const IDENTITY_SECRET = 'IDENTITY_DENYLIST';
+export const IDENTITY_MASK = '実名（伏せ字）';
+const HAN_RUN = /\p{Script=Han}+/gu;
+const LATIN_RUN = /[\p{Script=Latin}\p{M}]+/gu;
+const LETTER_RUN = /[\p{L}\p{M}\p{N}]+/gu;
+const NOT_LATIN_OR_HAN_LETTER = /(?![\p{Script=Latin}\p{Script=Han}])\p{L}/u;
+const MASK_HOLD = '\uE000'; // 置き換え中の仮の印（私用領域の字。漢字・英字の照合に当たらない）
+// 空白なしの ASCII で、英字以外（記号・数字）と2字以上の英字を含む項目（アカウント名・メールアドレスなど）
+const isIdentifierEntry = (e) => /^[A-Za-z0-9_.+@-]+$/.test(e) && /[^A-Za-z]/.test(e) && (e.match(/[A-Za-z]/g) || []).length >= 2;
+const escapeRegExp = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const latinWords = (s) => String(s).normalize('NFKD').replace(/\p{M}+/gu, '').toLowerCase().match(/[a-z]+/g) || [];
+const hanWindows = (run) => {
+  const cs = [...String(run).normalize('NFKC')];
+  const out = [];
+  for (let i = 0; i + 1 < cs.length; i++) out.push(cs[i] + cs[i + 1]);
+  return out;
+};
+const foldLiteral = (s) => String(s).normalize('NFKC').toLowerCase();
+// 見えない字（ゼロ幅・soft hyphen・向きの制御など）。名前の途中に挟むと語が切れるので、照合の前に外す
+const INVISIBLE = /[\u00AD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180B-\u180F\u200B-\u200F\u202A-\u202E\u2060-\u206F\u3164\uFE00-\uFE0F\uFEFF\uFFA0]/gu;
 
 /**
- * 照合用の名前一覧を**リポジトリの外**からも受ける（CLAUDE.md「新しい種類の対外送信は、錠前ができるまで始めない」
- * の錠前の考え方）。GitHub Secrets の IDENTITY_DENYLIST に、カンマ区切りで名前・アカウント名を置けば、
- * ここでハッシュにして上の表に足す。値はログに出さない。無ければ上の表だけで照合する。
+ * IDENTITY_DENYLIST から照合器を作る。**値はどこにも出さない**（返り値も外へ書かない。件数だけを使う）。
+ * size が 0 なら「照合できない」。unusable は照合に使えなかった項目の数。
  */
-export function identityHashes(env = process.env) {
-  const set = new Set(IDENTITY_HASHES);
-  for (const raw of String(env.IDENTITY_DENYLIST || '').split(/[,\n]/)) {
-    const w = raw.trim().toLowerCase();
-    if (!w) continue;
-    set.add(sha256(w));
-    // 漢字の名前は2字窓で照合するので、2字ずつにも分けて足す
-    if (/^[\u3400-\u9fff]{3,}$/.test(w)) for (let i = 0; i < w.length - 1; i++) set.add(sha256(w.slice(i, i + 2)));
+export function identityMatcher(env = process.env) {
+  const m = { words: new Set(), han: new Set(), literals: new Set(), identifiers: new Set(), unusable: 0, size: 0 };
+  const input = String(env?.[IDENTITY_SECRET] ?? '').normalize('NFKC').replace(INVISIBLE, '');
+  // Unsupported serialization is not an identifier. Reject the entire configuration.
+  if (/[;\[\]{}"`]/.test(input)) return { ...m, unusable: 1 };
+  for (const raw of input.split(/[,\r\n]/)) {
+    // 先頭の @ は外す（「@handle」で登録しても、@ の付かない URL や本文の handle に当たるように）
+    const entry = raw.trim().replace(/^@+/, '');
+    if (!entry) continue;
+    let used = 0;
+    if (isIdentifierEntry(entry)) { m.identifiers.add(entry.toLowerCase()); continue; }
+    for (const w of latinWords(entry)) if (w.length >= 2) { m.words.add(w); used++; }
+    for (const run of entry.match(HAN_RUN) || []) for (const w of hanWindows(run)) { m.han.add(w); used++; }
+    if (NOT_LATIN_OR_HAN_LETTER.test(entry)) {
+      for (const piece of foldLiteral(entry).split(/[^\p{L}\p{M}\p{N}]+/u)) if ([...piece].length >= 2) { m.literals.add(piece); used++; }
+    }
+    if (!used) m.unusable++;
   }
-  return set;
+  m.size = m.words.size + m.han.size + m.literals.size + m.identifiers.size;
+  return m;
 }
 
-export function identityHits(text, hashes = identityHashes()) {
-  const hits = [];
-  const t = String(text);
-  for (const w of t.toLowerCase().match(/[a-z]+/g) || []) if (hashes.has(sha256(w))) hits.push(w.slice(0, 1) + '…');
-  for (const run of t.match(/[㐀-鿿]{2,}/g) || []) {
-    for (let i = 0; i < run.length - 1; i++) if (hashes.has(sha256(run.slice(i, i + 2)))) hits.push(run.slice(i, i + 1) + '…');
+/** 照合して、当たった部分を固定の印に置き換える。当たった語を含む「字の連なり」ごと伏せる（伏せすぎるのは安全側）。 */
+function scanIdentity(text, m) {
+  let count = 0;
+  let t = String(text ?? '');
+  if (!m?.size) return { count, masked: t };
+  // Decode transport/HTML representations before matching, including nested forms.
+  // Unknown named entities fail closed; this is deliberately not an HTML renderer.
+  const entities = { amp: '&', lt: '<', gt: '>', quot: '\"', apos: "'", nbsp: ' ',
+    lowbar: '_', UnderBar: '_', commat: '@', period: '.', colon: ':', sol: '/',
+    hyphen: '-', percnt: '%', Tab: '\t', NewLine: '\n' };
+  // Each changed pass shortens the string, so this terminates without a depth bypass.
+  t = t.normalize('NFKC');
+  for (;;) {
+    const decoded = t.replace(/(?:%[0-9a-f]{2})+/gi, (part) => {
+      return Buffer.from(part.replace(/%/g, ''), 'hex').toString('utf8');
+    }).replace(/&#(x[0-9a-f]+|[0-9]+);?/gi, (_, value) => {
+      const cp = /^x/i.test(value) ? parseInt(value.slice(1), 16) : Number(value);
+      return cp > 0 && cp <= 0x10ffff && !(cp >= 0xd800 && cp <= 0xdfff) ? String.fromCodePoint(cp) : '\ufffd';
+    }).replace(/&([A-Za-z][A-Za-z0-9]*);?/g, (raw, name) => entities[name] ?? raw).normalize('NFKC');
+    if (decoded === t) break;
+    t = decoded;
   }
-  return hits;
+  if (/&[A-Za-z][A-Za-z0-9]*;?/.test(t)) return { count: 1, masked: IDENTITY_MASK };
+  t = t.normalize('NFKC').replace(INVISIBLE, '');
+  const hit = () => { count++; return MASK_HOLD; };
+  for (const id of m.identifiers) t = t.replace(new RegExp(escapeRegExp(id), 'gi'), hit);
+  if (m.literals.size) {
+    t = t.replace(LETTER_RUN, (run) => { const f = foldLiteral(run); return [...m.literals].some((l) => f.includes(l)) ? hit() : run; });
+  }
+  t = t.replace(HAN_RUN, (run) => (hanWindows(run).some((w) => m.han.has(w)) ? hit() : run));
+  t = t.replace(LATIN_RUN, (run) => (latinWords(run).some((w) => m.words.has(w)) ? hit() : run));
+  return { count, masked: count ? t.split(MASK_HOLD).join(IDENTITY_MASK) : String(text ?? '') };
 }
 
+/** 当たりの一覧。**中身は固定の印だけ**で、当たった語の字は1字も入らない（件数を数えるのに使う）。 */
+export function identityHits(text, m = identityMatcher()) {
+  return Array(scanIdentity(text, m).count).fill(IDENTITY_MASK);
+}
+
+/** 出力する文字列から実名を伏せる（検証の報告・エラー文。記事の一部を引用する行があるので、全部の行に通す）。 */
+export function maskIdentity(text, m = identityMatcher()) {
+  return scanIdentity(text, m).masked;
+}
+
+/** 外へ送る欄をすべて1つの文字列にする（題名・本文・説明・タグ・シリーズ）。媒体が送らない欄も含めて広めに見る。 */
+export function outgoingText(article, body = article?.body_markdown) {
+  const tags = Array.isArray(article?.tags) ? article.tags : [];
+  return [article?.title, body, article?.description, ...tags, article?.series].filter((v) => typeof v === 'string' && v).join('\n');
+}
+
+export const IDENTITY_MISSING_MESSAGE = `${IDENTITY_SECRET}（GitHub Secrets）が未設定か、照合に使える語が1つも無い — `
+  + '実名の照合ができないので外部へ投稿しない。オーナーが Secrets に名前の一覧（カンマか改行区切り）を登録する（値はログに出さない）';
+
+/** 送る段の錠前。照合器が空なら投げる（fail closed）。メッセージに一覧の値は入れない。 */
+export function requireIdentityDenylist(m = identityMatcher()) {
+  if (!m?.size) throw new Error(IDENTITY_MISSING_MESSAGE);
+  return m;
+}
+
+/** 送る直前の照合。一覧が無ければ止め、当たれば止める。どちらも当たった語は出さない。 */
+export function assertIdentityClear(text, m = identityMatcher()) {
+  requireIdentityDenylist(m);
+  const n = identityHits(text, m).length;
+  if (n) throw new Error(`送る内容に${IDENTITY_MASK}が ${n} 件ある — 外部へ投稿しない（どの語かは表示しない）`);
+}
+
+/** 禁止表現（題名・本文）。**実名はここでは見ない** —— 送る欄すべてを見る identityHits を validateArticle が別に通す。 */
 export function bannedHits(text) {
   const hits = [];
   const body = prose(text);
-  for (const h of identityHits(text)) hits.push({ id: 'real-name', text: h, why: '開発者個人の実名・個人アカウント名（伏せ字で表示）' });
   for (const b of BANNED) {
     b.re.lastIndex = 0;
     for (const m of body.matchAll(b.re)) hits.push({ id: b.id, text: m[0], why: b.why });
@@ -942,9 +1070,17 @@ const COMMERCIAL_ANCHOR = /^(?:(?:the )?(?:best|fastest|top)\s+)?(?:memo|note|no
 
 /**
  * 記事を検査する。network は { linkStatus(url) } を渡す（オフライン検査では省く）。
- * 返り値の problems が空なら投稿してよい。
+ * identity は照合器（identityMatcher。既定は環境変数 IDENTITY_DENYLIST から作る）。
+ * 返り値の problems が空なら投稿してよい。ただし identity_checked が false（一覧が無い）なら実名は見ていない ——
+ * 送る段（cmdPublish・publish*）はそれを通さない。problems には実名を伏せてから入れる（記事を引用する行があるため）。
  */
-export async function validateArticle(article, ctx, { readFile = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8'), network = null } = {}) {
+export async function validateArticle(article, ctx, { readFile = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8'), network = null,
+  identity = identityMatcher() } = {}) {
+  const r = await validateArticleRaw(article, ctx, { readFile, network, identity });
+  return { ...r, problems: r.problems.map((p) => maskIdentity(p, identity)), identity_checked: identity.size > 0 };
+}
+
+async function validateArticleRaw(article, ctx, { readFile, network, identity }) {
   const problems = [];
   const cfg = PLATFORMS[ctx.platform];
   const lang = cfg.lang;
@@ -972,6 +1108,12 @@ export async function validateArticle(article, ctx, { readFile = (p) => fs.readF
     for (const t of tags) if (!String(t).trim() || String(t).length > 20 || /[,\n]/.test(t)) P(`カテゴリ「${t}」が不正（1〜20字・カンマ不可）`);
   }
   const body = String(article.body_markdown);
+  // 実名（IDENTITY_DENYLIST）。題名・本文だけでなく、外へ送る欄すべて（説明・タグ・シリーズ）を見る。
+  // **どの語かは出さない**（固定の印と件数だけ）。本文を引用する検査（数字の出典・事実検査）は、実名を伏せた本文で行う ——
+  // 引用は前後の数文字で切るので、名前の途中で切れた断片は、あとから行ごと伏せても見分けられない。
+  const identityCount = identityHits(outgoingText(article), identity).length;
+  const quotedTitle = maskIdentity(title, identity); // 当たりが無ければ元のまま
+  const quotedBody = maskIdentity(body, identity);
   if (/devlog-syndication:/.test(body)) P('本文に印（devlog-syndication:）が入っている — 印と開示文は投稿時に付ける');
   if (new RegExp(`${VISIBLE_BASIS_LABEL}[:：]`).test(body)) P(`本文に「${VISIBLE_BASIS_LABEL}:」が入っている — 題材の記録は投稿時に付ける`);
   if (/^---\s*\n[\s\S]*?\n---/.test(body)) P('本文の先頭に front matter がある — 題名・タグは JSON の欄に入れる');
@@ -1011,17 +1153,22 @@ export async function validateArticle(article, ctx, { readFile = (p) => fs.readF
   // 数字の出典
   const allowed = allowedNumberSet(sourceTexts);
   const bad = [];
-  for (const q of quantities(`${title}\n${body}`)) if (!numberAllowed(q.value, allowed)) bad.push(q);
+  for (const q of quantities(`${quotedTitle}\n${quotedBody}`)) if (!numberAllowed(q.value, allowed)) bad.push(q);
   if (bad.length) {
     const uniq = [...new Map(bad.map((q) => [q.value, q])).values()].slice(0, 12);
     P(`出典に無い数字 ${uniq.length}件: ${uniq.map((q) => `「${q.context}」`).join(' / ')} — sources に挙げたファイルに同じ数字があるものだけ書く`);
   }
-  const words = wordQuantities(`${title}\n${body}`, sourceTexts.join('\n'));
+  const words = wordQuantities(`${quotedTitle}\n${quotedBody}`, sourceTexts.join('\n'));
   if (words.length) P(`字で書いた数量が出典に無い: ${words.slice(0, 8).map((w) => `「${w}」`).join(' / ')} — 数字を言い換えても同じ扱い。出典の値をそのまま使うか削る`);
+
+  if (identityCount) {
+    P(`禁止表現「${IDENTITY_MASK}」が ${identityCount} 件: 開発者個人の実名・個人アカウント名は、題名・本文・説明・タグのどこにも書かない`
+      + ' — どの語かは表示しない。人の名前と個人のアカウント名をすべて消す');
+  }
 
   // 禁止表現（このリポジトリの配信原稿の規則も同じく当てる）
   for (const h of bannedHits(`${title}\n${body}`)) P(`禁止表現「${h.text}」: ${h.why}`);
-  const pr = checkText(`<!-- fact-check: draft -->\n# ${title}\n${body}\n`);
+  const pr = checkText(`<!-- fact-check: draft -->\n# ${quotedTitle}\n${quotedBody}\n`);
   for (const v of pr.violations) P(`事実検査 ${v.rule}: ${v.message}（「${v.text}」）`);
 
   // 一人称
@@ -1053,7 +1200,11 @@ export async function validateArticle(article, ctx, { readFile = (p) => fs.readF
     if (!l.url.startsWith('https://')) P(`https でないリンク: ${l.url}`);
     if (LINK_DENY.test(host)) P(`使わないリンク先: ${host}（App Store 直リンク・短縮URL）`);
   }
-  if (network) {
+  // 実名が入っている記事の URL は、実在確認でも外へ送らない（URL に名前が入っていることがある）。
+  // 一覧が無い・使える語が無いときは、入っているかを確かめられないので同じく送らない（注意は warnIdentityState が出す。
+  // 投稿の段は錠前で止まるので、確認しないまま出ることは無い）
+  if (network && identityCount) P('実名が見つかったので、リンクの実在確認（外部への問い合わせ）はしていない');
+  if (network && !identityCount && identity?.size) {
     for (const l of siteLinks) {
       const st = await network.linkStatus(l.url, { noRedirect: true });
       if (st !== 200) P(`自社リンク ${l.url} が ${st} を返す（200 でリダイレクトなしが要る）`);
@@ -1085,7 +1236,22 @@ export async function linkStatus(url, { noRedirect }) {
     }
     return res.status;
   } catch (e) {
-    return `error(${e.message.slice(0, 80)})`;
+    return 'error(link_check_failed)';
+  }
+}
+
+/**
+ * 名前一覧の状態を注意として出す（値・件数の内訳は出さない）。送らない段（validate・publish --dry-run）は止めずに続ける。
+ * 送る段は requireIdentityDenylist が止める。
+ */
+function warnIdentityState(m, where) {
+  if (!m.size) {
+    console.log(`::warning title=Devlog syndication identity::${where}: ${IDENTITY_SECRET}（GitHub Secrets）が無いか照合に使える語が無いので、`
+      + '実名の照合とリンクの実在確認（外部への問い合わせ）をしていない。送らない検査なので続けるが、投稿（publish）はこのままでは止まる');
+  }
+  if (m.unusable) {
+    console.log(`::warning title=Devlog syndication identity::${where}: ${IDENTITY_SECRET} の ${m.unusable} 件は照合に使えない形`
+      + '（1字だけ・記号だけなど）なので使っていない');
   }
 }
 
@@ -1093,12 +1259,15 @@ async function cmdValidate(argv) {
   const platform = platformOf(argv);
   const article = JSON.parse(fs.readFileSync(argValue(argv, '--article'), 'utf8'));
   const ctx = JSON.parse(fs.readFileSync(argValue(argv, '--context'), 'utf8'));
-  if (ctx.platform !== platform) throw new Error(`文脈の platform（${ctx.platform}）と --platform（${platform}）が違う`);
-  if (![undefined, null, platform].includes(article.platform)) throw new Error(`記事の platform（${article.platform}）と --platform（${platform}）が違う`);
-  const r = await validateArticle(article, ctx, { network: argv.includes('--offline') ? null : { linkStatus } });
-  const lines = r.ok
+  if (ctx.platform !== platform) throw new Error('CONTEXT_PLATFORM_MISMATCH');
+  if (![undefined, null, platform].includes(article.platform)) throw new Error('ARTICLE_PLATFORM_MISMATCH');
+  const identity = identityMatcher();
+  warnIdentityState(identity, '検証');
+  const r = await validateArticle(article, ctx, { network: argv.includes('--offline') ? null : { linkStatus }, identity });
+  // 報告（validation.txt）は成果物として公開される。行は validateArticle が実名を伏せたもの。念のためもう一度通す
+  const lines = (r.ok
     ? [`検証: 通過（${JSON.stringify(r.stats)}）`]
-    : ['検証: 不合格。次をすべて直すこと（直せない数字は削る）:', ...r.problems.map((p) => `- ${p}`)];
+    : ['検証: 不合格。次をすべて直すこと（直せない数字は削る）:', ...(identity.size ? r.problems.map((p) => `- ${p}`) : [`- IDENTITY_UNCHECKED: ${r.problems.length} problems (details withheld)`])]).map((l) => maskIdentity(l, identity));
   const report = argValue(argv, '--report');
   if (report) fs.writeFileSync(report, lines.join('\n') + '\n');
   console.log(lines.join('\n'));
@@ -1439,7 +1608,8 @@ export function publishGuard(items, now, { minIntervalHours, force = false }) {
   return { ok: true, hours };
 }
 
-export async function publishDevto(article, key, body, { now = new Date(), wait = sleep, force = false } = {}) {
+export async function publishDevto(article, key, body, { now = new Date(), wait = sleep, force = false, identity = identityMatcher() } = {}) {
+  assertIdentityClear(outgoingText(article, body), identity); // 名前一覧が無い・当たるなら、一覧の取得も含めて何も送らない
   const headers = { 'api-key': key, accept: 'application/vnd.forem.api-v1+json', 'content-type': 'application/json' };
   // 冪等: 同じ題名が直近にあれば作らない（応答が失われた前回の投稿を二重に出さない）
   const mine = await fetchJson('https://dev.to/api/articles/me/all?per_page=30', { headers, wait });
@@ -1506,7 +1676,8 @@ async function atompubRequest(cfg, url, key, opts, okStatuses) {
 /** はてなの AtomPub（はてなブログの2つ。設定 cfg で投稿先を決める）。 */
 const hatenaRequest = (cfg, url, key, opts, okStatuses) => atompubRequest(cfg, url, key, opts, okStatuses);
 
-export async function publishHatena(cfg, article, key, body, { now = new Date(), force = false } = {}) {
+export async function publishHatena(cfg, article, key, body, { now = new Date(), force = false, identity = identityMatcher() } = {}) {
+  assertIdentityClear(outgoingText(article, body), identity); // 名前一覧が無い・当たるなら、一覧の取得も含めて何も送らない
   // 冪等: 直近の一覧（AtomPub・認証済み）に同じ題名があれば作らない
   const listXml = await (await hatenaRequest(cfg, cfg.atomUrl, key, { method: 'GET' }, [200])).text();
   const entries = parseAtomFeed(listXml);
@@ -1573,8 +1744,9 @@ export function livedoorPublicUrl(xml, cfg) {
  * - 一覧で app:draft が無い entry は「公開」とみなす。下書きを公開と数えても、止める側に倒れるだけなので安全。
  * - 本文は Markdown を HTML にして送る。カテゴリは cfg.categories に固定（モデルの tags は送らない）。
  */
-export async function publishLivedoor(cfg, article, key, body, { now = new Date(), force = false,
+export async function publishLivedoor(cfg, article, key, body, { now = new Date(), force = false, identity = identityMatcher(),
   warn = (msg) => console.log(`::warning title=Devlog syndication::${msg}`) } = {}) {
+  assertIdentityClear(outgoingText(article, body), identity); // 名前一覧が無い・当たるなら、一覧の取得も含めて何も送らない
   const authError = (e) => (e.status === 401 || e.status === 403
     ? new Error(`${cfg.label}の認証が通らない（HTTP ${e.status}）— ${cfg.secretEnv}（AtomPub用パスワード）とライブドアID「${cfg.livedoorId}」を確かめる。投稿しない`)
     : e);
@@ -1620,22 +1792,27 @@ export async function publishLivedoor(cfg, article, key, body, { now = new Date(
 async function cmdPublish(argv) {
   const platform = platformOf(argv);
   const cfg = PLATFORMS[platform];
+  const dryRun = argv.includes('--dry-run');
+  // 【錠前】名前一覧（IDENTITY_DENYLIST）が無ければ、外へは何も出さない。記事を読む前・ネットワークに出る前
+  // （リンクの実在確認も含む）に止める。試験実行（--dry-run）は送らないので、注意だけ出して続ける。
+  const identity = identityMatcher();
+  if (!dryRun) requireIdentityDenylist(identity);
+  warnIdentityState(identity, dryRun ? '投稿の試験実行' : '投稿');
   const article = JSON.parse(fs.readFileSync(argValue(argv, '--article'), 'utf8'));
   const ctx = JSON.parse(fs.readFileSync(argValue(argv, '--context'), 'utf8'));
+  if (ctx.platform !== platform) throw new Error('CONTEXT_PLATFORM_MISMATCH');
+  if (![undefined, null, platform].includes(article.platform)) throw new Error('ARTICLE_PLATFORM_MISMATCH');
   const out = argValue(argv, '--out');
   // **検証を通っていない記事は出さない。**ワークフローの順序だけに頼らず、ここでもう一度通す。
-  const r = await validateArticle(article, ctx, { network: { linkStatus } });
-  if (!r.ok) throw new Error(`検証を通らない記事は投稿しない:\n- ${r.problems.join('\n- ')}`);
+  const r = await validateArticle(article, ctx, { network: dryRun ? null : { linkStatus }, identity });
+  if (!r.ok) throw new Error(maskIdentity(`検証を通らない記事は投稿しない:\n- ${r.problems.join('\n- ')}`, identity));
+  if (!dryRun && !r.identity_checked) throw new Error(IDENTITY_MISSING_MESSAGE);
   const stop = readStop();
   if (stop.stopped) throw new Error(`停止中のため投稿しない: ${stop.reason}`);
   const body = composeBody(article, platform, { runId: process.env.GITHUB_RUN_ID || 'local' });
-  if (argv.includes('--dry-run')) {
-    const result = { platform, dry_run: true, title: article.title, body_preview: body.slice(0, 500) };
-    // ライブドアは HTML にして送るので、送るはずの HTML と entry をそのまま残す（目で確かめるため）
-    if (cfg.kind === 'livedoor') {
-      result.html = markdownToHtml(body);
-      result.entry_xml = livedoorEntryXml({ title: article.title, html: result.html, categories: cfg.categories });
-    }
+  if (dryRun) {
+    // Public diagnostic output is metadata only, never an article preview or payload.
+    const result = { platform, dry_run: true, identity_checked: identity.size > 0 };
     if (out) fs.writeFileSync(out, JSON.stringify(result, null, 2));
     console.log(`[${cfg.label}] dry-run: 投稿しない（検証は通過）`);
     return;
@@ -1644,9 +1821,10 @@ async function cmdPublish(argv) {
   if (!key) throw new Error(`${cfg.secretEnv} が無い — GitHub の Secrets に登録が要る（鍵の値はこのスクリプトしか読まない）`);
   const force = argv.includes('--force');
   let res;
-  if (cfg.kind === 'devto') res = await publishDevto(article, key, body, { force });
-  else if (cfg.kind === 'hatena') res = await publishHatena(cfg, article, key, body, { force });
-  else if (cfg.kind === 'livedoor') res = await publishLivedoor(cfg, article, key, body, { force });
+  // 各 publish* は通信の前に、実際に送る文字列（組み立てた本文・題名・説明・タグ）を同じ照合器でもう一度見る
+  if (cfg.kind === 'devto') res = await publishDevto(article, key, body, { force, identity });
+  else if (cfg.kind === 'hatena') res = await publishHatena(cfg, article, key, body, { force, identity });
+  else if (cfg.kind === 'livedoor') res = await publishLivedoor(cfg, article, key, body, { force, identity });
   else throw new Error(`知らない kind: ${cfg.kind}`);
   // 対外送信の記録（時刻・経路・表示名・本文のハッシュ）。本文そのものは成果物の article.json に残る。
   // ライブドアは HTML にして送るが、ハッシュは他の媒体と同じく組み立てた Markdown（composeBody の出力）で取る。
@@ -2025,6 +2203,10 @@ export async function selftest() {
   const now = new Date('2026-09-24T12:00:00Z');
   const hoursAgo = (h) => new Date(now.getTime() - h * 3600000).toISOString();
   const go = { stopped: false };
+  // 自己テストは本物の名前一覧（IDENTITY_DENYLIST）を使わない。架空の語を環境変数で渡し、終わったら戻す。
+  // 投稿の関数は既定で環境変数から照合器を作るので、一覧が空のままだと既存の投稿のテストが錠前で止まる。
+  const savedDenylist = process.env.IDENTITY_DENYLIST;
+  process.env.IDENTITY_DENYLIST = 'Zzexample, 鵺鶫, 鴇鷽鵤';
 
   await t('門: 間隔が空いていれば投稿する', () => {
     const d = decideGate({ stop: go, latestIso: hoursAgo(70), postsLast24h: 0, now, minIntervalHours: 66 });
@@ -2118,17 +2300,137 @@ export async function selftest() {
     assert(bannedHits('起動0.3秒').some((h) => h.id === 'launch-0.3'), '0.3秒を通した');
   });
 
-  await t('名乗り: 伏せた名前（ハッシュ）に当たる語を落とし、無関係な語は通す', () => {
-    // 実名を書かずに検出器を試すため、架空の語のハッシュで同じ経路を通す。
-    const fake = new Set([sha256('zqxname'), sha256('架空')]);
-    assert(identityHits('Posted by Zqxname today', fake).length === 1, '英字の語を検出しない');
-    assert(identityHits('これは架空の人名', fake).length === 1, '漢字2字窓を検出しない');
-    assert(identityHits('Simple Memo developer notes', fake).length === 0, '無関係な語を検出した');
-    assert(IDENTITY_HASHES.size >= 1 && [...IDENTITY_HASHES].every((h) => /^[0-9a-f]{64}$/.test(h)), '本番のハッシュ表が壊れている');
-    const extra = identityHashes({ IDENTITY_DENYLIST: 'Qwxname, 架空人名' });
-    assert(identityHits('by qwxname', extra).length === 1, 'Secrets から足した英字の名前を検出しない');
-    assert(identityHits('これは架空人名です', extra).length >= 1 && identityHits('空人', extra).length === 1, 'Secrets から足した漢字の名前を2字窓で検出しない');
-    assert(identityHashes({}).size === IDENTITY_HASHES.size, 'Secrets が無いときに表が変わった');
+  await t('名乗り: 照合は IDENTITY_DENYLIST だけ。架空の語で、英字・漢字2字・漢字3字以上・かなを検出し、無関係な語は通す', () => {
+    // 実名を書かずに検出器を試すため、架空の語を環境変数の形で渡す（本物の一覧には依存しない）。
+    const m = identityMatcher({ IDENTITY_DENYLIST: 'Zzexample, 鵺鶫\n鴇鷽鵤 , ぬえつぐみ' });
+    assert(m.size > 0 && m.unusable === 0, '架空の一覧から照合器を作れない');
+    assert(identityHits('Posted by Zzexample today', m).length === 1, '英字の語を検出しない');
+    assert(identityHits('by ＺＺＥＸＡＭＰＬＥ', m).length === 1, '全角の英字を検出しない');
+    assert(identityHits('by Zzéxample', m).length === 1, '補助記号つきの英字を検出しない');
+    assert(identityHits("Zzexample's notes", m).length === 1, '所有格の英字を検出しない');
+    assert(identityHits('zzexamples and zzexampled', m).length === 0, '別の語（部分一致）を検出した');
+    assert(identityHits('これは鵺鶫の話', m).length === 1, '漢字2字を検出しない');
+    assert(identityHits('鷽鵤だけ', m).length === 1, '3字以上の漢字の2字窓を検出しない');
+    assert(identityHits('鴇だけ', m).length === 0, '1字の漢字で当てた（照合は2字窓）');
+    assert(identityHits('ぬえつぐみが書いた', m).length === 1, 'かなの名前を検出しない');
+    assert(identityHits('Simple Memo developer notes. 開発の記録と鳥の話', m).length === 0, '無関係な語を検出した');
+    // 1項目に空白入りで書いても語ごとに当たる（旧実装は項目まるごとを照合し、空白入りの項目は一度も当たらなかった）
+    const full = identityMatcher({ IDENTITY_DENYLIST: 'Qqfirst Qqlast' });
+    assert(identityHits('written by Qqlast', full).length === 1 && identityHits('Qqfirst', full).length === 1, '空白入りの項目が語ごとに当たらない');
+    // 々 を含む漢字も2字窓で当たる（旧実装の範囲 U+3400〜U+9FFF に 々 は入っていなかった）
+    assert(identityHits('鵺々鶫さん', identityMatcher({ IDENTITY_DENYLIST: '鵺々鶫' })).length === 1, '々 を含む漢字の名前を検出しない');
+    // 一覧が無い・使える語が無いときは照合器が空（= 送る段が止まる）
+    for (const [label, env] of [['未設定', {}], ['空文字', { IDENTITY_DENYLIST: '' }], ['区切りだけ', { IDENTITY_DENYLIST: ' , \n,' }], ['1字だけ', { IDENTITY_DENYLIST: '鴇, q' }]]) {
+      assert(identityMatcher(env).size === 0, `${label}: 使える語が無いのに照合器が空でない`);
+    }
+    assert(identityMatcher({ IDENTITY_DENYLIST: '鴇, q, Zzexample' }).unusable === 2, '使えない項目を数えない');
+    // 記号・数字を含む英数字の項目（アカウント名・メールアドレス）は、そのままの文字列として探す（語に分けない）
+    const ids = identityMatcher({ IDENTITY_DENYLIST: 'zz.example@mail.test, zzhandle_77' });
+    assert(ids.size === 2 && identityHits('mail Zz.Example@Mail.test now', ids).length === 1 && identityHits('by @zzhandle_77', ids).length === 1,
+      'アカウント名・メールアドレスを検出しない');
+    assert(identityHits('See https://simplememofast.com/blog/x and mail.test docs', ids).length === 0,
+      '**メールアドレスを語に分けた**（com・test などが当たり、自社リンクのある記事がすべて止まる）');
+    assert(maskIdentity('write to zz.example@mail.test', ids) === `write to ${IDENTITY_MASK}`, 'メールアドレスを伏せない');
+    // 「@handle」で登録しても @ の付かない handle に当たる（URL の中など）
+    const at = identityMatcher({ IDENTITY_DENYLIST: '@zzhandle_77, @Zzexample' });
+    assert(identityHits('https://example.test/zzhandle_77/posts', at).length === 1 && identityHits('by Zzexample', at).length === 1
+      && identityHits('by @zzhandle_77', at).length === 1, '@ 付きで登録したアカウント名が、@ の無い形に当たらない');
+    // 見えない字を語の途中に挟んでも当たる（一覧の側に入っていても同じ）
+    assert(identityHits('by Zz\u200Bexam\u00ADple and 鵺\u2060鶫', m).length === 2, 'ゼロ幅の字・soft hyphen を挟んだ名前を検出しない');
+    assert(identityHits('by Zzexample', identityMatcher({ IDENTITY_DENYLIST: 'Zz\u200Bexample' })).length === 1, '一覧の見えない字を外していない');
+  });
+
+  await t('名乗り: 当たった語は1字も出さない（固定の印と件数だけ。記事を引用する行も伏せる）', async () => {
+    const m = identityMatcher({ IDENTITY_DENYLIST: 'Zzexample, 鵺鶫, 鴇鷽鵤, ぬえつぐみ' });
+    // 「1字も出さない」: 架空の英字の z・漢字の各字・旧実装の「先頭1字＋…」の形のどれも出ない（かなは周りの文に無いときだけ見る）
+    const leaks = (s, kana = false) => /z/i.test(s) || /[鵺鶫鴇鷽鵤]/u.test(s) || /[zZ鵺鴇鷽ぬ]…/u.test(s) || (kana && /[ぬえつぐみ]/u.test(s));
+    const hits = identityHits('Zzexample と 鵺鶫 と 鷽鵤 と ぬえつぐみ', m);
+    assert(hits.length === 4 && hits.every((h) => h === IDENTITY_MASK), `当たりの中身が固定の印でない: ${hits.length} 件`);
+    const masked = maskIdentity('Zzexample wrote 鵺鶫 and 鴇鷽鵤; ぬえつぐみ.', m);
+    assert(!leaks(masked, true) && masked.split(IDENTITY_MASK).length - 1 === 4, `伏せ字から字が漏れた、または件数が違う: ${masked.split(IDENTITY_MASK).length - 1}`);
+    assert(maskIdentity('Simple Memo notes', m) === 'Simple Memo notes', '当たらない文を書き換えた');
+    // 記事の検査: 題名・本文以外（説明）の実名も落とし、数字の出典の行が本文を引用しても伏せる。リンクの実在確認は送らない
+    const ctx = { platform: 'devto', used_bases: [], seeds_available: [{ id: 'S-20260903-issue-closed-same-day', claim: 'x' }], existing_posts: [],
+      allowed_site_links: [{ url: 'https://simplememofast.com/blog/benchmark-methodology', file: 'blog/benchmark-methodology.html' }] };
+    const article = { platform: 'devto', title: 'A close condition nobody feeds never closes', tags: ['devops'], description: 'Notes by Zzexample.',
+      series: null, basis: 'S-20260903-issue-closed-same-day', sources: ['docs/story-seeds.md'],
+      body_markdown: '## A\n\nThe open rate Zzexample said 83 percent, and 鵺鶫 agreed. See [notes](http://notes.test/zzexample).\n\n## B\n\nSee [the method](https://simplememofast.com/blog/benchmark-methodology).\n\n## C\n\nEnd.' };
+    let netCalls = 0;
+    const network = { linkStatus: async () => { netCalls++; return 200; } };
+    const r = await validateArticle(article, ctx, { readFile: (p) => fs.readFileSync(path.join(ROOT, p), 'utf8'), network, identity: m });
+    const all = r.problems.join('\n');
+    assert(r.ok === false, '実名の入った記事を通した');
+    assert(r.identity_checked === true, '一覧があるのに実名を見ていないと返した');
+    assert(all.includes(`「${IDENTITY_MASK}」が 4 件`), `実名の件数の行が無い: ${maskIdentity(all, m).slice(0, 300)}`);
+    // 引用は数字の前14字で切る。伏せる前の本文から引用すると「zexample said 83」のように名前の途中から始まり、語として見分けられない
+    assert(all.includes('said 83') && /http:\/\/notes\.test\//.test(all), '本文を引用する行が無い（引用の伏せ字を確かめられない）');
+    assert(!leaks(all), '検査の報告に実名の字が漏れた');
+    assert(netCalls === 0 && /実在確認/.test(all), `実名の入った記事の URL を外へ問い合わせた（${netCalls} 回）`);
+    // 一覧が無いときは落とさず（送らない検査）、identity_checked で「見ていない」を返す
+    // リンクの実在確認も外へ送らない（名前が入っているかを確かめられないため）
+    const none = await validateArticle({ ...article, description: 'Notes.', body_markdown: article.body_markdown.replace(/Zzexample|鵺鶫/g, 'The team') },
+      ctx, { readFile: (p) => fs.readFileSync(path.join(ROOT, p), 'utf8'), network, identity: identityMatcher({}) });
+    assert(none.identity_checked === false && !none.problems.some((p) => p.includes(IDENTITY_MASK)), '一覧が無いのに実名を見たことにした');
+    assert(netCalls === 0, `一覧が無いのにリンクの実在確認を外へ送った（${netCalls} 回）`);
+    const unusable = await validateArticle({ ...article, description: 'Notes.', body_markdown: article.body_markdown.replace(/Zzexample|鵺鶫/g, 'The team') },
+      ctx, { readFile: (p) => fs.readFileSync(path.join(ROOT, p), 'utf8'), network, identity: identityMatcher({ IDENTITY_DENYLIST: '鴇, q' }) });
+    assert(unusable.identity_checked === false && netCalls === 0, `使える語の無い一覧でリンクの実在確認を外へ送った（${netCalls} 回）`);
+  });
+
+  await t('錠前: 名前一覧が無い・使える語が無い・送る内容に当たる、のどれでも、外へ送る関数は通信の前に止まる', async () => {
+    const orig = globalThis.fetch;
+    const saved = process.env.IDENTITY_DENYLIST;
+    const noWait = async () => {};
+    let calls = 0;
+    globalThis.fetch = async () => { calls++; throw new Error('通信した'); };
+    try {
+      const art = { title: 'A safe fictional title for the lock test', tags: ['devops'], description: 'd' };
+      for (const [label, identity] of [['未設定', identityMatcher({})], ['区切りだけ', identityMatcher({ IDENTITY_DENYLIST: ' ,\n' })],
+        ['使えない語だけ', identityMatcher({ IDENTITY_DENYLIST: '鴇, q' })]]) {
+        for (const [name, call] of [
+          ['dev.to', () => publishDevto(art, 'k', 'b', { now, wait: noWait, identity })],
+          ['はてな', () => publishHatena(PLATFORMS.hatena, art, 'k', 'b', { now, identity })],
+          ['メモの設計図', () => publishHatena(PLATFORMS.hatenadiary, art, 'k', 'b', { now, identity })],
+          ['ライブドア', () => publishLivedoor(PLATFORMS.livedoor, art, 'k', 'b', { now, identity, warn: () => {} })],
+        ]) {
+          let err = null;
+          try { await call(); } catch (e) { err = e; }
+          assert(err?.message.includes('IDENTITY_DENYLIST') && !err.message.includes('鴇'), `${name}（${label}）: 一覧が無いのに止まらない、または値を出した`);
+        }
+      }
+      // 引数を省いたとき（既定）は環境変数から読む。環境変数が無ければ止まる
+      delete process.env.IDENTITY_DENYLIST;
+      let err = null;
+      try { await publishDevto(art, 'k', 'b', { now, wait: noWait }); } catch (e) { err = e; }
+      assert(err?.message.includes('IDENTITY_DENYLIST'), '既定（環境変数）で一覧が無いのに止まらない');
+      assert(requireIdentityDenylist(identityMatcher({ IDENTITY_DENYLIST: 'Zzexample' })).size === 1, '一覧があるのに止めた');
+      // 送る内容（題名・本文・説明・タグ）に当たれば、一覧があっても通信の前に止まる。どの語かは出さない
+      const m = identityMatcher({ IDENTITY_DENYLIST: 'Zzexample, 鵺鶫' });
+      for (const [what, a, b] of [['題名', { ...art, title: 'Zzexample notes on capture' }, 'b'], ['本文', art, '本文の鵺鶫'],
+        ['説明', { ...art, description: 'by Zzexample' }, 'b'], ['タグ', { ...art, tags: ['zzexample'] }, 'b']]) {
+        let e2 = null;
+        try { await publishHatena(PLATFORMS.hatena, a, 'k', b, { now, identity: m }); } catch (e) { e2 = e; }
+        assert(e2?.message.includes(IDENTITY_MASK) && !/zzexample/i.test(e2.message) && !e2.message.includes('鵺'), `${what}の実名で止まらない、または語を出した`);
+      }
+      assert(calls === 0, `**一覧が無い・当たるのに ${calls} 回通信した**`);
+    } finally {
+      globalThis.fetch = orig;
+      if (saved === undefined) delete process.env.IDENTITY_DENYLIST; else process.env.IDENTITY_DENYLIST = saved;
+    }
+  });
+
+  await t('門: 名前一覧が無ければ、投稿する番に no_identity_denylist で落とす（試験実行・間隔待ち・停止・鍵待ちは今までどおり）', () => {
+    const base = { stop: go, latestIso: hoursAgo(70), postsLast24h: 0, now, minIntervalHours: 66 };
+    const d = decideGate({ ...base, identityMissing: true });
+    assert(d.due === false && d.code === 'no_identity_denylist' && d.reason.includes('IDENTITY_DENYLIST'), `一覧が無いのに投稿する: ${d.code}`);
+    assert(decideGate({ ...base, latestIso: hoursAgo(30), identityMissing: true, force: true }).code === 'no_identity_denylist', 'force で一覧の無い投稿を通した');
+    assert(decideGate({ ...base, latestIso: null, identityMissing: true }).code === 'no_identity_denylist', '初回の投稿で一覧を見ない');
+    assert(decideGate({ ...base, identityMissing: true, keyMissing: true }).code === 'no_identity_denylist', '鍵も一覧も無いのに一覧で止めない');
+    assert(decideGate({ ...base, latestIso: hoursAgo(30), identityMissing: true }).code === 'too_soon', '間隔待ちを落とした');
+    assert(decideGate({ ...base, identityMissing: true, dryRun: true }).code === 'dry_run', '試験実行を止めた');
+    assert(decideGate({ ...base, stop: { stopped: true, reason: 't' }, identityMissing: true }).code === 'stopped', '停止より先に一覧を見た');
+    assert(decideGate({ ...base, identityMissing: true, keyMissing: true, pendingUntilKey: true }).code === 'key_pending', '鍵待ちの媒体を落とした');
+    assert(decideGate(base).code === 'interval_elapsed', '一覧があるのに止めた');
   });
 
   await t('リンク: 抽出・商用アンカー・短縮URL', () => {
@@ -2174,6 +2476,10 @@ export async function selftest() {
       ['見出し不足', (a) => { a.body_markdown = a.body_markdown.replace(/^## .*$/gm, ''); }, /見出し/],
       ['App Store 直リンク', (a) => { a.body_markdown += ' [app](https://apps.apple.com/app/id6758438948)'; }, /使わないリンク先/],
       ['題材の記録を本文に書いた', (a) => { a.body_markdown += '\n\n題材の記録: S-20260903-report-said-zero'; }, /題材の記録は投稿時に付ける/],
+      // 実名は題名・本文だけでなく、外へ送る欄（説明・タグ）も見る（架空の語。自己テストの冒頭で環境変数に入れてある）
+      ['実名（本文）', (a) => { a.body_markdown += '\n\nZzexample reviewed this.'; }, /実名（伏せ字）/],
+      ['実名（説明）', (a) => { a.description = 'Notes by Zzexample.'; }, /実名（伏せ字）/],
+      ['実名（タグ）', (a) => { a.tags = ['devops', 'zzexample']; }, /実名（伏せ字）/],
     ];
     for (const [name, mutate, expect] of breakages) {
       const copy = JSON.parse(JSON.stringify(good)); mutate(copy);
@@ -2619,14 +2925,15 @@ export async function selftest() {
       const ps = platformConfigProblems(copy);
       assert(ps.some((p) => expect.test(p)), `「${name}」で落ちない: ${ps.join(' / ')}`);
     }
-    // ワークフローが選べる・回す・鍵を渡す媒体と、この表が一致する（片方だけ足すと、その媒体は回らないか鍵が無いまま回る）
+    // Temporary suspension is an intentional production behavior change.
+    // Restore the per-platform credential/routing contract when private handoff is reviewed.
     const wf = fs.readFileSync(path.join(ROOT, '.github/workflows/devlog-syndication.yml'), 'utf8');
-    for (const [p, c] of Object.entries(PLATFORMS)) {
-      assert(new RegExp(`platform: \\[[^\\]]*\\b${p}\\b[^\\]]*\\]`).test(wf), `ワークフローの matrix に ${p} が無い`);
-      assert(new RegExp(`options: \\[all,[^\\]]*\\b${p}\\b[^\\]]*\\]`).test(wf), `workflow_dispatch の選択肢に ${p} が無い`);
-      assert(new RegExp(`matrix\\.platform == '${p}'[^\\n]*secrets\\.${c.secretEnv}`).test(wf), `ワークフローが ${p} に ${c.secretEnv} を渡していない`);
+    for (const p of Object.keys(PLATFORMS)) {
+      assert(new RegExp(`options: \\[all,[^\\]]*\\b${p}\\b[^\\]]*\\]`).test(wf), `workflow_dispatch selection missing: ${p}`);
     }
-    assert(wf.includes(`${PLATFORMS.livedoor.keySetEnv}: \${{ secrets.${PLATFORMS.livedoor.secretEnv} != '' }}`), '見張りに鍵の登録の有無（真偽）を渡していない');
+    const jobs = wf.slice(wf.indexOf('jobs:'));
+    assert(jobs.includes('PRIVATE_HANDOFF_REQUIRED') && jobs.includes('exit 1'), 'suspension must fail explicitly');
+    assert(!/uses:|secrets\.|node |curl|wget/.test(jobs), 'suspension must not execute model, watcher or publisher');
   });
 
   await t('門: 鍵の無い媒体 — 鍵待ちは休み（key_pending）、鍵のある媒体は投稿する番に落とす（no_key）、試験実行は鍵を見ない', () => {
@@ -3014,6 +3321,8 @@ export async function selftest() {
     }
   });
 
+  if (savedDenylist === undefined) delete process.env.IDENTITY_DENYLIST; else process.env.IDENTITY_DENYLIST = savedDenylist;
+
   let failed = 0;
   for (const [name, ok, msg] of results) {
     console.log(`  ${ok ? 'ok  ' : 'FAIL'} ${name}${ok ? '' : ` — ${msg}`}`);
@@ -3038,5 +3347,6 @@ if (isMain) {
       return;
     }
     await commands[cmd](argv.slice(1));
-  })().catch((e) => { console.error(`エラー: ${e.message}`); process.exitCode = 1; });
+  })().catch((e) => { console.error(e.message === IDENTITY_MISSING_MESSAGE ? IDENTITY_MISSING_MESSAGE : 'DEVLOG_COMMAND_FAILED: details withheld'); process.exitCode = 1; });
 }
+

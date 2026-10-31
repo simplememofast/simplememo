@@ -1285,6 +1285,7 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
   - **状態ファイルを持たない。**公開面を見るので、旧タスクが投稿しても二重にならず、落ちた枠は次の枠が拾い直す
   - 検査：本文の数字は記事が宣言した出典ファイルか一次ファイルにあるものだけ（字で書いた数量も同じ）／`check-pr-facts.mjs` の配信原稿の規則／
     禁止表現・売り込み／人間の開発者を名乗る文・一人称の上限／自社リンクは sitemap の正規URLだけ（1〜2本、はてなは1〜3本）・全リンクの実在／既存記事との題名の近さ／名前一覧との照合（ハッシュ＋Secrets `IDENTITY_DENYLIST`）
+    — **2026-10-30 追記：リポジトリ側の照合表は外した。**照合の一覧は Secrets `IDENTITY_DENYLIST` だけで、無ければ投稿しない
   - 投稿：dev.to は `ai_disclosure_level=fully_autonomous` を付け、公開面で読み戻す（付いていなければ付け直し、それでも駄目なら落とす）。はてなは本文末尾に固定の開示文
   - 公開確認：公開ページで自社リンクの rel と meta robots を実測し、nofollow / noindex なら落とす
   - **鍵を持つのは投稿ステップだけ。**執筆（Claude Code）には Read / Write / Edit / Glob / Grep しか渡さない
@@ -2999,7 +3000,7 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | 30 | ~~公開リポジトリの `docs/` に残るオーナー個人のユーザー名~~ → **2026-09-24 判断：今の版から伏せ字にする** → [#1567](https://github.com/simplememofast/simplememo/pull/1567)（17:54 マージ。31ファイル・40行） | 履歴の書き換えは行わない | — |
 | 31 | ~~宣伝文句（0.4秒・Never lose・Zero Message Loss・永久保存）~~ → **2026-09-24 判断：主要ページに条件を添える／言い換える** → [#1573](https://github.com/simplememofast/simplememo/pull/1573)（18:43 マージ） | — | 届かなかった所は第3弾・第4弾へ（§5.28） |
 | 32 | 言い過ぎの第3弾 → [#1575](https://github.com/simplememofast/simplememo/pull/1575)（9/24 21:19 マージ。43ページ：Captio の書き方・配達の保証・他社の事実・プライバシーの言い切り・裏付けのない「多くのユーザー」）、第4弾 → [#1591](https://github.com/simplememofast/simplememo/pull/1591)（9/25 10:37 マージ。「消えない」などの残り・他言語トップの 0.4秒） | — | 第5弾 [#1596](https://github.com/simplememofast/simplememo/pull/1596)（Boomerang・Email Me の古い記述、比較ハブのカード、他社の `aggregateRating`）（§5.28） |
-| 33 | 投稿用の鍵を GitHub Secrets に登録（`DEVTO_API_KEY`・`HATENA_API_KEY`、任意で `IDENTITY_DENYLIST`）（§5.27） | 鍵の値を読む・入力することは行わない | 登録されれば、devlog-syndication の dry_run → 実投稿 → 公開面での rel・robots・AI 開示の確認まで進める |
+| 33 | 投稿用の鍵を GitHub Secrets に登録（`DEVTO_API_KEY`・`HATENA_API_KEY`、任意で `IDENTITY_DENYLIST`。**2026-10-30 から `IDENTITY_DENYLIST` は必須** —— 無ければ devlog-syndication は投稿しない）（§5.27） | 鍵の値を読む・入力することは行わない | 登録されれば、devlog-syndication の dry_run → 実投稿 → 公開面での rel・robots・AI 開示の確認まで進める |
 | 34 | はてな・dev.to の過去記事にある出典の無い数値（起動187ms・開封率83%・「収益は買い切り」など）を訂正するか（§5.27） | 公開済み記事の書き換えは人の判断 | 訂正するなら、記事ごとに正しい値（`data/benchmark.json`・`data/site-constants.json`）と出典を並べた一覧を作る |
 | 35 | WordPress.com（`simplememofast.wordpress.com`・dofollow・1本）を定期投稿の対象に加えるか（§5.27） | 投稿 API に OAuth アプリの登録が要る（アカウント設定の操作） | 加えるなら、同じ門・検査を使う投稿先として devlog-syndication に足す |
 | 36 | ~~読者（`useTether.io` の創業者、9/25）からの聞き取りの依頼（30分）に返信するか（§5.28・§5.29）~~ → **2026-09-29 判断：返信しない**（§5.33） | 新しい宛先への送信は、送信の錠前ができるまで始めない（CLAUDE.md、2026-09-24 のオーナー判断） | 返信するなら文面を用意し、`Simple Memo <support@simplememofast.com>` から読み戻して送る |
