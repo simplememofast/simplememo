@@ -103,6 +103,13 @@ export function evaluatePromotion({
 
   // --- ガードの判定 -------------------------------------------------------
   if (!guard || typeof guard !== 'object') return unknown('guard');
+  // decisions は過去の判定。現在の凍結を確認するまで promote の根拠にしない。
+  // 欠測・旧形式・型の違う false は、凍結解除の証拠ではない。
+  const freeze = guard.promotion_freeze;
+  if (!freeze || typeof freeze !== 'object' || Array.isArray(freeze)
+      || typeof freeze.frozen !== 'boolean') return unknown('guard.promotion_freeze.frozen');
+  if (freeze.frozen) return hold('現在、昇格が凍結されている — 過去の promote 判定では広げない');
+
   if (!Array.isArray(guard.decisions)) return unknown('guard.decisions');
   const mine = guard.decisions.filter((d) => d && d.flag === flag && !d.drill);
   const latest = mine[0];
@@ -317,6 +324,7 @@ function fixture(over = {}) {
   });
   return {
     guard: {
+      promotion_freeze: { frozen: false },
       decisions: [{
         at: '2026-09-09T23:30:00.000Z', flag: 'tf04_progress', rollout: 25,
         action: 'promote', proposed_rollout: 50, executed: false,
@@ -381,6 +389,18 @@ function selftest() {
     }],
     ['enabled を倒すと止まる', () => {
       held(broken(fixture(), (f) => { f.policy.auto_promote.enabled = false; }), '有効になっていない');
+    }],
+    ['**現在の昇格凍結は、まだ新しい promote 判定より優先する**', () => {
+      held(broken(fixture(), (f) => {
+        f.guard.promotion_freeze = { frozen: true, reason: '起動の健全性を確認できない' };
+      }), '昇格が凍結されている');
+    }],
+    ['**昇格凍結の状態が読めなければ止まる**', () => {
+      for (const freeze of [undefined, null, false, true, 0, 'false', [],
+        {}, { frozen: null }, { frozen: 'false' }, { frozen: 0 }, { frozen: 'unknown' }]) {
+        held(broken(fixture(), (f) => { f.guard.promotion_freeze = freeze; }),
+          '材料が無い: guard.promotion_freeze');
+      }
     }],
     ['**ガードが hold なら止まる**（判定に届かない段はここで落ちる）', () => {
       held(broken(fixture(), (f) => {
@@ -454,6 +474,8 @@ function selftest() {
     ['**材料が1つでも欠けたら止まる**（全欄を1つずつ落として確かめる）', () => {
       const drops = [
         ['guard', (f) => { delete f.guard; }],
+        ['guard.promotion_freeze', (f) => { delete f.guard.promotion_freeze; }],
+        ['guard.promotion_freeze.frozen', (f) => { delete f.guard.promotion_freeze.frozen; }],
         ['guard.decisions', (f) => { delete f.guard.decisions; }],
         ['該当フラグの判定', (f) => { f.guard.decisions = []; }],
         ['判定の時刻', (f) => { delete f.guard.decisions[0].at; }],
@@ -506,12 +528,21 @@ function selftest() {
       assert(drill.decision === 'hold' && drill.why.includes('訓練用フラグ'), drill.why);
       assert(plan.promoted_today === 0, `promoted_today が ${plan.promoted_today}`);
     }],
+    ['**plan は現在凍結中なら過去の promote を実行候補にしない**', () => {
+      const f = fixture();
+      f.guard.promotion_freeze = { frozen: true, reason: '起動の健全性を確認できない' };
+      const flags = { flags: { tf04_progress: f.flagState }, history: [] };
+      const plan = planAll({ guard: f.guard, flags, doc: { policy: f.policy }, now: NOW });
+      assert(plan.promote.length === 0, '凍結中なのに実行候補へ promote が出た');
+      assert(plan.plans[0].decision === 'hold'
+        && plan.plans[0].why.includes('昇格が凍結されている'), JSON.stringify(plan.plans));
+    }],
     // **材料が欠けたときに止まることが、この門の中身そのもの**（machine_gate の
     // holds_when_unknown）。enabled が立った今、plan を守っているのはここだけになる。
     ['**材料が無ければ plan は promote を返さない**（holds_when_unknown）', () => {
       const flags = { flags: { tf04_progress: { rollout: 25, description: 'c', updated_at: '2026-09-05T00:00:00.000Z' } }, history: [] };
 
-      const noDecision = planAll({ guard: { decisions: [] }, flags, doc, now: NOW });
+      const noDecision = planAll({ guard: { promotion_freeze: { frozen: false }, decisions: [] }, flags, doc, now: NOW });
       assert(noDecision.promote.length === 0, 'ガードの判定が1件も無いのに promote が出た');
 
       const unjudged = fixture();
