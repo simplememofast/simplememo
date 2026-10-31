@@ -792,8 +792,19 @@ function checkOwnWorkflows(files, allow) {
   assert(open.length === 0, `実物に、台帳の例外で通らない読み方がある: ${open.join(' / ')}`);
   const model = jobs.filter((j) => j.model);
   const named = model.map((j) => `${j.file}#${j.id}`);
-  assert(named.includes('obsidian-autopilot.yml#autopilot') && named.includes('devlog-syndication-platform.yml#draft'),
+  assert(named.includes('obsidian-autopilot.yml#autopilot') && named.includes('autopilot-act.yml#act'),
     `モデルのジョブを見落としている: ${named.join(', ')}`);
+  // Devlog is deliberately suspended. Do not require its deleted draft/model job,
+  // or silently permit its replacement to receive credentials or run a model.
+  for (const file of ['devlog-syndication.yml', 'devlog-syndication-platform.yml']) {
+    const stopped = jobs.filter((j) => j.file === file);
+    assert(stopped.length === 1 && stopped[0].id === 'blocked' && !stopped[0].model,
+      `${file}: suspended workflow must contain only a non-model blocked job`);
+    const source = files.find((f) => f.name === file)?.text;
+    assert(source && source.includes('PRIVATE_HANDOFF_REQUIRED') && source.includes('exit 1')
+      && !/secrets\s*[:.\[]|uses\s*:/.test(source),
+      `${file}: suspension must not declare, inject or forward credentials or invoke actions`);
+  }
   assert(!named.includes('obsidian-autopilot.yml#collect') && !named.includes('obsidian-autopilot.yml#publish'),
     `モデルの無いジョブをモデルのジョブにしている: ${named.join(', ')}`);
   const before = new Set(findings.map(findingKey));

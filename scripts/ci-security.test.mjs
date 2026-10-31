@@ -20,6 +20,7 @@ function scratch(t) {
 test('syndication is explicitly blocked without model, secrets, network or public artifacts', () => {
   assert.deepEqual(Object.keys(jobs).filter((k) => k !== 'workflow_call'), ['blocked']);
   assert.match(workflow, /permissions: \{\}/);
+  assert.doesNotMatch(workflow, /secrets\s*[:.\[]/, 'suspension requires no declared or injected credentials');
   assert.match(jobs.blocked, /PRIVATE_HANDOFF_REQUIRED/);
   assert.match(jobs.blocked, /exit 1/);
   assert.doesNotMatch(jobs.blocked, /uses:|secrets\.|upload-artifact|download-artifact|node |curl|wget/);
