@@ -94,7 +94,11 @@ test('the bare Pages production alias is one 301 to the apex document; previews 
   const alias = 'https://simplememo-596.pages.dev';
   await redirect(alias + '/obsidian/', '/obsidian/');
   await redirect(alias + '/en?lang=en&utm_source=audit', '/en/?utm_source=audit');
+  // Trailing dot and :8443 reach Functions in request.url; neither may leak
+  // into the Location (observed on the alias 2026-10-31).
+  await redirect(alias + '.:8443/obsidian/', '/obsidian/');
   for (const host of ['https://1234abcd.simplememo-596.pages.dev',
+    'https://1234abcd.simplememo-596.pages.dev.',
     'https://claude-branch.simplememo-596.pages.dev', 'https://simplememo-596.pages.dev.evil.test']) {
     assert.deepEqual(await edge(host + '/obsidian/'), { kind: 'pass' }, host);
   }

@@ -37,10 +37,12 @@
 //      `simplememo-596.pages.dev` joins the same rule. It served the
 //      production HTML with 200 (canonical pointing at the apex, robots
 //      index,follow, no X-Robots-Tag), and a web search for the brand
-//      returned two alias URLs instead of the production domain. Unlike www
-//      there is no `_redirects` fallback: Cloudflare's Pages redirects
-//      documentation lists domain-level redirects as unsupported there. See
-//      HOST_ALIASES for which hosts are matched and why the match is exact.
+//      returned two URLs on the alias host. Nothing is added to `_redirects`
+//      for it: Cloudflare's Pages redirects documentation lists domain-level
+//      redirects as unsupported there. (By the same table the www line in
+//      `_redirects` may not be a working fallback either — not verified.)
+//      See HOST_ALIASES for which hosts are matched and why the match is
+//      exact.
 //
 //   0b. Collapse runs of duplicate slashes (`/en/vs/notion//` → `/en/vs/notion/`).
 //      Pages resolves the extra slashes and serves 200, so these are true
@@ -163,9 +165,9 @@ function isBlockedDataPath(pathname) {
 // hashed ones are what the preview-cache CI measures
 // (scripts/perf/cache_access_*.cjs, PREVIEW_SUFFIX). Redirecting them would
 // send that CI, and anyone reviewing a preview, to production instead.
-// `URL` lowercases the hostname, so letter case cannot dodge the match; a
-// look-alike such as `simplememo-596.pages.dev.evil.test` is a different host
-// and is left alone.
+// `URL` lowercases the hostname, so letter case cannot dodge the match, and
+// step 0 compares it without a trailing dot (see there). A look-alike such as
+// `simplememo-596.pages.dev.evil.test` is a different host and is left alone.
 const CANONICAL_HOST = "simplememofast.com";
 const HOST_ALIASES = new Set([
   "www.simplememofast.com",
@@ -299,8 +301,18 @@ export const onRequest = async (context) => {
   //    (`<hash>.` / `<branch>.simplememo-596.pages.dev`) are untouched.
   //    Internal paths and GONE slugs below still answer 404 / 410 on the
   //    alias host itself instead of redirecting first.
-  if (HOST_ALIASES.has(url.hostname)) {
+  //
+  //    Two spellings of the same alias reach Functions with the extra part
+  //    kept in request.url (both observed on the bare Pages alias,
+  //    2026-10-31): the fully qualified `simplememo-596.pages.dev.` and a
+  //    non-default port such as `:8443`. So the match ignores one trailing
+  //    dot, and the port is cleared — the hostname setter alone keeps it,
+  //    which would land on `https://simplememofast.com:8443/…` instead of the
+  //    canonical URL. The apex's own trailing-dot / port forms are not
+  //    aliases here and are left as they were.
+  if (HOST_ALIASES.has(url.hostname.replace(/\.$/, ""))) {
     url.hostname = CANONICAL_HOST;
+    url.port = "";
     needsRedirect = true;
   }
 

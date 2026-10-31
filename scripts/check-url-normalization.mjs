@@ -186,8 +186,8 @@ await servesDirectly("https://claude-branch.simplememo.pages.dev/vs/notion/");
 // ── 0a. Bare Pages production alias → apex, same single 301 ─────────────
 // Owner decision 2026-10-31. `simplememo-596.pages.dev` served the production
 // HTML with 200 (canonical → apex, robots index,follow) and a web search for
-// the brand returned alias URLs instead of the apex. Only the exact host
-// moves; path and query are kept.
+// the brand returned two URLs on the alias host. Only the exact host moves;
+// path and query are kept.
 await redirects(PAGES_ALIAS + "/", "/");
 await redirects(PAGES_ALIAS + "/obsidian/", "/obsidian/");
 // Analytics params survive the host move, as they do on the apex.
@@ -204,6 +204,17 @@ await redirects(PAGES_ALIAS + "//blog///instant-capture-workflow", "/blog/instan
 await redirects(PAGES_ALIAS + "/en", "/en/");
 // `URL` lowercases the host, so letter case cannot walk around the exact match.
 await redirects("https://SIMPLEMEMO-596.Pages.Dev/obsidian/", "/obsidian/");
+// The fully qualified spelling (trailing dot) and a non-default port reach
+// Functions with that part kept in request.url (both observed on the alias,
+// 2026-10-31). Neither may walk around the match, and neither may survive
+// into the Location — the canonical URL has no dot and no port.
+await redirects(PAGES_ALIAS + "./obsidian/", "/obsidian/");
+await redirects(PAGES_ALIAS + ":8443/faq.html?lang=ja", "/faq");
+await redirects(PAGES_ALIAS + ".:8443/obsidian/?utm_source=search", "/obsidian/?utm_source=search");
+await redirects("https://www.simplememofast.com.:8443/vs/notion/", "/vs/notion/");
+// The apex's own trailing-dot / port forms are not aliases: left as they were.
+await servesDirectly(ORIGIN + "./obsidian/");
+await servesDirectly(ORIGIN + ":8443/obsidian/");
 // /admin/* keeps the terminal retirement path on the alias too. Cloudflare
 // Access answers there before Functions; an authenticated request reaches the
 // same 410 as on the apex, so no redirect is added.
@@ -223,6 +234,8 @@ await gone(PAGES_ALIAS + "/blog/energy-budget-field-notes.html?lang=ja");
 // host even when a path fix applies.
 for (const host of [
   "https://1234abcd.simplememo-596.pages.dev",
+  // Dropping the trailing dot must not turn the match into a suffix match.
+  "https://1234abcd.simplememo-596.pages.dev.",
   "https://claude-pages-dev-alias.simplememo-596.pages.dev",
   "https://main.simplememo-596.pages.dev",
   "https://simplememo.pages.dev",
