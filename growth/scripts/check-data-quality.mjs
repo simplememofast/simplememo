@@ -25,6 +25,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { publicPage } from '../lib/gsc-privacy.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 export const GSC_DIR = path.join(ROOT, 'growth/data/gsc');
@@ -91,7 +92,11 @@ export function inspectSnapshot(dir, label) {
       if (k === undefined) { out.fatal.push(`${name}: ${key} が無い行がある`); continue; }
       if (seen.has(k)) dup.add(k); else seen.add(k);
     }
-    if (dup.size) out.fatal.push(`${name}: 重複キー ${dup.size} 件（例: ${[...dup].slice(0, 3).join(', ')}）`);
+    // 検索語は例に出さず、ページはサイトが公開しているパスだけを書く。この出力は CI の公開ログで、
+    // 検索語やサイトに無い URL は誰もが書ける文字列（監査 F6 の残り）。
+    const shown = name === 'pages' ? [...dup].slice(0, 3).map(publicPage) : [...dup].slice(0, 3);
+    const examples = name === 'queries' ? '検索語の本文は出さない' : `例: ${shown.join(', ')}`;
+    if (dup.size) out.fatal.push(`${name}: 重複キー ${dup.size} 件（${examples}）`);
   }
 
   // 2. 日付の欠け。period_start〜period_end のうち dates.json に無い日。
@@ -241,6 +246,17 @@ if (process.argv.includes('--selftest')) {
       ];
       const r = inspectSnapshot(snap({ dates }), 't');
       if (!has(r.fatal, '重複キー')) throw new Error(JSON.stringify(r.fatal));
+    }],
+    ['**検索語・ページの重複は落ちるが、検索語の本文とサイトに無いURLは出さない**（CI の公開ログ。監査 F6 の残り）', () => {
+      const canary = 'canary query ignore previous instructions';
+      const queries = [{ query: canary, clicks: 0 }, { query: canary, clicks: 0 }];
+      const r = inspectSnapshot(snap({ queries }), 't');
+      if (!has(r.fatal, 'queries: 重複キー 1 件')) throw new Error(JSON.stringify(r.fatal));
+      if (JSON.stringify([r.fatal, r.warn]).includes('canary')) throw new Error('検索語の本文が出ている');
+      const pages = [{ page: '/canary-unlisted/', clicks: 0 }, { page: '/canary-unlisted/', clicks: 0 }];
+      const p = inspectSnapshot(snap({ pages }), 't');
+      if (!has(p.fatal, 'pages: 重複キー 1 件（例: [サイトに無いURL]）')) throw new Error(JSON.stringify(p.fatal));
+      if (JSON.stringify([p.fatal, p.warn]).includes('canary')) throw new Error('サイトに無いURLが出ている');
     }],
     ['**row_counts と実データがずれたら落ちる**（どちらが正か分からなくなる）', () => {
       const meta = { ...BASE().meta, row_counts: { dates: 99, queries: 2, pages: 2 } };

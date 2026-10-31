@@ -266,7 +266,15 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      # 検出器の出力をそのままサマリに出す。読むために別画面を開かせない。
+      # 検出器の出力をサマリに出す。読むために別画面を開かせない。
+      #
+      # **検索語の本文は出さない（--no-query-text）。**このリポジトリは公開で、ジョブサマリも
+      # 毎日公開される。検索語は Google で検索する誰もが書ける文字列で、Autopilot のモデルは
+      # WebFetch で公開ページを読める —— ダイジェストの規則（scripts/autopilot-data.mjs）の外から
+      # 第三者の文章が届く経路になっていた（セキュリティ監査 F6 の残り）。同じ日の窓は暗号化して
+      # 渡している（下の Encrypt 段）。数・順位・CTR・クラスタの集計・サイトのページのパスは残る。
+      # 検索語の本文は、その暗号化した窓（Company が読む）か、コミット済みの週次スナップショットを
+      # 手元の `node growth/scripts/analyze.mjs` で読む。
       - name: Detectors
         env:
           GROWTH_GSC_DIR: ${{ runner.temp }}/gsc
@@ -276,7 +284,7 @@ jobs:
             echo "## 検出結果"
             echo ""
             echo '```'
-            node growth/scripts/analyze.mjs --top 10
+            node growth/scripts/analyze.mjs --top 10 --no-query-text
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 

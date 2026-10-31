@@ -13,11 +13,18 @@
  * **台帳にあったのは3件だけ**で、主系を止める鍵（GH_PAT）が入っていなかった。
  * つまり最後の手段が指す先が空だった。**平常時には何の症状も出ない穴。**
  *
- * だから見るのは、期限（それは check-expiry.mjs の仕事）ではなく次の4つ:
+ * だから見るのは、期限（それは check-expiry.mjs の仕事）ではなく次の5つ:
  *   1. ワークフローが読む secret が全部台帳にあるか（新しい経路が増えたときに漏れる）
  *   2. 鍵ごとに**失効のさせ方**と**失効させると何が止まるか**が書いてあるか
  *   3. 経路（emergency-stop.json の agents）ごとに、止められる鍵が1つ以上あるか
  *   4. 「自動運転を止める」と名乗る鍵が実在するか
+ *   5. secret を**名前で1つずつ**読んでいるか（2026-10-30・セキュリティ監査 F6 の残り）。
+ *      `${{ toJSON(secrets) }}`・`secrets[…]`・`${{ secrets }}`・`secrets: inherit` は名前を
+ *      書かずに全部を渡すので、1 の台帳もモデルのジョブの検査もすり抜ける。モデルを動かしうるジョブと、
+ *      それと needs でつながるジョブでは例外なく落とし、それ以外のジョブは台帳の
+ *      `$bulk_secret_access`（workflow・job・reason）に書いたものだけを通す。規則は
+ *      scripts/lib/workflow-secrets.mjs。ワークフローは字面ではなく YAML として読む（ruby の Psych）。
+ *      **読めないファイルは落とす**（飛ばさない）。拡張子は大文字小文字を区別しない（.YML も読む）。
  *
  * 【renewal と revocation は別物】
  * 更新手順があることは、失効手順があることを意味しない。急いでいるときに
@@ -27,8 +34,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
+import {
+  DOTNET_WHITESPACE, WORKFLOW_FILE, buildYamlDocuments, bulkSecretFindings, bulkSecretProblems, inspectWorkflows, readYamlEvents,
+} from './lib/workflow-secrets.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CRED_PATH = path.join(ROOT, 'data/credential-expiry.json');
@@ -47,7 +58,7 @@ export function secretsInUse(dirs = WF_DIRS, { required = false } = {}) {
       if (required) throw new Error(`検査対象が存在しない: ${dir}`);
       continue;
     }
-    const files = fs.readdirSync(dir).filter((x) => /\.ya?ml$/.test(x));
+    const files = fs.readdirSync(dir).filter((x) => WORKFLOW_FILE.test(x));
     if (required && files.length === 0) throw new Error(`検査対象にワークフローが無い: ${dir}`);
     for (const f of files) {
       const src = fs.readFileSync(path.join(dir, f), 'utf8');
@@ -60,6 +71,20 @@ export function secretsInUse(dirs = WF_DIRS, { required = false } = {}) {
     }
   }
   return found;
+}
+
+/**
+ * UTF-8 として読めないファイルは text: null（検査が「読めない」で落とす。置換文字で読み進めない）。
+ * 拡張子は大文字小文字を区別しない（.YML を GitHub が読むかは確かめていないので、読む側に倒す）。
+ */
+const readWorkflows = (dir) => fs.readdirSync(dir).filter((x) => WORKFLOW_FILE.test(x)).map((name) => {
+  try { return { name, text: new TextDecoder('utf-8', { fatal: true }).decode(fs.readFileSync(path.join(dir, name))) }; }
+  catch { return { name, text: null }; }
+});
+
+/** 名前を書かずに secret を読む箇所（5）。ディレクトリごとに読む（呼び先の解決は同じディレクトリの中）。 */
+export function bulkSecretsInUse(dirs = WF_DIRS) {
+  return dirs.filter((dir) => fs.existsSync(dir)).flatMap((dir) => bulkSecretFindings(readWorkflows(dir)));
 }
 
 /** 台帳が申告している secret 名（1件が複数を束ねることがある）。 */
@@ -151,9 +176,675 @@ SCENARIOS.push(['明示した検査対象の欠落・空ディレクトリは成
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 }]);
 
+// ── 5. 名前で読まない secret（監査 F6 の残り）──────────────────────
+// 検体は obsidian-autopilot.yml の形（モデルの無い collect → モデルのジョブ → 再利用ワークフローの
+// 呼び出し）を縮めたもの。audit は、モデルのジョブと needs でつながらないモデルの無いジョブ
+// （例外を書けば通る場所として使う）。sibling リポジトリの CI はこのファイルを .github 無しで動かすので、
+// 実物のワークフローを使う検体は、実物があるときだけ足す（下）。
+const BULK_FIXTURE = {
+  'fixture.yml': [
+    'name: fixture',
+    'on:',
+    '  workflow_dispatch:',
+    'permissions: {}',
+    'env:',
+    "  PLAIN: 'secrets are named one by one'",
+    'jobs:',
+    '  audit:',
+    '    runs-on: ubuntu-latest',
+    '    steps:',
+    '      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683',
+    '        with:',
+    '          persist-credentials: false',
+    '      - name: Audit',
+    '        env:',
+    '          AUDIT_TOKEN: ${{ secrets.GH_PAT }}',
+    '        run: node scripts/check-credentials.mjs --check',
+    '  collect:',
+    '    runs-on: ubuntu-latest',
+    '    steps:',
+    '      - name: Collect',
+    '        env:',
+    '          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}',
+    '        run: node scripts/autopilot-data.mjs --digest "$RUNNER_TEMP/gsc-digest"',
+    '  autopilot:',
+    '    needs: collect',
+    '    runs-on: ubuntu-latest',
+    '    steps:',
+    '      - name: Gate',
+    '        id: gate',
+    "        if: always() && steps.secrets.outputs.ok != 'secrets'",
+    "        run: echo \"${{ format('{0}', 'secrets') }}\"",
+    '      - name: Claude Code',
+    '        id: claude',
+    '        uses: anthropics/claude-code-action@925afb53776cf1a2b738c6bdbed37b4d4000ef13',
+    '        env:',
+    '          GH_TOKEN: ${{ github.token }}',
+    '        with:',
+    '          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}',
+    "          github_token: ${{ secrets['GITHUB_TOKEN'] }}",
+    '  call:',
+    '    uses: ./.github/workflows/callee.yml',
+    '    secrets: inherit',
+    '',
+  ].join('\n'),
+  'callee.yml': [
+    'on:',
+    '  workflow_call:',
+    'jobs:',
+    '  publish:',
+    '    runs-on: ubuntu-latest',
+    '    steps:',
+    '      - run: echo publish',
+    '        env:',
+    '          TOKEN: ${{ secrets.GH_PAT }}',
+    '',
+  ].join('\n'),
+};
+const bulkFiles = (edit = (files) => files) => Object.entries(edit({ ...BULK_FIXTURE })).map(([name, text]) => ({ name, text }));
+/** 検体の書き換え。**置き換える先が無ければ落ちる**（黙って元の検体を検査しない）。`$` は特別扱いしない。 */
+const replace = (file, from, to) => (f) => {
+  assert(f[file].includes(from), `検体に「${from.trim()}」が無い（自己テストの書き方の誤り）`);
+  return { ...f, [file]: f[file].replace(from, () => to) };
+};
+const chain = (...edits) => (f) => edits.reduce((acc, edit) => edit(acc), f);
+const MODEL_SECRET = '${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}';
+const inModel = (form) => replace('fixture.yml', MODEL_SECRET, form);
+const MODEL_ENV = '          GH_TOKEN: ${{ github.token }}\n';
+const COLLECT_ENV = '          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}\n';
+const MODEL_WITH = "          github_token: ${{ secrets['GITHUB_TOKEN'] }}\n";
+const lines = (...l) => l.map((x) => `          ${x}\n`).join('');
+const modelEnv = (...l) => replace('fixture.yml', MODEL_ENV, MODEL_ENV + lines(...l));
+const collectEnv = (...l) => replace('fixture.yml', COLLECT_ENV, COLLECT_ENV + lines(...l));
+const AUDIT_ENV = '          AUDIT_TOKEN: ${{ secrets.GH_PAT }}\n';
+const auditEnv = (...l) => replace('fixture.yml', AUDIT_ENV, AUDIT_ENV + lines(...l));
+const AUDIT_RUN = '        run: node scripts/check-credentials.mjs --check\n';
+/** audit の手順の後ろに手順を足す（l は「      - 」から始まる行。6桁の字下げを含めて書く）。 */
+const auditSteps = (...l) => replace('fixture.yml', AUDIT_RUN, AUDIT_RUN + l.map((x) => `${x}\n`).join(''));
+const modelCallee = replace('callee.yml', '      - run: echo publish', '      - uses: anthropics/claude-code-action@925afb53776cf1a2b738c6bdbed37b4d4000ef13');
+const INHERIT = '    secrets: inherit\n';
+/** YAML の単引用符の '' で、式の中に '}}' を作る形（字面の切り出しは途中で止まる）。 */
+const quoteTrick = (body) => `'\${{ ''}}'' && ${body} }}'`;
+
+/** モデルのジョブ（autopilot）に入れたら、例外を書いても落ちなければならない形。 */
+const BULK_BREAKAGES = [
+  ['toJSON(secrets) を経由して名前を引く', inModel('${{ fromJSON(toJSON(secrets)).CLAUDE_CODE_OAUTH_TOKEN }}')],
+  ['関数名の大文字小文字を変えた toJson(secrets)', inModel('${{ toJson(secrets) }}')],
+  ['${{ secrets }} そのもの', inModel('${{ secrets }}')],
+  ['format で作った添字 secrets[format(…)]', inModel("${{ secrets[format('{0}_TOKEN', 'CLAUDE_CODE_OAUTH')] }}")],
+  ['変数の添字 secrets[env.NAME]', inModel('${{ secrets[env.NAME] }}')],
+  ['全部を並べる secrets.*', inModel("${{ join(secrets.*, ',') }}")],
+  ['文脈名の大文字 SECRETS.NAME（大文字小文字を区別する名前の検査をすり抜ける）', inModel('${{ SECRETS.CLAUDE_CODE_OAUTH_TOKEN }}')],
+  ['名前の小文字 secrets.name（同上）', inModel('${{ secrets.claude_code_oauth_token }}')],
+  ['YAML の二重引用符のエスケープ（\\x73ecrets）', inModel('"${{ toJSON(\\x73ecrets) }}"')],
+  ['YAML の行継ぎ（行末の \\）で分けた字面', inModel('"${{ toJSON(sec\\\n            rets) }}"')],
+  ["YAML の単引用符の '' で式の中に '}}' を作る（切り出しが途中で止まる）",
+    inModel(quoteTrick('fromJSON(toJSON(secrets)).CLAUDE_CODE_OAUTH_TOKEN'))],
+  ["format の書式に '}}' を入れる（同上）", inModel("'${{ format(''{0}}}'', toJSON(secrets)) }}'")],
+  ['単引用符の値を折り返して、secrets を ${{ の無い行に置く', inModel("'${{ ''}}''\n            && toJSON(secrets) }}'")],
+  ['複数行の式', replace('fixture.yml', 'id: claude\n',
+    'id: claude\n        run: |\n          echo "${{\n            toJSON(secrets)\n          }}"\n')],
+  ['if: の式（${{ }} なし）', replace('fixture.yml', 'id: claude\n', "id: claude\n        if: contains(toJSON(secrets), 'x')\n")],
+  ['run: の中の # の行（GitHub はシェルより先に式を展開する）', replace('fixture.yml', 'id: claude\n',
+    'id: claude\n        run: |\n          # ${{ toJSON(secrets) }}\n')],
+  ['ワークフロー全体の env（モデルのジョブにも効く）', replace('fixture.yml', 'env:\n  PLAIN:', 'env:\n  ALL: ${{ toJSON(secrets) }}\n  PLAIN:')],
+  ['secrets: inherit でモデルを動かす呼び先へ渡す', modelCallee],
+  ['secrets: inherit で中身を確かめられない外の呼び先へ渡す', replace('fixture.yml',
+    'uses: ./.github/workflows/callee.yml', 'uses: example/repo/.github/workflows/x.yml@0123456789abcdef0123456789abcdef01234567')],
+];
+const ALLOW_MODEL = [{ workflow: 'fixture.yml', job: 'autopilot', reason: '検体' }, { workflow: 'fixture.yml', job: '(workflow)', reason: '検体' },
+  { workflow: 'fixture.yml', job: 'call', reason: '検体' }];
+
+// 2026-10-30 の作り直し: 字面を追う版（cdc207a9f）が0件で通した5系統（A〜E）と、名前を字面から
+// 隠す書き方（L）。独立したレビューが実物のワークフローで示したもの。
+const escaped = (e) => inModel(`"\${{ fromJSON(toJSON(${e}secrets)).CLAUDE_CODE_OAUTH_TOKEN }}"`);
+const toModelTrick = inModel(quoteTrick('fromJSON(toJSON(secrets)).CLAUDE_CODE_OAUTH_TOKEN'));
+const inheritAs = (to) => chain(modelCallee, replace('fixture.yml', INHERIT, to));
+const jobsAs = (header) => replace('fixture.yml', '\njobs:\n', `\n${header}\n`);
+const bomb = ['a: &a [x, x, x, x, x, x, x, x, x, x]',
+  ...['b', 'c', 'd', 'e'].map((k, n) => `${k}: &${k} [${Array(10).fill(`*${'abcd'[n]}`).join(', ')}]`),
+  'jobs:', '  a:', '    runs-on: ubuntu-latest', '    steps: [{ run: echo }]', ''].join('\n');
+
+/**
+ * [名前, 書き換え, モデルのジョブ（file#job）, 抜粋に含まれるべき文字列]。どれも、全部のジョブに例外を
+ * 書いても落ちなければならない。
+ */
+const MODEL_BYPASSES = [
+  ['(A) 二重引用符の \\t を secrets の前に置く', escaped('\\t')],
+  ['(A) 二重引用符の \\n', escaped('\\n')],
+  ['(A) 二重引用符の \\_（U+00A0）', escaped('\\_')],
+  ['(A) 二重引用符の \\L（U+2028）', escaped('\\L')],
+  ['(A) 二重引用符の \\N（U+0085）', escaped('\\N')],
+  ['(A) 二重引用符の \\P（U+2029）', escaped('\\P')],
+  ['(A) 二重引用符の \\ ・\\v・\\f・\\r（空白のエスケープ）', escaped('\\ \\v\\f\\r')],
+  ['(A) ${{ の直後の \\t（${{\\tsecrets }}）', inModel('"${{\\tsecrets }}"')],
+  ['(A) secrets.* の前の \\t', inModel('"${{ join(\\tsecrets.*, \',\') }}"')],
+  ["(A) 単引用符の '' と、生の U+0085 を secrets の前後に置く", inModel(quoteTrick('fromJSON(toJSON(\u0085secrets\u0085)).CLAUDE_CODE_OAUTH_TOKEN'))],
+  ["(B) '' の後ろで名前を小文字にする secrets.gcp_service_account_json", inModel(quoteTrick('secrets.gcp_service_account_json'))],
+  ["(B) '' の後ろで文脈名を大文字にする SECRETS.GH_PAT", inModel(quoteTrick('SECRETS.GH_PAT'))],
+  ["(B) '' の後ろで添字の名前を小文字にする secrets[''gh_pat'']", inModel(quoteTrick("secrets[''gh_pat'']"))],
+  ["(B) 文脈名の先頭だけ大文字 Secrets['GH_PAT']", inModel("${{ Secrets['GH_PAT'] }}")],
+  ["(B) 添字の名前の小文字 secrets['gh_pat']", inModel("${{ secrets['gh_pat'] }}")],
+  ['(B) 間に空白を入れた secrets . GH_PAT（名前の検査の字面に合わない）', inModel('${{ secrets . GH_PAT }}')],
+  ["(B) 添字の中の空白 secrets[ 'GH_PAT' ]", inModel("${{ secrets[ 'GH_PAT' ] }}")],
+  // 同じ値の地の文に正しい字面を置き、名前が字面にあるかの検査では拾えない形にする（読み方の判定だけで落とす）。
+  ['(B) 地の文に secrets.GH_PAT を置いても、文脈名の大文字 SECRETS.GH_PAT は落とす', inModel('${{ SECRETS.GH_PAT }} secrets.GH_PAT')],
+  ['(B) 地の文に secrets.GH_PAT を置いても、間に空白を入れた secrets . GH_PAT は落とす', inModel('${{ secrets . GH_PAT }} secrets.GH_PAT')],
+  ['(C) secrets: の値を次の行に置く', inheritAs('    secrets:\n      inherit\n'), 'fixture.yml#call'],
+  ['(C) 鍵を引用符で囲む "secrets": inherit', inheritAs('    "secrets": inherit\n'), 'fixture.yml#call'],
+  ['(C) 折り畳みのブロック secrets: >-', inheritAs('    secrets: >-\n      inherit\n'), 'fixture.yml#call'],
+  ["(C) 値を引用符で囲む secrets: 'inherit'", inheritAs("    secrets: 'inherit'\n"), 'fixture.yml#call'],
+  ['(C) 型を書く secrets: !!str inherit', inheritAs('    secrets: !!str inherit\n'), 'fixture.yml#call'],
+  ['(C) コロンの前の空白 secrets : inherit', inheritAs('    secrets : inherit\n'), 'fixture.yml#call'],
+  ['(C) 複合キー ? secrets', inheritAs('    ? secrets\n    : inherit\n'), 'fixture.yml#call'],
+  ['(C) ジョブをフロー形式で書く { uses: …, secrets: inherit }', chain(modelCallee, replace('fixture.yml',
+    `  call:\n    uses: ./.github/workflows/callee.yml\n${INHERIT}`, '  call: { uses: ./.github/workflows/callee.yml, secrets: inherit }\n')), 'fixture.yml#call'],
+  ['(C) 外のリポジトリの呼び先へ、次の行の inherit', chain(replace('fixture.yml', 'uses: ./.github/workflows/callee.yml',
+    'uses: example/agent/.github/workflows/agent.yml@0123456789abcdef0123456789abcdef01234567'), replace('fixture.yml', INHERIT, '    secrets:\n      inherit\n')), 'fixture.yml#call'],
+  ["(D) モデルの無いジョブで '' の形のアンカーを作り、モデルのジョブでエイリアスを参照する",
+    chain(collectEnv(`BULK_LIST: &all ${quoteTrick('toJSON(secrets)')}`), modelEnv('ALL: *all'))],
+  ['(D) env の対応表ごとアンカーにして、モデルの段でエイリアスにする', chain(
+    replace('fixture.yml', `        env:\n${COLLECT_ENV}`, `        env: &envs\n          ALL: \${{ toJSON(secrets) }}\n${COLLECT_ENV}`),
+    replace('fixture.yml', `        env:\n${MODEL_ENV}`, '        env: *envs\n'))],
+  ['(D) 名前1つの読み方でも、エイリアスでモデルのジョブへ持ち込む（ジョブの字面に名前が無い）', chain(
+    replace('fixture.yml', COLLECT_ENV, '          GOOGLE_SERVICE_ACCOUNT_JSON: &gcp ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}\n'), modelEnv('G: *gcp'))],
+  ['(D) 同じ名前のアンカーを定義し直す（GitHub は最後の定義を使う）', chain(
+    collectEnv('A1: &x harmless', `A2: &x \${{ toJSON(secrets) }}`), modelEnv('X: *x'))],
+  // 2026-10-30 の再レビュー: GitHub（YamlObjectReader.MoveNext）はアンカーを開始のイベントで登録し、
+  // エイリアスを再生の時点のアンカー表で解く。「定義した時点の木の写し」で読んだ前の版は、次の最初の
+  // 4つを台帳の例外が空のまま0件で通した。5つ目はモデルのジョブと判定せず（例外を書けば通る）、
+  // 6つ目はファイルを読めない扱いにしていた（安全側だが GitHub と違う）。どれも値が文字列であることに
+  // 意味がある所（secrets: inherit・${{ }} なしの if:・uses・jobs の鍵）で効く。
+  ['(D) 対応表の中で同じ名前を定義し直す: env: &x { MODE: &x inherit } → secrets: *x', chain(modelCallee,
+    replace('fixture.yml', 'env:\n  PLAIN:', 'env: &x\n  MODE: &x inherit\n  PLAIN:'),
+    replace('fixture.yml', INHERIT, '    secrets: *x\n')), 'fixture.yml#call', 'secrets: inherit'],
+  ['(D) 再生の中のエイリアスは再生の時点で解く: call: *x（x の中の secrets: *y を、後で inherit に定義し直す）', chain(modelCallee,
+    replace('fixture.yml', '  collect:\n    runs-on: ubuntu-latest\n', '  collect:\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n'
+      + '        a: [&y {n: 1}]\n        b: [&x {uses: ./.github/workflows/callee.yml, secrets: *y}]\n        c: [&y inherit]\n'),
+    replace('fixture.yml', `  call:\n    uses: ./.github/workflows/callee.yml\n${INHERIT}`, '  call: *x\n')), 'fixture.yml#call', 'secrets: inherit'],
+  ['(D) 鍵を対応表の中で定義し直したアンカーで書く: env: &s { KEYNAME: &s secrets } → *s : inherit', chain(modelCallee,
+    replace('fixture.yml', 'env:\n  PLAIN:', 'env: &s\n  KEYNAME: &s secrets\n  PLAIN:'),
+    replace('fixture.yml', INHERIT, '    *s : inherit\n')), 'fixture.yml#call', 'secrets: inherit'],
+  ['(D) ${{ }} なしの if: を対応表の中で定義し直したアンカーで書く: env: &c { COND: &c … } → if: *c', chain(
+    replace('fixture.yml', 'env:\n  PLAIN:', "env: &c\n  COND: &c \"contains(toJSON(secrets), 'x')\"\n  PLAIN:"),
+    replace('fixture.yml', 'id: claude\n', 'id: claude\n        if: *c\n')), 'fixture.yml#autopilot', 'toJSON(secrets)'],
+  ['(D) モデルの印を、再生の時点で解くエイリアスで持ち込む: sneaky: *tmpl（tmpl の uses: *act を後で claude-code-action に定義し直す）', chain(
+    replace('fixture.yml', '      - name: Collect\n', '      - uses: &act actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683\n      - name: Collect\n'),
+    (f) => ({ ...f, 'fixture.yml': `${f['fixture.yml']}  tmpl: &tmpl\n    runs-on: ubuntu-latest\n    steps:\n      - uses: *act\n        with:\n`
+      + '          all: ${{ toJSON(secrets) }}\n  redefine:\n    runs-on: ubuntu-latest\n    steps:\n'
+      + '      - uses: &act anthropics/claude-code-action@925afb53776cf1a2b738c6bdbed37b4d4000ef13\n  sneaky: *tmpl\n' })),
+    'fixture.yml#sneaky', 'toJSON(secrets)'],
+  ['(E) jobs の鍵を、対応表の中で定義し直したアンカーで書く: env: &k { X: &k jobs } → *k :（GitHub は内側の定義で読む）', chain(
+    replace('fixture.yml', 'env:\n  PLAIN:', 'env: &k\n  X: &k jobs\n  PLAIN:'), jobsAs('*k :'), toModelTrick)],
+  ['(D) モデルの印をエイリアスで持ち込んだジョブも、モデルのジョブとして扱う', chain(
+    replace('fixture.yml', 'uses: anthropics/claude-code-action@', 'uses: &act anthropics/claude-code-action@'),
+    (f) => ({ ...f, 'fixture.yml': `${f['fixture.yml']}  sneaky:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: *act\n        with:\n          all: \${{ toJSON(secrets) }}\n` })),
+    'fixture.yml#sneaky'],
+  ['(C) inherit をエイリアスで書く secrets: *inh', chain(modelCallee,
+    replace('fixture.yml', "  PLAIN: 'secrets are named one by one'\n", "  PLAIN: 'secrets are named one by one'\n  MODE: &inh inherit\n"),
+    replace('fixture.yml', INHERIT, '    secrets: *inh\n')), 'fixture.yml#call'],
+  ['(E) jobs : （コロンの前に空白）', chain(jobsAs('jobs :'), toModelTrick)],
+  ['(E) "jobs":', chain(jobsAs('"jobs":'), toModelTrick)],
+  ["(E) 'jobs':", chain(jobsAs("'jobs':"), toModelTrick)],
+  ['(E) 複合キー ? jobs', chain(jobsAs('? jobs\n:'), toModelTrick)],
+  ['(E) jobs の鍵をエイリアスで書く *k :', chain(replace('fixture.yml', 'name: fixture\n', 'name: &k jobs\n'), jobsAs('*k :'), toModelTrick)],
+  ['(E) 単引用符の値の続きを0桁目に置く', inModel("'${{ ''}}''\n&& fromJSON(toJSON(secrets)).CLAUDE_CODE_OAUTH_TOKEN }}'")],
+  ['(E) 改行が CR だけのファイル', chain(toModelTrick, (f) => ({ ...f, 'fixture.yml': f['fixture.yml'].replace(/\n/g, '\r') }))],
+  ['(E) ファイル全体をフロー形式で書く', (f) => ({ ...f, 'flow.yml': '{on: push, jobs: {ai: {runs-on: x, steps: [{uses: anthropics/claude-code-action@925afb53776cf1a2b738c6bdbed37b4d4000ef13, with: {t: "${{ toJSON(secrets) }}"}}]}}}\n' }),
+    'flow.yml#ai'],
+  ['ワークフロー全体の env にモデルの鍵があれば、印の無いジョブもモデルのジョブ', chain(
+    replace('fixture.yml', "env:\n  PLAIN:", 'env:\n  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}\n  PLAIN:'),
+    replace('fixture.yml', COLLECT_ENV, '          ALL: ${{ toJSON(secrets) }}\n')), 'fixture.yml#collect'],
+  ['対応表の鍵に書いた式（GitHub は鍵の式も読む場所がある）', modelEnv('"${{ toJSON(secrets) }}": x')],
+  ['(L) 名前の1文字を YAML のエスケープで書く secrets.GCP_SERVICE_ACCOUNT_JSO\\x4e', modelEnv('G: "${{ secrets.GCP_SERVICE_ACCOUNT_JSO\\x4e }}"')],
+  ["(L) 単引用符の中の secrets[''GCP_SERVICE_ACCOUNT_JSON'']（'' のままでは名前の検査が読めない）",
+    modelEnv("G: '${{ secrets[''GCP_SERVICE_ACCOUNT_JSON''] }}'")],
+  ['(L) 名前の途中で行継ぎ（行末の \\）', modelEnv('G: "${{ secrets.GCP_SERVICE_\\\n            ACCOUNT_JSON }}"')],
+  // 字面の位置（libyaml の行・桁）を1行でも取り違えると、前後の行のコメントにある名前を「字面にある」と
+  // 数えて見落とす。libyaml が改行に数える文字（CRLF・U+0085・U+2028）を前に置く（BOM・絵文字も混ぜる）。
+  ['(L) エスケープで書いた名前は、前後の行のコメントに同じ名前を字面で書いても見つける（BOM・CRLF・U+0085・U+2028・絵文字の後ろ）', chain(
+    modelEnv("N: 'a\u0085b'", "S: 'c\u2028d'", 'J: "日本語の説明🙂"', '#   secrets.GCP_SERVICE_ACCOUNT_JSON',
+      'G: "${{ secrets.GCP_SERVICE_ACCOUNT_JSO\\x4e }}"', '#   secrets.GCP_SERVICE_ACCOUNT_JSON'),
+    (f) => ({ ...f, 'fixture.yml': `\uFEFF${f['fixture.yml'].replace(/\n/g, '\r\n')}` })), 'fixture.yml#autopilot', 'secrets.GCP_SERVICE_ACCOUNT_JSON（'],
+];
+
+/** 誤検出しない形（どれも検出0件）。 */
+const BULK_PASSES = [
+  ["名前で1つずつ読む検体（文字列の中の secrets・steps.secrets・secrets['NAME']・モデルの無い呼び先への inherit）", (f) => f],
+  ['モデルの無いジョブの説明文の「, secrets,」', collectEnv("NOTE: 'No send, secrets, adoption or billing'")],
+  ['モデルのジョブの prompt の文章（箇条書き・&&・括弧・needs の配列）', replace('fixture.yml', MODEL_WITH, MODEL_WITH + lines('prompt: |',
+    '  Never print secrets, tokens or keys.', '  Do not echo any value (tokens, secrets).', '  Do not reveal secrets.', '  * Then open a PR.',
+    '  If unsure about secrets && tokens, stop.', '  needs: [build, secrets]'))],
+  ['YAML のコメント（GitHub は読まない）', modelEnv('# ${{ toJSON(secrets) }} はコメント')],
+  ["式の中の文字列（'' のエスケープを含む）と steps.secrets", modelEnv("A: \"${{ format('it''s {0}', 'secrets') }}\"", "B: ${{ 'toJSON(secrets)' }}",
+    'C: ${{ steps.secrets.outputs.x }}')],
+  ['名前1つの読み方を単引用符・折り畳み・フロー形式で書く', modelEnv("T: '${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}'",
+    'U: >-', '  ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}', "V: { W: \"${{ secrets['GITHUB_TOKEN'] }}\" }")],
+  ['BOM・CRLF・絵文字・U+0085・U+2028 の後ろでも、字面の位置を取り違えない', chain(
+    modelEnv("N: 'a\u0085b'", "S: 'c\u2028d'", 'J: "日本語の説明🙂"', "T: '${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}'"),
+    (f) => ({ ...f, 'fixture.yml': `\uFEFF${f['fixture.yml'].replace(/\n/g, '\r\n')}` }))],
+  ['アンカーとエイリアス（ジョブをまたぐ・定義し直す・${{ }} を含む）で secret 以外の値を使い回す', chain(
+    replace('fixture.yml', '  collect:\n    runs-on: ubuntu-latest\n', '  collect:\n    runs-on: &ro ubuntu-latest\n'),
+    replace('fixture.yml', '    needs: collect\n    runs-on: ubuntu-latest\n', '    needs: collect\n    runs-on: *ro\n'),
+    collectEnv('R1: &v one', 'R2: &w { V: *v }', 'R3: &v ${{ github.token }}'), modelEnv('R4: *v', 'R5: *w'))],
+  ['if: の値を2通り（${{ }} の中と、値そのもの）に読んでも、名前1つの読み方を二重に数えない',
+    replace('fixture.yml', 'id: claude\n', "id: claude\n        if: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}\n")],
+];
+
+/** 読めないファイル（どれも例外にできない問題になる）。 */
+const PARSE_FAILURES = [
+  ['YAML の構文の誤り', { 'broken.yml': 'jobs:\n  a: [1\n' }, ''],
+  ['文書が2つ（GitHub も受け付けない）', { 'two.yml': 'on: push\njobs:\n  a: { runs-on: x }\n---\njobs:\n  b: { runs-on: x }\n' }, '文書が 2 個'],
+  ['空のファイル', { 'empty.yml': '' }, '文書が 0 個'],
+  ['定義されていないアンカーへのエイリアス', { 'alias.yml': 'jobs:\n  a:\n    env: *nope\n' }, '定義されていないアンカー'],
+  ['自分自身を参照するエイリアス', { 'loop.yml': 'jobs: &j\n  a: *j\n' }, '自分自身を参照する'],
+  ['展開すると GitHub の上限（50000 イベント）を超えるエイリアス', { 'bomb.yml': bomb }, 'イベントが 50000 を超える'],
+  ['再生の中のエイリアスが、閉じていない列を指す（GitHub でも展開が終わらない）',
+    { 'replayloop.yml': 'a: &y 1\nb: &x [*y]\nc: &y [*x]\njobs:\n  a: { runs-on: x }\n' }, '自分自身を参照する'],
+  ['jobs の鍵が無い（ワークフロー全体の env だけ）', { 'nojobs.yml': 'on: push\nenv:\n  X: ${{ toJSON(secrets) }}\n' }, 'ジョブが1つも無い'],
+  ['jobs が空', { 'emptyjobs.yml': 'on: push\njobs: {}\n' }, 'ジョブが1つも無い'],
+  ['jobs の値が対応表でない', { 'seqjobs.yml': 'on: push\njobs: [a]\n' }, 'jobs の値が対応表でない'],
+  ['最上位が対応表でない', { 'list.yml': '- on: push\n  jobs: {}\n' }, '最上位が対応表でない'],
+];
+
+const findingsOf = (files) => bulkSecretFindings(files);
+const allowEvery = (findings) => findings.map((f) => ({ workflow: f.file, job: f.job, reason: '検体' }));
+
+for (const [name, edit] of BULK_PASSES) {
+  SCENARIOS.push([`**誤検出しない**: ${name}`, () => {
+    const findings = findingsOf(bulkFiles(edit));
+    assert(findings.length === 0 && bulkSecretProblems(findings).length === 0, `誤検出: ${JSON.stringify(findings)}`);
+  }]);
+}
+SCENARIOS.push(['モデルのジョブの判定（検体では autopilot だけ）', () => {
+  const model = inspectWorkflows(bulkFiles()).jobs.filter((j) => j.model).map((j) => `${j.file}#${j.id}`);
+  assert(model.join(',') === 'fixture.yml#autopilot', `モデルのジョブの判定が違う: ${model}`);
+}]);
+for (const [name, edit] of BULK_BREAKAGES) {
+  SCENARIOS.push([`**モデルのジョブで落ちる（例外を書いても）**: ${name}`, () => {
+    const findings = findingsOf(bulkFiles(edit));
+    assert(findings.length > 0, '見つけられない');
+    assert(findings.every((f) => f.model), `モデルのジョブと判定していない: ${JSON.stringify(findings)}`);
+    assert(bulkSecretProblems(findings, ALLOW_MODEL).length > 0, '例外の台帳で通ってしまう');
+  }]);
+}
+for (const [name, edit, at = 'fixture.yml#autopilot', form = ''] of MODEL_BYPASSES) {
+  SCENARIOS.push([`**モデルのジョブで落ちる（全部のジョブに例外を書いても）**: ${name}`, () => {
+    const findings = findingsOf(bulkFiles(edit));
+    assert(findings.some((f) => `${f.file}#${f.job}` === at && f.model && !f.kind && f.form.includes(form)),
+      `${at} で見つけられない${form ? `（「${form}」）` : ''}: ${JSON.stringify(findings)}`);
+    assert(bulkSecretProblems(findings, allowEvery(findings)).some((p) => p.includes(`ジョブ ${at.split('#')[1]}）`)), '例外の台帳で通ってしまう');
+  }]);
+}
+SCENARIOS.push(['(A) .NET が空白とみなす文字はどれも空白として読む（\\u で1つずつ）', () => {
+  for (const ch of DOTNET_WHITESPACE) {
+    const code = ch.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0');
+    const findings = findingsOf(bulkFiles(inModel(`"\${{ toJSON(\\u${code}secrets) }}"`)));
+    assert(findings.some((f) => f.job === 'autopilot' && f.model), `U+${code} を空白として読まない`);
+  }
+}]);
+/**
+ * エイリアスの展開を GitHub（actions/runner の YamlObjectReader.MoveNext）の手順に合わせているか。
+ * [YAML, 鍵, 期待する値（GitHub の読み方）, 定義した時点の写しで読んだときの値（以前の誤り）]
+ */
+const REPLAY_CASES = [
+  ['a: &x {b: &x 1}\nc: *x\n', 'c', '1', { b: '1' }],
+  ['a: &x [&x 1]\nc: *x\n', 'c', '1', ['1']],
+  ['a: &y 1\nb: &x [*y]\nc: &y 2\nd: *x\n', 'd', ['2'], ['1']],
+  ['a: &y 1\nb: &x {k: *y}\nc: &y {z: &y 3}\nd: *x\n', 'd', { k: '3' }, { k: '1' }],
+  // 再生の中のアンカーは登録し直さない（x を再生しても y は 2 のまま）。
+  ['a: &x {k: &y 1}\nb: &y 2\nc: *x\nd: *y\n', 'd', '2', '2'],
+  ['a: &x {k: v}\nb: *x\n', 'b', { k: 'v' }, { k: 'v' }],
+];
+const plainYaml = (node) => (node.t === 's' ? node.v : node.t === 'q' ? node.items.map(plainYaml)
+  : Object.fromEntries(node.pairs.map(([k, v]) => [plainYaml(k), plainYaml(v)])));
+SCENARIOS.push(['YAML のエイリアスは GitHub と同じ手順で展開する（アンカーは開始のイベントで登録し、エイリアスは再生の時点で解く）', () => {
+  const parsed = readYamlEvents(REPLAY_CASES.map(([text]) => text));
+  REPLAY_CASES.forEach(([text, key, expected, eager], n) => {
+    assert(!parsed[n].error, `${JSON.stringify(text)} が読めない: ${parsed[n].error}`);
+    const [root] = buildYamlDocuments(parsed[n].events);
+    const got = plainYaml(root)[key];
+    assert(JSON.stringify(got) === JSON.stringify(expected), `${JSON.stringify(text)} の ${key} が ${JSON.stringify(got)}`
+      + `（GitHub は ${JSON.stringify(expected)}。定義した時点の写しで読むと ${JSON.stringify(eager)}）`);
+  });
+}]);
+const ANCHOR_FROM_ALLOWED = chain(auditEnv('BULK_LIST: &all ${{ toJSON(secrets) }}'), modelEnv('ALL: *all'));
+const ESCAPED_NAME_OUTSIDE_MODEL = replace('fixture.yml', AUDIT_ENV, '          AUDIT_TOKEN: "${{ secrets.GH_PA\\x54 }}"\n');
+const BULK_OUTSIDE_MODEL = replace('fixture.yml', '${{ secrets.GH_PAT }}', '${{ toJSON(secrets) }}');
+const QUOTE_TRICK_OUTSIDE_MODEL = auditEnv(`X: ${quoteTrick('toJSON(secrets)')}`);
+const CALLEE_RUNS_MODEL = chain(replace('fixture.yml', INHERIT, '    secrets:\n      ALL: ${{ toJSON(secrets) }}\n'),
+  replace('callee.yml', 'TOKEN: ${{ secrets.GH_PAT }}', 'CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}'));
+SCENARIOS.push(['(D) エイリアスで持ち込んだ名前1つの読み方は、エイリアスと名指しして落とす', () => {
+  const findings = findingsOf(bulkFiles(MODEL_BYPASSES.find(([name]) => name.startsWith('(D) 名前1つの読み方でも'))[1]));
+  assert(findings.some((f) => f.job === 'autopilot' && f.model && f.form.includes('エイリアス *gcp')), JSON.stringify(findings));
+}]);
+SCENARIOS.push(['(D) 入れ子のエイリアスで持ち込んだ名前は、ジョブの字面に書いてある外側のエイリアスの名前と行で名指しする', () => {
+  const files = bulkFiles(chain(replace('fixture.yml', COLLECT_ENV, '          GOOGLE_SERVICE_ACCOUNT_JSON: &gcp ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}\n'
+    + '          WRAP: &wrap { G2: *gcp }\n'), modelEnv('X: *wrap')));
+  const line = files.find((f) => f.name === 'fixture.yml').text.split('\n').findIndex((l) => l.includes('X: *wrap')) + 1;
+  const findings = findingsOf(files);
+  assert(findings.some((f) => f.job === 'autopilot' && f.model && f.line === line && f.form.includes('エイリアス *wrap')),
+    `外側のエイリアス *wrap（${line}行）で名指ししていない: ${JSON.stringify(findings)}`);
+}]);
+SCENARIOS.push(['(D) 例外を書いたモデルの無いジョブのアンカーでも、モデルのジョブで参照すれば落ちる', () => {
+  const findings = findingsOf(bulkFiles(ANCHOR_FROM_ALLOWED));
+  const problems = bulkSecretProblems(findings, [{ workflow: 'fixture.yml', job: 'audit', reason: '名前の一覧を出すだけ' }]);
+  assert(problems.length > 0 && problems.every((p) => p.includes('ジョブ autopilot）')), `例外がモデルのジョブまで効いた: ${problems.join(' / ')}`);
+}]);
+for (const [name, files, reason] of PARSE_FAILURES) {
+  SCENARIOS.push([`**読めないファイルは落ちる（例外を書いても）**: ${name}`, () => {
+    const findings = findingsOf(Object.entries(files).map(([file, text]) => ({ name: file, text })));
+    assert(findings.some((f) => f.kind === 'parse' && f.form.includes(reason)), `読めないファイルを飛ばした（理由「${reason}」）: ${JSON.stringify(findings)}`);
+    assert(bulkSecretProblems(findings, allowEvery(findings)).some((p) => p.includes('読めないファイルは検査できないので通さない')),
+      '読めないファイルを例外で通した');
+  }]);
+}
+SCENARIOS.push(['**読めないファイルは落ちる**: UTF-8 として読めないファイル（置換文字で読み進めない）', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'credential-utf8-'));
+  try {
+    fs.writeFileSync(path.join(dir, 'bad.yml'), Buffer.from([0x6f, 0x6e, 0x3a, 0x20, 0xff, 0xfe, 0x0a]));
+    const findings = bulkSecretsInUse([dir]);
+    assert(findings.some((f) => f.kind === 'parse' && f.file === 'bad.yml'), `読めないファイルを飛ばした: ${JSON.stringify(findings)}`);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+}]);
+SCENARIOS.push(['**YAML を読む ruby が無ければ、検査を空にせず例外にする**', () => {
+  let threw = false;
+  try { inspectWorkflows(bulkFiles(), { ruby: path.join(os.tmpdir(), 'no-such-ruby-for-credential-selftest') }); } catch { threw = true; }
+  assert(threw, 'ruby が無いのに検査が通った');
+}]);
+SCENARIOS.push(['名前をエスケープで書いた読み方は、モデルの無いジョブでも見つけ、理由つきの例外でだけ通す', () => {
+  const findings = findingsOf(bulkFiles(ESCAPED_NAME_OUTSIDE_MODEL));
+  assert(findings.length === 1 && findings[0].job === 'audit' && !findings[0].model, JSON.stringify(findings));
+  assert(bulkSecretProblems(findings).length === 1, '例外なしで通ってしまう');
+  assert(bulkSecretProblems(findings, [{ workflow: 'fixture.yml', job: 'audit', reason: '検体' }]).length === 0, '例外が効かない');
+}]);
+SCENARIOS.push(['モデルの無いジョブは、理由つきの例外があるときだけ通る', () => {
+  const findings = findingsOf(bulkFiles(BULK_OUTSIDE_MODEL));
+  assert(findings.length === 1 && findings[0].job === 'audit' && !findings[0].model, JSON.stringify(findings));
+  assert(bulkSecretProblems(findings).length === 1, '例外なしで通ってしまう');
+  assert(bulkSecretProblems(findings, [{ workflow: 'fixture.yml', job: 'audit', reason: '名前の一覧を出すだけ' }]).length === 0, '例外が効かない');
+  assert(bulkSecretProblems(findings, [{ workflow: 'fixture.yml', job: 'audit' }]).length === 2, '理由の無い例外で通ってしまう');
+  assert(bulkSecretProblems(findings, [{ workflow: 'fixture.yml', job: 'autopilot', reason: '別のジョブ' }]).length === 1, '別のジョブの例外で通ってしまう');
+  assert(bulkSecretProblems(findings, { workflow: 'fixture.yml' }).length > 0, '配列でない台帳を黙って読む');
+}]);
+SCENARIOS.push(["モデルの無いジョブでも、'' の形の一括読み取りは見つけ、理由つきの例外でだけ通す", () => {
+  const findings = findingsOf(bulkFiles(QUOTE_TRICK_OUTSIDE_MODEL));
+  assert(findings.length === 1 && findings[0].job === 'audit' && !findings[0].model, JSON.stringify(findings));
+  assert(bulkSecretProblems(findings).length === 1, '例外なしで通ってしまう');
+  assert(bulkSecretProblems(findings, [{ workflow: 'fixture.yml', job: 'audit', reason: '検体' }]).length === 0, '例外が効かない');
+}]);
+SCENARIOS.push(['呼び先がモデルを動かすなら、呼ぶ側のジョブもモデルのジョブとして扱う（理由に呼び先のジョブと印を書く）', () => {
+  const findings = findingsOf(bulkFiles(CALLEE_RUNS_MODEL));
+  assert(findings.length === 1 && findings[0].job === 'call' && findings[0].model, JSON.stringify(findings));
+  assert(bulkSecretProblems(findings, ALLOW_MODEL).length === 1, '例外の台帳で通ってしまう');
+  assert(/呼び先 \.\/\.github\/workflows\/callee\.yml（publish: 印「/.test(findings[0].why ?? ''), `呼び先の中のどのジョブの何が理由かを書かない: ${findings[0].why}`);
+}]);
+
+// ── 2026-10-30 の再レビューの残り（モデルの印・needs のつながり・拡張子・実物の例外）──────────
+/**
+ * MODEL_MARKERS が見落としていたモデルの動かし方。audit（モデルの無い・つながらないジョブ）に足し、
+ * toJSON(secrets) を読ませる。前の版（5ec8904e1）はどれもモデルの無いジョブと判定したので、
+ * 台帳に理由つきの例外を1つ書けば、全部の secret がモデルに届いた。
+ */
+const AUDIT_BULK = auditEnv('ALL: ${{ toJSON(secrets) }}');
+const runner = (...steps) => chain(AUDIT_BULK, auditSteps(...steps));
+const MODEL_RUNNERS = [
+  ['claude の -p の前にオプションを置く（claude --model sonnet -p）', runner('      - run: claude --model sonnet -p "Summarize the report"')],
+  ['claude の --print の前にオプションを置く', runner('      - run: claude --verbose --output-format json --print "x"')],
+  ['claude をパスで呼ぶ（~/.local/bin/claude --model opus -p）', runner('      - run: ~/.local/bin/claude --model opus -p "x"')],
+  ['claude に標準入力で渡す（cat prompt.md | claude --model sonnet）', runner('      - run: cat prompt.md | claude --model sonnet')],
+  ['CLAUDE_CODE_USE_BEDROCK（OAuth も API の鍵も使わない）', runner('      - env:', '          CLAUDE_CODE_USE_BEDROCK: "1"', '        run: ./run.sh')],
+  ['CLAUDE_CODE_USE_VERTEX', runner('      - env:', '          CLAUDE_CODE_USE_VERTEX: "1"', '        run: ./run.sh')],
+  ['claude.ai/install.sh で入れる', runner('      - run: curl -fsSL https://claude.ai/install.sh | bash')],
+  ['@google/gemini-cli で入れる（鍵の名前が印にならない MY_KEY）', runner('      - env:', '          MY_KEY: ${{ secrets.MY_KEY }}',
+    '        run: npx --yes @google/gemini-cli --yolo --prompt "x"')],
+  ['GOOGLE_API_KEY だけ（Gemini CLI は GOOGLE_API_KEY でも動く）', runner('      - env:', '          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}',
+    '        run: ./run.sh')],
+  ['gemini をコマンドとして呼ぶ（gemini --yolo -p）', runner('      - run: gemini --yolo -p "x"')],
+  ['OPENROUTER_API_KEY だけ（aider などに渡す鍵）', runner('      - env:', '          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}',
+    '        run: python run.py')],
+  ['aider-install で入れる', runner('      - run: pip install aider-install && aider-install')],
+  ['aider だけ（鍵の名前が印にならない MY_KEY）', runner('      - env:', '          MY_KEY: ${{ secrets.MY_KEY }}', '        run: aider --yes-always --message "x"')],
+  ['codex の exec の前にオプションを置く（codex --full-auto exec）', runner('      - run: codex --full-auto exec "x"')],
+  ['API の宛先 api.anthropic.com を curl で叩く', runner('      - run: curl -s https://api.anthropic.com/v1/messages -H "x-api-key:$K" -d @req.json')],
+  ['GitHub Models（gh models run）', runner('      - run: gh models run openai/gpt-4.1 "x"')],
+  ['actions の下でもモデルを動かす actions/ai-inference', runner('      - uses: actions/ai-inference@a1b2c3d4e5f60718293a4b5c6d7e8f9012345678')],
+  ['一覧に無い actions/ の action（actions の下でも、一覧に無いものは動かしうる側）', runner('      - uses: actions/labeler@8558fd74291d67161a8a78ce36a881fa63b766a9')],
+  ['同じリポジトリの composite action（uses: ./…）', runner('      - uses: ./.github/actions/summarize')],
+  ['中身を確かめていない第三者の action', runner('      - uses: example-org/helpful-agent@0123456789abcdef0123456789abcdef01234567')],
+  ['docker:// の action', runner('      - uses: docker://ghcr.io/example/agent:1')],
+  // 2026-10-30 の再々レビュー: 中身を読めないイメージ、SDK の導入・読み込み、Azure OpenAI の宛先
+  ['ジョブの container のイメージ', chain(AUDIT_BULK, replace('fixture.yml', '  audit:\n    runs-on: ubuntu-latest\n',
+    '  audit:\n    runs-on: ubuntu-latest\n    container: ghcr.io/example/agent:1\n'))],
+  ['ジョブの services のイメージ（run も uses も無くても起動する）', chain(AUDIT_BULK, replace('fixture.yml', '  audit:\n    runs-on: ubuntu-latest\n',
+    '  audit:\n    runs-on: ubuntu-latest\n    services:\n      helper:\n        image: ghcr.io/example/agent:1\n'))],
+  ['npm で @anthropic-ai/sdk を入れる', runner('      - run: npm install @anthropic-ai/sdk && node summarize.mjs')],
+  ['pip で openai を入れる', runner('      - run: pip install --quiet openai==1.0.0 && python summarize.py')],
+  ['Python で anthropic を読み込む', runner("      - run: python -c 'import anthropic; print(1)'")],
+  ['Node で openai を読み込む（import { … } from）', runner('      - run: node --input-type=module -e "import { OpenAI } from \'openai\'; console.log(1)"')],
+  ['Node で openai を読み込む（require）', runner('      - run: node -e "const c = require(\'openai\'); console.log(1)"')],
+  ['Azure OpenAI の宛先', runner('      - run: curl -s https://example.openai.azure.com/openai/deployments/x/chat/completions')],
+  // f7615b2f7 のレビュー: 次の3つの印は、外しても全件通っていた（固定する検体が無かった）。
+  ['pip で litellm を入れる', runner('      - run: pip install litellm && python summarize.py')],
+  ['pip で langchain-core を入れる', runner('      - run: pip install langchain-core && python summarize.py')],
+  ['pip で llama-index を入れる', runner('      - run: pip install llama-index && python summarize.py')],
+  // run: | の中で行継ぎして、包みの名前を次の行に置く（ブロックの字下げは値に残らないので、名前は行頭に来る）。
+  ['run: | の中で行継ぎした次の行の包みの名前（pip install \\ → openai）', runner('      - run: |', '          pip install --quiet \\',
+    '          openai', '          python summarize.py')],
+];
+/** モデルを動かさない書き方（audit はモデルの無いジョブのまま、例外で通る）。 */
+const NOT_RUNNERS = [
+  ['文章の「Claude Code」「Codex」・claude/ のブランチ名・noreply@anthropic.com・inputs.claude_branch', runner(
+    '      - name: Claude Code と Codex の結果を記録する', '        env:', '          BRANCH: claude/obsidian-auto-20261030',
+    "          TRAILER: 'Co-Authored-By: Claude <noreply@anthropic.com>'", '          PREV: ${{ inputs.claude_branch }}',
+    '        run: git log --grep "claude/" --oneline')],
+  ['owner/repo の大文字小文字を変えた既知の action（Actions/Checkout）', runner('      - uses: Actions/Checkout@11bd71901bbe5b1630ceea73d27597364c9af683')],
+  ['npm の別の包み（npm install openapi-types・pip install opentelemetry）', runner('      - run: npm install openapi-types && pip install opentelemetry-api')],
+  // 包みの名前の前後の区切り（f7615b2f7 のレビュー: 上の検体には印の語で始まる名前が無く、前後の守りを外しても通った）。
+  ['語の途中にある包みの名前（pip install philanthropic。前の区切り）', runner('      - run: pip install philanthropic && python report.py')],
+  ['語の続きがある包みの名前（npm install groqd・pip install coherent。後ろの区切り）', runner('      - run: npm install groqd && pip install coherent')],
+  ['既知の action の副パス（actions/cache/restore）', runner('      - uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684')],
+];
+for (const [name, edit] of MODEL_RUNNERS) {
+  SCENARIOS.push([`**モデルを動かしうるジョブとして扱う（例外を書いても落ちる）**: ${name}`, () => {
+    const { findings, jobs } = inspectWorkflows(bulkFiles(edit));
+    const audit = jobs.find((j) => j.file === 'fixture.yml' && j.id === 'audit');
+    assert(audit && audit.model, `audit をモデルの無いジョブと判定した: ${JSON.stringify(audit)}`);
+    assert(findings.some((f) => f.job === 'audit' && f.model), `audit の toJSON(secrets) をモデルのジョブの問題にしていない: ${JSON.stringify(findings)}`);
+    assert(bulkSecretProblems(findings, [{ workflow: 'fixture.yml', job: 'audit', reason: '検体' }]).some((p) => p.includes('ジョブ audit）')),
+      '例外の台帳で通ってしまう');
+  }]);
+}
+for (const [name, edit] of NOT_RUNNERS) {
+  SCENARIOS.push([`**モデルを動かすと判定しない（例外で通る）**: ${name}`, () => {
+    const { findings, jobs } = inspectWorkflows(bulkFiles(edit));
+    const audit = jobs.find((j) => j.file === 'fixture.yml' && j.id === 'audit');
+    assert(audit && !audit.model, `audit をモデルのジョブと判定した: ${JSON.stringify(audit)}`);
+    assert(findings.length === 1 && bulkSecretProblems(findings, [{ workflow: 'fixture.yml', job: 'audit', reason: '検体' }]).length === 0,
+      `例外で通らない: ${JSON.stringify(findings)}`);
+  }]);
+}
+
+/**
+ * 1行が長いワークフローでも、検査が終わること（f7615b2f7 のレビュー）。f7615b2f7 の SDK の導入の印は、
+ * 遅延の `[^\n]*?` を2段重ねた1つの正規表現で、当たらない長い1行で O(n³) だった（`npm i ` の繰り返しで
+ * 20KB 26 秒・英文風の 1MB は2分でも終わらない）。CI の手順には上限時間が無く、止まると既定の360分まで待つ。
+ * **この自己テスト自身が止まらないよう、別のプロセスで時間を区切って走らせる**（同じプロセスで回すと、
+ * 遅い形に戻ったときに自己テストも終わらなくなる）。線形なら1秒前後で終わる。
+ */
+const LONG_LINE_BYTES = 1 << 20;
+const LONG_LINE_TIMEOUT_MS = 30000;
+const LONG_LINE_CHILD = `
+const lib = await import(process.argv[1]);
+const N = ${LONG_LINE_BYTES};
+const fill = (unit) => unit.repeat(Math.ceil(N / unit.length)).slice(0, N);
+const shapes = { npmi: 'npm i ', english: 'I install the tool and run it with npm when I can. ',
+  minified: 'for(var i=0;i<n;i++){x[i]=npm.install(i)||run(x)}', pipx: 'pipx run --spec x y ' };
+const markers = Object.fromEntries(Object.entries(shapes).map(([k, unit]) => [k, lib.modelMarker(fill(unit))]));
+const tail = lib.modelMarker(fill('npm i ') + ' openai');
+const jobs = Array.from({ length: 20 }, (_, n) => '  j' + n + ':\\n    runs-on: x\\n    steps:\\n      - run: echo ' + n + '\\n').join('');
+const text = 'on: push\\nenv:\\n  BIG: \\'' + fill(shapes.npmi) + '\\'\\njobs:\\n  long:\\n    runs-on: x\\n    steps:\\n'
+  + '      - run: \\'' + fill(shapes.english) + '\\'\\n' + jobs;
+const { findings, jobs: judged } = lib.inspectWorkflows([{ name: 'long.yml', text }]);
+console.log(JSON.stringify({ markers, tail: tail && [tail.slice(0, 5), tail.slice(-6), tail.length],
+  judged: judged.length, model: judged.filter((j) => j.model).length, findings: findings.length }));
+`;
+SCENARIOS.push([`**1行が ${LONG_LINE_BYTES / (1 << 20)}MB のワークフローでも、検査が ${LONG_LINE_TIMEOUT_MS / 1000} 秒以内に終わる**（印の正規表現が長い1行で破滅的なバックトラックをしない）`, () => {
+  const lib = pathToFileURL(path.join(ROOT, 'scripts/lib/workflow-secrets.mjs')).href;
+  const started = Date.now();
+  const r = spawnSync(process.execPath, ['--input-type=module', '-e', LONG_LINE_CHILD, lib],
+    { encoding: 'utf8', timeout: LONG_LINE_TIMEOUT_MS, maxBuffer: 1 << 26 });
+  const took = Date.now() - started;
+  assert(!r.error && r.status === 0, `${took}ms で終わらない・失敗した（${r.error?.code || r.signal || r.status}）: ${String(r.stderr).trim().slice(0, 300)}`);
+  const got = JSON.parse(r.stdout);
+  assert(Object.values(got.markers).every((m) => m === null), `印の無い長い1行で印を拾った: ${JSON.stringify(got.markers)}`);
+  assert(JSON.stringify(got.tail) === JSON.stringify(['npm i', 'openai', LONG_LINE_BYTES + 7]),
+    `長い1行の終わりの包みの名前を、行の始まりのパッケージマネージャからの範囲で拾わない: ${JSON.stringify(got.tail)}`);
+  assert(got.judged === 21 && got.model === 0 && got.findings === 0, `長い1行のワークフローの判定が違う: ${r.stdout.trim()}`);
+}]);
+
+/**
+ * モデルのジョブと needs でつながるジョブは、モデルが無くても例外にできない。上流なら outputs で値が
+ * モデルに渡り（base64 にするとマスクも効かない）、下流ならモデルの出力が全部の secret を持つジョブに入る。
+ * [名前, 書き換え, 'file#job', 向き（feeds: モデルが出力を受け取りうる / fedBy: モデルの出力が入る）]
+ */
+const BULK_IN_COLLECT = replace('fixture.yml', '${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}', '${{ toJSON(secrets) }}');
+const CALLEE_BULK = replace('callee.yml', 'TOKEN: ${{ secrets.GH_PAT }}', 'ALL: ${{ toJSON(secrets) }}');
+const AUTOPILOT_NEEDS_CALL = replace('fixture.yml', '    needs: collect\n', '    needs: [collect, call]\n');
+const LINKED = [
+  ['モデルのジョブが needs で待つジョブ（collect → autopilot）', BULK_IN_COLLECT, 'fixture.yml#collect', 'feeds'],
+  ['間接に待つジョブ（prepare → collect → autopilot）', replace('fixture.yml', '  collect:\n    runs-on: ubuntu-latest\n',
+    '  prepare:\n    runs-on: ubuntu-latest\n    steps:\n      - env:\n          ALL: ${{ toJSON(secrets) }}\n        run: echo prepare\n'
+    + '  collect:\n    needs: prepare\n    runs-on: ubuntu-latest\n'), 'fixture.yml#prepare', 'feeds'],
+  ['needs を流れの列と大文字で書く（needs: [ COLLECT ]）', chain(BULK_IN_COLLECT, replace('fixture.yml', '    needs: collect\n', '    needs: [ COLLECT ]\n')),
+    'fixture.yml#collect', 'feeds'],
+  ['needs をブロックの列で書く', chain(BULK_IN_COLLECT, replace('fixture.yml', '    needs: collect\n', '    needs:\n      - collect\n')),
+    'fixture.yml#collect', 'feeds'],
+  ['モデルのジョブを needs で待つジョブ（autopilot → report）', (f) => ({ ...f, 'fixture.yml': `${f['fixture.yml']}  report:\n    needs: autopilot\n`
+    + '    runs-on: ubuntu-latest\n    steps:\n      - env:\n          ALL: ${{ toJSON(secrets) }}\n        run: echo report\n' }), 'fixture.yml#report', 'fedBy'],
+  ['再利用ワークフローの呼び先のジョブ（callee の publish → call → autopilot。workflow_call の outputs）', chain(AUTOPILOT_NEEDS_CALL, CALLEE_BULK),
+    'callee.yml#publish', 'feeds'],
+  ['再利用ワークフローの呼び先のファイル全体の env', chain(AUTOPILOT_NEEDS_CALL, replace('callee.yml', 'jobs:\n', 'env:\n  ALL: ${{ toJSON(secrets) }}\njobs:\n')),
+    'callee.yml#(workflow)', 'feeds'],
+  ['モデルのジョブを待って呼ぶ再利用ワークフローのファイル全体の env（autopilot → call → callee の設定。inputs で値が入る）',
+    chain(replace('fixture.yml', '  call:\n    uses:', '  call:\n    needs: autopilot\n    uses:'),
+      replace('callee.yml', 'jobs:\n', 'env:\n  ALL: ${{ toJSON(secrets) }}\njobs:\n')), 'callee.yml#(workflow)', 'fedBy'],
+  ['needs を読めない形で書いたモデルのジョブは、同じファイルの全部のジョブを待つとみなす（audit → autopilot）',
+    chain(BULK_OUTSIDE_MODEL, replace('fixture.yml', '    needs: collect\n', '    needs: { job: collect }\n')), 'fixture.yml#audit', 'feeds'],
+];
+for (const [name, edit, at, direction] of LINKED) {
+  SCENARIOS.push([`**モデルのジョブと needs でつながるジョブは例外にできない**: ${name}`, () => {
+    const [file, job] = at.split('#');
+    const findings = findingsOf(bulkFiles(edit));
+    const own = findings.filter((f) => f.file === file && f.job === job);
+    assert(own.length > 0 && own.every((f) => !f.model && f[direction].includes('fixture.yml#autopilot')),
+      `${at} を autopilot とつながるモデルの無いジョブと判定していない（${direction}）: ${JSON.stringify(findings)}`);
+    const problems = bulkSecretProblems(findings, [{ workflow: file, job, reason: '検体' }]);
+    assert(problems.some((p) => p.includes(`ジョブ ${job}）`) && p.includes('needs でつながっている')), `例外で通ってしまう: ${problems.join(' / ')}`);
+  }]);
+}
+SCENARIOS.push(['needs でつながらないモデルの無いジョブは、同じファイルにモデルのジョブがあっても例外で通る（呼び先の env も）', () => {
+  for (const edit of [BULK_OUTSIDE_MODEL, CALLEE_BULK, replace('callee.yml', 'jobs:\n', 'env:\n  ALL: ${{ toJSON(secrets) }}\njobs:\n')]) {
+    const findings = findingsOf(bulkFiles(edit));
+    assert(findings.length === 1 && !findings[0].model && !findings[0].feeds.length && !findings[0].fedBy.length, JSON.stringify(findings));
+    assert(bulkSecretProblems(findings, [{ workflow: findings[0].file, job: findings[0].job, reason: '検体' }]).length === 0, '例外が効かない');
+  }
+}]);
+
+SCENARIOS.push(['**拡張子の大文字小文字を変えたワークフロー（.YML・.Yaml）も読む**（GitHub が読まないとは確かめていない）', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'credential-ext-'));
+  try {
+    fs.writeFileSync(path.join(dir, 'agent.YML'), 'on: push\njobs:\n  ai:\n    runs-on: x\n    steps:\n'
+      + '      - uses: anthropics/claude-code-action@925afb53776cf1a2b738c6bdbed37b4d4000ef13\n        with:\n          t: ${{ toJSON(secrets) }}\n');
+    fs.writeFileSync(path.join(dir, 'names.Yaml'), 'on: push\njobs:\n  a:\n    runs-on: x\n    steps:\n      - run: echo ${{ secrets.NEW_UNREGISTERED_KEY }}\n');
+    const bulk = bulkSecretsInUse([dir]);
+    assert(bulk.some((f) => f.file === 'agent.YML' && f.job === 'ai' && f.model), `.YML を読まない: ${JSON.stringify(bulk)}`);
+    const inUse = secretsInUse([dir], { required: true });
+    assert(inUse.has('NEW_UNREGISTERED_KEY'), `.Yaml の secret を集めない: ${[...inUse.keys()]}`);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+}]);
+
+// 実物のワークフロー（このリポジトリで走らせたときだけ）: 台帳の例外で通らない読み方が無いこと。
+// 全部のモデルのジョブに足すと落ちる。jobs の鍵を "jobs" : と書き換えても同じ（字面の推測でジョブを見失わない）。
+const OWN_WORKFLOWS = WF_DIRS[0];
+const HAS_OWN_WORKFLOWS = fs.existsSync(path.join(OWN_WORKFLOWS, 'obsidian-autopilot.yml'));
+/** 実物の各モデルのジョブの先頭に `env: BULK: ${{ toJSON(secrets) }}` を足し、jobs の行を header に変えた写し。 */
+function ownMutations(files, model) {
+  return model.flatMap((target) => ['jobs:', '"jobs" :'].map((header) => ({ target, header, files: files.map((file) => {
+    if (file.name !== target.file) return file;
+    const text = file.text.split('\n');
+    const pad = ' '.repeat(target.column + 2);
+    text.splice(target.line, 0, `${pad}env:`, `${pad}  BULK: \${{ toJSON(secrets) }}`);
+    const at = text.findIndex((l) => /^jobs:\s*(?:#.*)?$/.test(l));
+    assert(at !== -1, `${file.name} に jobs: の行が無い`);
+    text[at] = header;
+    return { ...file, text: text.join('\n') };
+  }) })));
+}
+const findingKey = (f) => `${f.file}|${f.job}|${f.form}`;
+/**
+ * 実物の検査。allow は台帳の $bulk_secret_access（--check と同じ）。**台帳の例外で通る箇所は数えない**
+ * （以前は例外によらず0件を求めていたので、モデルの無いジョブに理由つきの例外を書いても --check が通らなかった）。
+ */
+function checkOwnWorkflows(files, allow) {
+  const { findings, jobs } = inspectWorkflows(files);
+  const open = bulkSecretProblems(findings, allow);
+  assert(open.length === 0, `実物に、台帳の例外で通らない読み方がある: ${open.join(' / ')}`);
+  const model = jobs.filter((j) => j.model);
+  const named = model.map((j) => `${j.file}#${j.id}`);
+  assert(named.includes('obsidian-autopilot.yml#autopilot') && named.includes('devlog-syndication-platform.yml#draft'),
+    `モデルのジョブを見落としている: ${named.join(', ')}`);
+  assert(!named.includes('obsidian-autopilot.yml#collect') && !named.includes('obsidian-autopilot.yml#publish'),
+    `モデルの無いジョブをモデルのジョブにしている: ${named.join(', ')}`);
+  const before = new Set(findings.map(findingKey));
+  const mutations = ownMutations(files, model);
+  readYamlEvents(mutations.flatMap((m) => m.files.map((f) => f.text)));
+  for (const { target, header, files: mutated } of mutations) {
+    // 足した1か所だけを見る（台帳の例外で通っている元からの箇所は、行がずれても数えない）。
+    const hit = bulkSecretFindings(mutated).filter((f) => !before.has(findingKey(f)));
+    assert(hit.length === 1 && hit[0].file === target.file && hit[0].job === target.id && hit[0].model,
+      `${target.file}#${target.id}（${header}）に足しても見つけられない: ${JSON.stringify(hit)}`);
+    assert(bulkSecretProblems(hit, [...(Array.isArray(allow) ? allow : []), { workflow: target.file, job: target.id, reason: '検体' }]).length === 1,
+      `${target.file}#${target.id} が例外の台帳で通ってしまう`);
+  }
+}
+const ledgerAllow = () => JSON.parse(fs.readFileSync(CRED_PATH, 'utf8')).$bulk_secret_access;
+if (HAS_OWN_WORKFLOWS) {
+  SCENARIOS.push(['実物: 台帳の例外で通らない読み方が無く、全部のモデルのジョブに toJSON(secrets) を足すと、それぞれ落ちる（例外を書いても・jobs の鍵の書き方を変えても）', () => {
+    checkOwnWorkflows(readWorkflows(OWN_WORKFLOWS), ledgerAllow());
+  }]);
+  SCENARIOS.push(['実物: モデルの無い・つながらないジョブは、理由つきの例外があれば実物の検査も通る（つながれば例外を書いても落ちる）', () => {
+    const names = { name: 'bulk-names-probe.yml', text: 'on: workflow_dispatch\npermissions: {}\njobs:\n  names:\n    runs-on: ubuntu-latest\n'
+      + "    steps:\n      - env:\n          ALL: ${{ toJSON(secrets) }}\n        run: printf '%s' \"$ALL\" | jq -r 'keys[]'\n" };
+    const files = [...readWorkflows(OWN_WORKFLOWS), names];
+    const base = Array.isArray(ledgerAllow()) ? ledgerAllow() : [];
+    const allow = [...base, { workflow: names.name, job: 'names', reason: '検体（名前の一覧だけを出す）' }];
+    checkOwnWorkflows(files, allow);
+    const fails = (f, a) => { try { checkOwnWorkflows(f, a); return false; } catch { return true; } };
+    assert(fails(files, base), '例外の無い一括読み取りが実物の検査を通った');
+    const linked = { ...names, text: `${names.text}  ai:\n    needs: names\n    runs-on: ubuntu-latest\n    steps:\n      - run: claude -p "x"\n` };
+    assert(fails([...readWorkflows(OWN_WORKFLOWS), linked], allow), 'モデルのジョブが needs で待つジョブを、例外で通した');
+  }]);
+}
+
+/** 検体をまとめて1回で読んでおく（ruby の起動を検体ごとに払わない）。読めなければ各検体が報告する。 */
+function primeBulkFixtures() {
+  const texts = new Set();
+  const edits = [...BULK_PASSES, ...BULK_BREAKAGES, ...MODEL_BYPASSES].map(([, edit]) => edit)
+    .concat(ANCHOR_FROM_ALLOWED, ESCAPED_NAME_OUTSIDE_MODEL, BULK_OUTSIDE_MODEL, QUOTE_TRICK_OUTSIDE_MODEL, CALLEE_RUNS_MODEL)
+    .concat([...MODEL_RUNNERS, ...NOT_RUNNERS, ...LINKED].map(([, edit]) => edit), CALLEE_BULK);
+  for (const ch of DOTNET_WHITESPACE) edits.push(inModel(`"\${{ toJSON(\\u${ch.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')}secrets) }}"`));
+  for (const edit of edits) {
+    try { for (const f of bulkFiles(edit)) texts.add(f.text.replace(/^\uFEFF/, '')); } catch { /* 書き換えの誤りは、その検体が自分で報告する */ }
+  }
+  for (const [, files] of PARSE_FAILURES) for (const text of Object.values(files)) texts.add(text);
+  try { readYamlEvents([...texts]); } catch { /* ruby が無い・落ちたことは、各検体が自分で報告する */ }
+}
+const runScenarios = () => { primeBulkFixtures(); return run(SCENARIOS); };
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
-  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
+  if (process.argv.includes('--selftest')) process.exit(runScenarios() === 0 ? 0 : 1);
   const doc = JSON.parse(fs.readFileSync(CRED_PATH, 'utf8'));
   const stopDoc = JSON.parse(fs.readFileSync(STOP_PATH, 'utf8'));
   const dirAt = process.argv.indexOf('--workflow-dir');
@@ -181,10 +872,19 @@ if (isMain) {
   }
 
   const problems = validate(doc, stopDoc, inUse);
+  let bulk = [];
+  try {
+    bulk = bulkSecretsInUse(dirs);
+  } catch (e) {
+    problems.push(`secret の読み方を検査できない（5）: ${e.message} — **検査できないことを「問題なし」にしない**`);
+  }
+  problems.push(...bulkSecretProblems(bulk, doc.$bulk_secret_access));
   const declared = declaredSecrets(doc);
   console.log('資格情報 — 権限・経路・失効手順\n');
   console.log(`  ワークフローが読む secret ${inUse.size}件 / 台帳が申告 ${declared.size}件`
-    + ` / 対象外 ${Object.keys(doc.$exempt_secrets || {}).length}件\n`);
+    + ` / 対象外 ${Object.keys(doc.$exempt_secrets || {}).length}件`);
+  console.log(`  名前を書かずに secret を読む箇所 ${bulk.length}件`
+    + `（モデルのジョブ ${bulk.filter((f) => f.model).length}件 / 台帳の例外 ${Array.isArray(doc.$bulk_secret_access) ? doc.$bulk_secret_access.length : 0}件）\n`);
   for (const c of doc.credentials) {
     const routes = (c.agents || []).length ? (c.agents || []).join(',') : '—';
     const stops = c.revoke_stops_automation ? ' ⛔止まる' : '';
@@ -203,7 +903,7 @@ if (isMain) {
     process.exit(1);
   }
   if (process.argv.includes('--check')) {
-    if (run(SCENARIOS) !== 0) process.exit(1);
+    if (runScenarios() !== 0) process.exit(1);
     console.log('\n止めたい経路ごとに、失効させる鍵が名指しできる。');
   }
 }
