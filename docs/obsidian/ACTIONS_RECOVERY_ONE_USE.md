@@ -73,6 +73,41 @@ Claude Code のセッションは、この変数を読むことも書くこと�
 再発防止の後にもう一度試す（日付は許可の更新と模擬の後に AI が決める）と決めた。この行の interventions には、許可した
 1回限りの試運転として bootstrap を記録し（#2195）、その時点の指紋で許可の対象に足した（上限・修理回数は変えていない）。
 
+**2026-10-30 の更新（10-29 の試運転の修理）:** 10-29 の試運転（run 40803103665）も許可が効いたが、モデルの段が75分の上限で
+切られた（`The action has timed out.`）。単独実行の切り分けは通り（資格情報は無事）、モデル後の照合は clean だった。
+最初の宣言は段の開始から約65分後で、/obsidian/plugins/ の数値更新と生成ロケール8ページを実装した後、宣言を
+「生成ロケールのページを含まない」として取り下げ、宣言し直した直後の検査の途中で切られた（どの検査で気づいたかの記録は無い。
+実装から取り下げまで約5分で、`--verify-local` 1回分と推定）。コミット済みの6コミットは
+publish が `push_only` で当日ブランチへ push したが、status・LOG・依頼は無く、PR は開かれなかった。実行ログは終了時にしか
+書かれないので、実費とターン数は分からない。最初の約65分の内訳も記録が無い（途中の工程記録は #2205 で後から入った）。
+Act はこの run を `ap-20261029-actions`（`failed`・種別は未確定・needs_triage）として記帳し、レーンFの修理対象になった。
+**修理対象が残る間、許可は `repair_pending` で効かない。**封じ込め中のレーンFは中からは直せないので、オーナーの判断で
+外から修理の PR を出した（時間の期限。Runbook §5-1a）。その PR が `repair_of: ["ap-20261029-actions"]` を記帳して
+マージされれば、修理対象は無くなる。**許可の対象6行・上限・修理回数・`ACTIONS_RECOVERY.targets` は変えていない**
+（10-29 の行は `no_artifact` ではなく、封じ込めの対象に入っていない）。次の日付は、マージの後に模擬で確かめてから決める。
+
+**2026-10-30 の模擬（修理の PR を開く前）:** 作業用の写しで、修理の行の `pr` に仮の番号を入れ、ワークフローと同じ
+環境変数（`schedule`・1回目・`simplememofast/simplememo`・`refs/heads/main`・このワークフロー・当日の JST の日付）で
+`node scripts/autopilot-selfheal.mjs --contain --dry-run` を回した。
+
+- `pr` が null のままだと `repair_pending` で効かない。修理と数えるのは、PR 番号のある `shipped` の行の `repair_of` だけ
+  （`analyze`）。**番号を入れずにマージしても、許可は戻らない。**
+- 仮の番号を入れると `recovery=actions_once` が出た。時計を 10-31・11-01 にずらしても同じ。日付違い・手動起動・再実行・
+  別のブランチ・別のワークフローでは効かない。
+- **10-29 の行の `failure_class` を `no_artifact` にしない。**この修理の `repair_of` が `no_artifact` の6回目の修理に
+  数えられ、許可の対象の修理回数（5）と合わなくなり、`containment_changed` で効かなくなる（`time_box` なら効く）。
+- 許可の対象6行のどれかを書き換えると `target_row_changed`、修理が要る新しい故障が台帳に入ると `repair_pending` で効かない。
+- **試す日は、main の `data/autopilot-status.json` の `date_jst`（この修理では 2026-10-30）より後の日にする。**同じ日だと
+  Gate が `skip_already_shipped` で止め、封じ込めの段（許可の判定）まで進まない（`decide` に同じ状態を渡して確認）。
+- Gate（GitHub API を読む）そのものは模擬していない。予算の段（`--check`・`--check-run-cap --task article`）は手元で通った。
+
+**2026-10-31 の模擬（期限に当たった日の後の許可）:** 修理の行に PR 番号を入れた台帳に、翌日の Actions の行を1行足して
+`actionsRecoveryOnce` を回した（書き込みなし）。期限に当たった日は、行の形で次の試運転への効き方が分かれる（Runbook §5-1a）。
+
+- status/LOG だけの PR を依頼できた日（`no_artifact`・`time_box`）: `repair_pending`。その種別の修理が入れば戻る。
+- `push_only` で終わった日（Act が `no_artifact`・`no_artifact` と記帳）: `containment_changed`（`no_artifact` の7行目として
+  人に上げる行に入る）。**修理では戻らず、`ACTIONS_RECOVERY.targets` を足し直すオーナーの判断が要る。**
+
 ## 試運転の日にしないこと（2026-10-21 追記）
 
 - **試運転の日は、その日の定時 run が終わるまで、Obsidian Autopilot を手動起動（workflow_dispatch）も再実行もしない。**

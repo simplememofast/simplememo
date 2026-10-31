@@ -35,6 +35,9 @@ import { OUTCOMES, validate as validateRuns } from './autopilot-runs.mjs';
 import { hardDenyReason, MAX_COMMITS, MAX_TOTAL_BYTES, RECORD_PATHS } from './lib/autopilot-paths.mjs';
 import { GATED_LEDGERS, ledgerChange } from './lib/ledger-append-only.mjs';
 import { needsTranslationCheck, runTranslationCheck } from './lib/translation-check.mjs';
+import { TIME_BOX, checkTimeBoxRunbook, checkTimeBoxWiring } from './lib/autopilot-progress.mjs';
+import { EXPRESSION_BUDGET_BYTES, EXPRESSION_MARGIN_BYTES, GITHUB_EXPRESSION_LIMIT, checkExpressionLengths, templateExpression, templateStrings }
+  from './lib/workflow-expression-length.mjs';
 
 const require = createRequire(import.meta.url);
 const { findUnapprovedPrincipals } = require('./merge-identity-check.js');
@@ -143,6 +146,25 @@ export const RESUME_LIMITS = Object.freeze({ max_usd: 3, min_usd: 0.5, max_turns
 // job's clock, and the steps after the resume (audit, cost, checkpoint, summary, pack, upload; ~1 minute in all on
 // 2026-10-22). A resume that does not fit would cut the job before the handoff is uploaded.
 export const JOB_TIME = Object.freeze({ job_minutes: 90, outside_minutes: 5 });
+// 2026-10-30 (run 40803103665 ran into the main step's 75-minute limit with no status, LOG or handoff): the session
+// is told two deadlines from the Gate step's clock (TIME_BOX in scripts/lib/autopilot-progress.mjs). The limit counts
+// from the main step's own start, which is later than the Gate, so a handoff deadline this many minutes inside the
+// limit stays inside it on every day. The minutes are for the last commit and the StructuredOutput call.
+export const TIME_BOX_MARGIN_MINUTES = 5;
+
+/** The time box sits inside the main step's limit and inside the resume's time rule. Throws when it does not. */
+export function checkTimeBox(box, mainTimeoutMinutes) {
+  assert(box && Number.isInteger(box.wrap_up_minutes) && Number.isInteger(box.handoff_minutes) && box.wrap_up_minutes > 0,
+    'the time box needs whole minutes');
+  assert.equal(box.job_minutes, JOB_TIME.job_minutes, 'the time box assumes the job limit');
+  assert(box.wrap_up_minutes < box.handoff_minutes, 'the time box wraps up before it hands off');
+  assert(Number.isInteger(mainTimeoutMinutes) && box.handoff_minutes + TIME_BOX_MARGIN_MINUTES <= mainTimeoutMinutes,
+    'the time box hands off before the main step\'s limit, with room for the last commit and the handoff');
+  // A session that reaches the handoff deadline without the files can still be resumed in the job (resumeDecision).
+  assert(box.handoff_minutes <= JOB_TIME.job_minutes - JOB_TIME.outside_minutes - RESUME_LIMITS.minutes,
+    'the time box hands off while a resume still fits in the job');
+  return true;
+}
 // A day that ends at prompt step 0 writes only the exit code (step 8): no request is expected.
 export const NO_REQUEST_EXIT_CODE = 'skipped_already_done';
 // A long session (the 2026-10-22 trial ran 236 turns) must not make the main cost unreadable.
@@ -989,6 +1011,9 @@ function readsWholeModelOutputs(expression, modelIds) {
 }
 
 export function checkWiring(source) {
+  // 2026-10-31 (PR #2213): one line added to the model prompt took its expression past GitHub's limit, and GitHub
+  // refused the whole file (no job starts, scheduled or manual). Nothing else here would have noticed.
+  checkExpressionLengths(source);
   assert.match(source, /\npermissions: \{\}\n/, 'workflow-level permissions must be empty');
   assert.doesNotMatch(activeLines(source), /id-token/, 'no job may request an OIDC token');
   const jobs = splitJobs(source);
@@ -1050,6 +1075,10 @@ export function checkWiring(source) {
     && /\n        run: \|\n          echo "job_started_epoch=\$\(date \+%s\)" >> "\$GITHUB_OUTPUT"\n          node scripts\/autopilot-gate\.mjs --preflight\n/.test(gate)
     && inspect.includes('\n          JOB_STARTED_EPOCH: ${{ steps.gate.outputs.job_started_epoch }}\n'), 'the handoff check reads the job\'s clock from the Gate step');
   assert(model.includes(`\n    timeout-minutes: ${JOB_TIME.job_minutes}\n`), 'the job limit the resume\'s time rule assumes');
+  // 2026-10-30: the deadlines the session is told sit inside the main step's limit and the resume's rule, and the
+  // time box step and the prompt are wired (scripts/lib/autopilot-progress.mjs checkTimeBoxWiring).
+  checkTimeBox(TIME_BOX, Number(claude.match(/\n        timeout-minutes: (\d+)\n/)?.[1]));
+  checkTimeBoxWiring(source);
   assert.deepEqual([...resume.matchAll(/secrets\.([A-Z0-9_]+)/g)].map(m => m[1]), ['CLAUDE_CODE_OAUTH_TOKEN'], 'the resume gets the model credential only');
   assert(resume.includes('\n          github_token: ${{ github.token }}\n') && !/\n        env:\n/.test(resume)
     && [...resume.matchAll(/token: (.*)/g)].length === 2, 'the resume gets only the read-only job token');
@@ -1348,15 +1377,118 @@ function selftest() {
     assert.throws(() => checkWiring(mutated), undefined, `resume mutation must fail: ${from}`); n++;
   }
   // The job's clock: recorded by the Gate step, read by the check, against the job limit the rule assumes.
-  for (const [from, to] of [
-    ['          echo "job_started_epoch=$(date +%s)" >> "$GITHUB_OUTPUT"\n', ''],
-    ['          JOB_STARTED_EPOCH: ${{ steps.gate.outputs.job_started_epoch }}\n', ''],
-    ['          JOB_STARTED_EPOCH: ${{ steps.gate.outputs.job_started_epoch }}\n', '          JOB_STARTED_EPOCH: ${{ steps.resume.outputs.job_started_epoch }}\n'],
-    [`    timeout-minutes: ${JOB_TIME.job_minutes}\n`, `    timeout-minutes: ${JOB_TIME.job_minutes + 30}\n`],
+  // The handoff check's own line is mutated (since 2026-10-30 the time box step before the model reads the same
+  // clock, and a mutation of the first match would test that step instead).
+  const handoffCheckAt = workflow.indexOf('      - name: Check the handoff files after the model\n');
+  t(handoffCheckAt > workflow.indexOf('      - name: Set the model time box\n'), 'the handoff check comes after the time box step');
+  for (const [from, to, at] of [
+    ['          echo "job_started_epoch=$(date +%s)" >> "$GITHUB_OUTPUT"\n', '', 0],
+    ['          JOB_STARTED_EPOCH: ${{ steps.gate.outputs.job_started_epoch }}\n', '', handoffCheckAt],
+    ['          JOB_STARTED_EPOCH: ${{ steps.gate.outputs.job_started_epoch }}\n', '          JOB_STARTED_EPOCH: ${{ steps.resume.outputs.job_started_epoch }}\n', handoffCheckAt],
+    [`    timeout-minutes: ${JOB_TIME.job_minutes}\n`, `    timeout-minutes: ${JOB_TIME.job_minutes + 30}\n`, 0],
   ]) {
-    const mutated = workflow.replace(from, to);
+    const mutated = workflow.slice(0, at) + workflow.slice(at).replace(from, to);
     t(mutated !== workflow, `clock mutation applies: ${from.trim()}`);
     assert.throws(() => checkWiring(mutated), /clock|job limit/, `clock mutation must fail: ${from.trim()}`); n++;
+  }
+  // 2026-10-30 time box: inside the main step's limit (counted from its later start) and inside the resume's rule.
+  t(checkTimeBox(TIME_BOX, 75) === true, 'the shipped time box fits the 75-minute main step');
+  for (const [label, box, timeout] of [
+    ['a handoff on the main step\'s limit', TIME_BOX, TIME_BOX.handoff_minutes],
+    ['a handoff less than the margin before the limit', TIME_BOX, TIME_BOX.handoff_minutes + TIME_BOX_MARGIN_MINUTES - 1],
+    ['an unreadable main step limit', TIME_BOX, NaN],
+    ['a wrap-up after the handoff', { ...TIME_BOX, wrap_up_minutes: TIME_BOX.handoff_minutes }, 75],
+    ['a handoff too late for a resume', { ...TIME_BOX, handoff_minutes: 78 }, 120],
+    ['another job limit', { ...TIME_BOX, job_minutes: 120 }, 75],
+    ['fractional minutes', { ...TIME_BOX, wrap_up_minutes: 59.5 }, 75],
+    ['no wrap-up', { ...TIME_BOX, wrap_up_minutes: 0 }, 75],
+  ]) {
+    assert.throws(() => checkTimeBox(box, timeout), /time box/, `time box must be refused: ${label}`); n++;
+  }
+  // The highest handoff the resume rule allows (77) still passes with a limit that leaves the margin.
+  t(checkTimeBox({ ...TIME_BOX, handoff_minutes: 77 }, 82) === true, 'the resume rule\'s last minute is allowed');
+  for (const [label, from, to, expected] of [
+    ['the main step limit inside the margin', '        timeout-minutes: 75\n      # 【2026-08-25 SHA pin】', '        timeout-minutes: 74\n      # 【2026-08-25 SHA pin】', /main step's limit/],
+    ['no time box step', '      - name: Set the model time box\n', '      - name: Set a model time box\n', /time box step/],
+    ['a time box from another clock', '          JOB_STARTED_EPOCH: ${{ steps.gate.outputs.job_started_epoch }}\n        run: |\n          set -o noclobber',
+      '          JOB_STARTED_EPOCH: ${{ steps.output_baseline.outputs.job_started_epoch }}\n        run: |\n          set -o noclobber', /Gate step's clock/],
+    ['no deadlines in the prompt', '${{ steps.timebox.outputs.wrap_up_at || \'unknown\' }}', 'unknown', /mention/],
+  ]) {
+    const mutated = workflow.replace(from, to);
+    t(mutated !== workflow, `time box mutation applies: ${label}`);
+    assert.throws(() => checkWiring(mutated), expected, `time box mutation must fail: ${label}`); n++;
+  }
+  // 2026-10-31 GitHub's expression limit (PR #2213: the prompt reached 21,284 UTF-8 bytes and GitHub refused the file,
+  // runs 41070835616 and 41092240147 with no jobs). The count is the format() expression GitHub builds, in UTF-8 bytes.
+  t(templateExpression('no expression') === null && templateExpression('${{ a }}') === 'a', 'a lone expression is itself');
+  t(templateExpression("it's {b} ${{ a }} ${{ c }}") === "format('it''s {{b}} {0} {1}', a, c)", 'quotes and braces are doubled in format()');
+  t(templateExpression("${{ format('}}', x) }} y") === "format('{0} y', format('}}', x))", 'a quoted }} does not close the expression');
+  assert.throws(() => templateExpression('x ${{ a } y'), /unclosed/); n++;
+  {
+    const fixture = [
+      'on: push',
+      'jobs:',
+      '  a:',
+      '    steps:',
+      '      - name: plain ${{ x }}',
+      '        run: |',
+      '          echo ${{ y }}',
+      '          key: ${{ inside_the_block }}',
+      '',
+      '          tail',
+      '',
+      '        with:',
+      '          folded: >-',
+      '            one ${{ z }}',
+      '            two',
+      "          quoted: 'it''s ${{ q }}'",
+      '          long: first ${{ w }}',
+      '            continued',
+      '          # comment ${{ ignored }}',
+      '          none: |',
+      '            no ${ { expression } } here',
+      '      - ${{ item }}',
+      '',
+    ].join('\n');
+    const bytes = text => Buffer.byteLength(text, 'utf8');
+    assert.deepEqual(templateStrings(fixture), [
+      { line: 5, key: 'name', bytes: bytes("format('plain {0}', x)") },
+      { line: 6, key: 'run', bytes: bytes("format('echo {0}\nkey: {1}\n\ntail\n', y, inside_the_block)") },
+      { line: 13, key: 'folded', bytes: bytes("format('one {0}\ntwo', z)") },
+      { line: 16, key: 'quoted', bytes: bytes("format('it''s {0}', q)") },
+      { line: 17, key: 'long', bytes: bytes("format('first {0} continued', w)") },
+      { line: 22, key: null, bytes: bytes('item') },
+    ], 'every string with ${{ }} is found once, block bodies are not read as keys'); n++;
+  }
+  {
+    // The margin is what keeps a prompt GitHub may count a little longer than this file does from shipping; it does
+    // not shrink to make a long prompt pass.
+    t(GITHUB_EXPRESSION_LIMIT === 21000 && EXPRESSION_MARGIN_BYTES >= 500
+      && EXPRESSION_BUDGET_BYTES === GITHUB_EXPRESSION_LIMIT - EXPRESSION_MARGIN_BYTES, 'GitHub\'s limit less a margin of at least 500 bytes');
+    const prompt = templateStrings(workflow).find(found => found.key === 'prompt');
+    t(prompt && prompt.bytes <= EXPRESSION_BUDGET_BYTES && EXPRESSION_BUDGET_BYTES < GITHUB_EXPRESSION_LIMIT, 'the shipped prompt is inside the budget');
+    t(checkExpressionLengths(workflow, prompt.bytes) === true, 'a budget equal to the prompt passes');
+    assert.throws(() => checkExpressionLengths(workflow, prompt.bytes - 1), /expression over/); n++;
+    // Padding the prompt line: exactly the budget passes, one byte more fails; the same size in a multibyte script
+    // fails although its UTF-16 length is far under GitHub's limit (the 10-30 prompt was 11,188 UTF-16 units).
+    const pad = filler => workflow.replace('【時間の期限】', `【時間の期限】${filler}`);
+    const room = EXPRESSION_BUDGET_BYTES - prompt.bytes;
+    t(room >= 0 && checkExpressionLengths(pad('x'.repeat(room))) === true, 'a prompt at the budget passes');
+    assert.throws(() => checkWiring(pad('x'.repeat(room + 1))), /expression over/); n++;
+    assert.throws(() => checkWiring(pad("'".repeat(Math.ceil((room + 1) / 2)))), /expression over/); n++;
+    const kana = pad('あ'.repeat(Math.ceil((room + 1) / 3)));
+    t(templateStrings(kana).find(found => found.key === 'prompt').bytes > EXPRESSION_BUDGET_BYTES, 'kana count three bytes each');
+    assert.throws(() => checkWiring(kana), /expression over/); n++;
+  }
+  // The stage rules the prompt points to stay in Runbook §5-1a.
+  {
+    const runbook = fs.readFileSync(path.join(ROOT, 'docs/obsidian/AUTOPILOT_RUNBOOK.md'), 'utf8');
+    checkTimeBoxRunbook(runbook); n++;
+    for (const [from, to] of [['`containment_changed`', 'containment'], ['55分後・65分後', '後で'], ['`handoff_now`', 'handoff'],
+      ['\n### 5-1a.', '\n### 5-1x.'], ['\n- **時間の期限', '\n- **期限']]) {
+      t(runbook.includes(from), `runbook mutation applies: ${from.trim()}`);
+      assert.throws(() => checkTimeBoxRunbook(runbook.replaceAll(from, to)), /Runbook/, `runbook mutation must fail: ${from.trim()}`); n++;
+    }
   }
   const now = Date.parse('2026-10-24T01:30:00Z');
   const clockDir = fs.mkdtempSync(path.join(os.tmpdir(), 'autopilot-clock-'));
@@ -1521,7 +1653,10 @@ async function main(argv = process.argv.slice(2)) {
   if (argv.includes('--selftest')) return selftest();
   if (argv.includes('--check')) {
     checkWiring(fs.readFileSync(path.join(ROOT, '.github/workflows/obsidian-autopilot.yml'), 'utf8'));
-    console.log('autopilot-publish: workflow wiring OK (model job has no write credential; publish runs only workflow-commit tools)');
+    // The prompt points to Runbook §5-1a for the time box's stage rules (2026-10-31).
+    checkTimeBoxRunbook(fs.readFileSync(path.join(ROOT, 'docs/obsidian/AUTOPILOT_RUNBOOK.md'), 'utf8'));
+    console.log('autopilot-publish: workflow wiring OK (model job has no write credential; publish runs only workflow-commit tools;'
+      + ' every expression is inside GitHub\'s length limit)');
     return;
   }
   if (argv.includes('--inspect-handoff')) {
