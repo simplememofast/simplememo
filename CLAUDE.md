@@ -217,6 +217,10 @@ head が `Codex/decision-observe-*` の open PR が**1本でもある**と、`pu
 し続けていた（run 35406523045）。**その #1430 自身は当日の別検査（`台帳が 2 日書かれていない`）
 で落ちてマージできず**、自分で自分を塞いでいた。
 
+**2026-10-30 から、待つのは Monitor 自身の公開 PR だけ**（このリポジトリのブランチから main へ、
+`simplememofast` が開いたもの）。フォークや別のアカウントが同じ名前で開いた PR は、番号を
+stderr に出して先へ進む。再監査で、外の人が PR を1本開くだけで `--apply` が毎回止まると分かったため。
+
 **open PR が全部同じ6件で落ちていたら、まず main を疑う。**
 `node scripts/check-autopilot-page.mjs --check` を main で走らせれば1分で分かる。
 

@@ -17,11 +17,21 @@ import { reportTranslationFiles } from './lib/report-publication.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = 'simplememofast/simplememo';
+// The account that opens this monitor's PRs, publications and reverts alike:
+// decision-monitor.yml runs --apply only with GH_PAT (never GITHUB_TOKEN, so
+// never github-actions[bot]), and auto-merge.yml, the only automated merge,
+// merges only PRs this account opened. A PR from any other opener could never
+// complete a publication or a rollback.
+const MONITOR_OPENER = 'simplememofast';
 const hash = x => createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const read = f => JSON.parse(fs.readFileSync(path.join(ROOT, f), 'utf8'));
 const save = (f, x) => fs.writeFileSync(path.join(ROOT, f), JSON.stringify(x, null, 2) + '\n');
 const git = (...args) => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }).trim();
-const gh = (...args) => JSON.parse(execFileSync('gh', args, { cwd: ROOT, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }));
+// PR lists carry bodies that anyone opening a PR writes, so their size is not
+// ours to bound either: 100 bodies of 65,536 characters, each escaped to six
+// bytes, are about 40 MiB. Above the buffer gh's output throws (ENOBUFS) and the
+// run exits before settlement, recovery and the report (re-audit 2026-10-30).
+const gh = (...args) => JSON.parse(execFileSync('gh', args, { cwd: ROOT, encoding: 'utf8', maxBuffer: 128 * 1024 * 1024 }));
 const api = route => gh('api', `repos/${REPO}/${route}`);
 const shaOK = s => /^[a-f0-9]{40}$/.test(s ?? '');
 const stop = () => { const s = read('data/emergency-stop.json'); return s.stopped || s.agents?.act?.stopped; };
@@ -82,17 +92,61 @@ export function reportTranslationChange(file, files) {
     && files.some(p => p.filename === 'autopilot/index.html');
 }
 
-export function pendingPublication(request = api) {
-  const listed = request('pulls?state=open&base=main&per_page=100');
-  assert(Array.isArray(listed) && listed.length < 100, 'pending decision PR inventory is incomplete');
-  assert(listed.every(p => Number.isSafeInteger(p?.number) && typeof p?.head?.ref === 'string'), 'pending PR inventory has an unknown entry');
-  const candidates = listed.filter(p => typeof p?.head?.ref === 'string' && p.head.ref.startsWith('Codex/decision-observe-'));
+// Anyone can open PRs against this repository, from a fork or from one of its own
+// branches, so how many there are is not ours to bound. Read every page rather
+// than assert that one was enough: 100 open PRs used to stop every --apply run
+// (re-audit 2026-10-30). Fail closed when GitHub's answer is broken: not a list,
+// a page above the requested size, an entry without a PR number or head branch
+// (a deleted fork keeps its head branch name), or a full page with nothing new
+// (the page was not advanced). PR_INVENTORY_PAGES only stops a
+// list that never ends: 10,000 PRs, where 17 were open into main on 2026-10-30.
+// A list really that long also fails closed. A PR opened between two reads
+// repeats an entry and is read once. One closed between two reads can move an
+// entry past a page boundary unseen; the next run reads the list again.
+export const PR_INVENTORY_PAGES = 100;
+export function pullRequestInventory(route, what, request = api) {
+  const rows = [], seen = new Set();
+  for (let page = 1; page <= PR_INVENTORY_PAGES; page++) {
+    const batch = request(`${route}&per_page=100&page=${page}`);
+    assert(Array.isArray(batch) && batch.length <= 100, `${what} is incomplete`);
+    let added = 0;
+    for (const p of batch) {
+      assert(Number.isSafeInteger(p?.number) && p.number > 0 && typeof p.head?.ref === 'string', `${what} has an unknown entry`);
+      if (seen.has(p.number)) continue;
+      seen.add(p.number); rows.push(p); added++;
+    }
+    if (batch.length < 100) return rows;
+    assert(added > 0, `${what} is not advancing`);
+  }
+  throw new Error(`${what} is incomplete after ${PR_INVENTORY_PAGES} pages`);
+}
+
+// Only the monitor's own publication makes it wait: a PR from this
+// repository's branch, into main, that the monitor's account opened. A fork can
+// name its branch Codex/decision-observe-*, and anyone can open a PR from one of
+// the publication branches still in this repository. Those are skipped and
+// reported by number, never read or asserted on (re-audit 2026-10-30: one such
+// fork PR made every --apply run exit before settlement, recovery and the report).
+const reportIgnoredPublications = numbers => console.error(
+  `decision-monitor: not a pending publication (fork, other opener or base): ${numbers.map(n => `#${n}`).join(', ')}`);
+
+export function pendingPublication(request = api, ignored = reportIgnoredPublications) {
+  const listed = pullRequestInventory('pulls?state=open&base=main', 'pending decision PR inventory', request);
+  const candidates = [], others = [];
+  for (const p of listed) {
+    const named = p.head.ref.startsWith('Codex/decision-observe-');
+    if (p.head.repo?.full_name !== REPO) { if (named) others.push(p.number); continue; }
+    if (!named) continue;
+    if (p.user?.login !== MONITOR_OPENER || p.base?.ref !== 'main' || p.base.repo?.full_name !== REPO) { others.push(p.number); continue; }
+    candidates.push(p);
+  }
+  if (others.length) ignored(others);
   const verified = [];
   for (const item of candidates) {
     assert(Number.isSafeInteger(item.number) && item.number > 0, 'pending decision PR identity missing');
     const route = `pulls/${item.number}`, pr = request(route);
     assert(pr?.number === item.number && pr.state === 'open' && pr.base?.ref === 'main'
-      && pr.base.repo?.full_name === REPO && pr.head?.repo?.full_name === REPO
+      && pr.base.repo?.full_name === REPO && pr.head?.repo?.full_name === REPO && pr.user?.login === MONITOR_OPENER
       && pr.head.ref === item.head.ref && shaOK(pr.head.sha), 'pending decision PR changed or targets another repository');
     const files = request(`${route}/files?per_page=100`);
     assert(Array.isArray(files) && files.length > 0 && files.length < 100 && files.length === pr.changed_files
@@ -153,24 +207,19 @@ export function resumeRecovery(previous, pr, { contractId, targetSha }) {
   return { ...record, revert_pr: pr.number };
 }
 
-// The account that opens this monitor's revert PRs: decision-monitor.yml runs
-// --apply only with GH_PAT (never GITHUB_TOKEN, so never github-actions[bot]),
-// and auto-merge.yml, the only automated merge, merges only PRs this account
-// opened. A revert PR from any other opener could never complete the rollback.
-const RECOVERY_OPENER = 'simplememofast';
-
 // A fork can open a PR from a branch with the recovery branch's exact name, and
 // `gh pr list --head` matches that name alone and returns only its newest 30.
 // Anyone can also open a PR from this repository's own branch, into any base.
 // The checkpoint is trusted only from this repository's branch, into main, in a
 // PR the monitor's account opened: the lookup is scoped to this owner's branch
 // by GitHub, and every other PR it returns is ignored, never read as a checkpoint.
+// Those other PRs, open or closed, can be many, so every page is read
+// (re-audit 2026-10-30; 100 of them used to stop the monitor).
 export function recoveryPullRequest(branch, request = api) {
   const owner = REPO.split('/')[0];
-  const listed = request(`pulls?state=all&head=${encodeURIComponent(`${owner}:${branch}`)}&per_page=100`);
-  assert(Array.isArray(listed) && listed.length < 100, 'recovery PR inventory is incomplete');
+  const listed = pullRequestInventory(`pulls?state=all&head=${encodeURIComponent(`${owner}:${branch}`)}`, 'recovery PR inventory', request);
   const pr = listed.find(p => p?.head?.ref === branch && p.head.repo?.full_name === REPO
-    && p.base?.ref === 'main' && p.user?.login === RECOVERY_OPENER);
+    && p.base?.ref === 'main' && p.user?.login === MONITOR_OPENER);
   if (!pr) return undefined;
   assert(['open', 'closed'].includes(pr.state), 'recovery PR state unknown');
   return { number: pr.number, body: pr.body, state: pr.state === 'open' ? 'OPEN' : pr.merged_at ? 'MERGED' : 'CLOSED' };
@@ -543,14 +592,20 @@ function selftest() {
   }
   assert.equal(automatedDecisionOrigin({ ...native, execution_origin: { ...native.execution_origin, receipt_sha256: '0'.repeat(64) } }), false);
   assert.equal(automatedDecisionOrigin({ ...native, execution_origin: null }), false);
-  const publication = { number: 321, state: 'open', draft: false, changed_files: 1,
+  const publication = { number: 321, state: 'open', draft: false, changed_files: 1, user: { login: 'simplememofast' },
     head: { ref: 'Codex/decision-observe-abc', sha: 'a'.repeat(40), repo: { full_name: REPO } },
     base: { ref: 'main', repo: { full_name: REPO } } };
+  // `list` is every open PR into main; GitHub hands it out 100 per page.
   const publicationApi = ({ list = [publication], detail = publication, files = [{ filename: 'data/value-contracts.json' }],
-    refreshed = detail, branch = detail.head?.sha } = {}) => {
+    refreshed = detail, branch = detail.head?.sha, routes = [] } = {}) => {
     let reads = 0;
     return route => {
-      if (route.startsWith('pulls?')) return list;
+      routes.push(route);
+      if (route.startsWith('pulls?')) {
+        const url = new URL(route, 'https://api.github.test/'), page = Number(url.searchParams.get('page'));
+        assert.deepEqual(Object.fromEntries(url.searchParams), { state: 'open', base: 'main', per_page: '100', page: String(page) });
+        return Array.isArray(list) ? list.slice((page - 1) * 100, page * 100) : list;
+      }
       if (route.includes('/files?')) return files;
       if (route.startsWith('git/ref/')) return { object: { sha: branch } };
       return ++reads === 1 ? detail : refreshed;
@@ -604,11 +659,68 @@ function selftest() {
       files: [{ filename: 'autopilot/index.html' }, bad] })), /unverified scope/);
   }
   assert.throws(() => pendingPublication(publicationApi({ files: [sitemapChange] })), /unverified scope/);
-  for (const options of [{ list: Array(100).fill(publication) }, { list: [{}] },
+  for (const options of [{ list: null }, { list: {} }, { list: [{}] }, { list: [{ ...publication, number: 0 }] },
+    { list: [{ ...publication, head: { ...publication.head, ref: null } }] },
     { files: [{ filename: '.github/workflows/decision-monitor.yml' }] }, { files: [] },
     { detail: { ...publication, changed_files: 2 } }, { detail: { ...publication, state: 'closed' } },
+    { detail: { ...publication, user: { login: 'attacker' } } },
     { refreshed: { ...publication, head: { ...publication.head, sha: 'b'.repeat(40) } } }, { branch: 'b'.repeat(40) }]) {
-    assert.throws(() => pendingPublication(publicationApi(options)), /pending/);
+    assert.throws(() => pendingPublication(publicationApi(options), () => {}), /pending/, JSON.stringify(options));
+  }
+  // Re-audit 2026-10-30: one fork PR named like a publication, or 100 open PRs,
+  // made every --apply run exit before settlement, recovery and the report. Only
+  // the monitor's own PR (this repository's branch, into main, opened by the
+  // monitor's account) makes it wait; the others are reported, never read.
+  const named = (number, change = {}) => ({ ...publication, ...change, number,
+    head: { ...publication.head, ref: `Codex/decision-observe-${number}`, ...change.head } });
+  const foreignNamed = [named(400, { head: { repo: { full_name: 'attacker/simplememo' } } }),
+    named(401, { head: { repo: null } }), named(402, { user: { login: 'attacker' } }), named(403, { user: null }),
+    named(404, { base: { ref: 'claude/other', repo: { full_name: REPO } } })];
+  const unreadable = [{ number: 405 }, { number: 406, head: null }, { number: 407, head: { ref: null, repo: null } }];
+  const unrelated = number => ({ number, state: 'open', user: { login: `user${number}` },
+    head: { ref: `feature-${number}`, sha: 'c'.repeat(40), repo: number % 2 ? { full_name: `user${number}/simplememo` } : { full_name: REPO } },
+    base: { ref: 'main', repo: { full_name: REPO } } });
+  const watch = (options, expected) => {
+    const routes = [], ignored = [];
+    const result = pendingPublication(publicationApi({ ...options, routes }), numbers => ignored.push(...numbers));
+    assert.deepEqual(result, expected === 'own' ? [{ pr: 321, head: publication.head.sha, draft: false }] : []);
+    return { routes, ignored, pages: routes.filter(r => r.startsWith('pulls?')).map(r => Number(new URL(r, 'https://api.github.test/').searchParams.get('page'))) };
+  };
+  for (const row of unreadable) {
+    assert.throws(() => pendingPublication(publicationApi({ list: [publication, row] }), () => {}), /unknown entry/,
+      `a list row without a head branch is a broken answer, not a foreign PR: ${JSON.stringify(row)}`);
+  }
+  const foreignOnly = watch({ list: foreignNamed, detail: foreignNamed[0] }, 'none');
+  assert.deepEqual(foreignOnly.ignored, [400, 401, 402, 403, 404], 'a PR named like a publication but not the monitor\'s own is reported by number');
+  assert(foreignOnly.routes.every(r => r.startsWith('pulls?')), 'a fork or foreign PR is never read or asserted on');
+  assert.deepEqual(watch({ list: [foreignNamed[0], publication, foreignNamed[2]] }, 'own').ignored, [400, 402], 'the own publication still waits beside them');
+  const crowd = Array.from({ length: 250 }, (_, i) => unrelated(1000 + i));
+  crowd[42] = named(1042, { head: { repo: { full_name: 'attacker/simplememo' } } });
+  assert.deepEqual(watch({ list: [...crowd.slice(0, 150), publication] }, 'own').pages, [1, 2], 'a publication on the second page is found');
+  assert.deepEqual(watch({ list: [...crowd.slice(0, 99), publication] }, 'own').pages, [1, 2], 'a full first page is followed by an empty one');
+  assert.deepEqual(watch({ list: crowd }, 'none').pages, [1, 2, 3], '250 open PRs are read to the end');
+  assert.deepEqual(watch({ list: [...crowd.slice(0, 99), publication, publication, crowd[100]] }, 'own').pages, [1, 2],
+    'a PR opened between two reads repeats an entry; it is read once');
+  for (const options of [{ files: [{ filename: '.github/workflows/decision-monitor.yml' }] }, { detail: { ...publication, state: 'closed' } },
+    { branch: 'b'.repeat(40) }]) {
+    assert.throws(() => pendingPublication(publicationApi({ ...options, list: [...crowd.slice(0, 150), publication] }), () => {}), /pending/,
+      'the own publication on a later page keeps every integrity check');
+  }
+  // GitHub's answer itself broken still fails closed: a page above the requested
+  // size, the same full page again (the page was not advanced), or no end.
+  const brokenPages = [
+    [() => crowd.slice(0, 101), /pending decision PR inventory is incomplete/],
+    [() => crowd.slice(0, 100), /pending decision PR inventory is not advancing/],
+    [route => Array.from({ length: 100 }, (_, i) => unrelated(Number(new URL(route, 'https://api.github.test/').searchParams.get('page')) * 1000 + i)),
+      new RegExp(`pending decision PR inventory is incomplete after ${PR_INVENTORY_PAGES} pages`)]];
+  for (const [pages, error] of brokenPages) {
+    let reads = 0;
+    assert.throws(() => pendingPublication(route => {
+      assert(route.startsWith('pulls?'));
+      if (++reads > PR_INVENTORY_PAGES) throw new Error('unbounded inventory');
+      return pages(route);
+    }, () => {}), error);
+    assert(reads <= PR_INVENTORY_PAGES, 'the inventory is bounded');
   }
   // A publication that cannot merge must turn the monitor red instead of waiting quietly.
   const opened = '2026-10-05T15:14:57Z', later = h => new Date(Date.parse(opened) + h * 36e5);
@@ -699,11 +811,12 @@ function selftest() {
   const revertBranch = `Codex/decision-revert-${p.mergeSha.slice(0, 12)}`;
   const listedPR = (number, repo, change = {}) => ({ number, state: 'closed', merged_at: '2026-09-04T01:10:00Z', body: checkpoint,
     user: { login: 'simplememofast' }, base: { ref: 'main' }, head: { ref: revertBranch, repo: repo && { full_name: repo } }, ...change });
-  const lookup = rows => route => {
-    const url = new URL(route, 'https://api.github.test/');
+  const lookup = (rows, pages = []) => route => {
+    const url = new URL(route, 'https://api.github.test/'), page = Number(url.searchParams.get('page'));
     assert.equal(url.pathname, '/pulls');
-    assert.deepEqual(Object.fromEntries(url.searchParams), { state: 'all', head: `simplememofast:${revertBranch}`, per_page: '100' });
-    return rows;
+    assert.deepEqual(Object.fromEntries(url.searchParams), { state: 'all', head: `simplememofast:${revertBranch}`, per_page: '100', page: String(page) });
+    pages.push(page);
+    return Array.isArray(rows) ? rows.slice((page - 1) * 100, page * 100) : rows;
   };
   const forkPRs = Array.from({ length: 40 }, (_, i) => listedPR(500 + i, 'attacker/simplememo', { state: 'open', merged_at: null }));
   assert.equal(recoveryPullRequest(revertBranch, lookup([...forkPRs, listedPR(499, null)])), undefined, 'a fork PR is never the recovery PR');
@@ -727,7 +840,17 @@ function selftest() {
   assert.throws(() => resumeRecovery(observed, recoveryPullRequest(revertBranch, lookup([listedPR(123, REPO, { merged_at: null })])), binding), /closed by an operator/);
   assert.equal(recoveryPullRequest(revertBranch, lookup([listedPR(123, REPO, { head: { ref: 'Codex/other', repo: { full_name: REPO } } })])), undefined);
   assert.equal(recoveryPullRequest(revertBranch, lookup([])), undefined);
-  for (const rows of [null, {}, Array(100).fill(listedPR(123, REPO))]) assert.throws(() => recoveryPullRequest(revertBranch, lookup(rows)), /recovery PR inventory/);
+  for (const rows of [null, {}, [{}]]) assert.throws(() => recoveryPullRequest(revertBranch, lookup(rows)), /recovery PR inventory/);
+  // Re-audit 2026-10-30: PRs from the recovery branch into other bases, or by
+  // other openers, can be many; 100 of them used to stop the monitor.
+  const crowdPRs = Array.from({ length: 150 }, (_, i) => listedPR(600 + i, REPO,
+    { state: 'open', merged_at: null, base: { ref: `other-${i}` }, user: { login: 'attacker' } }));
+  const recoveryPages = [];
+  assert.deepEqual(recoveryPullRequest(revertBranch, lookup([...crowdPRs, listedPR(123, REPO)], recoveryPages)),
+    { number: 123, state: 'MERGED', body: checkpoint }, 'the own recovery PR behind 150 others is found');
+  assert.deepEqual(recoveryPages, [1, 2]);
+  assert.equal(recoveryPullRequest(revertBranch, lookup(crowdPRs)), undefined);
+  assert.throws(() => recoveryPullRequest(revertBranch, () => crowdPRs.slice(0, 100)), /recovery PR inventory is not advancing/);
   assert.throws(() => recoveryPullRequest(revertBranch, lookup([listedPR(123, REPO, { state: undefined })])), /state unknown/);
   const humanObservation = { ...observed, trigger: 'workflow_dispatch', human_interventions: 1 };
   const humanPending = pendingRecovery(humanObservation, { head: p.headSha, probes: p.probes, now: p.now, trigger: 'schedule' });
