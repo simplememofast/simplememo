@@ -1,0 +1,183 @@
+name: PageSpeed Six Capture Diagnosis 2026-10-31
+on:
+  push:
+    branches: [Codex/perf-six-capture-diagnosis-20261031]
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    # One newly-created diagnostic branch, one attempt; no PR or merge path.
+    if: github.event.created == true && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        slot: [runner-a, runner-b]
+    env:
+      DIAG_SLOT: ${{ matrix.slot }}
+      DIAG_MAIN_SHA: dadaae45eae45005200e94bd6a569a6b621f2275
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - name: Save fixed allocation before setup or measurements
+        shell: bash
+        run: |
+          export DIAG_RESULTS="$RUNNER_TEMP/diag-export"
+          export NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules"
+          echo "DIAG_RESULTS=$DIAG_RESULTS" >> "$GITHUB_ENV"
+          echo "NODE_PATH=$NODE_PATH" >> "$GITHUB_ENV"
+          mkdir -p "$DIAG_RESULTS"
+          cp scripts/perf/diagnosis_20261031.plan.json "$DIAG_RESULTS/protocol.json"
+          sha256sum scripts/perf/diagnosis_20261031.cjs scripts/perf/diagnosis_cpu_20261031.html scripts/perf/lighthouse_runtime.cjs .github/workflows/perf-six-diagnosis.yml > "$DIAG_RESULTS/source-hashes.txt"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          data = {
+            'experiment': '20261031-six-en-once',
+            'slot': os.environ['DIAG_SLOT'],
+            'main': os.environ['DIAG_MAIN_SHA'],
+            'diagnosticCommit': os.environ['GITHUB_SHA'],
+            'runId': os.environ['GITHUB_RUN_ID'],
+            'runAttempt': os.environ['GITHUB_RUN_ATTEMPT'],
+            'totalRunners': 2,
+            'productionEnPerRunner': 3,
+            'controlPerRunner': 3,
+            'order': ['control-1', 'production-en-1', 'control-2', 'production-en-2', 'control-3', 'production-en-3'],
+            'retryPolicy': 'none; retain failures; never select runners by benchmark',
+            'initialState': 'planned before dependency setup',
+          }
+          Path(os.environ['DIAG_RESULTS'], 'allocation.json').write_text(json.dumps(data, indent=2) + '\n')
+          PY
+      - name: Verify fixed source and isolated diagnostic scope
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "$DIAG_MAIN_SHA"
+          git diff --exit-code "$DIAG_MAIN_SHA" -- index.html en/index.html assets js scripts/perf/lighthouse_runtime.cjs scripts/perf/summarize.py .github/workflows/pagespeed-audit.yml
+          echo '4e3390bb49a10a2257b9efb42ce70320f74b3d0fcfe7432d3c4de3eb25fd45be  scripts/perf/lighthouse_runtime.cjs' | sha256sum --check --strict
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        id: node
+        with:
+          node-version: '24.22.1'
+          package-manager-cache: false
+      - name: Install the existing audit font environment
+        id: fonts
+        timeout-minutes: 3
+        run: |
+          grep -qE '^https://archive\.ubuntu\.com/ubuntu/([[:space:]]|$)' /etc/apt/apt-mirrors.txt
+          sudo sed -i '\|^http://azure\.archive\.ubuntu\.com/ubuntu/|d' /etc/apt/apt-mirrors.txt
+          if grep -qF 'azure.archive.ubuntu.com' /etc/apt/apt-mirrors.txt; then exit 1; fi
+          sudo tee /etc/apt/apt.conf.d/99-ci-timeouts > /dev/null <<'APT'
+          Acquire::http::Timeout "30";
+          Acquire::https::Timeout "30";
+          Acquire::Retries "2";
+          APT::Update::Error-Mode "any";
+          APT
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+      - name: Install the existing pinned measurement tools
+        id: tools
+        timeout-minutes: 2
+        run: npm install --prefix "$RUNNER_TEMP/perf-tools" --no-save lighthouse@12.8.2 chrome-launcher@1.2.2 playwright@1.55.0
+      - name: Install and attest the same exact Chrome for Testing
+        id: browser
+        timeout-minutes: 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          browser_dir="$RUNNER_TEMP/perf-browser"
+          mkdir "$browser_dir"
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 \
+            --connect-timeout 15 --max-time 150 \
+            'https://storage.googleapis.com/chrome-for-testing-public/155.0.8059.39/linux64/chrome-linux64.zip' \
+            --output "$browser_dir/chrome-linux64.zip"
+          echo "55672d1f392fd3e7b7a08621b6e804e6bcb39d40cf155504abb74b3a021ea8ea  $browser_dir/chrome-linux64.zip" | sha256sum --check --strict
+          unzip -q "$browser_dir/chrome-linux64.zip" -d "$browser_dir"
+          export CHROME_PATH="$browser_dir/chrome-linux64/chrome"
+          mkdir "$RUNNER_TEMP/diag-install-private"
+          PERF_RESULTS="$RUNNER_TEMP/diag-install-private" node scripts/perf/lighthouse_runtime.cjs --verify-browser
+          echo "CHROME_PATH=$CHROME_PATH" >> "$GITHUB_ENV"
+      - name: Preserve only allowlisted browser installation evidence
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          raw_path = Path(os.environ['RUNNER_TEMP'], 'diag-install-private/browser-install.json')
+          try:
+            raw = json.loads(raw_path.read_text())
+          except (OSError, ValueError):
+            raw = {}
+          browser = raw.get('browser', {})
+          version = browser.get('version', {})
+          stdout = version.get('stdout', '')
+          safe_version = stdout if isinstance(stdout, str) and re.fullmatch(r'Google Chrome for Testing [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', stdout) else None
+          def digest(value):
+            return value if isinstance(value, str) and re.fullmatch('[a-f0-9]{64}', value) else None
+          result = {
+            'complete': raw.get('complete') is True,
+            'expectedVersion': 'Google Chrome for Testing 155.0.8059.39',
+            'observedVersion': safe_version,
+            'versionMatches': safe_version == 'Google Chrome for Testing 155.0.8059.39',
+            'versionExitStatus': version.get('status') if type(version.get('status')) is int else None,
+            'versionStderrEmpty': version.get('stderr') == '',
+            'archiveSha256': digest(raw.get('archiveSha256')),
+            'executableSha256': digest(browser.get('executableSha256')),
+            'error': None if raw.get('complete') is True else 'INSTALLATION_INCOMPLETE',
+          }
+          Path(os.environ['DIAG_RESULTS'], 'browser-install.json').write_text(json.dumps(result, indent=2) + '\n')
+          PY
+      - name: Execute the fixed three control and EN pairs without retry
+        id: measure
+        if: always() && steps.source.outcome == 'success' && steps.node.outcome == 'success' && steps.fonts.outcome == 'success' && steps.tools.outcome == 'success' && steps.browser.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          control_dir="$RUNNER_TEMP/diag-control"
+          mkdir "$control_dir"
+          cp scripts/perf/diagnosis_cpu_20261031.html "$control_dir/cpu-control.html"
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory "$control_dir" > "$RUNNER_TEMP/diag-control-server.log" 2>&1 &
+          control_pid=$!
+          trap 'kill "$control_pid" 2>/dev/null || true' EXIT
+          ready=false
+          for attempt in $(seq 1 20); do
+            kill -0 "$control_pid"
+            if curl --fail --silent http://127.0.0.1:8765/cpu-control.html --output "$RUNNER_TEMP/control-readiness.html"; then
+              echo "f22325df3615fd949b5765a12cbf5e6b03422ed77d6ea768b045c5f857ad07b6  $RUNNER_TEMP/control-readiness.html" | sha256sum --check --strict
+              ready=true
+              break
+            fi
+            sleep 0.1
+          done
+          test "$ready" = true
+          node scripts/perf/diagnosis_20261031.cjs
+      - name: Preserve setup and measurement outcomes including skipped attempts
+        if: always()
+        env:
+          DIAG_SOURCE_OUTCOME: ${{ steps.source.outcome }}
+          DIAG_NODE_OUTCOME: ${{ steps.node.outcome }}
+          DIAG_FONTS_OUTCOME: ${{ steps.fonts.outcome }}
+          DIAG_TOOLS_OUTCOME: ${{ steps.tools.outcome }}
+          DIAG_BROWSER_OUTCOME: ${{ steps.browser.outcome }}
+          DIAG_MEASURE_OUTCOME: ${{ steps.measure.outcome }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          fields = ['source', 'node', 'fonts', 'tools', 'browser', 'measure']
+          result = {name: os.environ['DIAG_' + name.upper() + '_OUTCOME'] for name in fields}
+          result['unstartedTrialsAreNotSuccessful'] = True
+          Path(os.environ['DIAG_RESULTS'], 'step-outcomes.json').write_text(json.dumps(result, indent=2) + '\n')
+          PY
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: perf-six-diagnosis-${{ matrix.slot }}
+          path: ${{ runner.temp }}/diag-export/
+          retention-days: 14
+          if-no-files-found: error

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-NGwAWVkC3Eefxk+vRA7T4RU7RfcQM83+TxKeW/D2xrQ='; img-src data:; base-uri 'none'; form-action 'none'">
+  <link rel="icon" href="data:,">
+  <title>Fixed CPU control</title>
+</head>
+<body>
+  <main>
+    <h1>Fixed CPU control</h1>
+    <p>Deterministic integer work for runner comparison.</p>
+  </main>
+  <script>
+'use strict';
+// Fixed before measurement: no elapsed-time loop or adaptive calibration.
+// This measures this integer/16 KiB memory workload, not total host capacity.
+const buffer = new Uint32Array(4096);
+const stages = [
+  {phase: 'warmup', index: 1, iterations: 1048576, expected: 148855246},
+  {phase: 'warmup', index: 2, iterations: 1048576, expected: 148855246},
+  {phase: 'sample', index: 1, iterations: 16777216, expected: 3576595659},
+  {phase: 'sample', index: 2, iterations: 16777216, expected: 3576595659},
+  {phase: 'sample', index: 3, iterations: 16777216, expected: 3576595659},
+];
+
+function reset(a) {
+  for (let i = 0; i < a.length; i++) {
+    a[i] = (Math.imul(i + 1, 0x9e3779b1) ^ 0xa5a5a5a5) >>> 0;
+  }
+}
+
+function kernel(a, n) {
+  let state = 0x12345678;
+  for (let i = 0; i < n; i++) {
+    const j = i & 4095;
+    state = (Math.imul(state ^ a[j], 1664525) + 1013904223) | 0;
+    state = state ^ (state >>> 13);
+    a[j] = (a[j] + state) >>> 0;
+  }
+  let checksum = state >>> 0;
+  for (let i = 0; i < a.length; i++) {
+    checksum = Math.imul(checksum ^ a[i], 16777619) >>> 0;
+  }
+  return checksum >>> 0;
+}
+
+function runStage(index) {
+  if (document.visibilityState !== 'visible') {
+    performance.mark('cpu-control-v1:error:hidden');
+    return;
+  }
+  const stage = stages[index];
+  // Allocation and deterministic reset stay outside the timed work.
+  reset(buffer);
+  const name = 'cpu-control-v1:' + stage.phase + ':' + stage.index;
+  performance.mark(name + ':start');
+  const checksum = kernel(buffer, stage.iterations);
+  // The consumed checksum prevents unobservable/dead work; no DOM mutations.
+  performance.mark(name + ':end:' + checksum);
+  if (checksum !== stage.expected) {
+    performance.mark('cpu-control-v1:error:checksum');
+    return;
+  }
+  if (index + 1 === stages.length) {
+    performance.mark('cpu-control-v1:done');
+  } else {
+    setTimeout(() => runStage(index + 1), 50);
+  }
+}
+
+let started = false;
+const observer = new PerformanceObserver(list => {
+  if (started || !list.getEntries().some(entry => entry.name === 'first-contentful-paint')) return;
+  started = true;
+  observer.disconnect();
+  performance.mark('cpu-control-v1:fcp-seen');
+  // Fixed scheduling delays keep work after visible content and inside the
+  // ordinary Lighthouse capture. Missing trace marks invalidate the control;
+  // they never cause a retry or a longer/adapted measurement window.
+  setTimeout(() => runStage(0), 100);
+});
+observer.observe({type: 'paint', buffered: true});
+  </script>
+</body>
+</html>
