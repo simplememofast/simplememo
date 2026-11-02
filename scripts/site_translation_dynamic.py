@@ -72,6 +72,10 @@ def wrap_code(code, rows):
 
 def inline_code(source, file, rows):
     expected = [row for row in rows if row['file'] == file]
+    # With no approved literals for this file there is nothing to rewrite or
+    # count. Other pipeline stages still validate the document's HTML.
+    if not expected:
+        return source
     changes = []
     count = 0
     for node in all_nodes(Parser(source).root):
@@ -169,3 +173,4 @@ def locale_assets(locale, catalog):
     assets.update(diagrams)
     paths.update(diagram_paths)
     return assets, paths, rows
+

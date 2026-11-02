@@ -16,6 +16,65 @@ from faq_question_audit import audit_page
 
 
 class TranslationPipelineTests(unittest.TestCase):
+    def test_document_validates_each_unit_once_and_aggregates_errors(self):
+        import site_translation_validation as validation
+        source = '<p>説明</p><p>別の説明</p>'
+        units = collect(source)
+        group = {'source': 'source.html', 'sourceLocale': 'ja', 'pages': {'en': 'en/source.html'}}
+        catalog = {'ja:'+u['id']: {'source': u['text'], 'text': '<script>bad</script>'} for u in units}
+        expected = 'source.html → en: ' + '; '.join('ja:'+u['id']+': unknown_markup' for u in units)
+        with patch.object(build, 'units_for', return_value=(source, units)), patch.object(validation, 'validate', wraps=validation.validate) as check:
+            with self.assertRaises(ValueError) as error:
+                build.translate_document(group, 'en', catalog, {})
+            self.assertEqual(str(error.exception), expected)
+            self.assertEqual(check.call_count, len(units))
+        # A subsequent call must see the changed catalog; no persisted result.
+        catalog['ja:'+units[0]['id']]['text'] = ''
+        with patch.object(build, 'units_for', return_value=(source, units)):
+            with self.assertRaisesRegex(ValueError, ': empty;'):
+                build.translate_document(group, 'en', catalog, {})
+
+    def test_json_payload_is_decoded_once_and_isolated_per_document(self):
+        import site_translation_validation as validation
+        payload = '{"@type":"WebPage","name":"説明","description":"別の説明","url":"https://simplememofast.com/source"}'
+        source = '<html><head><script type="application/ld+json">'+payload+'</script></head><body><details class="site-languages"><summary>JA</summary></details><p>説明</p></body></html>'
+        group = {'source': 'source.html', 'sourceLocale': 'ja', 'pages': {'ja': 'source.html', 'es': 'es/source.html', 'ko': 'ko/source.html'}}
+        units = collect(source) + collect_extra(source)
+        decode = json.loads
+        with patch.object(build, 'units_for', return_value=(source, units)), patch('sync_shared_chrome.transform', side_effect=lambda s, f:s), patch('sync_page_design.transform', side_effect=lambda s, f:s):
+            for locale, text in [('es', 'Descripción'), ('ko', '설명')]:
+                catalog = {'ja:'+u['id']: {'source': u['text'], 'text': text} for u in units}
+                with patch.object(build.json, 'loads', wraps=decode) as loads, patch.object(validation, 'validate', wraps=validation.validate) as check:
+                    output = build.translate_document(group, locale, catalog, {'/source': group})
+                self.assertEqual(sum(call.args[0] == payload for call in loads.call_args_list), 1)
+                # Includes only unit calls: diagram validation may warm its own cache.
+                for u in units:
+                    self.assertEqual(sum(call.args == (u['text'], text, locale) for call in check.call_args_list), sum(v['text'] == u['text'] for v in units))
+                data = decode(re.search(r'<script type="application/ld\+json">(.*?)</script>', output, re.S)[1])
+                self.assertEqual(data['name'], text)
+                self.assertEqual(data['description'], text)
+                self.assertEqual(data['url'], 'https://simplememofast.com/'+locale+'/source')
+        self.assertIn('説明', source)
+
+    def test_inline_no_binding_fast_path_does_not_parse(self):
+        source = '<html><script>const x = "unchanged";</script><p>Content</p></html>'
+        with patch.object(dynamic, 'Parser', side_effect=AssertionError('unnecessary parse')):
+            self.assertEqual(dynamic.inline_code(source, 'source.html', []), source)
+            self.assertEqual(dynamic.inline_code(source, 'source.html', [{'file': 'other.html'}]), source)
+
+    def test_inline_bindings_still_fail_when_script_changed_or_absent(self):
+        code = 'const x = "保存";'
+        start = code.index('"保存"')
+        row = {'file': 'source.html', 'scriptHash': hashlib.sha256(code.encode()).hexdigest(), 'start': start, 'end': start+4, 'literal': '"保存"', 'text': '保存'}
+        for source in ['<p>No script</p>', '<script>'+code+' // changed</script>']:
+            with self.assertRaisesRegex(ValueError, 'Re-extract changed inline program text: source.html'):
+                dynamic.inline_code(source, 'source.html', [row])
+        output = dynamic.inline_code('<script>'+code+'</script>', 'source.html', [row])
+        self.assertIn('globalThis.SimpleMemoI18n.text(', output)
+        row['literal'] = 'stale'
+        with self.assertRaisesRegex(ValueError, 'Dynamic text binding no longer matches'):
+            dynamic.inline_code('<script>'+code+'</script>', 'source.html', [row])
+
     def test_keep_product_labels_are_preserved_but_ordinary_verbs_translate(self):
         source='<p>KeepメモとKeepの設定</p><a>Keep</a><h2>Export Keep data</h2><p>Keep a backup</p>'
         units=collect(source)
@@ -323,3 +382,4 @@ class TranslationPipelineTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

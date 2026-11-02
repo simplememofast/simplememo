@@ -1,5 +1,6 @@
 // A CI success is not evidence that its report-only browser measurement ran.
 export const MARKER = 'SIMPLEMEMO_VIEWPORT_V1 ';
+export const WORKFLOW = 'viewport-full-report.yml';
 export const STEP = 'Landing pages do not scroll sideways (report-only)';
 const GROUPS = ['blink_deep', 'blink_sweep', 'webkit'];
 const sha = x => typeof x === 'string' && /^[a-f0-9]{40}$/.test(x);
@@ -90,11 +91,11 @@ export async function observeViewport({ repo, token, fetchImpl = fetch, now = Da
     if (merged.length > 1) return unknown('ambiguous_merged_pr');
     const head = merged[0]?.head.sha ?? main;
     evidence.head_sha = head;
-    const listing = await get(`/actions/workflows/seo-check.yml/runs?head_sha=${head}&per_page=100`);
+    const listing = await get(`/actions/workflows/${WORKFLOW}/runs?head_sha=${head}&per_page=100`);
     if (!Array.isArray(listing.workflow_runs) || listing.total_count > 100) return unknown('incomplete_run_list');
     const runs = listing.workflow_runs.filter(r => r.head_sha === head
       && r.repository?.full_name === repo && r.head_repository?.full_name === repo
-      && r.path === '.github/workflows/seo-check.yml'
+      && r.path === `.github/workflows/${WORKFLOW}`
       && (merged.length ? r.event === 'pull_request' : r.event === 'push' && r.head_branch === 'main'));
     runs.sort((a, b) => Date.parse(b.run_started_at) - Date.parse(a.run_started_at) || b.id - a.id);
     const run = runs[0];
@@ -164,3 +165,4 @@ export function viewportMeasured(params, ctx) {
   }
   return { closed: true, evidence: `最新main ${v.main_sha} の全範囲実測・新規横はみ出し0: ${v.url}` };
 }
+

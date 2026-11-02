@@ -23,3 +23,30 @@ GitHubの仕様上、GITHUB_TOKENによる自動マージではmain pushワー�
 場合があるため、「同一コミットの検査はすべて同じ」とは扱わない。
 
 仕様：[GitHub Actionsのイベント](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request)
+
+
+## Full viewport report is separate from the merge gate
+
+`viewport-full-report.yml` runs the unchanged exhaustive report on the same PR event
+merge tree and direct-main push event as SEO Validation. It has its own cancellation
+group and keeps all pages, widths, Chromium and WebKit. The static nowrap check,
+transport tests (including Xvfb setup), and Chromium pool integration test remain
+mandatory in SEO Validation. Main Daily Validation calls both workflows separately.
+No auto-merge rule, owner approval, authority boundary or token permission changes.
+
+GITHUB_TOKEN merges do not create main push runs. The already-started PR report
+continues after merge; the observer accepts only the exact same-repository merged
+PR head associated with current main, under its existing provenance rules. The
+checkout remains the event's merge tree, not a new checkout of that head. This is
+not proof that the PR merge tree equals a later squash commit after base advances.
+No new provenance claim or receipt reuse is introduced. Daily reports remain visible
+but are not accepted by the observer as PR-head recovery evidence.
+
+`viewport-health.mjs` now reads only Viewport Full Report. A green SEO Validation
+cannot close a viewport action. A pending report stays pending; a missing, canceled,
+incomplete, unmeasurable or wrong-source report never becomes healthy. During the
+migration, old SEO reports are deliberately not used as fallback.
+
+Local `scripts/preflight.mjs` follows the merge-gate commands; it no longer includes
+the exhaustive report. Run `node scripts/check-viewport-overflow.mjs --check`
+separately for the full local rendering check required by the Runbook.
