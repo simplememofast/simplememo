@@ -21,10 +21,12 @@ preflightは192件成功し、残るQR関連2件は新規worktreeの依存不足
 ## 更新手順
 
 ```sh
-python3 scripts/build_font_delta.py
+~/.venvs/simplememo-fonts/bin/python scripts/build_font_delta.py
 node scripts/check-css-version.mjs --write
 node scripts/preflight.mjs
 ```
+
+Python の環境は CLAUDE.md の「Homepage performance assets」で作る専用 venv（2026-11-02 の #2238 から）。生成器は、fontTools が修正済みの brotli（1.2.1 以上）で WOFF2 を展開する環境でなければ、フォントを読む前に止まる。
 
 生成器は2つのCSS内の対応するfont-faceが各2件であることと、生成した各ウエイトの文字収録を検査し、範囲とコンテンツハッシュを更新する。必要なページの文字が増えた場合は再生成し、ブラウザーのフォント取得を確認する。
 

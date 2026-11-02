@@ -12,7 +12,10 @@ PR⑥ のバナーは「幅 1536px > 1200px」で G1 に 1 が付き、そのう
 （docs/pr-banner-audit-2026-09-02.md §2）。**幅は通って、中身が壊れていた。**
 数字で落とせるのは3つだけなので、そこは機械に固定し、残りは切った絵を人が見る。
 
-依存: python3 -m pip install Pillow==12.3.0
+依存: Pillow 13.0.0（scripts/perf/requirements-fonts.txt と同じ版）。CLAUDE.md の
+「Homepage performance assets」で作る ~/.venvs/simplememo-fonts に入っているので、
+上の python3 の代わりに ~/.venvs/simplememo-fonts/bin/python で動かせる
+（macOS の素の python3 が Apple の 3.9 だと、この版は入らない）。
 """
 
 from __future__ import annotations
