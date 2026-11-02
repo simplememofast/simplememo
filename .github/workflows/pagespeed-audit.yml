@@ -74,9 +74,11 @@ jobs:
       - name: Reproduce generated assets and test integrity guards
         timeout-minutes: 3
         run: |
-          pip install fonttools==4.63.0 brotli==1.2.1 Pillow==12.3.0
-          # FontTools prefers brotlicffi when present; require the patched decoder.
-          python -c "import brotli; from fontTools.ttLib import woff2; assert woff2.brotli is brotli; assert brotli.__version__ == '1.2.1'; print('WOFF2 decoder:', woff2.brotli.__name__, brotli.__version__)"
+          # Same hash-pinned file as local generation (CLAUDE.md), so its Linux hashes are checked on every run.
+          pip install --require-hashes --only-binary=:all: -r scripts/perf/requirements-fonts.txt
+          # FontTools prefers brotlicffi when present; require the patched decoder (raises, so -O cannot skip it).
+          python scripts/perf/woff2_guard.py
+          python scripts/perf/test_woff2_guard.py
           python scripts/perf/build_home.py --check
           python scripts/perf/verify_home.py --selftest
           python scripts/perf/verify_home.py

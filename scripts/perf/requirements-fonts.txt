@@ -1,0 +1,17 @@
+# Font/image generation only (scripts/perf/build_home.py, scripts/build_font_delta.py).
+# Installed by PageSpeed Audit and, locally, into a dedicated Python 3.13 venv (CLAUDE.md):
+#   python -m pip install --require-hashes --only-binary=:all: -r scripts/perf/requirements-fonts.txt
+# Do not add brotlicffi: fontTools prefers it over brotli; scripts/perf/woff2_guard.py rejects it.
+# Hashes: CPython 3.13 wheels for Apple Silicon macOS (arm64/universal2) and manylinux x86_64,
+# from PyPI JSON 2026-11-02. Other CPUs and Python versions fail the hash check on purpose.
+# To bump a package, replace its version and all of its hashes together, then run build_home.py --check.
+# A Dependabot update adds every platform's hashes; trim them back to these two before merging.
+fonttools==4.63.0 \
+    --hash=sha256:cd7e9857e5e63738b9d9fd707bc1f59c8b09e5177726d23664db393c59bb08bd \
+    --hash=sha256:22135da48a348785c5e2d5d2d9d6bec5ed44adacbaeb9db12d9493bf6c6bfa68
+brotli==1.2.1 \
+    --hash=sha256:a84e0ae14d1efe782a9f143021c4e01d5ed986a140fe5070505cc5978eaf0592 \
+    --hash=sha256:264fd5b200f6f6170cb551a4b9fcaabf8aa846ddaefe72db4d5f49f9d3743df9
+pillow==13.0.0 \
+    --hash=sha256:f11a3c1358bb3c68012a7b1f41b223c3db9f7bfde90b481df028cfe1c3363313 \
+    --hash=sha256:5f56499c1a74d2b862beb0c33b8016f99d095858455df9d21583bbbc1c15b582
