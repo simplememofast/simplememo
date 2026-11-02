@@ -17,9 +17,9 @@ import sys
 # CVE-2026-111497 (out-of-bounds write in the decoder) is fixed in brotli 1.2.1,
 # the only fixed release on PyPI (upstream's 1.1.1 and 1.0.10 were not published there).
 MINIMUM_BROTLI = (1, 2, 1)
-# Matches the PageSpeed Audit step (`woff2.brotli is brotli`). brotlicffi is
-# rejected even when patched (>= 1.2.1.0) so local runs use the same decoder
-# as CI; allow it only together with a CI change and a byte-for-byte check.
+# PageSpeed Audit runs this module too. brotlicffi is rejected even when patched
+# (>= 1.2.1.0) so local runs and CI use the same decoder; allow it only together
+# with a byte-for-byte check of the generated assets.
 ALLOWED_PROVIDER = 'brotli'
 FIX = ('Use the dedicated venv: python3.13 -m venv ~/.venvs/simplememo-fonts && '
        '~/.venvs/simplememo-fonts/bin/python -m pip install --require-hashes --only-binary=:all: '
