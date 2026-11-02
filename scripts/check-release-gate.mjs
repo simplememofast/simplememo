@@ -108,6 +108,9 @@ export function evaluateSubmission({ policy, build, ci, quality_alternative, rel
   // **到達しない門に条件を置いたままにすると、条件が在ることと効くことがずれる。**
   // だから同じ条件をこちら側にも置く（あちらからは消さない ——
   // `asc-release-type.yml` で1版だけ MANUAL に戻せば、あちらの経路は復活する）。
+  //
+  // [2026-11-02] オーナー方針「承認後自動一括公開」で、台帳の require_phased_release は
+  // false になった。条件式は残す —— policy を true に戻せば、両方の門でそのまま効く。
   if (policy.require_phased_release === true && review.phased_release !== true) {
     return review.phased_release === undefined
       ? unknown('段階リリースの設定 — **承認された瞬間に出るので、提出の時点で要る**')
@@ -282,9 +285,8 @@ export function validate(doc) {
   if (typeof p.daily_cap === 'number' && p.daily_cap <= 0) {
     problems.push('policy.daily_cap が正でない — **上限の無い門は使えない**');
   }
-  if (p.require_phased_release === false) {
-    problems.push('require_phased_release が false — **一度に全員へ出す設定は、この門では通さない**');
-  }
+  // [2026-11-02] 一度に全員へ出すかはオーナーが決めた（承認後自動一括公開）。
+  // false も台帳として通す。真偽値でなければ上で落ちる（欠落を「不要」と読まない）。
   if (!Array.isArray(p.require_release_notes_locales) || p.require_release_notes_locales.length === 0) {
     problems.push('require_release_notes_locales が空 — **言語を1つも要求しない設定にしない**');
   }
@@ -339,6 +341,13 @@ function selftest() {
     const r = evaluateSubmission(subOk(over));
     assert(r.decision === 'hold', `hold になっていない（${r.decision}: ${r.why}）`);
     if (needle) assert(r.why.includes(needle), `理由が違う: ${r.why}`);
+  };
+  /** 段階リリースを要求する policy の検体（実台帳は 2026-11-02 から要求しない）。 */
+  const phasedRequired = (c) => { c.policy.require_phased_release = true; return c; };
+  const heldPhased = (evaluate, c, needle) => {
+    const r = evaluate(phasedRequired(c));
+    assert(r.decision === 'hold', `hold になっていない（${r.decision}: ${r.why}）`);
+    assert(r.why.includes(needle), `理由が違う: ${r.why}`);
   };
   const heldR = (over, needle) => {
     const r = evaluateRelease(relOk(over));
@@ -451,11 +460,11 @@ function selftest() {
 
     // **段階リリースを提出側でも要求する**（2026-09-03・自動公開の帰結）。
     // ここが無いと、承認された瞬間に全員へ出る版を、門が素通りさせる。
-    ['**段階リリースでなければ提出しない**', () => heldS(
-      { review: { submission_open: false, phased_release: false } }, '一度に全員',
+    ['**段階リリースを要求する policy では、段階リリースでなければ提出しない**', () => heldPhased(
+      evaluateSubmission, subOk({ review: { submission_open: false, phased_release: false } }), '一度に全員',
     )],
-    ['段階リリースの設定が読めなければ提出しない', () => heldS(
-      { review: { submission_open: false } }, '材料が無い',
+    ['段階リリースを要求する policy では、設定が読めなければ提出しない', () => heldPhased(
+      evaluateSubmission, subOk({ review: { submission_open: false } }), '材料が無い',
     )],
     ['提出側の段階リリースは policy で切れる（公開側と同じ条件式）', () => {
       const c = subOk({ review: { submission_open: false, phased_release: false } });
@@ -473,10 +482,20 @@ function selftest() {
       const v = { ...relOk().review }; delete v.state;
       heldR({ review: v }, '材料が無い');
     }],
-    ['**段階リリースでなければ公開しない**', () => heldR({ review: { ...relOk().review, phased_release: false } }, '一度に全員')],
-    ['段階リリースの設定が読めなければ hold', () => {
+    ['**段階リリースを要求する policy では、段階リリースでなければ公開しない**', () => heldPhased(
+      evaluateRelease, relOk({ review: { ...relOk().review, phased_release: false } }), '一度に全員',
+    )],
+    ['段階リリースを要求する policy では、設定が読めなければ hold', () => {
       const v = { ...relOk().review }; delete v.phased_release;
-      heldR({ review: v }, '材料が無い');
+      heldPhased(evaluateRelease, relOk({ review: v }), '材料が無い');
+    }],
+    ['**実台帳（2026-11-02）では、段階リリース無しでも他の条件で提出・公開を決める**', () => {
+      assert(doc.policy.require_phased_release === false, '台帳はオーナー方針どおり false');
+      const s = evaluateSubmission(subOk({ review: { submission_open: false, phased_release: false } }));
+      assert(s.decision === 'submit', JSON.stringify(s));
+      const r = evaluateRelease(relOk({ review: { ...relOk().review, phased_release: false } }));
+      assert(r.decision === 'release', JSON.stringify(r));
+      heldR({ review: { ...relOk().review, phased_release: false, approved_at: ago(1) } }, '承認から');
     }],
     ['承認直後は公開しない', () => heldR({ review: { ...relOk().review, approved_at: ago(1) } }, '承認から')],
     ['**クラッシュ率の母数が足りなければ判定しない**', () => {
@@ -494,9 +513,15 @@ function selftest() {
     ['公開側も日次上限に従う', () => heldR({ doneToday: 1 }, '上限')],
 
     // --- 台帳の検査 ---
-    ['**段階リリースを外した台帳は落ちる**', () => {
+    ['段階リリースを外した台帳も通る（2026-11-02 オーナー方針）', () => {
       const p = validate(broken(doc, (d) => { d.policy.require_phased_release = false; }));
-      assert(p.some((x) => x.includes('一度に全員')), p.join(' / '));
+      assert(p.length === 0, p.join(' / '));
+    }],
+    ['**段階リリースの欄が真偽値でなければ落ちる**（欠落を「不要」と読まない）', () => {
+      for (const value of [undefined, 'false', 0, null]) {
+        const p = validate(broken(doc, (d) => { d.policy.require_phased_release = value; }));
+        assert(p.some((x) => x.includes('require_phased_release')), `${String(value)}: ${p.join(' / ')}`);
+      }
     }],
     ['daily_cap 0 の台帳は落ちる', () => {
       const p = validate(broken(doc, (d) => { d.policy.daily_cap = 0; }));
