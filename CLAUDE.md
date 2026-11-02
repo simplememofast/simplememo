@@ -443,11 +443,18 @@ Shared source CSS and all original image fallbacks remain authoritative.
 After editing either homepage, its source CSS, fonts or banner images, run:
 
 ```sh
-python3 -m pip install fonttools==4.63.0 brotli==1.2.1 Pillow==12.3.0
-python3 scripts/perf/build_home.py --write
-python3 scripts/perf/build_home.py --check
+python3.13 -m venv ~/.venvs/simplememo-fonts   # once, outside the repo; never add brotlicffi
+~/.venvs/simplememo-fonts/bin/python -m pip install --require-hashes --only-binary=:all: -r scripts/perf/requirements-fonts.txt
+~/.venvs/simplememo-fonts/bin/python scripts/perf/build_home.py --write
+~/.venvs/simplememo-fonts/bin/python scripts/perf/build_home.py --check
 node scripts/check-css-version.mjs
 ```
+
+`build_home.py` and `build_font_delta.py` stop before reading any WOFF2 unless
+fontTools would decode it with brotli >= 1.2.1 (`scripts/perf/woff2_guard.py`).
+PageSpeed Audit installs the same file. Its hashes cover CPython 3.13 on Apple
+Silicon and Linux x86_64 only. On macOS a bare `python3` may be Apple's 3.9,
+which cannot install these pins; if `python3.13` is missing, `brew install python@3.13`.
 
 Commit the changed HTML, content-addressed `assets/home-perf/` files and manifest
 together. The existing SEO CSS check rejects stale inline CSS, missing/corrupt

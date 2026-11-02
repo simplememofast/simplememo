@@ -8,8 +8,12 @@ comment in assets/css/style.css.
 
 After adding/changing visible text on a PAGES entry, run:
 
-    pip install fonttools brotli
-    python3 scripts/build_font_delta.py
+    python3.13 -m venv ~/.venvs/simplememo-fonts
+    ~/.venvs/simplememo-fonts/bin/python -m pip install --require-hashes --only-binary=:all: -r scripts/perf/requirements-fonts.txt
+    ~/.venvs/simplememo-fonts/bin/python scripts/build_font_delta.py
+
+The script stops before reading any WOFF2 unless fontTools uses brotli >= 1.2.1
+(scripts/perf/woff2_guard.py).
 
 The script updates both CSS font-face ranges and content-hashed font URLs,
 including the homepage preloads. Then run:
@@ -26,6 +30,7 @@ import html
 import hashlib
 import os
 import re
+import sys
 
 from fontTools.subset import Options, Subsetter, load_font, save_font
 from fontTools.ttLib import TTFont
@@ -126,6 +131,10 @@ def update_css_and_preloads(delta, extended):
 
 
 def main():
+    sys.path.insert(0, os.path.join(ROOT, "scripts", "perf"))
+    from woff2_guard import require_patched_decoder
+    print("WOFF2 decoder:", require_patched_decoder())  # raises, not assert
+
     # CSS declares Regular as 400 and Bold as 500–800. Verify the binaries
     # match those declarations before deriving any child font. A 2026-09-19
     # audit found the files named "Regular" were actually 100/Thin outlines,

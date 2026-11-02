@@ -57,6 +57,8 @@ def characters(html: str, css: str) -> set[int]:
 
 
 def build() -> dict[str, bytes]:
+    from woff2_guard import require_patched_decoder
+    require_patched_decoder()  # before any WOFF2 is decoded; raises, not assert
     from fontTools import subset
     from fontTools.ttLib import TTFont
     from PIL import Image
