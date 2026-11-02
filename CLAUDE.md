@@ -443,7 +443,7 @@ Shared source CSS and all original image fallbacks remain authoritative.
 After editing either homepage, its source CSS, fonts or banner images, run:
 
 ```sh
-python3 -m pip install fonttools==4.63.0 brotli==1.2.0 Pillow==12.3.0
+python3 -m pip install fonttools==4.63.0 brotli==1.2.1 Pillow==12.3.0
 python3 scripts/perf/build_home.py --write
 python3 scripts/perf/build_home.py --check
 node scripts/check-css-version.mjs
