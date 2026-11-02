@@ -51,7 +51,13 @@
     "【2026-09-08 有効化】",
     "上記のenabled=false・経路外という記述は導入時の履歴。現在はpolicyをenabled=true / dry_run=falseへ移す。",
     "実行側はsimplememo-ios#423の恒常委任経路、enforce=true、DELEGATED_SUBMISSION_ENABLED=trueを別途必要とする。",
-    "本変更は申請をdispatchせず、過去の個別承認提出を自律提出へ読み替えない。実行実績が確認されるまで実行率は変更しない。"
+    "本変更は申請をdispatchせず、過去の個別承認提出を自律提出へ読み替えない。実行実績が確認されるまで実行率は変更しない。",
+    "",
+    "【2026-11-02 オーナー方針：承認後自動一括公開】",
+    "オーナーが 5.9.24 (2209) 以降の版について、Apple の承認後に自動で、全員へ一度に公開すると決めた。",
+    "上の【段階公開を必須にしている理由】は履歴。require_phased_release を false にした。",
+    "条件式は両方の門に残してあるので、true に戻せばそのまま効く。kill_switch・日次上限・CI・",
+    "実機確認・リリースノート・提出枠・承認後の待機など、ほかの条件は変えていない。"
   ],
   "policy": {
     "kill_switch": false,
@@ -72,8 +78,8 @@
     "$min_crash_free_sessions": "この母数に届かないクラッシュ率は**判定に使わない**（hold であって「異常なし」ではない）",
     "cooldown_after_kill_days": 7,
     "$cooldown_after_kill_days": "直近でカナリアの kill があったら、その間は出さない",
-    "require_phased_release": true,
-    "$require_phased_release": "**一度に全員へ出さない。**Apple の段階リリースでなければ通さない",
+    "require_phased_release": false,
+    "$require_phased_release": "2026-11-02 オーナー方針（承認後自動一括公開）で段階リリースを要求しない。true に戻すと、提出・公開の両方で段階リリースでなければ通さない",
     "require_ci_green": true,
     "require_release_notes_locales": [
       "ja",
