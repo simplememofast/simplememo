@@ -736,7 +736,10 @@ if (isMain) {
         console.log(`      right=${c.right} w=${c.width} <${c.tag}.${c.cls}> "${c.text}"`);
       }
     }
-    for (const f of wk.failures) console.log(`  ! WebKit で測れなかった ${f.page} @${f.width}px — ${f.why}`);
+    for (const f of wk.failures) {
+      console.log(`  ! WebKit で測れなかった ${f.page} @${f.width}px — ${f.why}`);
+      if (f.diagnostic) console.log(`    probe diagnostic: ${JSON.stringify(f.diagnostic)}`);
+    }
   }
   for (const f of [...(m.failures ?? []), ...(sweep?.failures ?? [])]) {
     console.log(`  ! 測れなかった ${f.page} @${f.width}px — ${f.why}`);
@@ -779,3 +782,4 @@ if (isMain) {
   if (!report && (m.problems.length || staticResult.problems.length || sweepFailed || wkFailed
     || (m.failures ?? []).length)) process.exit(1);
 }
+
