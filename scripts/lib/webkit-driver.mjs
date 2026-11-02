@@ -109,14 +109,30 @@ export async function ensureDisplay({ env = process.env, xvfbPath = '/usr/bin/Xv
  * `arguments` の最後は WebDriver の `execute/async` が渡すコールバック。
  */
 export const IFRAME_PROBE = `
-  const [path, width] = arguments;
+  const [path, width, probeId] = arguments;
   const done = arguments[arguments.length - 1];
+  // Retire the previous invocation before its late load/timer can call an
+  // expired WebDriver callback. Keep the load requirement and 320ms settle.
+  if (window.__viewportProbe) window.__viewportProbe.cancel();
   const prev = document.getElementById('__probe'); if (prev) prev.remove();
+  let active = true, settleTimer;
+  const state = window.__viewportProbe = { probeId, phase: 'loading',
+    cancel() { active = false; clearTimeout(settleTimer); f.onload = null; f.remove(); } };
+  const finish = value => {
+    if (!active) return;
+    active = false; clearTimeout(settleTimer); f.onload = null; f.remove();
+    state.phase = 'completed'; done(JSON.stringify(value));
+  };
   const f = document.createElement('iframe');
   f.id = '__probe';
   f.style.cssText = 'position:absolute;left:0;top:0;border:0;width:' + width + 'px;height:900px';
   f.src = path;
-  f.onload = () => setTimeout(() => {
+  f.onload = () => {
+    if (!active) return;
+    state.phase = 'settling';
+    settleTimer = setTimeout(() => {
+    if (!active) return;
+    state.phase = 'measuring';
     try {
       const d = f.contentDocument, de = d.documentElement;
       const vw = de.clientWidth, doc = de.scrollWidth;
@@ -138,10 +154,38 @@ export const IFRAME_PROBE = `
             text: (e.textContent || '').replace(/\\s+/g, ' ').trim().slice(0, 40) });
         }
       }
-      done(JSON.stringify({ vw, doc, over: doc - vw, culprits: culprits.slice(-3) }));
-    } catch (err) { done(JSON.stringify({ error: String(err && err.message || err).slice(0, 140) })); }
-  }, 320);
+      finish({ vw, doc, over: doc - vw, culprits: culprits.slice(-3) });
+    } catch (err) { finish({ error: String(err && err.message || err).slice(0, 140) }); }
+    }, 320);
+  };
   document.body.appendChild(f);`;
+
+// After a failed command, capture phase and outstanding geometry resources
+// before retiring its iframe. This is diagnostic only: never a measurement or
+// a retry, and the original failed case remains in failures.
+export const IFRAME_FAILURE_DIAGNOSTIC = `
+  const state = window.__viewportProbe;
+  if (!state) return { phase: 'unavailable' };
+  if (state.probeId !== arguments[0]) return { phase: 'superseded' };
+  const f = document.getElementById('__probe');
+  const code = (value, allowed) => allowed.includes(value) ? value : 'unavailable';
+  const result = { phase: code(state.phase, ['loading', 'settling', 'measuring', 'completed']) };
+  try {
+    const d = f?.contentDocument;
+    result.readyState = code(d?.readyState, ['loading', 'interactive', 'complete']);
+    result.fonts = code(d?.fonts?.status, ['loading', 'loaded']);
+    result.pendingImages = Array.from(d?.images || []).filter(i => !i.complete).length;
+    result.imageCount = Array.from(d?.images || []).length;
+  } catch { result.error = 'document-inspection-failed'; }
+  finally { state.cancel(); }
+  return result;`;
+
+export async function failedProbeDiagnostic(d, probeId) {
+  try {
+    return await d.call('POST', `/session/${d.session}/execute/sync`,
+      { script: IFRAME_FAILURE_DIAGNOSTIC, args: [probeId] }, { deadlineMs: 2_000 });
+  } catch { return { unavailable: 'diagnostic-command-failed' }; }
+}
 
 // The async script's own deadline is 60 seconds. Allow its error response to
 // arrive, but do not inherit fetch's much longer default transport deadline.
@@ -275,12 +319,13 @@ export async function measureWebKit({ pages, widths, port, concurrency = 3, base
         const { page, width } = jobs[i];
         try {
           const raw = await d.call('POST', `/session/${d.session}/execute/async`,
-            { script: IFRAME_PROBE, args: [page, width] });
+            { script: IFRAME_PROBE, args: [page, width, i] });
           const r = JSON.parse(raw);
           if (r.error) failures.push({ page, width, why: r.error });
           else results.push({ page, width, ...r });
         } catch (e) {
-          failures.push({ page, width, why: String(e.message || e).split('\n')[0].slice(0, 140) });
+          failures.push({ page, width, why: String(e.message || e).split('\n')[0].slice(0, 140),
+            diagnostic: await failedProbeDiagnostic(d, i) });
         }
       }
     }));
@@ -303,3 +348,4 @@ export async function measureWebKit({ pages, widths, port, concurrency = 3, base
 
 /** どこから読み込まれても壊れないよう、パスの組み立てだけ切り出しておく。 */
 export const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..');
+

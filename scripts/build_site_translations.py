@@ -17,7 +17,7 @@ from functools import lru_cache
 from urllib.parse import urljoin, urlsplit, urlunsplit
 from localization_registry import ROOT, groups, page_url, localized_fragment, indexed
 from site_translation_units import collect, collect_extra, prepare_source, source_language, examples_for, Parser, all_nodes
-from site_translation_validation import validate, render
+from site_translation_validation import render
 from site_translation_dynamic import bindings, locale_assets, inline_code
 from site_translation_literals import literal_filenames
 from site_translation_dates import source_dates, localize_dates, leftover_dates
@@ -157,15 +157,19 @@ def translate_document(group, locale, catalog, routes, script_paths=None, dynami
             errors.append(key + ': missing'); continue
         if entry['source'] != unit['text']:
             errors.append(key + ': stale source'); continue
-        problem = validate(unit['text'], entry['text'], locale)
-        if problem:
-            errors.append(key + ': ' + problem); continue
-        translated = render(unit, entry['text'], attribute=unit.get('kind') == 'attribute', locale=locale)
+        # render validates before restoring markup. Do not validate the same
+        # source/target pair a second time here; retain per-entry diagnostics.
+        try:
+            translated = render(unit, entry['text'], attribute=unit.get('kind') == 'attribute', locale=locale)
+        except ValueError as problem:
+            errors.append(key + ': ' + str(problem)); continue
         if group['sourceLocale'] == 'ja' and language == 'ja':
             translated = localize_dates(translated, source_dates(unit), locale)
         if unit.get('kind') == 'json':
             start, end = unit['script']
-            payload = payloads.setdefault((start, end), json.loads(source[start:end]))
+            if (start, end) not in payloads:
+                payloads[start, end] = json.loads(source[start:end])
+            payload = payloads[start, end]
             item = payload
             for key_part in unit['path'][:-1]:
                 item = item[key_part]
@@ -179,7 +183,8 @@ def translate_document(group, locale, catalog, routes, script_paths=None, dynami
     # when they contain no prose for the translation catalog.
     for node in all_nodes(Parser(source).root):
         if node.tag == 'script' and node.attrs.get('type') == 'application/ld+json':
-            payloads.setdefault((node.inner, node.end), json.loads(source[node.inner:node.end]))
+            if (node.inner, node.end) not in payloads:
+                payloads[node.inner, node.end] = json.loads(source[node.inner:node.end])
     source_canonical = SITE + page_url(group['source'])
     target_canonical = SITE + page_url(group['pages'][locale])
     def localized_schema(value, preserve_identity=False):
@@ -403,3 +408,4 @@ def main():
 
 if __name__ == '__main__':
     raise SystemExit(main())
+

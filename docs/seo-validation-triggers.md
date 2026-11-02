@@ -23,3 +23,52 @@ GitHubの仕様上、GITHUB_TOKENによる自動マージではmain pushワー�
 場合があるため、「同一コミットの検査はすべて同じ」とは扱わない。
 
 仕様：[GitHub Actionsのイベント](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request)
+
+
+## Full viewport report is separate from the merge gate
+
+`viewport-full-report.yml` runs the unchanged exhaustive report on the same PR event
+merge tree and direct-main push event as SEO Validation. It has its own cancellation
+group and keeps all pages, widths, Chromium and WebKit. The static nowrap check,
+transport tests (including Xvfb setup), and Chromium pool integration test remain
+mandatory in SEO Validation. Main Daily Validation calls both workflows separately.
+No auto-merge rule, owner approval, authority boundary or token permission changes.
+
+GITHUB_TOKEN merges do not create main push runs. The already-started PR report
+continues after merge; the observer accepts only the exact same-repository merged
+PR head associated with current main, under its existing provenance rules. The
+checkout remains the event's merge tree, not a new checkout of that head. This is
+not proof that the PR merge tree equals a later squash commit after base advances.
+No new provenance claim or receipt reuse is introduced. Daily reports remain visible
+but are not accepted by the observer as PR-head recovery evidence.
+
+`viewport-health.mjs` now reads only Viewport Full Report. A green SEO Validation
+cannot close a viewport action. A pending report stays pending; a missing, canceled,
+incomplete, unmeasurable or wrong-source report never becomes healthy. During the
+migration, old SEO reports are deliberately not used as fallback.
+
+Local `scripts/preflight.mjs` follows the merge-gate commands; it no longer includes
+the exhaustive report. Run `node scripts/check-viewport-overflow.mjs --check`
+separately for the full local rendering check required by the Runbook.
+
+## Mandatory gates run in isolated jobs
+
+SEO Validation retains every existing mandatory check. `seo-core` keeps the
+remaining steps in their original order, including the routine scope producer and
+all five conditional consumers. Translations, shared chrome plus sitemap, generators,
+and the three-file Autonomous Company suite each use an independent full-history
+checkout of the same event revision and the same pinned Node version. Generator
+writes/restores never share a worktree with readers. No artifacts or evidence are
+reused across revisions, and no permissions or conditional exemptions are added.
+
+The original `seo-check` check name is now an `always()` final aggregate. It requires
+exactly all five mandatory lane results to be `success`; failure, cancellation,
+skipping, missing results, and unexpected lane sets fail closed. Main-push IndexNow
+notification stays after successful aggregation with its existing conditions and
+nonblocking failure policy. Routine health stays independent and unchanged;
+auto-merge still requires success of the entire SEO Validation workflow.
+
+This changes dependency structure, not coverage. Local structural tests establish
+step accounting, command extraction and failure propagation; only an actual run at
+the published head can establish queue/setup overhead and whether the roughly
+five-minute target is met. No measured runtime improvement is claimed here.

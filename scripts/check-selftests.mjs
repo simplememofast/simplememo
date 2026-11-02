@@ -89,6 +89,12 @@ export function gatingChecks(workflow = WORKFLOW) {
   const steps = [];
   let cur = null;
   for (const raw of lines) {
+    // A new job's if/continue-on-error belongs to that job, not the previous
+    // job's last step. Independent mandatory lanes must not lose that step.
+    if (/^  [\w-]+:\s*$/.test(raw)) {
+      if (cur) steps.push(cur);
+      cur = null;
+    }
     let st = raw.trim();
     if (st.startsWith('- ')) {
       if (cur) steps.push(cur);
@@ -420,3 +426,4 @@ if (isMain) {
     console.log('\n列挙・証跡・ラチェットに問題なし。');
   }
 }
+

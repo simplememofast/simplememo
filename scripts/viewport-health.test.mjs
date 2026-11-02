@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { MARKER, STEP, measurementGroup, reportState, parseReport, observeViewport } from './lib/viewport-health.mjs';
+import { MARKER, STEP, WORKFLOW, measurementGroup, reportState, parseReport, observeViewport } from './lib/viewport-health.mjs';
 import { derive, merge, reconcile, classify, validateLedger } from './autopilot-act.mjs';
 
 const repo = 'simplememofast/simplememo';
@@ -18,7 +18,7 @@ const line = report => `${end.replace('00Z', '00.5000000Z')} ${MARKER}${JSON.str
 function fixture({ report = good(), log = line(report), change = () => {}, mainChanged = false,
   rerun = false, denial = false, pending = false, direct = false } = {}) {
   const run = { id: 100, run_attempt: 1, head_sha: direct ? main : head, repository: { full_name: repo },
-    head_repository: { full_name: repo }, path: '.github/workflows/seo-check.yml',
+    head_repository: { full_name: repo }, path: `.github/workflows/${WORKFLOW}`,
     event: direct ? 'push' : 'pull_request', head_branch: direct ? 'main' : 'Codex/example',
     status: pending ? 'in_progress' : 'completed', conclusion: 'success', run_started_at: start };
   const pr = { merged_at: end, merge_commit_sha: main, base: { ref: 'main', repo: { full_name: repo } },
@@ -40,7 +40,10 @@ function fixture({ report = good(), log = line(report), change = () => {}, mainC
     const route = url.replace(`https://api.github.com/repos/${repo}`, '');
     if (route === '/git/ref/heads/main') return json({ object: { sha: ++refs > 1 && mainChanged ? 'c'.repeat(40) : main } });
     if (route.startsWith('/commits/')) return json(state.prs);
-    if (route.startsWith('/actions/workflows/')) return json({ total_count: state.total, workflow_runs: [state.run] });
+    if (route.startsWith('/actions/workflows/')) {
+      assert.equal(route, `/actions/workflows/${WORKFLOW}/runs?head_sha=${direct ? main : head}&per_page=100`);
+      return json({ total_count: state.total, workflow_runs: [state.run] });
+    }
     if (route.endsWith('/jobs?per_page=100')) return json({ total_count: 1, jobs: [state.job] });
     if (route === '/actions/jobs/200/logs') return new Response(null, { status: 302, headers: { location: 'https://logs.example/signed' } });
     if (route === '/actions/runs/100') return json({ ...state.run, run_attempt: rerun ? 2 : 1 });
@@ -169,4 +172,12 @@ test('real authority routes the candidate to an AI session without granting an u
   assert.deepEqual(validateLedger(ledger, matrix), []);
   assert.equal(classify({ ...action, auto: 'not-authorized' }, matrix).owner, 'human');
   assert.equal(classify({ ...action, force_owner: 'human' }, matrix).owner, 'human');
+});
+
+
+// Fast gate success is never full-coverage evidence, even with a forged report step.
+test('SEO Validation cannot substitute for the independent full report', async () => {
+  const result = await observe({ change: s => { s.run.path = '.github/workflows/seo-check.yml'; } });
+  assert.equal(result.state, 'unknown');
+  assert.equal(result.reason, 'no_qualifying_run');
 });

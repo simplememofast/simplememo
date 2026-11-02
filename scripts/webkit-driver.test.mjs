@@ -4,8 +4,10 @@ import http from 'node:http';
 import { once, EventEmitter } from 'node:events';
 import { spawn, execFileSync } from 'node:child_process';
 import fs from 'node:fs';
+import vm from 'node:vm';
 import { webDriverCall, stopDrivers, driverDiagnostic, REQUEST_TIMEOUT_MS,
-  ensureDisplay, terminateOwnedProcess, initializeDriverSessions } from './lib/webkit-driver.mjs';
+  ensureDisplay, terminateOwnedProcess, initializeDriverSessions,
+  IFRAME_PROBE, IFRAME_FAILURE_DIAGNOSTIC, failedProbeDiagnostic } from './lib/webkit-driver.mjs';
 
 function ownedFixture(onKill) {
   const proc = Object.assign(new EventEmitter(), { pid: 123, exitCode: null, signalCode: null });
@@ -324,4 +326,101 @@ test('driver diagnostics distinguish process exit and stderr, with bounded singl
   assert(!result.includes('\n'));
   assert(result.length <= 600);
   assert(result.endsWith('last-error-marker'));
+});
+
+
+function fixture() {
+  const frames = [], timers = new Map(), results = [];
+  let serial = 0, invocation = 0;
+  const document = {
+    getElementById: () => frames.find(f => !f.removed),
+    createElement: () => {
+      const f = { style: {}, remove() { this.removed = true; },
+        contentDocument: { readyState: 'complete', URL: 'http://localhost/?token=secret#private',
+          fonts: { status: 'loaded' }, images: [],
+          documentElement: { clientWidth: 320, scrollWidth: 340 }, querySelectorAll: () => [] } };
+      frames.push(f); return f;
+    },
+    body: { appendChild() {} },
+  };
+  const context = vm.createContext({ window: {}, document, URL,
+    setTimeout(fn, delay) { assert.equal(delay, 320); timers.set(++serial, fn); return serial; },
+    clearTimeout(id) { timers.delete(id); } });
+  return { frames, timers, results, state: () => context.window.__viewportProbe,
+    start() { context.arguments = ['/', 320, ++invocation, value => results.push(JSON.parse(value))]; vm.runInContext('(function() {' + IFRAME_PROBE + '}).apply(null, arguments)', context); return frames.at(-1); },
+    diagnostic: (id = invocation) => { context.diagnosticArgs = [id]; return JSON.parse(JSON.stringify(vm.runInContext('(function() {' + IFRAME_FAILURE_DIAGNOSTIC + '}).apply(null, diagnosticArgs)', context))); },
+    settle() { for (const [id, fn] of timers) { timers.delete(id); fn(); } },
+  };
+}
+
+test('success preserves load plus 320ms readiness, reports real overflow and cleans owned frame/timer', () => {
+  const f = fixture(), frame = f.start();
+  assert.deepEqual(f.results, []);
+  frame.onload(); assert.deepEqual(f.results, []);
+  f.settle();
+  assert.deepEqual(f.results, [{ vw: 320, doc: 340, over: 20, culprits: [] }]);
+  assert.equal(frame.removed, true); assert.equal(frame.onload, null); assert.equal(f.timers.size, 0);
+});
+
+test('timed-out load diagnostics retire frame; late callback cannot contaminate next case', () => {
+  const f = fixture(), first = f.start(), lateLoad = first.onload;
+  first.contentDocument.readyState = 'loading';
+  first.contentDocument.images = [{ complete: false, src: 'https://example.test/image.png?secret=yes#private' }];
+  const diagnostic = f.diagnostic();
+  assert.deepEqual(diagnostic, { phase: 'loading', readyState: 'loading', fonts: 'loaded', pendingImages: 1, imageCount: 1 });
+  assert.equal(first.removed, true);
+  const next = f.start(); lateLoad(); f.settle();
+  assert.deepEqual(f.results, []);
+  next.onload(); f.settle(); assert.equal(f.results.length, 1);
+});
+
+test('timed-out settling cancels even an already queued callback and keeps failed case unmeasured', () => {
+  const f = fixture(), frame = f.start(); frame.onload();
+  const lateTimer = [...f.timers.values()][0];
+  assert.equal(f.diagnostic().phase, 'settling');
+  lateTimer(); assert.deepEqual(f.results, []); assert.equal(f.timers.size, 0);
+});
+
+test('measurement exception is a failure and cleans owned frame', () => {
+  const f = fixture(), frame = f.start(); frame.contentDocument.documentElement = null;
+  frame.onload(); f.settle();
+  assert.match(f.results[0].error, /clientWidth/);
+  assert.equal(frame.removed, true); assert.equal(f.timers.size, 0);
+});
+
+test('new invocation cancels predecessor even when its diagnostic command was unavailable', () => {
+  const f = fixture(), first = f.start(); first.onload(); const lateTimer = [...f.timers.values()][0];
+  const second = f.start(); lateTimer(); assert.deepEqual(f.results, []);
+  assert.equal(first.removed, true); second.onload(); f.settle(); assert.equal(f.results.length, 1);
+});
+
+test('diagnostic command is bounded, never retries measurement, and preserves unavailability', async () => {
+  const calls = [];
+  const diagnostic = await failedProbeDiagnostic({ session: 'fixture', call: async (...args) => {
+    calls.push(args); throw Error('https://user:password@example.test/path?token=secret#private');
+  } }, 42);
+  assert.deepEqual(diagnostic, { unavailable: 'diagnostic-command-failed' });
+  assert.equal(calls.length, 1); assert.equal(calls[0][1], '/session/fixture/execute/sync');
+  assert.deepEqual(calls[0][3], { deadlineMs: 2000 });
+  assert.deepEqual(calls[0][2].args, [42]);
+});
+
+test('diagnostic inspection errors cannot expose credential URLs and still clean frame', () => {
+  const f = fixture(), frame = f.start();
+  Object.defineProperty(frame, 'contentDocument', { get() { throw Error('https://user:password@example.test/?token=secret'); } });
+  assert.deepEqual(f.diagnostic(), { phase: 'loading', error: 'document-inspection-failed' });
+  assert.equal(frame.removed, true);
+});
+
+test('a remotely delayed diagnostic cannot inspect or cancel the next invocation', () => {
+  const f = fixture(); f.start(); const second = f.start();
+  assert.deepEqual(f.diagnostic(1), { phase: 'superseded' });
+  assert.notEqual(second.removed, true);
+  second.onload(); f.settle(); assert.equal(f.results.length, 1);
+});
+
+test('diagnostic state fields are fixed codes, not page-provided strings', () => {
+  const f = fixture(), frame = f.start();
+  f.state().phase = frame.contentDocument.readyState = frame.contentDocument.fonts.status = 'https://user:password@example.test/token/secret';
+  assert.deepEqual(f.diagnostic(), { phase: 'unavailable', readyState: 'unavailable', fonts: 'unavailable', pendingImages: 0, imageCount: 0 });
 });
