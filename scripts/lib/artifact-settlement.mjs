@@ -37,24 +37,78 @@ async function failedValidation(get, pr, repo, now) {
   const latest = [...rows].sort((a, b) => time(b.created_at) - time(a.created_at) || b.id - a.id)[0];
   if (latest.conclusion !== 'failure') return { reason: `latest_validation_${latest.conclusion}` };
   const jobs = await get(`/actions/runs/${latest.id}/attempts/${latest.run_attempt}/jobs?per_page=100`);
-  const named = Array.isArray(jobs?.jobs) ? jobs.jobs.filter(j => j?.name === 'seo-check') : [];
-  if (named.length !== 1 || named[0].conclusion !== 'failure') return { reason: 'validation_job_unknown' };
-  const steps = Array.isArray(named[0].steps) ? named[0].steps : [];
-  const failed = steps.filter(s => s?.conclusion === 'failure' && time(s.completed_at) !== null)
-    .sort((a, b) => time(a.completed_at) - time(b.completed_at));
-  const step = failed[0] ?? null;
-  const at = step ? time(step.completed_at) : time(named[0].completed_at);
+  const selected = validationJobs(jobs);
+  if (!selected) return { reason: 'validation_job_unknown' };
+  const failures = selected.filter(j => j.conclusion === 'failure');
+  if (!failures.length) return { reason: 'validation_job_unknown' };
+  if (failures.length > 1) return { reason: 'multiple_validation_failures' };
+  // In the parallel layout every failed lane must identify its real failing step.
+  // Never attribute an aggregate's generic failure to a test or silently ignore
+  // another failed lane with missing/malformed timing evidence.
+  if (selected.length > 1 && failures.some(j => !Array.isArray(j.steps)
+    || !j.steps.some(s => s?.conclusion === 'failure')
+    || j.steps.some(s => s?.conclusion === 'failure' && (!validFailureStep(s)
+      || time(s.completed_at) > now || time(s.completed_at) < time(latest.created_at))))) {
+    return { reason: 'failure_step_unknown' };
+  }
+  const failed = failures.flatMap(job => (Array.isArray(job.steps) ? job.steps : [])
+    .filter(s => s?.conclusion === 'failure' && time(s.completed_at) !== null)
+    .map(step => ({ job, step }))).sort((a, b) => time(a.step.completed_at) - time(b.step.completed_at));
+  const { job, step } = failed[0] ?? { job: failures[0], step: null };
+  const at = step ? time(step.completed_at) : time(job.completed_at);
   // Never substitute the run's creation time or "now" for an unknown failure time.
   if (at === null || at > now || at < time(latest.created_at)) return { reason: 'failure_time_unknown' };
   // Keep GitHub's own timestamp string (the ledger's other failed_at values use the same form).
-  return { run: latest, failed_at: step ? step.completed_at : named[0].completed_at,
+  return { run: latest, failed_at: step ? step.completed_at : job.completed_at, job: job.name,
     step: step && typeof step.name === 'string' ? step.name : null,
     step_number: step && Number.isSafeInteger(step.number) ? step.number : null };
 }
 
 const DAY_MS = 24 * 3600 * 1000;
-const failedStep = (jobs, step, jobName) => Array.isArray(jobs?.jobs) && jobs.jobs.some(j => jobName(String(j?.name))
-  && Array.isArray(j.steps) && j.steps.some(s => s?.conclusion === 'failure' && s.name === step));
+const LANES = ['seo-core', 'seo-translations', 'seo-pages', 'seo-generators', 'seo-company'];
+const AGGREGATE_STEP = 'Require every mandatory SEO lane to succeed';
+const validFailureStep = s => s?.conclusion === 'failure' && typeof s.name === 'string'
+  && s.name.trim().length > 0 && s.name !== AGGREGATE_STEP && time(s.completed_at) !== null;
+
+// A partial parallel inventory is not the old single-job layout. In particular,
+// cancellation/skipping is not evidence that the underlying tests rejected a PR.
+function validationJobs(response, daily = false) {
+  if (!Array.isArray(response?.jobs) || response.jobs.length >= 100
+    || (response.total_count !== undefined && response.total_count !== response.jobs.length)) return null;
+  const leaf = name => daily && typeof name === 'string' ? name.split(' / ').at(-1) : name;
+  const relevant = response.jobs.filter(j => ['seo-check', ...LANES].includes(leaf(j?.name)));
+  const aggregate = relevant.filter(j => leaf(j.name) === 'seo-check');
+  if (aggregate.length !== 1) return null;
+  const parallel = relevant.some(j => LANES.includes(leaf(j.name)))
+    || aggregate[0].steps?.some(s => s?.name === AGGREGATE_STEP);
+  if (!parallel) return aggregate[0].conclusion === 'failure' ? aggregate : null;
+  if (aggregate[0].conclusion !== 'failure') return null;
+  const lanes = LANES.map(name => relevant.filter(j => leaf(j.name) === name));
+  if (lanes.some(js => js.length !== 1 || !['success', 'failure'].includes(js[0].conclusion))) return null;
+  return lanes.flat().map(j => ({ ...j, name: leaf(j.name) }));
+}
+
+function failedStep(response, failure, daily = false) {
+  const jobs = validationJobs(response, daily);
+  if (!jobs) throw Error('validation jobs incomplete');
+  if (jobs.length > 1 && (!jobs.some(j => j.conclusion === 'failure')
+    || jobs.some(j => j.conclusion === 'failure' && (!Array.isArray(j.steps)
+      || !j.steps.some(validFailureStep)
+      || j.steps.some(s => s?.conclusion === 'failure' && !validFailureStep(s)))))) {
+    throw Error('validation failure evidence incomplete');
+  }
+  // During rollout a legacy main and parallel PR can reject the same test.
+  // Their lane identities cannot be proved equivalent from job logs alone.
+  // Preserve uncertainty instead of recording an unrelated artifact failure.
+  const crossLayout = (failure.job === 'seo-check') !== (jobs.length === 1);
+  if (crossLayout && jobs.some(j => j.conclusion === 'failure' && Array.isArray(j.steps)
+    && j.steps.some(s => validFailureStep(s) && s.name === failure.step))) {
+    throw Error('validation layout comparison uncertain');
+  }
+  return jobs.some(j => (daily ? j.name.split(' / ').at(-1) : j.name) === failure.job
+    && j.conclusion === 'failure' && Array.isArray(j.steps)
+    && j.steps.some(s => validFailureStep(s) && s.name === failure.step));
+}
 
 /**
  * A red main fails every PR at the same step (09-16..19 the /autopilot/ date score,
@@ -69,15 +123,13 @@ async function baseRed(get, repo, branch, failure) {
   if (!Array.isArray(daily?.workflow_runs)) throw Error('main validation unreadable');
   const last = daily.workflow_runs[0];
   if (last && last.conclusion === 'failure' && Math.abs(time(last.updated_at) - at) <= DAY_MS
-    && failedStep(await get(`/actions/runs/${last.id}/attempts/${last.run_attempt}/jobs?per_page=100`), failure.step,
-      name => name.endsWith('seo-check'))) return 'main_daily_validation';
+    && failedStep(await get(`/actions/runs/${last.id}/attempts/${last.run_attempt}/jobs?per_page=100`), failure, true)) return 'main_daily_validation';
   const recent = await get('/actions/workflows/seo-check.yml/runs?event=pull_request&status=completed&per_page=30');
   if (!Array.isArray(recent?.workflow_runs)) throw Error('sibling validations unreadable');
   const siblings = recent.workflow_runs.filter(r => r?.conclusion === 'failure' && r.head_branch !== branch
     && r.repository?.full_name === repo && Math.abs(time(r.created_at) - at) <= SETTLE_MS * 2).slice(0, 5);
   for (const r of siblings) {
-    if (failedStep(await get(`/actions/runs/${r.id}/attempts/${r.run_attempt}/jobs?per_page=100`), failure.step,
-      name => name === 'seo-check')) return 'sibling_pr_validation';
+    if (failedStep(await get(`/actions/runs/${r.id}/attempts/${r.run_attempt}/jobs?per_page=100`), failure)) return 'sibling_pr_validation';
   }
   return null;
 }
@@ -129,7 +181,7 @@ export async function settleArtifactPr(run, { repo, get, now = Date.now() }) {
     if (!v.run) return defer(pr.state === 'closed' ? `closed_${v.reason}` : v.reason, { pr: pr.number });
     if (pr.state === 'open' && now - time(v.failed_at) < SETTLE_MS) return defer('settling', { pr: pr.number, failed_at: v.failed_at });
     // Without the failing step's name a red main cannot be told apart.
-    if (v.step === null) return defer('failure_step_unknown', { pr: pr.number });
+    if (v.step === null || v.step === AGGREGATE_STEP) return defer('failure_step_unknown', { pr: pr.number });
     const red = await baseRed(get, repo, branch, v);
     if (red) return defer('base_red', { pr: pr.number, evidence: red });
     // Re-read right before deciding: a re-run, a push or a merge may have landed meanwhile.
@@ -145,7 +197,7 @@ export async function settleArtifactPr(run, { repo, get, now = Date.now() }) {
       if (ref?.object?.sha !== pr.head.sha) return defer('branch_moved', { pr: pr.number });
     }
     return { state: 'unshippable', reason: pr.state === 'closed' ? 'closed_after_failed_validation' : 'validation_failed_settled',
-      pr: pr.number, row, failed_at: v.failed_at, validation_run_id: v.run.id, step: v.step, step_number: v.step_number };
+      pr: pr.number, row, failed_at: v.failed_at, validation_run_id: v.run.id, job: v.job, step: v.step, step_number: v.step_number };
   } catch {
     // Never echo transport errors (they can carry credentials) or guess on a failed read.
     return defer('read_failed');
@@ -287,6 +339,60 @@ export async function settlementSelftest() {
   }
   await deferred({ jobs: { jobs: [{ name: 'seo-check', conclusion: 'failure', completed_at: '2026-10-05T01:50:00Z', steps: [] }] } },
     'failure_step_unknown');
+  // Parallel jobs retain lane identity; a generic aggregate failure is never
+  // shared-failure evidence. Keep all legacy assertions above unchanged.
+  const parallel = (lane = 'seo-core', stepName = steps[1].name, dailyPrefix = '') => ({ jobs: [
+    { name: dailyPrefix + 'seo-check', conclusion: 'failure', steps: [
+      { ...steps[1], name: AGGREGATE_STEP }] },
+    ...LANES.map(name => ({ name: dailyPrefix + name,
+      conclusion: name === lane ? 'failure' : 'success',
+      completed_at: '2026-10-05T01:50:00Z',
+      steps: name === lane ? [{ ...steps[1], name: stepName }] : [] })),
+  ] });
+  const laneFailure = parallel();
+  const settledLane = await settle({ jobs: laneFailure });
+  assert.equal(settledLane.state, 'unshippable');
+  assert.equal(settledLane.job, 'seo-core');
+  assert.equal(settledLane.failed_at, steps[1].completed_at);
+  assert.equal(open.job, 'seo-check', 'legacy job identity is retained');
+  await deferred({ jobs: laneFailure, siblings: sibling(), otherJobs: { 801: parallel() } }, 'base_red');
+  await deferred({ jobs: laneFailure, daily: redDaily,
+    otherJobs: { 700: parallel('seo-core', steps[1].name, 'validation / ') } }, 'base_red');
+  for (const mismatch of [parallel('seo-pages'), parallel('seo-core', 'Another step')]) {
+    assert.equal((await settle({ jobs: laneFailure, siblings: sibling(), otherJobs: { 801: mismatch } })).state,
+      'unshippable', 'same step in another lane or another step in same lane is not base red');
+  }
+  await deferred({ jobs: laneFailure, siblings: sibling(), otherJobs: { 801: step18('seo-check') } }, 'read_failed');
+  await deferred({ jobs: laneFailure, daily: redDaily, otherJobs: { 700: step18('validation / seo-check') } }, 'read_failed');
+  await deferred({ daily: redDaily, otherJobs: { 700: parallel('seo-core', steps[1].name, 'validation / ') } }, 'read_failed');
+  await deferred({ siblings: sibling(), otherJobs: { 801: parallel() } }, 'read_failed');
+  const twoFailed = parallel(); twoFailed.jobs[2].conclusion = 'failure';
+  twoFailed.jobs[2].steps = [{ ...steps[1], name: 'Unrelated second failure' }];
+  await deferred({ jobs: twoFailed, daily: redDaily,
+    otherJobs: { 700: parallel('seo-core', steps[1].name, 'validation / ') } }, 'multiple_validation_failures');
+  const aggregateOnly = { jobs: [parallel().jobs[0]] };
+  await deferred({ jobs: aggregateOnly }, 'validation_job_unknown');
+  await deferred({ jobs: laneFailure, siblings: sibling(), otherJobs: { 801: aggregateOnly } }, 'read_failed');
+  for (const conclusion of ['cancelled', 'skipped', null, 'invalid']) {
+    const broken = parallel(); broken.jobs[2].conclusion = conclusion;
+    await deferred({ jobs: broken }, 'validation_job_unknown');
+    await deferred({ jobs: laneFailure, siblings: sibling(), otherJobs: { 801: broken } }, 'read_failed');
+  }
+  for (const change of [{ steps: [] }, { steps: null }, { steps: [{ ...steps[1], completed_at: null }] }]) {
+    const broken = parallel(); Object.assign(broken.jobs[1], change);
+    await deferred({ jobs: laneFailure, siblings: sibling(), otherJobs: { 801: broken } }, 'read_failed');
+  }
+  const missingLane = parallel(); missingLane.jobs.pop();
+  await deferred({ jobs: missingLane }, 'validation_job_unknown');
+  const duplicateLane = parallel(); duplicateLane.jobs.push(duplicateLane.jobs[1]);
+  await deferred({ jobs: duplicateLane }, 'validation_job_unknown');
+  await deferred({ jobs: { ...parallel(), total_count: 100 } }, 'validation_job_unknown');
+  for (const change of [{ name: AGGREGATE_STEP }, { name: '' }, { completed_at: null },
+    { completed_at: '2026-10-05T00:59:00Z' }, { completed_at: '2026-10-06T00:00:00Z' }]) {
+    const broken = parallel(); Object.assign(broken.jobs[1].steps[0], change);
+    await deferred({ jobs: broken }, 'failure_step_unknown');
+  }
+
   for (const broken of [{ daily: null }, { siblings: null }]) await deferred(broken, 'read_failed');
   // Unreadable is never absence.
   for (const fail of ['/pulls?', '/pulls/7', '/contents/', '/actions/workflows/', '/actions/runs/900/attempts', '/git/ref'])
@@ -296,3 +402,4 @@ export async function settlementSelftest() {
   assert.equal((await settle({}, later, { id: 555, jst_date: '2026/10/05' })).reason, 'run_identity_unknown');
   return 'artifact settlement: 2 settled shapes, every doubt deferred';
 }
+

@@ -2371,7 +2371,7 @@ export const HANDLERS = {
         const own = settled.row.run_id;
         const day = run.jst_date.replace(/-/g, '');
         const rowId = typeof own === 'string' && new RegExp(`^ap-${day}-actions(?:-\\d+)?$`).test(own) && !taken.has(own) ? own : runId;
-        const where = settled.step ? `job seo-check の step #${settled.step_number}「${settled.step}」` : 'job seo-check';
+        const where = settled.step ? `job ${settled.job} の step #${settled.step_number}「${settled.step}」` : `job ${settled.job}`;
         const closed = settled.reason === 'closed_after_failed_validation';
         const args = ['--append', '--run-id', rowId, '--date', run.jst_date, '--route', 'actions',
           '--outcome', 'no_artifact', '--attempted', 'true', '--failure-class', 'no_artifact',
@@ -5613,3 +5613,4 @@ async function main() {
 if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch((e) => { console.error(e); process.exit(1); });
 }
+

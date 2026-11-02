@@ -50,3 +50,25 @@ migration, old SEO reports are deliberately not used as fallback.
 Local `scripts/preflight.mjs` follows the merge-gate commands; it no longer includes
 the exhaustive report. Run `node scripts/check-viewport-overflow.mjs --check`
 separately for the full local rendering check required by the Runbook.
+
+## Mandatory gates run in isolated jobs
+
+SEO Validation retains every existing mandatory check. `seo-core` keeps the
+remaining steps in their original order, including the routine scope producer and
+all five conditional consumers. Translations, shared chrome plus sitemap, generators,
+and the three-file Autonomous Company suite each use an independent full-history
+checkout of the same event revision and the same pinned Node version. Generator
+writes/restores never share a worktree with readers. No artifacts or evidence are
+reused across revisions, and no permissions or conditional exemptions are added.
+
+The original `seo-check` check name is now an `always()` final aggregate. It requires
+exactly all five mandatory lane results to be `success`; failure, cancellation,
+skipping, missing results, and unexpected lane sets fail closed. Main-push IndexNow
+notification stays after successful aggregation with its existing conditions and
+nonblocking failure policy. Routine health stays independent and unchanged;
+auto-merge still requires success of the entire SEO Validation workflow.
+
+This changes dependency structure, not coverage. Local structural tests establish
+step accounting, command extraction and failure propagation; only an actual run at
+the published head can establish queue/setup overhead and whether the roughly
+five-minute target is met. No measured runtime improvement is claimed here.

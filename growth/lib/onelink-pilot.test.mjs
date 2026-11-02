@@ -342,14 +342,38 @@ test('an unreadable site boundary fails instead of scanning a guessed set of fil
   fails(policy, /publication-policy\.json の files を読めない/, 'publication policy unreadable');
 });
 
-// A test cannot notice its own deletion: removing the step shows only in review. This pins the rest, so the
-// step stays in the seo-check job, runs this file, and cannot be made conditional or non-blocking.
-test('SEO Validation runs this file in the seo-check job, unconditionally and blocking', () => {
+// A test cannot notice its own deletion: removing the step shows only in review. Pin both
+// the unconditional core step and its fail-closed route into the required seo-check job.
+test('SEO Validation runs this file in a mandatory core lane with a fail-closed aggregate', () => {
   const workflow = fs.readFileSync(path.join(ROOT, '.github/workflows/seo-check.yml'), 'utf8');
-  const jobs = workflow.split('\n  routine-health:\n');
-  assert.equal(jobs.length, 2, 'seo-check.yml still has the seo-check job followed by routine-health');
-  const step = /\n {6}- name: OneLink pilot hero anchors match growth\/onelink-pilot\.json\n((?: {8}.*\n)+)/.exec(jobs[0]);
-  assert(step, 'the step is in the seo-check job');
+  const jobs = Object.fromEntries([...workflow.matchAll(/^  ([\w-]+):\n([\s\S]*?)(?=^  [\w-]+:\n|$(?![\s\S]))/gm)]
+    .map(m => [m[1], m[2]]));
+  const core = jobs['seo-core'], aggregate = jobs['seo-check'];
+  assert.ok(core, 'the mandatory core job exists');
+  assert.doesNotMatch(core, /^    (?:if|continue-on-error):/m);
+  const step = /\n {6}- name: OneLink pilot hero anchors match growth\/onelink-pilot\.json\n((?: {8}.*\n)+)/.exec(core);
+  assert(step, 'the step is in the seo-core job');
   assert.match(step[1], /^ {8}run: node --test growth\/lib\/onelink-pilot\.test\.mjs$/m);
   assert.doesNotMatch(step[1], /^ {8}(?:if|continue-on-error):/m);
+  assert.ok(aggregate, 'the original required seo-check job exists');
+  assert.match(aggregate, /^    if: always\(\)\n/);
+  assert.doesNotMatch(aggregate, /^    continue-on-error:/m);
+  const lanes = aggregate.match(/^    needs: \[(.*?)\]$/m)?.[1].split(', ');
+  assert.ok(lanes?.includes('seo-core'), 'the aggregate waits for the core lane');
+  const gate = aggregate.split('      - name: Require every mandatory SEO lane to succeed\n')[1]?.split('\n      - ')[0];
+  assert.ok(gate, 'the aggregate has the mandatory lane gate');
+  assert.doesNotMatch(gate, /^ {8}(?:if|continue-on-error):/m);
+  assert.match(gate, /SEO_NEEDS: \$\{\{ toJSON\(needs\) \}\}/);
+  const script = gate.match(/          script: \|\n((?:            .*\n|\n)+)/)?.[1];
+  assert.ok(script, 'the exact aggregate script is available to execute');
+  const execute = needs => vm.runInNewContext(script.split('\n').map(line => line.slice(12)).join('\n'),
+    { process: { env: { SEO_NEEDS: JSON.stringify(needs) } } });
+  const green = () => Object.fromEntries(lanes.map(lane => [lane, { result: 'success' }]));
+  assert.doesNotThrow(() => execute(green()));
+  for (const result of ['failure', 'skipped', 'cancelled', 'neutral', '', undefined]) {
+    const needs = green(); needs['seo-core'] = { result };
+    assert.throws(() => execute(needs), undefined, `reject core result: ${result}`);
+  }
+  const missing = green(); delete missing['seo-core'];
+  assert.throws(() => execute(missing), undefined, 'reject a missing core lane');
 });

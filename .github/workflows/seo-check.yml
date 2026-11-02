@@ -22,7 +22,7 @@ permissions:
   contents: read
 
 jobs:
-  seo-check:
+  seo-core:
     runs-on: ubuntu-latest
     steps:
       # Full history is required for content-derived sitemap lastmod dates.
@@ -111,7 +111,9 @@ jobs:
           node scripts/execution-priorities.mjs --check
 
       - name: Local preflight includes grouped tests and propagates failures
-        run: node scripts/preflight.mjs --selftest
+        run: |
+          node scripts/preflight.mjs --selftest
+          node --test scripts/seo-parallel-workflow.test.mjs
 
       - name: AI monthly budget decisions respect evidence and runtime caps
         run: node --test scripts/monthly-budget.test.mjs
@@ -202,20 +204,12 @@ jobs:
       # still read ?v=20260529-titlefix, and _headers serves /*.js as
       # immutable/max-age=604800 — so returning visitors had been holding a
       # month-old lang.js. Only CSS was covered, so nothing could report it.
-      - name: Shared chrome rules fire (self-test)
-        run: python3 scripts/sync_shared_chrome.py --selftest
-      - name: Shared chrome matches maintained source
-        run: python3 scripts/sync_shared_chrome.py --check
 
       - name: Page design preserves content and language (self-test)
         run: python3 scripts/sync_page_design.py --selftest
       - name: Public pages use the shared reading design
         run: python3 scripts/sync_page_design.py --check
 
-      - name: Static translation safeguards fire (self-test)
-        run: python3 scripts/build_site_translations.py --selftest
-      - name: All public topics have complete current translations
-        run: python3 scripts/build_site_translations.py --check
 
       - name: Cache-busters match asset contents (CSS + JS)
         run: node scripts/check-css-version.mjs
@@ -520,11 +514,6 @@ jobs:
       #
       # 隣リポジトリが要るものは、**隣が無いとき非0で拒否するのが正しい。**
       # CI では「拒否したこと」を確かめる（免除にしない）。
-      - name: Generators still run, artifacts not stale
-        run: |
-          node scripts/check-generators.mjs --selftest
-          node scripts/check-generators.mjs --check
-          node scripts/check-generators.mjs --run
 
       # 【中期ロードマップ】日次のアクション台帳と個別バックログしか無く、
       # **「次の四半期に何をやるか」を機械が組み立てる経路が無かった。**
@@ -1494,8 +1483,6 @@ jobs:
       - name: GA4 tag queue ordering
         run: node --test scripts/ga4-tag-order.test.mjs
 
-      - name: Autonomous Company source boundaries and recovery
-        run: node --test growth/lib/company.test.mjs growth/lib/company-connection-evidence.test.mjs growth/lib/company-goal-followup.test.mjs
       - name: Website acquisition source attribution
         run: node --test growth/lib/company-acquisition.test.mjs
       # acquisition-daily.yml の契約（鍵の隣で走るコードのハッシュ固定・権限・出力の形）と、Mac 側の取り込み。
@@ -1524,10 +1511,6 @@ jobs:
       # Validate both URL coverage and content-derived dates. The self-test
       # exercises real Git histories, including large changes and merges.
       # Neither validation step writes the repository's sitemap files.
-      - name: Sitemap check fires (self-test)
-        run: python3 scripts/generate_sitemap.py --selftest
-      - name: Sitemap lists every page with content-derived dates
-        run: python3 scripts/generate_sitemap.py --check
       # 開発記事のフィード（en/devlog/feed.xml）は、記事の h1・meta description・dateModified から作る。
       # 2026-09-24 に #1563 が relay-api-design の説明文を変えたままフィードを作り直さず、
       # フィードだけ古い説明文で配られていた。記事を直したら `python3 scripts/generate_dev_feed.py` を回す。
@@ -1554,6 +1537,120 @@ jobs:
       # 再発は check-selftests.mjs の gatingChecks() が見る。
       - name: IndexNow selection rules fire (self-test)
         run: node scripts/indexnow-notify.js --selftest
+
+
+  # Independent full event checkouts prevent generator writes/restores from
+  # racing readers. All original checks remain mandatory, without cache reuse.
+  seo-translations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24.22.1'
+          package-manager-cache: false
+
+      - name: Static translation safeguards fire (self-test)
+        run: python3 scripts/build_site_translations.py --selftest
+
+      - name: All public topics have complete current translations
+        run: python3 scripts/build_site_translations.py --check
+
+  seo-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24.22.1'
+          package-manager-cache: false
+
+      - name: Shared chrome rules fire (self-test)
+        run: python3 scripts/sync_shared_chrome.py --selftest
+
+      - name: Shared chrome matches maintained source
+        run: python3 scripts/sync_shared_chrome.py --check
+
+      - name: Sitemap check fires (self-test)
+        run: python3 scripts/generate_sitemap.py --selftest
+
+      - name: Sitemap lists every page with content-derived dates
+        run: python3 scripts/generate_sitemap.py --check
+
+  seo-generators:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24.22.1'
+          package-manager-cache: false
+
+      - name: Generators still run, artifacts not stale
+        run: |
+          node scripts/check-generators.mjs --selftest
+          node scripts/check-generators.mjs --check
+          node scripts/check-generators.mjs --run
+
+  seo-company:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24.22.1'
+          package-manager-cache: false
+
+      - name: Autonomous Company source boundaries and recovery
+        run: node --test growth/lib/company.test.mjs growth/lib/company-connection-evidence.test.mjs growth/lib/company-goal-followup.test.mjs
+
+  # Keep the original required check name. No absent, skipped, cancelled or failed
+  # lane may turn the aggregate green; IndexNow remains after ALL site gates.
+  seo-check:
+    if: always()
+    needs: [seo-core, seo-translations, seo-pages, seo-generators, seo-company]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every mandatory SEO lane to succeed
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          SEO_NEEDS: ${{ toJSON(needs) }}
+        with:
+          script: |
+            const expected = ['seo-core', 'seo-translations', 'seo-pages', 'seo-generators', 'seo-company'];
+            const needs = JSON.parse(process.env.SEO_NEEDS);
+            if (!needs || Object.keys(needs).sort().join(',') !== [...expected].sort().join(',')) {
+              throw new Error('Missing or unexpected mandatory SEO lane');
+            }
+            for (const job of expected) {
+              if (needs[job]?.result !== 'success') throw new Error(`${job}: ${needs[job]?.result ?? 'missing result'}`);
+            }
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24.22.1'
+          package-manager-cache: false
 
       - name: IndexNow notification (on main push only)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
