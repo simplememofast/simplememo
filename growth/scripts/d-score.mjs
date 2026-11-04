@@ -21,6 +21,11 @@
  *   4. 合格ライン未満のまま running になっている
  * どれも「配信してから気づく」と取り返しがつかない種類のもの。
  *
+ * 【唯一の例外】配信前採点が無いまま出て、D+14 も測れずに measurement_failed で
+ * 閉じた配信（PR⑦）だけは `d_score_pre_absent`（理由・配信見出し・根拠）で記録できる。
+ * 点は作らず、running/planned・他の判定・d_score_pre との併用には使えない
+ * （preScoreAbsenceProblems() と自己テストが固定している）。
+ *
  * 【このスクリプトが決めないこと】
  * 各軸の点数そのもの。採点は人（かセッション）が根拠つきで置く。ここが自動で
  * 点を出し始めると、点を取るための見出しを機械が書くようになり、G2 が防いで
@@ -101,9 +106,81 @@ export function scoredBefore(record = {}) {
   return scoredAt < startedAt;
 }
 
-export function score(record) {
-  const d = record.d_score_pre || {};
+/**
+ * **配信前採点が無いまま出た配信を、measurement_failed で閉じるときだけの表現。**（2026-11-04）
+ *
+ * PR⑦（対話メモ・2026-09-24）は配信前に採点されなかった。D+14 の必須4指標もそろわず、
+ * オーナーは 2026-11-04 に「延長し続けず measurement_failed で閉じる」と決めた。
+ * score() は evaluated に7軸の数値・判定済みゲート・`d_score_pre.headline` を要求するので、
+ * そのままでは閉じる手段が (a) 点やゲートを後から作る か (b) この検査を外す しかなかった。
+ * **どちらもしない。**採点の欠落を「欠落」として、理由つきで台帳に残す。
+ *
+ * `d_score_pre_absent` を受け付けるのは、次の**全部**を満たすときだけ:
+ *   - status が evaluated（running/planned には使えない —— 採点なしで撃たせない）
+ *   - decision が measurement_failed（keep/iterate 等の効果判定を採点なしで残さない）
+ *   - d_score_pre が無い（採点があるならそちらを使う。2つを混ぜない）
+ *   - reason・delivered_headline・reference が空でない文字列。reference はリポジトリ内の
+ *     相対パス（--check では実在も確かめる）。それ以外のキー（点・total・gates 等）を持たない
+ *
+ * 受け付けた記録は**点を持たない**（sum は null）。verdict は GO で始まらないので、
+ * press-release-next の品質ゲート（problems 0 かつ verdict が GO）にも転用できない。
+ * --backtest は annotations.json の label の「D-SCORE nn」しか読まないので、
+ * この記録は較正に入らない（入れるために annotation へ点を書き足さないこと）。
+ */
+export const PRE_SCORE_ABSENT_KEYS = ['reason', 'delivered_headline', 'reference'];
+export const UNSCORED_VERDICT = 'UNSCORED（配信前採点なし・measurement_failed で閉鎖。較正にも配信判定にも使わない）';
+
+export function preScoreAbsenceProblems(record = {}, { fileExists } = {}) {
+  const absent = record?.d_score_pre_absent;
+  if (absent === undefined) return [];
   const problems = [];
+  if (record.status !== 'evaluated') {
+    problems.push(`d_score_pre_absent は status=evaluated でだけ使える（いまは ${JSON.stringify(record.status)}）— **これから出す配信を採点なしで通さない**`);
+  }
+  if (record.decision !== 'measurement_failed') {
+    problems.push(`d_score_pre_absent は decision=measurement_failed でだけ使える（いまは ${JSON.stringify(record.decision)}）— 採点なしで効果判定を残さない`);
+  }
+  if (record.d_score_pre !== undefined && record.d_score_pre !== null) {
+    problems.push('d_score_pre と d_score_pre_absent を同時に置けない — 採点があるなら d_score_pre だけを使う');
+  }
+  if (!absent || typeof absent !== 'object' || Array.isArray(absent)) {
+    problems.push('d_score_pre_absent がオブジェクトでない（reason・delivered_headline・reference を書く）');
+    return problems;
+  }
+  for (const key of PRE_SCORE_ABSENT_KEYS) {
+    if (typeof absent[key] !== 'string' || !absent[key].trim()) {
+      problems.push(`d_score_pre_absent.${key} が空 — 採点が無い理由・配信した見出し・根拠の所在は省けない`);
+    }
+  }
+  const extra = Object.keys(absent).filter((k) => k !== '$comment' && !PRE_SCORE_ABSENT_KEYS.includes(k));
+  if (extra.length) {
+    problems.push(`d_score_pre_absent に知らないキー（${extra.join(', ')}）— 点・ゲート・合計をここへ置かない`);
+  }
+  const ref = absent.reference;
+  if (typeof ref === 'string' && ref.trim()) {
+    if (path.isAbsolute(ref) || ref.split(/[\\/]/).includes('..')) {
+      problems.push(`d_score_pre_absent.reference「${ref}」はリポジトリ内の相対パスで書く`);
+    } else if (fileExists && !fileExists(ref)) {
+      problems.push(`d_score_pre_absent.reference「${ref}」が無い — 根拠の所在が読めない`);
+    }
+  }
+  return problems;
+}
+
+export function score(record, options = {}) {
+  const absenceProblems = preScoreAbsenceProblems(record, options);
+  if (record?.d_score_pre_absent !== undefined && !absenceProblems.length) {
+    // **点を作らない。**軸もゲートも「未判定」のまま返し、sum は null にする。
+    const gates = GATES.map(([key, label]) => ({ key, label, value: null }));
+    return {
+      id: record.id, status: record.status, sum: null,
+      axes: AXES.map(([key, max, label]) => ({ key, label, value: null, max })),
+      gates, gateFailed: [], gateUnknown: gates, need: necessary({}), needFailed: [],
+      verdict: UNSCORED_VERDICT, problems: [], unscored: true,
+    };
+  }
+  const d = record.d_score_pre || {};
+  const problems = [...absenceProblems];
   let sum = 0;
   const axes = [];
   for (const [key, max, label] of AXES) {
@@ -435,6 +512,89 @@ const SCENARIOS = [
   }],
 ];
 
+// ---- 配信前採点なし・measurement_failed で閉じる記録（2026-11-04・PR⑦）----
+// **受け付けるのは1通りだけ**であることと、それが点・較正・配信許可へ漏れないことを固定する。
+const ABSENT = () => ({
+  reason: '配信前に採点されなかった（合成の固定値）',
+  delivered_headline: '合成の配信見出し',
+  reference: 'docs/synthetic.md',
+});
+const closedUnscored = (over = {}) => ({
+  id: 'synthetic-closed-unscored', type: 'pr_release', status: 'evaluated',
+  decision: 'measurement_failed', started_at: '2026-09-24', d_score_pre_absent: ABSENT(), ...over,
+});
+const fullPre = () => ({
+  ...Object.fromEntries(AXES.map(([k, max]) => [k, max])),
+  total: AXES.reduce((a, [, max]) => a + max, 0),
+  scored_at: '2026-09-24', headline: '採点対象の見出し',
+  gates: Object.fromEntries(GATES.map(([k]) => [k, true])),
+});
+const rejectsAbsence = (record, needle, options) => {
+  const r = score(record, options);
+  if (r.unscored) throw new Error('採点なしの例外として受け付けた');
+  if (!r.problems.some((p) => p.includes(needle))) {
+    throw new Error(`「${needle}」で落ちていない: ${r.problems.join(' / ') || '(problem 無し)'}`);
+  }
+};
+SCENARIOS.push(
+  ['**配信前採点なし・evaluated・measurement_failed・理由つきだけを受け付ける**（点を作らない）', () => {
+    const r = score(closedUnscored());
+    if (r.problems.length) throw new Error(r.problems.join(' / '));
+    if (!r.unscored || r.sum !== null || r.axes.some((a) => a.value !== null)) throw new Error('点が入った');
+    if (r.gateFailed.length || r.gateUnknown.length !== GATES.length) throw new Error('ゲートを判定済みにした');
+    if (score(closedUnscored({ d_score_pre: null })).problems.length) throw new Error('d_score_pre: null を「採点あり」と読んだ');
+  }],
+  ['**採点なしの閉鎖は配信許可に転用できない**（verdict が GO で始まらない）', () => {
+    const r = score(closedUnscored());
+    // scripts/press-release-next.mjs の品質ゲートと同じ条件
+    const clears = !r.problems.length && r.verdict.startsWith('GO');
+    if (clears || r.verdict !== UNSCORED_VERDICT) throw new Error(`品質ゲートを通る: ${r.verdict}`);
+  }],
+  ['**例外が無ければ、measurement_failed でも採点なしの evaluated は従来どおり落ちる**', () => {
+    const r = score(closedUnscored({ d_score_pre_absent: undefined }));
+    if (r.unscored || !r.problems.some((p) => p.includes('空欄のまま撃たない'))) throw new Error('採点なしが黙って通った');
+    if (!r.problems.some((p) => p.includes('何を採点したのか'))) throw new Error('見出しの欠落が落ちない');
+  }],
+  ...['running', 'planned', 'frozen', 'cancelled', undefined].map((status) => [
+    `採点なしの例外は status=${status} に使えない（**これから出す配信を採点なしで通さない**）`, () => {
+      rejectsAbsence(closedUnscored({ status }), 'status=evaluated でだけ');
+    }]),
+  ...['keep', 'revert', 'iterate', 'inconclusive', 'abandoned', null].map((decision) => [
+    `採点なしの例外は decision=${decision} に使えない（採点なしで効果判定を残さない）`, () => {
+      rejectsAbsence(closedUnscored({ decision }), 'decision=measurement_failed でだけ');
+    }]),
+  ['**d_score_pre と同時には置けない**（満点・ゲート全通過の採点でも混ぜない）', () => {
+    rejectsAbsence(closedUnscored({ d_score_pre: fullPre() }), '同時に置けない');
+    rejectsAbsence(closedUnscored({ d_score_pre: {} }), '同時に置けない');
+  }],
+  ...PRE_SCORE_ABSENT_KEYS.flatMap((key) => [
+    ['空文字', (a) => { a[key] = ''; }], ['空白だけ', (a) => { a[key] = '   '; }],
+    ['欠落', (a) => { delete a[key]; }], ['文字列でない', (a) => { a[key] = 42; }],
+  ].map(([kind, mutate]) => [`採点なしの例外は ${key} が${kind}なら落ちる`, () => {
+    const absent = ABSENT();
+    mutate(absent);
+    rejectsAbsence(closedUnscored({ d_score_pre_absent: absent }), `d_score_pre_absent.${key} が空`);
+  }])),
+  ...[['null', null], ['文字列', '理由'], ['配列', []]].map(([kind, value]) => [
+    `採点なしの例外が${kind}なら落ちる`, () => {
+      rejectsAbsence(closedUnscored({ d_score_pre_absent: value }), 'オブジェクトでない');
+    }]),
+  ...['total', 'S1_novelty', 'gates', 'headline'].map((key) => [
+    `採点なしの例外に ${key} を持ち込めない（点・ゲートを裏口で置かない）`, () => {
+      rejectsAbsence(closedUnscored({ d_score_pre_absent: { ...ABSENT(), [key]: key === 'gates' ? {} : 1 } }), '知らないキー');
+    }]),
+  ...['/etc/passwd', '../outside.md', 'docs/../../outside.md'].map((ref) => [
+    `採点なしの例外の reference はリポジトリ内の相対パスだけ（${ref}）`, () => {
+      rejectsAbsence(closedUnscored({ d_score_pre_absent: { ...ABSENT(), reference: ref } }), '相対パスで書く');
+    }]),
+  ['採点なしの例外の reference が実在しなければ --check で落ちる', () => {
+    rejectsAbsence(closedUnscored(), 'が無い', { fileExists: () => false });
+    if (score(closedUnscored(), { fileExists: (p) => p === 'docs/synthetic.md' }).problems.length) {
+      throw new Error('実在する reference で落ちた');
+    }
+  }],
+);
+
 // 4つのゲートすべてで同じ型契約を確認する。採点・満点・必要条件は変更しない。
 // 値の本文をエラーへ転記せず、判定不能な項目の key だけを知らせる。
 const INVALID_GATE_VALUES = [
@@ -550,9 +710,17 @@ if (isMain) {
   }
 
   let bad = 0;
+  const fileExists = (p) => fs.existsSync(path.join(ROOT, p));
   for (const r of records) {
-    const s = score(r);
+    const s = score(r, { fileExists });
     console.log(`\n${s.id}  [${s.status}]  → ${s.verdict}`);
+    if (s.unscored) {
+      // 点は無い。**無いことと、その理由・配信した見出し・根拠の所在**だけを出す。
+      console.log(`   配信前採点: なし — ${r.d_score_pre_absent.reason}`);
+      console.log(`   配信した見出し: ${r.d_score_pre_absent.delivered_headline}`);
+      console.log(`   根拠: ${r.d_score_pre_absent.reference}`);
+      continue;
+    }
     for (const a of s.axes) {
       const v = a.value === null ? ' --' : String(a.value).padStart(3);
       console.log(`   ${a.key.padEnd(20)} ${v} / ${String(a.max).padEnd(3)} ${a.label}`);

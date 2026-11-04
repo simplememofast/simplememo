@@ -42,6 +42,13 @@
 //   2. 最後の全件確認から `max_days_between_confirmations` 日を超えた
 //   3. `known_unrecorded` に `resolve_by` を過ぎた項目がある
 //   4. 台帳ファイルか設定ファイルが読めない（**黙って通さない**）
+//   5. `resolved_unrecorded`（解決済みの履歴）の項目が、experiments.json の
+//      配信済み pr_release（running/evaluated・同じ配信日）を指していない
+//
+// 5 は 2026-11-04 に足した。PR⑦ を measurement_failed の評価済みレコードとして
+// experiments.json へ入れ、`known_unrecorded` から `resolved_unrecorded` へ移した
+// （延長・限定例外の履歴は消さずに残す）。**「解決済み」へ移すだけで未記録を隠せる**
+// 形にしないため、移した先のレコードが実在することを毎回確かめる。
 //
 // 4 を入れてあるのは、`check-guard-shapes` が言う「地面が無くなると消える見張り」に
 // しないため。設定を消せば鳴らなくなる検査は、検査ではない。
@@ -65,6 +72,9 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 // Owner-authorized on 2026-10-23 for Web PR #2139 only. This does not
 // evaluate PR⑦, extend its deadline, or assert any historical gate passed.
+// Since 2026-11-04 the live entry is in `resolved_unrecorded` (closed as
+// measurement_failed in experiments.json), so this never matches the live
+// ledger; the publication test keeps exercising it on a frozen fixture.
 const PR7 = Object.freeze({
   id: 'pr7-dialogue-memo',
   published_at: '2026-09-24',
@@ -122,10 +132,21 @@ export function daysBetween(fromIso, toIso) {
   return Math.round((b - a) / 86400000);
 }
 
+/** 形だけでなく暦として成立する日付か（`2026-02-30` を通さない）。 */
+function calendarDate(value) {
+  if (!ISO_DATE.test(String(value))) return false;
+  const t = Date.parse(`${value}T00:00:00Z`);
+  return Number.isFinite(t) && new Date(t).toISOString().slice(0, 10) === value;
+}
+
+function experimentRows(experiments) {
+  const rows = experiments?.experiments ?? experiments ?? [];
+  return Array.isArray(rows) ? rows : Object.values(rows);
+}
+
 /** experiments から、実際に配信された（planned でない）PR 実験の配信日を集める。 */
 export function shippedExperimentDates(experiments) {
-  const rows = experiments?.experiments ?? experiments ?? [];
-  const list = Array.isArray(rows) ? rows : Object.values(rows);
+  const list = experimentRows(experiments);
   const dates = new Set();
   for (const r of list) {
     if (!r || typeof r !== 'object') continue;
@@ -221,10 +242,65 @@ export function audit(config, annotations, experiments, today = todayJst(), publ
     }
   }
 
+  problems.push(...resolvedProblems(config, experiments));
+  return problems;
+}
+
+/**
+ * ⑤ 解決済みの履歴（`resolved_unrecorded`）が、本当に experiments.json に載っているか。
+ *
+ * **移しただけで黙る形にしない。**実験行を消す・別の配信日を指す・planned のままにする、
+ * のどれでも落とす。履歴そのもの（延長の経緯・限定例外の記録）はここでは書き換えない。
+ */
+export function resolvedProblems(config, experiments) {
+  const resolved = config.resolved_unrecorded;
+  if (resolved === undefined) return [];
+  if (!Array.isArray(resolved)) return ['resolved_unrecorded が配列ではない — 解決済みの履歴を読めない状態で通さない'];
+  const problems = [];
+  const rows = experimentRows(experiments);
+  const parked = new Set((config.known_unrecorded || []).map((e) => e?.id));
+  const seen = new Set();
+  for (const entry of resolved) {
+    const id = entry?.id;
+    if (typeof id !== 'string' || !id.trim()) {
+      problems.push('resolved_unrecorded に id の無い項目がある');
+      continue;
+    }
+    if (seen.has(id)) problems.push(`resolved_unrecorded「${id}」が重複している`);
+    seen.add(id);
+    if (parked.has(id)) {
+      problems.push(`「${id}」が known_unrecorded と resolved_unrecorded の両方にある — 未記録か解決済みか、どちらか一方にする`);
+    }
+    if (!calendarDate(entry.resolved_on)) {
+      problems.push(`resolved_unrecorded「${id}」の resolved_on が日付ではない（${JSON.stringify(entry.resolved_on)}）`);
+    }
+    const target = rows.filter((r) => r && r.id === entry.experiment_id);
+    const exp = target.length === 1 ? target[0] : null;
+    if (!exp || exp.type !== 'pr_release' || !['running', 'evaluated'].includes(exp.status)
+        || !ISO_DATE.test(String(entry.published_at)) || exp.started_at !== entry.published_at) {
+      problems.push(
+        `resolved_unrecorded「${id}」が experiments.json の配信済み pr_release を指していない ` +
+        `（experiment_id ${JSON.stringify(entry.experiment_id)}・配信日 ${JSON.stringify(entry.published_at)}）— ` +
+        `**解決済みへ移しただけでは、D+14 を拾う台帳に載ったことにならない。**`,
+      );
+    }
+  }
   return problems;
 }
 
 // ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+// ⑤ の合成データ。期限 2026-11-11 を過ぎた日でも、解決済みなら鳴らないことを見る。
+const resolvedConfig = (over = {}) => ({
+  cross_check_from: '2026-09-03', last_confirmed_complete: '2026-11-04', max_days_between_confirmations: 21,
+  known_unrecorded: [],
+  resolved_unrecorded: [{ id: 'pr7', experiment_id: 'pr7-exp', published_at: '2026-09-24',
+    resolve_by: '2026-11-11', resolved_on: '2026-11-04' }],
+  ...over,
+});
+const pr7Row = () => ({ annotations: [{ type: 'pr', date: '2026-09-24', label: 'PR⑦' }] });
+const shippedPr7 = (over = {}) => ({ experiments: [{ id: 'pr7-exp', type: 'pr_release', status: 'evaluated',
+  decision: 'measurement_failed', started_at: '2026-09-24', ...over }] });
+
 const SCENARIOS = [
   ['期限内・未記録なしなら通る', () => {
     const p = audit({ cross_check_from: '2026-09-03', last_confirmed_complete: '2026-09-20', max_days_between_confirmations: 21 },
@@ -336,6 +412,57 @@ const SCENARIOS = [
       { annotations: [] }, null, '2026-09-24');
     if (!p.length) throw new Error('experiments なしで通った');
   }],
+  // ── ⑤ 解決済みの履歴（2026-11-04・PR⑦ を measurement_failed で閉じたときに追加）──
+  ['**解決済みへ移した配信は、実験行があれば通る**（期限・延長の履歴は残したまま）', () => {
+    const p = audit(resolvedConfig(), pr7Row(), shippedPr7(), '2026-11-26');
+    if (p.some((x) => !x.includes('全件確認'))) throw new Error(`通らなかった: ${p.join(' / ')}`);
+    if (audit(resolvedConfig({ last_confirmed_complete: '2026-11-20' }), pr7Row(), shippedPr7(), '2026-11-26').length) {
+      throw new Error('解決済みの古い resolve_by で鳴った');
+    }
+  }],
+  ['**解決済みへ移しても、実験行が無ければ落ちる**（移すだけで未記録を隠せない）', () => {
+    const p = audit(resolvedConfig(), pr7Row(), { experiments: [] }, '2026-11-12');
+    if (!p.some((x) => x.includes('配信済み pr_release を指していない'))) throw new Error(`黙った: ${JSON.stringify(p)}`);
+    if (!p.some((x) => x.includes('D+14 を拾わない'))) throw new Error('突き合わせ①も鳴るべき');
+  }],
+  ...[
+    ['planned のまま', { status: 'planned' }],
+    ['配信日が違う', { started_at: '2026-09-25' }],
+    ['pr_release でない', { type: 'title_test' }],
+    ['id が違う', { id: 'other-experiment' }],
+  ].map(([name, over]) => [`解決済みの指す実験が${name}なら落ちる`, () => {
+    const p = audit(resolvedConfig(), pr7Row(), shippedPr7(over), '2026-11-12');
+    if (!p.some((x) => x.includes('配信済み pr_release を指していない'))) throw new Error(`黙った: ${JSON.stringify(p)}`);
+  }]),
+  ['同じ実験IDが2行あれば落ちる（どちらを指すか決められない）', () => {
+    const e = shippedPr7();
+    e.experiments.push({ ...e.experiments[0] });
+    const p = audit(resolvedConfig(), pr7Row(), e, '2026-11-12');
+    if (!p.some((x) => x.includes('配信済み pr_release を指していない'))) throw new Error(`黙った: ${JSON.stringify(p)}`);
+  }],
+  ...['2026-02-30', '2026-13-01', 'あとで', undefined].map((resolvedOn) => [
+    `resolved_on が暦の日付でなければ落ちる（${resolvedOn}）`, () => {
+      const c = resolvedConfig();
+      c.resolved_unrecorded[0].resolved_on = resolvedOn;
+      const p = audit(c, pr7Row(), shippedPr7(), '2026-11-12');
+      if (!p.some((x) => x.includes('resolved_on'))) throw new Error(`黙った: ${JSON.stringify(p)}`);
+    }]),
+  ['**未記録と解決済みの両方にあれば落ちる**（どちらの状態か曖昧にしない）', () => {
+    const c = resolvedConfig();
+    c.known_unrecorded = [{ ...c.resolved_unrecorded[0] }];
+    const p = audit(c, pr7Row(), shippedPr7(), '2026-11-05');
+    if (!p.some((x) => x.includes('両方にある'))) throw new Error(`黙った: ${JSON.stringify(p)}`);
+  }],
+  ['解決済みの重複・id 欠落・配列でない形を落とす', () => {
+    const dup = resolvedConfig();
+    dup.resolved_unrecorded.push({ ...dup.resolved_unrecorded[0] });
+    if (!audit(dup, pr7Row(), shippedPr7(), '2026-11-12').some((x) => x.includes('重複'))) throw new Error('重複が通った');
+    const noId = resolvedConfig();
+    delete noId.resolved_unrecorded[0].id;
+    if (!audit(noId, pr7Row(), shippedPr7(), '2026-11-12').some((x) => x.includes('id の無い'))) throw new Error('id 欠落が通った');
+    if (!audit(resolvedConfig({ resolved_unrecorded: {} }), pr7Row(), shippedPr7(), '2026-11-12')
+      .some((x) => x.includes('配列ではない'))) throw new Error('配列でない形が通った');
+  }],
   ['件数と最終配信日を台帳から読む', () => {
     const s = ledgerState({ annotations: [
       { type: 'pr', date: '2026-04-24', label: 'PR①' },
@@ -380,6 +507,13 @@ export function checkPublication(publication = {}) {
       console.log(`  - ${e.id}  ${e.published_at}  ${e.subject_hint ?? ''}  → 期限 ${e.resolve_by}`);
     }
     console.log('  **したがって --backtest の n は、出荷された全件ではない。**');
+  }
+  const resolved = Array.isArray(config?.resolved_unrecorded) ? config.resolved_unrecorded : [];
+  if (resolved.length) {
+    console.log(`解決済みの履歴: ${resolved.length} 件（延長・限定例外の記録は残してある）`);
+    for (const e of resolved) {
+      console.log(`  - ${e.id}  ${e.published_at}  → ${e.resolved_on} に experiments.json「${e.experiment_id}」へ`);
+    }
   }
 
   if (problems.length) {
