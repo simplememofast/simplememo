@@ -2960,6 +2960,69 @@
       }
     },
     {
+      "id": "pr7-dialogue-memo",
+      "page": "(PR TIMES配信 — 新機能「対話メモ」提供開始。ページ実験ではなくPRリリース型レコード)",
+      "type": "pr_release",
+      "hypothesis": "（配信前に登録されていない。この行は 2026-11-04 に、D+14 の測定が成立しなかったことを閉じるために作った。事後に仮説・採点・基準値を作らない）",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-09-24",
+      "evaluation_at": "2026-10-08",
+      "status": "evaluated",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "note": "配信前の基準値は登録されていない（配信時に experiments.json の行が作られなかった）。PR⑥ が持つ n=5 の PV・転載の幅などを後から写して基準値にしない。"
+      },
+      "target_metric": "discover_boarding",
+      "decision": "measurement_failed",
+      "evaluated_at": "2026-11-04",
+      "d_score_pre_absent": {
+        "$comment": "growth/scripts/d-score.mjs の preScoreAbsenceProblems() が受け付ける唯一の形（status=evaluated・decision=measurement_failed・d_score_pre なし）。点・ゲート判定は持たない。",
+        "reason": "配信前採点は行われていない。2026-09-24 の配信時に experiments.json の行が作られず、D-SCORE の7軸・ゲート G1〜G4 の判定がどこにも残っていない。2026-11-04 のオーナー判断で measurement_failed として閉じる。点やゲート判定を後から作らない。配信見出しで事後に採点しても、配信前採点としては扱わない。",
+        "delivered_headline": "「シンプルメモ」、Apple Intelligence活用の新機能「対話メモ」を提供開始",
+        "reference": "docs/pr7-d14-evaluation-2026-10-23.md"
+      },
+      "notes": [
+        "2026-11-04: 配信（2026-09-24 09:12 JST 公開）の時点で experiments.json の行が作られず、data/pr-release-ledger.json の known_unrecorded で期限つきで把握していた（期限は 10-08 → 10-22 → 11-04 → 11-11 と3回延長）。オーナーは 2026-11-04 に、延長を続けず measurement_failed で閉じると決めた。この行はその閉鎖のために作り、同じ日に評価済みにした（running は記録用の一時状態で、その状態ではコミットしていない）。延長と Web PR #2139 限定例外の履歴は data/pr-release-ledger.json の resolved_unrecorded に残してある。",
+        "2026-11-04: D+14（2026-09-24〜10-08）の必須4指標のうち、PV・転載・スマートフォン比率の3つは 2026-10-23 に PR TIMES の管理画面で確認した。google_referral_ratio は参照元一覧が期間の変更に追随せず D+14 の値と確定できないので null、boarded は判定不能。確認できた部分値は評価記録（docs/pr7-d14-evaluation-2026-10-23.md）にだけ置き、discover_boarding_post へは転記しない（較正や事後の効果判定に混ぜないため）。",
+        "2026-11-04: これは計測が成立しなかったことの記録で、配信の効果（乗車・非乗車、PV への影響）の判定ではない。D-SCORE の --backtest は annotations.json の label を読むので、この配信は従来どおり比較対象の外（配信一覧 7・比較対象 n=6）。annotations.json の PR⑦ 行は変えていない。",
+        "2026-11-04: オーナー判断（2026-11-04）により、配信前採点が無く D+14 の必須指標もそろわない配信として measurement_failed で閉じる。根拠は診断レビュー docs/pr7-measurement-failed-review-2026-11-04.json と評価記録 docs/pr7-d14-evaluation-2026-10-23.md。効果の判定ではない。"
+      ],
+      "evidence": {
+        "schema_version": 1,
+        "kind": "measurement_diagnostic",
+        "target_metric": "discover_boarding",
+        "gsc_snapshots": [],
+        "reviewed_by": "Claude Opus 5.5 (AI; closure as measurement_failed decided by the owner on 2026-11-04)",
+        "rationale": "事前に決めた乗車判定（google_referral_ratio > 0.9 かつ mobile_ratio > 0.5）に必要な google_referral_ratio を D+14 の期間に帰属できず、配信前採点も無いため、この配信の評価も D-SCORE の較正も成立しない。参照元の期間別の値は後から取り直せず、配信前採点は遡って作れないので、待っても解けない。したがって inconclusive ではなく measurement_failed。2026-11-04 にオーナーがこの扱いを決めた。",
+        "findings": [
+          "配信前採点（D-SCORE の7軸とゲート G1〜G4）は行われていない。配信時に experiments.json の行が作られず、採点の記録がどこにも無い。点やゲート判定を後から作らない。",
+          "D+14（2026-09-24〜2026-10-08）の必須4指標（pv・syndication_count・mobile_ratio・google_referral_ratio）がそろっていない。2026-10-23 に管理画面で PV 3,401・転載 28・スマートフォン 36.37% を確認したが、google_referral_ratio は null のまま。",
+          "参照元一覧（google.com/ 229・com.google.android.googlequicksearchbox/ 54・news.google.com/ 3）は、期間を 2026-10-09〜10-23 に変えても同じ人数のまま変わらず、D+14 の期間に帰属できない。期間別エクスポートの内容も確認できていない。後日の累計から過去の人数を逆算しない。",
+          "google_referral_ratio が null なので、既存の規約（比率の片方が null なら boarded も null）により boarded を判定しない。スマートフォン比率 36.37% は条件 mobile_ratio > 0.5 を満たさないが、この規約に従い、ここから非乗車とは書かない。",
+          "これは計測の不成立（measurement_failed）の記録であり、配信の効果（乗車・非乗車、PV やインストールへの影響）の判定ではない。",
+          "オーナーは 2026-11-04 に、期限の延長（10-08 → 10-22 → 11-04 → 11-11）を続けず、この配信を measurement_failed で閉じると決めた。この診断と台帳の記録は AI が用意したもので、マージ前にオーナーが確認する。"
+        ],
+        "artifacts": [
+          {
+            "name": "pr7-d14-evaluation-2026-10-23.md",
+            "sha256": "34f6db4facf4d70806c5bea35b31908c3ffe5eba34dc675c4f70659f4f6fcdb6",
+            "bytes": 7745
+          },
+          {
+            "name": "prtimes-d14-capture.md",
+            "sha256": "2876917e86258e053b26cb7c6efa4f94e40f0c3ba3da14652b54aab289ec50a1",
+            "bytes": 14356
+          }
+        ],
+        "manifest_sha256": "44517c730aeab2d33b08106d77af76331685c3e144ba5bc96e103a102d488032",
+        "validation": "artifact integrity and explicit diagnostic review; no efficacy comparison"
+      }
+    },
+    {
       "id": "gsc-voice-input-title-20261002",
       "page": "/voice-input/",
       "change_paths": [

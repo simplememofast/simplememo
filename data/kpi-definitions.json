@@ -663,11 +663,11 @@
     {
       "id": "d_score",
       "name": "D-SCORE",
-      "formula": "S1..S7 の合計（100点満点・合格60）**かつ** 必要条件 S1_novelty >= 20 かつ S2_entity_reach >= 10。合計が合格でも必要条件が欠ければ NO-GO。**採点は配信される見出しに対して行い、その見出しを d_score_pre.headline に残す** —— scored_at < started_at なら「配信物を採点していない」として、headline が空なら「何を採点したか読めない」として落とす。合格ライン・必要条件を落とす対象は status=running（これから出る弾）。ゲートの未判定・不合格は running と evaluated の両方。",
+      "formula": "S1..S7 の合計（100点満点・合格60）**かつ** 必要条件 S1_novelty >= 20 かつ S2_entity_reach >= 10。合計が合格でも必要条件が欠ければ NO-GO。**採点は配信される見出しに対して行い、その見出しを d_score_pre.headline に残す** —— scored_at < started_at なら「配信物を採点していない」として、headline が空なら「何を採点したか読めない」として落とす。合格ライン・必要条件を落とす対象は status=running（これから出る弾）。ゲートの未判定・不合格は running と evaluated の両方。 **例外は1つだけ（v10）:** 配信前採点が無いまま出て D+14 も測れず measurement_failed で閉じた配信（status=evaluated かつ decision=measurement_failed かつ d_score_pre なし）は、d_score_pre_absent（reason・delivered_headline・reference）で記録できる。点は持たず（sum=null・verdict は UNSCORED で GO にならない）、較正にも配信判定にも使わない。running/planned 等・他の判定・d_score_pre との併用・空の理由/見出し/根拠・未知のキーは落とす。",
       "source_file": "growth/scripts/d-score.mjs",
-      "version": 9,
-      "checksum": "62ff12a99fd3b20c",
-      "changed_at": "2026-10-23",
+      "version": 10,
+      "checksum": "9ebed7cb3fdc389e",
+      "changed_at": "2026-11-04",
       "why_it_matters": "合格ライン60は n=6 のバックテスト（乗車の最低65 / 非乗車の最高46）由来。**⚠ 2026-09-24 訂正: ここは長く「合計だけでは PR⑥（85点・非乗車）を止められなかった」と書いていた。誤り。**配信された見出しで採り直すと 45 で、合計ラインでも必要条件でも止まっていた。**85点は、配信されなかった見出しに対する点だった。**破れていたのは較正ではなく採点の運用で、だから直したのは閾値ではなく「いつ採点するか」のほう。必要条件の AND は n=6 を 6/6 で分離し続けるので残す（合計ラインも 6/6 分離に戻った）。較正を変えたら過去の採点は比較できない。",
       "history": [
         {
@@ -709,6 +709,11 @@
           "version": 9,
           "at": "2026-10-23",
           "why": "定義は変えていない。PR⑦など採点・PV欠測の配信をbacktestの比較対象外一覧へ表示する変更。採点式・配点・ゲート・既存比較対象は維持。"
+        },
+        {
+          "version": 10,
+          "at": "2026-11-04",
+          "why": "**定義を変えた（狭い例外を1つ足した）。**配信前採点が無いまま出て D+14 の必須指標もそろわず、オーナー判断で measurement_failed として閉じる配信（PR⑦・2026-11-04）だけを、点やゲート判定を作らずに記録できるようにした。受け付けるのは status=evaluated かつ decision=measurement_failed かつ d_score_pre なしで、reason・delivered_headline・reference が空でなく未知のキーが無いときだけ。受け付けた記録は sum=null・verdict UNSCORED（GO にならないので press-release-next の品質ゲートにも使えない）。採点式・配点・合格60・必要条件・ゲートの判定、既存レコードの判定と --backtest（annotations.json の label だけを読む・n=6）は変えていない。running/planned・他の判定・d_score_pre 併用・空欄・未知キー・リポジトリ外の reference を落とす自己テストを38件足した（90→128）。"
         }
       ]
     },

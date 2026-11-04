@@ -7,7 +7,9 @@
   "$comment_confirmation_2026_10_14": "2026-10-14 の確認は、オーナーが判断を AI セッションに委ねて行った（**人が PR TIMES の管理画面で確かめた日ではない**）。確かめた方法: PR TIMES は配信のたびに「プレスリリース配信完了のお知らせ」を support@simplememofast.com へ送る（2026-08-03・08-18・09-03・09-24 の4回で実在を確認）。2026-09-25 以降に PR TIMES から届いたのはログイン通知・利用規約改定の告知・9月分の請求書だけで、配信完了も配信予約完了も無い。prtimes.jp の企業ページはこの環境から到達できない（DNS 解決失敗・2026-10-14 実測）ので、公開一覧そのものは見ていない。**この方法は、通知メールが届かなかった配信を見落とす。**",
   "max_days_between_confirmations": 21,
   "$comment_threshold": "21日。過去の配信間隔は 15〜38日（PR①〜⑦）なので、21日を超えて確認が無ければ『1本出ていても両方の台帳に無い』窓に入る。短くすると平時に鳴り続ける。**この値は間隔の実測から置いただけで、最適だと確かめたわけではない。**",
-  "known_unrecorded": [
+  "known_unrecorded": [],
+  "$comment_resolved_unrecorded": "解決済みの履歴。known_unrecorded にあった配信が experiments.json に載ったら、項目を消さずにここへ移し、resolved_on を足す（延長の経緯や限定例外の記録を残すため）。期限（resolve_by）はもう鳴らないが、指している実験行が無い・配信日が違う・planned のまま、のどれでも check-pr-release-ledger.mjs が落とす。",
+  "resolved_unrecorded": [
     {
       "id": "pr7-dialogue-memo",
       "url": "https://prtimes.jp/main/html/rd/p/000000011.000182412.html",
@@ -30,7 +32,9 @@
       "experiment_id": "pr7-dialogue-memo",
       "evaluation_at": "2026-10-08",
       "evaluation_record": "docs/pr7-d14-evaluation-2026-10-23.md",
-      "$comment_capture_2026_10_23": "2026-10-23: 管理画面ログインに成功し、9/24〜10/8のPV3401・転載28・スマートフォン36.37%を確認。参照元一覧は期間変更後も同じ229/54/3人でありD+14値とは確定できない。詳細はevaluation_record。必須4指標は未完備、配信前採点は未実施。確定台帳への部分転記・実験の評価済み扱いは行わず、11/4の期限と延長・限定例外履歴を維持する。"
+      "$comment_capture_2026_10_23": "2026-10-23: 管理画面ログインに成功し、9/24〜10/8のPV3401・転載28・スマートフォン36.37%を確認。参照元一覧は期間変更後も同じ229/54/3人でありD+14値とは確定できない。詳細はevaluation_record。必須4指標は未完備、配信前採点は未実施。確定台帳への部分転記・実験の評価済み扱いは行わず、11/4の期限と延長・限定例外履歴を維持する。",
+      "resolved_on": "2026-11-04",
+      "$comment_resolution_2026_11_04": "2026-11-04、オーナーの判断どおり、この配信を growth/experiments/experiments.json の pr7-dialogue-memo（type pr_release・status evaluated・decision measurement_failed）として記録し、known_unrecorded からここへ移した。**評価合格・採点済み・乗車判定済みではない。**配信前採点は無いまま（d_score_pre は作らず、d_score_pre_absent に理由・配信見出し・根拠を置いた）、D+14 の必須4指標も不完全なまま（google_referral_ratio は期間に帰属できず null）。上の resolve_by・延長3回・Web PR #2139 限定例外・10-23 の取得記録は履歴として変えずに残す。check-pr-release-ledger.mjs は、ここにある項目が experiments.json の配信済み pr_release を指していることを毎回確かめる。"
     }
   ]
 }
