@@ -36,11 +36,15 @@ const expired = result => result.some(x => x.includes('置き去り'));
 
 test('the current upstream deadline is preserved and cannot inherit the old exception', () => {
   const entry = liveConfig.known_unrecorded.find(e => e.id === 'pr7-dialogue-memo');
-  assert.equal(entry.resolve_by, '2026-11-04');
+  // 2026-11-04: owner-approved bridge to 11-11 while the measurement_failed
+  // closing change goes through review as its own PR (not a completed record).
+  assert.equal(entry.resolve_by, '2026-11-11');
   assert.ok(entry.$comment_extension_2026_10_23);
+  assert.ok(entry.$comment_extension_2026_11_04);
   assert.equal(pr7PublicationException(liveConfig, annotations, '2026-10-23', publication), null);
   assert.deepEqual(audit(liveConfig, annotations, experiments, '2026-10-23'), []);
-  assert.equal(expired(audit(liveConfig, annotations, experiments, '2026-11-05', publication)), true);
+  assert.equal(expired(audit(liveConfig, annotations, experiments, '2026-11-11', publication)), false);
+  assert.equal(expired(audit(liveConfig, annotations, experiments, '2026-11-12', publication)), true);
 });
 
 test('extending the fixture deadline never expands the pinned exception', () => {
@@ -161,7 +165,13 @@ test('another expired item and a later missing release still fail', () => {
 });
 
 test('freshness and missing-file checks remain active even with the owner exception', () => {
-  assert.ok(run(config, annotations, publication, '2026-11-05').some(x => x.includes('全件確認')));
+  // Derive the first stale day from the live confirmation so the next
+  // confirmation update does not silently turn this into a passing no-op.
+  const stale = new Date(Date.parse(`${config.last_confirmed_complete}T00:00:00Z`)
+    + (config.max_days_between_confirmations + 1) * 86400000).toISOString().slice(0, 10);
+  assert.ok(run(config, annotations, publication, stale).some(x => x.includes('全件確認')));
+  const lastFresh = new Date(Date.parse(`${stale}T00:00:00Z`) - 86400000).toISOString().slice(0, 10);
+  assert.equal(run(config, annotations, publication, lastFresh).some(x => x.includes('全件確認')), false);
   for (const result of [run(null), run(config, null), run(config, annotations, publication, '2026-10-23', null)]) {
     assert.ok(result.length > 0);
   }
