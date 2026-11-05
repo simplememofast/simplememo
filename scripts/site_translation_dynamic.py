@@ -50,6 +50,26 @@ def translated_message(binding, locale, catalog):
     return html.unescape(source)
 
 
+def initial_demo_note(source, file, locale, catalog, rows):
+    # The AI-tags tab handler already uses an approved translated fragment.
+    # Render that same fragment before interaction, without enabling general
+    # translation of pre/code samples or user-created notes.
+    if file != 'ai-tags/index.html':
+        return source
+    notes = [node for node in all_nodes(Parser(source).root)
+             if node.tag == 'pre' and node.attrs.get('id') == 'demo-note']
+    if len(notes) != 1:
+        raise ValueError('Expected one initial AI-tags demo note: ' + file)
+    note = notes[0]
+    fragment = source[note.inner:note.end]
+    approved = [row for row in rows
+                if row['file'] == file and row['text'] == fragment]
+    if len(approved) != 1:
+        raise ValueError('Initial AI-tags demo must match one approved program literal: ' + file)
+    translated = translated_message(approved[0], locale, catalog)
+    return source[:note.inner] + translated + source[note.end:]
+
+
 def wrap_code(code, rows):
     digest = hashlib.sha256(code.encode()).hexdigest()
     replacements = []

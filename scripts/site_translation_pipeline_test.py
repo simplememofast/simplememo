@@ -285,6 +285,36 @@ class TranslationPipelineTests(unittest.TestCase):
         actual = dynamic.translated_message({'source':'ja','text':source},'es',catalog)
         self.assertEqual(actual, '<span>title:</span> Shopping\n<span>tags:</span> [<span>Supplies</span>]\n<span>---</span>\n  Body\n')
 
+    def test_initial_ai_tags_note_matches_interactive_translation_and_keeps_other_code(self):
+        fragment = '<span>title:</span> 買い物\n<span>tags:</span> [<span>日用品</span>]\n<span>---</span>\n  本文\n'
+        translations = {'title:':'title:', '買い物':'Shopping', 'tags:':'tags:',
+                        '日用品':'Supplies', '本文':'Body'}
+        catalog = {}
+        for unit in collect(fragment):
+            language = 'ja' if re.search(r'[\u3040-\u30ff\u3400-\u9fff]', unit['text']) else 'en'
+            catalog[language + ':' + unit['id']] = {'source':unit['text'], 'text':translations[unit['text']]}
+        binding = {'file':'ai-tags/index.html', 'source':'ja', 'text':fragment}
+        unrelated = '<pre><code>' + fragment + '</code></pre>'
+        source = '<pre id="demo-note" tabindex="0">' + fragment + '</pre>' + unrelated
+        output = dynamic.initial_demo_note(source, binding['file'], 'en', catalog, [binding])
+        interactive = dynamic.translated_message(binding, 'en', catalog)
+        self.assertEqual(output, '<pre id="demo-note" tabindex="0">' + interactive + '</pre>' + unrelated)
+        self.assertIn('Shopping\n', output)
+        self.assertIn('\n  Body\n', output)
+        self.assertEqual(collect(source), [])
+        self.assertEqual(dynamic.initial_demo_note(source, 'other/index.html', 'en', {}, []), source)
+
+    def test_initial_ai_tags_note_rejects_missing_or_changed_approval(self):
+        source = '<pre id="demo-note">本文</pre>'
+        binding = {'file':'ai-tags/index.html', 'source':'ja', 'text':'本文'}
+        for rows in ([], [dict(binding, file='other/index.html')],
+                     [dict(binding, text='以前の本文')], [binding, binding]):
+            with self.subTest(rows=rows), self.assertRaisesRegex(ValueError, 'must match one approved program literal'):
+                dynamic.initial_demo_note(source, binding['file'], 'en', {}, rows)
+        for document in ('<pre>本文</pre>', source + source):
+            with self.subTest(document=document), self.assertRaisesRegex(ValueError, 'Expected one initial AI-tags demo note'):
+                dynamic.initial_demo_note(document, binding['file'], 'en', {}, [binding])
+
     def test_localized_module_names_hash_the_final_bytes(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp);folder=root/'memo-inbox';folder.mkdir()

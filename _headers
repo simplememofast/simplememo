@@ -126,12 +126,39 @@
   X-Robots-Tag: noindex, nofollow
   Cache-Control: public, max-age=3600
 
-# Public machine-readable data remains downloadable and linkable from the
-# explanatory pages. Search results should show those pages, not raw JSON or
-# CSV files. Google must be able to fetch these responses to see noindex.
+# Public data, downloadable examples and raw evidence remain available and
+# linkable from their explanatory pages. Search results should show those pages.
+# Google must be able to fetch these responses to see noindex. Scope by format
+# so images, audio, video and PDFs keep their existing indexing policy.
+# Mirror these rules in functions/_middleware.js for Function responses and
+# cached assets that still carry older headers.
 # scripts/gsc-crawled-indexing.mjs --live checks the deployed headers.
 /data/*.json
   X-Robots-Tag: noindex
 
+/data/*.csv
+  X-Robots-Tag: noindex
+
 /assets/downloads/*.csv
+  X-Robots-Tag: noindex
+
+/assets/downloads/*.md
+  X-Robots-Tag: noindex
+
+/assets/downloads/*.json
+  X-Robots-Tag: noindex
+
+/assets/downloads/*.swift
+  X-Robots-Tag: noindex
+
+/assets/downloads/*.canvas
+  X-Robots-Tag: noindex
+
+/assets/evidence/*.md
+  X-Robots-Tag: noindex
+
+/assets/evidence/*.json
+  X-Robots-Tag: noindex
+
+/memo-inbox/LICENSE
   X-Robots-Tag: noindex

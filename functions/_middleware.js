@@ -415,12 +415,17 @@ export const onRequest = async (context) => {
     return Response.redirect(url.toString(), 301);
   }
 
-  // Public raw JSON and CSV remain available to the site's readers and data
-  // consumers. Set noindex on the final response as well as in _headers:
-  // an unchanged CSV can retain a cached asset response with old headers.
+  // Public data, downloadable examples and raw evidence remain available to
+  // readers. Search results should show their explanatory HTML pages. Limit
+  // this policy to raw text/data formats: image, audio, video and PDF assets
+  // keep their existing indexing policy. Mirror these paths in _headers.
+  // Set noindex on the final response too: unchanged assets can retain cached
+  // responses with old headers, and _headers does not cover Function responses.
   if (
-    (pathname.startsWith("/data/") && pathname.endsWith(".json")) ||
-    (pathname.startsWith("/assets/downloads/") && pathname.endsWith(".csv"))
+    (pathname.startsWith("/data/") && /\.(?:json|csv)$/.test(pathname)) ||
+    (pathname.startsWith("/assets/downloads/") && /\.(?:md|json|csv|swift|canvas)$/.test(pathname)) ||
+    (pathname.startsWith("/assets/evidence/") && /\.(?:md|json)$/.test(pathname)) ||
+    pathname === "/memo-inbox/LICENSE"
   ) {
     const asset = await context.next();
     // A conditional request can return 304 with no body. It still needs the

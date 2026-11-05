@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Owner's 2026-09-16, 2026-09-29 and 2026-10-14 GSC samples: serving policy, not Google's indexing verdict.
+// Owner's complete GSC samples: serving policy, not Google's indexing verdict.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
@@ -17,6 +17,7 @@ const suppliedSamples = [
   // 2026-10-14: all 123 rows of the report updated 2026-10-09. Adds locale
   // HTML published by #2031 and three video files referenced by watch pages.
   ["docs/seo/gsc-crawled-cases-2026-10-14.json", 123],
+  ["docs/seo/gsc-crawled-cases-2026-11-05.json", 182],
 ];
 const bySource = new Map();
 for (const [file, expected] of suppliedSamples) {
@@ -105,6 +106,40 @@ const attr = (tag, name) => {
 };
 const noindex = (value) => /(?:^|[\s,:])(?:noindex|none)(?:[\s,]|$)/i.test(value || "");
 const htmlFile = (urlPath) => urlPath.slice(1) + (urlPath.endsWith("/") ? "index.html" : ".html");
+
+// Raw download formats have distinct MIME types. A 200 HTML fallback must not
+// count as a working download; retain JSON parsing for machine-readable files.
+function rawFormat(urlPath) {
+  if (urlPath === "/memo-inbox/LICENSE") return { type: "text/plain", json: false };
+  const extension = path.extname(urlPath);
+  const formats = {
+    ".json": { type: "application/json", json: true },
+    ".csv": { type: "text/csv", json: false },
+    ".md": { type: "text/markdown", json: false },
+    ".swift": { type: "text/plain", json: false },
+    ".canvas": { type: "application/json", json: true },
+  };
+  assert(formats[extension], `${urlPath}: unreviewed raw-file format`);
+  return formats[extension];
+}
+
+function checkRawResponse(response, urlPath) {
+  const format = rawFormat(urlPath);
+  const type = (response.contentType || "").split(";")[0].trim().toLowerCase();
+  const allowed = new Set([format.type]);
+  // Preserve the pre-existing strict JSON/CSV MIME gates. Pages may serve
+  // newly covered Markdown, Swift, Canvas and LICENSE as generic text/binary.
+  if (!/\.(json|csv)$/.test(urlPath)) {
+    allowed.add("application/octet-stream");
+    allowed.add("text/plain");
+  }
+  assert(allowed.has(type), `${urlPath}: unexpected raw-file Content-Type ${type}`);
+  assert(response.bytes.length > 0, `${urlPath}: empty raw-file response`);
+  assert(!/^\s*(?:<!doctype\s+html|<html\b)/i.test(response.body), `${urlPath}: HTML fallback instead of raw file`);
+  if (format.json) JSON.parse(response.body);
+}
+
+const videoType = urlPath => urlPath.endsWith(".webm") ? "video/webm" : "video/mp4";
 
 function checkHtml(html, urlPath) {
   const document = clean(html);
@@ -342,7 +377,7 @@ async function selftest() {
     `<script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@graph": [{ "@type": ["https://schema.org/TechArticle"], headline: metadata.techArticleHeadline, description: metadata.techArticleDescription, dateModified: metadata.techArticleDateModified }] })}</script></head>`);
   const fixtureBytes = new Map(publicationPaths.map(target => [target.kind === "html" ? htmlFile(target.url) : target.url.slice(1),
     target.kind === "html" ? Buffer.from((target.checkDescriptions ? fixtureA7Html : target.checkTechArticleMetadata ? fixtureA1Html : fixtureHtml)(target.url, `Synthetic ${target.url}`))
-      : target.url.endsWith(".png") ? Buffer.from([0x89, 0x50, 0x4e, 0x47, 0xff, 0xfe, 0x00, 0x80]) : Buffer.from("Synthetic 日本語\nsecond capture\n")]));
+      : target.url.endsWith(".png") ? Buffer.from([0x89, 0x50, 0x4e, 0x47, 0xff, 0xfe, 0x00, 0x80]) : /\.(json|canvas)$/.test(target.url) ? Buffer.from('{"synthetic":"日本語"}\n') : Buffer.from("Synthetic 日本語\nsecond capture\n")]));
   const readBytes = file => { assert(fixtureBytes.has(file), `Unexpected synthetic source: ${file}`); return fixtureBytes.get(file); };
   const publication = publicationTargets(readBytes), htmlTarget = publication[0], pngTarget = publication.find(target => target.url.endsWith(".png"));
   assert.equal(publication.length, 62);
@@ -362,6 +397,19 @@ async function selftest() {
   assert.throws(() => headTitle(html.replace("</head>", "<title>Duplicate</title></head>"), htmlTarget.url));
   assert.throws(() => headTitle(html.replace(/<title>.*?<\/title>/, ""), htmlTarget.url));
   const responseSnapshot = (bytes, contentType = "text/html", status = 200, robots = null) => ({ status, contentType, robots, bytes, body: bytes.toString("utf8") });
+  for (const url of ["/data/x.json", "/data/benchmark-2026.csv", "/assets/downloads/空白 あり.md", "/assets/downloads/demo.swift", "/assets/downloads/Untitled.canvas", "/memo-inbox/LICENSE"]) {
+    const format = rawFormat(url), bytes = Buffer.from(format.json ? '{"x":"日本語"}' : "Download 日本語\n");
+    checkRawResponse(responseSnapshot(bytes, format.type), url);
+    if (/\.(json|csv)$/.test(url)) {
+      assert.throws(() => checkRawResponse(responseSnapshot(bytes, "application/octet-stream"), url));
+      assert.throws(() => checkRawResponse(responseSnapshot(bytes, "text/plain"), url));
+    } else checkRawResponse(responseSnapshot(bytes, "application/octet-stream"), url);
+    assert.throws(() => checkRawResponse(responseSnapshot(bytes, "text/html"), url));
+    assert.throws(() => checkRawResponse(responseSnapshot(Buffer.alloc(0), format.type), url));
+    assert.throws(() => checkRawResponse(responseSnapshot(Buffer.from("<!doctype html><html>404</html>"), format.type), url));
+    if (format.json) assert.throws(() => checkRawResponse(responseSnapshot(Buffer.from("not json"), format.type), url));
+  }
+  assert.throws(() => rawFormat("/assets/downloads/unreviewed.pdf"));
   const goodHtml = publicationResponse(htmlTarget, responseSnapshot(Buffer.from(html)));
   assert(goodHtml.ok);
   const goodA7 = publicationResponse(a7Target, responseSnapshot(Buffer.from(a7Html)));
@@ -452,13 +500,14 @@ async function selftest() {
     assert(publicationResponse(target, responseSnapshot(bytes, "application/octet-stream")).ok);
     assert(!publicationResponse(target, responseSnapshot(Buffer.concat([bytes, Buffer.from("changed")]), "text/plain")).ok);
   }
-  const allSitemap = [...new Set([...cases.filter(c => c.kind !== "noindex-html").map(c => c.to), ...publication.filter(c => c.kind === "html").map(c => c.url)])].map(url => `<loc>${ORIGIN}${url}</loc>`).join("\n");
+  const allSitemap = [...new Set([...cases.filter(c => ["html", "redirect"].includes(c.kind)).map(c => c.to), ...publication.filter(c => c.kind === "html").map(c => c.url)])].map(url => `<loc>${ORIGIN}${url}</loc>`).join("\n");
   const makeRequest = ({ staleTitle = false, staleSitemap = false, staleAsset = false, staleDescriptions = false, staleTechArticleMetadata = false, unavailable = false } = {}) => {
     const calls = new Map();
     return { calls, request: async (url, method) => {
       const key = `${method} ${url}`, call = (calls.get(key) || 0) + 1;
       calls.set(key, call);
-      if (cases.some(c => c.kind === "video" && c.from === url)) return new Response(null, { headers: { "Content-Type": "video/mp4" } });
+      const video = cases.find(c => c.kind === "video" && c.from === url);
+      if (video) return new Response(null, { headers: { "Content-Type": videoType(video.to) } });
       if (cases.some(c => c.kind === "noindex-html" && c.from === url)) return new Response(fixtureHtml(url, "Noindex fixture").replace("</head>", '<meta name="robots" content="noindex, follow"></head>'), { headers: { "Content-Type": "text/html" } });
       if (method === "HEAD") return new Response(null, { headers: { "X-Robots-Tag": "noindex" } });
       if (url === "/robots.txt") return new Response("User-agent: *\nAllow: /\n");
@@ -471,12 +520,13 @@ async function selftest() {
         if (staleAsset && target === pngTarget && call === 1) bytes = Buffer.from("Stale PNG");
         if (staleDescriptions && target === a7Target && call === 1) bytes = Buffer.from(fixtureA7Html(url, target.expectedTitle, oldDescriptions));
         if (staleTechArticleMetadata && target === a1Target && call === 1) bytes = Buffer.from(fixtureA1Html(url, target.expectedTitle, oldA1Metadata));
-        return new Response(bytes, { headers: { "Content-Type": target.kind === "html" ? "text/html" : url.endsWith(".png") ? "image/png" : "text/plain" } });
+        const raw = cases.find(c => ["data", "asset"].includes(c.kind) && c.to === url);
+        return new Response(bytes, { headers: { "Content-Type": target.kind === "html" ? "text/html" : url.endsWith(".png") ? "image/png" : raw ? rawFormat(raw.to).type : "text/plain", ...(raw ? { "X-Robots-Tag": "noindex" } : {}) } });
       }
       const c = cases.find(c => c.from === url);
       if (c?.kind === "redirect") return new Response(null, { status: 301, headers: { Location: c.to } });
-      if (c?.kind === "data") return new Response("{}", { headers: { "Content-Type": "application/json", "X-Robots-Tag": "noindex" } });
-      if (c?.kind === "asset") return new Response("header\nvalue\n", { headers: { "Content-Type": "text/csv", "X-Robots-Tag": "noindex" } });
+      const raw = cases.find(c => ["data", "asset"].includes(c.kind) && (c.from === url || c.to === url));
+      if (raw) return new Response(rawFormat(raw.to).json ? "{}" : "header\nvalue\n", { headers: { "Content-Type": rawFormat(raw.to).type, "X-Robots-Tag": "noindex" } });
       assert(cases.some(c => c.to === url), `Unexpected synthetic request: ${url}`);
       return new Response(fixtureHtml(url, "Existing fixture"), { headers: { "Content-Type": "text/html" } });
     } };
@@ -511,14 +561,16 @@ async function selftest() {
   assert.equal(expired.calls.size, 0, "Expired propagation budget must perform no requests");
   const baseline = makeRequest(), baselineReports = [];
   const baselineReport = await liveAudit(false, { request: baseline.request, readBytes: () => { throw new Error("PR baseline must not load candidate sources"); }, saveReport: report => baselineReports.push(report), logReport: () => {} });
-  assert.equal(baselineReport.passed, 173);
+  assert.equal(baselineReport.passed, 311);
   assert.equal(baselineReport.publication.skipped, 62);
   assert(baselineReport.ok);
   assert.equal(baselineReports.length, 1);
-  for (const target of publication) assert(!baseline.calls.has(`GET ${target.url}`), "PR baseline must not fetch unpublished candidates");
+  for (const target of publication.filter(target => !cases.some(c => c.from === target.url || c.to === target.url))) {
+    assert(!baseline.calls.has(`GET ${target.url}`), "PR baseline must not fetch unpublished candidates");
+  }
   const deployed = makeRequest(), deployedReports = [];
   const deployedReport = await liveAudit(true, { request: deployed.request, readBytes, wait: async () => {}, saveReport: report => deployedReports.push(report), logReport: () => {} });
-  assert.equal(deployedReport.passed, 173);
+  assert.equal(deployedReport.passed, 311);
   assert.equal(deployedReport.publication.passed, 62);
   assert.deepEqual(deployedReport.publication.cases.at(-2).actualDescriptions, a7Descriptions);
   assert.deepEqual(deployedReport.publication.cases.at(-2).expectedDescriptions, a7Descriptions);
@@ -533,7 +585,7 @@ async function selftest() {
   assert.equal(failureReports.length, 1, "Propagation failure must retain report evidence");
   assert.equal(failureReports[0].publication.failed, 1);
   assert.equal(failureReports[0].publication.cases.find(row => row.url === htmlTarget.url).status, 404);
-  assert.equal(failureReports[0].skipped, 173);
+  assert.equal(failureReports[0].skipped, 311);
   assert(!failureReports[0].ok);
   const sourceFailureReports = [];
   await assert.rejects(liveAudit(true, { request: async () => { throw new Error("Missing sources must fail before HTTP"); }, readBytes: () => { throw new Error("Missing publication source"); }, saveReport: report => sourceFailureReports.push(report), logReport: () => {} }), /Missing publication source/);
@@ -554,6 +606,29 @@ async function sourceAudit() {
   const policy = JSON.parse(read("data/publication-policy.json"));
   const publication = publicationTargets();
   const targets = new Set();
+  // Prefix boundaries and file types protect real pages and searchable media.
+  for (const url of ["/ko/ai-tags/", "/data/voice-shift/", "/assets/img/example.png", "/assets/downloads/example.svg", "/assets/downloads/example.pdf", "/assets/downloads/example.wav", "/assets/downloads/example.webm", "/assets/video/example.mp4", "/assets/downloads/example.md.html", "/assets/downloads-other/example.md", "/memo-inbox/LICENSE.html"]) {
+    assert(!noindex(configuredRobots(headers, url)), `${url}: unrelated file covered by noindex header rule`);
+    const original = new Response("preserved", { headers: { "Content-Type": "application/octet-stream" } });
+    const response = await middleware({ request: new Request(ORIGIN + url), next: async () => original });
+    if (url.endsWith(".html")) {
+      assert.equal(response.status, 301, "Preserve existing .html canonical redirects");
+      assert(!noindex(response.headers.get("x-robots-tag")));
+    } else assert.equal(response, original, `${url}: unrelated response changed`);
+  }
+  const rawUrl = "/assets/downloads/obsidian-markdown-catalogue/資料/参照メモ.md";
+  for (const url of [rawUrl, encodeURI(rawUrl) + "?v=example"]) {
+    for (const status of [206, 404, 500]) {
+      const original = new Response("partial or error", { status, headers: { ETag: '"unchanged"', "Content-Type": "text/markdown", "Content-Range": "bytes 0-15/100" } });
+      const response = await middleware({ request: new Request(ORIGIN + url), next: async () => original });
+      assert.equal(response.status, status);
+      assert.equal(response.headers.get("etag"), '"unchanged"');
+      assert.equal(response.headers.get("content-range"), "bytes 0-15/100");
+      assert.equal(await response.text(), "partial or error");
+      if (status === 206) assert(noindex(response.headers.get("x-robots-tag")));
+      else assert.equal(response, original, "Error responses must not be rewritten");
+    }
+  }
   for (const c of cases) {
     const result = await edgeResult(middleware, ORIGIN + c.from, ORIGIN);
     assert.deepEqual(result, c.kind === "redirect" ? { kind: "redirect", status: 301, to: c.to } : { kind: "pass" }, c.from);
@@ -562,10 +637,11 @@ async function sourceAudit() {
       // Video files referenced by watch pages stay fetchable and indexable:
       // Google's video guidelines ask not to noindex or block the video file.
       // Their place in the crawled-not-indexed report is expected.
-      assert(c.to.startsWith("/assets/video/") && c.to.endsWith(".mp4") && c.from.startsWith(c.to + "?v="), `${c.from}: unexpected video case`);
+      assert((c.to.startsWith("/assets/video/") && c.to.endsWith(".mp4")) || c.to === "/assets/downloads/obsidian-markdown-catalogue/著者映像.webm", `${c.from}: unexpected video case`);
+      assert(c.from === c.to || c.from.startsWith(c.to + "?v="), `${c.from}: unexpected video query`);
       assert(readFileSync(path.join(ROOT, c.to.slice(1))).length > 0, `${c.to}: video file missing`);
       assert(!noindex(configuredRobots(headers, c.to)), `${c.to}: video file must not be noindex`);
-      const response = await middleware({ request: new Request(ORIGIN + c.from), next: async () => new Response("video bytes", { headers: { "Content-Type": "video/mp4" } }) });
+      const response = await middleware({ request: new Request(ORIGIN + c.from), next: async () => new Response("video bytes", { headers: { "Content-Type": videoType(c.to) } }) });
       assert.equal(response.status, 200, `${c.from}: video response status changed`);
       assert(!noindex(response.headers.get("x-robots-tag")), `${c.from}: middleware noindexed a video file`);
       assert(!sitemap.includes(`<loc>${ORIGIN}${c.to}</loc>`), `${c.to}: video file must not be a page sitemap entry`);
@@ -573,22 +649,27 @@ async function sourceAudit() {
       checkNoindexHtml(read(htmlFile(c.to)), c.to);
       assert(!sitemap.includes(`<loc>${ORIGIN}${c.to}</loc>`), `${c.to}: noindex locale must not be in a sitemap`);
     } else if (c.kind === "data" || c.kind === "asset") {
-      if (c.kind === "data") {
-        assert.equal(policy.files[c.from.slice("/data/".length)]?.served_by_site, true, `${c.from}: preserve publication policy`);
-        JSON.parse(read(c.from.slice(1)));
+      if (c.kind === "data" && c.to.endsWith(".json")) {
+        assert.equal(policy.files[c.to.slice("/data/".length)]?.served_by_site, true, `${c.from}: preserve publication policy`);
+      } else if (c.kind === "data") {
+        // The publication registry governs JSON. This existing CSV is linked
+        // by the benchmark article and keeps its established public response.
+        assert.equal(c.to, "/data/benchmark-2026.csv");
       } else {
-        assert(c.from.startsWith("/assets/downloads/") && c.from.endsWith(".csv"));
-        assert(read(c.from.slice(1)).length > 0, `${c.from}: downloadable CSV missing`);
+        assert(c.to.startsWith("/assets/downloads/") || c.to.startsWith("/assets/evidence/") || c.to === "/memo-inbox/LICENSE", `${c.from}: unexpected raw-file location`);
       }
-      assert(noindex(configuredRobots(headers, c.from)), `${c.from}: missing noindex response rule`);
+      const bytes = readFileSync(path.join(ROOT, c.to.slice(1)));
+      checkRawResponse({ bytes, body: bytes.toString("utf8"), contentType: rawFormat(c.to).type }, c.to);
+      assert(noindex(configuredRobots(headers, c.to)), `${c.from}: missing noindex response rule`);
       const response = await middleware({
         request: new Request(ORIGIN + c.from),
-        next: async () => new Response("asset body", { headers: { "Content-Type": c.kind === "data" ? "application/json" : "text/csv", "Cache-Control": "public, max-age=3600" } }),
+        next: async () => new Response(bytes, { headers: { "Content-Type": rawFormat(c.to).type, "Cache-Control": "public, max-age=3600" } }),
       });
       assert.equal(response.status, 200, `${c.from}: raw asset response status changed`);
       assert(noindex(response.headers.get("x-robots-tag")), `${c.from}: middleware lost noindex on a cached asset`);
       assert.equal(response.headers.get("cache-control"), "public, max-age=3600", `${c.from}: raw asset cache policy changed`);
-      assert.equal(await response.text(), "asset body", `${c.from}: raw asset body changed`);
+      assert.equal(response.headers.get("content-type"), rawFormat(c.to).type, `${c.from}: raw asset MIME type changed`);
+      assert.deepEqual(Buffer.from(await response.arrayBuffer()), bytes, `${c.from}: raw asset body changed`);
       const conditional = await middleware({
         request: new Request(ORIGIN + c.from, { headers: { "If-None-Match": '"cached-raw"' } }),
         next: async () => new Response(null, { status: 304, headers: { ETag: '"cached-raw"', "Cache-Control": "public, max-age=3600" } }),
@@ -598,7 +679,7 @@ async function sourceAudit() {
       assert.equal(conditional.headers.get("etag"), '"cached-raw"', `${c.from}: conditional response ETag changed`);
       assert.equal(conditional.headers.get("cache-control"), "public, max-age=3600", `${c.from}: conditional response cache policy changed`);
       assert.equal(conditional.body, null, `${c.from}: conditional response acquired a body`);
-      assert(!sitemap.includes(`<loc>${ORIGIN}${c.from}</loc>`), `${c.from}: raw file must not be in sitemap`);
+      assert(!sitemap.includes(`<loc>${ORIGIN}${c.to}</loc>`), `${c.from}: raw file must not be in sitemap`);
     } else targets.add(c.to);
   }
   for (const target of publication) {
@@ -683,7 +764,7 @@ function snapshotCache(request = get, deadline = Infinity) {
 }
 
 async function propagation(publication, cache, wait = pause, deadline = Infinity, now = Date.now) {
-  const rawPolicyPaths = ["/data/eligibility-policy.json", "/assets/downloads/autopilot-runs-2026-09-02.csv"];
+  const rawPolicyPaths = ["/data/eligibility-policy.json", "/data/benchmark-2026.csv", "/assets/downloads/autopilot-runs-2026-09-02.csv", "/assets/downloads/obsidian-markdown-catalogue/資料/参照メモ.md", "/assets/downloads/speech-analyzer-preparation.swift", "/assets/downloads/obsidian-canvas/Untitled.canvas", "/assets/evidence/uri-scheme-20260930/cases/S-N02.json", "/assets/evidence/uri-scheme-20260930/raw/encoded-new.md", "/memo-inbox/LICENSE"];
   const controlPaths = ["/robots.txt", "/sitemap-ja.xml", "/sitemap-en.xml"];
   const state = { ready: false, attempts: 0, maxAttempts: 18, intervalMs: 5000, rawPolicy: [], controls: [], publication: [] };
   for (let attempt = 0; attempt < 18; attempt++) {
@@ -785,6 +866,7 @@ async function liveAudit(strict, { request = get, readBytes, wait = pause, now =
         assert(robotsAllows(robots, c.from) && robotsAllows(robots, c.to), `${c.from}: robots.txt prevents Google's verification`);
         row.finalStatus = final.status;
         row.xRobotsTag = final.robots;
+        row.contentType = final.contentType;
         if (c.kind === "noindex-html") {
           // Like raw files: the PR baseline sees production before the noindex ships.
           row.noindexObserved = /<meta\b[^>]*name=["']robots["'][^>]*noindex/i.test(final.body.split(/<\/head\s*>/i)[0]);
@@ -793,18 +875,14 @@ async function liveAudit(strict, { request = get, readBytes, wait = pause, now =
             assert(!sitemap.includes(`<loc>${ORIGIN}${c.to}</loc>`), `${c.to}: noindex locale is in the live sitemap`);
           }
         } else if (c.kind === "video") {
-          assert(/^video\/mp4(?:\s*;|$)/i.test(final.contentType || ""), `${c.from}: not an MP4 response`);
+          assert.equal((final.contentType || "").split(";")[0].trim().toLowerCase(), videoType(c.to), `${c.from}: incorrect video Content-Type`);
           row.noindexObserved = noindex(final.robots);
           assert(!row.noindexObserved, `${c.from}: live video file is noindex`);
         } else if (c.kind === "data" || c.kind === "asset") {
-          if (c.kind === "data") {
-            assert(/application\/json/i.test(final.contentType || ""), `${c.to}: not a JSON response`);
-            JSON.parse(final.body);
-          } else {
-            assert(/text\/csv/i.test(final.contentType || ""), `${c.to}: not a CSV response`);
-            assert(final.body.length > 0, `${c.to}: empty CSV response`);
-          }
-          row.noindexObserved = noindex(final.robots);
+          checkRawResponse(first, c.to);
+          checkRawResponse(final, c.to);
+          row.initialXRobotsTag = first.robots;
+          row.noindexObserved = noindex(first.robots) && noindex(final.robots);
           if (strict) assert(row.noindexObserved, `${c.to}: missing live noindex header`);
         } else {
           checkHtml(final.body, c.to);
@@ -840,9 +918,9 @@ async function liveAudit(strict, { request = get, readBytes, wait = pause, now =
   return report;
 }
 
-assert.equal(cases.length, 173, "All complete supplied samples must remain covered");
-assert.equal(new Set(cases.map(c => c.from)).size, 173, "Duplicate fixture URL");
-assert.deepEqual(counts(), { redirect: 60, html: 95, "noindex-html": 1, data: 13, asset: 1, video: 3 });
+assert.equal(cases.length, 311, "All complete supplied samples must remain covered");
+assert.equal(new Set(cases.map(c => c.from)).size, 311, "Duplicate fixture URL");
+assert.deepEqual(counts(), { redirect: 60, html: 106, "noindex-html": 1, data: 29, asset: 111, video: 4 });
 for (const c of cases) assert(c.from.startsWith("/") && c.to.startsWith("/") && !c.to.includes("?"));
 if (process.argv.includes("--selftest")) await selftest();
 else if (process.argv.includes("--live")) await liveAudit(true);
