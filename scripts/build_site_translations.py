@@ -18,7 +18,7 @@ from urllib.parse import urljoin, urlsplit, urlunsplit
 from localization_registry import ROOT, groups, page_url, localized_fragment, indexed
 from site_translation_units import collect, collect_extra, prepare_source, source_language, examples_for, Parser, all_nodes
 from site_translation_validation import render
-from site_translation_dynamic import bindings, locale_assets, inline_code
+from site_translation_dynamic import bindings, locale_assets, inline_code, initial_demo_note
 from site_translation_literals import literal_filenames
 from site_translation_dates import source_dates, localize_dates, leftover_dates
 
@@ -283,6 +283,7 @@ def translate_document(group, locale, catalog, routes, script_paths=None, dynami
     for start, end, value in reversed(css_changes):
         source = source[:start] + value + source[end:]
     source = inline_code(source, group['source'], dynamic_rows or [])
+    source = initial_demo_note(source, group['source'], locale, catalog, dynamic_rows or [])
     from site_translation_diagrams import localize_references
     source = localize_references(source, locale)
     uses_runtime = 'globalThis.SimpleMemoI18n.' in source or any(
