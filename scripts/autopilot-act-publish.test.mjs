@@ -33,6 +33,8 @@ function stepScript(name) {
 const prepare = stepScript('Prepare ledger branch before observation');
 const publish = stepScript('変更があればPRにする');
 const branch = 'claude/autopilot-act-20260917';
+const mainSha = 'b'.repeat(40), pendingSha = 'c'.repeat(40);
+const branchOutput = (pending = '') => `branch=${branch}\nmain_sha=${mainSha}\npending_sha=${pending}\n`;
 
 const stubs = String.raw`
 record() { printf '%s' "$1" >> "$CALL_LOG"; shift; printf '\t%s' "$@" >> "$CALL_LOG"; printf '\n' >> "$CALL_LOG"; }
@@ -46,10 +48,16 @@ git() {
     diff) if [ -n "$PENDING_PATH" ]; then printf '%s\n' "$PENDING_PATH"; fi ;;
     checkout) return "$CHECKOUT_EXIT" ;;
     add) if [ "$ADD_EXIT" != 0 ]; then printf 'synthetic staging failure\n' >&2; fi; return "$ADD_EXIT" ;;
-    config|fetch|merge) return 0 ;;
+    rev-parse) if [ "$LAST_FETCH" = main ]; then printf '%s\n' "$PREPARED_MAIN_SHA"; else printf '%s\n' "$FETCHED_PENDING_SHA"; fi ;;
+    ls-remote)
+      if [[ "$*" == *'refs/heads/main'* ]]; then printf '%s\trefs/heads/main\n' "$REMOTE_MAIN_SHA";
+      elif [ -n "$OPEN_PR" ] || [ "$EXISTING_BRANCH" = 1 ]; then printf '%s\trefs/heads/%s\n' "$FETCHED_PENDING_SHA" "$PREPARED_BRANCH"; fi ;;
+    fetch) LAST_FETCH="$3"; return 0 ;;
+    config|merge) return 0 ;;
     *) printf 'unexpected git command: %s\n' "$1" >&2; return 90 ;;
   esac
 }
+node() { record node "$@"; return "$CHECKOUT_EXIT"; }
 gh() {
   record gh "$@"
   case "$1 $2" in
@@ -99,7 +107,8 @@ function run(script, overrides = {}) {
       env: {
         PATH: bin, HOME: dir, RUNNER_TEMP: dir,
         CALL_LOG: log, GITHUB_OUTPUT: output,
-        PREPARED_BRANCH: branch, CHECKED_OUT_BRANCH: branch,
+        PREPARED_BRANCH: branch, CHECKED_OUT_BRANCH: branch, PREPARED_MAIN_SHA: mainSha,
+        PREPARED_PENDING_SHA: '', REMOTE_MAIN_SHA: mainSha, FETCHED_PENDING_SHA: pendingSha, EXISTING_BRANCH: '0', LAST_FETCH: '',
         CLOCK_DAY: '20260918', CLOCK_DATE: '2026-09-18', HAS_CHANGES: '1', OPEN_PR: '', FORK_PR: '',
         GITHUB_REPOSITORY: 'o/r', GITHUB_REPOSITORY_OWNER: 'o',
         LIST_EXIT: '0', COMMIT_EXIT: '0', PUSH_EXIT: '0', STATUS_EXIT: '0', ADD_EXIT: '0',
@@ -124,19 +133,20 @@ function noWrites(result) {
 test('preparation exports its selected branch only after successful checkout', () => {
   const result = run(prepare, { CLOCK_DAY: '20260917' });
   assert.equal(result.status, 0, result.stderr);
-  assert.equal(result.output, `branch=${branch}\n`);
-  assert.deepEqual(callsOf(result, 'git', 'checkout')[0], ['git', 'checkout', '-B', branch]);
+  assert.equal(result.output, branchOutput());
+  assert.equal(callsOf(result, 'node', 'scripts/autopilot-act-prepare.mjs').length, 1);
   const failed = run(prepare, { CLOCK_DAY: '20260917', CHECKOUT_EXIT: '23' });
   assert.equal(failed.status, 23);
   assert.equal(failed.output, '');
 });
 
-test('an existing pending branch keeps its path allowlist and main merge', () => {
+test('an existing pending branch keeps its path allowlist and semantic reconciliation', () => {
   const result = run(prepare, { CLOCK_DAY: '20260917', OPEN_PR: '1447', PENDING_PATH: 'autopilot/index.html' });
   assert.equal(result.status, 0, result.stderr);
-  assert.equal(result.output, `branch=${branch}\n`);
-  assert.deepEqual(callsOf(result, 'git', 'checkout')[0], ['git', 'checkout', '-B', branch, 'FETCH_HEAD']);
-  assert.deepEqual(callsOf(result, 'git', 'merge')[0], ['git', 'merge', '--no-edit', 'origin/main']);
+  assert.equal(result.output, branchOutput(pendingSha));
+  const args = callsOf(result, 'node', 'scripts/autopilot-act-prepare.mjs')[0];
+  assert.deepEqual(args.slice(0, 5), ['node', 'scripts/autopilot-act-prepare.mjs', branch, mainSha, pendingSha]);
+  assert.equal(callsOf(result, 'git', 'merge').length, 0);
   const rejected = run(prepare, { OPEN_PR: '1447', PENDING_PATH: 'scripts/protected.mjs' });
   assert.notEqual(rejected.status, 0);
   assert.equal(rejected.output, '');
@@ -147,7 +157,7 @@ test('a pending branch may carry the generated report translations, and nothing 
   for (const locale of ['ar', 'es', 'id', 'ko', 'pt-BR', 'tr', 'zh-Hant', 'zh']) {
     const result = run(prepare, { CLOCK_DAY: '20260917', OPEN_PR: '1447', PENDING_PATH: `${locale}/autopilot/index.html` });
     assert.equal(result.status, 0, result.stderr);
-    assert.equal(result.output, `branch=${branch}\n`);
+    assert.equal(result.output, branchOutput(pendingSha));
   }
   for (const path of ['es/index.html', 'en/autopilot/index.html', 'fr/autopilot/index.html']) {
     const rejected = run(prepare, { OPEN_PR: '1447', PENDING_PATH: path });
@@ -161,7 +171,7 @@ for (const clock of ['20260917', '20260918', '20261001']) {
   test(`publishing at ${clock} uses the prepared branch, not the new clock date`, () => {
     const result = run(publish, { CLOCK_DAY: clock });
     assert.equal(result.status, 0, result.stderr);
-    assert.deepEqual(callsOf(result, 'git', 'push'), [['git', 'push', '--force-with-lease', '-u', 'origin', branch]]);
+    assert.deepEqual(callsOf(result, 'git', 'push'), [['git', 'push', `--force-with-lease=refs/heads/${branch}:`, '-u', 'origin', branch]]);
     for (const call of callsOf(result, 'gh', 'pr')) {
       assert.equal(call[call.indexOf('--head') + 1], branch);
     }
@@ -251,15 +261,15 @@ test('an existing open PR is not duplicated after midnight', () => {
 test('a fork PR with the predictable branch name is not taken as the ledger PR', () => {
   const prepared = run(prepare, { CLOCK_DAY: '20260917', FORK_PR: '666' });
   assert.equal(prepared.status, 0, prepared.stderr);
-  assert.equal(prepared.output, `branch=${branch}\n`);
-  assert.equal(callsOf(prepared, 'git', 'fetch').length, 0);
-  assert.deepEqual(callsOf(prepared, 'git', 'checkout'), [['git', 'checkout', '-B', branch]]);
+  assert.equal(prepared.output, branchOutput());
+  assert.deepEqual(callsOf(prepared, 'git', 'fetch'), [['git', 'fetch', 'origin', 'main']]);
+  assert.equal(callsOf(prepared, 'node', 'scripts/autopilot-act-prepare.mjs')[0][4], '-');
   const published = run(publish, { FORK_PR: '666' });
   assert.equal(published.status, 0, published.stderr);
   assert.equal(callsOf(published, 'gh', 'pr').filter(parts => parts[2] === 'create').length, 1);
   const own = run(prepare, { CLOCK_DAY: '20260917', OPEN_PR: '1447', FORK_PR: '666', PENDING_PATH: 'autopilot/index.html' });
   assert.equal(own.status, 0, own.stderr);
-  assert.deepEqual(callsOf(own, 'git', 'checkout')[0], ['git', 'checkout', '-B', branch, 'FETCH_HEAD']);
+  assert.equal(callsOf(own, 'node', 'scripts/autopilot-act-prepare.mjs')[0][4], pendingSha);
 });
 
 const OWN_PR_FILTER = '.[] | select(.base.ref == "main" and .head.repo.full_name == env.GITHUB_REPOSITORY and .base.repo.full_name == env.GITHUB_REPOSITORY and (.user.login == env.GITHUB_REPOSITORY_OWNER or .user.login == "github-actions[bot]")) | .number';
@@ -308,4 +318,14 @@ test('the workflow passes the prepared output to the guarded publishing step', (
   assert.ok(/run: node --test scripts\/refactor\.test\.mjs/.test(seo), 'normal CI runs refactor tests');
   const suite = fs.readFileSync(path.join(ROOT, 'scripts/refactor.test.mjs'), 'utf8');
   assert.ok(suite.includes("import './autopilot-act-publish.test.mjs';"), 'refactor suite runs these regressions');
+});
+
+test('publishing rejects a moved main before staging or pushing', () => {
+  const result = run(publish, { REMOTE_MAIN_SHA: 'd'.repeat(40) });
+  assert.notEqual(result.status, 0); noWrites(result);
+});
+test('publishing uses the captured pending SHA even if tracking refs refreshed', () => {
+  const result = run(publish, { PREPARED_PENDING_SHA: pendingSha });
+  assert.equal(result.status, 0, result.stderr);
+  assert.deepEqual(callsOf(result, 'git', 'push'), [['git', 'push', `--force-with-lease=refs/heads/${branch}:${pendingSha}`, '-u', 'origin', branch]]);
 });

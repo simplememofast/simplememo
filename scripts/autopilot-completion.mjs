@@ -5,7 +5,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import os from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
@@ -128,7 +127,10 @@ export function checkWiring(primary, act, source) {
   assert.match(act, /workflow_run:[\s\S]*?types: \[completed\]/);
   assert.match(act, /cron: '0 0 \* \* \*'/);
   assert.ok(act.indexOf('Prepare ledger branch before observation') < act.indexOf('id: act\n'), 'Load pending ledger before deriving observations');
-  assert.match(act, /git merge --no-edit origin\/main/);
+  assert.match(act, /node scripts\/autopilot-act-prepare\.mjs \"\$DAY\" \"\$MAIN_SHA\"/);
+  assert.match(act, /--force-with-lease=refs\/heads\/\$DAY:\$PREPARED_PENDING_SHA/);
+  assert.match(act, /autopilot-act-prepare\.mjs --verify-history/);
+  assert.doesNotMatch(act, /git merge --no-edit/);
   assert.doesNotMatch(act, /git stash/);
   assert.match(source, /await completionOrigin\(\)/);
   assert.match(source, /primarySteps\(\(await jr\.json\(\)\)\.jobs \?\? \[\]\)/);
@@ -137,63 +139,12 @@ export function checkWiring(primary, act, source) {
 }
 
 function testPendingBranch(act) {
-  const block = act.split('      - name: Prepare ledger branch before observation\n')[1]?.split('\n      #')[0];
-  assert.ok(block, 'Pending branch preparation is missing');
-  const shell = block.split('        run: |\n')[1].split('\n').map(line => line.replace(/^          /, '')).join('\n');
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'act-branch-'));
-  const cwd = path.join(root, 'work');
-  const env = { ...process.env, RUNNER_TEMP: root, GITHUB_OUTPUT: path.join(root, 'step-output'), PATH: `${root}:${process.env.PATH}`,
-    GIT_AUTHOR_NAME: 'test', GIT_COMMITTER_NAME: 'test', GIT_AUTHOR_EMAIL: 'test@example.test', GIT_COMMITTER_EMAIL: 'test@example.test' };
-  const git = (...args) => execFileSync('git', args, { cwd, env, stdio: 'pipe' });
-  try {
-    fs.mkdirSync(cwd);
-    execFileSync('git', ['init', '--bare', path.join(root, 'origin')], { stdio: 'pipe' });
-    git('init', '-b', 'main'); git('remote', 'add', 'origin', path.join(root, 'origin'));
-    fs.mkdirSync(path.join(cwd, 'data')); fs.mkdirSync(path.join(cwd, 'scripts'));
-    fs.writeFileSync(path.join(cwd, 'data/autopilot-runs.json'), '[]\n');
-    fs.writeFileSync(path.join(cwd, 'scripts/trusted'), 'v1\n');
-    git('add', '.'); git('commit', '-m', 'base'); git('push', '-u', 'origin', 'main');
-    const day = execFileSync('date', ['+%Y%m%d'], { env: { ...env, TZ: 'Asia/Tokyo' }, encoding: 'utf8' }).trim();
-    const branch = `claude/autopilot-act-${day}`;
-    git('checkout', '-b', branch);
-    fs.writeFileSync(path.join(cwd, 'data/autopilot-runs.json'), '[1]\n');
-    git('commit', '-am', 'first observation'); git('push', '-u', 'origin', branch);
-    git('checkout', 'main');
-    fs.writeFileSync(path.join(cwd, 'scripts/trusted'), 'v2\n');
-    git('commit', '-am', 'new trusted code'); git('push', 'origin', 'main');
-    fs.writeFileSync(path.join(root, 'gh'), '#!/bin/sh\nprintf "123\\n"\n', { mode: 0o700 });
-    execFileSync('bash', ['-e', '-c', shell], { cwd, env, stdio: 'pipe' });
-    assert.equal(fs.readFileSync(path.join(cwd, 'data/autopilot-runs.json'), 'utf8'), '[1]\n');
-    assert.equal(fs.readFileSync(path.join(cwd, 'scripts/trusted'), 'utf8'), 'v2\n');
-    fs.writeFileSync(path.join(cwd, 'data/autopilot-runs.json'), '[1,2]\n');
-    git('commit', '-am', 'second observation'); git('push', 'origin', branch);
-    git('checkout', 'main');
-    execFileSync('bash', ['-e', '-c', shell], { cwd, env, stdio: 'pipe' });
-    assert.equal(fs.readFileSync(path.join(cwd, 'data/autopilot-runs.json'), 'utf8'), '[1,2]\n');
-    // A generated report translation is ledger output; an editorial page is not.
-    fs.mkdirSync(path.join(cwd, 'ko/autopilot'), { recursive: true });
-    fs.writeFileSync(path.join(cwd, 'ko/autopilot/index.html'), 'report\n');
-    git('add', '.'); git('commit', '-m', 'report translation'); git('push', 'origin', branch);
-    git('checkout', 'main');
-    execFileSync('bash', ['-e', '-c', shell], { cwd, env, stdio: 'pipe' });
-    assert.equal(fs.readFileSync(path.join(cwd, 'ko/autopilot/index.html'), 'utf8'), 'report\n');
-    fs.mkdirSync(path.join(cwd, 'en/autopilot'), { recursive: true });
-    fs.writeFileSync(path.join(cwd, 'en/autopilot/index.html'), 'editorial\n');
-    git('add', '.'); git('commit', '-m', 'editorial page'); git('push', 'origin', branch);
-    git('checkout', 'main');
-    let editorial;
-    try { execFileSync('bash', ['-e', '-c', shell], { cwd, env, stdio: 'pipe' }); } catch (error) { editorial = error; }
-    assert.equal(editorial?.status, 1);
-    assert.match(editorial.stdout.toString(), /Unexpected pending PR path: en\/autopilot\/index\.html/);
-    git('checkout', branch); git('reset', '--hard', 'HEAD~1'); git('push', '--force', 'origin', branch);
-    fs.writeFileSync(path.join(cwd, 'scripts/untrusted'), 'must not execute\n');
-    git('add', '.'); git('commit', '-m', 'unexpected code'); git('push', 'origin', branch);
-    git('checkout', 'main');
-    let rejected;
-    try { execFileSync('bash', ['-e', '-c', shell], { cwd, env, stdio: 'pipe' }); } catch (error) { rejected = error; }
-    assert.equal(rejected?.status, 1);
-    assert.match(rejected.stdout.toString(), /Unexpected pending PR path: scripts\/untrusted/);
-  } finally { fs.rmSync(root, { recursive: true, force: true }); }
+  // The same tests are also part of refactor.test.mjs. They execute the real
+  // workflow shell with isolated commands and the actual reconciler against
+  // local Git remotes, including concurrent writes and fail-closed decisions.
+  assert.match(act, /node scripts\/autopilot-act-prepare\.mjs/);
+  execFileSync(process.execPath, ['--test', 'scripts/autopilot-act-prepare.test.mjs',
+    'scripts/autopilot-act-publish.test.mjs'], { cwd: ROOT, stdio: 'pipe' });
 }
 
 async function selftest() {
@@ -281,6 +232,11 @@ async function selftest() {
     primary.replace('actions: read', 'actions: write')]) {
     assert.throws(() => checkWiring(mutated, act, source));
   }
+  for (const altered of [act.replace('node scripts/autopilot-act-prepare.mjs', 'node scripts/missing.mjs'),
+    act.replace('--force-with-lease=refs/heads/$DAY:$PREPARED_PENDING_SHA', '--force'),
+    act.replace('autopilot-act-prepare.mjs --verify-history', 'missing-history-check')]) {
+    assert.throws(() => checkWiring(primary, altered, source));
+  }
   console.log('autopilot-completion: provenance, bounded wait, primary job selection and disconnected wiring rejected');
 }
 
@@ -295,3 +251,4 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     } else throw Error('Use --selftest or --check');
   } catch (error) { console.error(error.message); process.exitCode = 1; }
 }
+

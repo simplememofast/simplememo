@@ -188,6 +188,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
           DAY="claude/autopilot-act-$(TZ=Asia/Tokyo date +%Y%m%d)"
           # Own PRs only. `gh pr list --head` matches the branch name in any fork, so
           # anyone could open claude/autopilot-act-<date> and stall the ledger sync.
@@ -201,8 +202,19 @@ jobs:
             --jq '.[] | select(.base.ref == "main" and .head.repo.full_name == env.GITHUB_REPOSITORY and .base.repo.full_name == env.GITHUB_REPOSITORY and (.user.login == env.GITHUB_REPOSITORY_OWNER or .user.login == "github-actions[bot]")) | .number')"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if [ -n "$OPEN" ]; then
+          # Pin both refs. An explicit empty lease means the remote branch must
+          # still not exist; a background fetch must never refresh the lease.
+          git fetch origin main
+          MAIN_SHA="$(git rev-parse --verify FETCH_HEAD)"
+          PENDING_REF="$(git ls-remote --heads origin "refs/heads/$DAY")"
+          PENDING_SHA=""
+          if [ -n "$OPEN" ] && [ -z "$PENDING_REF" ]; then
+            echo "Open PR branch disappeared; stop before observation" >&2
+            exit 1
+          fi
+          if [ -n "$PENDING_REF" ]; then
             git fetch origin "$DAY"
+            PENDING_SHA="$(git rev-parse --verify FETCH_HEAD)"
             git diff --name-only origin/main...FETCH_HEAD > "$RUNNER_TEMP/act-pending-paths"
             while IFS= read -r FILE; do
               case "$FILE" in
@@ -211,13 +223,16 @@ jobs:
                 *) echo "Unexpected pending PR path: $FILE"; exit 1 ;;
               esac
             done < "$RUNNER_TEMP/act-pending-paths"
-            git checkout -B "$DAY" FETCH_HEAD
-            git merge --no-edit origin/main
-          else
-            git checkout -B "$DAY"
           fi
+          # Reconcile IDs on trusted main, preserving main's decisions and
+          # refusing unknown pending changes. Regenerate reports below.
+          node scripts/autopilot-act-prepare.mjs "$DAY" "$MAIN_SHA" "${PENDING_SHA:--}" "$RUNNER_TEMP/act-branch-reconciliation.json"
           echo "branch=$DAY" >> "$GITHUB_OUTPUT"
+          echo "main_sha=$MAIN_SHA" >> "$GITHUB_OUTPUT"
+          echo "pending_sha=$PENDING_SHA" >> "$GITHUB_OUTPUT"
 
+      # The prepared inputs are not publishable until all existing generators
+      # and ledger/publication checks below succeed. No gate is bypassed.
       # 判定ロジックそのものの自己検査。台帳を読まないので、台帳が壊れていても
       # ここは通る（＝壊れているのが判定側か台帳側かを切り分けられる）。
       - name: 自己検査
@@ -254,6 +269,10 @@ jobs:
       # `--write` は同じ候補・同じ日なら上書きなので、同日2回目でも行は増えない。
       # **enforcement は record_plus_r2_block** なので、ここで何かが「落ちた」ことは
       # 実行が止まったことを意味しない（止まったかどうかは halted が持つ）。
+      # Only the derived runs block is rebuilt; owner prose stays from main.
+      - name: 運転台帳の集計を再生成
+        run: node scripts/autopilot-runs.mjs --write-status
+
       - name: L1適格性ゲート（判定して台帳に残す）
         run: node scripts/autonomy-eligibility.mjs --write
 
@@ -288,6 +307,7 @@ jobs:
       # 翌日も同じ壊れた状態から始まる。
       - name: 台帳の検査
         run: |
+          node scripts/autopilot-act-prepare.mjs --verify-history "$RUNNER_TEMP/act-branch-reconciliation.json"
           node scripts/autopilot-act.mjs --check
           node scripts/autopilot-runs.mjs --check
           node scripts/autopilot-budget.mjs --check
@@ -301,6 +321,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
           PREPARED_BRANCH: ${{ steps.ledger_branch.outputs.branch }}
+          PREPARED_MAIN_SHA: ${{ steps.ledger_branch.outputs.main_sha }}
+          PREPARED_PENDING_SHA: ${{ steps.ledger_branch.outputs.pending_sha }}
         run: |
           # Keep the branch selected before observation, even across midnight.
           # Only the branch identity is pinned; ledger/score dates stay real time.
@@ -315,6 +337,16 @@ jobs:
             exit 1
           fi
           DAY="$PREPARED_BRANCH"
+          if [[ ! "$PREPARED_MAIN_SHA" =~ ^[a-f0-9]{40}$ ]] ||
+             [[ -n "$PREPARED_PENDING_SHA" && ! "$PREPARED_PENDING_SHA" =~ ^[a-f0-9]{40}$ ]]; then
+            echo "Missing or invalid pinned refs" >&2
+            exit 1
+          fi
+          REMOTE_MAIN="$(git ls-remote --exit-code origin refs/heads/main)"
+          if [[ "$REMOTE_MAIN" != "$PREPARED_MAIN_SHA"$'\t'refs/heads/main ]]; then
+            echo "Main moved during observation; recompute instead of publishing stale data" >&2
+            exit 1
+          fi
           # Read failures are unknown, not a clean tree; retain the Git exit code.
           CHANGES="$(git status --porcelain)"
           if [ -z "$CHANGES" ]; then
@@ -334,7 +366,7 @@ jobs:
           # そのPRは既にマージ済み（open が無いことは上で確認済み）なので、
           # **既マージ履歴の上書きにしかならない。**--force-with-lease にして
           # 「読んだ時点から動いていたら落ちる」ようにしておく。
-          git push --force-with-lease -u origin "$DAY"
+          git push "--force-with-lease=refs/heads/$DAY:$PREPARED_PENDING_SHA" -u origin "$DAY"
           # **open なPRだけを見る。**`gh pr view` はマージ済み・クローズ済みのPRも
           # 見つけてしまう。同日2回目が走ったとき、1回目のPRが既にマージされていると
           # 「PRはある」と判定して新しいPRを作らず、**pushしたコミットがどこにも
@@ -354,3 +386,4 @@ jobs:
               --title "日次アクチュエータの同期（$(TZ=Asia/Tokyo date +%Y-%m-%d)）" \
               --body "$(cat /tmp/act.txt)"
           fi
+
