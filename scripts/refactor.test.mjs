@@ -1,6 +1,8 @@
 import './admin-retirement.test.mjs';
 // Exercise the real publishing shell with synthetic, network-isolated commands.
 import './autopilot-act-publish.test.mjs';
+import './autopilot-act-reconcile.test.mjs';
+import './autopilot-act-prepare.test.mjs';
 import './lib/refactor-behavior.test.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -248,3 +250,4 @@ test('shared selftest runner continues after failures and retains the failure co
   assert.equal(reached, true);
   assert.deepEqual(logs, ['  FAIL broken\n       deliberate', '  ok   later', '\n  自己テスト 2 件中 1 件失敗']);
 });
+
