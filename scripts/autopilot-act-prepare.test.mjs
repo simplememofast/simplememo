@@ -25,6 +25,7 @@ function repository() {
     'data/eligibility-log.json': { judgements: [] },
     'data/emergency-stop.json': { stopped: false, agents: { act: { stopped: false } } },
     'data/autopilot-actions-report.json': { value: 'base' },
+    'scripts/trusted': { version: 1 },
   })) write(file, d);
   const commit = msg => { git(cwd, 'add', '.'); git(cwd, 'commit', '-m', msg); return git(cwd, 'rev-parse', 'HEAD'); };
   commit('base'); git(cwd, 'branch', '-M', 'main'); git(cwd, 'push', 'origin', 'main');
@@ -39,6 +40,7 @@ function diverge(r) {
   r.git(r.cwd, 'checkout', 'main');
   r.write('data/autopilot-runs.json', { runs: [run('a', '100'), run('main', '300')] });
   r.write('data/autopilot-actions-report.json', { value: 'main' });
+  r.write('scripts/trusted', { version: 2 });
   const mainSha = r.commit('main'); r.git(r.cwd, 'push', 'origin', 'main');
   return { cwd: r.cwd, gitEnv: r.env, branch, mainSha, pendingSha, receipt: path.join(r.dir, 'receipt.json') };
 }
@@ -49,6 +51,7 @@ test('real git divergence preserves both run rows and regenerates from main repo
     prepareBranch(args);
     assert.deepEqual(r.read('data/autopilot-runs.json').runs.map(x => x.run_id), ['a', 'main', 'pending']);
     assert.deepEqual(r.read('data/autopilot-actions-report.json'), { value: 'main' });
+    assert.deepEqual(r.read('scripts/trusted'), { version: 2 });
     assert.equal(r.git(r.cwd, 'symbolic-ref', '--short', 'HEAD'), branch);
     assert.equal(r.git(r.cwd, 'ls-remote', 'origin', `refs/heads/${branch}`).split(/\s+/)[0], args.pendingSha);
     assert.equal(JSON.parse(fs.readFileSync(args.receipt)).status, 'prepared_not_publishable');
@@ -93,5 +96,35 @@ test('criss-cross history with two merge bases is rejected before checkout', () 
     assert.equal(r.git(r.cwd, 'merge-base', '--all', mainSha, pendingSha).split('\n').length, 2);
     assert.throws(() => prepareBranch({ cwd: r.cwd, gitEnv: r.env, branch, mainSha, pendingSha }), /unique merge base/);
     assert.equal(r.git(r.cwd, 'symbolic-ref', '--short', 'HEAD'), 'main');
+  } finally { r.cleanup(); }
+});
+test('actual preparation shell and local Git are idempotent after publishing an update', async () => {
+  const { fileURLToPath } = await import('node:url');
+  const sourceRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+  const r = repository(); try {
+    for (const rel of ['scripts/autopilot-act-prepare.mjs', 'scripts/lib/autopilot-act-reconcile.mjs',
+      'scripts/autopilot-runs.mjs', 'scripts/autopilot-budget.mjs', 'scripts/check-model-routing.mjs',
+      'scripts/lib/read-ledger.mjs', 'scripts/lib/autopilot-gate-codes.mjs',
+      'scripts/lib/intervention-observation.mjs', 'scripts/lib/selftest.mjs']) {
+      const dest = path.join(r.cwd, rel); fs.mkdirSync(path.dirname(dest), { recursive: true }); fs.copyFileSync(path.join(sourceRoot, rel), dest);
+    }
+    r.baseSha = r.commit('trusted preparation helpers'); r.git(r.cwd, 'push', 'origin', 'main');
+    const args = diverge(r);
+    const workflow = fs.readFileSync(path.join(sourceRoot, '.github/workflows/autopilot-act.yml'), 'utf8');
+    const block = workflow.split('      - name: Prepare ledger branch before observation\n')[1].split('\n      #')[0];
+    const shell = block.split('        run: |\n')[1].split('\n').map(line => line.replace(/^          /, '')).join('\n');
+    const bin = path.join(r.dir, 'bin'); fs.mkdirSync(bin);
+    fs.writeFileSync(path.join(bin, 'gh'), '#!/bin/sh\nprintf "123\\n"\n', { mode: 0o700 });
+    fs.writeFileSync(path.join(bin, 'date'), '#!/bin/sh\nprintf "20261105\\n"\n', { mode: 0o700 });
+    const env = { ...r.env, PATH: `${bin}:${path.dirname(process.execPath)}:/usr/bin:/bin`,
+      RUNNER_TEMP: r.dir, GITHUB_OUTPUT: path.join(r.dir, 'step-output'), GITHUB_REPOSITORY: 'o/r', GITHUB_REPOSITORY_OWNER: 'o' };
+    const prepare = () => execFileSync('/bin/bash', ['--noprofile', '--norc', '-euo', 'pipefail', '-c', shell], { cwd: r.cwd, env, stdio: 'pipe' });
+    prepare();
+    const before = r.read('data/autopilot-runs.json'); assert.equal(before.runs.length, 3);
+    r.commit('prepared observation');
+    r.git(r.cwd, 'push', `--force-with-lease=refs/heads/${branch}:${args.pendingSha}`, 'origin', `HEAD:refs/heads/${branch}`);
+    r.git(r.cwd, 'checkout', 'main'); prepare();
+    assert.deepEqual(r.read('data/autopilot-runs.json'), before);
+    assert.deepEqual(r.read('scripts/trusted'), { version: 2 });
   } finally { r.cleanup(); }
 });
