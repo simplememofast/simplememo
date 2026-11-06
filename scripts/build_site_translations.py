@@ -21,6 +21,9 @@ from site_translation_validation import render
 from site_translation_dynamic import bindings, locale_assets, inline_code, initial_demo_note
 from site_translation_literals import literal_filenames
 from site_translation_dates import source_dates, localize_dates, leftover_dates
+from editorial_internal_links import (
+    apply as apply_editorial_links, strip as strip_editorial_links, load_manifest,
+)
 
 SITE = 'https://simplememofast.com'
 CATALOGS = ROOT / 'data/i18n/translations'
@@ -32,7 +35,10 @@ OG_LOCALES = {'ja': 'ja_JP', 'en': 'en_US', 'zh-Hans': 'zh_CN',
 
 @lru_cache(maxsize=256)
 def source_units(file, locale):
-    source = (ROOT / file).read_text()
+    # Page-specific editorial links are not translation units. Restore only
+    # their audited wrappers before extraction so catalogs and other locales
+    # retain their original prose/markup; each output receives its own plan.
+    source = strip_editorial_links((ROOT / file).read_text(), file)
     examples = examples_for(file) + literal_filenames(source, file, ROOT)
     prepared = prepare_source(source, locale, file)
     return prepared, collect(prepared, examples) + collect_extra(prepared, examples)
@@ -141,7 +147,8 @@ def coverage_errors(root, page_groups, files):
 def selftest():
     import unittest
     suite = unittest.defaultTestLoader.loadTestsFromNames([
-        'site_translation_validation_test', 'site_translation_pipeline_test'])
+        'site_translation_validation_test', 'site_translation_pipeline_test',
+        'editorial_internal_links_test'])
     return 0 if unittest.TextTestRunner().run(suite).wasSuccessful() else 1
 
 
@@ -396,6 +403,15 @@ def main():
             localized = localize_references(original, locale)
             if original != localized:
                 output[file] = localized
+    # Apply after every locale/chrome/breadcrumb transform. Editorial pages
+    # participate too, so --check detects missing wraps and --write restores
+    # them without allowing the generator to rewrite any existing prose.
+    for file in load_manifest():
+        if file not in output:
+            output[file] = (ROOT / file).read_text()
+    for file, source in list(output.items()):
+        if file.endswith('.html'):
+            output[file] = apply_editorial_links(source, file)
     stale = []
     for file, source in output.items():
         path = ROOT / file
