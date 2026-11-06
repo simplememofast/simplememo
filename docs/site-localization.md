@@ -58,6 +58,25 @@ maps the same section to its actual ID in each locale. Shared-page metadata
 
 ## Protected content
 
+### Page-specific editorial links
+
+`data/editorial-internal-links.json` stores reviewed inline link placements by
+published page. Each entry preserves the exact original HTML context and wraps
+only an existing phrase. It contains public page text and routes, not search
+analytics or private review evidence.
+
+The translation builder removes only these exact wrappers before extracting
+source units, then applies each output page's own plan after localization.
+Links therefore survive regeneration without changing catalog IDs or spreading
+to other languages. Existing editorial pages are checked against their plans
+too. Missing or ambiguous context, unsafe placement, self-links, repeated or
+already-linked destinations, and more than five new links per page fail closed.
+When editing a planned passage, review and update its context and offsets rather
+than disabling the check. Run the translation self-tests and complete `--check`,
+then regenerate the content-derived sitemaps before publishing.
+
+### Translation protections
+
 - Inline HTML structure, links, tracking parameters and identities are
   preserved. New markup from translation output is rejected.
 - Generated pages retain the editorial source's CTA placement, campaign and
