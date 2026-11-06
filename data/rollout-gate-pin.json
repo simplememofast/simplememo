@@ -17,19 +17,21 @@
     "レビュー返信は「気づかないうちに止まる」だったが、こちらは",
     "「気づかないうちに実行される」向き。",
     "",
-    "【更新するときは2か所】",
-    "  1. ここ（公開側の写し）",
-    "  2. simplememo-api/data/rollout-gate-pin.json（**実際に止めている側**）",
+    "【実行対象の更新と、公開側の自己テストの更新を分ける】",
+    "通常、実行対象を更新するときは公開側とAPI側の指紋、および PUBLIC_GATE_SHA を整合させる。",
+    "2026-11-06 は自己テストのみの変更で、公開側の指紋だけ更新する。",
+    "API側の SHA・指紋は既存の組を維持する。本番実行対象の更新や停止解除を意味しない。",
+    "指紋検査の成功はコードの一致だけを示す。kill_switch の解除や昇格の承認を示さない。",
     "",
     "**指紋だけ機械的に貼り替えるなら、この仕組みは何もしていない。**",
     "変わったのが判断に効く変更なのかを読んでから書くこと。"
   ],
   "entry": "scripts/check-rollout-promotion.mjs",
   "mirror": "simplememo-api/data/rollout-gate-pin.json",
-  "reviewed_at": "2026-08-28",
-  "reviewed_note": "初回。evaluatePromotion / planAll / countPromotionsToday を留めた。**この時点で auto_promote.enabled は false** なので、実行側は指紋が合っても1件も昇格しない\n\n2026-08-28 に留め直した。**変わったのは自己テスト2件だけで、evaluatePromotion / planAll / countPromotionsToday の判定ロジックは1行も動いていない**（差分は selftest() の中）。理由: オーナーが auto_promote.enabled を立てたので、『実台帳のまま評価すると必ず止まる』を前提にした自己テスト2件が成り立たなくなった。**フラグの値をピンしていた自己テストを、性質のピンへ書き直した** —— 出荷している policy の数字（寝かせ48h・各群30）が実際に効くこと、材料（ガードの判定・指標の判定・フラグの現状）が欠けたら promote を返さないこと。後者は machine_gate の holds_when_unknown そのもので、**enabled が立った今、plan を守っているのはここだけになった。**",
+  "reviewed_at": "2026-11-06",
+  "reviewed_note": "初回。evaluatePromotion / planAll / countPromotionsToday を留めた。**この時点で auto_promote.enabled は false** なので、実行側は指紋が合っても1件も昇格しない\n\n2026-08-28 に留め直した。**変わったのは自己テスト2件だけで、evaluatePromotion / planAll / countPromotionsToday の判定ロジックは1行も動いていない**（差分は selftest() の中）。理由: オーナーが auto_promote.enabled を立てたので、『実台帳のまま評価すると必ず止まる』を前提にした自己テスト2件が成り立たなくなった。**フラグの値をピンしていた自己テストを、性質のピンへ書き直した** —— 出荷している policy の数字（寝かせ48h・各群30）が実際に効くこと、材料（ガードの判定・指標の判定・フラグの現状）が欠けたら promote を返さないこと。後者は machine_gate の holds_when_unknown そのもので、**enabled が立った今、plan を守っているのはここだけになった。**\n\n2026-11-06: 停止中も自己テストを実行できるよう、検体内だけ kill_switch=false / enabled=true にする。実台帳の数値条件は保持し、実台帳の停止状態と停止2スイッチの全4組み合わせを別に検証する。実行側の判断関数・CLIは逐語同一。公開側の現行コードの指紋のみ更新する。APIの実行対象は引き続き PUBLIC_GATE_SHA=a178c3e9a62fd59f92817e2d904e2d9c0052e115 と既存指紋 cc0276295a16 / 498def1338f8 の組で、ここでは更新しない。APIは main の台帳から停止だけを重ねるため、既存の実行対象のまま kill_switch=true を適用できる。",
   "files": {
-    "scripts/check-rollout-promotion.mjs": "cc0276295a16",
+    "scripts/check-rollout-promotion.mjs": "2b5f71352579",
     "scripts/lib/selftest.mjs": "498def1338f8"
   }
 }
