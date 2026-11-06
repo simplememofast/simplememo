@@ -26,10 +26,10 @@
   ],
   "entry": "scripts/check-rollout-promotion.mjs",
   "mirror": "simplememo-api/data/rollout-gate-pin.json",
-  "reviewed_at": "2026-08-28",
-  "reviewed_note": "初回。evaluatePromotion / planAll / countPromotionsToday を留めた。**この時点で auto_promote.enabled は false** なので、実行側は指紋が合っても1件も昇格しない\n\n2026-08-28 に留め直した。**変わったのは自己テスト2件だけで、evaluatePromotion / planAll / countPromotionsToday の判定ロジックは1行も動いていない**（差分は selftest() の中）。理由: オーナーが auto_promote.enabled を立てたので、『実台帳のまま評価すると必ず止まる』を前提にした自己テスト2件が成り立たなくなった。**フラグの値をピンしていた自己テストを、性質のピンへ書き直した** —— 出荷している policy の数字（寝かせ48h・各群30）が実際に効くこと、材料（ガードの判定・指標の判定・フラグの現状）が欠けたら promote を返さないこと。後者は machine_gate の holds_when_unknown そのもので、**enabled が立った今、plan を守っているのはここだけになった。**",
+  "reviewed_at": "2026-10-23",
+  "reviewed_note": "初回。evaluatePromotion / planAll / countPromotionsToday を留めた。**この時点で auto_promote.enabled は false** なので、実行側は指紋が合っても1件も昇格しない\n\n2026-08-28 に留め直した。**変わったのは自己テスト2件だけで、evaluatePromotion / planAll / countPromotionsToday の判定ロジックは1行も動いていない**（差分は selftest() の中）。理由: オーナーが auto_promote.enabled を立てたので、『実台帳のまま評価すると必ず止まる』を前提にした自己テスト2件が成り立たなくなった。**フラグの値をピンしていた自己テストを、性質のピンへ書き直した** —— 出荷している policy の数字（寝かせ48h・各群30）が実際に効くこと、材料（ガードの判定・指標の判定・フラグの現状）が欠けたら promote を返さないこと。後者は machine_gate の holds_when_unknown そのもので、**enabled が立った今、plan を守っているのはここだけになった。**\n\n2026-10-23 に留め直した。evaluatePromotion が過去の promote 判定を見る前に、現在の promotion_freeze.frozen が boolean の false であることを必須にした。true・欠測・不正な型は hold。API が明示的に false を返す既存の無効・dry-run 環境の扱いは変更していない。通常の昇格条件（寝かせ48h・各群30・鮮度120分・日次上限1件・最大50%）は維持。現行凍結と過去の promote の競合、欠測・不正値、planAll の回帰テストを含む自己テスト37件を確認した。",
   "files": {
-    "scripts/check-rollout-promotion.mjs": "cc0276295a16",
+    "scripts/check-rollout-promotion.mjs": "9ccf48e4d811",
     "scripts/lib/selftest.mjs": "498def1338f8"
   }
 }
