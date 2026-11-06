@@ -200,8 +200,11 @@ export function clauseGuard(cr, today) {
   for (const v of cr.vendors || []) {
     const resetClauses = new Set(Array.isArray(v.reset_clauses) ? v.reset_clauses : []);
     const resetAt = typeof v.reset_at === 'string' ? v.reset_at : null;
+    const draftClauses = new Set(Array.isArray(v.draft_clauses) ? v.draft_clauses : []);
     for (const c of clauses) {
-      if (v[c] !== 'unreviewed') continue;
+      // An AI draft is still waiting for human review. The worksheet keeps it
+      // visible; the CI guard must not treat its risk/ok label as a completed read.
+      if (v[c] !== 'unreviewed' && v.reviewed_by !== 'ai_draft' && !draftClauses.has(c)) continue;
       if (resetAt && resetClauses.has(c)) {
         const days = Math.round(
           (Date.parse(`${today}T00:00:00Z`) - Date.parse(`${resetAt}T00:00:00Z`)) / 86400000);
@@ -612,6 +615,37 @@ SCENARIOS.push(
     const p = validate(d, { today: '2026-08-29' }).problems;   // 28日後
     assert(p.some((x) => x.includes('戻されたまま')),
       `28日放置しても落ちない: ${p.join(' / ')}`);
+  }],
+  ['**AI下書きは猶予切れの人手確認を閉じない**', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const cr = d.contract_review;
+    const c = cr.clauses[0];
+    const v = cr.vendors[0];
+    v[c] = 'risk';
+    v.reviewed_at = '2026-08-29';
+    v.reviewed_by = 'ai_draft';
+    v.draft_note = '公開条項のみをAIが確認。適用契約と受諾版は人が未確認。';
+    v.reset_at = '2026-08-29';
+    v.reset_clauses = [c];
+    const p = clauseGuard(cr, '2026-09-23');
+    assert(p.some((x) => x.includes(`${v.id}.${c}`)),
+      'AI下書きのriskが猶予切れのマスをCIから消した');
+  }],
+  ['**一部だけ人が見た行でも、残るAI下書きはCIから消えない**', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const cr = d.contract_review;
+    const c = cr.clauses[0];
+    const v = cr.vendors[0];
+    v[c] = 'risk';
+    v.reviewed_at = '2026-08-29';
+    v.reviewed_by = 'human';
+    v.draft_note = 'この観点はAI下書きのまま。';
+    v.draft_clauses = [c];
+    v.reset_at = '2026-08-29';
+    v.reset_clauses = [c];
+    const p = clauseGuard(cr, '2026-09-23');
+    assert(p.some((x) => x.includes(`${v.id}.${c}`)),
+      'draft_clausesのriskが猶予切れのマスをCIから消した');
   }],
   ['**戻されていない観点は猶予に乗らない**（reset_clauses に無いものを守らない）', () => {
     const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
