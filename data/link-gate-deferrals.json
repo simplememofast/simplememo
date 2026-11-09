@@ -17,7 +17,8 @@
     "【項目】id（kebab-case・一意）/ kind（hub|page）/ page（日本語か翻訳元のページの URL パス）/ rules（HUB・ORPHAN・CHILD・CHILD-EN の部分集合。kind hub は HUB/CHILD/CHILD-EN、page は HUB/ORPHAN）/ experiments（実験 id。無ければ []）/ until / reason（決定の出どころつき）/ added。キーはすべて必須で、これ以外のキーは書き間違いとして落ちる。",
     "",
     "【2026-10-14 の実測】seo-check の 253件（[HUB] 234・[ORPHAN] 19）と content-graph の [CHILD] 23件は、すべて下の10行のどれかに当たり、当たらない指摘も当たらない行も無い。/obsidian/sync/ の [CHILD] 2件（→ /obsidian/backup/・/obsidian/troubleshooting/sync-conflict/）も同じ実験 internal-link-2026-09-02-003 の凍結による（実験の対象6ページに /obsidian/sync/ が入っている）。",
-    "【2026-10-15】internal-link-2026-09-02-003 を measurement_failed で閉じた（基準値を記録された定義で復元できない）ので、/obsidian/plugins/・/obsidian/sync/ の保留2行を消し、待たせていたリンクを足した。/obsidian/ は video-2026-08-11-five-clips の評価日 2026-11-14 まで保留を延ばした。"
+    "【2026-10-15】internal-link-2026-09-02-003 を measurement_failed で閉じた（基準値を記録された定義で復元できない）ので、/obsidian/plugins/・/obsidian/sync/ の保留2行を消し、待たせていたリンクを足した。/obsidian/ は video-2026-08-11-five-clips の評価日 2026-11-14 まで保留を延ばした。",
+    "【2026-11-09】統合保留7行（until 2026-11-08）が判定されないまま失効し、11-09 0時（JST）から全PRの seo-core が [ORPHAN]/[HUB] 80件で落ちた。オーナー判断（2026-11-09、選択肢「統合しない。リンクを足す」）: 2026-11-09 の GSC スナップショット（2026-10-10〜11-06 の28日窓）で7本とも表示があり（1〜360）、「表示ゼロ＋強い競合ページ」の統合条件に当たらないので統合しない。日本語の /blog/ に6本のカード、/blog/email-yourself-app-comparison から /iphone-shortcuts-email-guide/ へのリンクを足し（英語版へのリンクは実験 en-2026-08-11-native-rewrite の対象なので残す）、7行を消した。"
   ],
   "deferrals": [
     {
@@ -28,76 +29,6 @@
       "experiments": ["video-2026-08-11-five-clips"],
       "until": "2026-11-14",
       "reason": "凍結中の実験 video-2026-08-11-five-clips の対象ページ。評価日は 2026-11-14（同じ長さの変更後の窓が 11-11 に閉じ、確定遅れ3日）。評価が記録されるまでハブを変えない（日本語のハブを変えると生成8言語のハブも変わる）。internal-link-2026-09-02-003 は 2026-10-15 に measurement_failed で閉じた。出典: growth/experiments/experiments.json",
-      "added": "2026-10-14"
-    },
-    {
-      "id": "consolidation-hold-best-note-to-self-apps-2026",
-      "kind": "page",
-      "page": "/blog/best-note-to-self-apps-2026",
-      "rules": ["HUB", "ORPHAN"],
-      "experiments": [],
-      "until": "2026-11-08",
-      "reason": "#2031 で生成した日本語ページ。既存の日本語ページと意図が重なり、10/09〜11/05 の GSC 窓（11/08頃）で統合を判定するまで日本語のハブ・日本語ページからリンクを足さない。出典: docs/seo/gsc-crawled-not-indexed-2026-10-14.md",
-      "added": "2026-10-14"
-    },
-    {
-      "id": "consolidation-hold-captio-shutdown-alternatives",
-      "kind": "page",
-      "page": "/blog/captio-shutdown-alternatives",
-      "rules": ["HUB"],
-      "experiments": [],
-      "until": "2026-11-08",
-      "reason": "#2031 で生成した日本語ページ。既存の日本語ページと意図が重なり、10/09〜11/05 の GSC 窓（11/08頃）で統合を判定するまで日本語のハブ・日本語ページからリンクを足さない。出典: docs/seo/gsc-crawled-not-indexed-2026-10-14.md",
-      "added": "2026-10-14"
-    },
-    {
-      "id": "consolidation-hold-fastest-note-app-iphone-2026",
-      "kind": "page",
-      "page": "/blog/fastest-note-app-iphone-2026",
-      "rules": ["HUB"],
-      "experiments": [],
-      "until": "2026-11-08",
-      "reason": "#2031 で生成した日本語ページ。既存の日本語ページと意図が重なり、10/09〜11/05 の GSC 窓（11/08頃）で統合を判定するまで日本語のハブ・日本語ページからリンクを足さない。出典: docs/seo/gsc-crawled-not-indexed-2026-10-14.md",
-      "added": "2026-10-14"
-    },
-    {
-      "id": "consolidation-hold-how-to-email-yourself-note-iphone",
-      "kind": "page",
-      "page": "/blog/how-to-email-yourself-note-iphone",
-      "rules": ["HUB"],
-      "experiments": [],
-      "until": "2026-11-08",
-      "reason": "#2031 で生成した日本語ページ。既存の日本語ページと意図が重なり、10/09〜11/05 の GSC 窓（11/08頃）で統合を判定するまで日本語のハブ・日本語ページからリンクを足さない。出典: docs/seo/gsc-crawled-not-indexed-2026-10-14.md",
-      "added": "2026-10-14"
-    },
-    {
-      "id": "consolidation-hold-inbox-zero-workflow-tips-2026",
-      "kind": "page",
-      "page": "/blog/inbox-zero-workflow-tips-2026",
-      "rules": ["HUB", "ORPHAN"],
-      "experiments": [],
-      "until": "2026-11-08",
-      "reason": "#2031 で生成した日本語ページ。既存の日本語ページと意図が重なり、10/09〜11/05 の GSC 窓（11/08頃）で統合を判定するまで日本語のハブ・日本語ページからリンクを足さない。出典: docs/seo/gsc-crawled-not-indexed-2026-10-14.md",
-      "added": "2026-10-14"
-    },
-    {
-      "id": "consolidation-hold-offline-first-comparison",
-      "kind": "page",
-      "page": "/blog/offline-first-comparison",
-      "rules": ["HUB"],
-      "experiments": [],
-      "until": "2026-11-08",
-      "reason": "#2031 で生成した日本語ページ。既存の日本語ページと意図が重なり、10/09〜11/05 の GSC 窓（11/08頃）で統合を判定するまで日本語のハブ・日本語ページからリンクを足さない。出典: docs/seo/gsc-crawled-not-indexed-2026-10-14.md",
-      "added": "2026-10-14"
-    },
-    {
-      "id": "consolidation-hold-iphone-shortcuts-email-guide",
-      "kind": "page",
-      "page": "/iphone-shortcuts-email-guide/",
-      "rules": ["ORPHAN"],
-      "experiments": [],
-      "until": "2026-11-08",
-      "reason": "#2031 で生成した日本語ページ（/note-to-email/ 等と意図が重なる）。10/09〜11/05 の GSC 窓（11/08頃）で統合を判定するまで日本語ページからリンクを足さない。出典: docs/seo/gsc-crawled-not-indexed-2026-10-14.md",
       "added": "2026-10-14"
     }
   ]
