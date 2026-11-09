@@ -18,6 +18,10 @@ const suppliedSamples = [
   // HTML published by #2031 and three video files referenced by watch pages.
   ["docs/seo/gsc-crawled-cases-2026-10-14.json", 123],
   ["docs/seo/gsc-crawled-cases-2026-11-05.json", 182],
+  // 2026-11-09: all 172 rows of the report updated 2026-11-06 (validation
+  // started 11-05, failed 11-07). 163 repeat earlier rows; adds eight locale
+  // pages crawled 11-07/08 and the current ai-tags.mp4 cache-busted URL.
+  ["docs/seo/gsc-crawled-cases-2026-11-09.json", 172],
 ];
 const bySource = new Map();
 for (const [file, expected] of suppliedSamples) {
@@ -561,7 +565,7 @@ async function selftest() {
   assert.equal(expired.calls.size, 0, "Expired propagation budget must perform no requests");
   const baseline = makeRequest(), baselineReports = [];
   const baselineReport = await liveAudit(false, { request: baseline.request, readBytes: () => { throw new Error("PR baseline must not load candidate sources"); }, saveReport: report => baselineReports.push(report), logReport: () => {} });
-  assert.equal(baselineReport.passed, 311);
+  assert.equal(baselineReport.passed, 320);
   assert.equal(baselineReport.publication.skipped, 62);
   assert(baselineReport.ok);
   assert.equal(baselineReports.length, 1);
@@ -570,7 +574,7 @@ async function selftest() {
   }
   const deployed = makeRequest(), deployedReports = [];
   const deployedReport = await liveAudit(true, { request: deployed.request, readBytes, wait: async () => {}, saveReport: report => deployedReports.push(report), logReport: () => {} });
-  assert.equal(deployedReport.passed, 311);
+  assert.equal(deployedReport.passed, 320);
   assert.equal(deployedReport.publication.passed, 62);
   assert.deepEqual(deployedReport.publication.cases.at(-2).actualDescriptions, a7Descriptions);
   assert.deepEqual(deployedReport.publication.cases.at(-2).expectedDescriptions, a7Descriptions);
@@ -585,7 +589,7 @@ async function selftest() {
   assert.equal(failureReports.length, 1, "Propagation failure must retain report evidence");
   assert.equal(failureReports[0].publication.failed, 1);
   assert.equal(failureReports[0].publication.cases.find(row => row.url === htmlTarget.url).status, 404);
-  assert.equal(failureReports[0].skipped, 311);
+  assert.equal(failureReports[0].skipped, 320);
   assert(!failureReports[0].ok);
   const sourceFailureReports = [];
   await assert.rejects(liveAudit(true, { request: async () => { throw new Error("Missing sources must fail before HTTP"); }, readBytes: () => { throw new Error("Missing publication source"); }, saveReport: report => sourceFailureReports.push(report), logReport: () => {} }), /Missing publication source/);
@@ -918,9 +922,9 @@ async function liveAudit(strict, { request = get, readBytes, wait = pause, now =
   return report;
 }
 
-assert.equal(cases.length, 311, "All complete supplied samples must remain covered");
-assert.equal(new Set(cases.map(c => c.from)).size, 311, "Duplicate fixture URL");
-assert.deepEqual(counts(), { redirect: 60, html: 106, "noindex-html": 1, data: 29, asset: 111, video: 4 });
+assert.equal(cases.length, 320, "All complete supplied samples must remain covered");
+assert.equal(new Set(cases.map(c => c.from)).size, 320, "Duplicate fixture URL");
+assert.deepEqual(counts(), { redirect: 60, html: 114, "noindex-html": 1, data: 29, asset: 111, video: 5 });
 for (const c of cases) assert(c.from.startsWith("/") && c.to.startsWith("/") && !c.to.includes("?"));
 if (process.argv.includes("--selftest")) await selftest();
 else if (process.argv.includes("--live")) await liveAudit(true);
