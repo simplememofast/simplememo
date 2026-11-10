@@ -1,5 +1,6 @@
 """Translate only approved program literals, never user-created note content."""
 import hashlib
+import html
 import json
 import posixpath
 import re
@@ -34,20 +35,23 @@ def translated_message(binding, locale, catalog):
         error = validate(unit['text'], entry['text'], locale)
         if error:
             raise ValueError('Invalid dynamic translation: ' + key + ': ' + error)
-        if unit['tag'] == '#text':
+        is_text = unit['tag'] == '#text'
+        if is_text:
             # Program fragments can display YAML/Markdown with significant
             # line breaks. Catalog prose is normalized, but the surrounding
             # whitespace belongs to the original fragment, not its translation.
             original = source[slice(*unit['range'])]
             unit = dict(unit, prefix=re.match(r'\s*', original)[0],
                         suffix=re.search(r'\s*$', original)[0])
-        changes.append((*unit['range'], render(unit, entry['text'], locale=locale)))
+        value = render(unit, entry['text'], locale=locale)
+        # Program strings are text, not HTML attributes, so translated text is
+        # decoded once. Protected markup (tags, attributes, code/kbd/pre and
+        # other skipped elements, comments) keeps its source encoding: decoding
+        # it would turn escaped sample text into live markup.
+        changes.append((*unit['range'], html.unescape(value) if is_text else value))
     for start, end, value in reversed(changes):
         source = source[:start] + value + source[end:]
-    # Program strings are text, not HTML attributes. Rendering escapes only new
-    # markup; known HTML fragments retain their original tag structure.
-    import html
-    return html.unescape(source)
+    return source
 
 
 def initial_demo_note(source, file, locale, catalog, rows):

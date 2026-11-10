@@ -420,6 +420,25 @@ class TranslationPipelineTests(unittest.TestCase):
         self.assertEqual(collect(source), [])
         self.assertEqual(dynamic.initial_demo_note(source, 'other/index.html', 'en', {}, []), source)
 
+    def test_program_fragment_keeps_protected_markup_encoded(self):
+        # Escaped sample text inside <code> or an attribute must not become live
+        # markup in the translated message; only translated text is decoded.
+        fragment = ('<span class="c" title="&quot;&gt;">tags:</span> 買い物 '
+                    '<code>&lt;img src=x onerror=1&gt;</code>\n本文 &amp; メモ\n')
+        translations = {'tags:':'tags:', '買い物':'Shopping', '本文 & メモ':'Body & Memo'}
+        catalog = {}
+        for unit in collect(fragment):
+            language = 'ja' if re.search(r'[぀-ヿ㐀-鿿]', unit['text']) else 'en'
+            catalog[language + ':' + unit['id']] = {'source':unit['text'], 'text':translations[unit['text']]}
+        binding = {'file':'ai-tags/index.html', 'source':'ja', 'text':fragment}
+        actual = dynamic.translated_message(binding, 'en', catalog)
+        self.assertEqual(actual, '<span class="c" title="&quot;&gt;">tags:</span> Shopping '
+                                 '<code>&lt;img src=x onerror=1&gt;</code>\nBody & Memo\n')
+        self.assertNotIn('<img', actual)
+        source = '<pre id="demo-note">' + fragment + '</pre>'
+        self.assertEqual(dynamic.initial_demo_note(source, binding['file'], 'en', catalog, [binding]),
+                         '<pre id="demo-note">' + actual + '</pre>')
+
     def test_initial_ai_tags_note_rejects_missing_or_changed_approval(self):
         source = '<pre id="demo-note">本文</pre>'
         binding = {'file':'ai-tags/index.html', 'source':'ja', 'text':'本文'}
