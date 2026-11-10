@@ -11,7 +11,7 @@
 # 守り:
 #   - claude/ 配下しか消さない（main も他人のブランチも名前で弾く）
 #   - main に取り込み済みでなければ消さない。squash マージは祖先にならないので、
-#     ブランチが変えたファイルが main と同じ内容かで判定する
+#     ブランチが変えたファイルが main と同じ内容かで判定する（パスは NUL 区切り・literal pathspec で照合）
 #   - 入力は env 経由で渡す（run: に式を直接展開しない — check-injection-surface.mjs の規律）
 name: Delete merged branch
 
@@ -56,10 +56,17 @@ jobs:
             echo "main の祖先 — 取り込み済み"
           else
             base=$(git merge-base origin/main "origin/$BRANCH")
-            files=$(git diff --name-only "$base" "origin/$BRANCH")
-            if [ -n "$files" ] && [ -n "$(git diff --stat "origin/$BRANCH" origin/main -- $files)" ]; then
+            # NUL 区切りで受ける（2026-11-10 監査）。git は非 ASCII のパスを引用・8進エスケープして
+            # 出し、空白入りのパスは単語に割れるので、改行区切りの文字列を pathspec に渡すと
+            # どのファイルにも当たらず「取り込み済み」と読んでいた。プロセス置換は git の失敗を
+            # 拾えないので一時ファイルを経由する（失敗したら set -e で止まり、消さない）。
+            list="$RUNNER_TEMP/branch-files"
+            git diff --name-only -z "$base" "origin/$BRANCH" > "$list"
+            mapfile -d '' -t files < "$list"
+            # diff --quiet は差分で 1、エラーで 128。! で受けるとどちらも「消さない」になる。
+            if [ "${#files[@]}" -gt 0 ] && ! git --literal-pathspecs diff --quiet "origin/$BRANCH" origin/main -- "${files[@]}"; then
               echo "::error::main に無い差分がある — 消さない"
-              git diff --stat "origin/$BRANCH" origin/main -- $files
+              git --literal-pathspecs diff --stat "origin/$BRANCH" origin/main -- "${files[@]}" || true
               exit 1
             fi
             echo "変更したファイルは main と同一 — squash で取り込み済み"
