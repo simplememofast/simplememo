@@ -206,6 +206,33 @@ class TranslationPipelineTests(unittest.TestCase):
         data = 'url("data:image/svg+xml,<svg></svg>")'
         self.assertEqual(build.map_css_urls(data, 'blog/example.html', 'es', {}), data)
 
+    def test_style_element_urls_are_mapped_as_raw_text(self):
+        # A <style> element is raw text: browsers leave &lt; as it is there.
+        css = 'a{background:url("&lt;/style&gt;&lt;script&gt;x&lt;/script&gt;.png")}'
+        mapped = build.map_style_element(css, 'blog/example.html', 'es', {})
+        self.assertEqual(mapped, 'a{background:url("/blog/&lt;/style&gt;&lt;script&gt;x&lt;/script&gt;.png")}')
+        # Dot segments can still assemble an end tag from inert source text.
+        for value in ('</x/../style><script>x</script><style>.png', '</x/../STYLE x>.png'):
+            with self.assertRaisesRegex(ValueError, 'would close the element'):
+                build.map_style_element('a{background:url("'+value+'")}', 'blog/example.html', 'es', {})
+        # Attribute values are still decoded; their caller escapes the result.
+        self.assertEqual(build.map_css_urls("url('../img/a.webp?x=1&amp;y=2')", 'blog/example.html', 'es', {}), "url('/img/a.webp?x=1&y=2')")
+
+    def test_document_style_element_cannot_be_closed_by_a_mapped_url(self):
+        group = {'source': 'source.html', 'sourceLocale': 'ja', 'pages': {'ja': 'source.html', 'es': 'es/source.html'}}
+        def translate(css):
+            source = '<html lang="ja"><head><title>説明</title><style>'+css+'</style></head><body><details class="site-languages"><summary>JA</summary></details><p>説明</p></body></html>'
+            units = collect(source) + collect_extra(source)
+            catalog = {'ja:'+u['id']: {'source': u['text'], 'text': 'Descripción'} for u in units}
+            with patch.object(build, 'units_for', return_value=(source, units)), patch('sync_shared_chrome.transform', side_effect=lambda s, f:s), patch('sync_page_design.transform', side_effect=lambda s, f:s):
+                return build.translate_document(group, 'es', catalog, {'/source': group})
+        output = translate('a{background:url("img/&lt;/style&gt;&lt;script&gt;x&lt;/script&gt;.png")}')
+        self.assertEqual(output.lower().count('</style'), 1)
+        self.assertNotIn('<script>x</script>', output)
+        self.assertIn('url("/img/&lt;/style&gt;&lt;script&gt;x&lt;/script&gt;.png")', output)
+        with self.assertRaisesRegex(ValueError, 'source.html → es: <style> url\\(\\) would close the element'):
+            translate('a{background:url("</x/../style><script>x</script><style>.png")}')
+
     def test_document_schema_cannot_close_its_script_element(self):
         # Untranslated JSON-LD values are decoded and written back; "\u003c"
         # in the source must not come back as a raw "<" that ends the script.
