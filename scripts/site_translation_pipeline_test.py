@@ -15,6 +15,12 @@ from site_translation_faq import synchronize
 from faq_question_audit import audit_page
 
 
+def script_body(output):
+    # Where a browser ends the first JSON-LD element: "</script" followed by
+    # whitespace, "/" or ">", in any letter case.
+    return re.search(r'<script type="application/ld\+json">(.*?)</script(?=[\t\n\r\f />])', output, re.S | re.I)[1]
+
+
 class TranslationPipelineTests(unittest.TestCase):
     def test_document_validates_each_unit_once_and_aggregates_errors(self):
         import site_translation_validation as validation
@@ -199,6 +205,39 @@ class TranslationPipelineTests(unittest.TestCase):
         self.assertEqual(build.map_css_urls("url('../img/a.webp')", 'blog/example.html', 'es', {}), "url('/img/a.webp')")
         data = 'url("data:image/svg+xml,<svg></svg>")'
         self.assertEqual(build.map_css_urls(data, 'blog/example.html', 'es', {}), data)
+
+    def test_document_schema_cannot_close_its_script_element(self):
+        # Untranslated JSON-LD values are decoded and written back; "\u003c"
+        # in the source must not come back as a raw "<" that ends the script.
+        value = '</script><img src=x onerror=alert(1)><!--'
+        payload = '{"@type":"WebPage","url":"https://simplememofast.com/source","identifier":"\\u003c/script\\u003e\\u003cimg src=x onerror=alert(1)\\u003e\\u003c!--"}'
+        source = '<html lang="ja"><head><title>説明</title><script type="application/ld+json">'+payload+'</script></head><body><details class="site-languages"><summary>JA</summary></details><p>説明</p></body></html>'
+        group = {'source': 'source.html', 'sourceLocale': 'ja', 'pages': {'ja': 'source.html', 'es': 'es/source.html'}}
+        units = collect(source) + collect_extra(source)
+        catalog = {'ja:'+u['id']: {'source': u['text'], 'text': 'Descripción'} for u in units}
+        with patch.object(build, 'units_for', return_value=(source, units)), patch('sync_shared_chrome.transform', side_effect=lambda s, f:s), patch('sync_page_design.transform', side_effect=lambda s, f:s):
+            output = build.translate_document(group, 'es', catalog, {'/source': group})
+        body = script_body(output)
+        self.assertNotIn('</', body)
+        self.assertNotIn('<!--', body)
+        data = json.loads(body)
+        self.assertEqual(data['identifier'], value)
+        self.assertEqual(data['url'], 'https://simplememofast.com/es/source')
+
+    def test_faq_schema_keeps_decoded_markup_inside_its_script_element(self):
+        # Visible prose decodes &lt; to "<". Written back raw into JSON-LD,
+        # "</script" would end the element and "<!--" would escape it.
+        shown = '&lt;/script/&gt;&lt;img src=x onerror=alert(1)&gt;&lt;!--'
+        value = '</script/><img src=x onerror=alert(1)><!--'
+        faq = {'@type':'FAQPage','mainEntity':[{'@type':'Question','name':'Question?','acceptedAnswer':{'@type':'Answer','text':'Use '+shown+' here.'}}]}
+        source = '<script type="application/ld+json">'+json.dumps(faq)+'</script><details><summary>Question?</summary><p>Use <code>'+shown+'</code> here.</p></details>'
+        translated = source.replace('<p>Use <code>', '<p>Usa <code>').replace('</code> here.</p>', '</code> aquí.</p>')
+        output = synchronize(source, translated, 'https://simplememofast.com/es/example', 'es')
+        body = script_body(output)
+        self.assertNotIn('</', body)
+        self.assertNotIn('<!--', body)
+        schema = json.loads(body)
+        self.assertEqual(schema['mainEntity'][0]['acceptedAnswer']['text'], 'Usa '+value+' aquí.')
 
     def test_existing_translations_keep_their_actual_section_anchor(self):
         group = next(g for g in build.groups() if g['source'] == 'faq.html')

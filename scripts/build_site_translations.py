@@ -18,6 +18,7 @@ from urllib.parse import urljoin, urlsplit, urlunsplit
 from localization_registry import ROOT, groups, page_url, localized_fragment, indexed
 from site_translation_units import collect, collect_extra, prepare_source, source_language, examples_for, Parser, all_nodes
 from site_translation_validation import render
+from json_script import json_for_script
 from site_translation_dynamic import bindings, locale_assets, inline_code, initial_demo_note
 from site_translation_literals import literal_filenames
 from site_translation_dates import source_dates, localize_dates, leftover_dates
@@ -209,7 +210,7 @@ def translate_document(group, locale, catalog, routes, script_paths=None, dynami
                     return SITE + map_reference(value, group['source'], locale, routes, document=True)
         return value
     for (start, end), payload in payloads.items():
-        changes.append((start, end, json.dumps(localized_schema(payload), ensure_ascii=False, indent=2)))
+        changes.append((start, end, json_for_script(localized_schema(payload), ensure_ascii=False, indent=2)))
     # Inline attributes remain in preserved start tags. Merge their translated
     # values into the outer block replacement rather than losing either edit.
     collapsed = []

@@ -38,6 +38,8 @@ import re
 import sys
 from pathlib import Path
 
+from json_script import json_for_script
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 MANAGED_MARKER = "<!-- faq-schema: managed by scripts/inject_faq_schema.py -->"
@@ -179,7 +181,7 @@ def build_payload(page_url: str, in_language: str, faqs: list[tuple[str, str]]) 
             for q, a in faqs
         ],
     }
-    return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+    return json_for_script(payload, ensure_ascii=False, separators=(",", ":"))
 
 
 def build_faqpage(page_url: str, in_language: str, faqs: list[tuple[str, str]]) -> str:
@@ -566,6 +568,14 @@ def run_selftest() -> int:
     t("生成したブロックから中身を取り出せる",
       managed_payload(build_faqpage("https://x/p/", "ja", [("Q", "A")]))
       == build_payload("https://x/p/", "ja", [("Q", "A")]))
+    # **値で script 要素を閉じさせない。**回答の文字列に `</script` や `<!--` が
+    # あっても、JSON の文字列のエスケープ（`<\/`・`\u003c`）で書く。値は同じ。
+    hostile = "</script><img src=x onerror=alert(1)><!--"
+    body = build_payload("https://x/p/", "ja", [("Q", hostile)])
+    t("値の </ と <!-- を生のまま書かない", "</" not in body and "<!--" not in body)
+    t("エスケープしても値は同じ", json.loads(body)["mainEntity"][0]["acceptedAnswer"]["text"] == hostile)
+    t("その値でも生成したブロックから中身を取り出せる",
+      managed_payload(build_faqpage("https://x/p/", "ja", [("Q", hostile)])) == body)
 
     # --- 差し込み（本番を壊した形） ---
     block = build_faqpage("https://x/p/", "ja", [("Q", "A")])
@@ -654,7 +664,7 @@ def run_selftest() -> int:
 
     for f2 in failures:
         print(f"  x {f2}")
-    print(f"自己テスト 43 件中 {len(failures)} 件失敗")
+    print(f"自己テスト 46 件中 {len(failures)} 件失敗")
     return 1 if failures else 0
 
 
