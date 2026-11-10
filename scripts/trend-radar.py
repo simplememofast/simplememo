@@ -28,70 +28,83 @@ TITLE_MAX = 200
 URL_MAX = 2048  # 日本語スラッグを percent-encode した正規の URL も通す
 
 
-# Default_Ignorable_Code_Point members outside Cf / Cn (categories Mn and Lo): the
-# variation selectors (Mongolian FVS1-4, VS1-14, VS17-256), the CGJ, the Khmer inherent
-# vowels and the Hangul fillers. Removing by category alone leaves them, and a selector
-# can hide one byte per code point. Together with the Cf and Cn rule in clean_title this
-# covers the whole property. The exceptions are the two emoji need: ZWJ and VS15 / VS16.
-_IGNORABLE_MARKS = ((0x034F, 0x034F), (0x115F, 0x1160), (0x17B4, 0x17B5), (0x180B, 0x180F),
-                    (0x3164, 0x3164), (0xFE00, 0xFE0D), (0xFFA0, 0xFFA0), (0xE0100, 0xE01EF))
-_ZWJ, _VS16 = '\u200d', '\ufe0f'
-_PRESENTATION = ('\ufe0e', _VS16)
-_BLANKS = ('\u2800',)  # BRAILLE PATTERN BLANK (So) draws nothing: treated as a space
-# Bases that take VS15 / VS16 besides the symbols (S*): emoji-variation-sequences.txt
-_PRESENTATION_BASES = set('#*0123456789\u203c\u2049\u2139\u3030\u303d')
+# Code points that render as nothing but are not format characters, so the Cf rule
+# below misses them (Default_Ignorable_Code_Point outside Cf / Cn / the selectors):
+# Hangul fillers (Lo), COMBINING GRAPHEME JOINER and the Khmer inherent vowels (Mn).
+IGNORABLE = {'\u034f', '\u115f', '\u1160', '\u17b4', '\u17b5', '\u3164', '\uffa0'}
+BLANK = {'\u2800'}  # BRAILLE PATTERN BLANK (So) draws nothing: it becomes a space
+ZWJ = '\u200d'
+SELECTORS_MAX = 8  # per title; real titles carry a few (VS16 after an emoji, an IVS)
 
 
-def _ignorable_mark(ch):
+def _is_variation_selector(ch):
+    """The Variation_Selector property: Mongolian FVS1-4, VS1-16 and VS17-256."""
     o = ord(ch)
-    return any(lo <= o <= hi for lo, hi in _IGNORABLE_MARKS)
+    return (0x180B <= o <= 0x180D or o == 0x180F
+            or 0xFE00 <= o <= 0xFE0F or 0xE0100 <= o <= 0xE01EF)
 
 
-def _emoji_part(ch):
-    return bool(ch) and ch not in _BLANKS and unicodedata.category(ch) in ('So', 'Sk')
+def _visible_base(ch):
+    """Drawn on its own: a letter, number, symbol or punctuation mark. Marks, format
+    characters, spaces, selectors and the blank code points are not bases."""
+    return (unicodedata.category(ch)[0] in 'LNSP'
+            and ch not in IGNORABLE and ch not in BLANK)
+
+
+def _emoji(ch):
+    return unicodedata.category(ch) in ('So', 'Sk') and ch not in BLANK
 
 
 def clean_title(value, limit=TITLE_MAX):
-    """Controls, line separators and the braille blank become a space. Every
-    Default_Ignorable code point (format and unassigned code points such as bidi
-    overrides, zero-width spaces and tag characters; the variation selectors, including
-    the Mongolian FVS and the ideographic IVS; the CGJ; the Khmer inherent vowels; the
-    Hangul fillers) and private-use code points are removed, with two exceptions emoji
-    need: one VS15 / VS16 right after a symbol, and ZWJ between two emoji. A kanji keeps
-    its base character and loses its IVS. Ordinary spacing (including U+3000) is kept.
-    limit=None returns the whole title (parse matches on it; collect cuts what it stores).
+    """Controls, line separators and the braille blank become a space; format /
+    private-use / unassigned code points (bidi overrides, zero-width spaces, tag
+    characters, ...) and the other code points that render as nothing (IGNORABLE) are
+    removed. Only a drawn character can take a selector: a variation selector (including
+    the Mongolian FVS) is kept only right after a visible base character (one VS16 after
+    an emoji, one IVS after a kanji), and at most SELECTORS_MAX per title. A ZWJ is kept
+    only between two emoji (an emoji, or an emoji and its VS15 / VS16, before it; an
+    emoji after it). Selectors interleaved with ZWJ, CGJ or combining marks therefore
+    never form a run. Ordinary spacing (including U+3000) is kept. limit=None returns the
+    whole title (parse matches on it; collect cuts what it stores).
 
     "Unassigned" (Cn) is judged by the running interpreter's Unicode tables, on purpose:
     a code point the runner does not know may be a format character newer than its tables,
     and the unassigned planes could carry hidden bytes the way selector runs do. The cost
     is that an emoji newer than the runner's tables (U+1FAE9 under Python 3.12 / 3.13) is
     dropped from the title. A title that is empty once cleaned drops only its row (parse)."""
-    chars = value or ''
     out = []
-    for i, ch in enumerate(chars):
+    selectors = 0
+
+    def keep(ch):
+        if out and out[-1] == ZWJ and not _emoji(ch):
+            out.pop()  # a ZWJ stays only when an emoji follows it
+        out.append(ch)
+
+    for ch in value or '':
         cat = unicodedata.category(ch)
-        prev = out[-1] if out else ' '
-        if cat in ('Cc', 'Zl', 'Zp') or ch in _BLANKS:
-            out.append(' ')
-        elif ch in _PRESENTATION:
-            # Only once: after one is kept, prev is a selector (Mn) and fails this test.
-            if unicodedata.category(prev)[0] == 'S' or prev in _PRESENTATION_BASES:
+        if cat in ('Cc', 'Zl', 'Zp') or ch in BLANK:
+            keep(' ')
+        elif ch in IGNORABLE:
+            continue
+        elif _is_variation_selector(ch):
+            if out and _visible_base(out[-1]) and selectors < SELECTORS_MAX:
                 out.append(ch)
-        elif ch == _ZWJ:
-            # A code point that passes _emoji_part is always kept, so the raw next one is
-            # what will follow this ZWJ in the output.
-            nxt = chars[i + 1] if i + 1 < len(chars) else ''
-            if (prev == _VS16 or _emoji_part(prev)) and _emoji_part(nxt):
+                selectors += 1
+        elif ch == ZWJ:
+            prev = out[-1] if out else ''
+            if prev and (_emoji(prev) or (prev in '\ufe0e\ufe0f' and _emoji(out[-2]))):
                 out.append(ch)
-        elif cat not in ('Cf', 'Co', 'Cn', 'Cs') and not _ignorable_mark(ch):
-            out.append(ch)
+        elif cat not in ('Cf', 'Co', 'Cn', 'Cs'):
+            keep(ch)
+    if out and out[-1] == ZWJ:
+        out.pop()
     text = ''.join(out).strip()
     return cut(text, limit) if limit else text
 
 
 def cut(title, limit=TITLE_MAX):
     """Cut a cleaned title for storage, without leaving a ZWJ that no emoji follows."""
-    return title[:limit].rstrip(_ZWJ)
+    return title[:limit].rstrip(ZWJ)
 
 
 def valid_url(value):
