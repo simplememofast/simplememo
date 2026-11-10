@@ -83,7 +83,20 @@ def wrap_code(code, rows):
         start, end = row['start'], row['end']
         if code[start:end] != row['literal']:
             raise ValueError('Dynamic text binding no longer matches: ' + row['file'])
+        # Parameters are inserted as code. Accept only expressions that already
+        # occur in the reviewed literal, one per placeholder in the message.
+        params = row.get('parameters') or []
+        if any(not isinstance(p, str) or not p or p not in row['literal'] for p in params):
+            raise ValueError('Dynamic text parameter is not an expression of its literal: ' + row['file'])
+        if params and sorted(set(int(i) for i in re.findall(r'\{(\d+)\}', row['text']))) != list(range(len(params))):
+            raise ValueError('Dynamic text placeholders do not match parameters: ' + row['file'])
         key = json.dumps(row['text'], ensure_ascii=False)
+        # The key also lands in inline <script> elements. Existing messages
+        # contain ordinary closing tags such as </span>, so reject only the
+        # sequences that can end or confuse a script element, without
+        # changing the bytes of any current output.
+        if re.search(r'<(?:/?script|!--)', key, re.I):
+            raise ValueError('Dynamic text cannot be embedded in a script: ' + row['file'])
         if row.get('parameters'):
             expression = 'globalThis.SimpleMemoI18n.format(' + key + ',[' + ','.join(row['parameters']) + '])'
         else:

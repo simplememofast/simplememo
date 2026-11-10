@@ -390,6 +390,34 @@ class TranslationPipelineTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'Re-extract'):
             dynamic.inline_code('<script>'+code+' </script>','page.html',[row])
 
+    def test_program_binding_parameters_come_from_the_literal(self):
+        code = "const message = '保存 ' + count + ' 件';"
+        literal = "'保存 ' + count + ' 件'"
+        start = code.index(literal)
+        row = {'file':'page.html','scriptHash':hashlib.sha256(code.encode()).hexdigest(),'start':start,
+               'end':start+len(literal),'literal':literal,'source':'ja','text':'保存 {0} 件','parameters':['count']}
+        good, count = dynamic.wrap_code(code,[row])
+        self.assertEqual(count,1)
+        self.assertIn('SimpleMemoI18n.format("保存 {0} 件",[count])',good)
+        for parameters in (['fetch("//x")'], [''], [1], ['count + fetch("//x")']):
+            with self.subTest(parameters=parameters), self.assertRaisesRegex(ValueError,'not an expression of its literal'):
+                dynamic.wrap_code(code,[dict(row, parameters=parameters)])
+        for text, parameters in (('保存 件', ['count']), ('保存 {1} 件', ['count']), ('保存 {0} {1} 件', ['count'])):
+            with self.subTest(text=text), self.assertRaisesRegex(ValueError,'placeholders do not match'):
+                dynamic.wrap_code(code,[dict(row, text=text, parameters=parameters)])
+
+    def test_program_binding_text_cannot_leave_an_inline_script(self):
+        code = "const message = '保存';"
+        start = code.index("'保存'")
+        row = {'file':'page.html','scriptHash':hashlib.sha256(code.encode()).hexdigest(),'start':start,'end':start+4,'literal':"'保存'",'source':'ja'}
+        # Ordinary closing tags already occur in approved fragments and stay as-is.
+        good, count = dynamic.wrap_code(code,[dict(row, text='<span class="y">---</span>')])
+        self.assertEqual(count,1)
+        self.assertIn('SimpleMemoI18n.text("<span class=\\"y\\">---</span>")',good)
+        for text in ('</script><script>alert(1)</script>', '保存</SCRIPT >', '<!-- 保存', '<script>保存'):
+            with self.subTest(text=text), self.assertRaisesRegex(ValueError,'cannot be embedded in a script'):
+                dynamic.wrap_code(code,[dict(row, text=text)])
+
     def test_program_yaml_fragment_keeps_line_breaks_and_indentation(self):
         source = '<span>title:</span> 買い物\n<span>tags:</span> [<span>日用品</span>]\n<span>---</span>\n  本文\n'
         translations = {'title:':'title:', '買い物':'Shopping', 'tags:':'tags:',
