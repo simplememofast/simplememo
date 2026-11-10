@@ -33,48 +33,91 @@ const WORKFLOW_DIR = path.join(ROOT, '.github/workflows');
 
 export const TRUST = ['none', 'partial', 'own'];
 
-/** run: ブロックに直接展開すると危ない式。**第三者が中身を書ける場所。** */
+/**
+ * run: / github-script の script: に直接展開すると危ない式。**第三者が中身を書ける場所。**
+ *
+ * 【2026-11-10 監査】以前は `${{` の直後に来る6種だけを run: の中で見ていた。
+ * workflow_run の head_branch（フォークの PR が決められる）や inputs、
+ * format() で包んだ式、github-script の script: は素通りしていた。いまは各行の
+ * `${{ … }}` の中身だけを取り出して照合する（地の文の "inputs." は拾わない）。
+ */
 export const UNTRUSTED_EXPR = [
-  /\$\{\{\s*github\.event\.issue\.(title|body)/,
-  /\$\{\{\s*github\.event\.comment\.body/,
-  /\$\{\{\s*github\.event\.pull_request\.(title|body)/,
-  /\$\{\{\s*github\.event\.review\.body/,
-  /\$\{\{\s*github\.head_ref/,
-  /\$\{\{\s*github\.event\.discussion\./,
+  /\bgithub\.event\.issue\.(title|body)\b/,
+  /\bgithub\.event\.comment\.body\b/,
+  /\bgithub\.event\.pull_request\.(title|body)\b/,
+  /\bgithub\.event\.review\.body\b/,
+  /\bgithub\.head_ref\b/,
+  /\bgithub\.event\.discussion\./,
+  /\bgithub\.event\.workflow_run\.(head_branch|head_commit|display_title|head_repository|pull_requests)\b/,
+  /\bgithub\.event\.pull_request\.head\.(ref|label|repo)\b/,
+  /\bgithub\.event\.(head_commit|commits|pages)\b/,
+  /\bgithub\.ref_name\b/,
+  /\bgithub\.event\.(inputs|client_payload)\b/,
+  /(?<![\w.])inputs\./,
+  /\btoJSON\(\s*github\.event\s*\)/,
 ];
 
 /**
- * ワークフローの `run:` ブロックだけを取り出す。
- * env: 経由で渡すのは安全（シェル変数になるので展開されない）ので、
- * **run: の中に直接書かれている場合だけを問題にする。**
+ * ワークフローの `run:` と github-script の `script:` のブロックだけを取り出す。
+ * env: 経由で渡すのは安全（シェル変数・process.env になるので展開されない）ので、
+ * **ブロックの中に直接書かれている場合だけを問題にする。**
  */
 export function scanWorkflow(text, file) {
   const hits = [];
   const lines = text.split('\n');
-  let inRun = false, runIndent = 0;
+  let inBlock = false, blockIndent = 0;
   lines.forEach((line, i) => {
-    const m = /^(\s*)(-?\s*)run:\s*(\|[-+]?|>[-+]?)?\s*(.*)$/.exec(line);
-    if (m) {
-      inRun = true;
-      runIndent = m[1].length;
-      checkLine(m[4] ?? '', i + 1);
-      return;
-    }
-    if (inRun) {
+    if (inBlock) {
       const indent = line.search(/\S/);
       if (line.trim() === '') return;
-      if (indent <= runIndent) { inRun = false; return; }
-      checkLine(line, i + 1);
+      if (indent > blockIndent) { checkLine(line, i + 1); return; }
+      inBlock = false; // the block ended; this line may start the next one
+    }
+    const m = /^(\s*)(-?\s*)(run|script):\s*(\|[-+]?|>[-+]?)?\s*(.*)$/.exec(line);
+    if (m) {
+      inBlock = true;
+      blockIndent = m[1].length;
+      checkLine(m[5] ?? '', i + 1);
     }
   });
   function checkLine(s, ln) {
-    for (const re of UNTRUSTED_EXPR) {
-      if (re.test(s)) {
-        hits.push({ file, line: ln, expr: String(re), text: s.trim().slice(0, 90) });
+    for (const [, inner] of s.matchAll(/\$\{\{([\s\S]*?)\}\}/g)) {
+      for (const re of UNTRUSTED_EXPR) {
+        if (re.test(inner)) {
+          hits.push({ file, line: ln, expr: String(re), text: s.trim().slice(0, 90) });
+        }
       }
     }
   }
   return hits;
+}
+
+/** scanWorkflow 自身の自己テスト。**拾うべきものを拾い、拾わないものを拾わない。** */
+export const SCAN_SELFTEST = [
+  ['run: の workflow_run.head_branch を拾う', 1,
+    'jobs:\n  a:\n    steps:\n      - run: echo "${{ github.event.workflow_run.head_branch }}"\n'],
+  ['github-script の script: の pull_request.head.ref を拾う', 1,
+    'jobs:\n  a:\n    steps:\n      - uses: actions/github-script@x\n        with:\n          script: |\n            const b = "${{ github.event.pull_request.head.ref }}";\n'],
+  ['format() で包んだ issue.title を拾う', 1,
+    'jobs:\n  a:\n    steps:\n      - run: |\n          echo "${{ format(\'{0}\', github.event.issue.title) }}"\n'],
+  ['run: の inputs.x を拾う', 1,
+    'jobs:\n  a:\n    steps:\n      - run: |\n          [ "${{ inputs.dry_run }}" = true ]\n'],
+  ['続けて書いた2つ目のブロックも読む', 1,
+    'jobs:\n  a:\n    steps:\n      - run: |\n          echo ok\n      - run: echo "${{ github.head_ref }}"\n'],
+  ['env: 経由は拾わない', 0,
+    'jobs:\n  a:\n    steps:\n      - env:\n          B: ${{ github.event.workflow_run.head_branch }}\n        run: echo "$B"\n'],
+  ['地の文の "inputs." は拾わない', 0,
+    'jobs:\n  a:\n    steps:\n      - uses: actions/github-script@x\n        with:\n          script: |\n            core.notice("This PR changes waiting-progress inputs. The waiting");\n'],
+];
+export function scanSelftest(log = console.log) {
+  let failed = 0;
+  for (const [name, want, yml] of SCAN_SELFTEST) {
+    const got = scanWorkflow(yml, 'selftest.yml').length;
+    const ok = got === want;
+    if (!ok) failed++;
+    log(`  ${ok ? 'ok  ' : 'FAIL'} ${name}${ok ? '' : `（${got} 件 / 期待 ${want} 件）`}`);
+  }
+  return failed;
 }
 
 export function validate(doc) {
@@ -118,7 +161,7 @@ const SCENARIOS = ledgerScenarios(
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
-  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 && scanSelftest() === 0 ? 0 : 1);
   const doc = JSON.parse(fs.readFileSync(SURFACE_PATH, 'utf8'));
   const problems = validate(doc);
 
@@ -135,10 +178,10 @@ if (isMain) {
   console.log(`\n  ワークフローの script injection 検査: ${files.length} ファイル`);
   if (hits.length) {
     for (const h of hits) console.log(`    ${h.file}:${h.line}  ${h.text}`);
-    problems.push(`run: に第三者が書ける式を直接展開している ${hits.length}件`
+    problems.push(`run: / script: に第三者が書ける式を直接展開している ${hits.length}件`
       + ' — **env: 経由で渡すこと**（シェル変数になるので展開されない）');
   } else {
-    console.log('    run: に第三者が書ける式の直接展開なし。');
+    console.log('    run: / script: に第三者が書ける式の直接展開なし。');
   }
   console.log('\n  **機械で確かめられるのはここまで。**セッションの判断そのものの汚染');
   console.log('  （「この手順に従え」と書かれたページを読んで従わない保証）は、');
@@ -151,6 +194,7 @@ if (isMain) {
   }
   if (process.argv.includes('--check')) {
     if (run(SCENARIOS) !== 0) process.exit(1);
+    if (scanSelftest(() => {}) !== 0) { scanSelftest(); process.exit(1); }
     console.log('\n入口の棚卸しと、機械で見える範囲に問題なし。');
   }
 }

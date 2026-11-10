@@ -65,20 +65,25 @@ function actBlock() {
     if (!line.startsWith('          ')) break;
     body.push(line.slice(10));
   }
-  return body.join('\n').replaceAll('${{ inputs.dry_run }}', 'false');
+  return body.join('\n');
 }
-function replay(exit, badTee = false) {
+function replay(exit, badTee = false, dryRun) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'act-failure-contract-'));
   try {
     const bin = path.join(dir, 'bin'); fs.mkdirSync(bin);
-    fs.writeFileSync(path.join(bin, 'node'), '#!/bin/sh\nprintf "synthetic report\\n"\nexit "$FAKE_EXIT"\n', { mode: 0o700 });
+    fs.writeFileSync(path.join(bin, 'node'), '#!/bin/sh\nprintf "%s\\n" "$*" > "$ARGS_FILE"\nprintf "synthetic report\\n"\nexit "$FAKE_EXIT"\n', { mode: 0o700 });
     if (badTee) fs.writeFileSync(path.join(bin, 'tee'), '#!/bin/sh\ncat >/dev/null\nexit 23\n', { mode: 0o700 });
     const summary = path.join(dir, 'summary');
     const script = actBlock().replaceAll('/tmp/act.txt', path.join(dir, 'act.txt'));
-    const run = spawnSync('bash', ['-e', '-c', script], { cwd: dir, encoding: 'utf8', timeout: 5000,
-      env: { PATH: `${bin}:/usr/bin:/bin`, FAKE_EXIT: String(exit), GITHUB_STEP_SUMMARY: summary } });
+    const argsFile = path.join(dir, 'args');
+    const env = { PATH: `${bin}:/usr/bin:/bin`, FAKE_EXIT: String(exit), GITHUB_STEP_SUMMARY: summary, ARGS_FILE: argsFile };
+    // The workflow passes inputs.dry_run through env (unset on schedule).
+    if (dryRun !== undefined) env.DRY_RUN = dryRun;
+    const run = spawnSync('bash', ['-e', '-c', script], { cwd: dir, encoding: 'utf8', timeout: 5000, env });
     assert.ifError(run.error);
-    return { status: run.status, summary: fs.existsSync(summary) ? fs.readFileSync(summary, 'utf8') : null };
+    const result = { status: run.status, summary: fs.existsSync(summary) ? fs.readFileSync(summary, 'utf8') : null };
+    if (dryRun !== undefined) result.args = fs.existsSync(argsFile) ? fs.readFileSync(argsFile, 'utf8').trim() : null;
+    return result;
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 }
 test('act producer failure survives tee and does not publish a summary', () => {
@@ -89,6 +94,14 @@ test('act log-writer failure is also fatal', () => {
 });
 test('successful act still writes its exact output once', () => {
   assert.deepEqual(replay(0), { status: 0, summary: 'synthetic report\n' });
+});
+test('DRY_RUN=true (workflow_dispatch input via env) runs without --apply; otherwise --apply', () => {
+  assert.equal(replay(0, false, 'true').args.includes('--apply'), false);
+  assert.equal(replay(0, false, 'false').args.includes('--apply'), true);
+  assert.match(replay(0).summary, /synthetic report/); // DRY_RUN unset on schedule: set -u must not trip
+});
+test('the act step reads the dry-run input from env, not from an expression in run:', () => {
+  assert.equal(actBlock().includes('${{'), false);
 });
 test('a repeated third owner task id is not hidden by the first task', () => {
   assert.throws(() => intake([manual('task-a'), manual('task-b'), manual('task-b')]), /duplicate Codex ledger/);
