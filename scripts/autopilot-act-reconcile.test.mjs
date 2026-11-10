@@ -4,7 +4,9 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { test } from 'node:test';
-import { reconcileSnapshots, assertPinnedRefs, canonical, RUNS, COST, ACTIONS, HISTORY, ELIGIBILITY, renderReconciliationReport } from './lib/autopilot-act-reconcile.mjs';
+import { reconcileSnapshots, assertPinnedRefs, canonical, RUNS, COST, ACTIONS, HISTORY, ELIGIBILITY, ALLOWED, REGENERATED, renderReconciliationReport } from './lib/autopilot-act-reconcile.mjs';
+import { GENERATED, GENERATED_LOCALES } from './lib/autopilot-paths.mjs';
+import { reportTranslationFiles } from './lib/report-publication.mjs';
 import { prepare } from './autopilot-act-reconcile.mjs';
 const text = d => JSON.stringify(d, null, 2) + '\n';
 const run = (id, ref) => ({ run_id: id, external_ref: ref, date_jst: '2026-11-05', route: 'actions', source: 'act-reconcile',
@@ -208,4 +210,21 @@ test('post-generation check rejects lost or changed earlier-day history, permits
   assert.throws(() => verifyPreparedHistory(plan.receipt, current, '2026-11-05'), /historical_row_changed/);
   // Today's score is derived afresh by the existing generator.
   verifyPreparedHistory(plan.receipt, current, '2026-11-04');
+});
+
+// The same report pages are listed four times: Act's REGENERATED (and its ALLOWED), the publish job's GENERATED,
+// and the pending-path case list and git add of autopilot-act.yml. decision-monitor --selftest pins its own copy to
+// the translation registry; these were pinned to nothing, so a locale added to the registry would leave them behind
+// and stop Act with "Unexpected pending PR path" (the 2026-10-09..13 shape). Nothing here changes what runs.
+test('Act, the publish job and the workflow list the same report pages as the translation registry', () => {
+  assert.deepEqual([...REGENERATED], ['data/autopilot-actions-report.json', ...GENERATED]);
+  assert.deepEqual(GENERATED_LOCALES.map(l => `${l}/autopilot/index.html`).sort(), reportTranslationFiles());
+  const workflow = fs.readFileSync(new URL('../.github/workflows/autopilot-act.yml', import.meta.url), 'utf8');
+  const caseBody = workflow.split('case "$FILE" in\n')[1]?.split('*) echo "Unexpected pending PR path')[0];
+  const gitAdd = workflow.split('\n          git add ')[1]?.split('\n          git commit')[0];
+  assert.ok(caseBody && gitAdd, 'autopilot-act.yml: pending-path case list or git add block not found');
+  const set = list => [...new Set(list)].sort();
+  const pending = caseBody.split(/[|\s]+|\)\s*;;/).map(x => x.trim()).filter(x => x && x !== ';;' && x !== ')');
+  assert.deepEqual(set(pending), set(ALLOWED), 'pending-path case list');
+  assert.deepEqual(set(gitAdd.split(/[\s\\]+/).filter(Boolean)), set(ALLOWED), 'git add list');
 });
