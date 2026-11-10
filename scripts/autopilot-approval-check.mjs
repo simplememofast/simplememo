@@ -204,6 +204,45 @@ export function workflowBodies(text) {
   return { autoMerge: body(split[0]), approval: body(split[1]), approvalJob: split[1] === undefined ? '' : `\n${split[1]}` };
 }
 
+/**
+ * The jobs of a workflow read as YAML, not as text: aliases are expanded the way GitHub does and
+ * quoted or flow-style keys are keys (scripts/lib/workflow-secrets.mjs, the reader
+ * check-credentials.mjs uses). Returns { id, write, runs } per job. write: the job's permissions
+ * (the workflow's when the job has none) grant write to anything, or no permissions are declared
+ * (the repository default may be write). runs: a `run` key anywhere in the job. Throws when the
+ * file does not parse. The 2026-11-10 review found that a step defined once (`- &notify`) and
+ * reused with `- *notify` in a write-token job passed the text guards. Self-test only, so the
+ * merge path never loads the reader.
+ */
+export async function workflowJobTokens(text) {
+  const { allPairs, buildYamlDocuments, isKey, readYamlEvents, scalarText } = await import('./lib/workflow-secrets.mjs');
+  const parsed = readYamlEvents([text])[0];
+  if (parsed.error) throw new Error(`workflow YAML does not parse: ${parsed.error}`);
+  const docs = buildYamlDocuments(parsed.events);
+  if (docs.length !== 1 || docs[0].t !== 'm') throw new Error('workflow YAML is not one mapping');
+  const get = (node, name) => (node?.t === 'm' ? node.pairs.find(([k]) => isKey(k, name))?.[1] : undefined);
+  const lower = node => scalarText(node)?.trim().toLowerCase();
+  const writes = perm => perm === undefined || lower(perm) === 'write-all'
+    || [...allPairs(perm)].some(([, v]) => lower(v) === 'write');
+  const jobs = get(docs[0], 'jobs');
+  if (jobs?.t !== 'm') throw new Error('workflow YAML has no jobs mapping');
+  const top = get(docs[0], 'permissions');
+  return jobs.pairs.map(([k, job]) => ({
+    id: scalarText(k),
+    write: writes(get(job, 'permissions') ?? top),
+    runs: [...allPairs(job)].some(([key]) => isKey(key, 'run')),
+  }));
+}
+
+/** Insert step text right after the `steps:` line of job `id` (self-test fixtures). */
+function withStep(text, id, step) {
+  const start = text.indexOf(`\n  ${id}:\n`);
+  const at = start === -1 ? -1 : text.indexOf('\n    steps:\n', start);
+  if (at === -1) throw new Error(`no steps: for job ${id}`);
+  const cut = at + '\n    steps:\n'.length;
+  return text.slice(0, cut) + step + text.slice(cut);
+}
+
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 const OWNER = 'simplememofast';
 const REPO_NAME = 'simplememo';
@@ -303,6 +342,10 @@ async function selftest() {
   }
   t(autoMergeClass([file('.github/workflows/auto-merge.yml')], 1).reasons[0].startsWith('hard_deny:'), 'hard-denied path needs approval');
   t(autoMergeClass([file('data/decision-intents/x.json', 'modified')], 1).class === 'approval', 'editing a declaration is not an append');
+  // Audit 2026-11-10: only the names decision-ci counts as a declaration (<id>.json) are an append.
+  for (const p of ['data/decision-intents/Zz_extra.json', 'data/decision-intents/x.JSON.json', 'data/decision-rejections/Zz_extra.json']) {
+    t(autoMergeClass([...ledgerOnly, file(p, 'added')], ledgerOnly.length + 1).class === 'approval', `a file named other than <id>.json needs approval: ${p}`);
+  }
   t(autoMergeClass([file('data/autopilot-runs.json', 'removed')], 1).class === 'approval', 'removing a ledger is not an append');
   t(autoMergeClass([file('data/autopilot-runs.json', 'changed')], 1).class === 'approval', 'mode/type change is not an append');
   t(autoMergeClass([file('data/autopilot-status.json', 'renamed', { previous_filename: 'index.html' })], 1).class === 'approval',
@@ -358,11 +401,52 @@ async function selftest() {
   t(approvalJob.includes(`\n    environment: ${APPROVAL_ENVIRONMENT}\n`), 'approval job waits for the protected environment');
   t(/\n    concurrency:\n      group: autopilot-approval-\$\{\{ needs\.auto-merge\.outputs\.approval_pr \}\}\n      cancel-in-progress: true\n/.test(approvalJob),
     'one pending approval per PR');
-  const [approvalOnly, indexnowJob = ''] = approvalJob.split('\n  indexnow-after-approval:\n');
-  t(!/\n\s+run:/.test(approvalOnly), 'the job holding the write token runs no script from the merged tree');
+  const [, indexnowJob = ''] = approvalJob.split('\n  indexnow-after-approval:\n');
+  // Read as YAML (aliases expanded, quoted and flow keys read as keys), not as text.
+  const jobTokens = await workflowJobTokens(workflow);
+  const approvalTokens = jobTokens.find(j => j.id === 'merge-after-approval');
+  t(Boolean(approvalTokens?.write) && !approvalTokens.runs, 'the job holding the write token runs no script from the merged tree');
   t(/^ {4}needs: merge-after-approval\n/.test(indexnowJob) && /\n {4}permissions:\n {6}contents: read\n {4}steps:/.test(indexnowJob),
     'IndexNow after an approved merge runs in a read-only job');
   t(!/secrets\./.test(workflow), 'auto-merge.yml uses no secrets');
+  // 2026-11-10 audit: no job holding a write token runs a script (the merged tree's
+  // scripts run in read-only jobs), and the normal path's IndexNow job is wired.
+  const jobBodies = Object.fromEntries(
+    workflow.split('\njobs:\n')[1].split(/\n(?=  [\w-]+:\n)/).map(b => [b.match(/^  ([\w-]+):/)?.[1], b]),
+  );
+  const writers = jobTokens.filter(j => j.write).map(j => j.id);
+  t(writers.length >= 2 && writers.includes('merge-after-approval') && jobTokens.filter(j => j.write).every(j => !j.runs),
+    'no job holding a write token runs a script');
+  // Every way of writing a run: step must trip the guard, in each write-token job (2026-11-10
+  // reviews: the one-line `- run:` form, then a step reused through a YAML alias, passed unseen).
+  const notifyStep = '\n      - name: IndexNow notify (merged diff)\n';
+  t(workflow.split(notifyStep).length === 3, 'the IndexNow step the alias fixture anchors is present in both read-only jobs');
+  const anchored = workflow.replace(notifyStep, '\n      - &notify\n        name: IndexNow notify (merged diff)\n');
+  const forms = [
+    ['one-line `- run:`', workflow, '      - run: node scripts/indexnow-notify.js --since 1\n'],
+    ['`- name:` + `run:`', workflow, '      - name: notify\n        run: node scripts/indexnow-notify.js --since 1\n'],
+    ['quoted "run" key', workflow, '      - "run": node scripts/indexnow-notify.js --since 1\n'],
+    ['flow-style step', workflow, '      - { name: notify, run: node scripts/indexnow-notify.js }\n'],
+    ['step reused with *notify', anchored, '      - *notify\n'],
+  ];
+  // An alias can only name an anchor written above it, so the reused step goes into the write-token
+  // jobs after the anchored read-only step (merge-after-approval, the job the review used).
+  const after = name => anchored.indexOf('&notify') < anchored.indexOf(`\n  ${name}:\n`);
+  const fixtures = writers.flatMap(name => forms.filter(([, base]) => base !== anchored || after(name))
+    .map(([form, base, step]) => [name, form, withStep(base, name, step)]));
+  t(fixtures.some(([name, form]) => name === 'merge-after-approval' && form.includes('*notify')), 'the alias fixture reaches the approval job');
+  (await import('./lib/workflow-secrets.mjs')).readYamlEvents(fixtures.map(([, , text]) => text)); // one ruby process
+  for (const [name, form, text] of fixtures) {
+    t((await workflowJobTokens(text)).find(j => j.id === name)?.runs === true, `the write-token guard sees a ${form} step added to ${name}`);
+  }
+  t((await workflowJobTokens(anchored)).every(j => !j.write || !j.runs), 'anchoring a read-only step alone does not trip the guard');
+  const notify = jobBodies['indexnow-after-merge'] ?? '';
+  t(/\n {4}needs: auto-merge\n/.test(notify) && notify.includes("\n    if: needs.auto-merge.outputs.merged_sha != ''\n")
+    && /\n {4}permissions:\n {6}contents: read\n {4}steps:/.test(notify), 'normal-path IndexNow runs in a read-only job after a merge');
+  t(notify.includes('ref: ${{ needs.auto-merge.outputs.merged_sha }}') && notify.includes('MERGED_COUNT: ${{ needs.auto-merge.outputs.merged_count }}'),
+    'normal-path IndexNow checks out the merged commit');
+  t(['merged_sha', 'merged_count'].every(o => (jobBodies['auto-merge'] ?? '').includes(`\n      ${o}: \${{ steps.merge.outputs.${o} }}\n`)),
+    'auto-merge job exports merged_sha and merged_count');
   const checkouts = workflow.match(/uses: actions\/checkout@/g)?.length ?? 0;
   const unpersisted = workflow.match(/\n {10}persist-credentials: false\n/g)?.length ?? 0;
   t(checkouts > 0 && unpersisted === checkouts, 'every checkout in auto-merge.yml drops its credential');
@@ -386,7 +470,8 @@ async function selftest() {
   };
   // catchError: return what the body threw (with the calls made before it) instead of throwing.
   const runAutoMerge = async ({ branch = 'claude/obsidian-auto-20261020', files = [file('index.html')], pr: prOver = {},
-    extraOpen = [], fail = {}, behindBy = 1, ledgers = {}, workspace = ROOT, catchError = false } = {}) => {
+    extraOpen = [], fail = {}, behindBy = 1, ledgers = {}, workspace = ROOT, catchError = false,
+    runRepo = `${OWNER}/${REPO_NAME}` } = {}) => {
     const pr = fixturePr({ branch, files, pr: prOver });
     const { github, calls } = mockGithub({ pr, files, extraOpen, fail, behindBy, ledgers });
     const { core, out } = mockCore(fail);
@@ -395,7 +480,8 @@ async function selftest() {
     try {
       await new AsyncFunction('context', 'github', 'core', 'require', autoMerge)(
         { repo: { owner: OWNER, repo: REPO_NAME }, payload: { workflow_run: {
-          head_branch: branch, head_sha: SHA, event: 'pull_request', created_at: '2026-10-20T01:02:03Z' } } },
+          head_branch: branch, head_sha: SHA, event: 'pull_request', created_at: '2026-10-20T01:02:03Z',
+          head_repository: { full_name: runRepo } } } },
         github, core, requireIdentity);
     } catch (error) {
       if (!catchError) throw error;
@@ -407,6 +493,14 @@ async function selftest() {
   let r = await runAutoMerge({ files: ledgerOnly });
   t(r.calls.merged.length === 1 && !r.out.outputs.approval_pr && r.out.failed.length === 0, 'autopilot ledger-only PR merges');
   t(r.calls.listArgs[0]?.base === 'main', 'PR lookup is limited to main');
+  // 2026-11-10 監査: フォークの head で走った検証の成功を、こちらの PR の検証として数えない。
+  for (const runRepo of ['someone/simplememo', null]) {
+    r = await runAutoMerge({ files: ledgerOnly, runRepo });
+    t(r.calls.merged.length === 0 && !r.out.outputs.approval_pr && r.out.failed.length === 0
+      && (r.calls.listArgs?.length ?? 0) === 0, `validation run from ${runRepo ?? 'an unknown head'} merges nothing`);
+  }
+  t(/\n    if: >-\n      github\.event\.workflow_run\.conclusion == 'success'\n      && github\.event\.workflow_run\.head_repository\.full_name == github\.repository\n/.test(workflow),
+    'auto-merge job only runs for validation of this repository\'s head');
   for (const files of [[file('index.html')], [file('autopilot/index.html'), file('sitemap.xml')],
     [file('scripts/x.mjs'), file('data/autopilot-runs.json')]]) {
     r = await runAutoMerge({ files });

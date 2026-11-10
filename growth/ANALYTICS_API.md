@@ -420,7 +420,7 @@ The funnel's SQL behavior is also checked with synthetic extracted events:
 
 ```sh
 python3 -m venv /tmp/simplememo-sql-tests
-/tmp/simplememo-sql-tests/bin/python -m pip install -r growth/tests/requirements-sql.txt
+/tmp/simplememo-sql-tests/bin/python -m pip install --require-hashes --only-binary=:all: -r growth/tests/requirements-sql.txt
 /tmp/simplememo-sql-tests/bin/python growth/tests/ga4-funnel-sql.test.py
 /tmp/simplememo-sql-tests/bin/python growth/tests/ga4-journey-sql.test.py
 ```

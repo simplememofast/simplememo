@@ -9,7 +9,7 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
   Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
-  Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://tools.applemediaservices.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com https://*.ahrefs.com https://fazier.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com https://analytics.ahrefs.com https://static.cloudflareinsights.com; connect-src 'self' https://api.simplememofast.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://analytics.google.com https://*.ahrefs.com https://cloudflareinsights.com; object-src 'none'; base-uri 'self'
+  Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://tools.applemediaservices.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com https://*.ahrefs.com https://fazier.com; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com https://analytics.ahrefs.com https://static.cloudflareinsights.com; connect-src 'self' https://api.simplememofast.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://analytics.google.com https://*.ahrefs.com https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
   # 【2026-09-03】HTML は max-age=3600 から no-cache へ。
   #
   # **1時間、直したページが読者に届かない。**この日、横スクロールの修理を
@@ -80,6 +80,13 @@
 # but this rule covers any static asset under /admin/ (e.g. /admin/bg/*.jpg)
 # that bypasses the function. Authenticated content must never be cached by
 # the CDN — otherwise one user's response could be served to another.
+# Since 2026-10-20 the middleware answers every /admin/* request with 410
+# (retired; pinned by scripts/admin-retirement.test.mjs) and still sets these
+# two headers. Access stays in front: older deployments keep their own code
+# (see functions/admin/_middleware.js; Access login observed 2026-10-31,
+# functions/_middleware.js). Nothing authenticated is served any more; this
+# rule is the fallback for an /admin/ response that does not come from the
+# function.
 /admin/*
   Cache-Control: private, no-store
   X-Robots-Tag: noindex, nofollow

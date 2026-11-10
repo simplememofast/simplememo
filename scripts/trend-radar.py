@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import re
+import unicodedata
 import urllib.request
 import xml.etree.ElementTree as ET
 
@@ -18,6 +19,160 @@ SOURCES = {
 }
 RELEVANT = re.compile(r'メモ|ノート|Obsidian|Notion|Evernote|Google Keep|LINE|リマインダー|カレンダー|音声|レコーダー|iPhone|Apple Watch', re.I)
 CHANGES = re.compile(r'終了|値上げ|障害|仕様変更|廃止|サービス停止')
+
+
+# 第三者の題名と URL を、保存する前に整える（2026-11-10 監査）。題名はページの作者や
+# アプリの開発者が決められ、それを Bash を持つセッションが読む。長さの上限と見えない
+# 文字の除去だけを機械で掛ける（命令めいた文そのものは、200字でも運べる）。
+TITLE_MAX = 200
+URL_MAX = 2048  # 日本語スラッグを percent-encode した正規の URL も通す
+
+
+# Code points that render as nothing but are not format characters, so the Cf rule
+# below misses them (Default_Ignorable_Code_Point outside Cf / Cn / the selectors):
+# Hangul fillers (Lo), COMBINING GRAPHEME JOINER and the Khmer inherent vowels (Mn).
+IGNORABLE = {'\u034f', '\u115f', '\u1160', '\u17b4', '\u17b5', '\u3164', '\uffa0'}
+# Symbols (So) that draw nothing: BRAILLE PATTERN BLANK and MUSICAL SYMBOL NULL NOTEHEAD.
+# Each becomes a space, so it is never a selector base or a ZWJ end.
+BLANK = {'\u2800', '\U0001d159'}
+# The one space separator (Zs) kept besides U+0020. Every other Zs (NO-BREAK SPACE, OGHAM
+# SPACE MARK, EN QUAD to HAIR SPACE, NARROW NO-BREAK SPACE, MEDIUM MATHEMATICAL SPACE)
+# becomes U+0020 like the blanks, so the choice between spaces that look alike stores
+# nothing.
+WIDE_SPACE = '\u3000'
+ZWJ = '\u200d'
+# LEFT RIGHT ARROW is a math symbol (Sm), not So, yet it ends an RGI emoji ZWJ sequence
+# (head shaking horizontally: U+1F642 ZWJ U+2194 VS16). It is the only such code point.
+ZWJ_ARROW = '\u2194'
+# Per title, like SELECTORS_MAX: a ZWJ draws nothing, so a title keeps only a few. No
+# committed title carries one; a family emoji uses 3.
+ZWJ_MAX = 8
+PRESENTATION = ('\ufe0e', '\ufe0f')  # VS15 / VS16: the only selectors a title keeps
+# Bases that take VS15 / VS16 besides the symbols (S*): emoji-variation-sequences.txt
+PRESENTATION_BASES = set('#*0123456789\u203c\u2049\u2139\u3030\u303d')
+# Per title, on top of the one-per-emoji-base rule (defence in depth). Real titles carry a
+# few VS16, each after an emoji; no committed title reaches this cap.
+SELECTORS_MAX = 8
+
+
+def _is_variation_selector(ch):
+    """The Variation_Selector property: Mongolian FVS1-4, VS1-16 and VS17-256."""
+    o = ord(ch)
+    return (0x180B <= o <= 0x180D or o == 0x180F
+            or 0xFE00 <= o <= 0xFE0F or 0xE0100 <= o <= 0xE01EF)
+
+
+def _presentation_base(ch):
+    """Takes a VS15 / VS16: a symbol (S*) or a listed emoji base. A letter (kanji, kana,
+    Latin), a space, a mark, a format character, a selector and the blanks are not."""
+    return (unicodedata.category(ch)[0] == 'S' or ch in PRESENTATION_BASES) and ch not in BLANK
+
+
+def _emoji(ch):
+    """What a ZWJ may join: a symbol (So) at U+2000 or above, where emoji are, or a
+    skin-tone modifier. Not ASCII ^ or ` (Sk), not ° or ©, and not a blank."""
+    o = ord(ch)
+    return (((unicodedata.category(ch) == 'So' and o >= 0x2000) or 0x1F3FB <= o <= 0x1F3FF)
+            and ch not in BLANK)
+
+
+def _zwj_end(ch):
+    """What may follow a kept ZWJ: an emoji (_emoji), or ZWJ_ARROW. The arrow only ends a
+    sequence (a ZWJ after it is not kept), and no other Sm (ASCII + < = > | ~) joins."""
+    return _emoji(ch) or ch == ZWJ_ARROW
+
+
+def clean_title(value, limit=TITLE_MAX):
+    """Controls, line separators, every space separator (Zs) except U+3000 (NO-BREAK SPACE,
+    EN QUAD to HAIR SPACE, NARROW NO-BREAK SPACE, ...) and the blanks (U+2800 BRAILLE
+    PATTERN BLANK and U+1D159 MUSICAL SYMBOL NULL NOTEHEAD, symbols that draw nothing)
+    become a space (U+0020); format /
+    private-use / unassigned code points (bidi overrides, zero-width spaces, tag
+    characters, ...) and the other code points that render as nothing (IGNORABLE) are
+    removed. Variation selectors are removed (VS1-14, VS17-256 such as the ideographic
+    IVS, and the Mongolian FVS), with one exception emoji need: one VS15 / VS16 directly
+    after an emoji or symbol base (the code point right before it in the title, so never
+    after a kanji, kana, Latin letter, space, ZWJ, CGJ, combining mark or another
+    selector), and at most SELECTORS_MAX per title. A title therefore carries no more
+    selectors than it has emoji bases, and selectors interleaved with ZWJ, CGJ or
+    combining marks never survive. A kanji keeps its base character and loses its IVS.
+    A ZWJ is kept only between two emoji (_emoji: a symbol at U+2000 or above, or a
+    skin-tone modifier; an emoji, or an emoji and its VS15 / VS16, before it; an emoji
+    or U+2194 LEFT RIGHT ARROW after it), and at most ZWJ_MAX per title, so ASCII ^ and `
+    or ° join nothing.
+    U+0020 and U+3000 (WIDE_SPACE) are the only spaces a title keeps.
+    limit=None returns the whole title (parse matches on it; collect cuts what it stores).
+
+    "Unassigned" (Cn) is judged by the running interpreter's Unicode tables, on purpose:
+    a code point the runner does not know may be a format character newer than its tables,
+    and the unassigned planes could carry hidden bytes the way selector runs do. The cost
+    is that an emoji newer than the runner's tables (U+1FAE9 under Python 3.12 / 3.13) is
+    dropped from the title. A title that is empty once cleaned drops only its row (parse)."""
+    chars = value or ''
+    out = []
+    selectors = joiners = 0  # joiners: the ZWJs in out
+
+    def keep(ch):
+        nonlocal joiners
+        if out and out[-1] == ZWJ and not _zwj_end(ch):
+            out.pop()  # a ZWJ stays only when an emoji (or ZWJ_ARROW) follows it
+            joiners -= 1
+        out.append(ch)
+
+    for i, ch in enumerate(chars):
+        cat = unicodedata.category(ch)
+        if cat in ('Cc', 'Zl', 'Zp') or ch in BLANK or (cat == 'Zs' and ch != WIDE_SPACE):
+            keep(' ')
+        elif ch in IGNORABLE:
+            continue
+        elif _is_variation_selector(ch):
+            # Judged on the raw previous code point, so nothing removed in between (a CGJ,
+            # a zero-width space) lets a selector reach a base; a selector is not a base,
+            # so a second one in a row goes. A base is always kept, so out[-1] is it.
+            prev = chars[i - 1] if i else ''
+            if (ch in PRESENTATION and prev and _presentation_base(prev)
+                    and out and out[-1] == prev and selectors < SELECTORS_MAX):
+                out.append(ch)
+                selectors += 1
+        elif ch == ZWJ:
+            prev = out[-1] if out else ''
+            if (prev and joiners < ZWJ_MAX
+                    and (_emoji(prev) or (prev in '\ufe0e\ufe0f' and _emoji(out[-2])))):
+                out.append(ch)
+                joiners += 1
+        elif cat not in ('Cf', 'Co', 'Cn', 'Cs'):
+            keep(ch)
+    if out and out[-1] == ZWJ:
+        out.pop()
+    text = ''.join(out).strip()
+    return cut(text, limit) if limit else text
+
+
+def cut(title, limit=TITLE_MAX):
+    """Cut a cleaned title for storage, without leaving a ZWJ that no emoji follows."""
+    return title[:limit].rstrip(ZWJ)
+
+
+def valid_url(value):
+    # ASCII only, with no space or control: a URL is percent-encoded (the App Store's
+    # Japanese slugs are), so a raw non-ASCII code point (a variation selector, a CGJ, a
+    # Hangul filler, a blank, a ZWJ, a raw kana) fails. Every URL in the committed
+    # data/trend-radar.json is ASCII. url is also the RSS row's id. A failing URL drops
+    # only its row (parse).
+    return (isinstance(value, str) and len(value) <= URL_MAX and value.isascii()
+            and value.startswith(('https://', 'http://'))
+            and not any(ch.isspace() or unicodedata.category(ch)[0] in 'CZ' for ch in value))
+
+
+# An App Store row's id is the app's numeric Apple ID (im:id). [0-9], not \d: \d also
+# matches non-ASCII digits such as ARABIC-INDIC DIGIT ONE (U+0661). Every App Store id in
+# the committed data/trend-radar.json is ASCII digits.
+APPSTORE_ID = re.compile(r'[0-9]{1,20}')
+
+
+def valid_appstore_id(value):
+    """1 to 20 ASCII digits and nothing else. A failing id drops only its row (parse)."""
+    return isinstance(value, str) and APPSTORE_ID.fullmatch(value) is not None
 
 
 def parse(source, raw):
@@ -34,9 +189,18 @@ def parse(source, raw):
             fields = {e.tag.split('}')[-1]: e.text or '' for e in item}
             rows.append({'id': fields.get('link'), 'title': fields.get('title'),
                          'url': fields.get('link')})
-    if not rows or any(not r['id'] or not r['title'] or not r['url'].startswith(('https://', 'http://')) for r in rows):
+    for r in rows:
+        r['title'] = clean_title(r['title'], limit=None)  # matched whole; cut in collect()
+    # Check each row, not the source: one third-party row (a URL over URL_MAX, a title of
+    # invisible characters, an App Store id that is not 1 to 20 ASCII digits) must not fail
+    # the whole source, so that row is dropped and counted. Only an empty feed, or one where
+    # most rows are invalid, is a source failure.
+    kept = [r for r in rows if r['id'] and r['title'] and valid_url(r['url'])
+            and (source != 'appstore' or valid_appstore_id(r['id']))]
+    dropped = len(rows) - len(kept)
+    if not kept or 2 * dropped > len(rows):
         raise ValueError('Empty or invalid source; do not overwrite the last successful observation')
-    return rows
+    return kept, dropped  # App Store ranks were assigned before filtering: they stay as published
 
 
 def select(source, rows, previous):
@@ -66,10 +230,15 @@ def collect(previous, fetch):
     for name, url in SOURCES.items():
         prior = previous.get('sources', {}).get(name, {})
         try:
-            rows = parse(name, fetch(url))
+            rows, dropped = parse(name, fetch(url))
+            # Match on the whole cleaned title, then cut only what is stored.
+            hits = select(name, rows, prior.get('rows', []))
+            for r in rows + hits:
+                r['title'] = cut(r['title'])
+            # dropped_rows: rows parse() discarded, so a dropped row never reads as "no news".
             result['sources'][name] = {'status': 'ok', 'url': url, 'last_success_at': now,
                 'baseline': name == 'appstore' and not prior.get('rows'),
-                'rows': rows, 'hits': select(name, rows, prior.get('rows', [])),
+                'rows': rows, 'hits': hits, 'dropped_rows': dropped,
                 'comparison_at': prior.get('last_success_at')}
         except Exception as exc:
             result['sources'][name] = {'status': 'unreadable', 'url': url,
@@ -105,6 +274,7 @@ if __name__ == '__main__':
     temp.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
     temp.replace(args.output)
     print(json.dumps({'status': result['status'], 'acquisition_mode': result['acquisition_mode'], 'sources': {
-        k: {'status': v['status'], 'hits': len(v['hits']) if v['hits'] is not None else None}
+        k: {'status': v['status'], 'hits': len(v['hits']) if v['hits'] is not None else None,
+            'dropped_rows': v.get('dropped_rows')}
         for k, v in result['sources'].items()}}, ensure_ascii=False))
     raise SystemExit(0 if result['status'] == 'ok' else 1)

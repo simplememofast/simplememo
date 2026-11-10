@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 const source = readFileSync(new URL('../functions/admin/_middleware.js', import.meta.url), 'utf8');
 const { onRequest } = await import('data:text/javascript,' + encodeURIComponent(source));
 
@@ -41,4 +42,24 @@ test('direct legacy API exports return 410 without fetching or reading credentia
       assert.equal((await handler(new Proxy({}, { get() { throw new Error('retired API read context'); } }))).status, 410);
     }
   } finally { globalThis.fetch = previousFetch; }
+});
+
+// 2026-11-10 audit: cdnjs was allowed in script-src only for the retired admin
+// tools. It must not come back into the site-wide CSP, and no served page
+// outside admin/ may load from it.
+test('the site-wide CSP no longer allows cdnjs, and only retired admin pages reference it', async () => {
+  const headers = readFileSync(new URL('../_headers', import.meta.url), 'utf8');
+  const csp = headers.split('\n').find((l) => /^\s+Content-Security-Policy:/.test(l)) ?? '';
+  assert.ok(csp.includes("script-src 'self'"), 'CSP line must be found');
+  assert.doesNotMatch(csp, /cdnjs\.cloudflare\.com/);
+  assert.match(csp, /frame-ancestors 'none'/);
+  assert.match(csp, /form-action 'self'/);
+  const { execFileSync } = await import('node:child_process');
+  // fileURLToPath, not .pathname: .pathname keeps percent-escapes (a space is
+  // %20), so git would be handed a directory that does not exist.
+  const root = fileURLToPath(new URL('..', import.meta.url));
+  const files = execFileSync('git', ['-C', root, 'ls-files', '-z', '*.html'], { encoding: 'utf8' }).split('\0').filter(Boolean);
+  const offenders = files.filter((f) => !f.startsWith('admin/')
+    && readFileSync(new URL('../' + f, import.meta.url), 'utf8').includes('cdnjs.cloudflare.com'));
+  assert.deepEqual(offenders, []);
 });

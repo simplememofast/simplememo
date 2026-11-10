@@ -9,10 +9,16 @@ from unittest.mock import patch
 
 import build_site_translations as build
 import site_translation_dynamic as dynamic
-from site_translation_units import collect, collect_extra, prepare_source, examples_for
-from site_translation_validation import render
+from site_translation_units import collect, collect_extra, prepare_source, examples_for, source_language
+from site_translation_validation import render, validate
 from site_translation_faq import synchronize
 from faq_question_audit import audit_page
+
+
+def script_body(output):
+    # Where a browser ends the first JSON-LD element: "</script" followed by
+    # whitespace, "/" or ">", in any letter case.
+    return re.search(r'<script type="application/ld\+json">(.*?)</script(?=[\t\n\r\f />])', output, re.S | re.I)[1]
 
 
 class TranslationPipelineTests(unittest.TestCase):
@@ -200,6 +206,116 @@ class TranslationPipelineTests(unittest.TestCase):
         data = 'url("data:image/svg+xml,<svg></svg>")'
         self.assertEqual(build.map_css_urls(data, 'blog/example.html', 'es', {}), data)
 
+    def test_style_element_urls_are_mapped_as_raw_text(self):
+        # A <style> element is raw text: browsers leave &lt; as it is there.
+        css = 'a{background:url("&lt;/style&gt;&lt;script&gt;x&lt;/script&gt;.png")}'
+        mapped = build.map_style_element(css, 'blog/example.html', 'es', {})
+        self.assertEqual(mapped, 'a{background:url("/blog/&lt;/style&gt;&lt;script&gt;x&lt;/script&gt;.png")}')
+        # Dot segments can still assemble an end tag from inert source text.
+        # Which end tag matters depends on the container: </style for plain
+        # raw text, </noscript inside <noscript> (scripting browsers), and any
+        # tag inside <svg>/<math>, where <style> is not raw text at all.
+        for value in ('</x/../style><script>x</script><style>.png', '</x/../STYLE x>.png',
+                      '</x/../noscript><img src=x onerror=alert(1)>.png', '</./noscript>.png',
+                      '</x/../p><video src=x onerror=alert(1)></video>.png', 'img/<b>.png'):
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'would write a raw "<"'):
+                build.map_style_element('a{background:url("'+value+'")}', 'blog/example.html', 'es', {})
+        # A value that mapping leaves alone is the source page's own bytes.
+        for css in ('a{background:url("data:image/svg+xml,<svg></svg>")}',
+                    'a{background:url("https://example.com/</p>.png")}'):
+            self.assertEqual(build.map_style_element(css, 'blog/example.html', 'es', {}), css)
+        # Attribute values are still decoded; their caller escapes the result.
+        self.assertEqual(build.map_css_urls("url('../img/a.webp?x=1&amp;y=2')", 'blog/example.html', 'es', {}), "url('/img/a.webp?x=1&y=2')")
+
+    def test_document_style_element_cannot_be_closed_by_a_mapped_url(self):
+        group = {'source': 'source.html', 'sourceLocale': 'ja', 'pages': {'ja': 'source.html', 'es': 'es/source.html'}}
+        def translate(css, container='<style>CSS</style>', in_body=False):
+            element = container.replace('CSS', css)
+            head, body = ('', element) if in_body else (element, '')
+            source = '<html lang="ja"><head><title>説明</title>'+head+'</head><body><details class="site-languages"><summary>JA</summary></details><p>説明</p>'+body+'</body></html>'
+            units = collect(source) + collect_extra(source)
+            catalog = {'ja:'+u['id']: {'source': u['text'], 'text': 'Descripción'} for u in units}
+            with patch.object(build, 'units_for', return_value=(source, units)), patch('sync_shared_chrome.transform', side_effect=lambda s, f:s), patch('sync_page_design.transform', side_effect=lambda s, f:s):
+                return build.translate_document(group, 'es', catalog, {'/source': group})
+        output = translate('a{background:url("img/&lt;/style&gt;&lt;script&gt;x&lt;/script&gt;.png")}')
+        self.assertEqual(output.lower().count('</style'), 1)
+        self.assertNotIn('<script>x</script>', output)
+        self.assertIn('url("/img/&lt;/style&gt;&lt;script&gt;x&lt;/script&gt;.png")', output)
+        message = 'source.html → es: <style> url\\(\\) would write a raw "<" that could close the element'
+        with self.assertRaisesRegex(ValueError, message):
+            translate('a{background:url("</x/../style><script>x</script><style>.png")}')
+        # The same lock holds where the browser ends the element elsewhere.
+        noscript, svg = '<noscript><style>CSS</style></noscript>', '<svg width="10" height="10"><style>CSS</style></svg>'
+        cases = [
+            ('a{background:url("</x/../noscript><img src=x onerror=alert(1)>.png")}', noscript, False),
+            ('a{background:url("</./noscript>.png")}', noscript, False),
+            ('a{background:url("</x/../p><video src=x onerror=alert(1)></video>")}', svg, True),
+        ]
+        for css, container, in_body in cases:
+            with self.subTest(css=css), self.assertRaisesRegex(ValueError, message):
+                translate(css, container, in_body)
+        # Mapping inside those containers still works for ordinary values.
+        output = translate('a{background:url("img/a.png")}', svg, True)
+        self.assertIn('<svg width="10" height="10"><style>a{background:url("/img/a.png")}</style></svg>', output)
+
+    def test_document_schema_cannot_close_its_script_element(self):
+        # Untranslated JSON-LD values are decoded and written back; "\u003c"
+        # in the source must not come back as a raw "<" that ends the script.
+        value = '</script><img src=x onerror=alert(1)><!--'
+        payload = '{"@type":"WebPage","url":"https://simplememofast.com/source","identifier":"\\u003c/script\\u003e\\u003cimg src=x onerror=alert(1)\\u003e\\u003c!--"}'
+        source = '<html lang="ja"><head><title>説明</title><script type="application/ld+json">'+payload+'</script></head><body><details class="site-languages"><summary>JA</summary></details><p>説明</p></body></html>'
+        group = {'source': 'source.html', 'sourceLocale': 'ja', 'pages': {'ja': 'source.html', 'es': 'es/source.html'}}
+        units = collect(source) + collect_extra(source)
+        catalog = {'ja:'+u['id']: {'source': u['text'], 'text': 'Descripción'} for u in units}
+        with patch.object(build, 'units_for', return_value=(source, units)), patch('sync_shared_chrome.transform', side_effect=lambda s, f:s), patch('sync_page_design.transform', side_effect=lambda s, f:s):
+            output = build.translate_document(group, 'es', catalog, {'/source': group})
+        body = script_body(output)
+        self.assertNotIn('</', body)
+        self.assertNotIn('<!--', body)
+        data = json.loads(body)
+        self.assertEqual(data['identifier'], value)
+        self.assertEqual(data['url'], 'https://simplememofast.com/es/source')
+
+    def test_faq_schema_keeps_decoded_markup_inside_its_script_element(self):
+        # Visible prose decodes &lt; to "<". Written back raw into JSON-LD,
+        # "</script" would end the element and "<!--" would escape it.
+        shown = '&lt;/script/&gt;&lt;img src=x onerror=alert(1)&gt;&lt;!--'
+        value = '</script/><img src=x onerror=alert(1)><!--'
+        faq = {'@type':'FAQPage','mainEntity':[{'@type':'Question','name':'Question?','acceptedAnswer':{'@type':'Answer','text':'Use '+shown+' here.'}}]}
+        source = '<script type="application/ld+json">'+json.dumps(faq)+'</script><details><summary>Question?</summary><p>Use <code>'+shown+'</code> here.</p></details>'
+        translated = source.replace('<p>Use <code>', '<p>Usa <code>').replace('</code> here.</p>', '</code> aquí.</p>')
+        output = synchronize(source, translated, 'https://simplememofast.com/es/example', 'es')
+        body = script_body(output)
+        self.assertNotIn('</', body)
+        self.assertNotIn('<!--', body)
+        schema = json.loads(body)
+        self.assertEqual(schema['mainEntity'][0]['acceptedAnswer']['text'], 'Usa '+value+' aquí.')
+
+    def test_schema_values_do_not_open_a_script_tag_that_check_script_tags_counts(self):
+        # check-script-tags.mjs counts every "<script" and every "</script>"
+        # in the document. A value that mentions a <script>…</script> pair
+        # must not leave a raw "<script" behind once "</" is escaped, or a
+        # correct page fails CI as an unclosed element.
+        def balanced(output):
+            return len(re.findall(r'<script\b', output, re.I)) == len(re.findall(r'</script\s*>', output, re.I))
+        shown = '&lt;SCRIPT src="a.js"&gt;&lt;/script&gt;'
+        value = '<SCRIPT src="a.js"></script>'
+        faq = {'@type':'FAQPage','mainEntity':[{'@type':'Question','name':'Question?','acceptedAnswer':{'@type':'Answer','text':'Add '+shown+' to the page.'}}]}
+        source = '<script type="application/ld+json">'+json.dumps(faq)+'</script><details><summary>Question?</summary><p>Add <code>'+shown+'</code> to the page.</p></details>'
+        translated = source.replace('<p>Add <code>', '<p>Añade <code>').replace('</code> to the page.</p>', '</code> a la página.</p>')
+        output = synchronize(source, translated, 'https://simplememofast.com/es/example', 'es')
+        self.assertTrue(balanced(output), output)
+        self.assertEqual(json.loads(script_body(output))['mainEntity'][0]['acceptedAnswer']['text'], 'Añade '+value+' a la página.')
+        payload = '{"@type":"WebPage","url":"https://simplememofast.com/source","identifier":"\\u003cscript src=\\"a.js\\"\\u003e\\u003c/script\\u003e"}'
+        page = '<html lang="ja"><head><title>説明</title><script type="application/ld+json">'+payload+'</script></head><body><details class="site-languages"><summary>JA</summary></details><p>説明</p></body></html>'
+        group = {'source': 'source.html', 'sourceLocale': 'ja', 'pages': {'ja': 'source.html', 'es': 'es/source.html'}}
+        units = collect(page) + collect_extra(page)
+        catalog = {'ja:'+u['id']: {'source': u['text'], 'text': 'Descripción'} for u in units}
+        with patch.object(build, 'units_for', return_value=(page, units)), patch('sync_shared_chrome.transform', side_effect=lambda s, f:s), patch('sync_page_design.transform', side_effect=lambda s, f:s):
+            output = build.translate_document(group, 'es', catalog, {'/source': group})
+        self.assertTrue(balanced(output), output)
+        self.assertEqual(json.loads(script_body(output))['identifier'], '<script src="a.js"></script>')
+
     def test_existing_translations_keep_their_actual_section_anchor(self):
         group = next(g for g in build.groups() if g['source'] == 'faq.html')
         routes = {'/faq': group, '/en/faq': group}
@@ -274,6 +390,34 @@ class TranslationPipelineTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'Re-extract'):
             dynamic.inline_code('<script>'+code+' </script>','page.html',[row])
 
+    def test_program_binding_parameters_come_from_the_literal(self):
+        code = "const message = '保存 ' + count + ' 件';"
+        literal = "'保存 ' + count + ' 件'"
+        start = code.index(literal)
+        row = {'file':'page.html','scriptHash':hashlib.sha256(code.encode()).hexdigest(),'start':start,
+               'end':start+len(literal),'literal':literal,'source':'ja','text':'保存 {0} 件','parameters':['count']}
+        good, count = dynamic.wrap_code(code,[row])
+        self.assertEqual(count,1)
+        self.assertIn('SimpleMemoI18n.format("保存 {0} 件",[count])',good)
+        for parameters in (['fetch("//x")'], [''], [1], ['count + fetch("//x")']):
+            with self.subTest(parameters=parameters), self.assertRaisesRegex(ValueError,'not an expression of its literal'):
+                dynamic.wrap_code(code,[dict(row, parameters=parameters)])
+        for text, parameters in (('保存 件', ['count']), ('保存 {1} 件', ['count']), ('保存 {0} {1} 件', ['count'])):
+            with self.subTest(text=text), self.assertRaisesRegex(ValueError,'placeholders do not match'):
+                dynamic.wrap_code(code,[dict(row, text=text, parameters=parameters)])
+
+    def test_program_binding_text_cannot_leave_an_inline_script(self):
+        code = "const message = '保存';"
+        start = code.index("'保存'")
+        row = {'file':'page.html','scriptHash':hashlib.sha256(code.encode()).hexdigest(),'start':start,'end':start+4,'literal':"'保存'",'source':'ja'}
+        # Ordinary closing tags already occur in approved fragments and stay as-is.
+        good, count = dynamic.wrap_code(code,[dict(row, text='<span class="y">---</span>')])
+        self.assertEqual(count,1)
+        self.assertIn('SimpleMemoI18n.text("<span class=\\"y\\">---</span>")',good)
+        for text in ('</script><script>alert(1)</script>', '保存</SCRIPT >', '<!-- 保存', '<script>保存'):
+            with self.subTest(text=text), self.assertRaisesRegex(ValueError,'cannot be embedded in a script'):
+                dynamic.wrap_code(code,[dict(row, text=text)])
+
     def test_program_yaml_fragment_keeps_line_breaks_and_indentation(self):
         source = '<span>title:</span> 買い物\n<span>tags:</span> [<span>日用品</span>]\n<span>---</span>\n  本文\n'
         translations = {'title:':'title:', '買い物':'Shopping', 'tags:':'tags:',
@@ -303,6 +447,81 @@ class TranslationPipelineTests(unittest.TestCase):
         self.assertIn('\n  Body\n', output)
         self.assertEqual(collect(source), [])
         self.assertEqual(dynamic.initial_demo_note(source, 'other/index.html', 'en', {}, []), source)
+
+    def test_program_fragment_keeps_protected_markup_encoded(self):
+        # Escaped sample text inside <code> or an attribute must not become live
+        # markup in the translated message; only translated text is decoded.
+        fragment = ('<span class="c" title="&quot;&gt;">tags:</span> 買い物 '
+                    '<code>&lt;img src=x onerror=1&gt;</code>\n本文 &amp; メモ\n')
+        translations = {'tags:':'tags:', '買い物':'Shopping', '本文 & メモ':'Body & Memo'}
+        catalog = {}
+        for unit in collect(fragment):
+            language = 'ja' if re.search(r'[぀-ヿ㐀-鿿]', unit['text']) else 'en'
+            catalog[language + ':' + unit['id']] = {'source':unit['text'], 'text':translations[unit['text']]}
+        binding = {'file':'ai-tags/index.html', 'source':'ja', 'text':fragment}
+        actual = dynamic.translated_message(binding, 'en', catalog)
+        self.assertEqual(actual, '<span class="c" title="&quot;&gt;">tags:</span> Shopping '
+                                 '<code>&lt;img src=x onerror=1&gt;</code>\nBody & Memo\n')
+        self.assertNotIn('<img', actual)
+        source = '<pre id="demo-note">' + fragment + '</pre>'
+        self.assertEqual(dynamic.initial_demo_note(source, binding['file'], 'en', catalog, [binding]),
+                         '<pre id="demo-note">' + actual + '</pre>')
+
+    def test_program_block_unit_keeps_skipped_child_encoded(self):
+        # A skipped element inside an element unit is a raw token of that unit.
+        # Element units are not decoded, so the escaped sample stays text.
+        fragment = '<li>リンク <code>&lt;img src=x onerror=1&gt;</code> です</li>'
+        [unit] = collect(fragment)
+        self.assertEqual(unit['tag'], 'li')
+        catalog = {'ja:' + unit['id']: {'source':unit['text'], 'text':'Link ZXQ0000 here'}}
+        binding = {'file':'obsidian/index.html', 'source':'ja', 'text':fragment}
+        actual = dynamic.translated_message(binding, 'en', catalog)
+        self.assertEqual(actual, '<li>Link <code>&lt;img src=x onerror=1&gt;</code> here</li>')
+        self.assertNotIn('<img', actual)
+
+    def test_program_text_cannot_decode_into_markup(self):
+        # validate() checks a translation with its ZXQ markers removed, so a '<'
+        # placed before a protected token passes there; escaped source text
+        # passes too. Both would only become markup after the token value is
+        # restored and the #text unit is decoded, and these messages reach
+        # innerHTML. The decoded value is checked instead.
+        def catalog_for(fragment, translations):
+            catalog = {}
+            for unit in collect(fragment):
+                language = source_language(unit, 'ja')
+                if language != 'en':
+                    catalog[language + ':' + unit['id']] = {'source':unit['text'], 'text':translations[unit['text']]}
+            return catalog
+        cases = (
+            # Catalog only: a '<' placed before a brand, an address or a placeholder.
+            ('<span class="c">tags:</span> Obsidian メモ\n', {'ZXQ0000 メモ':'<ZXQ0000 onmouseover=1> note'}),
+            ('<span class="c">From:</span> 送信元 noreply@mail.simplememofast.com\n',
+             {'送信元 ZXQ0000':'Sender <ZXQ0000 onmouseover=1>'}),
+            ('保存 {0} 件', {'保存 ZXQ0000 件':'<ZXQ0000 saved'}),
+            # Source only: escaped sample text in its own English text node.
+            ('<span class="c">tags:</span> 買い物\n<span class="c">---</span>\n&lt;Obsidian onmouseover=1&gt;\n',
+             {'買い物':'Shopping'}),
+        )
+        for fragment, translations in cases:
+            catalog = catalog_for(fragment, translations)
+            for unit in collect(fragment):
+                entry = catalog.get('ja:' + unit['id'])
+                if entry:
+                    # Precondition of this case, not a requirement on validate().
+                    self.assertIsNone(validate(unit['text'], entry['text'], 'en'),
+                                      'validate() now rejects this case; it no longer reaches the decoded check')
+            binding = {'file':'ai-tags/index.html', 'source':'ja', 'text':fragment}
+            with self.subTest(fragment=fragment):
+                with self.assertRaisesRegex(ValueError, 'Invalid dynamic translation: .*: unknown_markup'):
+                    dynamic.translated_message(binding, 'en', catalog)
+                with self.assertRaisesRegex(ValueError, 'unknown_markup'):
+                    dynamic.initial_demo_note('<pre id="demo-note">' + fragment + '</pre>',
+                                              binding['file'], 'en', catalog, [binding])
+        # A '<' that cannot start a tag is ordinary text and is still decoded once.
+        fragment = '<span class="c">tags:</span> 買い物\n<span class="c">---</span>\n1 &lt; 2 &amp;&amp; 3 &lt;3\n'
+        binding = {'file':'ai-tags/index.html', 'source':'ja', 'text':fragment}
+        self.assertEqual(dynamic.translated_message(binding, 'en', catalog_for(fragment, {'買い物':'Shopping'})),
+                         '<span class="c">tags:</span> Shopping\n<span class="c">---</span>\n1 < 2 && 3 <3\n')
 
     def test_initial_ai_tags_note_rejects_missing_or_changed_approval(self):
         source = '<pre id="demo-note">本文</pre>'

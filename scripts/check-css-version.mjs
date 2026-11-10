@@ -57,6 +57,11 @@ const ASSETS = [
   'assets/css/editorial-resources.css',
   'js/obsidian-inbox-tool.js',
   'js/meeting-template-tools.js',
+  // 2026-11-10 監査: 同じく immutable で配っているのに照合していなかった3本。
+  // 現在の ?v= は中身と一致しているので、次に中身を変えたときに効く。
+  'js/aes-gcm-demo.js',
+  'js/obsidian-uri-generator.js',
+  'assets/css/obsidian-uri-generator.css',
   'assets/css/style.min.css',
   // 共有CSSを読まない17面のための「網」。immutable で配るので ?v= が要る。
   'assets/css/safety-net.css',

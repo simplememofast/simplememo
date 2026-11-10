@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 
 // These overrides take precedence over cwd; inheriting one can make a mirror's
 // git add/commit operate on the source repository. Names from git's local-env-vars.
-const GIT_REPOSITORY_ENV = [
+export const GIT_REPOSITORY_ENV = [
   'GIT_ALTERNATE_OBJECT_DIRECTORIES', 'GIT_CONFIG', 'GIT_CONFIG_PARAMETERS',
   'GIT_CONFIG_COUNT', 'GIT_OBJECT_DIRECTORY', 'GIT_DIR', 'GIT_WORK_TREE',
   'GIT_IMPLICIT_WORK_TREE', 'GIT_GRAFT_FILE', 'GIT_INDEX_FILE',

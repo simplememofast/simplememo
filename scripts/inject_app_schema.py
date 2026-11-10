@@ -35,6 +35,8 @@ import re
 import sys
 from pathlib import Path
 
+from json_script import json_for_script
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SITE_URL = "https://simplememofast.com"
 C = json.loads((REPO_ROOT / "data/site-constants.json").read_text(encoding="utf-8"))
@@ -115,7 +117,7 @@ def build_node(lang: str) -> str:
             "url": f"{SITE_URL}/about/",
         },
     }
-    body = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+    body = json_for_script(payload, ensure_ascii=False, separators=(",", ":"))
     return f'  {MANAGED_MARKER}\n  <script type="application/ld+json">{body}</script>\n'
 
 

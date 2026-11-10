@@ -40,6 +40,14 @@ jobs:
       - name: Web and CI security boundaries
         run: node --test scripts/ci-security.test.mjs
 
+      # No tracked file carries a credential-shaped value (2026-11-10 audit). The
+      # PR is already public when this runs; what it stops is the merge and the deploy.
+      - name: Secret shapes self-test
+        run: node scripts/check-secret-shapes.mjs --selftest
+
+      - name: No credential-shaped values in tracked files
+        run: node scripts/check-secret-shapes.mjs
+
       - name: Locked tools dependency advisory gate
         working-directory: tools
         run: |
@@ -1502,7 +1510,7 @@ jobs:
       - name: Test GA4 funnel SQL with synthetic events
         run: |
           python3 -m venv "$RUNNER_TEMP/ga4-sql-tests"
-          "$RUNNER_TEMP/ga4-sql-tests/bin/python" -m pip install --disable-pip-version-check -r growth/tests/requirements-sql.txt
+          "$RUNNER_TEMP/ga4-sql-tests/bin/python" -m pip install --disable-pip-version-check --require-hashes --only-binary=:all: -r growth/tests/requirements-sql.txt
           "$RUNNER_TEMP/ga4-sql-tests/bin/python" growth/tests/ga4-funnel-sql.test.py
           "$RUNNER_TEMP/ga4-sql-tests/bin/python" growth/tests/ga4-journey-sql.test.py
           "$RUNNER_TEMP/ga4-sql-tests/bin/python" growth/tests/ga4-cta-pages-sql.test.py

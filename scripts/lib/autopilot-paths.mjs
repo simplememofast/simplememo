@@ -19,8 +19,11 @@ export const LEDGER = Object.freeze([
   'data/autopilot-status.json', 'data/autopilot-runs.json', 'data/autopilot-cost.json',
   'docs/obsidian/AUTOPILOT_LOG.md',
 ]);
-// Added-only directories (a new intent or rejection file, never an edit of an old one).
-export const LEDGER_ADDED_ONLY = Object.freeze([/^data\/decision-intents\/[^/]+\.json$/, /^data\/decision-rejections\/[^/]+\.json$/]);
+// Added-only directories (a new intent or rejection file, never an edit of an old one). Only the names
+// decision-ci counts as a declaration (<id>.json): any other name under data/decision-intents/ was ledger
+// here while decision-ci did not count it, so a second contract rode along with a valid declaration and
+// merged without approval (audit 2026-11-10).
+export const LEDGER_ADDED_ONLY = Object.freeze([/^data\/decision-intents\/[a-z0-9-]+\.json$/, /^data\/decision-rejections\/[a-z0-9-]+\.json$/]);
 // Same list as autopilot-act.yml's pending-path allowlist and git add list.
 export const GENERATED_LOCALES = Object.freeze(['ar', 'es', 'id', 'ko', 'pt-BR', 'tr', 'zh-Hant', 'zh']);
 export const GENERATED = Object.freeze([

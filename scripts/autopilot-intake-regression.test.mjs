@@ -65,21 +65,33 @@ function actBlock() {
     if (!line.startsWith('          ')) break;
     body.push(line.slice(10));
   }
-  return body.join('\n').replaceAll('${{ inputs.dry_run }}', 'false');
+  return body.join('\n');
 }
-function replay(exit, badTee = false) {
+function runAct(exit, badTee, extraEnv) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'act-failure-contract-'));
   try {
     const bin = path.join(dir, 'bin'); fs.mkdirSync(bin);
-    fs.writeFileSync(path.join(bin, 'node'), '#!/bin/sh\nprintf "synthetic report\\n"\nexit "$FAKE_EXIT"\n', { mode: 0o700 });
+    fs.writeFileSync(path.join(bin, 'node'), '#!/bin/sh\nprintf "%s\\n" "$*" > "$ARGS_FILE"\nprintf "synthetic report\\n"\nexit "$FAKE_EXIT"\n', { mode: 0o700 });
     if (badTee) fs.writeFileSync(path.join(bin, 'tee'), '#!/bin/sh\ncat >/dev/null\nexit 23\n', { mode: 0o700 });
     const summary = path.join(dir, 'summary');
     const script = actBlock().replaceAll('/tmp/act.txt', path.join(dir, 'act.txt'));
-    const run = spawnSync('bash', ['-e', '-c', script], { cwd: dir, encoding: 'utf8', timeout: 5000,
-      env: { PATH: `${bin}:/usr/bin:/bin`, FAKE_EXIT: String(exit), GITHUB_STEP_SUMMARY: summary } });
+    const argsFile = path.join(dir, 'args');
+    // The workflow passes inputs.dry_run through env: extraEnv. No trigger leaves it unset — on schedule the
+    // expression `event_name == 'workflow_dispatch' && inputs.dry_run` short-circuits to false, so the step sees
+    // DRY_RUN='false'; on dispatch it is 'true' or 'false'. Unset is only a defensive case for ${DRY_RUN:-false}.
+    const env = { PATH: `${bin}:/usr/bin:/bin`, FAKE_EXIT: String(exit), GITHUB_STEP_SUMMARY: summary, ARGS_FILE: argsFile, ...extraEnv };
+    const run = spawnSync('bash', ['-e', '-c', script], { cwd: dir, encoding: 'utf8', timeout: 5000, env });
     assert.ifError(run.error);
-    return { status: run.status, summary: fs.existsSync(summary) ? fs.readFileSync(summary, 'utf8') : null };
+    return {
+      status: run.status,
+      summary: fs.existsSync(summary) ? fs.readFileSync(summary, 'utf8') : null,
+      args: fs.existsSync(argsFile) ? fs.readFileSync(argsFile, 'utf8').trim() : null,
+    };
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+}
+function replay(exit, badTee = false) {
+  const { status, summary } = runAct(exit, badTee, {});
+  return { status, summary };
 }
 test('act producer failure survives tee and does not publish a summary', () => {
   assert.deepEqual(replay(42), { status: 42, summary: null });
@@ -89,6 +101,19 @@ test('act log-writer failure is also fatal', () => {
 });
 test('successful act still writes its exact output once', () => {
   assert.deepEqual(replay(0), { status: 0, summary: 'synthetic report\n' });
+});
+test('DRY_RUN=true (workflow_dispatch input via env) runs without --apply; otherwise --apply', () => {
+  assert.equal(runAct(0, false, { DRY_RUN: 'true' }).args.includes('--apply'), false);
+  const scheduled = runAct(0, false, { DRY_RUN: 'false' }); // what schedule actually sets (the && short-circuits)
+  assert.equal(scheduled.status, 0);
+  assert.equal(scheduled.args.includes('--apply'), true);
+  // Defensive: no trigger leaves DRY_RUN unset, but set -u must not trip if the env line is ever dropped.
+  const unset = runAct(0, false, {});
+  assert.equal(unset.status, 0);
+  assert.equal(unset.args.includes('--apply'), true);
+});
+test('the act step reads the dry-run input from env, not from an expression in run:', () => {
+  assert.equal(actBlock().includes('${{'), false);
 });
 test('a repeated third owner task id is not hidden by the first task', () => {
   assert.throws(() => intake([manual('task-a'), manual('task-b'), manual('task-b')]), /duplicate Codex ledger/);

@@ -1,11 +1,21 @@
 import json
+import re
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from finalize_split_pages import finalize, finish_markup, finish_text_labels, finish_faq, finish_breadcrumbs, finish_schema_names, finish_product_schema
 from inject_faq_schema import JSONLD_RE
 from normalize_i18n_head import HeadInventory, build_block, replace_i18n_lines, set_html_lang
+
+HOSTILE = '</script><img src=x onerror=alert(1)><!--'
+
+
+def script_body(text):
+    # Where a browser ends the first JSON-LD element: "</script" followed by
+    # whitespace, "/" or ">", in any letter case.
+    return re.search(r'<script type="application/ld\+json">(.*?)</script(?=[\t\n\r\f />])', text, re.S | re.I)[1]
 
 
 class SplitPageRegressionTests(unittest.TestCase):
@@ -87,6 +97,26 @@ class SplitPageRegressionTests(unittest.TestCase):
         crumb = json.loads(next(JSONLD_RE.finditer(out))[1])['itemListElement'][0]
         self.assertEqual(crumb['name'], 'Guides')
         self.assertEqual(crumb['item'], 'https://simplememofast.com/en/guides/')
+
+    def test_rewritten_schema_values_cannot_close_their_script_element(self):
+        # Headings are read decoded and pruned payloads are re-serialized.
+        # Written back raw, "</script" would end the JSON-LD element and
+        # "<!--" would escape it; the values themselves must stay the same.
+        src = '<script type="application/ld+json">' + json.dumps({
+            '@type':'BreadcrumbList', 'itemListElement':[
+                {'@type':'ListItem','name':'Old title','item':'https://simplememofast.com/en/new-topic/'}
+            ]}) + '</script>'
+        documents = {'en/new-topic/index.html':'<h1>&lt;/script&gt;&lt;img src=x onerror=alert(1)&gt;&lt;!--</h1>'}
+        body = script_body(finish_breadcrumbs(src, self.root, documents))
+        self.assertNotIn('</', body)
+        self.assertNotIn('<!--', body)
+        self.assertEqual(json.loads(body)['itemListElement'][0]['name'], HOSTILE)
+        src = '<head><script type="application/ld+json">{"@graph":[{"@type":"FAQPage","mainEntity":[]},' \
+              '{"@type":"Article","headline":"\\u003c/script\\u003e\\u003cimg src=x onerror=alert(1)\\u003e\\u003c!--"}]}</script></head>'
+        body = script_body(finish_faq(src, 'https://simplememofast.com/en/guides/'))
+        self.assertNotIn('</', body)
+        self.assertNotIn('<!--', body)
+        self.assertEqual(json.loads(body)['@graph'], [{'@type': 'Article', 'headline': HOSTILE}])
 
     def test_other_item_lists_keep_their_editorial_labels(self):
         src = '<script type="application/ld+json">{"@type":"ItemList","itemListElement":[' \
@@ -178,6 +208,14 @@ class SplitPageRegressionTests(unittest.TestCase):
         self.assertEqual(en['offers'][0]['description'], f"Up to {C['freeSendsPerDay']} sends a day, with no time limit")
         self.assertNotIn('aggregateRating', ja)
         self.assertNotIn('aggregateRating', en)
+
+    def test_product_schema_values_cannot_close_their_script_element(self):
+        import inject_app_schema
+        with patch.dict(inject_app_schema.C, {'alternateNames': [HOSTILE]}):
+            body = script_body(inject_app_schema.build_node('en'))
+        self.assertNotIn('</', body)
+        self.assertNotIn('<!--', body)
+        self.assertIn(HOSTILE, json.loads(body)['alternateName'])
 
     def test_product_schema_stays_in_place_and_uses_real_head(self):
         from inject_app_schema import build_node, replace_or_insert

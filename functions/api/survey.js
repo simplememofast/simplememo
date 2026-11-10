@@ -8,13 +8,15 @@
  *
  * Why the hop exists rather than posting to the Worker from the browser:
  *
- *   1. `_headers` pins `connect-src 'self'` for the whole site. A direct
- *      fetch to api.simplememofast.com is refused by the page's own CSP, and
- *      widening connect-src for one form would widen it for all 240 pages.
- *   2. The Worker has no CORS surface at all (see src/index.ts routeRequest).
- *      Adding preflight handling to a hardened API so a marketing page can
- *      submit a form is the wrong trade — this keeps the browser talking only
- *      to its own origin.
+ *   1. The survey route on the Worker answers no CORS preflight (see
+ *      simplememo-api src/survey.ts), so a JSON POST from the page would be
+ *      refused by the browser. Adding preflight handling to a hardened API so
+ *      a marketing page can submit a form is the wrong trade — this keeps the
+ *      browser talking only to its own origin.
+ *   2. CSP is no longer what stops it. When this function was written
+ *      (2026-08-22) connect-src did not list the API host; since 2026-08-26
+ *      `_headers` allows https://api.simplememofast.com for the contact form
+ *      (/v1/inquiry, the only Worker routes that answer CORS).
  *
  * No secrets and no bindings are required here, so this deploys with the
  * static site and needs no Cloudflare Pages dashboard configuration.
@@ -45,7 +47,7 @@ const PAGE_HANDLED_ERRORS = new Set([
 
 const JSON_HEADERS = {
   'Content-Type': 'application/json',
-  // A survey POST must never sit in a cache — /* sets max-age=3600 site-wide.
+  // A survey POST must never sit in a cache.
   'Cache-Control': 'no-store',
 };
 

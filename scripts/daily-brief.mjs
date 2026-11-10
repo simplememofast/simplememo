@@ -31,11 +31,12 @@ import { summarize as summarizeCoverage } from './automation-rate.mjs';
 import { summarize as summarizeBudget } from './autopilot-budget.mjs';
 import { analyze as analyzeSelfheal } from './autopilot-selfheal.mjs';
 import { requireShape } from './lib/read-ledger.mjs';
+import { todayJst } from './lib/jst.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
 
-export function build() {
+export function build(now = new Date()) {
   const stop = read('data/emergency-stop.json');
   const status = read('data/autopilot-status.json');
   const cost = read('data/autopilot-cost.json');
@@ -54,7 +55,8 @@ export function build() {
   );
 
   return {
-    date_jst: new Date().toISOString().slice(0, 10),
+    // JST の暦日（2026-11-10 まで UTC の日付で、JST 0:00〜8:59 は前日を出していた）。
+    date_jst: todayJst(now),
     // **停止スイッチは「読めたか」を分けて持つ。**
     //
     // [2026-08-26] ここは Boolean(stop.stopped) だけだった。stop が {} でも
@@ -207,6 +209,12 @@ if (process.argv.includes('--selftest')) {
         throw new Error('NaN を通した（**旧実装はここで「生成できた」と出していた**）');
       }
     }],
+    ['**date_jst は JST の暦日**（UTC 16:00 は JST の翌日 1:00。UTC の日付を出していた形）', () => {
+      const d = build(new Date('2026-11-09T16:00:00Z')).date_jst;
+      if (d !== '2026-11-10') throw new Error(`JST 2026-11-10 01:00 の date_jst が ${d}`);
+      const e = build(new Date('2026-11-09T14:59:59Z')).date_jst;
+      if (e !== '2026-11-09') throw new Error(`JST 2026-11-09 23:59 の date_jst が ${e}`);
+    }],
     ['date_jst が日付でなければ落ちる', () => {
       const b = clone(build());
       b.date_jst = 'きょう';
@@ -311,6 +319,9 @@ if (isMain) {
 
   if (process.argv.includes('--check')) {
     const problems = verify(b);
+    // CI runs only --check, so the JST boundary is pinned here too (UTC 16:00 is JST 01:00 of the next day).
+    const boundary = build(new Date('2026-11-09T16:00:00Z')).date_jst;
+    if (boundary !== '2026-11-10') problems.push(`date_jst が JST の暦日でない（JST 2026-11-10 01:00 に ${boundary}）`);
     if (problems.length) {
       console.error('\n1枚が台帳と食い違っている:');
       for (const p of problems) console.error(`  - ${p}`);

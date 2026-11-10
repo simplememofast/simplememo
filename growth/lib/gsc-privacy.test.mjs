@@ -123,20 +123,102 @@ test('build-queues --check and search-intent --check print no query text; their 
   }
 });
 
-test('workflows run the GSC reports only in their query-free modes', () => {
-  const dir = path.join(ROOT, '.github/workflows');
+// Every mention of a report's file name in workflow code is a call, not only `node growth/scripts/…` at
+// the start of a line: an env prefix, `./`, a quoted or absolute path, `cd growth && node scripts/…`,
+// `cd growth/scripts && node analyze.mjs`, `$(…)` and a second command after `;` or `&&` all run the
+// script too. Lines end at CR, CRLF, NEL, U+2028 and U+2029 as well as LF, as they do for YAML.
+// A call is judged on the words after the name up to the next shell operator, without a trailing
+// comment, and only on the plain words before the first quote, backslash or redirection: a flag inside
+// 'x --no-query-text', after `>` (a file name there) or after a YAML `\n` escape does not count.
+// A call whose arguments cannot be read that way (the path in a variable, the mode on another command)
+// fails: the scan errs on the closed side. It reads the raw workflow text, not the parsed YAML, so a
+// file name assembled from pieces (`${NAME}.mjs`) is not seen at all.
+const GSC_REPORT = /(?<![\w.-])(?:\.\/)?(?:(?:growth\/)?scripts\/)?(analyze|build-queues|search-intent)\.mjs\b/g;
+function callsIn(text, file) {
   const calls = [];
-  for (const file of fs.readdirSync(dir).filter(name => /\.ya?ml$/.test(name))) {
-    for (const line of fs.readFileSync(path.join(dir, file), 'utf8').split('\n')) {
-      const m = line.match(/^\s*(?:-\s+)?(?:run:\s*)?node\s+growth\/scripts\/(analyze|build-queues|search-intent)\.mjs\b(.*)$/);
-      if (m) calls.push({ file, script: m[1], args: m[2], line: line.trim() });
+  const lines = text.replace(/\r\n?|[\u0085\u2028\u2029]/g, '\n').split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    if (/^\s*#/.test(lines[i])) continue; // YAML or shell comment line; a comment never continues
+    let line = lines[i];
+    while (line.endsWith('\\') && i + 1 < lines.length) line = line.slice(0, -1) + ' ' + lines[++i].trim();
+    for (const m of line.matchAll(GSC_REPORT)) {
+      const args = line.slice(m.index + m[0].length).split(/[;&|)`]|\$\(/)[0].replace(/\s#.*$/s, '')
+        .split(/["'\\<>]/)[0];
+      calls.push({ file, script: m[1], args, line: line.trim() });
     }
   }
+  return calls;
+}
+const queryFree = (c) => (c.script === 'analyze'
+  ? /(?:^|\s)--no-query-text(?:\s|$)/.test(c.args)
+  : /^\s+--(?:check|write|selftest)(?:\s|$)/.test(c.args));
+
+test('workflows run the GSC reports only in their query-free modes', () => {
+  const dir = path.join(ROOT, '.github/workflows');
+  const calls = fs.readdirSync(dir).filter(name => /\.ya?ml$/.test(name))
+    .flatMap(file => callsIn(fs.readFileSync(path.join(dir, file), 'utf8'), file));
   assert.ok(calls.some(c => c.file === 'seo-daily.yml' && c.script === 'analyze'), 'seo-daily Detectors is found');
-  for (const c of calls) {
-    if (c.script === 'analyze') assert.match(c.args, /(?:^|\s)--no-query-text(?:\s|$)/, `${c.file}: ${c.line}`);
-    else assert.match(c.args, /^\s+--(?:check|write|selftest)(?:\s|$)/, `${c.file}: ${c.line}`);
+  for (const c of calls) assert.ok(queryFree(c), `${c.file}: ${c.line} (arguments: "${c.args}")`);
+});
+
+test('the workflow scan finds the report in each shell form a step can call it with', () => {
+  // Each runs a report in a mode that prints query text, or in a mode the scan cannot read.
+  for (const text of [
+    'run: cd growth/scripts && node analyze.mjs --top 10',
+    '  node analyze.mjs --top 10',
+    '  cd growth/scripts; node ./analyze.mjs --top 10',
+    '  cd growth/scripts; node search-intent.mjs',
+    '  node growth/scripts/./analyze.mjs --top 10',
+    '  node growth/scripts//analyze.mjs --top 10',
+    '  node growth/scripts/analyze.mjs --top 10 # --no-query-text\r\n', // CRLF: the comment is still cut
+    '  node growth/scripts/analyze.mjs --top 10 # --no-query-text\r',
+    '  node growth/scripts/analyze.mjs --top 10\u2028# --no-query-text',
+    "  node growth/scripts/analyze.mjs --top 10 'x --no-query-text '", // one quoted word, not the flag
+    '  node growth/scripts/analyze.mjs --top 10 > --no-query-text', // a file name, not an argument
+    'run: "node growth/scripts/analyze.mjs --top 10\\necho --no-query-text "', // YAML escape: two lines
+    '  node growth/scripts/analyze.mjs --top 10\\ --no-query-text', // one word with a leading space
+    'run: GROWTH_GSC_DIR=x node growth/scripts/analyze.mjs --top 10',
+    'run: node ./growth/scripts/analyze.mjs --top 10',
+    '  out=$(node growth/scripts/analyze.mjs --top 10)',
+    '  echo start; node growth/scripts/analyze.mjs --top 10',
+    'run: cd growth && node scripts/analyze.mjs --top 10',
+    '  (cd growth && node scripts/analyze.mjs)',
+    '  node growth/scripts/analyze.mjs --top 10 # --no-query-text',
+    '  node growth/scripts/analyze.mjs --top 10; echo --no-query-text',
+    '  node growth/scripts/build-queues.mjs --check && node growth/scripts/analyze.mjs --top 10',
+    '  node "growth/scripts/analyze.mjs" --top 10',
+    '  node --no-warnings growth/scripts/analyze.mjs --top 10',
+    '  node "$GITHUB_WORKSPACE/growth/scripts/analyze.mjs" --top 10',
+    '  time node growth/scripts/analyze.mjs',
+    '  if node growth/scripts/analyze.mjs; then echo ok; fi',
+    '  # a comment ending in a backslash does not continue \\\n  node growth/scripts/analyze.mjs --top 10',
+    '  echo " # "; node growth/scripts/analyze.mjs --top 10', // a quoted # is not a comment
+    '  SCRIPT=growth/scripts/analyze.mjs; node "$SCRIPT" --no-query-text', // unreadable: fails closed
+    '  node growth/scripts/search-intent.mjs',
+    '  node growth/scripts/search-intent.mjs --json',
+  ]) {
+    const calls = callsIn(text, 'fixture.yml');
+    assert.ok(calls.some(c => !queryFree(c)), `${JSON.stringify(text)} -> ${JSON.stringify(calls)}`);
   }
+  // The query-free modes still pass, including the flag on a continuation line.
+  for (const text of [
+    '  node growth/scripts/analyze.mjs --top 10 \\\n    --no-query-text',
+    '  node growth/scripts/analyze.mjs --top 10 --no-query-text # summary',
+    '  out=$(node ./growth/scripts/analyze.mjs --no-query-text)',
+    '  node growth/scripts/build-queues.mjs --write',
+    '  node growth/scripts/search-intent.mjs --selftest',
+    '  node growth/scripts/search-intent.mjs --check',
+    '  node analyze.mjs --no-query-text',
+    '  cd growth/scripts && node ./build-queues.mjs --check',
+    '  node growth/scripts/analyze.mjs --top 10 --no-query-text # summary\r\n',
+    '  node growth/scripts/analyze.mjs --top 10 \\\r\n    --no-query-text\r\n',
+    '  node growth/scripts/analyze.mjs --top 10 --no-query-text >> "$GITHUB_STEP_SUMMARY"',
+  ]) {
+    const calls = callsIn(text, 'fixture.yml');
+    assert.ok(calls.length === 1 && calls.every(queryFree), `${JSON.stringify(text)} -> ${JSON.stringify(calls)}`);
+  }
+  // A comment that names the script is not a call.
+  assert.deepEqual(callsIn('      # 手元の `node growth/scripts/analyze.mjs` で読む。', 'fixture.yml'), []);
 });
 
 test('model sessions are not echoed into public logs or job summaries', () => {
