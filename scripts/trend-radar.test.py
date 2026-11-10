@@ -14,7 +14,7 @@ class RadarTests(unittest.TestCase):
         # 2026-11-10 audit: third-party titles are stored for a session that has Bash.
         title = 'LINE メモ\u202e終了\u200b\nnext line\u3000全角' + 'x' * 5000
         rss = f'<rss><channel><item><title>{title}</title><link>https://example.org/a</link></item></channel></rss>'
-        rows = radar.parse('hatena', rss)
+        rows, _ = radar.parse('hatena', rss)
         t = rows[0]['title'][:radar.TITLE_MAX]
         res = radar.collect({}, lambda url: rss if url != radar.SOURCES['appstore'] else self.feed(url))
         self.assertLessEqual(len(res['sources']['hatena']['rows'][0]['title']), radar.TITLE_MAX)
@@ -25,6 +25,40 @@ class RadarTests(unittest.TestCase):
             rss = f'<rss><channel><item><title>メモ</title><link>{bad}</link></item></channel></rss>'
             with self.assertRaises(ValueError):
                 radar.parse('hatena', rss)
+
+    def test_one_bad_row_is_dropped_and_counted_not_the_whole_source(self):
+        # A failed source sends the session to the uncleaned fixed feed, so one third-party
+        # row (a URL over URL_MAX, a title that is empty once cleaned) must drop only itself.
+        good = ('<item><title>LINE メモ終了</title><link>https://example.org/article</link></item>'
+                '<item><title>天気</title><link>https://example.org/weather</link></item>')
+        for bad in ['<item><title>メモ終了</title><link>https://example.org/' + 'a' * 2049 + '</link></item>',
+                    '<item><title>\u200b\u200b</title><link>https://example.org/blank</link></item>',
+                    '<item><title>\u3000 \u3164</title><link>https://example.org/blank2</link></item>']:
+            rss = f'<rss><channel>{good}{bad}</channel></rss>'
+            rows, dropped = radar.parse('hatena', rss)
+            self.assertEqual((len(rows), dropped), (2, 1))
+            self.assertEqual(rows[0]['title'], 'LINE メモ終了')
+            res = radar.collect({}, lambda url: rss if url == radar.SOURCES['hatena'] else self.feed(url))
+            src = res['sources']['hatena']
+            self.assertEqual(res['status'], 'ok')
+            self.assertEqual((src['status'], src['dropped_rows']), ('ok', 1))
+            self.assertEqual([h['title'] for h in src['hits']], ['LINE メモ終了'])
+        # App Store ranks stay as published when a row in between is dropped.
+        entries = [{'id': {'attributes': {'im:id': str(i)}, 'label': f'https://example.org/app{i}'},
+                    'im:name': {'label': name}} for i, name in enumerate(['メモA', '\u200b', 'メモB'], 1)]
+        rows, dropped = radar.parse('appstore', json.dumps({'feed': {'entry': entries}}))
+        self.assertEqual(([r['rank'] for r in rows], dropped), ([1, 3], 1))
+        # Most rows invalid is still a source failure.
+        rss = ('<rss><channel><item><title>メモ</title><link>https://example.org/ok</link></item>'
+               '<item><title>\u200b</title><link>https://example.org/x</link></item>'
+               '<item><title>メモ</title><link>javascript:alert(1)</link></item></channel></rss>')
+        with self.assertRaises(ValueError):
+            radar.parse('hatena', rss)
+
+    def test_unassigned_code_points_are_removed_whatever_the_runner(self):
+        # Noncharacters are unassigned in every Unicode version; plane 4 has nothing on the
+        # roadmap. Kept on purpose (see clean_title), so this pins the choice.
+        self.assertEqual(radar.clean_title('メモ\ufdd0\U00040000\U0004ffff終了'), 'メモ終了')
 
     def test_matching_reads_the_whole_title_and_only_storage_is_cut(self):
         # The keyword sits past character TITLE_MAX: it must still produce a hit.
@@ -109,7 +143,7 @@ class RadarTests(unittest.TestCase):
             radar.parse('google', '<rss><channel/></rss>')
 
     def test_rdf_namespace_and_escaped_title(self):
-        rows = radar.parse('hatena', '<rdf:RDF xmlns:rdf="urn:rdf" xmlns="urn:rss"><item><title>LINE &amp; メモ終了</title><link>https://example.org/</link></item></rdf:RDF>')
+        rows, _ = radar.parse('hatena', '<rdf:RDF xmlns:rdf="urn:rdf" xmlns="urn:rss"><item><title>LINE &amp; メモ終了</title><link>https://example.org/</link></item></rdf:RDF>')
         self.assertEqual(len(radar.select('hatena', rows, [])), 1)
 
 

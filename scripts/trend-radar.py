@@ -43,7 +43,13 @@ def clean_title(value, limit=TITLE_MAX):
     emoji sequences need. Hangul fillers are removed, and a variation selector is kept
     only right after a visible base character (one VS16 after an emoji, one IVS after a
     kanji): runs of selectors (category Mn) render as nothing and can carry hidden bytes.
-    Ordinary spacing (including U+3000) is kept. limit=None returns the whole title."""
+    Ordinary spacing (including U+3000) is kept. limit=None returns the whole title.
+
+    "Unassigned" (Cn) is judged by the running interpreter's Unicode tables, on purpose:
+    a code point the runner does not know may be a format character newer than its tables,
+    and the unassigned planes could carry hidden bytes the way selector runs do. The cost
+    is that an emoji newer than the runner's tables (U+1FAE9 under Python 3.12 / 3.13) is
+    dropped from the title. A title that is empty once cleaned drops only its row (parse)."""
     out = []
     for ch in value or '':
         cat = unicodedata.category(ch)
@@ -61,6 +67,9 @@ def clean_title(value, limit=TITLE_MAX):
 
 
 def valid_url(value):
+    # Any C or Z category character fails, including code points the runner's Unicode
+    # tables call unassigned (a raw new emoji); percent-encoded URLs pass. A failing URL
+    # drops only its row (parse).
     return (isinstance(value, str) and len(value) <= URL_MAX
             and value.startswith(('https://', 'http://'))
             and not any(ch.isspace() or unicodedata.category(ch)[0] in 'CZ' for ch in value))
@@ -82,9 +91,15 @@ def parse(source, raw):
                          'url': fields.get('link')})
     for r in rows:
         r['title'] = clean_title(r['title'], limit=None)  # matched whole; cut in collect()
-    if not rows or any(not r['id'] or not r['title'] or not valid_url(r['url']) for r in rows):
+    # Check each row, not the source. A failed source sends the session to the fixed feed,
+    # which this cleaning never touched, so one third-party row (a URL over URL_MAX, a
+    # title of invisible characters) must not fail it: that row is dropped and counted.
+    # Only an empty feed, or one where most rows are invalid, is a source failure.
+    kept = [r for r in rows if r['id'] and r['title'] and valid_url(r['url'])]
+    dropped = len(rows) - len(kept)
+    if not kept or 2 * dropped > len(rows):
         raise ValueError('Empty or invalid source; do not overwrite the last successful observation')
-    return rows
+    return kept, dropped  # App Store ranks were assigned before filtering: they stay as published
 
 
 def select(source, rows, previous):
@@ -114,14 +129,15 @@ def collect(previous, fetch):
     for name, url in SOURCES.items():
         prior = previous.get('sources', {}).get(name, {})
         try:
-            rows = parse(name, fetch(url))
+            rows, dropped = parse(name, fetch(url))
             # Match on the whole cleaned title, then cut only what is stored.
             hits = select(name, rows, prior.get('rows', []))
             for r in rows + hits:
                 r['title'] = r['title'][:TITLE_MAX]
+            # dropped_rows: rows parse() discarded, so a dropped row never reads as "no news".
             result['sources'][name] = {'status': 'ok', 'url': url, 'last_success_at': now,
                 'baseline': name == 'appstore' and not prior.get('rows'),
-                'rows': rows, 'hits': hits,
+                'rows': rows, 'hits': hits, 'dropped_rows': dropped,
                 'comparison_at': prior.get('last_success_at')}
         except Exception as exc:
             result['sources'][name] = {'status': 'unreadable', 'url': url,
@@ -157,6 +173,7 @@ if __name__ == '__main__':
     temp.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
     temp.replace(args.output)
     print(json.dumps({'status': result['status'], 'acquisition_mode': result['acquisition_mode'], 'sources': {
-        k: {'status': v['status'], 'hits': len(v['hits']) if v['hits'] is not None else None}
+        k: {'status': v['status'], 'hits': len(v['hits']) if v['hits'] is not None else None,
+            'dropped_rows': v.get('dropped_rows')}
         for k, v in result['sources'].items()}}, ensure_ascii=False))
     raise SystemExit(0 if result['status'] == 'ok' else 1)
