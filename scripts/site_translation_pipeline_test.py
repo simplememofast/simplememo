@@ -291,6 +291,31 @@ class TranslationPipelineTests(unittest.TestCase):
         schema = json.loads(body)
         self.assertEqual(schema['mainEntity'][0]['acceptedAnswer']['text'], 'Usa '+value+' aquí.')
 
+    def test_schema_values_do_not_open_a_script_tag_that_check_script_tags_counts(self):
+        # check-script-tags.mjs counts every "<script" and every "</script>"
+        # in the document. A value that mentions a <script>…</script> pair
+        # must not leave a raw "<script" behind once "</" is escaped, or a
+        # correct page fails CI as an unclosed element.
+        def balanced(output):
+            return len(re.findall(r'<script\b', output, re.I)) == len(re.findall(r'</script\s*>', output, re.I))
+        shown = '&lt;SCRIPT src="a.js"&gt;&lt;/script&gt;'
+        value = '<SCRIPT src="a.js"></script>'
+        faq = {'@type':'FAQPage','mainEntity':[{'@type':'Question','name':'Question?','acceptedAnswer':{'@type':'Answer','text':'Add '+shown+' to the page.'}}]}
+        source = '<script type="application/ld+json">'+json.dumps(faq)+'</script><details><summary>Question?</summary><p>Add <code>'+shown+'</code> to the page.</p></details>'
+        translated = source.replace('<p>Add <code>', '<p>Añade <code>').replace('</code> to the page.</p>', '</code> a la página.</p>')
+        output = synchronize(source, translated, 'https://simplememofast.com/es/example', 'es')
+        self.assertTrue(balanced(output), output)
+        self.assertEqual(json.loads(script_body(output))['mainEntity'][0]['acceptedAnswer']['text'], 'Añade '+value+' a la página.')
+        payload = '{"@type":"WebPage","url":"https://simplememofast.com/source","identifier":"\\u003cscript src=\\"a.js\\"\\u003e\\u003c/script\\u003e"}'
+        page = '<html lang="ja"><head><title>説明</title><script type="application/ld+json">'+payload+'</script></head><body><details class="site-languages"><summary>JA</summary></details><p>説明</p></body></html>'
+        group = {'source': 'source.html', 'sourceLocale': 'ja', 'pages': {'ja': 'source.html', 'es': 'es/source.html'}}
+        units = collect(page) + collect_extra(page)
+        catalog = {'ja:'+u['id']: {'source': u['text'], 'text': 'Descripción'} for u in units}
+        with patch.object(build, 'units_for', return_value=(page, units)), patch('sync_shared_chrome.transform', side_effect=lambda s, f:s), patch('sync_page_design.transform', side_effect=lambda s, f:s):
+            output = build.translate_document(group, 'es', catalog, {'/source': group})
+        self.assertTrue(balanced(output), output)
+        self.assertEqual(json.loads(script_body(output))['identifier'], '<script src="a.js"></script>')
+
     def test_existing_translations_keep_their_actual_section_anchor(self):
         group = next(g for g in build.groups() if g['source'] == 'faq.html')
         routes = {'/faq': group, '/en/faq': group}
