@@ -363,6 +363,20 @@ async function selftest() {
   t(/^ {4}needs: merge-after-approval\n/.test(indexnowJob) && /\n {4}permissions:\n {6}contents: read\n {4}steps:/.test(indexnowJob),
     'IndexNow after an approved merge runs in a read-only job');
   t(!/secrets\./.test(workflow), 'auto-merge.yml uses no secrets');
+  // 2026-11-10 audit: no job holding a write token runs a script (the merged tree's
+  // scripts run in read-only jobs), and the normal path's IndexNow job is wired.
+  const jobBodies = Object.fromEntries(
+    workflow.split('\njobs:\n')[1].split(/\n(?=  [\w-]+:\n)/).map(b => [b.match(/^  ([\w-]+):/)?.[1], b]),
+  );
+  const writers = Object.entries(jobBodies).filter(([, b]) => /\n {6}[\w-]+: write\b/.test(b));
+  t(writers.length >= 2 && writers.every(([, b]) => !/\n\s+run:/.test(b)), 'no job holding a write token runs a script');
+  const notify = jobBodies['indexnow-after-merge'] ?? '';
+  t(/\n {4}needs: auto-merge\n/.test(notify) && notify.includes("\n    if: needs.auto-merge.outputs.merged_sha != ''\n")
+    && /\n {4}permissions:\n {6}contents: read\n {4}steps:/.test(notify), 'normal-path IndexNow runs in a read-only job after a merge');
+  t(notify.includes('ref: ${{ needs.auto-merge.outputs.merged_sha }}') && notify.includes('MERGED_COUNT: ${{ needs.auto-merge.outputs.merged_count }}'),
+    'normal-path IndexNow checks out the merged commit');
+  t(['merged_sha', 'merged_count'].every(o => (jobBodies['auto-merge'] ?? '').includes(`\n      ${o}: \${{ steps.merge.outputs.${o} }}\n`)),
+    'auto-merge job exports merged_sha and merged_count');
   const checkouts = workflow.match(/uses: actions\/checkout@/g)?.length ?? 0;
   const unpersisted = workflow.match(/\n {10}persist-credentials: false\n/g)?.length ?? 0;
   t(checkouts > 0 && unpersisted === checkouts, 'every checkout in auto-merge.yml drops its credential');
