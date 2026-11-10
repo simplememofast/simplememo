@@ -1501,7 +1501,7 @@ jobs:
       - name: Test GA4 funnel SQL with synthetic events
         run: |
           python3 -m venv "$RUNNER_TEMP/ga4-sql-tests"
-          "$RUNNER_TEMP/ga4-sql-tests/bin/python" -m pip install --disable-pip-version-check -r growth/tests/requirements-sql.txt
+          "$RUNNER_TEMP/ga4-sql-tests/bin/python" -m pip install --disable-pip-version-check --require-hashes --only-binary=:all: -r growth/tests/requirements-sql.txt
           "$RUNNER_TEMP/ga4-sql-tests/bin/python" growth/tests/ga4-funnel-sql.test.py
           "$RUNNER_TEMP/ga4-sql-tests/bin/python" growth/tests/ga4-journey-sql.test.py
           "$RUNNER_TEMP/ga4-sql-tests/bin/python" growth/tests/ga4-cta-pages-sql.test.py

@@ -82,6 +82,37 @@ test('security-sensitive actions use immutable revisions and supported Node; aud
   assert.match(check, /npm ci --ignore-scripts --no-audit\n          npm audit --omit=dev --audit-level=moderate/);
 });
 
+// SEO Validation decides the production merge, and a version pin alone lets PyPI add a new file to that
+// version or fall back to an sdist that runs code at install time. So every pip install in a workflow
+// takes wheels only, from a requirements file that pins each package to one version and its file hashes.
+test('workflows install Python packages only as hash-pinned wheels', () => {
+  const dir = path.join(fileURLToPath(new URL('..', import.meta.url)), '.github/workflows');
+  const installs = [];
+  for (const name of fs.readdirSync(dir).filter((n) => /\.ya?ml$/.test(n))) {
+    const lines = fs.readFileSync(path.join(dir, name), 'utf8').split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      if (/^\s*#/.test(lines[i])) continue;
+      let line = lines[i];
+      while (line.endsWith('\\') && i + 1 < lines.length) line = line.slice(0, -1) + ' ' + lines[++i].trim();
+      for (const m of line.matchAll(/\bpip3?\s+install\b([^;&|)`]*)/g)) installs.push({ name, line: line.trim(), args: m[1] });
+    }
+  }
+  assert.ok(installs.some((c) => c.name === 'seo-check.yml' && c.args.includes('growth/tests/requirements-sql.txt')),
+    'the GA4 SQL test install in SEO Validation is found');
+  for (const c of installs) {
+    const where = `${c.name}: ${c.line}`;
+    assert.match(c.args, /(?:^|\s)--require-hashes(?:\s|$)/, where);
+    assert.match(c.args, /(?:^|\s)--only-binary[= ]:all:(?:\s|$)/, where);
+    const files = [...c.args.matchAll(/(?:^|\s)(?:-r|--requirement)(?:=|\s+)(\S+)/g)].map((m) => m[1]);
+    assert.ok(files.length, `${where}: installs from a requirements file`);
+    for (const file of files) {
+      const entries = read(file).replace(/\\\n/g, ' ').split('\n').map((l) => l.replace(/(?:^|\s)#.*$/, '').trim()).filter(Boolean);
+      assert.ok(entries.length, file);
+      for (const entry of entries) assert.match(entry, /^[A-Za-z0-9._-]+==[^\s;]+(?:\s+--hash=sha256:[0-9a-f]{64})+$/, `${file}: ${entry.split(/\s/)[0]}`);
+    }
+  }
+});
+
 // Devlog Syndication: the real-name check uses only the IDENTITY_DENYLIST secret. Without it nothing is sent,
 // and a hit is reported as a fixed marker. Fictional words only; the real secret is never needed here.
 const DEVLOG = fileURLToPath(new URL('../scripts/devlog-syndication.mjs', import.meta.url));
