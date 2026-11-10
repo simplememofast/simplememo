@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { loadIntents, contractProblems, verifyHistory, settle, staticPath, verifiedSettlement, METRICS, approvedMetric } from './value-contracts.mjs';
@@ -225,13 +225,20 @@ export function recoveryPullRequest(branch, request = api) {
   return { number: pr.number, body: pr.body, state: pr.state === 'open' ? 'OPEN' : pr.merged_at ? 'MERGED' : 'CLOSED' };
 }
 
+// staticPath includes images, so a rollback patch can be binary. It carries both sides (base85), and the
+// contract's budget bounds only the new side: a 450 KB image already overflowed execFileSync's 1 MiB default.
+const PATCH_BUFFER = 128 * 1024 * 1024;
+// One diff form for the patch verified here and the patch applied (applyRevert): binary, full blob ids, no rename
+// detection, and no external diff driver or text conversion from the runner's git configuration.
+const PATCH_DIFF = ['diff', '--binary', '--full-index', '--no-renames', '--no-ext-diff', '--no-textconv'];
+
 export function verifyRollback(incident, revertHead, paths, cwd = ROOT) {
-  const command = (...args) => execFileSync('git', args, { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }).trim();
+  const command = (...args) => execFileSync('git', args, { cwd, encoding: 'utf8', maxBuffer: PATCH_BUFFER }).trim();
   assert(shaOK(incident.execution_head) && shaOK(incident.target_sha) && shaOK(revertHead), 'rollback commits required');
   assert.equal(command('rev-parse', `${revertHead}^`), incident.execution_head, 'rollback PR was changed after creation');
-  const expected = command('diff', '--binary', '--full-index', '--no-renames', incident.target_sha, `${incident.target_sha}^`, '--', ...paths);
+  const expected = command(...PATCH_DIFF, incident.target_sha, `${incident.target_sha}^`, '--', ...paths);
   assert(expected, 'empty declared rollback');
-  const actual = command('diff', '--binary', '--full-index', '--no-renames', incident.execution_head, revertHead);
+  const actual = command(...PATCH_DIFF, incident.execution_head, revertHead);
   assert.equal(actual, expected, 'rollback PR differs from the declared reverse patch');
 }
 
@@ -396,7 +403,8 @@ export function applyRevert(plan, cwd = ROOT) {
   const command = (...args) => execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
   assert.equal(command('rev-parse', 'HEAD'), plan.expected_head, 'HEAD moved before rollback');
   assert.equal(command('status', '--porcelain', '--untracked-files=no'), '', 'rollback requires a clean tracked tree');
-  const diff = execFileSync('git', ['diff', `${plan.target}^`, plan.target, '--', ...plan.paths], { cwd });
+  // Without --binary an image is only "Binary files differ", and git apply refuses it on every run (audit 2026-11-10).
+  const diff = execFileSync('git', [...PATCH_DIFF, `${plan.target}^`, plan.target, '--', ...plan.paths], { cwd, maxBuffer: PATCH_BUFFER });
   if (!diff.length) throw new Error('empty rollback');
   execFileSync('git', ['apply', '--reverse', '--check'], { cwd, input: diff });
   execFileSync('git', ['apply', '--reverse'], { cwd, input: diff });
@@ -968,18 +976,30 @@ async function selftest() {
   const g = (...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
   try {
     g('init'); g('config', 'user.name', 'Test'); g('config', 'user.email', 'test@example.invalid');
+    // staticPath includes images (audit 2026-11-10): an incompressible image starting with NUL, about 600 KB on
+    // each side, so the reverse patch is binary and larger than execFileSync's 1 MiB default buffer; and an image
+    // the regression added, which the rollback deletes.
+    const image = () => { const bytes = randomBytes(600 * 1024); bytes[0] = 0; return bytes; };
+    const healthyImage = image(), imagePaths = ['assets/img/x.png', 'assets/img/new.png'];
+    fs.mkdirSync(path.join(dir, 'assets/img'), { recursive: true });
     fs.writeFileSync(path.join(dir, 'index.html'), 'healthy\n'); fs.writeFileSync(path.join(dir, 'other.txt'), 'keep\n');
+    fs.writeFileSync(path.join(dir, imagePaths[0]), healthyImage);
     g('add', '.'); g('commit', '-m', 'baseline');
-    fs.writeFileSync(path.join(dir, 'index.html'), 'broken\n'); g('add', '.'); g('commit', '-m', 'regression');
+    fs.writeFileSync(path.join(dir, 'index.html'), 'broken\n');
+    fs.writeFileSync(path.join(dir, imagePaths[0]), image()); fs.writeFileSync(path.join(dir, imagePaths[1]), image());
+    g('add', '.'); g('commit', '-m', 'regression');
     const target = g('rev-parse', 'HEAD');
-    applyRevert({ target, expected_head: target, paths: ['index.html'] }, dir);
+    const rollbackPaths = ['index.html', ...imagePaths];
+    applyRevert({ target, expected_head: target, paths: rollbackPaths }, dir);
     assert.equal(fs.readFileSync(path.join(dir, 'index.html'), 'utf8'), 'healthy\n');
     assert.equal(fs.readFileSync(path.join(dir, 'other.txt'), 'utf8'), 'keep\n');
+    assert(fs.readFileSync(path.join(dir, imagePaths[0])).equals(healthyImage), 'a changed image is restored byte for byte');
+    assert.equal(fs.existsSync(path.join(dir, imagePaths[1])), false, 'an image the regression added is removed');
     assert.throws(() => applyRevert({ target, expected_head: '0'.repeat(40), paths: ['index.html'] }, dir));
     g('add', '.'); g('commit', '-m', 'restore');
     const restored = g('rev-parse', 'HEAD');
     const incident = { target_sha: target, execution_head: target };
-    verifyRollback(incident, restored, ['index.html'], dir);
+    verifyRollback(incident, restored, rollbackPaths, dir);
     fs.writeFileSync(path.join(dir, 'other.txt'), 'unexpected change\n');
     g('add', '.'); g('commit', '--amend', '--no-edit');
     assert.throws(() => verifyRollback(incident, g('rev-parse', 'HEAD'), ['index.html'], dir), /declared reverse patch/);
