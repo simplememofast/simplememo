@@ -123,21 +123,27 @@ test('build-queues --check and search-intent --check print no query text; their 
   }
 });
 
-// Every mention of a report's path in workflow code is a call, not only `node growth/scripts/…` at the
-// start of a line: an env prefix, `./`, a quoted or absolute path, `cd growth && node scripts/…`, `$(…)`
-// and a second command after `;` or `&&` all run the script too. A call is judged on the words after the
-// path up to the next shell operator, without a trailing comment. A call whose arguments cannot be read
-// there (the path in a variable, the mode on another command) fails: the scan errs on the closed side.
-const GSC_REPORT = /(?<![\w.-])(?:\.\/)?(?:growth\/)?scripts\/(analyze|build-queues|search-intent)\.mjs\b/g;
+// Every mention of a report's file name in workflow code is a call, not only `node growth/scripts/…` at
+// the start of a line: an env prefix, `./`, a quoted or absolute path, `cd growth && node scripts/…`,
+// `cd growth/scripts && node analyze.mjs`, `$(…)` and a second command after `;` or `&&` all run the
+// script too. Lines end at CR, CRLF, NEL, U+2028 and U+2029 as well as LF, as they do for YAML.
+// A call is judged on the words after the name up to the next shell operator, without a trailing
+// comment, and only on the plain words before the first quote, backslash or redirection: a flag inside
+// 'x --no-query-text', after `>` (a file name there) or after a YAML `\n` escape does not count.
+// A call whose arguments cannot be read that way (the path in a variable, the mode on another command)
+// fails: the scan errs on the closed side. It reads the raw workflow text, not the parsed YAML, so a
+// file name assembled from pieces (`${NAME}.mjs`) is not seen at all.
+const GSC_REPORT = /(?<![\w.-])(?:\.\/)?(?:(?:growth\/)?scripts\/)?(analyze|build-queues|search-intent)\.mjs\b/g;
 function callsIn(text, file) {
   const calls = [];
-  const lines = text.split('\n');
+  const lines = text.replace(/\r\n?|[\u0085\u2028\u2029]/g, '\n').split('\n');
   for (let i = 0; i < lines.length; i++) {
     if (/^\s*#/.test(lines[i])) continue; // YAML or shell comment line; a comment never continues
     let line = lines[i];
     while (line.endsWith('\\') && i + 1 < lines.length) line = line.slice(0, -1) + ' ' + lines[++i].trim();
     for (const m of line.matchAll(GSC_REPORT)) {
-      const args = line.slice(m.index + m[0].length).split(/[;&|)`]|\$\(/)[0].replace(/\s#.*$/, '');
+      const args = line.slice(m.index + m[0].length).split(/[;&|)`]|\$\(/)[0].replace(/\s#.*$/s, '')
+        .split(/["'\\<>]/)[0];
       calls.push({ file, script: m[1], args, line: line.trim() });
     }
   }
@@ -155,9 +161,22 @@ test('workflows run the GSC reports only in their query-free modes', () => {
   for (const c of calls) assert.ok(queryFree(c), `${c.file}: ${c.line} (arguments: "${c.args}")`);
 });
 
-test('the workflow scan finds the report however a step calls it', () => {
+test('the workflow scan finds the report in each shell form a step can call it with', () => {
   // Each runs a report in a mode that prints query text, or in a mode the scan cannot read.
   for (const text of [
+    'run: cd growth/scripts && node analyze.mjs --top 10',
+    '  node analyze.mjs --top 10',
+    '  cd growth/scripts; node ./analyze.mjs --top 10',
+    '  cd growth/scripts; node search-intent.mjs',
+    '  node growth/scripts/./analyze.mjs --top 10',
+    '  node growth/scripts//analyze.mjs --top 10',
+    '  node growth/scripts/analyze.mjs --top 10 # --no-query-text\r\n', // CRLF: the comment is still cut
+    '  node growth/scripts/analyze.mjs --top 10 # --no-query-text\r',
+    '  node growth/scripts/analyze.mjs --top 10\u2028# --no-query-text',
+    "  node growth/scripts/analyze.mjs --top 10 'x --no-query-text '", // one quoted word, not the flag
+    '  node growth/scripts/analyze.mjs --top 10 > --no-query-text', // a file name, not an argument
+    'run: "node growth/scripts/analyze.mjs --top 10\\necho --no-query-text "', // YAML escape: two lines
+    '  node growth/scripts/analyze.mjs --top 10\\ --no-query-text', // one word with a leading space
     'run: GROWTH_GSC_DIR=x node growth/scripts/analyze.mjs --top 10',
     'run: node ./growth/scripts/analyze.mjs --top 10',
     '  out=$(node growth/scripts/analyze.mjs --top 10)',
@@ -189,6 +208,11 @@ test('the workflow scan finds the report however a step calls it', () => {
     '  node growth/scripts/build-queues.mjs --write',
     '  node growth/scripts/search-intent.mjs --selftest',
     '  node growth/scripts/search-intent.mjs --check',
+    '  node analyze.mjs --no-query-text',
+    '  cd growth/scripts && node ./build-queues.mjs --check',
+    '  node growth/scripts/analyze.mjs --top 10 --no-query-text # summary\r\n',
+    '  node growth/scripts/analyze.mjs --top 10 \\\r\n    --no-query-text\r\n',
+    '  node growth/scripts/analyze.mjs --top 10 --no-query-text >> "$GITHUB_STEP_SUMMARY"',
   ]) {
     const calls = callsIn(text, 'fixture.yml');
     assert.ok(calls.length === 1 && calls.every(queryFree), `${JSON.stringify(text)} -> ${JSON.stringify(calls)}`);
