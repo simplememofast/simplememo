@@ -1,4 +1,5 @@
 import '../tools/server-guard.test.js';
+import './delete-branch-workflow.test.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
