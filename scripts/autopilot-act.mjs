@@ -1909,28 +1909,69 @@ export async function fetchOrphanedCommits(repo, token, today, { fetchImpl = fet
 
 const WORKFLOW_FILE = 'obsidian-autopilot.yml';
 
+/** The events the production obsidian-autopilot.yml is started by (its `on:`). */
+export const AUTOPILOT_RUN_EVENTS = ['schedule', 'workflow_dispatch'];
+
+/**
+ * **出自を確かめた run だけを運転台帳・実費台帳の材料にする**（2026-11-10 監査）。
+ *
+ * 同じワークフローの一覧には、PR やブランチ側で定義を書き換えた版の run も並ぶ
+ * （`on: pull_request` を足した改変版など）。ステップ名・結果・ログの1行を選べる
+ * ので、それを読むと「失敗した回」や任意の実費を台帳に入れられた。
+ * autopilot-completion.mjs の isRun・company-daily-gsc.mjs と同じ方針で、
+ * このリポジトリ自身の・本番の定義の・本来の起動種別の run だけを通す。
+ * head_branch は見ていない（main 以外で手動起動した run の扱いはオーナー判断）。
+ */
+export function isProductionAutopilotRun(r, repo) {
+  return Number.isSafeInteger(r?.id)
+    && r.path === `.github/workflows/${WORKFLOW_FILE}`
+    && r.repository?.full_name === repo
+    && r.head_repository?.full_name === repo
+    && AUTOPILOT_RUN_EVENTS.includes(r.event);
+}
+
+/** Runs for each production event, merged newest first and cut to `limit`. Throws if any read fails. */
+export async function listProductionRuns(repo, headers, limit = 30, fetchImpl = fetch) {
+  const byId = new Map();
+  for (const event of AUTOPILOT_RUN_EVENTS) {
+    const url = `https://api.github.com/repos/${repo}/actions/workflows/${WORKFLOW_FILE}/runs?event=${event}&per_page=${limit}`;
+    let res;
+    try {
+      res = await fetchImpl(url, { headers, signal: AbortSignal.timeout(20_000) });
+    } catch (e) {
+      throw new Error(`Actions API に到達できず: ${e.message}`);
+    }
+    if (!res.ok) throw new Error(`Actions API が HTTP ${res.status}`);
+    for (const r of (await res.json()).workflow_runs ?? []) {
+      if (!isProductionAutopilotRun(r, repo)) {
+        // 黙って消さない。捨てた理由を追えるように、識別子と起動種別だけ出す。
+        console.error(`# 出自を確かめられない run を台帳の材料にしない: id=${r?.id} event=${r?.event} head=${r?.head_repository?.full_name}`);
+        continue;
+      }
+      byId.set(r.id, r);
+    }
+  }
+  return [...byId.values()]
+    .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
+    .slice(0, limit);
+}
+
 async function fetchWorkflowRuns(repo, token, limit = 30) {
   if (!token) return null;
-  const url = `https://api.github.com/repos/${repo}/actions/workflows/${WORKFLOW_FILE}/runs?per_page=${limit}`;
   const headers = {
     authorization: `Bearer ${token}`,
     accept: 'application/vnd.github+json',
     'user-agent': 'simplememo-autopilot-act',
   };
-  let res;
+  let runs;
   try {
-    res = await fetch(url, { headers, signal: AbortSignal.timeout(20_000) });
+    runs = await listProductionRuns(repo, headers, limit);
   } catch (e) {
-    console.error(`# Actions API に到達できず: ${e.message}（台帳が完全という意味ではない）`);
+    console.error(`# ${e.message}（台帳が完全という意味ではない）`);
     return null;
   }
-  if (!res.ok) {
-    console.error(`# Actions API が HTTP ${res.status}（台帳が完全という意味ではない）`);
-    return null;
-  }
-  const body = await res.json();
   const out = [];
-  for (const r of body.workflow_runs ?? []) {
+  for (const r of runs) {
     // Gateでスキップした回（＝そもそも着手していない）と、着手して落ちた回を
     // 区別するにはジョブの step まで見る必要がある。ここで一緒に取る。
     let steps = null;
@@ -3018,6 +3059,47 @@ async function selftest() {
   let count = 0;
   const t = (name, cond) => { count += 1; if (!cond) fails.push(name); };
   t('成果物PRの確定は2つの形だけで、他はすべて保留する（lib/artifact-settlement.mjs の自己検査を通過）', true);
+  {
+    // 2026-11-10 監査: 改変版の定義で起動した run を台帳の材料にしない。
+    const repo = 'simplememofast/simplememo';
+    const run = (over) => ({
+      id: 1, path: '.github/workflows/obsidian-autopilot.yml', event: 'schedule',
+      repository: { full_name: repo }, head_repository: { full_name: repo }, head_branch: 'main',
+      created_at: '2026-11-09T00:00:00Z', ...over,
+    });
+    t('出自: main の schedule / workflow_dispatch の run は通す',
+      isProductionAutopilotRun(run({}), repo) && isProductionAutopilotRun(run({ event: 'workflow_dispatch' }), repo));
+    t('出自: pull_request / push で起動した run は通さない',
+      !isProductionAutopilotRun(run({ event: 'pull_request' }), repo) && !isProductionAutopilotRun(run({ event: 'push' }), repo));
+    t('出自: フォークの run は head_branch が main でも通さない',
+      !isProductionAutopilotRun(run({ head_repository: { full_name: 'someone/simplememo' } }), repo));
+    t('出自: 別のワークフローのパスや識別子の無い run は通さない',
+      !isProductionAutopilotRun(run({ path: '.github/workflows/other.yml' }), repo)
+      && !isProductionAutopilotRun(run({ id: '1' }), repo) && !isProductionAutopilotRun(null, repo));
+    const urls = [];
+    const pages = {
+      schedule: [run({ id: 3, created_at: '2026-11-09T00:00:00Z' }), run({ id: 9, event: 'pull_request', created_at: '2026-11-09T05:00:00Z' })],
+      workflow_dispatch: [run({ id: 4, event: 'workflow_dispatch', created_at: '2026-11-09T03:00:00Z' }),
+        run({ id: 8, event: 'workflow_dispatch', head_repository: { full_name: 'someone/simplememo' }, created_at: '2026-11-09T06:00:00Z' })],
+    };
+    const fakeFetch = async (url) => {
+      urls.push(url);
+      const event = new URL(url).searchParams.get('event');
+      return { ok: true, json: async () => ({ workflow_runs: pages[event] }) };
+    };
+    const quiet = console.error; console.error = () => {};
+    let listed;
+    try { listed = await listProductionRuns(repo, {}, 30, fakeFetch); } finally { console.error = quiet; }
+    t('出自: 起動種別ごとにサーバ側で絞り、PR の run を除く指定は使わない',
+      urls.length === 2 && urls.some(u => u.includes('event=schedule')) && urls.some(u => u.includes('event=workflow_dispatch'))
+      && urls.every(u => !u.includes('exclude_pull_requests')));
+    t('出自: 混ざった応答から本番の run だけを新しい順に返す',
+      JSON.stringify(listed.map(r => r.id)) === '[4,3]');
+    const failing = async () => ({ ok: false, status: 502, json: async () => ({}) });
+    let failed = false;
+    try { await listProductionRuns(repo, {}, 30, failing); } catch { failed = true; }
+    t('出自: 1本でも読めなければ失敗にする（台帳が完全とは言わない）', failed);
+  }
   {
     const { appendRun } = await import('./autopilot-budget.mjs');
     const job = { id: 97262077233, run_id: 32667079679, run_attempt: 1, status: 'completed',
