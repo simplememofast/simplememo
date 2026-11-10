@@ -164,6 +164,24 @@ export function pendingPublication(request = api, ignored = reportIgnoredPublica
   return verified;
 }
 
+// What --check holds data/decision-recovery.json to. The monitor writes only verified commit SHAs and positive PR
+// numbers into an incident, and they reach git (fetch, diff) as revisions; a field absent at an earlier state is
+// fine, a present one of another shape is not the monitor's (audit 2026-11-10).
+export function recoveryLedgerProblems(doc) {
+  if (!Array.isArray(doc?.incidents)) return ['incidents must be a list'];
+  const problems = [];
+  doc.incidents.forEach((incident, n) => {
+    if (!incident || typeof incident !== 'object' || Array.isArray(incident)) { problems.push(`incident ${n}: not an object`); return; }
+    for (const key of ['target_sha', 'head_sha', 'execution_head', 'revert_sha'].filter(k => Object.hasOwn(incident, k))) {
+      if (!shaOK(incident[key])) problems.push(`incident ${n}: ${key} is not a commit SHA`);
+    }
+    if (Object.hasOwn(incident, 'revert_pr') && !(Number.isSafeInteger(incident.revert_pr) && incident.revert_pr > 0)) {
+      problems.push(`incident ${n}: revert_pr is not a pull request number`);
+    }
+  });
+  return problems;
+}
+
 export function recoveryAttribution(previous, origin) {
   const current = typeof origin === 'string' ? { trigger: origin } : origin;
   const priorHuman = previous?.detected_at && !(previous.human_interventions === 0 && automatedDecisionOrigin(previous)) ? 1 : 0;
@@ -478,6 +496,9 @@ async function main() {
     if (!row) { row = { id: c.id, run_id: c.run_id, horizon_days: c.horizon_days, intent: c }; ledger.contracts.push(row); }
     row.delivery ??= await delivery(c, run);
     if (!row.delivery) continue;
+    // The ledger's merge SHA reaches git diff below as a revision, before recoveryPlan checks its shape. A value
+    // like --output=<path> is read as an option there (audit 2026-11-10); the monitor itself writes only SHAs.
+    if (!shaOK(row.delivery.merge_sha)) { warnings.push({ id: c.id, reasons: ['invalid delivery merge_sha'] }); continue; }
     if (c.selection) strategy = recordSelection(strategy, c.id, c.selection);
     if (!verifiedSettlement(row)) row.settlement = settle(c, row.delivery, ctx);
     const merge = row.delivery.merge_sha;
@@ -496,6 +517,8 @@ async function main() {
     if (incident?.revert_pr && incident.state !== 'recovered') {
       const pr = api(`pulls/${incident.revert_pr}`);
       if (pr.merged && (await deployment(pr.merge_commit_sha))?.conclusion === 'success') {
+        // Same shape check as verifyRollback, before these values reach git fetch (audit 2026-11-10).
+        assert(shaOK(pr.head.sha) && shaOK(incident.execution_head) && shaOK(incident.target_sha), 'rollback commits required');
         git('fetch', 'origin', pr.head.sha, incident.execution_head);
         verifyRollback(incident, pr.head.sha, c.touches.filter(staticPath));
         const checks = decisionCheckRuns(pr.head.sha, 'seo-check');
@@ -1050,14 +1073,85 @@ async function selftest() {
       fs.rmSync(publicationTest, { recursive: true });
     }
   } finally { fs.rmSync(dir, { recursive: true }); }
+  // Audit 2026-11-10: ledger values reach git only as commit SHAs. --check holds the recovery ledger to the
+  // shapes the monitor writes; fields absent at an earlier state are fine.
+  const sha = ch => ch.repeat(40);
+  const observing = { contract_id: 'x', state: 'observing', head_sha: sha('b'), target_sha: sha('a'), probes: [] };
+  const recovered = { ...observing, state: 'recovered', execution_head: sha('b'), revert_pr: 12, revert_sha: sha('c') };
+  assert.deepEqual(recoveryLedgerProblems({ incidents: [] }), []);
+  assert.deepEqual(recoveryLedgerProblems({ incidents: [observing, recovered] }), [], 'the shapes the monitor writes pass');
+  assert.deepEqual(recoveryLedgerProblems({ incidents: [{ ...recovered, execution_head: '--output=x', revert_pr: 0 }, null] }),
+    ['incident 0: execution_head is not a commit SHA', 'incident 0: revert_pr is not a pull request number', 'incident 1: not an object']);
+  assert.deepEqual(recoveryLedgerProblems({ incidents: [{ ...observing, target_sha: null, head_sha: 'main' }] }),
+    ['incident 0: target_sha is not a commit SHA', 'incident 0: head_sha is not a commit SHA']);
+  assert.deepEqual(recoveryLedgerProblems({}), ['incidents must be a list']);
+  // The production entry point (dry run, GitHub replaced) over ledgers that carry option-shaped values.
+  const shapes = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'decision-ledger-shape-test-')));
+  try {
+    const sg = (...a) => execFileSync('git', a, { cwd: shapes, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+    const put = (file, value) => { fs.mkdirSync(path.dirname(path.join(shapes, file)), { recursive: true }); fs.writeFileSync(path.join(shapes, file), JSON.stringify(value, null, 2) + '\n'); };
+    fs.cpSync(path.join(ROOT, 'scripts'), path.join(shapes, 'scripts'), { recursive: true });
+    const metric = { id: 'shipping_day_rate', tier: 'A', approved_by: 'test-owner', approved_at: '2026-08-01', direction: 'up',
+      null_model: { kind: 'trailing_median', window_days: 3 } };
+    const intent = { id: 'shape-test', run_id: 'shape-run', metric: metric.id, created_at: '2026-09-04T00:00:00.000Z', metric_policy_hash: hash(metric),
+      horizon_days: 1, baseline: 0, null_model: { kind: 'trailing_median', value: 0 }, predicted_delta: .1, p: .8, rank_gap: .1,
+      counterfactual: { id: 'runner-up', reason: 'Independent candidate comparison' },
+      eligibility: { criteria: Object.fromEntries(['a', 'b', 'c', 'd', 'e'].map(k => [k, { result: 'pass' }])), reversibility_class: 'R0' },
+      touches: ['index.html'], max_changed_lines: 100, max_binary_bytes: 0, predicted_usd: 0 };
+    assert.deepEqual(contractProblems(intent, { metrics: [metric] }), [], 'fixture: a valid declaration');
+    put('data/emergency-stop.json', { stopped: false, agents: { act: { stopped: false } } });
+    put('data/value-metrics.json', { metrics: [metric] });
+    put('data/autopilot-runs.json', { runs: [{ run_id: intent.run_id, date_jst: '2026-09-04', outcome: 'shipped', lane: 'A', action: 'refresh', pr: 7 }] });
+    put('data/autopilot-cost.json', { runs: [] });
+    put('data/decision-review.json', { selections: [] });
+    put(`data/decision-intents/${intent.id}.json`, intent);
+    const bin = path.join(shapes, 'bin'); fs.mkdirSync(bin);
+    // gh answers only the routes a test names (SHAPE_GH: route fragment -> JSON); any other call fails the run.
+    fs.writeFileSync(path.join(bin, 'gh'), `#!${process.execPath}\nconst route = process.argv.at(-1);\n`
+      + `for (const [part, value] of Object.entries(JSON.parse(process.env.SHAPE_GH))) if (route.includes(part)) { console.log(JSON.stringify(value)); process.exit(0); }\n`
+      + `console.error('unexpected gh route: ' + route); process.exit(1);\n`, { mode: 0o700 });
+    const monitor = (ledgers, replies = {}, args = []) => {
+      put('data/value-contracts.json', { contracts: [{ id: intent.id, run_id: intent.run_id, horizon_days: 1, intent,
+        delivery: { verified: true, intent_hash: hash(intent), merge_sha: sha('a'), deployed_at: new Date().toISOString(), pr: 7, ...ledgers.delivery } }] });
+      put('data/decision-recovery.json', { incidents: ledgers.incidents ?? [] });
+      sg('add', '-A'); sg('commit', '-q', '--allow-empty', '-m', 'ledger shape fixture');
+      const env = { ...process.env, PATH: `${bin}:${process.env.PATH}`, GITHUB_EVENT_NAME: 'workflow_dispatch', SHAPE_GH: JSON.stringify(replies) };
+      delete env.DECISION_MONITOR_NATIVE_TIMER;
+      try {
+        return { code: 0, stdout: execFileSync(process.execPath, [path.join(shapes, 'scripts/decision-monitor.mjs'), ...args], { cwd: shapes, env, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }) };
+      } catch (error) { return { code: error.status, stdout: error.stdout, stderr: error.stderr }; }
+    };
+    sg('init'); sg('config', 'user.name', 'Test'); sg('config', 'user.email', 'test@example.invalid');
+    // (1) data/value-contracts.json: a merge SHA shaped like a git option is a warning (the run is red, nothing is
+    // saved), never a git argument. Unfixed, git diff took it as --output and wrote this file.
+    const written = path.join(shapes, 'written-by-git');
+    const optionMerge = monitor({ delivery: { merge_sha: `--output=${written}` } });
+    assert.equal(fs.existsSync(written), false, 'a ledger value must not reach git as an option');
+    assert.equal(optionMerge.code, 1);
+    assert.deepEqual(JSON.parse(optionMerge.stdout).warnings, [{ id: intent.id, reasons: ['invalid delivery merge_sha'] }]);
+    assert.match(optionMerge.stderr, /invalid declarations require attention/);
+    // (2) data/decision-recovery.json: a rollback execution head of the wrong shape stops before git fetch.
+    const pending = { contract_id: intent.id, state: 'revert_pending', mode: 'production', target_sha: sha('a'), head_sha: sha('d'),
+      execution_head: '--upload-pack=not-a-commit', revert_pr: 8 };
+    const replies = { 'pulls/8': { number: 8, merged: true, merge_commit_sha: sha('b'), head: { sha: sha('c') } },
+      '/check-runs': { total_count: 1, check_runs: [{ id: 1, name: 'Cloudflare Pages', head_sha: sha('b'), conclusion: 'success' }] } };
+    const optionHead = monitor({ incidents: [pending] }, replies);
+    assert.equal(optionHead.code, 1);
+    assert.equal(optionHead.stderr.trim(), 'rollback commits required', 'the shape check precedes git fetch');
+    // (3) The actual --check reads the same ledger.
+    const check = monitor({ incidents: [pending] }, {}, ['--check']);
+    assert.equal(check.code, 1);
+    assert.match(check.stderr, /incident 0: execution_head is not a commit SHA/);
+    assert.equal(monitor({ incidents: [{ ...pending, execution_head: sha('d') }] }, {}, ['--check']).code, 0);
+  } finally { fs.rmSync(shapes, { recursive: true }); }
   console.log('decision-monitor: repeated probes, safe scope, stop, stale HEAD, and real Git recovery drill passed');
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   if (process.argv.includes('--selftest')) selftest().catch(e => { console.error(e); process.exitCode = 1; });
   else if (process.argv.includes('--publish-report')) publishReport().then(() => console.log('Public operating report synchronized.')).catch(e => { console.error(e.message); process.exitCode = 1; });
   else if (process.argv.includes('--check')) {
-    const d = read('data/decision-recovery.json');
-    assert(Array.isArray(d.incidents));
-    console.log('decision recovery ledger OK');
+    const problems = recoveryLedgerProblems(read('data/decision-recovery.json'));
+    if (problems.length) { console.error(`decision recovery ledger:\n${problems.join('\n')}`); process.exitCode = 1; }
+    else console.log('decision recovery ledger OK');
   } else main().catch(e => { console.error(e.message); process.exitCode = 1; });
 }
