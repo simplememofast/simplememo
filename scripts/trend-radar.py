@@ -34,7 +34,12 @@ URL_MAX = 2048  # 日本語スラッグを percent-encode した正規の URL �
 IGNORABLE = {'\u034f', '\u115f', '\u1160', '\u17b4', '\u17b5', '\u3164', '\uffa0'}
 BLANK = {'\u2800'}  # BRAILLE PATTERN BLANK (So) draws nothing: it becomes a space
 ZWJ = '\u200d'
-SELECTORS_MAX = 8  # per title; real titles carry a few (VS16 after an emoji, an IVS)
+PRESENTATION = ('\ufe0e', '\ufe0f')  # VS15 / VS16: the only selectors a title keeps
+# Bases that take VS15 / VS16 besides the symbols (S*): emoji-variation-sequences.txt
+PRESENTATION_BASES = set('#*0123456789\u203c\u2049\u2139\u3030\u303d')
+# Per title, on top of the one-per-emoji-base rule (defence in depth). Real titles carry a
+# few VS16, each after an emoji; no committed title reaches this cap.
+SELECTORS_MAX = 8
 
 
 def _is_variation_selector(ch):
@@ -44,11 +49,10 @@ def _is_variation_selector(ch):
             or 0xFE00 <= o <= 0xFE0F or 0xE0100 <= o <= 0xE01EF)
 
 
-def _visible_base(ch):
-    """Drawn on its own: a letter, number, symbol or punctuation mark. Marks, format
-    characters, spaces, selectors and the blank code points are not bases."""
-    return (unicodedata.category(ch)[0] in 'LNSP'
-            and ch not in IGNORABLE and ch not in BLANK)
+def _presentation_base(ch):
+    """Takes a VS15 / VS16: a symbol (S*) or a listed emoji base. A letter (kanji, kana,
+    Latin), a space, a mark, a format character, a selector and the blank are not."""
+    return (unicodedata.category(ch)[0] == 'S' or ch in PRESENTATION_BASES) and ch not in BLANK
 
 
 def _emoji(ch):
@@ -59,19 +63,23 @@ def clean_title(value, limit=TITLE_MAX):
     """Controls, line separators and the braille blank become a space; format /
     private-use / unassigned code points (bidi overrides, zero-width spaces, tag
     characters, ...) and the other code points that render as nothing (IGNORABLE) are
-    removed. Only a drawn character can take a selector: a variation selector (including
-    the Mongolian FVS) is kept only right after a visible base character (one VS16 after
-    an emoji, one IVS after a kanji), and at most SELECTORS_MAX per title. A ZWJ is kept
-    only between two emoji (an emoji, or an emoji and its VS15 / VS16, before it; an
-    emoji after it). Selectors interleaved with ZWJ, CGJ or combining marks therefore
-    never form a run. Ordinary spacing (including U+3000) is kept. limit=None returns the
-    whole title (parse matches on it; collect cuts what it stores).
+    removed. Variation selectors are removed (VS1-14, VS17-256 such as the ideographic
+    IVS, and the Mongolian FVS), with one exception emoji need: one VS15 / VS16 directly
+    after an emoji or symbol base (the code point right before it in the title, so never
+    after a kanji, kana, Latin letter, space, ZWJ, CGJ, combining mark or another
+    selector), and at most SELECTORS_MAX per title. A title therefore carries no more
+    selectors than it has emoji bases, and selectors interleaved with ZWJ, CGJ or
+    combining marks never survive. A kanji keeps its base character and loses its IVS.
+    A ZWJ is kept only between two emoji (an emoji, or an emoji and its VS15 / VS16,
+    before it; an emoji after it). Ordinary spacing (including U+3000) is kept.
+    limit=None returns the whole title (parse matches on it; collect cuts what it stores).
 
     "Unassigned" (Cn) is judged by the running interpreter's Unicode tables, on purpose:
     a code point the runner does not know may be a format character newer than its tables,
     and the unassigned planes could carry hidden bytes the way selector runs do. The cost
     is that an emoji newer than the runner's tables (U+1FAE9 under Python 3.12 / 3.13) is
     dropped from the title. A title that is empty once cleaned drops only its row (parse)."""
+    chars = value or ''
     out = []
     selectors = 0
 
@@ -80,14 +88,19 @@ def clean_title(value, limit=TITLE_MAX):
             out.pop()  # a ZWJ stays only when an emoji follows it
         out.append(ch)
 
-    for ch in value or '':
+    for i, ch in enumerate(chars):
         cat = unicodedata.category(ch)
         if cat in ('Cc', 'Zl', 'Zp') or ch in BLANK:
             keep(' ')
         elif ch in IGNORABLE:
             continue
         elif _is_variation_selector(ch):
-            if out and _visible_base(out[-1]) and selectors < SELECTORS_MAX:
+            # Judged on the raw previous code point, so nothing removed in between (a CGJ,
+            # a zero-width space) lets a selector reach a base; a selector is not a base,
+            # so a second one in a row goes. A base is always kept, so out[-1] is it.
+            prev = chars[i - 1] if i else ''
+            if (ch in PRESENTATION and prev and _presentation_base(prev)
+                    and out and out[-1] == prev and selectors < SELECTORS_MAX):
                 out.append(ch)
                 selectors += 1
         elif ch == ZWJ:
