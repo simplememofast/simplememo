@@ -10,6 +10,21 @@ spec.loader.exec_module(radar)
 
 
 class RadarTests(unittest.TestCase):
+    def test_titles_are_bounded_and_invisible_characters_removed(self):
+        # 2026-11-10 audit: third-party titles are stored for a session that has Bash.
+        title = 'LINE メモ\u202e終了\u200b\nnext line\u3000全角' + 'x' * 5000
+        rss = f'<rss><channel><item><title>{title}</title><link>https://example.org/a</link></item></channel></rss>'
+        rows = radar.parse('hatena', rss)
+        t = rows[0]['title']
+        self.assertLessEqual(len(t), radar.TITLE_MAX)
+        self.assertFalse(any(radar.unicodedata.category(ch) in ('Cc', 'Cf') for ch in t))
+        self.assertIn('\u3000全角', t)
+        self.assertTrue(radar.RELEVANT.search(t) and radar.CHANGES.search(t))
+        for bad in ['https://example.org/' + 'a' * 2049, 'https://example.org/a b', 'javascript:alert(1)']:
+            rss = f'<rss><channel><item><title>メモ</title><link>{bad}</link></item></channel></rss>'
+            with self.assertRaises(ValueError):
+                radar.parse('hatena', rss)
+
     @staticmethod
     def feed(url):
         if url == radar.SOURCES['appstore']:

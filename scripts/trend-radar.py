@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import re
+import unicodedata
 import urllib.request
 import xml.etree.ElementTree as ET
 
@@ -18,6 +19,33 @@ SOURCES = {
 }
 RELEVANT = re.compile(r'メモ|ノート|Obsidian|Notion|Evernote|Google Keep|LINE|リマインダー|カレンダー|音声|レコーダー|iPhone|Apple Watch', re.I)
 CHANGES = re.compile(r'終了|値上げ|障害|仕様変更|廃止|サービス停止')
+
+
+# 第三者の題名と URL を、保存する前に整える（2026-11-10 監査）。題名はページの作者や
+# アプリの開発者が決められ、それを Bash を持つセッションが読む。長さの上限と見えない
+# 文字の除去だけを機械で掛ける（命令めいた文そのものは、200字でも運べる）。
+TITLE_MAX = 200
+URL_MAX = 2048  # 日本語スラッグを percent-encode した正規の URL も通す
+
+
+def clean_title(value):
+    """Controls and line separators become a space; format / private-use / unassigned
+    code points (bidi overrides, zero-width spaces, …) are removed, except ZWJ, which
+    emoji sequences need. Ordinary spacing (including U+3000) is kept."""
+    out = []
+    for ch in value or '':
+        cat = unicodedata.category(ch)
+        if cat in ('Cc', 'Zl', 'Zp'):
+            out.append(' ')
+        elif cat not in ('Cf', 'Co', 'Cn', 'Cs') or ch == '\u200d':
+            out.append(ch)
+    return ''.join(out).strip()[:TITLE_MAX]
+
+
+def valid_url(value):
+    return (isinstance(value, str) and len(value) <= URL_MAX
+            and value.startswith(('https://', 'http://'))
+            and not any(ch.isspace() or unicodedata.category(ch)[0] in 'CZ' for ch in value))
 
 
 def parse(source, raw):
@@ -34,7 +62,9 @@ def parse(source, raw):
             fields = {e.tag.split('}')[-1]: e.text or '' for e in item}
             rows.append({'id': fields.get('link'), 'title': fields.get('title'),
                          'url': fields.get('link')})
-    if not rows or any(not r['id'] or not r['title'] or not r['url'].startswith(('https://', 'http://')) for r in rows):
+    for r in rows:
+        r['title'] = clean_title(r['title'])
+    if not rows or any(not r['id'] or not r['title'] or not valid_url(r['url']) for r in rows):
         raise ValueError('Empty or invalid source; do not overwrite the last successful observation')
     return rows
 
