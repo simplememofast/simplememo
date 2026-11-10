@@ -97,6 +97,36 @@ class RadarTests(unittest.TestCase):
         self.assertTrue(radar.valid_url('https://apps.apple.com/jp/app/%E3%83%A1%E3%83%A2/id1?uo=2'))
         self.assertTrue(radar.valid_url('https://example.org/' + 'a' * (radar.URL_MAX - 20)))
 
+    def test_an_app_store_id_that_is_not_ascii_digits_drops_its_row(self):
+        # The App Store id (im:id) is the app's numeric Apple ID. A letter, a non-ASCII digit
+        # (ARABIC-INDIC DIGIT ONE U+0661 or FULLWIDTH DIGIT ONE U+FF11, which str.isdigit()
+        # and the regex digit class both accept), a trailing newline or more than 20 digits
+        # drops only its row; the source stays ok and the other rows keep their ranks.
+        def feed(middle_id):
+            ids = [('100', 'メモA'), (middle_id, 'メモB'), ('300', 'メモC')]
+            return json.dumps({'feed': {'entry': [
+                {'id': {'attributes': {'im:id': i}, 'label': f'https://example.org/app{n}'},
+                 'im:name': {'label': name}} for n, (i, name) in enumerate(ids, 1)]}})
+        for bad in ['12a4', 'id123', '1' + chr(0x0661), chr(0x0661) * 3, chr(0xFF11),
+                    '123' + chr(10), '1' * 21]:
+            self.assertFalse(radar.valid_appstore_id(bad), ascii(bad))
+            raw = feed(bad)
+            rows, dropped = radar.parse('appstore', raw)
+            self.assertEqual(([r['id'] for r in rows], [r['rank'] for r in rows], dropped),
+                             (['100', '300'], [1, 3], 1), ascii(bad))
+            res = radar.collect({}, lambda url, raw=raw: raw if url == radar.SOURCES['appstore'] else self.feed(url))
+            src = res['sources']['appstore']
+            self.assertEqual((res['status'], src['status'], src['dropped_rows']), ('ok', 'ok', 1), ascii(bad))
+            self.assertEqual([r['id'] for r in src['rows']], ['100', '300'], ascii(bad))
+        # 1 to 20 ASCII digits pass; every committed App Store id has 9 or 10.
+        for good in ['1', '1234567890', '9' * 20]:
+            self.assertTrue(radar.valid_appstore_id(good), good)
+            self.assertEqual(radar.parse('appstore', feed(good))[1], 0, good)
+        # An RSS row's id is its URL, not an App Store id, so the digit rule does not apply.
+        rss = '<rss><channel><item><title>メモ</title><link>https://example.org/a</link></item></channel></rss>'
+        rows, dropped = radar.parse('hatena', rss)
+        self.assertEqual((rows[0]['id'], dropped), ('https://example.org/a', 0))
+
     def test_no_hit_rule_carries_dropped_rows_in_the_prompt_and_the_runbook(self):
         # Runbook §6 tells the session to run the prompt verbatim, so the two no-hit rules
         # must agree: with 'それ以上書かない' alone, a dropped row (perhaps a hit) reads as

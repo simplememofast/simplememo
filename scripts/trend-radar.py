@@ -164,6 +164,17 @@ def valid_url(value):
             and not any(ch.isspace() or unicodedata.category(ch)[0] in 'CZ' for ch in value))
 
 
+# An App Store row's id is the app's numeric Apple ID (im:id). [0-9], not \d: \d also
+# matches non-ASCII digits such as ARABIC-INDIC DIGIT ONE (U+0661). Every App Store id in
+# the committed data/trend-radar.json is ASCII digits.
+APPSTORE_ID = re.compile(r'[0-9]{1,20}')
+
+
+def valid_appstore_id(value):
+    """1 to 20 ASCII digits and nothing else. A failing id drops only its row (parse)."""
+    return isinstance(value, str) and APPSTORE_ID.fullmatch(value) is not None
+
+
 def parse(source, raw):
     if source == 'appstore':
         entries = json.loads(raw)['feed']['entry']
@@ -181,9 +192,11 @@ def parse(source, raw):
     for r in rows:
         r['title'] = clean_title(r['title'], limit=None)  # matched whole; cut in collect()
     # Check each row, not the source: one third-party row (a URL over URL_MAX, a title of
-    # invisible characters) must not fail the whole source, so that row is dropped and
-    # counted. Only an empty feed, or one where most rows are invalid, is a source failure.
-    kept = [r for r in rows if r['id'] and r['title'] and valid_url(r['url'])]
+    # invisible characters, an App Store id that is not 1 to 20 ASCII digits) must not fail
+    # the whole source, so that row is dropped and counted. Only an empty feed, or one where
+    # most rows are invalid, is a source failure.
+    kept = [r for r in rows if r['id'] and r['title'] and valid_url(r['url'])
+            and (source != 'appstore' or valid_appstore_id(r['id']))]
     dropped = len(rows) - len(kept)
     if not kept or 2 * dropped > len(rows):
         raise ValueError('Empty or invalid source; do not overwrite the last successful observation')
