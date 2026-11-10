@@ -4,6 +4,11 @@ export const SCHEDULE_EXPECTATIONS = Object.freeze([
   Object.freeze({ path: '.github/workflows/decision-monitor.yml', max_silence_minutes: 180 }),
   // Daily schedule: one 24-hour interval plus four hours for delayed starts.
   Object.freeze({ path: '.github/workflows/main-daily-validation.yml', max_silence_minutes: 1680 }),
+  // Daily date lookahead (2026-11-10). A lookahead that silently stops looks the same as
+  // "no deadline within the horizon", so its own liveness is tracked here. Kept before the
+  // acquisition entry: index 1 stays the daily selftest case and acquisition stays last
+  // (growth/lib/acquisition-handoff.test.mjs reads the last entry).
+  Object.freeze({ path: '.github/workflows/date-lookahead.yml', max_silence_minutes: 1680 }),
   // Daily acquisition collection. Appended last: selftest probes index 1 as the daily case.
   // Stop it through data/emergency-stop.json agents.acquisition, not "Disable workflow".
   Object.freeze({ path: '.github/workflows/acquisition-daily.yml', max_silence_minutes: 1680 }),

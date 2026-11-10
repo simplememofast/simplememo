@@ -880,6 +880,15 @@ jobs:
       - name: Health intake
         run: node scripts/health-intake.mjs --check
 
+      # 【日付の先読み】暦が進むだけで落ちる検査を、落ちる前に見つける道具
+      # （.github/workflows/date-lookahead.yml が毎日回す）。ここで見るのは道具の側だけ:
+      # 境目の計算・分類・台帳の形。**先読みそのものはここでは回さない**（全検査をもう1周する）。
+      # 除外の台帳（known_artifacts）は、理由の無い行・実在しない検査の行で落ちる。
+      - name: Date lookahead (self-test and ledger)
+        run: |
+          node scripts/date-lookahead.mjs --selftest
+          node scripts/date-lookahead.mjs --check
+
       - name: Autopilot action ledger
         run: |
           node scripts/autopilot-act.mjs --selftest
