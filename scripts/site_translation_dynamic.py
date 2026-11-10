@@ -48,7 +48,18 @@ def translated_message(binding, locale, catalog):
         # decoded once. Protected markup (tags, attributes, code/kbd/pre and
         # other skipped elements, comments) keeps its source encoding: decoding
         # it would turn escaped sample text into live markup.
-        changes.append((*unit['range'], html.unescape(value) if is_text else value))
+        if is_text:
+            value = html.unescape(value)
+            # validate() looks at the translation with its ZXQ markers removed,
+            # so `<ZXQ0000 onmouseover=…>` passes there and only becomes
+            # `<brand onmouseover=…>` once the token value is restored. Escaped
+            # source text (`&lt;x …&gt;`) decodes the same way. A #text unit
+            # never holds markup (its tokens never start with '<'), and these
+            # messages reach innerHTML, so check the decoded value itself.
+            # `{` covers `<{0}`, which format() fills with a parameter.
+            if re.search(r'<[/!?A-Za-z{]', value):
+                raise ValueError('Invalid dynamic translation: ' + key + ': unknown_markup')
+        changes.append((*unit['range'], value))
     for start, end, value in reversed(changes):
         source = source[:start] + value + source[end:]
     return source

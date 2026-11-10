@@ -9,8 +9,8 @@ from unittest.mock import patch
 
 import build_site_translations as build
 import site_translation_dynamic as dynamic
-from site_translation_units import collect, collect_extra, prepare_source, examples_for
-from site_translation_validation import render
+from site_translation_units import collect, collect_extra, prepare_source, examples_for, source_language
+from site_translation_validation import render, validate
 from site_translation_faq import synchronize
 from faq_question_audit import audit_page
 
@@ -466,6 +466,62 @@ class TranslationPipelineTests(unittest.TestCase):
         source = '<pre id="demo-note">' + fragment + '</pre>'
         self.assertEqual(dynamic.initial_demo_note(source, binding['file'], 'en', catalog, [binding]),
                          '<pre id="demo-note">' + actual + '</pre>')
+
+    def test_program_block_unit_keeps_skipped_child_encoded(self):
+        # A skipped element inside an element unit is a raw token of that unit.
+        # Element units are not decoded, so the escaped sample stays text.
+        fragment = '<li>リンク <code>&lt;img src=x onerror=1&gt;</code> です</li>'
+        [unit] = collect(fragment)
+        self.assertEqual(unit['tag'], 'li')
+        catalog = {'ja:' + unit['id']: {'source':unit['text'], 'text':'Link ZXQ0000 here'}}
+        binding = {'file':'obsidian/index.html', 'source':'ja', 'text':fragment}
+        actual = dynamic.translated_message(binding, 'en', catalog)
+        self.assertEqual(actual, '<li>Link <code>&lt;img src=x onerror=1&gt;</code> here</li>')
+        self.assertNotIn('<img', actual)
+
+    def test_program_text_cannot_decode_into_markup(self):
+        # validate() checks a translation with its ZXQ markers removed, so a '<'
+        # placed before a protected token passes there; escaped source text
+        # passes too. Both would only become markup after the token value is
+        # restored and the #text unit is decoded, and these messages reach
+        # innerHTML. The decoded value is checked instead.
+        def catalog_for(fragment, translations):
+            catalog = {}
+            for unit in collect(fragment):
+                language = source_language(unit, 'ja')
+                if language != 'en':
+                    catalog[language + ':' + unit['id']] = {'source':unit['text'], 'text':translations[unit['text']]}
+            return catalog
+        cases = (
+            # Catalog only: a '<' placed before a brand, an address or a placeholder.
+            ('<span class="c">tags:</span> Obsidian メモ\n', {'ZXQ0000 メモ':'<ZXQ0000 onmouseover=1> note'}),
+            ('<span class="c">From:</span> 送信元 noreply@mail.simplememofast.com\n',
+             {'送信元 ZXQ0000':'Sender <ZXQ0000 onmouseover=1>'}),
+            ('保存 {0} 件', {'保存 ZXQ0000 件':'<ZXQ0000 saved'}),
+            # Source only: escaped sample text in its own English text node.
+            ('<span class="c">tags:</span> 買い物\n<span class="c">---</span>\n&lt;Obsidian onmouseover=1&gt;\n',
+             {'買い物':'Shopping'}),
+        )
+        for fragment, translations in cases:
+            catalog = catalog_for(fragment, translations)
+            for unit in collect(fragment):
+                entry = catalog.get('ja:' + unit['id'])
+                if entry:
+                    # Precondition of this case, not a requirement on validate().
+                    self.assertIsNone(validate(unit['text'], entry['text'], 'en'),
+                                      'validate() now rejects this case; it no longer reaches the decoded check')
+            binding = {'file':'ai-tags/index.html', 'source':'ja', 'text':fragment}
+            with self.subTest(fragment=fragment):
+                with self.assertRaisesRegex(ValueError, 'Invalid dynamic translation: .*: unknown_markup'):
+                    dynamic.translated_message(binding, 'en', catalog)
+                with self.assertRaisesRegex(ValueError, 'unknown_markup'):
+                    dynamic.initial_demo_note('<pre id="demo-note">' + fragment + '</pre>',
+                                              binding['file'], 'en', catalog, [binding])
+        # A '<' that cannot start a tag is ordinary text and is still decoded once.
+        fragment = '<span class="c">tags:</span> 買い物\n<span class="c">---</span>\n1 &lt; 2 &amp;&amp; 3 &lt;3\n'
+        binding = {'file':'ai-tags/index.html', 'source':'ja', 'text':fragment}
+        self.assertEqual(dynamic.translated_message(binding, 'en', catalog_for(fragment, {'買い物':'Shopping'})),
+                         '<span class="c">tags:</span> Shopping\n<span class="c">---</span>\n1 < 2 && 3 <3\n')
 
     def test_initial_ai_tags_note_rejects_missing_or_changed_approval(self):
         source = '<pre id="demo-note">本文</pre>'

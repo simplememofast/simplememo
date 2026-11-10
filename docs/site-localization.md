@@ -122,6 +122,10 @@ Original app screenshots and evidence images remain unchanged.
 hashes and exact ranges. Changed scripts fail until their bindings are reviewed
 and updated. Parameterized messages preserve the original expressions; user
 notes, recipients and other form values are not translation inputs.
+Some pages insert these messages as HTML. Translated text is decoded once and
+fails the build if the decoded value could open markup (`<` followed by a
+letter, `/`, `!`, `?` or `{`); tags and skipped elements such as `<code>` keep
+their source encoding.
 
 Generated scripts in `js/i18n/LOCALE/` are named by their final content hashes.
 Module imports are rewritten before hashing. Generated HTML loads only the
