@@ -52,6 +52,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -249,11 +250,30 @@ export function internalPrefixes(text) {
   return [...m[1].matchAll(/"([^"]+)"/g)].map((x) => x[1]);
 }
 
-/** 配信対象になりうるトップレベルのディレクトリ。ドット始まりと node_modules は除く。 */
-export function topLevelDirs(root = ROOT, readdir = fs.readdirSync) {
-  return readdir(root, { withFileTypes: true })
+/**
+ * 配信対象になりうるトップレベルのディレクトリ。
+ *
+ * ドット始まりは**追跡されているものだけ**を数える（2026-11-10 監査）。以前は
+ * ドット始まりを丸ごと除いていたので、2026-09-13 に足した `.agents/` が分類されない
+ * まま配信された —— Pages のアップロードは `.git` 以外のドット始まりを除かない。
+ * ディスクから数えると手元の `.venv` などまで拾うので、追跡ファイルから求める。
+ * git が読めないときは落とす（黙って空にすると、この検査が無力になる）。
+ */
+export function trackedDotDirs(root = ROOT, run = execFileSync) {
+  const out = run('git', ['-C', root, 'ls-files', '-z'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  const dirs = new Set();
+  for (const f of out.split('\0')) {
+    const i = f.indexOf('/');
+    if (i > 0 && f.startsWith('.')) dirs.add(f.slice(0, i));
+  }
+  return [...dirs];
+}
+
+export function topLevelDirs(root = ROOT, readdir = fs.readdirSync, dotDirs = trackedDotDirs) {
+  const plain = readdir(root, { withFileTypes: true })
     .filter((e) => e.isDirectory() && !e.name.startsWith('.') && e.name !== 'node_modules')
-    .map((e) => e.name).sort();
+    .map((e) => e.name);
+  return [...new Set([...plain, ...dotDirs(root)])].sort();
 }
 
 export function validate(policy, { files, referenced }) {
@@ -325,6 +345,17 @@ function selftest() {
     undeclaredDirs(['blog', 'fixtures'], ['/docs', '/fixtures'], ['blog']).length === 0);
   t('台帳の served_dirs にあれば通る',
     undeclaredDirs(['blog', 'newpage'], ['/docs'], ['blog', 'newpage']).length === 0);
+  t('**追跡されたドット始まりのディレクトリも分類を要求する**（.agents/ が素通りした形）', (() => {
+    const readdir = () => [{ name: 'blog', isDirectory: () => true }, { name: '.venv', isDirectory: () => true }];
+    const run = () => ['blog/a.html', '.agents/skills/x/SKILL.md', '.well-known/aasa', '.gitignore', ''].join('\0');
+    const dirs = topLevelDirs('/x', readdir, (root) => trackedDotDirs(root, run));
+    return dirs.join() === '.agents,.well-known,blog'
+      && undeclaredDirs(dirs, ['/.agents'], ['blog']).join() === '.well-known'
+      && undeclaredDirs(dirs, ['/.agents'], ['blog', '.well-known']).length === 0;
+  })());
+  t('git が読めないときは黙って空にしない', (() => {
+    try { trackedDotDirs('/x', () => { throw new Error('no git'); }); return false; } catch { return true; }
+  })());
   t('**INTERNAL_PREFIXES を実ファイルから読む**（推測しない）', (() => {
     const got = internalPrefixes('const INTERNAL_PREFIXES = ["/a", "/b"];');
     return got && got.join() === '/a,/b' && internalPrefixes('なにも無い') === null;

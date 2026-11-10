@@ -383,6 +383,14 @@ await notFound("/CLAUDE.md");
 await notFound("/growth/data/gsc/2026-08-09/queries.json");
 await notFound("//growth//experiments/experiments.json");
 await notFound("/growth/");
+// Dot directories are uploaded by Pages too (2026-11-10 監査). Workflows and
+// agent instructions are not part of the site; /.well-known stays served.
+await notFound("/.github/workflows/auto-merge.yml");
+await notFound("//.github//workflows/auto-merge.yml");
+await notFound("/.agents/skills/autonomy-audit/SKILL.md");
+await notFound("/%2Egithub/workflows/auto-merge.yml");
+await notFound(PAGES_ALIAS + "/.github/workflows/auto-merge.yml");
+await servesDirectly("/.well-known/apple-app-site-association");
 
 // data/*.json のうち「配信しない」と決めたもの。
 //

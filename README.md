@@ -35,7 +35,7 @@ simplememo/
 ├── js/                   # small scripts, e.g. js/analytics.js (deferred Google Analytics 4 loader)
 ├── functions/            # Pages Functions; _middleware.js handles redirects and returns 404 for internal paths
 ├── _headers, _redirects  # Cloudflare Pages configuration
-├── scripts/ tools/ docs/ growth/ fixtures/   # repository-only working files (not served)
+├── scripts/ tools/ docs/ growth/ fixtures/ .github/ .agents/   # repository-only working files (not served)
 ├── CLAUDE.md             # working rules (not served)
 └── README.md             # this file (served at /README.md)
 ```

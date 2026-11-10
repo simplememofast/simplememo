@@ -530,6 +530,7 @@
     }
   },
   "served_dirs": [
+    ".well-known",
     "about",
     "admin",
     "ai-tags",
@@ -585,7 +586,7 @@
   "$served_dirs": [
     "**サイトが配信するトップレベルのディレクトリ。**scripts/check-publication.mjs が検査する。",
     "",
-    "遮断は functions/_middleware.js の INTERNAL_PREFIXES（/docs /scripts /tools /growth /fixtures /data/i18n）。",
+    "遮断は functions/_middleware.js の INTERNAL_PREFIXES（/docs /scripts /tools /growth /fixtures /data/i18n /.github /.agents）。",
     "ここに無く遮断にも無いディレクトリを置くと、検査が落ちる。",
     "[2026-10-07] 全公開ページの10言語対応として、既存英語記事の日本語版3ディレクトリと、英語がルートのMemo Inboxに対応するja/を配信対象へ追加。翻訳カタログは公開本文を元にしたビルド入力で、GitHubでは公開、サイトからは配信しない。",
     "",
@@ -595,6 +596,10 @@
     "",
     "`functions/` は配信されない（Pages が Functions として消費する。実測 404）が、",
     "遮断一覧には入れていない —— **遮断しているのではなく、そもそも静的配信の対象外**なので、",
-    "ここに「配信される」側として置いてある（実測に合わせる。名前と事実をずらさない）。"
+    "ここに「配信される」側として置いてある（実測に合わせる。名前と事実をずらさない）。",
+    "",
+    "[2026-11-10] 追跡されたドット始まりのディレクトリも検査の対象にした。以前は丸ごと除いていたので、",
+    "2026-09-13 に足した .agents/ が分類されないまま配信されていた（Pages は .git 以外のドット始まりを除かない）。",
+    ".github/ と .agents/ は遮断へ、.well-known/ は配信へ（apple-app-site-association。_headers が Content-Type を付けて配っている）。"
   ]
 }

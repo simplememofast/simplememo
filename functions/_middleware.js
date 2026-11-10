@@ -250,7 +250,12 @@ const HOST_ALIASES = new Set([
 // `noindex,nofollow` は索引だけを止める。配信を止めるのはここ。
 // Translation catalogs are build inputs; browsers use generated HTML and
 // localized JS. They remain readable in the public repository.
-const INTERNAL_PREFIXES = ["/docs", "/scripts", "/tools", "/growth", "/fixtures", "/data/i18n"];
+// 2026-11-10 監査: `/.github` と `/.agents` を追加。Pages のアップロードは
+// ドット始まりのディレクトリも除かない（`.well-known` が配信されるのはその
+// ためで、AASA は _headers が Content-Type を付けて配っている）。ワークフローと
+// エージェント向けの手順書はサイトの一部ではないので、他の作業ファイルと同じく
+// サイトからは配信しない。`.well-known` はここに入れない。
+const INTERNAL_PREFIXES = ["/docs", "/scripts", "/tools", "/growth", "/fixtures", "/data/i18n", "/.github", "/.agents"];
 
 // Referral/attribution params that carry no content meaning (step 1b).
 // Each one mints a distinct crawlable URL for the same page — GSC has
