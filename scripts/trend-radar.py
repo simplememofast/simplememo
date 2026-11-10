@@ -32,8 +32,13 @@ URL_MAX = 2048  # 日本語スラッグを percent-encode した正規の URL �
 # below misses them (Default_Ignorable_Code_Point outside Cf / Cn / the selectors):
 # Hangul fillers (Lo), COMBINING GRAPHEME JOINER and the Khmer inherent vowels (Mn).
 IGNORABLE = {'\u034f', '\u115f', '\u1160', '\u17b4', '\u17b5', '\u3164', '\uffa0'}
-BLANK = {'\u2800'}  # BRAILLE PATTERN BLANK (So) draws nothing: it becomes a space
+# Symbols (So) that draw nothing: BRAILLE PATTERN BLANK and MUSICAL SYMBOL NULL NOTEHEAD.
+# Each becomes a space, so it is never a selector base or a ZWJ end.
+BLANK = {'\u2800', '\U0001d159'}
 ZWJ = '\u200d'
+# Per title, like SELECTORS_MAX: a ZWJ draws nothing, so a title keeps only a few. No
+# committed title carries one; a family emoji uses 3.
+ZWJ_MAX = 8
 PRESENTATION = ('\ufe0e', '\ufe0f')  # VS15 / VS16: the only selectors a title keeps
 # Bases that take VS15 / VS16 besides the symbols (S*): emoji-variation-sequences.txt
 PRESENTATION_BASES = set('#*0123456789\u203c\u2049\u2139\u3030\u303d')
@@ -51,16 +56,21 @@ def _is_variation_selector(ch):
 
 def _presentation_base(ch):
     """Takes a VS15 / VS16: a symbol (S*) or a listed emoji base. A letter (kanji, kana,
-    Latin), a space, a mark, a format character, a selector and the blank are not."""
+    Latin), a space, a mark, a format character, a selector and the blanks are not."""
     return (unicodedata.category(ch)[0] == 'S' or ch in PRESENTATION_BASES) and ch not in BLANK
 
 
 def _emoji(ch):
-    return unicodedata.category(ch) in ('So', 'Sk') and ch not in BLANK
+    """What a ZWJ may join: a symbol (So) at U+2000 or above, where emoji are, or a
+    skin-tone modifier. Not ASCII ^ or ` (Sk), not ° or ©, and not a blank."""
+    o = ord(ch)
+    return (((unicodedata.category(ch) == 'So' and o >= 0x2000) or 0x1F3FB <= o <= 0x1F3FF)
+            and ch not in BLANK)
 
 
 def clean_title(value, limit=TITLE_MAX):
-    """Controls, line separators and the braille blank become a space; format /
+    """Controls, line separators and the blanks (U+2800 BRAILLE PATTERN BLANK and U+1D159
+    MUSICAL SYMBOL NULL NOTEHEAD, symbols that draw nothing) become a space; format /
     private-use / unassigned code points (bidi overrides, zero-width spaces, tag
     characters, ...) and the other code points that render as nothing (IGNORABLE) are
     removed. Variation selectors are removed (VS1-14, VS17-256 such as the ideographic
@@ -70,8 +80,10 @@ def clean_title(value, limit=TITLE_MAX):
     selector), and at most SELECTORS_MAX per title. A title therefore carries no more
     selectors than it has emoji bases, and selectors interleaved with ZWJ, CGJ or
     combining marks never survive. A kanji keeps its base character and loses its IVS.
-    A ZWJ is kept only between two emoji (an emoji, or an emoji and its VS15 / VS16,
-    before it; an emoji after it). Ordinary spacing (including U+3000) is kept.
+    A ZWJ is kept only between two emoji (_emoji: a symbol at U+2000 or above, or a
+    skin-tone modifier; an emoji, or an emoji and its VS15 / VS16, before it; an emoji
+    after it), and at most ZWJ_MAX per title, so ASCII ^ and ` or ° join nothing.
+    Ordinary spacing (including U+3000) is kept.
     limit=None returns the whole title (parse matches on it; collect cuts what it stores).
 
     "Unassigned" (Cn) is judged by the running interpreter's Unicode tables, on purpose:
@@ -81,11 +93,13 @@ def clean_title(value, limit=TITLE_MAX):
     dropped from the title. A title that is empty once cleaned drops only its row (parse)."""
     chars = value or ''
     out = []
-    selectors = 0
+    selectors = joiners = 0  # joiners: the ZWJs in out
 
     def keep(ch):
+        nonlocal joiners
         if out and out[-1] == ZWJ and not _emoji(ch):
             out.pop()  # a ZWJ stays only when an emoji follows it
+            joiners -= 1
         out.append(ch)
 
     for i, ch in enumerate(chars):
@@ -105,8 +119,10 @@ def clean_title(value, limit=TITLE_MAX):
                 selectors += 1
         elif ch == ZWJ:
             prev = out[-1] if out else ''
-            if prev and (_emoji(prev) or (prev in '\ufe0e\ufe0f' and _emoji(out[-2]))):
+            if (prev and joiners < ZWJ_MAX
+                    and (_emoji(prev) or (prev in '\ufe0e\ufe0f' and _emoji(out[-2])))):
                 out.append(ch)
+                joiners += 1
         elif cat not in ('Cf', 'Co', 'Cn', 'Cs'):
             keep(ch)
     if out and out[-1] == ZWJ:

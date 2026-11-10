@@ -10,6 +10,9 @@ spec = importlib.util.spec_from_file_location('radar', Path(__file__).with_name(
 radar = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(radar)
 
+# Symbols that draw nothing: BRAILLE PATTERN BLANK and MUSICAL SYMBOL NULL NOTEHEAD.
+BLANKS = '\u2800\U0001d159'
+
 
 class RadarTests(unittest.TestCase):
     def test_titles_are_bounded_and_invisible_characters_removed(self):
@@ -37,7 +40,12 @@ class RadarTests(unittest.TestCase):
                     '<item><title>\u200b\u200b</title><link>https://example.org/blank</link></item>',
                     '<item><title>\u3000 \u3164</title><link>https://example.org/blank2</link></item>',
                     # Default_Ignorable marks outside Cf (CGJ, Mongolian FVS, Khmer inherent vowels)
-                    '<item><title>\u034f\u180b\u17b4\u180f\u17b5</title><link>https://example.org/blank3</link></item>']:
+                    '<item><title>\u034f\u180b\u17b4\u180f\u17b5</title><link>https://example.org/blank3</link></item>',
+                    # Symbols that draw nothing (null notehead, braille blank) with VS16 and ZWJ
+                    '<item><title>' + '\U0001d159\ufe0f\u200d' * 8 + '\U0001d159\u200d' * 60
+                    + '</title><link>https://example.org/blank4</link></item>',
+                    '<item><title>\U0001d159</title><link>https://example.org/blank5</link></item>',
+                    '<item><title>\u2800\ufe0f\u200d\u2800</title><link>https://example.org/blank6</link></item>']:
             rss = f'<rss><channel>{good}{bad}</channel></rss>'
             rows, dropped = radar.parse('hatena', rss)
             self.assertEqual((len(rows), dropped), (2, 1))
@@ -124,8 +132,16 @@ class RadarTests(unittest.TestCase):
     def is_emoji_base(ch):
         # What may take a VS15 / VS16 (emoji-variation-sequences.txt): a symbol, or one of
         # the listed non-symbol bases. Written out here rather than read from the script.
-        return (radar.unicodedata.category(ch)[0] == 'S' and ch != '\u2800'
+        return (radar.unicodedata.category(ch)[0] == 'S' and ch not in BLANKS
                 or ch in '#*0123456789\u203c\u2049\u2139\u3030\u303d')
+
+    @staticmethod
+    def is_zwj_end(ch):
+        # What a ZWJ may join: a symbol (So) at U+2000 or above, or a skin-tone modifier.
+        # Written out here rather than read from the script.
+        o = ord(ch)
+        return ((radar.unicodedata.category(ch) == 'So' and o >= 0x2000 or 0x1F3FB <= o <= 0x1F3FF)
+                and ch not in BLANKS)
 
     def test_hidden_payloads_in_default_ignorable_code_points_are_removed(self):
         # 2026-11-10 re-audit: variation selectors (Mn) and Hangul fillers (Lo) passed the
@@ -149,8 +165,18 @@ class RadarTests(unittest.TestCase):
                     self.assertEqual(radar.clean_title('\u2605 ' + c + 'b'), '\u2605 b', hex(o))
                 else:
                     self.assertEqual(radar.clean_title('\u2605' + c + 'b'), '\u2605b', hex(o))
-        # Lookalike blanks and runs of joiners do not survive either.
-        self.assertEqual(radar.clean_title('a' + '\u2800' + 'b'), 'a b')
+        # Lookalike blanks and runs of joiners do not survive either. A symbol that draws
+        # nothing becomes a space: it takes no selector and joins nothing.
+        for blank in BLANKS:
+            self.assertEqual(radar.clean_title('a' + blank + 'b'), 'a b', hex(ord(blank)))
+            self.assertEqual(radar.clean_title(blank), '', hex(ord(blank)))
+            self.assertEqual(radar.clean_title(blank * 20), '', hex(ord(blank)))
+            for vs in '\ufe0e\ufe0f':
+                self.assertEqual(radar.clean_title(blank + vs + 'b'), 'b', hex(ord(blank)))
+            self.assertEqual(radar.clean_title('\U0001F600\u200d' + blank + '\u200d\U0001F600'),
+                             '\U0001F600 \U0001F600', hex(ord(blank)))
+            self.assertEqual(radar.clean_title((blank + '\ufe0f\u200d') * 8 + (blank + '\u200d') * 60),
+                             '', hex(ord(blank)))
         self.assertEqual(radar.clean_title('メモ' + '\u200d' * 5), 'メモ')
         self.assertEqual(radar.clean_title('\u2764' + '\ufe0f' * 4), '\u2764' + '\ufe0f')
         # Emoji sequences that need ZWJ / VS15 / VS16 come through unchanged.
@@ -190,21 +216,30 @@ class RadarTests(unittest.TestCase):
     def test_a_title_carries_no_more_selectors_than_emoji_bases(self):
         # However selectors, joiners, marks, letters and bases are arranged, every selector
         # left is a VS15 / VS16 right after an emoji base (so at most one per base) and the
-        # title holds at most SELECTORS_MAX of them.
+        # title holds at most SELECTORS_MAX of them. Every ZWJ left sits between two emoji
+        # (an emoji and its VS15 / VS16 before it), at most ZWJ_MAX per title.
         pool = ['\u2605', '\u2764', '\U0001F600', '\U0001F3FD', '#', '1', '\u2139', '\u3030',
                 'x', 'A', 'メ', '葛', ' ', '\u3000', '\u200d', '\u034f', '\u0301', '\u200b', '\u2800',
+                '\U0001d159', '^', '`', '\u00b0', '\u00a9',
                 '\ufe0e', '\ufe0f', '\ufe00', '\ufe0d', '\U000E0100', '\U000E01EF',
                 '\u180b', '\u180c', '\u180d', '\u180f']
         rng = random.Random(20261110)
         for _ in range(4000):
             title = ''.join(rng.choice(pool) for _ in range(rng.randint(1, 80)))
-            cleaned = radar.clean_title(title, limit=None)
-            kept = [i for i, c in enumerate(cleaned) if self.is_selector(c)]
-            bases = sum(map(self.is_emoji_base, cleaned))
-            self.assertLessEqual(len(kept), min(bases, radar.SELECTORS_MAX), repr(title))
-            for i in kept:
-                self.assertIn(cleaned[i], '\ufe0e\ufe0f', repr(title))
-                self.assertTrue(i and self.is_emoji_base(cleaned[i - 1]), repr(title))
+            for cleaned in (radar.clean_title(title, limit=None), radar.clean_title(title)):
+                kept = [i for i, c in enumerate(cleaned) if self.is_selector(c)]
+                bases = sum(map(self.is_emoji_base, cleaned))
+                self.assertLessEqual(len(kept), min(bases, radar.SELECTORS_MAX), repr(title))
+                for i in kept:
+                    self.assertIn(cleaned[i], '\ufe0e\ufe0f', repr(title))
+                    self.assertTrue(i and self.is_emoji_base(cleaned[i - 1]), repr(title))
+                joins = [i for i, c in enumerate(cleaned) if c == '\u200d']
+                self.assertLessEqual(len(joins), radar.ZWJ_MAX, repr(title))
+                for i in joins:
+                    before = cleaned[i - 2] if i > 1 and cleaned[i - 1] in '\ufe0e\ufe0f' else cleaned[i - 1]
+                    self.assertTrue(i and self.is_zwj_end(before), repr(title))
+                    self.assertTrue(i + 1 < len(cleaned) and self.is_zwj_end(cleaned[i + 1]), repr(title))
+                self.assertFalse(set(cleaned) & set(BLANKS), repr(title))
         # A kanji, a kana or a Latin letter takes no VS15 / VS16 either.
         for base in ('\u845b', '\u30e1', 'x', 'A'):
             for vs in '\ufe0e\ufe0f':
@@ -224,6 +259,24 @@ class RadarTests(unittest.TestCase):
         self.assertEqual(radar.clean_title('メモ\U0001F600\u200d'), 'メモ\U0001F600')
         # The whole title parse() matches on (limit=None, not cut) has no dangling ZWJ either.
         self.assertEqual(radar.clean_title('メモ\U0001F600\u200d', limit=None), 'メモ\U0001F600')
+        # A symbol below U+2000 is no emoji for a ZWJ: ASCII ^ and ` (Sk), ° and © (So).
+        for sym in ('^', '`', '\u00b0', '\u00a9'):
+            self.assertEqual(radar.clean_title((sym + '\u200d') * 50 + sym), sym * 51, repr(sym))
+            self.assertEqual(radar.clean_title((sym + '\ufe0f\u200d') * 8 + sym),
+                             (sym + '\ufe0f') * 8 + sym, repr(sym))
+        # At most ZWJ_MAX per title. A ZWJ that was dropped because no emoji followed it
+        # does not count, so real sequences later in the title keep theirs.
+        self.assertEqual(radar.clean_title('\U0001F600\u200d' * 40 + '\U0001F600').count('\u200d'),
+                         radar.ZWJ_MAX)
+        family = '\u200d'.join(['\U0001F468', '\U0001F469', '\U0001F467'])
+        self.assertEqual(radar.clean_title('\U0001F600\u200d ' * 20 + family + ' ' + family),
+                         '\U0001F600 ' * 20 + family + ' ' + family)
+        # Hidden bits coded as a ZWJ present or absent between symbols that draw nothing,
+        # plus VS15 / VS16, leave only the visible text.
+        bits = ''.join(f'{b:08b}' for b in b'rm -rf')
+        raw = 'メモ' + ''.join('\U0001d159' + ('\ufe0f' if bit == '1' else '\ufe0e') * (i < 8)
+                               + '\u200d' * (bit == '1') for i, bit in enumerate(bits)) + '\U0001d159'
+        self.assertEqual(radar.clean_title(raw), 'メモ')
 
     @staticmethod
     def feed(url):
