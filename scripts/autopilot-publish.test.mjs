@@ -107,6 +107,9 @@ test('path classes', () => {
   assert.deepEqual(classifyAutopilotChange(['data/autopilot-status.json', 'ko/autopilot/index.html']), { class: 'ledger', reasons: [] });
   assert.equal(classifyAutopilotChange([{ path: 'data/decision-intents/x.json', status: 'A' }]).class, 'ledger');
   assert.equal(classifyAutopilotChange([{ path: 'data/decision-intents/x.json', status: 'M' }]).class, 'approval');
+  // Audit 2026-11-10: a name decision-ci does not count as a declaration is not a ledger append.
+  assert.equal(classifyAutopilotChange([{ path: 'data/decision-intents/Zz_extra.json', status: 'A' }]).class, 'approval');
+  assert.equal(classifyAutopilotChange([{ path: 'data/decision-rejections/Zz_extra.json', status: 'A' }]).class, 'approval');
   assert.equal(classifyAutopilotChange(['obsidian/index.html']).class, 'approval');
 });
 

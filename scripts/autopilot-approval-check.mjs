@@ -303,6 +303,10 @@ async function selftest() {
   }
   t(autoMergeClass([file('.github/workflows/auto-merge.yml')], 1).reasons[0].startsWith('hard_deny:'), 'hard-denied path needs approval');
   t(autoMergeClass([file('data/decision-intents/x.json', 'modified')], 1).class === 'approval', 'editing a declaration is not an append');
+  // Audit 2026-11-10: only the names decision-ci counts as a declaration (<id>.json) are an append.
+  for (const p of ['data/decision-intents/Zz_extra.json', 'data/decision-intents/x.JSON.json', 'data/decision-rejections/Zz_extra.json']) {
+    t(autoMergeClass([...ledgerOnly, file(p, 'added')], ledgerOnly.length + 1).class === 'approval', `a file named other than <id>.json needs approval: ${p}`);
+  }
   t(autoMergeClass([file('data/autopilot-runs.json', 'removed')], 1).class === 'approval', 'removing a ledger is not an append');
   t(autoMergeClass([file('data/autopilot-runs.json', 'changed')], 1).class === 'approval', 'mode/type change is not an append');
   t(autoMergeClass([file('data/autopilot-status.json', 'renamed', { previous_filename: 'index.html' })], 1).class === 'approval',
