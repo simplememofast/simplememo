@@ -204,6 +204,45 @@ export function workflowBodies(text) {
   return { autoMerge: body(split[0]), approval: body(split[1]), approvalJob: split[1] === undefined ? '' : `\n${split[1]}` };
 }
 
+/**
+ * The jobs of a workflow read as YAML, not as text: aliases are expanded the way GitHub does and
+ * quoted or flow-style keys are keys (scripts/lib/workflow-secrets.mjs, the reader
+ * check-credentials.mjs uses). Returns { id, write, runs } per job. write: the job's permissions
+ * (the workflow's when the job has none) grant write to anything, or no permissions are declared
+ * (the repository default may be write). runs: a `run` key anywhere in the job. Throws when the
+ * file does not parse. The 2026-11-10 review found that a step defined once (`- &notify`) and
+ * reused with `- *notify` in a write-token job passed the text guards. Self-test only, so the
+ * merge path never loads the reader.
+ */
+export async function workflowJobTokens(text) {
+  const { allPairs, buildYamlDocuments, isKey, readYamlEvents, scalarText } = await import('./lib/workflow-secrets.mjs');
+  const parsed = readYamlEvents([text])[0];
+  if (parsed.error) throw new Error(`workflow YAML does not parse: ${parsed.error}`);
+  const docs = buildYamlDocuments(parsed.events);
+  if (docs.length !== 1 || docs[0].t !== 'm') throw new Error('workflow YAML is not one mapping');
+  const get = (node, name) => (node?.t === 'm' ? node.pairs.find(([k]) => isKey(k, name))?.[1] : undefined);
+  const lower = node => scalarText(node)?.trim().toLowerCase();
+  const writes = perm => perm === undefined || lower(perm) === 'write-all'
+    || [...allPairs(perm)].some(([, v]) => lower(v) === 'write');
+  const jobs = get(docs[0], 'jobs');
+  if (jobs?.t !== 'm') throw new Error('workflow YAML has no jobs mapping');
+  const top = get(docs[0], 'permissions');
+  return jobs.pairs.map(([k, job]) => ({
+    id: scalarText(k),
+    write: writes(get(job, 'permissions') ?? top),
+    runs: [...allPairs(job)].some(([key]) => isKey(key, 'run')),
+  }));
+}
+
+/** Insert step text right after the `steps:` line of job `id` (self-test fixtures). */
+function withStep(text, id, step) {
+  const start = text.indexOf(`\n  ${id}:\n`);
+  const at = start === -1 ? -1 : text.indexOf('\n    steps:\n', start);
+  if (at === -1) throw new Error(`no steps: for job ${id}`);
+  const cut = at + '\n    steps:\n'.length;
+  return text.slice(0, cut) + step + text.slice(cut);
+}
+
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 const OWNER = 'simplememofast';
 const REPO_NAME = 'simplememo';
@@ -362,10 +401,11 @@ async function selftest() {
   t(approvalJob.includes(`\n    environment: ${APPROVAL_ENVIRONMENT}\n`), 'approval job waits for the protected environment');
   t(/\n    concurrency:\n      group: autopilot-approval-\$\{\{ needs\.auto-merge\.outputs\.approval_pr \}\}\n      cancel-in-progress: true\n/.test(approvalJob),
     'one pending approval per PR');
-  const [approvalOnly, indexnowJob = ''] = approvalJob.split('\n  indexnow-after-approval:\n');
-  // A step runs a script whether it is written `- name: x` + `run:` or as one line `- run: x`.
-  const runsScript = body => /\n\s+(?:-\s+)?run:/.test(body);
-  t(!runsScript(approvalOnly), 'the job holding the write token runs no script from the merged tree');
+  const [, indexnowJob = ''] = approvalJob.split('\n  indexnow-after-approval:\n');
+  // Read as YAML (aliases expanded, quoted and flow keys read as keys), not as text.
+  const jobTokens = await workflowJobTokens(workflow);
+  const approvalTokens = jobTokens.find(j => j.id === 'merge-after-approval');
+  t(Boolean(approvalTokens?.write) && !approvalTokens.runs, 'the job holding the write token runs no script from the merged tree');
   t(/^ {4}needs: merge-after-approval\n/.test(indexnowJob) && /\n {4}permissions:\n {6}contents: read\n {4}steps:/.test(indexnowJob),
     'IndexNow after an approved merge runs in a read-only job');
   t(!/secrets\./.test(workflow), 'auto-merge.yml uses no secrets');
@@ -374,17 +414,32 @@ async function selftest() {
   const jobBodies = Object.fromEntries(
     workflow.split('\njobs:\n')[1].split(/\n(?=  [\w-]+:\n)/).map(b => [b.match(/^  ([\w-]+):/)?.[1], b]),
   );
-  const writers = Object.entries(jobBodies).filter(([, b]) => /\n {6}[\w-]+: write\b/.test(b));
-  t(writers.length >= 2 && writers.every(([, b]) => !runsScript(b)), 'no job holding a write token runs a script');
-  // Both step forms must trip the guard, in each write-token job (2026-11-10 review: the
-  // one-line `- run:` form passed unseen).
-  for (const [name, body] of writers) {
-    for (const step of ['\n      - run: node scripts/indexnow-notify.js --since 1\n',
-      '\n      - name: notify\n        run: node scripts/indexnow-notify.js --since 1\n']) {
-      t(runsScript(body + step), `the write-token guard sees ${JSON.stringify(step.trim().split('\n')[0])} added to ${name}`);
-    }
+  const writers = jobTokens.filter(j => j.write).map(j => j.id);
+  t(writers.length >= 2 && writers.includes('merge-after-approval') && jobTokens.filter(j => j.write).every(j => !j.runs),
+    'no job holding a write token runs a script');
+  // Every way of writing a run: step must trip the guard, in each write-token job (2026-11-10
+  // reviews: the one-line `- run:` form, then a step reused through a YAML alias, passed unseen).
+  const notifyStep = '\n      - name: IndexNow notify (merged diff)\n';
+  t(workflow.split(notifyStep).length === 3, 'the IndexNow step the alias fixture anchors is present in both read-only jobs');
+  const anchored = workflow.replace(notifyStep, '\n      - &notify\n        name: IndexNow notify (merged diff)\n');
+  const forms = [
+    ['one-line `- run:`', workflow, '      - run: node scripts/indexnow-notify.js --since 1\n'],
+    ['`- name:` + `run:`', workflow, '      - name: notify\n        run: node scripts/indexnow-notify.js --since 1\n'],
+    ['quoted "run" key', workflow, '      - "run": node scripts/indexnow-notify.js --since 1\n'],
+    ['flow-style step', workflow, '      - { name: notify, run: node scripts/indexnow-notify.js }\n'],
+    ['step reused with *notify', anchored, '      - *notify\n'],
+  ];
+  // An alias can only name an anchor written above it, so the reused step goes into the write-token
+  // jobs after the anchored read-only step (merge-after-approval, the job the review used).
+  const after = name => anchored.indexOf('&notify') < anchored.indexOf(`\n  ${name}:\n`);
+  const fixtures = writers.flatMap(name => forms.filter(([, base]) => base !== anchored || after(name))
+    .map(([form, base, step]) => [name, form, withStep(base, name, step)]));
+  t(fixtures.some(([name, form]) => name === 'merge-after-approval' && form.includes('*notify')), 'the alias fixture reaches the approval job');
+  (await import('./lib/workflow-secrets.mjs')).readYamlEvents(fixtures.map(([, , text]) => text)); // one ruby process
+  for (const [name, form, text] of fixtures) {
+    t((await workflowJobTokens(text)).find(j => j.id === name)?.runs === true, `the write-token guard sees a ${form} step added to ${name}`);
   }
-  t(runsScript(approvalOnly + '\n      - run: node x.js\n'), 'the approval-job guard sees a one-line "- run:" step');
+  t((await workflowJobTokens(anchored)).every(j => !j.write || !j.runs), 'anchoring a read-only step alone does not trip the guard');
   const notify = jobBodies['indexnow-after-merge'] ?? '';
   t(/\n {4}needs: auto-merge\n/.test(notify) && notify.includes("\n    if: needs.auto-merge.outputs.merged_sha != ''\n")
     && /\n {4}permissions:\n {6}contents: read\n {4}steps:/.test(notify), 'normal-path IndexNow runs in a read-only job after a merge');
