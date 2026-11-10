@@ -325,16 +325,24 @@ export function pageHealth(html, status, expected) {
   return { known: true, healthy: Boolean(title && canonical && title === expected.title && canonical === expected.canonical), reason: 'title_and_canonical' };
 }
 
-async function probe(p) {
-  const local = fs.readFileSync(path.join(ROOT, p), 'utf8');
-  const expected = { title: local.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim(),
-    canonical: local.match(/<link\b[^>]*rel=["']canonical["'][^>]*>/i)?.[0]?.match(/href=["']([^"']+)/)?.[1] };
-  if (!expected.title || !expected.canonical) return { path: p, known: false, healthy: false, reason: 'local_baseline_invalid' };
-  const u = new URL(expected.canonical);
-  if (u.origin !== 'https://simplememofast.com') return { path: p, known: false, reason: 'nonproduction_canonical' };
+// A page the contract touched may be gone from this checkout (deleted by the contract itself, declared but
+// never written, renamed by a later PR within the 28 days) or carry a relative canonical. Reading or parsing
+// that baseline used to throw out of Promise.all and stop main() for every contract until the window passed
+// (audit 2026-11-10). It is an unknown, held like any other unknown (recoveryPlan: 'unknown_transport'), and
+// never a healthy page after a recovery.
+export async function probe(p, { root = ROOT, request = fetch } = {}) {
+  let expected, u;
+  try {
+    const local = fs.readFileSync(path.join(root, p), 'utf8');
+    expected = { title: local.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim(),
+      canonical: local.match(/<link\b[^>]*rel=["']canonical["'][^>]*>/i)?.[0]?.match(/href=["']([^"']+)/)?.[1] };
+    if (!expected.title || !expected.canonical) return { path: p, known: false, healthy: false, reason: 'local_baseline_invalid' };
+    u = new URL(expected.canonical);
+  } catch { return { path: p, known: false, healthy: false, reason: 'local_baseline_unavailable' }; }
+  if (u.origin !== 'https://simplememofast.com') return { path: p, known: false, healthy: false, reason: 'nonproduction_canonical' };
   u.searchParams.set('decision_probe', String(Date.now()));
   try {
-    const r = await fetch(u, { signal: AbortSignal.timeout(15000), redirect: 'error', headers: { 'cache-control': 'no-cache' } });
+    const r = await request(u, { signal: AbortSignal.timeout(15000), redirect: 'error', headers: { 'cache-control': 'no-cache' } });
     return { path: p, ...pageHealth(await r.text(), r.status, expected) };
   } catch { return { path: p, known: false, healthy: false, reason: 'transport_or_redirect_unknown' }; }
 }
@@ -484,7 +492,7 @@ async function main() {
         verifyRollback(incident, pr.head.sha, c.touches.filter(staticPath));
         const checks = decisionCheckRuns(pr.head.sha, 'seo-check');
         const seo = checks.find(x => x.name === 'seo-check' && x.conclusion === 'success');
-        const after = await Promise.all(c.touches.filter(p => staticPath(p) && p.endsWith('.html')).map(probe));
+        const after = await Promise.all(c.touches.filter(p => staticPath(p) && p.endsWith('.html')).map(p => probe(p)));
         if (seo && after.length && after.every(p => p.known && p.healthy)) Object.assign(incident,
           recoveryAttribution(incident, origin), {
           state: 'recovered', revert_sha: pr.merge_commit_sha, validation: 'success', deployment_verified: true,
@@ -497,7 +505,7 @@ async function main() {
     const changedSince = git('diff', '--name-only', merge, head).split('\n').filter(Boolean);
     const changedAtMerge = git('diff', '--name-only', `${merge}^`, merge).split('\n').filter(Boolean);
     const checks = await deployment(head);
-    const probes = await Promise.all(c.touches.filter(p => staticPath(p) && p.endsWith('.html')).map(probe));
+    const probes = await Promise.all(c.touches.filter(p => staticPath(p) && p.endsWith('.html')).map(p => probe(p)));
     const plan = recoveryPlan({ intent: c, mergeSha: merge, headSha: head, changedSince, changedAtMerge, checks,
       probes, previous: incident, now: now.toISOString(), stopped: stop() });
     if (plan.action === 'observe') {
@@ -534,7 +542,7 @@ async function main() {
   }
 }
 
-function selftest() {
+async function selftest() {
   const checkSha = 'a'.repeat(40);
   const check = (id, name = 'Cloudflare Pages', conclusion = 'success') => ({ id, name, head_sha: checkSha, conclusion });
   const buriedChecks = [...Array.from({ length: 41 }, (_, i) => check(100 + i, 'unrelated')), check(1)];
@@ -873,6 +881,32 @@ function selftest() {
   assert.equal(pageHealth('<title>good</title><link rel="canonical" href="https://simplememofast.com/">', 200,
     { title: 'good', canonical: 'https://simplememofast.com/' }).healthy, true);
   assert.equal(pageHealth('<title>bad</title>', 200, { title: 'good' }).healthy, false);
+  // Audit 2026-11-10: a touched page missing from this checkout, or one with a relative canonical, is an
+  // unknown that holds. It used to throw out of main() and stop every contract for up to 28 days.
+  const probeRoot = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'decision-probe-test-')));
+  try {
+    const page = (file, canonical) => {
+      fs.mkdirSync(path.dirname(path.join(probeRoot, file)), { recursive: true });
+      fs.writeFileSync(path.join(probeRoot, file), `<title>live</title><link rel="canonical" href="${canonical}">`);
+    };
+    page('blog/relative.html', '/blog/relative');
+    page('blog/live.html', 'https://simplememofast.com/blog/live');
+    const noRequest = () => assert.fail('a probe without a local baseline must not reach production');
+    const unknowns = await Promise.all(['blog/missing.html', 'blog/relative.html'].map(file => probe(file, { root: probeRoot, request: noRequest })));
+    assert.deepEqual(unknowns, ['blog/missing.html', 'blog/relative.html'].map(file =>
+      ({ path: file, known: false, healthy: false, reason: 'local_baseline_unavailable' })), 'no local baseline is an unknown, not an exception');
+    const requested = [];
+    const live = await probe('blog/live.html', { root: probeRoot, request: async (url, init) => {
+      requested.push(url); assert.equal(init.redirect, 'error');
+      return { status: 200, text: async () => fs.readFileSync(path.join(probeRoot, 'blog/live.html'), 'utf8') };
+    } });
+    assert.deepEqual(live, { path: 'blog/live.html', known: true, healthy: true, reason: 'title_and_canonical' }, 'a present page is still probed');
+    assert.deepEqual(requested.map(url => `${url.origin}${url.pathname}:${url.searchParams.has('decision_probe')}`), ['https://simplememofast.com/blog/live:true']);
+    const missing = { ...p, intent: { ...p.intent, touches: ['blog/missing.html'] }, changedAtMerge: ['blog/missing.html'], probes: unknowns.slice(0, 1) };
+    assert.deepEqual(recoveryPlan(missing), { action: 'hold', reason: 'unknown_transport' }, 'an R0 contract without its page holds');
+    assert.deepEqual(recoveryPlan({ ...missing, intent: { ...missing.intent, eligibility: { reversibility_class: 'R1' } } }),
+      { action: 'hold', reason: 'R1_requires_recovery_evidence_and_owner_boundary' });
+  } finally { fs.rmSync(probeRoot, { recursive: true }); }
   const sample = { total: 42.5, generated_jst: '2026-09-04', components: {
     vdc: { n: 2, hit: 1, points: 15 }, umr: { points: 10 }, ra: { n: 1, points: 5, detect: { hit: 1 }, recover: { hit: 0 }, auto_revert_count: 0 },
     ep: { points: 5, precision: { judged: 0 } }, tuc: { points: 7.5, per_week: 5.3, target: 7 },
@@ -999,7 +1033,7 @@ function selftest() {
   console.log('decision-monitor: repeated probes, safe scope, stop, stale HEAD, and real Git recovery drill passed');
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  if (process.argv.includes('--selftest')) selftest();
+  if (process.argv.includes('--selftest')) selftest().catch(e => { console.error(e); process.exitCode = 1; });
   else if (process.argv.includes('--publish-report')) publishReport().then(() => console.log('Public operating report synchronized.')).catch(e => { console.error(e.message); process.exitCode = 1; });
   else if (process.argv.includes('--check')) {
     const d = read('data/decision-recovery.json');
