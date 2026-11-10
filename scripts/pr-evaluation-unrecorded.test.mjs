@@ -50,15 +50,32 @@ test('real PR7 appears at D+14 even though its experiment is absent', () => {
   assert.equal(JSON.stringify([rows, entries]), before);
 });
 
-test('the live ledger: known_unrecorded validates, and each entry is due exactly from its D+14', () => {
-  const rows = read('../growth/experiments/experiments.json').experiments;
-  const entries = readKnownUnrecorded();
+// None on the day before evaluation_at, exactly one on the day. Entries whose experiment row exists take the ordinary
+// path (covered by the per-status tests below) and are skipped. Returns how many entries were actually checked.
+const assertDueExactlyFromD14 = (rows, entries) => {
+  let checked = 0;
   for (const entry of entries) {
     if (rows.some(e => e.id === entry.experiment_id)) continue;
     const dayBefore = new Date(Date.parse(`${entry.evaluation_at}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
     assert.equal(due(rows, dayBefore, entries).some(e => e.source_id === entry.id), false, entry.id);
     assert.equal(due(rows, entry.evaluation_at, entries).filter(e => e.source_id === entry.id).length, 1, entry.id);
+    checked += 1;
   }
+  return checked;
+};
+
+test('the live ledger: known_unrecorded validates, and the D+14 contract holds against the live experiments', t => {
+  const rows = read('../growth/experiments/experiments.json').experiments;
+  // An empty known_unrecorded is the healthy state (every release recorded; PR7 was resolved on 2026-11-04), and then
+  // the live loop checks nothing. So the same contract also runs on two parked entries against the live rows (minus
+  // PR7's later row), and the test says how many live entries it saw instead of passing silently.
+  const live = assertDueExactlyFromD14(rows, readKnownUnrecorded());
+  t.diagnostic(`live known_unrecorded entries without an experiment row: ${live}`);
+  const parkedRows = rows.filter(e => e.id !== PR7_PARKED.experiment_id);
+  const parked = [{ ...PR7_PARKED }, { ...known()[0], id: 'unrecorded-second', experiment_id: 'experiment-second',
+    published_at: '2026-10-20', evaluation_at: '2026-11-03', resolve_by: '2026-11-30' }];
+  validateKnownUnrecorded(parked);
+  assert.equal(assertDueExactlyFromD14(parkedRows, parked), 2);
 });
 
 test('extending only the recording deadline cannot postpone or complete capture', () => {

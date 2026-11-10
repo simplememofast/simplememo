@@ -76,7 +76,9 @@ function runAct(exit, badTee, extraEnv) {
     const summary = path.join(dir, 'summary');
     const script = actBlock().replaceAll('/tmp/act.txt', path.join(dir, 'act.txt'));
     const argsFile = path.join(dir, 'args');
-    // The workflow passes inputs.dry_run through env (unset on schedule): extraEnv.
+    // The workflow passes inputs.dry_run through env: extraEnv. No trigger leaves it unset — on schedule the
+    // expression `event_name == 'workflow_dispatch' && inputs.dry_run` short-circuits to false, so the step sees
+    // DRY_RUN='false'; on dispatch it is 'true' or 'false'. Unset is only a defensive case for ${DRY_RUN:-false}.
     const env = { PATH: `${bin}:/usr/bin:/bin`, FAKE_EXIT: String(exit), GITHUB_STEP_SUMMARY: summary, ARGS_FILE: argsFile, ...extraEnv };
     const run = spawnSync('bash', ['-e', '-c', script], { cwd: dir, encoding: 'utf8', timeout: 5000, env });
     assert.ifError(run.error);
@@ -102,10 +104,13 @@ test('successful act still writes its exact output once', () => {
 });
 test('DRY_RUN=true (workflow_dispatch input via env) runs without --apply; otherwise --apply', () => {
   assert.equal(runAct(0, false, { DRY_RUN: 'true' }).args.includes('--apply'), false);
-  assert.equal(runAct(0, false, { DRY_RUN: 'false' }).args.includes('--apply'), true);
-  const scheduled = runAct(0, false, {}); // DRY_RUN unset on schedule: set -u must not trip
+  const scheduled = runAct(0, false, { DRY_RUN: 'false' }); // what schedule actually sets (the && short-circuits)
   assert.equal(scheduled.status, 0);
   assert.equal(scheduled.args.includes('--apply'), true);
+  // Defensive: no trigger leaves DRY_RUN unset, but set -u must not trip if the env line is ever dropped.
+  const unset = runAct(0, false, {});
+  assert.equal(unset.status, 0);
+  assert.equal(unset.args.includes('--apply'), true);
 });
 test('the act step reads the dry-run input from env, not from an expression in run:', () => {
   assert.equal(actBlock().includes('${{'), false);
