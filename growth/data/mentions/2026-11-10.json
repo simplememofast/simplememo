@@ -1,0 +1,1007 @@
+{
+  "date": "2026-11-10",
+  "note": "固定6クエリを Claude の WebSearch（standard・引用符なし）で 2026-11-10T15:00:03Z〜15:03:01Z UTC（JST では 2026-11-11 00:00〜00:03）の間に検索し、返却された計55件（「simplememofast」が10件、他の5クエリが各9件）をすべて記録した。**このファイルの日付は、これまでのスナップショットと同じく観測時刻の UTC の日付（2026-11-10）にした**（JST では11日。growth/scripts/check-mentions.mjs と growth/lib/company-mentions.mjs は日付を UTC の0時として扱い、後者は現在時刻より後の日付を future observation として弾く）。検索経路・モードは前回2026-11-04・前々回2026-10-31と同じ。ツール側の検索基盤・索引が前回と同じかは確認できない。WebSearchはツール説明上US向け（US-only）の検索で、返却に添えられた要約文（社名・料金などの記述・問いかけ・選択肢を含む）は記録せず従ってもおらず、タイトル・URLのみを記録した。どのページの本文も開いておらず、全項目 verified=false・body_scope=search_metadata_only。分類（new_mentions / competitor_listicles、mentions_us / includes_us、context）は、前回までに観測済みの50URLは直近に観測したときの分類をそのまま引き継ぎ、今回初めて返った5URLだけを新しく分類した（根拠は各 context に明記）。そのうち prtimes.jp の1URLは、検索タイトルがドメイン名だけだが、このリポジトリの公開ページ（captio-alternative/index.html）が同じURLを自社のプレスリリースとして出典に挙げていることを根拠に自社発信と分類した。already_observed・first_observed_date・last_previously_observed_date は既存の全スナップショットの new_mentions/competitor_listicles の url とのURL完全一致で算出した。new_mentionsは今回観測の項目名であり、新規公開・新規獲得を意味しない。検索は網羅的でなく、検索順位・流入・因果効果・業務移管・会社自律率を認定しない。checked_window_utc は検索の正確な時刻ではなく、検索の前後に実行した date -u から取った上下限。6クエリは同じ窓の中で並べて検索した。",
+  "queries": [
+    {
+      "q": "シンプルメモ Obsidian",
+      "new_mentions": [
+        {
+          "title": "新機能「Obsidian連携」を提供開始、自分宛メモアプリ『シンプルメモ(iOS版)』 ― 送ったメモを“プラグイン不要”でObsidian保管庫へ自動追記",
+          "url": "https://resemom.jp/release/prtimes/20260601/186525.html",
+          "verified": false,
+          "context": "検索タイトル・URLから自社/自社発信に関連すると分類。本文・新規公開・成果は未確認。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "mentions_us": true,
+          "search_result_evidence_key": "search_0_0",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "話すだけでObsidianへ|Apple Watch対応メモアプリ「シンプルメモ」登場。1日3通まで無料",
+          "url": "https://www.smartwatchlife.jp/73542/",
+          "verified": false,
+          "context": "検索タイトル・URLから自社/自社発信に関連すると分類。本文・新規公開・成果は未確認。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "mentions_us": true,
+          "search_result_evidence_key": "search_0_1",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "新機能「Obsidian連携」を提供開始、自分宛メモアプリ『シンプルメモ(iOS版)』 ― 送ったメモを“プラグイン不要”でObsidian保管庫へ自動追記",
+          "url": "https://prtimes.jp/main/html/rd/p/000000002.000182412.html",
+          "verified": false,
+          "context": "検索タイトル・URLから自社/自社発信に関連すると分類。本文・新規公開・成果は未確認。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "mentions_us": true,
+          "search_result_evidence_key": "search_0_2",
+          "already_observed": true,
+          "first_observed_date": "2026-08-12",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "app-liv.jp",
+          "url": "https://app-liv.jp/press/156175/",
+          "verified": false,
+          "context": "自社名のクエリで返却されたが、検索タイトルはドメイン名だけで、今回は本文未読（2026-10-13は本文の取得に失敗）。自社への言及かは未確認で、falseは非言及の確定ではない。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "mentions_us": false,
+          "search_result_evidence_key": "search_0_3",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "メモアプリ比較 Memo App Comparison",
+          "url": "https://simplememo-596.pages.dev/vs/obsidian",
+          "verified": false,
+          "context": "URLのホスト simplememo-596.pages.dev は、このリポジトリの docs/security/preview-cache-ci-activation-20261022.md が自社Cloudflare Pagesのホスト名として記録するもので、パスはリポジトリ内の既存ページ /vs/obsidian/ と対応するため自社ページと分類。本文・配信内容・索引の扱いは未確認。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "mentions_us": true,
+          "search_result_evidence_key": "search_0_4",
+          "already_observed": true,
+          "first_observed_date": "2026-10-31",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "www.appbank.net",
+          "url": "https://www.appbank.net/2026/06/01/iphone-news/3013385.php",
+          "verified": false,
+          "context": "検索タイトルはドメイン名のみで、今回は本文未読。2026-10-13のスナップショットで本文を確認した記録（[PR]表記の記事・2026-06-01・会社発表に基づき独立した推薦ではない）に基づき自社関連と分類。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "mentions_us": true,
+          "search_result_evidence_key": "search_0_5",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "www.appbank.net",
+          "url": "https://www.appbank.net/2026/06/01/iphone-application/3013385.php",
+          "verified": false,
+          "context": "検索タイトルはドメイン名のみで、今回は本文未読。2026-10-13のスナップショットで本文を確認した記録（上と同じ[PR]表記の記事の別URL・2026-06-01）に基づき自社関連と分類。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "mentions_us": true,
+          "search_result_evidence_key": "search_0_6",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "新機能 · v3.0 New in v3.0",
+          "url": "https://simplememo-596.pages.dev/obsidian/",
+          "verified": false,
+          "context": "URLのホスト simplememo-596.pages.dev は、このリポジトリの docs/security/preview-cache-ci-activation-20261022.md が自社Cloudflare Pagesのホスト名として記録するもので、パスはリポジトリ内の既存ページ /obsidian/ と一致するため自社ページと分類。本文・配信内容・索引の扱いは未確認。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "mentions_us": true,
+          "search_result_evidence_key": "search_0_7",
+          "already_observed": true,
+          "first_observed_date": "2026-10-31",
+          "last_previously_observed_date": "2026-11-04"
+        }
+      ],
+      "competitor_listicles": [
+        {
+          "title": "scrapbox.io",
+          "url": "https://scrapbox.io/thinkandcreateteck/%E3%80%8EObsidian%E3%81%A7%E3%81%A4%E3%81%AA%E3%81%92%E3%82%8B%E6%83%85%E5%A0%B1%E7%AE%A1%E7%90%86%E8%A1%93%E3%80%8F",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_0_8",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        }
+      ],
+      "search_observation": {
+        "query_complete": true,
+        "returned_result_headers": 9,
+        "retained_result_headers": 9,
+        "retention_limit": 12,
+        "complete_search_inventory": false,
+        "raw_response_saved": false,
+        "search_route": "Claude WebSearch (standard mode), unquoted query text",
+        "checked_window_utc": {
+          "from": "2026-11-10T15:00:03Z",
+          "to": "2026-11-10T15:03:01Z"
+        }
+      }
+    },
+    {
+      "q": "simplememofast",
+      "new_mentions": [
+        {
+          "title": "i built simplememofast a captio style app to email yourself notes instantly e6225127d8",
+          "url": "https://www.indiehackers.com/post/i-built-simplememofast-a-captio-style-app-to-email-yourself-notes-instantly-e6225127d8",
+          "verified": false,
+          "context": "検索タイトル・URLから自社/自社発信に関連すると分類。本文・新規公開・成果は未確認。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "mentions_us": true,
+          "search_result_evidence_key": "search_1_0",
+          "already_observed": true,
+          "first_observed_date": "2026-08-12",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "Simple Memo - Captio-style",
+          "url": "https://nextnoteapps.featureupvote.com/suggestions/702301/simple-memo-captiostyle",
+          "verified": false,
+          "context": "検索タイトル・URLから自社/自社発信に関連すると分類。本文・新規公開・成果は未確認。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "mentions_us": true,
+          "search_result_evidence_key": "search_1_1",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "ascii.jp",
+          "url": "https://ascii.jp/elem/000/004/398/4398130/",
+          "verified": false,
+          "context": "検索タイトルはドメイン名のみで、今回は本文未読。2026-10-13のスナップショットで本文を確認した記録（PR TIMES配信の転載・2026-04-24・自社の発表で独立した推薦ではない）に基づき自社関連と分類。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "mentions_us": true,
+          "search_result_evidence_key": "search_1_2",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "Simple Memo - Captio-style icon",
+          "url": "https://alternativeto.net/software/simple-memo--captio-style/about",
+          "verified": false,
+          "context": "検索タイトル・URLから自社/自社発信に関連すると分類。本文・新規公開・成果は未確認。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "mentions_us": true,
+          "search_result_evidence_key": "search_1_3",
+          "already_observed": true,
+          "first_observed_date": "2026-08-12",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "app-liv.jp",
+          "url": "https://app-liv.jp/press/155942/",
+          "verified": false,
+          "context": "自社名のクエリで返却されたが、検索タイトルはドメイン名だけで、今回は本文未読（2026-10-13は本文の取得に失敗）。自社への言及かは未確認で、falseは非言及の確定ではない。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "mentions_us": false,
+          "search_result_evidence_key": "search_1_4",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "prtimes.jp",
+          "url": "https://prtimes.jp/main/html/rd/p/000000001.000182412.html",
+          "verified": false,
+          "context": "検索タイトルはドメイン名だけで、今回は本文未読。このリポジトリの公開ページ captio-alternative/index.html が、同じURLを自社（株式会社ユリカ）のプレスリリース（2026年4月24日）として出典に挙げているため自社発信と分類。今回初めて返却されたURL。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "mentions_us": true,
+          "search_result_evidence_key": "search_1_5",
+          "already_observed": false,
+          "first_observed_date": "2026-11-10",
+          "last_previously_observed_date": null
+        },
+        {
+          "title": "DEV Community",
+          "url": "https://dev.to/simple_memo",
+          "verified": false,
+          "context": "検索タイトルはサイト名（DEV Community）だけで、今回は本文未読。URLのハンドル simple_memo が、このリポジトリの記録（docs/seo/directory-registration-2026-09.md・scripts/devlog-syndication.mjs）にある自社の dev.to 転載アカウントと一致するため自社関連と分類。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "mentions_us": true,
+          "search_result_evidence_key": "search_1_6",
+          "already_observed": true,
+          "first_observed_date": "2026-10-31",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "simple memo captio style",
+          "url": "https://www.producthunt.com/products/simple-memo-captio-style",
+          "verified": false,
+          "context": "検索タイトル・URLから自社/自社発信に関連すると分類。本文・新規公開・成果は未確認。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "mentions_us": true,
+          "search_result_evidence_key": "search_1_7",
+          "already_observed": true,
+          "first_observed_date": "2026-10-31",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "SimpleMem: LLM 에이전트의 장기 기억을 압축해 토큰을 최대 30배 줄이는 메모리 프레임워크",
+          "url": "https://discuss.pytorch.kr/t/simplemem-llm-30/11501",
+          "verified": false,
+          "context": "検索返却に含まれた同名/別製品候補（SimpleMem 等）。SimpleMemo製品との同一性は未確認。falseは製品不一致の確定ではない。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "mentions_us": false,
+          "search_result_evidence_key": "search_1_8",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "sourceforge.net",
+          "url": "https://sourceforge.net/mirror/simplemem",
+          "verified": false,
+          "context": "検索返却に含まれた同名/別製品候補（SimpleMem 等）。SimpleMemo製品との同一性は未確認。falseは製品不一致の確定ではない。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "mentions_us": false,
+          "search_result_evidence_key": "search_1_9",
+          "already_observed": true,
+          "first_observed_date": "2026-10-31",
+          "last_previously_observed_date": "2026-11-04"
+        }
+      ],
+      "competitor_listicles": [],
+      "search_observation": {
+        "query_complete": true,
+        "returned_result_headers": 10,
+        "retained_result_headers": 10,
+        "retention_limit": 12,
+        "complete_search_inventory": false,
+        "raw_response_saved": false,
+        "search_route": "Claude WebSearch (standard mode), unquoted query text",
+        "checked_window_utc": {
+          "from": "2026-11-10T15:00:03Z",
+          "to": "2026-11-10T15:03:01Z"
+        }
+      }
+    },
+    {
+      "q": "Obsidian メモアプリ おすすめ",
+      "new_mentions": [],
+      "competitor_listicles": [
+        {
+          "title": "Google KeepやNotionなど、便利なノートアプリが溢れていますが自分に合ったノートアプリって、なかなか見つかりませんよね。",
+          "url": "https://www.lifehacker.jp/article/2605-matome-obsidian/",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_2_0",
+          "already_observed": true,
+          "first_observed_date": "2026-08-12",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "2608 matome memo app giz",
+          "url": "https://www.lifehacker.jp/article/2608-matome-memo-app-giz/",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_2_1",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "2503 matome memo app",
+          "url": "https://www.lifehacker.jp/article/2503-matome-memo-app/",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_2_2",
+          "already_observed": true,
+          "first_observed_date": "2026-09-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "2502four apps you can replace with obsidian plugins",
+          "url": "https://www.lifehacker.jp/article/2502four-apps-you-can-replace-with-obsidian-plugins/",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_2_3",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "library.libecity.com",
+          "url": "https://library.libecity.com/articles/01KNGRH6MDHRN69Q7FX5HYZDSV",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_2_4",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "www.appbank.net",
+          "url": "https://www.appbank.net/tag/obsidian",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_2_5",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "appmatch.jp",
+          "url": "https://appmatch.jp/?p=86605",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_2_6",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "appmatch.jp",
+          "url": "https://appmatch.jp/1557175442-2/",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_2_7",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "zenn.dev",
+          "url": "https://zenn.dev/appleshinja/articles/7e8ba1dc970cb0",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_2_8",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        }
+      ],
+      "search_observation": {
+        "query_complete": true,
+        "returned_result_headers": 9,
+        "retained_result_headers": 9,
+        "retention_limit": 12,
+        "complete_search_inventory": false,
+        "raw_response_saved": false,
+        "search_route": "Claude WebSearch (standard mode), unquoted query text",
+        "checked_window_utc": {
+          "from": "2026-11-10T15:00:03Z",
+          "to": "2026-11-10T15:03:01Z"
+        }
+      }
+    },
+    {
+      "q": "Obsidian 音声入力",
+      "new_mentions": [],
+      "competitor_listicles": [
+        {
+          "title": "obsidian 音声入力",
+          "url": "https://usevoicy.com/ja/obsidian-音声入力/",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_3_0",
+          "already_observed": true,
+          "first_observed_date": "2026-10-31",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "voice input",
+          "url": "https://community.obsidian.md/plugins/voice-input",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_3_1",
+          "already_observed": true,
+          "first_observed_date": "2026-09-02",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "github.com%2Fmssoftjp%2Fobsidian voice input",
+          "url": "https://awesome.ecosyste.ms/projects/github.com%2Fmssoftjp%2Fobsidian-voice-input",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_3_2",
+          "already_observed": true,
+          "first_observed_date": "2026-10-31",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "wisprflow.ai",
+          "url": "https://wisprflow.ai/use-cases/obsidian",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_3_3",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "obsidianstats.com",
+          "url": "https://obsidianstats.com/tags/voice",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_3_4",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "Voice Input",
+          "url": "https://www.obsidianstats.com/plugins/voice-input",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_3_5",
+          "already_observed": true,
+          "first_observed_date": "2026-09-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "hand free",
+          "url": "https://obsidianstats.com/tags/hand-free",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_3_6",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "local speech recognition",
+          "url": "https://community.obsidian.md/plugins/local-speech-recognition",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_3_7",
+          "already_observed": true,
+          "first_observed_date": "2026-09-24",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "rewrite voice notes",
+          "url": "https://community.obsidian.md/plugins/rewrite-voice-notes",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_3_8",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        }
+      ],
+      "search_observation": {
+        "query_complete": true,
+        "returned_result_headers": 9,
+        "retained_result_headers": 9,
+        "retention_limit": 12,
+        "complete_search_inventory": false,
+        "raw_response_saved": false,
+        "search_route": "Claude WebSearch (standard mode), unquoted query text",
+        "checked_window_utc": {
+          "from": "2026-11-10T15:00:03Z",
+          "to": "2026-11-10T15:03:01Z"
+        }
+      }
+    },
+    {
+      "q": "Obsidian Logseq 比較",
+      "new_mentions": [],
+      "competitor_listicles": [
+        {
+          "title": "obsidian vs logseq メモアプリ",
+          "url": "https://blog.openreplay.com/ja/obsidian-vs-logseq-メモアプリ/",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_4_0",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "obsidian vs logseq",
+          "url": "https://affine.pro/zh-tw/vs/obsidian-vs-logseq",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_4_1",
+          "already_observed": true,
+          "first_observed_date": "2026-09-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "Obsidian logo",
+          "url": "https://affine.pro/ja/vs/obsidian-vs-logseq",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_4_2",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "obsidian vs logseq %E8%AE%B0%E7%AC%94%E8%AE%B0",
+          "url": "https://blog.openreplay.com/zh/obsidian-vs-logseq-%E8%AE%B0%E7%AC%94%E8%AE%B0/",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_4_3",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "DEV Community",
+          "url": "https://dev.to/airabbit/logseq-vs-obsidian-a-comprehensive-comparison-26nk",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_4_4",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "obsidian to logseq no hikaku",
+          "url": "https://www.obsibrain.com/ja/blog/obsidian-to-logseq-no-hikaku/",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_4_5",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "Logseq vs Obsidian",
+          "url": "https://www.sourceforge.net/software/compare/Logseq-vs-Obsidian",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_4_6",
+          "already_observed": true,
+          "first_observed_date": "2026-10-31",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "ToolQuestor Logo",
+          "url": "https://toolquestor.com/ja/vs/logseq-vs-obsidian",
+          "verified": false,
+          "context": "関連する比較・競合/参照面として観測。検索タイトル・URLのみで自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_4_7",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "Ghostboard pixel",
+          "url": "https://itsfoss.com/comparison/obsidian-vs-logseq/",
+          "verified": false,
+          "context": "検索タイトルは記事名を示しておらず、URLから比較ページと分類し、関連する比較・競合/参照面として観測。本文未読で自社掲載の有無は未確認（falseは非掲載の断定ではない）。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_4_8",
+          "already_observed": true,
+          "first_observed_date": "2026-08-12",
+          "last_previously_observed_date": "2026-11-04"
+        }
+      ],
+      "search_observation": {
+        "query_complete": true,
+        "returned_result_headers": 9,
+        "retained_result_headers": 9,
+        "retention_limit": 12,
+        "complete_search_inventory": false,
+        "raw_response_saved": false,
+        "search_route": "Claude WebSearch (standard mode), unquoted query text",
+        "checked_window_utc": {
+          "from": "2026-11-10T15:00:03Z",
+          "to": "2026-11-10T15:03:01Z"
+        }
+      }
+    },
+    {
+      "q": "Captio 代替",
+      "new_mentions": [],
+      "competitor_listicles": [
+        {
+          "title": "Capto Alternatives",
+          "url": "https://alternativeto.net/software/capto/?p=6",
+          "verified": false,
+          "context": "検索返却は別製品の Capto（画面収録アプリ）や同名の別アプリ・辞書を示す。メモアプリCaptioの代替とは同定せず、同名混入として保持。本文・自社掲載は未確認。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_5_0",
+          "already_observed": true,
+          "first_observed_date": "2026-10-13",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "# Top 10 Capto Alternatives &amp; Competitors",
+          "url": "https://www.g2.com/products/capto/competitors/alternatives",
+          "verified": false,
+          "context": "検索返却は別製品の Capto（画面収録アプリ）や同名の別アプリ・辞書を示す。メモアプリCaptioの代替とは同定せず、同名混入として保持。本文・自社掲載は未確認。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_5_1",
+          "already_observed": true,
+          "first_observed_date": "2026-10-31",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "fr.wiktionary.org",
+          "url": "https://fr.wiktionary.org/wiki/captio",
+          "verified": false,
+          "context": "検索タイトルはドメイン名だけ。URLはフランス語版ウィクショナリーの語「captio」の項目を示し、辞書の同名混入として保持。メモアプリCaptioの代替とは同定しない。本文・自社掲載は未確認。今回初めて返却されたURL。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_5_2",
+          "already_observed": false,
+          "first_observed_date": "2026-11-10",
+          "last_previously_observed_date": null
+        },
+        {
+          "title": "VIDIO 與 Captions 比較",
+          "url": "https://www.vidio.ai/zh-TW/alternatives/captions",
+          "verified": false,
+          "context": "検索タイトル・URLは、名前の似た別製品 Captions との比較ページ（繁体字中国語版）を示す。前回までの類似名の混入（字幕生成系の Captions 等）と同じ扱いで保持し、メモアプリCaptioの代替とは同定しない。本文・自社掲載は未確認。今回初めて返却されたURL。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_5_3",
+          "already_observed": false,
+          "first_observed_date": "2026-11-10",
+          "last_previously_observed_date": null
+        },
+        {
+          "title": "VIDIO 与 Captions 对比",
+          "url": "https://www.vidio.ai/zh-CN/alternatives/captions",
+          "verified": false,
+          "context": "検索タイトル・URLは、名前の似た別製品 Captions との比較ページ（簡体字中国語版）を示す。前回までの類似名の混入（字幕生成系の Captions 等）と同じ扱いで保持し、メモアプリCaptioの代替とは同定しない。本文・自社掲載は未確認。今回初めて返却されたURL。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_5_4",
+          "already_observed": false,
+          "first_observed_date": "2026-11-10",
+          "last_previously_observed_date": null
+        },
+        {
+          "title": "Captionation Alternatives",
+          "url": "https://alternativeto.net/software/captionation",
+          "verified": false,
+          "context": "検索返却は名前の似た別製品（字幕生成系の Captions・Captionation・Captionic 等）の代替一覧を示す。メモアプリCaptioの代替とは同定せず、類似名の混入として保持。本文・自社掲載は未確認。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_5_5",
+          "already_observed": true,
+          "first_observed_date": "2026-10-31",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "Best Captionic Alternatives in 2026",
+          "url": "https://topai.tools/alternatives/captionic",
+          "verified": false,
+          "context": "検索返却は名前の似た別製品（字幕生成系の Captions・Captionation・Captionic 等）の代替一覧を示す。メモアプリCaptioの代替とは同定せず、類似名の混入として保持。本文・自社掲載は未確認。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_5_6",
+          "already_observed": true,
+          "first_observed_date": "2026-10-31",
+          "last_previously_observed_date": "2026-11-04"
+        },
+        {
+          "title": "Captionation Alternatives",
+          "url": "https://alternativeto.net/software/captionation/?p=2",
+          "verified": false,
+          "context": "観測済みの alternativeto の Captionation 代替一覧の2ページ目（URLの p=2 から判断）。名前の似た別製品の代替一覧で、メモアプリCaptioの代替とは同定せず、類似名の混入として保持。本文・自社掲載は未確認。今回初めて返却されたURL。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_5_7",
+          "already_observed": false,
+          "first_observed_date": "2026-11-10",
+          "last_previously_observed_date": null
+        },
+        {
+          "title": "captions ai alternative",
+          "url": "https://vidyo.ai/alternative/captions-ai-alternative",
+          "verified": false,
+          "context": "検索返却は名前の似た別製品（字幕生成系の Captions・Captionation・Captionic 等）の代替一覧を示す。メモアプリCaptioの代替とは同定せず、類似名の混入として保持。本文・自社掲載は未確認。",
+          "observation": {
+            "body_scope": "search_metadata_only",
+            "published_date": null,
+            "new_publication_verified": false
+          },
+          "includes_us": false,
+          "search_result_evidence_key": "search_5_8",
+          "already_observed": true,
+          "first_observed_date": "2026-10-31",
+          "last_previously_observed_date": "2026-11-04"
+        }
+      ],
+      "search_observation": {
+        "query_complete": true,
+        "returned_result_headers": 9,
+        "retained_result_headers": 9,
+        "retention_limit": 12,
+        "complete_search_inventory": false,
+        "raw_response_saved": false,
+        "search_route": "Claude WebSearch (standard mode), unquoted query text",
+        "checked_window_utc": {
+          "from": "2026-11-10T15:00:03Z",
+          "to": "2026-11-10T15:03:01Z"
+        }
+      }
+    }
+  ],
+  "diff_from_last": "前回2026-11-04から6日後に、同じ経路（WebSearch standard・引用符なし）で固定6クエリを検索した。返却は計55件（「simplememofast」が10件、他の5クエリが各9件）・重複なし55URLで、50URLは前回と同一、前回の5URLが返らず、5URLが新たに返った。既存の全スナップショットとのURL完全一致では、その5URLはすべて今回初観測。「シンプルメモ Obsidian」「Obsidian メモアプリ おすすめ」「Obsidian 音声入力」「Obsidian Logseq 比較」の4クエリは、前回と同じURL・同じ順序。「simplememofast」は10件中1件が入れ替わった（末尾にあった書籍の版一覧 goodreads のURLが返らず、自社のプレスリリース prtimes.jp の …/000000001.000182412.html が6番目に返った。残る9件の並び順は前回と同じ）。「Captio 代替」は9件中4件が入れ替わった（抜けた4件は、同名の別アプリの紹介ページ1件・辞書1件・字幕生成系 Captions の代替一覧2件。加わった4件は、辞書（フランス語版ウィクショナリー）1件・Captions との比較ページ2件・Captionation 代替一覧の2ページ目1件。残る5件の並び順は前回と同じ）。自社関連と分類したのは14項目（前回の13項目はすべて今回も返り、初観測の自社プレスリリース1件が加わった）。本文は読んでおらず、言及の増減・掲載の開始/終了・検索順位の変化は示さない（返却が同じであることも入れ替わったことも、索引や検索基盤の変化の有無の証明ではない）。",
+  "actions_suggested": [
+    "前回までの提案（自社Cloudflare Pagesのホスト simplememo-596.pages.dev の2URLが自社名クエリで返る件の扱い）は、今回も同じ2URLが返った。扱いは引き続きオーナー/キュー判断に委ね、この回では変更しない。",
+    "今回初めて返った5URL（自社のプレスリリース1件・辞書の項目1件・類似名の別製品の比較ページと代替一覧3件）は記録のみとし、検索ヒットだけで掲載依頼や施策化はしない。過去投稿の表記訂正・外部掲載依頼・メール送信は行わない。",
+    "今回の観測は、Autopilot の Actions 副系が封じ込め中（docs/obsidian/ACTIONS_RECOVERY_ONE_USE.md）で週次観測を回す主体が無いため、2026-11-10 のオーナー判断（前回分の10日上限が切れる 2026-11-15 09:00 JST から全PRがこの検査で落ちるのを防ぐ）で手元のセッションが行った。この回の10日上限は 2026-11-20（UTC）で、2026-11-21 09:00 JST（00:00 UTC）からは次の観測が無いと検査が落ちる。次の週次観測は 2026-11-17 を基準とする。週次観測を誰がいつ回すかの置き方は、引き続きオーナー判断に委ねる。"
+  ]
+}
