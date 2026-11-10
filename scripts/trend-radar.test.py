@@ -1,6 +1,7 @@
 import importlib.util
 import json
 from pathlib import Path
+import re
 import threading
 import unittest
 
@@ -56,6 +57,17 @@ class RadarTests(unittest.TestCase):
                '<item><title>メモ</title><link>javascript:alert(1)</link></item></channel></rss>')
         with self.assertRaises(ValueError):
             radar.parse('hatena', rss)
+
+    def test_no_hit_rule_carries_dropped_rows_in_the_prompt_and_the_runbook(self):
+        # Runbook §6 tells the session to run the prompt verbatim, so the two no-hit rules
+        # must agree: with 'それ以上書かない' alone, a dropped row (perhaps a hit) reads as
+        # plain 'no hits'.
+        root = Path(__file__).resolve().parents[1]
+        for doc in ('docs/obsidian/AUTOPILOT_RUNBOOK.md', 'docs/trend-radar-prompt.md'):
+            bullets = re.split(r'\n\s*- ', (root / doc).read_text(encoding='utf-8'))
+            rules = [b for b in bullets if b.startswith('ヒットなしの日') and '本日ヒットなし' in b]
+            self.assertEqual(len(rules), 1, doc)
+            self.assertIn('dropped_rows', rules[0], doc)
 
     def test_unassigned_code_points_are_removed_whatever_the_runner(self):
         # Noncharacters are unassigned in every Unicode version; plane 4 has nothing on the
