@@ -363,7 +363,9 @@ async function selftest() {
   t(/\n    concurrency:\n      group: autopilot-approval-\$\{\{ needs\.auto-merge\.outputs\.approval_pr \}\}\n      cancel-in-progress: true\n/.test(approvalJob),
     'one pending approval per PR');
   const [approvalOnly, indexnowJob = ''] = approvalJob.split('\n  indexnow-after-approval:\n');
-  t(!/\n\s+run:/.test(approvalOnly), 'the job holding the write token runs no script from the merged tree');
+  // A step runs a script whether it is written `- name: x` + `run:` or as one line `- run: x`.
+  const runsScript = body => /\n\s+(?:-\s+)?run:/.test(body);
+  t(!runsScript(approvalOnly), 'the job holding the write token runs no script from the merged tree');
   t(/^ {4}needs: merge-after-approval\n/.test(indexnowJob) && /\n {4}permissions:\n {6}contents: read\n {4}steps:/.test(indexnowJob),
     'IndexNow after an approved merge runs in a read-only job');
   t(!/secrets\./.test(workflow), 'auto-merge.yml uses no secrets');
@@ -373,7 +375,16 @@ async function selftest() {
     workflow.split('\njobs:\n')[1].split(/\n(?=  [\w-]+:\n)/).map(b => [b.match(/^  ([\w-]+):/)?.[1], b]),
   );
   const writers = Object.entries(jobBodies).filter(([, b]) => /\n {6}[\w-]+: write\b/.test(b));
-  t(writers.length >= 2 && writers.every(([, b]) => !/\n\s+run:/.test(b)), 'no job holding a write token runs a script');
+  t(writers.length >= 2 && writers.every(([, b]) => !runsScript(b)), 'no job holding a write token runs a script');
+  // Both step forms must trip the guard, in each write-token job (2026-11-10 review: the
+  // one-line `- run:` form passed unseen).
+  for (const [name, body] of writers) {
+    for (const step of ['\n      - run: node scripts/indexnow-notify.js --since 1\n',
+      '\n      - name: notify\n        run: node scripts/indexnow-notify.js --since 1\n']) {
+      t(runsScript(body + step), `the write-token guard sees ${JSON.stringify(step.trim().split('\n')[0])} added to ${name}`);
+    }
+  }
+  t(runsScript(approvalOnly + '\n      - run: node x.js\n'), 'the approval-job guard sees a one-line "- run:" step');
   const notify = jobBodies['indexnow-after-merge'] ?? '';
   t(/\n {4}needs: auto-merge\n/.test(notify) && notify.includes("\n    if: needs.auto-merge.outputs.merged_sha != ''\n")
     && /\n {4}permissions:\n {6}contents: read\n {4}steps:/.test(notify), 'normal-path IndexNow runs in a read-only job after a merge');
