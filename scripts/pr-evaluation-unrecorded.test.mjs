@@ -14,11 +14,18 @@ const existing = status => ({ id: 'experiment-seven', type: 'pr_release', status
   discover_boarding_post: { pv: 123, google_referral_ratio: null, mobile_ratio: null,
     syndication_count: null, day1_senders_vs_prev3avg: null, boarded: null } });
 
+// PR7 as it was parked in known_unrecorded before 2026-11-04 (no experiment row yet). This test used to read the
+// live ledger and started failing the day PR7 was resolved (2026-11-04), unseen because no workflow ran this file.
+// Frozen like PARKED_PR7 in pr-release-publication-exception.test.mjs; the live ledger is checked separately below.
+const PR7_PARKED = Object.freeze({ id: 'pr7-dialogue-memo', experiment_id: 'pr7-dialogue-memo',
+  published_at: '2026-09-24', evaluation_at: '2026-10-08', resolve_by: '2026-11-04' });
+
 test('real PR7 appears at D+14 even though its experiment is absent', () => {
-  const rows = read('../growth/experiments/experiments.json').experiments;
-  const entries = readKnownUnrecorded();
-  const pr7 = entries.find(e => e.id === 'pr7-dialogue-memo');
-  assert.ok(pr7);
+  // The live experiments, minus the row PR7 later got: the state the parked entry described.
+  const rows = read('../growth/experiments/experiments.json').experiments.filter(e => e.id !== PR7_PARKED.experiment_id);
+  const entries = [{ ...PR7_PARKED }];
+  validateKnownUnrecorded(entries);
+  const pr7 = entries[0];
   const before = JSON.stringify([rows, entries]);
   assert.equal(rows.some(e => e.id === pr7.experiment_id), false);
   assert.equal(due(rows, '2026-10-07', entries).some(e => e.id === pr7.experiment_id), false);
@@ -41,6 +48,17 @@ test('real PR7 appears at D+14 even though its experiment is absent', () => {
       assert.equal(Object.hasOwn(row, key), false);
   }
   assert.equal(JSON.stringify([rows, entries]), before);
+});
+
+test('the live ledger: known_unrecorded validates, and each entry is due exactly from its D+14', () => {
+  const rows = read('../growth/experiments/experiments.json').experiments;
+  const entries = readKnownUnrecorded();
+  for (const entry of entries) {
+    if (rows.some(e => e.id === entry.experiment_id)) continue;
+    const dayBefore = new Date(Date.parse(`${entry.evaluation_at}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
+    assert.equal(due(rows, dayBefore, entries).some(e => e.source_id === entry.id), false, entry.id);
+    assert.equal(due(rows, entry.evaluation_at, entries).filter(e => e.source_id === entry.id).length, 1, entry.id);
+  }
 });
 
 test('extending only the recording deadline cannot postpone or complete capture', () => {

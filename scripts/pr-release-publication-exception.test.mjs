@@ -5,6 +5,8 @@ import { audit, isPr2139Publication, pr7PublicationException } from './check-pr-
 import { extractCommands } from './preflight.mjs';
 import { wiredChecks, gatingChecks } from './check-selftests.mjs';
 import { score, UNSCORED_VERDICT } from '../growth/scripts/d-score.mjs';
+// Runs the unrecorded-PR contracts too: no workflow names that file (it sat unrun from #2150 until 2026-11-10).
+import './pr-evaluation-unrecorded.test.mjs';
 
 const read = relative => JSON.parse(fs.readFileSync(new URL(relative, import.meta.url), 'utf8'));
 const PR7_ID = 'pr7-dialogue-memo';
