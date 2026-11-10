@@ -470,12 +470,15 @@ export const onRequest = async (context) => {
   // keep their existing indexing policy. Mirror these paths in _headers.
   // Set noindex on the final response too: unchanged assets can retain cached
   // responses with old headers, and _headers does not cover Function responses.
-  if (
-    (pathname.startsWith("/data/") && /\.(?:json|csv)$/.test(pathname)) ||
-    (pathname.startsWith("/assets/downloads/") && /\.(?:md|json|csv|swift|canvas)$/.test(pathname)) ||
-    (pathname.startsWith("/assets/evidence/") && /\.(?:md|json)$/.test(pathname)) ||
-    pathname === "/memo-inbox/LICENSE"
-  ) {
+  // Test the decoded spelling as well (see decodedLookupPath): the asset server
+  // serves `/data%2Fx.json` or `/%64ata/x.json` as /data/x.json, but matches
+  // _headers against the raw spelling, so only this header reaches them.
+  const isRawTextFile = (p) =>
+    (p.startsWith("/data/") && /\.(?:json|csv)$/.test(p)) ||
+    (p.startsWith("/assets/downloads/") && /\.(?:md|json|csv|swift|canvas)$/.test(p)) ||
+    (p.startsWith("/assets/evidence/") && /\.(?:md|json)$/.test(p)) ||
+    p === "/memo-inbox/LICENSE";
+  if (isRawTextFile(pathname) || (decodedPath !== null && isRawTextFile(decodedPath))) {
     const asset = await context.next();
     // A conditional request can return 304 with no body. It still needs the
     // new directive so an older cached 200 does not hide the indexing policy.
