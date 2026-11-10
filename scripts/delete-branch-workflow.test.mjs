@@ -22,7 +22,7 @@ function deleteStep() {
     if (!line.startsWith('          ')) break;
     body.push(line.slice(10));
   }
-  assert.match(body.join('\n'), /git push origin --delete/);
+  assert.match(body.join('\n'), /git push --force-with-lease="refs\/heads\/\$BRANCH:\$sha" origin ":refs\/heads\/\$BRANCH"/);
   return body.join('\n');
 }
 
@@ -64,18 +64,34 @@ function fixture(t) {
   git(work, 'push', '-q', 'origin', 'main');
 
   // Runs the real step in a fresh clone, as actions/checkout with fetch-depth: 0 leaves it.
-  const runStep = (branch) => {
+  // race: { dir, ref } pushes `ref` from `dir` to origin right before the step's own push (the
+  // delete), through a git shim placed first on PATH: a push that lands after the check.
+  const runStep = (branch, { race } = {}) => {
     const runner = path.join(fs.mkdtempSync(path.join(dir, 'runner-')), 'checkout');
     git(dir, 'clone', '-q', origin, runner);
     const temp = fs.mkdtempSync(path.join(dir, 'tmp-'));
     const summary = path.join(temp, 'summary.md');
+    const stepEnv = { ...env, BRANCH: branch, RUNNER_TEMP: temp, GITHUB_STEP_SUMMARY: summary };
+    if (race) {
+      const shim = fs.mkdtempSync(path.join(dir, 'shim-'));
+      const realGit = spawnSync('bash', ['-c', 'command -v git'], { env, encoding: 'utf8' }).stdout.trim();
+      fs.writeFileSync(path.join(shim, 'git'), [
+        '#!/bin/bash',
+        'if [ "$1" = push ] && [ ! -e "$RACE_DONE" ]; then',
+        '  : > "$RACE_DONE"',
+        '  "$REAL_GIT" -C "$RACE_DIR" push -q origin "$RACE_REF" || exit 99',
+        'fi',
+        'exec "$REAL_GIT" "$@"',
+        '',
+      ].join('\n'), { mode: 0o755 });
+      Object.assign(stepEnv, { PATH: `${shim}:${env.PATH}`, REAL_GIT: realGit, RACE_DONE: path.join(shim, 'done'),
+        RACE_DIR: race.dir, RACE_REF: race.ref });
+    }
     const r = spawnSync('bash', ['--noprofile', '--norc', '-eo', 'pipefail', '-c', deleteStep()], {
-      cwd: runner, encoding: 'utf8',
-      env: { ...env, BRANCH: branch, RUNNER_TEMP: temp, GITHUB_STEP_SUMMARY: summary },
+      cwd: runner, encoding: 'utf8', env: stepEnv,
     });
-    const remains = spawnSync('git', ['ls-remote', '--exit-code', '--heads', origin, branch],
-      { env, encoding: 'utf8' }).status === 0;
-    return { status: r.status, out: r.stdout + r.stderr, remains };
+    const head = spawnSync('git', ['ls-remote', '--exit-code', '--heads', origin, branch], { env, encoding: 'utf8' });
+    return { status: r.status, out: r.stdout + r.stderr, remains: head.status === 0, head: head.stdout.split('\t')[0] };
   };
   return { git, work, write, commit, long, runStep };
 }
@@ -101,6 +117,60 @@ test('a branch whose unmerged change is the source half of a rename is kept', (t
   assert.notEqual(r.status, 0, r.out);
   assert.match(r.out, /main に無い差分がある/);
   assert.equal(r.remains, true, 'the unmerged deletion of a.txt must not be lost');
+});
+
+// Shared setup: the branch changes dl/My Note.md, and the same change is squashed into main.
+function squashMerged(f, branch) {
+  f.git(f.work, 'checkout', '-q', '-b', branch);
+  f.write('dl/My Note.md', 'validated change\n');
+  f.commit('change');
+  f.git(f.work, 'push', '-q', 'origin', branch);
+  f.git(f.work, 'checkout', '-q', 'main');
+  f.write('dl/My Note.md', 'validated change\n');
+  f.commit('squash: change');
+  f.git(f.work, 'push', '-q', 'origin', 'main');
+  f.git(f.work, 'checkout', '-q', branch);
+}
+
+test('a branch whose post-merge commit puts the validated change back is kept', (t) => {
+  // Re-review: the net diff from the merge-base no longer lists a file the branch changed and
+  // then changed back after the squash, so it was never compared with main and the branch
+  // (holding 'base' while main holds the validated change) was deleted.
+  const f = fixture(t);
+  squashMerged(f, 'claude/revert-race');
+  f.write('dl/My Note.md', 'base\n');
+  f.commit('put it back after the merge');
+  f.git(f.work, 'push', '-q', 'origin', 'claude/revert-race');
+
+  const r = f.runStep('claude/revert-race');
+  assert.notEqual(r.status, 0, r.out);
+  assert.match(r.out, /main に無い差分がある/);
+  assert.equal(r.remains, true, 'the unmerged revert must not be lost');
+});
+
+test('a push that lands after the check is not deleted with the branch', (t) => {
+  // Re-review: the check reads origin/$BRANCH at fetch time, but a plain delete push removes
+  // whatever the branch holds at push time.
+  const f = fixture(t);
+  squashMerged(f, 'claude/late-push');
+  f.write('late.txt', 'pushed after the check\n');
+  f.commit('late');
+  const late = f.git(f.work, 'rev-parse', 'HEAD').trim();
+
+  const r = f.runStep('claude/late-push', { race: { dir: f.work, ref: 'claude/late-push' } });
+  assert.notEqual(r.status, 0, r.out);
+  assert.match(r.out, /照合した後にブランチが動いた/);
+  assert.equal(r.remains, true);
+  assert.equal(r.head, late, 'the late commit is still on the branch');
+});
+
+test('a squash-merged branch is deleted when nothing moves (the lease names the checked SHA)', (t) => {
+  const f = fixture(t);
+  squashMerged(f, 'claude/plain');
+  const r = f.runStep('claude/plain');
+  assert.equal(r.status, 0, r.out);
+  assert.match(r.out, /squash で取り込み済み/);
+  assert.equal(r.remains, false);
 });
 
 test('a rename that main already has is still deleted', (t) => {

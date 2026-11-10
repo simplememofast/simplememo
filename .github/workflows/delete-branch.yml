@@ -11,8 +11,9 @@
 # 守り:
 #   - claude/ 配下しか消さない（main も他人のブランチも名前で弾く）
 #   - main に取り込み済みでなければ消さない。squash マージは祖先にならないので、
-#     ブランチが変えたファイルが main と同じ内容かで判定する（パスは NUL 区切り・literal pathspec で照合。
-#     rename は --no-renames で移動元と移動先の両方を照合する）。scripts/delete-branch-workflow.test.mjs が
+#     ブランチが変えたファイル（最後の差分と、どれかのコミットが触ったもの全部）が main と同じ内容かで
+#     判定する（パスは NUL 区切り・literal pathspec で照合。rename は --no-renames で移動元と移動先の両方を
+#     照合する）。消す push は照合した SHA への lease 付き。scripts/delete-branch-workflow.test.mjs が
 #     この run: をそのまま一時リポジトリで動かして確かめる
 #   - 入力は env 経由で渡す（run: に式を直接展開しない — check-injection-surface.mjs の規律）
 name: Delete merged branch
@@ -64,9 +65,19 @@ jobs:
             # 拾えないので一時ファイルを経由する（失敗したら set -e で止まり、消さない）。
             # --no-renames: rename として読むと移動先のパスしか出ず、移動元を消した変更が
             # main と照合されない（移動先が main と同じなら「取り込み済み」と読んで消していた）。
+            # 照合するのは、最後の状態の差分に加えて、ブランチのコミットが1つでも触ったファイル全部
+            # （2026-11-10 再レビュー）。squash の後に検証済みの変更を元へ戻すコミットが載ると、base との
+            # 差分からそのファイルが消え、main（検証済みの内容）と照合しないまま消していた（PR #851 の形）。
+            # main がその後にそのファイルを変えていると消さない側に倒れる（手で確かめて消す）。
             list="$RUNNER_TEMP/branch-files"
             git diff --no-renames --name-only -z "$base" "origin/$BRANCH" > "$list"
-            mapfile -d '' -t files < "$list"
+            git log --no-renames --format= --name-only -z "$base..origin/$BRANCH" >> "$list"
+            LC_ALL=C sort -zu -o "$list" "$list"
+            mapfile -d '' -t listed < "$list"
+            files=()
+            for f in "${listed[@]}"; do
+              if [ -n "$f" ]; then files+=("$f"); fi
+            done
             # diff --quiet は差分で 1、エラーで 128。! で受けるとどちらも「消さない」になる。
             if [ "${#files[@]}" -gt 0 ] && ! git --literal-pathspecs diff --quiet "origin/$BRANCH" origin/main -- "${files[@]}"; then
               echo "::error::main に無い差分がある — 消さない"
@@ -75,5 +86,11 @@ jobs:
             fi
             echo "変更したファイルは main と同一 — squash で取り込み済み"
           fi
-          git push origin --delete "$BRANCH"
-          echo "削除した: \`$BRANCH\`" >> "$GITHUB_STEP_SUMMARY"
+          # 照合した SHA のときだけ消す（2026-11-10 再レビュー）。照合は fetch した時点の origin/$BRANCH を
+          # 見ているので、その後に載った push は照合していない。lease で、動いていたら拒ませる。
+          sha=$(git rev-parse --verify "refs/remotes/origin/$BRANCH")
+          if ! git push --force-with-lease="refs/heads/$BRANCH:$sha" origin ":refs/heads/$BRANCH"; then
+            echo "::error::照合した後にブランチが動いた（か、削除の push が失敗した）— 消さない"
+            exit 1
+          fi
+          echo "削除した: \`$BRANCH\`（$sha）" >> "$GITHUB_STEP_SUMMARY"
