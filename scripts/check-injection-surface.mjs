@@ -26,6 +26,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ledgerScenarios, run } from './lib/selftest.mjs';
+import {
+  allPairs, buildYamlDocuments, expressionTokens, isKey, readYamlEvents, scalarText, templateExpressions,
+} from './lib/workflow-secrets.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const SURFACE_PATH = path.join(ROOT, 'data/injection-surface.json');
@@ -38,7 +41,7 @@ export const TRUST = ['none', 'partial', 'own'];
  *
  * 【2026-11-10 監査】以前は `${{` の直後に来る6種だけを run: の中で見ていた。
  * workflow_run の head_branch（フォークの PR が決められる）や inputs、
- * format() で包んだ式、github-script の script: は素通りしていた。いまはブロックの
+ * format() で包んだ式、github-script の script: は素通りしていた。いまは値の
  * `${{ … }}` の中身だけを取り出して照合する（地の文の "inputs." は拾わない）。
  *
  * 【同日の再レビュー】同じ値を別の書き方で展開する形も拾う:
@@ -49,7 +52,7 @@ export const TRUST = ['none', 'partial', 'own'];
  *     `.` の形へ直してから照合する
  *   - `${{ env.X }}`。env: で渡しても、`${{ env.X }}` と書けば値がスクリプトへ展開される。
  *     安全なのはシェルの `"$X"` と github-script の `process.env.X` だけ
- *   - 行をまたいで書いた `${{ … }}`（ブロック全体をつないでから照合する）
+ *   - 行をまたいで書いた `${{ … }}`（値の全体から切り出す。scanWorkflow）
  *   - 大文字小文字の違い（GitHub の式は文脈名・プロパティ名の大文字小文字を区別しない）
  */
 export const UNTRUSTED_EXPR = [
@@ -71,49 +74,69 @@ export const UNTRUSTED_EXPR = [
 ];
 
 /**
- * 照合の前に式を整える。`x['y']` を `x.y` に直し、残った文字列リテラルを空にし
- * （`'inputs.'` のような地の文を拾わない）、`.` の前後の空白を詰める。
+ * 照合の前に式を整える。GitHub の字句解析（expressionTokens）で区切り、文字列リテラルを空にし
+ * （`'inputs.'` のような地の文を拾わない）、リテラル1つだけの添字 `x['y']` を `x.y` に直し、
+ * 字句をつなぎ直す（`.` の前後の空白は消える）。
+ *
+ * 【2026-11-10 再レビュー】以前は正規表現で `[ '…' ]` を先に `.…` へ直してから文字列を空にして
+ * いたので、`format('[', 1) == null || github.head_ref || format(']', 2)` では別々の文字列の `[` と `]`
+ * を1つの添字として組み、間の `github.head_ref` を文字列の中身として消していた（0件）。字句で
+ * 区切れば、文字列の中の `[` `]` は文字列のまま空になる。
  */
 export function normalizeExpr(s) {
-  return s
-    .replace(/\[\s*'((?:[^']|'')*)'\s*\]/g, (_, k) => `.${k.replace(/''/g, "'")}`)
-    .replace(/'(?:[^']|'')*'/g, "''")
-    .replace(/\s*\.\s*/g, '.');
+  const tokens = expressionTokens(s);
+  const word = (t) => ['named', 'property', 'function', 'literal', 'number', 'unexpected'].includes(t.kind);
+  let out = '';
+  for (let k = 0; k < tokens.length; k++) {
+    const [t, key, close] = [tokens[k], tokens[k + 1], tokens[k + 2]];
+    if (t.kind === 'start-index' && key?.kind === 'string' && close?.kind === 'end-index') {
+      out += `.${key.value}`;
+      k += 2;
+      continue;
+    }
+    if (word(t) && /[\w-]$/.test(out)) out += ' ';
+    out += t.kind === 'string' ? "''" : t.raw;
+  }
+  return out;
 }
 
 /**
- * ワークフローの `run:` と github-script の `script:` のブロックだけを取り出す。
+ * ワークフローの `run:` と github-script の `script:` の値だけを取り出す。
  * env: 経由で渡し、シェル変数・process.env として読むのは安全（展開されない）ので、
- * **ブロックの中に直接書かれている場合だけを問題にする。**
+ * **値の中に直接書かれている場合だけを問題にする。**
  *
- * ブロックの終わりは、キー（`run` / `script`）自身の桁より深くない行。`- run: …` と
- * 書いたステップでは、同じステップの env: / if: / with: が `run` と同じ桁に並ぶので、
- * そこでブロックが終わる（ダッシュの桁で測ると、env: に移した値まで run: の中身として
- * 読んでいた）。
+ * 【2026-11-10 再レビュー】以前は字面を行で追っていた。それで見えない書き方が3つあった ——
+ * エイリアス（`run: *cmd` で env: に置いた値を持ち込む）、引用符で囲んだ鍵（`"run":`）、
+ * 流れの書き方（`- { run: "…" }`）。式の終わりも最初の `}}` で決めていたので、
+ * `format('}}{0}', github.head_ref)` のように文字列の中に `}}` があると、その後ろを見なかった。
+ * いまは YAML を ruby の Psych で読み、エイリアスを GitHub と同じ手順で展開した木の上で
+ * （scripts/lib/workflow-secrets.mjs。check-credentials.mjs と同じ読み方）、鍵が run / script の
+ * 文字列の値すべてから、GitHub と同じ切り出し方（文字列の中の `}}` は閉じではない）で式を拾う。
+ * 読めないファイルは「読めない」として1件にする（読めないまま0件にしない）。
  */
 export function scanWorkflow(text, file) {
-  const hits = [];
   const lines = text.split('\n');
-  let block = null; // { indent, rows: [[lineNo, text], …] }
-  const flush = () => { if (block) checkBlock(block.rows); block = null; };
-  lines.forEach((line, i) => {
-    if (block) {
-      if (line.trim() === '') { block.rows.push([i + 1, '']); return; }
-      if (line.search(/\S/) > block.indent) { block.rows.push([i + 1, line]); return; }
-      flush(); // the block ended; this line may start the next one
-    }
-    const m = /^(\s*)(-?\s*)(run|script):\s*(\|[-+]?|>[-+]?)?\s*(.*)$/.exec(line);
-    if (m) block = { indent: m[1].length + m[2].length, rows: [[i + 1, m[5] ?? '']] };
-  });
-  flush();
-  function checkBlock(rows) {
-    const joined = rows.map(([, s]) => s).join('\n');
-    for (const mm of joined.matchAll(/\$\{\{([\s\S]*?)\}\}/g)) {
-      const inner = normalizeExpr(mm[1]);
-      const re = UNTRUSTED_EXPR.find((r) => r.test(inner));
-      if (!re) continue;
-      const [ln, s] = rows[joined.slice(0, mm.index).split('\n').length - 1];
-      hits.push({ file, line: ln, expr: String(re), text: s.trim().slice(0, 90) });
+  const parsed = readYamlEvents([text.replace(/^\uFEFF/, '')])[0];
+  let docs;
+  try {
+    if (parsed.error) throw new Error(parsed.error);
+    docs = buildYamlDocuments(parsed.events);
+  } catch (e) {
+    return [{ file, line: 1, expr: 'unreadable', unreadable: true, text: `YAML として読めない: ${String(e.message).slice(0, 120)}` }];
+  }
+  const hits = [];
+  for (const root of docs) {
+    for (const [key, value] of allPairs(root)) {
+      if (!(isKey(key, 'run') || isKey(key, 'script')) || scalarText(value) === null) continue;
+      for (const { index, text: expr } of templateExpressions(value.v)) {
+        const re = UNTRUSTED_EXPR.find((r) => r.test(normalizeExpr(expr)));
+        if (!re) continue;
+        // 行は目安（エイリアスなら、それを書いた行）。ブロック（| >）の中身は鍵の次の行から。
+        const block = value.style === 4 || value.style === 5 ? 1 : 0;
+        const ln = value.aliasOf !== undefined ? value.line
+          : value.line + block + value.v.slice(0, index).split('\n').length - 1;
+        hits.push({ file, line: ln, expr: String(re), text: (lines[ln - 1] ?? '').trim().slice(0, 90) });
+      }
     }
   }
   return hits;
@@ -163,9 +186,29 @@ export const SCAN_SELFTEST = [
     'jobs:\n  a:\n    steps:\n      - run: echo "${{ github.event[\'pull_request\'][\'number\'] }}"\n'],
   ['文字列リテラルの中の "env." / "inputs." は拾わない', 0,
     'jobs:\n  a:\n    steps:\n      - run: echo "${{ format(\'env.{0} inputs.\', github.run_id) }}"\n'],
+  // 2026-11-10 再レビュー: 字句で区切る・文字列の中の }} で閉じない・YAML として読む。
+  ['別々の文字列の [ と ] を1つの添字として組まない', 1,
+    'jobs:\n  a:\n    steps:\n      - run: echo "${{ format(\'[\', 1) == null || github.head_ref || format(\']\', 2) }}"\n'],
+  ['文字列の中の }} で式を閉じない（format の書式）', 1,
+    'jobs:\n  a:\n    steps:\n      - run: echo "${{ format(\'}}{0}\', github.head_ref) }}"\n'],
+  ['文字列の中の }} で式を閉じない（&& の左）', 1,
+    'jobs:\n  a:\n    steps:\n      - run: echo "${{ \'}}\' && github.event.issue.title }}"\n'],
+  ["'' を含む文字列の中の }} でも閉じない", 1,
+    'jobs:\n  a:\n    steps:\n      - run: echo "${{ format(\'it\'\'s }}\', github.head_ref) }}"\n'],
+  ['文字列の中に書いた github.head_ref は、}} を含んでも拾わない', 0,
+    'jobs:\n  a:\n    steps:\n      - run: echo "${{ format(\'}} github.head_ref {0}\', github.run_id) }}"\n'],
+  ['エイリアスで env: の値を run: に持ち込む形を拾う', 1,
+    'jobs:\n  a:\n    steps:\n      - env:\n          X: &cmd echo "${{ github.head_ref }}"\n        run: *cmd\n'],
+  ['引用符で囲んだ鍵 "run" を拾う', 1,
+    'jobs:\n  a:\n    steps:\n      - "run": echo "${{ github.head_ref }}"\n'],
+  ['流れの書き方 { run: … } を拾う', 1,
+    'jobs:\n  a:\n    steps:\n      - { run: "echo ${{ github.head_ref }}" }\n'],
+  ['YAML として読めないファイルは、読めないことを1件にする', 1,
+    'jobs:\n  a:\n    steps:\n      - run: echo ok\n     bad: [\n'],
 ];
 export function scanSelftest(log = console.log) {
   let failed = 0;
+  readYamlEvents(SCAN_SELFTEST.map(([, , yml]) => yml)); // ruby を1回だけ起動する（結果は読み手が覚える）
   for (const [name, want, yml] of SCAN_SELFTEST) {
     const got = scanWorkflow(yml, 'selftest.yml').length;
     const ok = got === want;
@@ -222,7 +265,12 @@ if (isMain) {
 
   const files = fs.existsSync(WORKFLOW_DIR)
     ? fs.readdirSync(WORKFLOW_DIR).filter((f) => f.endsWith('.yml') || f.endsWith('.yaml')) : [];
-  const hits = files.flatMap((f) => scanWorkflow(fs.readFileSync(path.join(WORKFLOW_DIR, f), 'utf8'), f));
+  const texts = files.map((f) => fs.readFileSync(path.join(WORKFLOW_DIR, f), 'utf8'));
+  readYamlEvents(texts.map((t) => t.replace(/^\uFEFF/, ''))); // ruby を1回だけ起動する
+  const scanned = files.flatMap((f, n) => scanWorkflow(texts[n], f));
+  const unreadable = scanned.filter((h) => h.unreadable);
+  const hits = scanned.filter((h) => !h.unreadable);
+  for (const h of unreadable) problems.push(`${h.file}: ${h.text} — 読めないワークフローは、何を展開しているか確かめられない`);
 
   console.log(`注入面 — 外部コンテンツの入口 ${doc.entry_points.length}件\n`);
   for (const e of doc.entry_points) {
