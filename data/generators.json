@@ -59,7 +59,8 @@
         "_redirects",
         "functions/_middleware.js"
       ],
-      "why": "公開方針から遮断ブロックを作る。**ずれると非公開のつもりの台帳が配信される**"
+      "why": "公開方針から遮断ブロックを作る。**ずれると非公開のつもりの台帳が配信される**",
+      "deterministic_why": "子プロセスは git ls-files（同じチェックアウトの追跡ファイル一覧）だけで、それも検査側の topLevelDirs（追跡されたドット始まりのディレクトリを数える）でしか使わない。--write が書く遮断ブロックは data/publication-policy.json だけで決まり、時計・ネット・外部APIは出力に入らない（2026-11-10）"
     },
     {
       "cmd": "scripts/check-selftests.mjs --sync",
