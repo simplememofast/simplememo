@@ -264,7 +264,12 @@ export function renderMarkdown(report) {
   lines.push(`- 測った時刻: ${jst(now)} ／ 先読みの範囲: ${jst(Date.parse(report.horizon_until))} まで`,
     `- 回した検査: ${report.commands}本（SEO Validation から導出）`);
   if (report.already_red.length) {
-    lines.push(`- 本物の時計でも落ちる検査（日付のせいではない。先読みの対象外）: ${report.already_red.map((l) => `\`${l}\``).join(' / ')}`);
+    // [2026-11-11] 実ランナーの初回で `viewport-pool-browser.test.mjs` がここに出た。先読みのジョブは
+    // ブラウザ（playwright-core）を入れないので、このジョブの中でだけ落ちる。前の文言
+    // 「本物の時計でも落ちる検査」は **main が赤い**と読めた。どこで落ちたのかを本文に書く。
+    lines.push('- **この先読みのジョブの中では**、本物の時計でも落ちた検査（日付のせいではないので先読みの対象外。'
+      + '**SEO Validation で落ちているという意味ではない** —— このジョブが入れていない依存（ブラウザなど）が要る検査もここに出る。'
+      + `いま main が赤いかどうかは main の日次検証で見る）: ${report.already_red.map((l) => `\`${l}\``).join(' / ')}`);
   }
   if (report.artifacts.length) {
     lines.push(`- 時計ずらしの副作用として除外した検査（data/date-lookahead.json）: ${report.artifacts.map((a) => `\`${a.check}\``).join(' / ')}`);
@@ -479,6 +484,16 @@ function selftest() {
         classified: { already_red: [], artifacts: [], cliffs: ['x.test.mjs'] }, cliffs: [], unstable: ['x.test.mjs'] });
       eq([r.state, exitCodeOf(r)], ['clear', 0], 'state');
       assert(renderMarkdown(r).includes('測り直すと通った検査') && renderMarkdown(r).includes('`x.test.mjs`'), '本文に再現しなかった検査が無い');
+    }],
+    ['**このジョブの中でだけ落ちた検査を「main が赤い」と読ませない**（2026-11-11 の初回でブラウザの検査が出た）', () => {
+      const r = buildReport({ nowMs: T0, horizonDays: 7, total: 248, shiftedFailed: ['--test needs-browser.test.mjs'],
+        classified: classify(['--test needs-browser.test.mjs'], new Set(['--test needs-browser.test.mjs']), []), cliffs: [] });
+      eq([r.state, exitCodeOf(r)], ['clear', 0], 'state');
+      const line = renderMarkdown(r).split('\n').find((l) => l.includes('`--test needs-browser.test.mjs`'));
+      assert(line, '本文に、いまも落ちる検査の名前が無い');
+      for (const needle of ['この先読みのジョブの中では', 'SEO Validation で落ちているという意味ではない', '先読みの対象外']) {
+        assert(line.includes(needle), `いまも落ちる検査の行に「${needle}」が無い`);
+      }
     }],
     ['台帳: 正しい形は通る', () => eq(validateLedger(goodLedger(), labelsWith()), [], 'problems')],
     ['台帳: **理由の無い除外は落ちる**（検査を黙らせる経路にしない）', () => {
