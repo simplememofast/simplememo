@@ -1918,20 +1918,44 @@ export const AUTOPILOT_RUN_EVENTS = ['schedule', 'workflow_dispatch'];
  * 同じワークフローの一覧には、PR やブランチ側で定義を書き換えた版の run も並ぶ
  * （`on: pull_request` を足した改変版など）。ステップ名・結果・ログの1行を選べる
  * ので、それを読むと「失敗した回」や任意の実費を台帳に入れられた。
- * autopilot-completion.mjs の isRun・company-daily-gsc.mjs と同じ方針で、
- * このリポジトリ自身の・本番の定義の・本来の起動種別の run だけを通す。
- * head_branch は見ていない（main 以外で手動起動した run の扱いはオーナー判断）。
+ * **main 以外のブランチで手動起動した run も同じ形になる** —— workflow_dispatch は
+ * 起動したブランチ側の定義とスクリプトで走るので、パス・リポジトリ・起動種別は
+ * 本番と同じでも中身は改変版でありうる（AI のセッションも手動起動できる）。
+ * そこで autopilot-completion.mjs の isRun・company-daily-gsc.mjs と同じく、
+ * このリポジトリ自身の・main の・本来の起動種別の run だけを通す。
+ * main 以外の手動起動は台帳に書かず、捨てたことを日次の出力（stdout →
+ * ステップ要約と Act PR の本文）に出す。実費は掛かっているので、
+ * 数えるかどうかはオーナーが名指しで決める（決まるまでは書かない側）。
  */
 export function isProductionAutopilotRun(r, repo) {
   return Number.isSafeInteger(r?.id)
     && r.path === `.github/workflows/${WORKFLOW_FILE}`
     && r.repository?.full_name === repo
     && r.head_repository?.full_name === repo
+    && r.head_branch === 'main'
     && AUTOPILOT_RUN_EVENTS.includes(r.event);
 }
 
-/** Runs for each production event, merged newest first and cut to `limit`. Throws if any read fails. */
-export async function listProductionRuns(repo, headers, limit = 30, fetchImpl = fetch) {
+/**
+ * The runs left out of the ledgers, as one line for the daily output; '' when none were left out.
+ * Identifiers only (id, event, branch, head repository): enough to find the run, nothing from its log.
+ */
+export function droppedRunsNote(dropped) {
+  if (!Array.isArray(dropped) || !dropped.length) return '';
+  const plain = (shownField) => String(shownField ?? '?').replace(/[^\w./-]/g, '?').slice(0, 80);
+  const shown = dropped.slice(0, 10).map((r) =>
+    `id=${plain(r.id)} event=${plain(r.event)} branch=${plain(r.head_branch)} head=${plain(r.head_repository)}`);
+  return `出自を確かめられず台帳の材料にしなかった run: ${dropped.length}件（${shown.join(' / ')}`
+    + `${dropped.length > shown.length ? ` ほか${dropped.length - shown.length}件` : ''}）。`
+    + (dropped.some((r) => r.event === 'workflow_dispatch' && r.head_branch !== 'main')
+      ? 'main 以外で手動起動した回の実費は実費台帳に載らない（数えるかはオーナー判断）。' : '');
+}
+
+/**
+ * Runs for each production event, merged newest first and cut to `limit`. Throws if any read fails.
+ * Runs that fail isProductionAutopilotRun are pushed to `dropped` (when given) instead of vanishing.
+ */
+export async function listProductionRuns(repo, headers, limit = 30, fetchImpl = fetch, dropped = null) {
   const byId = new Map();
   for (const event of AUTOPILOT_RUN_EVENTS) {
     const url = `https://api.github.com/repos/${repo}/actions/workflows/${WORKFLOW_FILE}/runs?event=${event}&per_page=${limit}`;
@@ -1945,7 +1969,10 @@ export async function listProductionRuns(repo, headers, limit = 30, fetchImpl = 
     for (const r of (await res.json()).workflow_runs ?? []) {
       if (!isProductionAutopilotRun(r, repo)) {
         // 黙って消さない。捨てた理由を追えるように、識別子と起動種別だけ出す。
-        console.error(`# 出自を確かめられない run を台帳の材料にしない: id=${r?.id} event=${r?.event} head=${r?.head_repository?.full_name}`);
+        console.error(`# 出自を確かめられない run を台帳の材料にしない: id=${r?.id} event=${r?.event} branch=${r?.head_branch} head=${r?.head_repository?.full_name}`);
+        if (Array.isArray(dropped) && !dropped.some((d) => d.id === r?.id)) {
+          dropped.push({ id: r?.id, event: r?.event, head_branch: r?.head_branch, head_repository: r?.head_repository?.full_name });
+        }
         continue;
       }
       byId.set(r.id, r);
@@ -1956,7 +1983,7 @@ export async function listProductionRuns(repo, headers, limit = 30, fetchImpl = 
     .slice(0, limit);
 }
 
-async function fetchWorkflowRuns(repo, token, limit = 30) {
+async function fetchWorkflowRuns(repo, token, limit = 30, dropped = null) {
   if (!token) return null;
   const headers = {
     authorization: `Bearer ${token}`,
@@ -1965,7 +1992,7 @@ async function fetchWorkflowRuns(repo, token, limit = 30) {
   };
   let runs;
   try {
-    runs = await listProductionRuns(repo, headers, limit);
+    runs = await listProductionRuns(repo, headers, limit, fetch, dropped);
   } catch (e) {
     console.error(`# ${e.message}（台帳が完全という意味ではない）`);
     return null;
@@ -3071,6 +3098,9 @@ async function selftest() {
       isProductionAutopilotRun(run({}), repo) && isProductionAutopilotRun(run({ event: 'workflow_dispatch' }), repo));
     t('出自: pull_request / push で起動した run は通さない',
       !isProductionAutopilotRun(run({ event: 'pull_request' }), repo) && !isProductionAutopilotRun(run({ event: 'push' }), repo));
+    t('出自: main 以外のブランチで手動起動した run（ブランチ側の定義で走る）は通さない',
+      !isProductionAutopilotRun(run({ event: 'workflow_dispatch', head_branch: 'claude/modified-def' }), repo)
+      && !isProductionAutopilotRun(run({ head_branch: undefined }), repo));
     t('出自: フォークの run は head_branch が main でも通さない',
       !isProductionAutopilotRun(run({ head_repository: { full_name: 'someone/simplememo' } }), repo));
     t('出自: 別のワークフローのパスや識別子の無い run は通さない',
@@ -3080,7 +3110,8 @@ async function selftest() {
     const pages = {
       schedule: [run({ id: 3, created_at: '2026-11-09T00:00:00Z' }), run({ id: 9, event: 'pull_request', created_at: '2026-11-09T05:00:00Z' })],
       workflow_dispatch: [run({ id: 4, event: 'workflow_dispatch', created_at: '2026-11-09T03:00:00Z' }),
-        run({ id: 8, event: 'workflow_dispatch', head_repository: { full_name: 'someone/simplememo' }, created_at: '2026-11-09T06:00:00Z' })],
+        run({ id: 8, event: 'workflow_dispatch', head_repository: { full_name: 'someone/simplememo' }, created_at: '2026-11-09T06:00:00Z' }),
+        run({ id: 7, event: 'workflow_dispatch', head_branch: 'claude/x', created_at: '2026-11-09T07:00:00Z' })],
     };
     const fakeFetch = async (url) => {
       urls.push(url);
@@ -3089,12 +3120,21 @@ async function selftest() {
     };
     const quiet = console.error; console.error = () => {};
     let listed;
-    try { listed = await listProductionRuns(repo, {}, 30, fakeFetch); } finally { console.error = quiet; }
+    const dropped = [];
+    try { listed = await listProductionRuns(repo, {}, 30, fakeFetch, dropped); } finally { console.error = quiet; }
     t('出自: 起動種別ごとにサーバ側で絞り、PR の run を除く指定は使わない',
       urls.length === 2 && urls.some(u => u.includes('event=schedule')) && urls.some(u => u.includes('event=workflow_dispatch'))
       && urls.every(u => !u.includes('exclude_pull_requests')));
     t('出自: 混ざった応答から本番の run だけを新しい順に返す',
       JSON.stringify(listed.map(r => r.id)) === '[4,3]');
+    const note = droppedRunsNote(dropped);
+    t('出自: 捨てた run は黙って消さず、日次の出力に識別子だけを出す',
+      JSON.stringify(dropped.map(r => r.id).sort()) === '[7,8,9]'
+      && note.includes('3件') && note.includes('id=7') && note.includes('branch=claude/x')
+      && note.includes('実費台帳に載らない')
+      && !droppedRunsNote([{ id: 9, event: 'pull_request', head_branch: 'main' }]).includes('実費台帳に載らない')
+      && droppedRunsNote([]) === '' && droppedRunsNote(null) === ''
+      && !droppedRunsNote([{ id: 1, head_branch: 'x\n## 偽の見出し' }]).includes('\n'));
     const failing = async () => ({ ok: false, status: 502, json: async () => ({}) });
     let failed = false;
     try { await listProductionRuns(repo, {}, 30, failing); } catch { failed = true; }
@@ -5508,7 +5548,8 @@ async function buildContext(today, ledger = null) {
   } catch (e) {
     console.error(`# 実費ゲートの判定を取得できなかった: ${e.message}`);
   }
-  const workflowRuns = await fetchWorkflowRuns(repo, token);
+  const droppedRuns = [];
+  const workflowRuns = await fetchWorkflowRuns(repo, token, 30, droppedRuns);
   const orphans = await fetchOrphanedCommits(repo, token, today,
     { watchSince: orphanWatchSince(ledger) });
   // **issue_closed の材料。**取れなければ null のまま渡す（判定不能を回復と読ませない）。
@@ -5519,7 +5560,7 @@ async function buildContext(today, ledger = null) {
   if (issues === null) console.error('# 監視Issueの一覧を取得できず判定不能（台帳を解決扱いにしない）');
   // 台帳そのものも渡す。**handler が積んだ状態（除外一覧）を導出が読めないと、
   // 題と根拠で違う件数が出る。**判定には使わない —— 使うのは件数の表示だけ。
-  return { today, runsDoc, matrix, costDoc, statusDoc, routineDoc, selfheal, budget, workflowRuns, orphans, issues, viewport,
+  return { today, runsDoc, matrix, costDoc, statusDoc, routineDoc, selfheal, budget, workflowRuns, droppedRuns, orphans, issues, viewport,
     ledgerDoc: ledger, repo, token, eventName: process.env.GITHUB_EVENT_NAME, completion,
     // 採点の方針（L4・読むだけ）。D8 の月次追認と、その閉じ条件が accepted_modes を見る
     scorePolicy: readJson(path.join(ROOT, 'data/autonomy-score.json')) };
@@ -5689,6 +5730,9 @@ async function main() {
   if (retirementStatus(ctx.routineDoc).present) {
     console.log(`副系の観測: retired — not observed since ${ctx.routineDoc.observed_at}（退役中。routine の状態は判定しない）\n`);
   }
+  // 台帳に書かなかった run を、ステップ要約と Act PR の本文に出す（stderr だけだと誰も読まない）。
+  const dropNote = droppedRunsNote(ctx.droppedRuns);
+  if (dropNote) console.log(`${dropNote}\n`);
   console.log(render(sum, applied, today));
 }
 
