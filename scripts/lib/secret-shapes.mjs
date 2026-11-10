@@ -27,15 +27,27 @@ export const SECRET_SHAPES = [
   ['private_key', /-----BEGIN [A-Z ]*PRIVATE KEY-----/],
   ['gcp_service_account', /"private_key_id"\s*:\s*"[0-9a-f]{20,}"/],
   // パスにトークンを埋めた API の URL（設定ファイルへ貼った接続先の URL で起きる形）。
-  ['token_in_api_url', /https:\/\/(?:api|mcp)\.[a-z0-9.-]+\/[^\s"')<>]*[0-9a-f]{32,}/],
+  // api.github.com と api.indexnow.org は除く: 前者のパスにはコミットや blob の SHA（40/64桁の16進）が
+  // 普通に入り（GitHub のトークンは gh*_ の形で上が拾う）、後者の key は公開が前提（<key>.txt で配信する）。
+  // 桁数（40/64）では除かない: 接続先の URL に埋めるトークンには、SHA-256 と同じ 64 桁の16進のものがある。
+  ['token_in_api_url', /https:\/\/(?:api\.(?!github\.com\/|indexnow\.org\/)|mcp\.)[a-z0-9.-]+\/[^\s"')<>]*[0-9a-f]{32,}/],
 ];
+
+/**
+ * JSON と JS の文字列は改行やタブを `\n` `\t` の2文字で持つ。値がその直後に来ると、手前が語の文字（n, t）に
+ * なって先頭の `\b` が効かない（JSON.stringify が書く複数行のメモが、まさにこの形になる）。各行をもう一度、
+ * エスケープを空白に（`\/` は `/` に）戻して読む。空白を足すだけなので、元の行で当たらなかったものが
+ * 語境界の分だけ当たるようになるほかは変わらない。
+ */
+const ESCAPES = /\\(?:[nrtbfv0]|u[0-9a-fA-F]{4}|x[0-9a-fA-F]{2})/g;
 
 /** text の中の該当を `{ line, kind }` で返す。値は返さない。 */
 export function scanText(text) {
   const hits = [];
   String(text ?? '').split('\n').forEach((line, i) => {
+    const unescaped = line.replace(/\\\//g, '/').replace(ESCAPES, ' ');
     for (const [kind, re] of SECRET_SHAPES) {
-      if (re.test(line)) hits.push({ line: i + 1, kind });
+      if (re.test(line) || (unescaped !== line && re.test(unescaped))) hits.push({ line: i + 1, kind });
     }
   });
   return hits;
@@ -59,6 +71,13 @@ export const SHAPE_SAMPLES = {
     ['private_key', '-----BEGIN ' + 'EC PRIVATE KEY-----'],
     ['gcp_service_account', '"private_key_id": "' + 'a'.repeat(40) + '"'],
     ['token_in_api_url', 'https://api.example.com/mcp/' + 'f'.repeat(64)],
+    // JSON / JS のエスケープの直後（JSON.stringify が複数行のメモをこう書く）。
+    ['github_token', JSON.stringify({ note: 'line1\n' + 'ghp_' + 'a1B2c3D4e5'.repeat(4) })],
+    ['aws_access_key', JSON.stringify({ note: 'a\t' + 'AKIA' + 'Q'.repeat(16) })],
+    ['anthropic_key', '"line1\\r\\nsk-ant-' + 'api03-' + 'x'.repeat(30) + '"'],
+    ['token_in_api_url', '{"url":"https:\\/\\/mcp.example.com\\/sse\\/' + 'e'.repeat(40) + '"}'],
+    // 同じホスト名で始まる別のホストは除外しない。
+    ['token_in_api_url', 'https://api.github.com.example.net/x/' + 'f'.repeat(40)],
   ],
   negative: [
     'ghp_TEST_SENTINEL_TOKEN_never_on_disk',
@@ -67,5 +86,14 @@ export const SHAPE_SAMPLES = {
     'const re = /\\bsk-ant-/;',
     'https://example.org/assets/' + 'a'.repeat(10) + '.png',
     'AKIA0000',
+    // コミット・blob の SHA と IndexNow の公開鍵は資格情報ではない。
+    'https://api.github.com/repos/o/r/commits/' + '0123456789abcdef'.repeat(3).slice(0, 40) + '/check-runs',
+    'https://api.github.com/repos/o/r/git/blobs/' + 'd'.repeat(40),
+    'https://api.github.com/repos/o/r/compare/main...' + 'a'.repeat(40),
+    'https://api.github.com/repos/o/r/actions/runs?head_sha=' + 'b'.repeat(40),
+    'https://api.indexnow.org/indexnow?url=https://simplememofast.com/&key=' + 'c'.repeat(32),
+    // エスケープを空白に戻しても、正規表現の本文や語の途中は当たらない。
+    'const re = /\\bAKIA[0-9A-Z]{16}\\b/;',
+    '{"note":"line1\\nsee docs"}',
   ],
 };

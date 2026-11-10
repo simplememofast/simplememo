@@ -608,6 +608,7 @@ export async function verifyHandoff({ handoff, repo, day, takeover = false, forc
   const cache = {};
   let total = 0;
   const seen = new Set();
+  const pushedPaths = new Set();
   for (const commit of commits) {
     const parents = git(repo, ['rev-list', '--parents', '-n', '1', commit]).trim().split(' ').slice(1);
     for (const extra of parents.slice(1)) if (!ancestor(extra, 'refs/remotes/origin/main')) fail('rejected_merge_commit');
@@ -616,6 +617,7 @@ export async function verifyHandoff({ handoff, repo, day, takeover = false, forc
     // A merge of main brings main's (already public, trusted) content: only check what differs from main.
     if (parents.length > 1) entries = entries.filter(e => mainEntry(repo, cache, e.path) !== `${e.mode} ${e.sha}`);
     const sizes = checkEntries(repo, entries, gscDay);
+    for (const e of entries) if (e.status !== 'D') pushedPaths.add(e.path);
     for (const e of entries) if (e.status !== 'D' && !seen.has(e.sha)) { seen.add(e.sha); total += sizes.get(e.sha) ?? 0; }
     if (total > MAX_TOTAL_BYTES) fail('rejected_total_size');
   }
@@ -626,8 +628,10 @@ export async function verifyHandoff({ handoff, repo, day, takeover = false, forc
   if (findUnapprovedPrincipals(principals).length) fail('rejected_identity');
 
   // Nor a credential-shaped value (2026-11-10 audit): every blob any pushed commit adds or changes (a value added
-  // and then removed is still in the public history) and every commit message. Checked on push_only days too.
-  if (blobsCarrySecretShape(repo, [...seen]) || principals.some(p => scanText(p.commit.message).length)) {
+  // and then removed is still in the public history), every path those commits add or change (a tree entry name is
+  // public too; each read on its own), and every commit message. Checked on push_only days too.
+  if (blobsCarrySecretShape(repo, [...seen]) || [...pushedPaths].some(p => scanText(p).length)
+    || principals.some(p => scanText(p.commit.message).length)) {
     fail('rejected_secret_shape');
   }
 

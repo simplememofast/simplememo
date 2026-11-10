@@ -218,6 +218,14 @@ test('credential-shaped values are never published: any pushed blob, commit mess
     ['PR title', f => commitPage(f), { req: request({ title: shape }) }],
     ['request run field', f => commitPage(f), { req: request({ run: { ...request().run, artifact: `/obsidian/${shape}/` } }) }],
     ['push_only day', f => commitPage(f, BOT, 'x', 'obsidian/new/index.html', shape), { outcome: 'failure' }],
+    // After a JSON / JS escape the value follows the word character "n" or "t", and "\b" alone would not match.
+    ['JSON-LD after an escaped newline', f => commitPage(f, BOT, 'x', 'obsidian/new/index.html',
+      `<script type="application/ld+json">${JSON.stringify({ note: 'line1\n' + bare })}</script>\n`), {}],
+    ['a JS string literal after an escaped tab', f => commitPage(f, BOT, 'x', 'obsidian/new/app.js',
+      `const note = ${JSON.stringify('a\t' + bare)};\n`), {}],
+    // A tree entry name is public as soon as the branch is pushed.
+    ['path name', f => commitPage(f, BOT, 'x', `obsidian/${bare}/index.html`), {}],
+    ['path name on a push_only day', f => commitPage(f, BOT, 'x', `obsidian/${bare}/index.html`), { outcome: 'failure' }],
   ];
   for (const [name, mutate, options] of cases) {
     const f = fixture();
