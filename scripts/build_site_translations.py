@@ -121,11 +121,12 @@ def map_srcset(value, source, locale, routes):
 def map_css_urls(value, source, locale, routes, decode=True):
     def replace(match):
         mapped = map_reference(match[2], source, locale, routes, decode=decode)
+        if not decode and mapped != match[2] and '<' in mapped:
+            # Raw text is written back unescaped (see map_style_element).
+            raise ValueError(source + ' → ' + locale + ': <style> url() would write a raw "<" '
+                             'that could close the element: ' + repr(mapped))
         return 'url(' + match[1] + mapped + match[1] + ')'
     return re.sub(r'url\(\s*(["\']?)(.*?)\1\s*\)', replace, value)
-
-
-STYLE_END = re.compile(r'</style', re.I)
 
 
 def map_style_element(css, source, locale, routes):
@@ -134,13 +135,15 @@ def map_style_element(css, source, locale, routes):
     Browsers do not decode character references there, so values are mapped
     as written: `&lt;` stays the text `&lt;` instead of becoming `<`. URL
     resolution can still assemble an end tag from inert text (`</x/../style>`
-    resolves to `/</style>`), so a changed result that would end the element
-    stops the build rather than turning the rest of the page into markup.
+    resolves to `/</style>`). Which end tag matters depends on the container,
+    not on this parser: inside <noscript> a scripting browser ends the raw
+    text at `</noscript`, and inside <svg> or <math> the <style> is not raw
+    text at all, so any tag (`</x/../p>` becomes `/</p>`) leaves foreign
+    content. A real URL never holds a raw `<`, so a url() value that mapping
+    changed and that now contains one stops the build, whatever the
+    container; unchanged values are byte-identical to the source page.
     """
-    mapped = map_css_urls(css, source, locale, routes, decode=False)
-    if mapped != css and STYLE_END.search(mapped):
-        raise ValueError(source + ' → ' + locale + ': <style> url() would close the element')
-    return mapped
+    return map_css_urls(css, source, locale, routes, decode=False)
 
 
 ROBOTS_META = re.compile(r'<meta\b(?=[^>]*\bname\s*=\s*["\']robots["\'])[^>]*>', re.I)

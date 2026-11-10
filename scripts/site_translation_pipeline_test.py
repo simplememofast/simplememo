@@ -212,16 +212,27 @@ class TranslationPipelineTests(unittest.TestCase):
         mapped = build.map_style_element(css, 'blog/example.html', 'es', {})
         self.assertEqual(mapped, 'a{background:url("/blog/&lt;/style&gt;&lt;script&gt;x&lt;/script&gt;.png")}')
         # Dot segments can still assemble an end tag from inert source text.
-        for value in ('</x/../style><script>x</script><style>.png', '</x/../STYLE x>.png'):
-            with self.assertRaisesRegex(ValueError, 'would close the element'):
+        # Which end tag matters depends on the container: </style for plain
+        # raw text, </noscript inside <noscript> (scripting browsers), and any
+        # tag inside <svg>/<math>, where <style> is not raw text at all.
+        for value in ('</x/../style><script>x</script><style>.png', '</x/../STYLE x>.png',
+                      '</x/../noscript><img src=x onerror=alert(1)>.png', '</./noscript>.png',
+                      '</x/../p><video src=x onerror=alert(1)></video>.png', 'img/<b>.png'):
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'would write a raw "<"'):
                 build.map_style_element('a{background:url("'+value+'")}', 'blog/example.html', 'es', {})
+        # A value that mapping leaves alone is the source page's own bytes.
+        for css in ('a{background:url("data:image/svg+xml,<svg></svg>")}',
+                    'a{background:url("https://example.com/</p>.png")}'):
+            self.assertEqual(build.map_style_element(css, 'blog/example.html', 'es', {}), css)
         # Attribute values are still decoded; their caller escapes the result.
         self.assertEqual(build.map_css_urls("url('../img/a.webp?x=1&amp;y=2')", 'blog/example.html', 'es', {}), "url('/img/a.webp?x=1&y=2')")
 
     def test_document_style_element_cannot_be_closed_by_a_mapped_url(self):
         group = {'source': 'source.html', 'sourceLocale': 'ja', 'pages': {'ja': 'source.html', 'es': 'es/source.html'}}
-        def translate(css):
-            source = '<html lang="ja"><head><title>説明</title><style>'+css+'</style></head><body><details class="site-languages"><summary>JA</summary></details><p>説明</p></body></html>'
+        def translate(css, container='<style>CSS</style>', in_body=False):
+            element = container.replace('CSS', css)
+            head, body = ('', element) if in_body else (element, '')
+            source = '<html lang="ja"><head><title>説明</title>'+head+'</head><body><details class="site-languages"><summary>JA</summary></details><p>説明</p>'+body+'</body></html>'
             units = collect(source) + collect_extra(source)
             catalog = {'ja:'+u['id']: {'source': u['text'], 'text': 'Descripción'} for u in units}
             with patch.object(build, 'units_for', return_value=(source, units)), patch('sync_shared_chrome.transform', side_effect=lambda s, f:s), patch('sync_page_design.transform', side_effect=lambda s, f:s):
@@ -230,8 +241,22 @@ class TranslationPipelineTests(unittest.TestCase):
         self.assertEqual(output.lower().count('</style'), 1)
         self.assertNotIn('<script>x</script>', output)
         self.assertIn('url("/img/&lt;/style&gt;&lt;script&gt;x&lt;/script&gt;.png")', output)
-        with self.assertRaisesRegex(ValueError, 'source.html → es: <style> url\\(\\) would close the element'):
+        message = 'source.html → es: <style> url\\(\\) would write a raw "<" that could close the element'
+        with self.assertRaisesRegex(ValueError, message):
             translate('a{background:url("</x/../style><script>x</script><style>.png")}')
+        # The same lock holds where the browser ends the element elsewhere.
+        noscript, svg = '<noscript><style>CSS</style></noscript>', '<svg width="10" height="10"><style>CSS</style></svg>'
+        cases = [
+            ('a{background:url("</x/../noscript><img src=x onerror=alert(1)>.png")}', noscript, False),
+            ('a{background:url("</./noscript>.png")}', noscript, False),
+            ('a{background:url("</x/../p><video src=x onerror=alert(1)></video>")}', svg, True),
+        ]
+        for css, container, in_body in cases:
+            with self.subTest(css=css), self.assertRaisesRegex(ValueError, message):
+                translate(css, container, in_body)
+        # Mapping inside those containers still works for ordinary values.
+        output = translate('a{background:url("img/a.png")}', svg, True)
+        self.assertIn('<svg width="10" height="10"><style>a{background:url("/img/a.png")}</style></svg>', output)
 
     def test_document_schema_cannot_close_its_script_element(self):
         # Untranslated JSON-LD values are decoded and written back; "\u003c"
