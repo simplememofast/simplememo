@@ -106,6 +106,7 @@ const UNSERVED_DATA = new Set([
   "cpp-map.json",
   "credential-expiry.json",
   "crossrepo-probes.json",
+  "date-lookahead.json",
   "editorial-internal-links.json",
   "emergency-stop.json",
   "escalation-rules.json",

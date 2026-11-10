@@ -1,0 +1,160 @@
+name: Date Lookahead
+
+# 【運用】暦が進むだけで落ちる検査を、落ちる前に見つける（scripts/date-lookahead.mjs）。
+#
+# 【なぜ要るか】SEO Validation の検査のいくつかは期限を持つ（保留の until、定点観測の鮮度、
+# 公開表示の確認日）。期限は誰もコミットしなくても過ぎ、過ぎた瞬間に main も全PRも同じ検査で
+# 落ちる。原因がどのPRにも出ない。
+#   2026-11-09  リンクゲートの保留7行が失効して全PRが落ち、Decision Monitor の公開PR #2281 が
+#               39時間詰まった（前日までは緑だった）
+#   2026-11-10  時計をずらして測ったら、7日以内に同じ形が3件あった
+# cron-health は「落ちた定期実行」を、main-daily-validation は「いま落ちる検査」を見る。
+# **「あと何日で落ちるか」を見るものが無かった。**
+#
+# 【何をするか】時計を data/date-lookahead.json の horizon_days（7日）先にずらして
+# SEO Validation の検査を回し、いまは通るのに先では落ちるものを、最初に落ちる時刻つきで出す。
+# 検査は読むだけで、リポジトリにも外にも書かない（書くのは下の Issue だけ）。
+#
+# 【Issue運用】label `ops/date-lookahead` の open 1件に集約する（autopilot-health.yml /
+# cron-health.yml と同じ作法）。本文は毎回その日の結果で置き換え、**期限の集合が変わった日だけ**
+# コメントを足す（同じ内容を毎日コメントしない）。期限が無くなったら閉じる。
+# scripts/health-intake.mjs がこのラベルをアクション台帳へ運ぶので、日報に載る。
+#
+# 【測れなかった回】faketime が入らない・時計がずれない・導出が壊れている回は exit 2 で
+# このジョブが赤くなる（cron-health が拾う）。**Issue は触らない** ——「読めなかった」を
+# 「期限が無くなった」として閉じない。
+#
+# 【時刻】04:23 JST。配信は2〜3時間遅れることがある（CLAUDE.md）。07:00 の日報と 09:00 の
+# アクチュエータの取り込みより前に終わる位置。1回 15〜25分（検査246本を1周＋落ちた検査の測り直し）。
+#
+# schedule はデフォルトブランチの定義でのみ動くため、このファイルの変更は main へマージされて
+# 初めて有効になる。
+on:
+  schedule:
+    - cron: '23 19 * * *' # 04:23 JST
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: date-lookahead
+  cancel-in-progress: false
+
+jobs:
+  lookahead:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      # Full history: content-derived sitemap lastmod checks read it (same as SEO Validation).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24.22.1'
+          package-manager-cache: false
+
+      # SEO Validation と同じ依存（tools/ の検査がこれを要る）。入らなければ、その検査は
+      # 本物の時計でも落ちるので「いまの赤」に分類され、予告には混ざらない。
+      - name: Locked tools dependencies
+        working-directory: tools
+        run: npm ci --ignore-scripts --no-audit
+
+      # SEO Validation の「Published QR codes …」の段と同じ入れ方・同じ版（QR の検査がこれを要る）。
+      - name: QR check dependencies
+        run: npm i --no-save --ignore-scripts qrcode@1.5.4 jsqr@1.4.0
+
+      # 【ブラウザは入れない】SEO Validation は viewport-pool-browser.test.mjs の直前で playwright-core を
+      # 入れて Chrome を起こす。ここでは入れない —— 時計をずらした Chrome を起こして確かめたことが無く、
+      # 止まればジョブごと60分の上限まで待つ。その検査に日付の期限は無いので、確かめる利得も無い。
+      # その検査は CI=true のとき playwright-core を要るので、**このジョブの中では本物の時計でも落ち**、
+      # 報告の「この先読みのジョブの中では、本物の時計でも落ちた検査」の行に毎回出る
+      # （2026-11-11 の初回 run 42845301207 で確認）。**main が赤いという意味ではない。**
+
+      - name: Install libfaketime
+        timeout-minutes: 10
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends faketime
+
+      - name: Look ahead
+        id: lookahead
+        run: |
+          set +e
+          node scripts/date-lookahead.mjs --run \
+            --json "$RUNNER_TEMP/date-lookahead.json" \
+            --markdown "$RUNNER_TEMP/date-lookahead.md" > /dev/null
+          code=$?
+          set -e
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          if [ -f "$RUNNER_TEMP/date-lookahead.md" ]; then
+            cat "$RUNNER_TEMP/date-lookahead.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          # 0 = 期限なし / 1 = 期限あり（どちらも測れた回）。2 以上は測れなかった回で、赤くする。
+          if [ "$code" -ge 2 ]; then
+            echo "::error title=Date lookahead::判定不能（測れなかった回）。期限が無いという意味ではない。"
+            exit "$code"
+          fi
+
+      - name: Open, update or close the lookahead issue
+        if: steps.lookahead.outputs.code == '0' || steps.lookahead.outputs.code == '1'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          REPORT_JSON: ${{ runner.temp }}/date-lookahead.json
+          REPORT_MD: ${{ runner.temp }}/date-lookahead.md
+        with:
+          script: |
+            const fs = require('fs');
+            const LABEL = 'ops/date-lookahead';
+            const TITLE = '日付の先読み: 暦が進むだけで全PRの検証が落ちる検査があります';
+            const { owner, repo } = context.repo;
+            const report = JSON.parse(fs.readFileSync(process.env.REPORT_JSON, 'utf8'));
+            if (!['clear', 'cliffs'].includes(report.state) || !Array.isArray(report.cliffs)) {
+              core.setFailed(`先読みの報告が想定の形でない（state=${report.state}）。Issue は触らない。`);
+              return;
+            }
+            // 期限の集合（検査と最初に落ちる時刻）。前回と同じならコメントを足さない。
+            const signature = JSON.stringify(report.cliffs.map((c) => [c.check, c.first_fail]));
+            const marker = `<!-- date-lookahead ${Buffer.from(signature).toString('base64')} -->`;
+            const stamp = `_[date-lookahead.yml](${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}) による自動投稿_`;
+            const markdown = fs.readFileSync(process.env.REPORT_MD, 'utf8').slice(0, 55000);
+            const body = `${markdown}\n${stamp}\n${marker}`;
+
+            const { data: openIssues } = await github.rest.issues.listForRepo({
+              owner, repo, state: 'open', labels: LABEL, per_page: 10,
+            });
+            const existing = openIssues.find((i) => !i.pull_request);
+
+            if (report.state === 'cliffs') {
+              try { await github.rest.issues.getLabel({ owner, repo, name: LABEL }); }
+              catch {
+                await github.rest.issues.createLabel({ owner, repo, name: LABEL, color: 'D93F0B',
+                  description: '数日以内に、暦が進むだけで SEO Validation が落ちる検査がある' });
+              }
+              if (!existing) {
+                const { data: created } = await github.rest.issues.create({ owner, repo, labels: [LABEL], title: TITLE, body });
+                core.notice(`期限 ${report.cliffs.length}件 — #${created.number} を作成`);
+              } else {
+                const changed = !(existing.body ?? '').includes(marker);
+                await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
+                if (changed) {
+                  await github.rest.issues.createComment({ owner, repo, issue_number: existing.number,
+                    body: `期限の集合が変わりました（本文を更新）。現在 ${report.cliffs.length}件:\n\n`
+                      + report.cliffs.map((c) => `- \`${c.check}\` — ${c.first_fail}（UTC）から`).join('\n')
+                      + `\n\n${stamp}` });
+                }
+                core.notice(`期限 ${report.cliffs.length}件 — #${existing.number} を更新${changed ? '（変化あり）' : '（変化なし）'}`);
+              }
+            } else if (existing) {
+              await github.rest.issues.createComment({ owner, repo, issue_number: existing.number,
+                body: `${report.horizon_days}日以内に、暦が進むだけで落ちる検査が無くなったためクローズします。\n\n${stamp}` });
+              await github.rest.issues.update({ owner, repo, issue_number: existing.number, state: 'closed' });
+              core.notice(`期限なし — #${existing.number} をクローズ`);
+            } else {
+              core.notice(`期限なし（${report.horizon_days}日以内）・open Issue なし`);
+            }

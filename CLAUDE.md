@@ -177,6 +177,43 @@ mainへのマージ＝本番デプロイなので、検証を通ったコミッ�
 マージされて初めて有効になる。
 
 
+## 日付の先読み — 暦だけで落ちる検査を、落ちる前に見つける（2026-11-10）
+
+SEO Validation の検査のいくつかは**期限**を持つ（リンクゲートの保留の until、言及ウォッチの鮮度、
+App Store 表示の確認日など）。期限は誰もコミットしなくても過ぎ、過ぎた瞬間に main も全PRも同じ検査で
+落ちる。**原因がどのPRにも出ない。**
+
+2026-11-09 0時（JST）、保留7行（until 11-08）が失効して全PRが落ち、Decision Monitor の公開PR
+#2281 がそこで落ちて39時間詰まった（前日までは緑。#2284 で復旧）。11-10 に時計をずらして測ると、
+7日以内に同じ形が3件あった（11-15 00:00 /obsidian/ ハブの保留、11-15 09:00 言及ウォッチ、
+11-17 09:00 App Store 表示）。
+
+**いまは `.github/workflows/date-lookahead.yml` が毎日（04:23 JST）測る。**時計を7日先にずらして
+SEO Validation の検査を回し（libfaketime）、いまは通るのに先では落ちる検査を、最初に落ちる時刻つきで
+Issue（label `ops/date-lookahead`）に出す。`scripts/health-intake.mjs` がそれをアクション台帳へ運ぶ。
+
+- **Issue が開いていたら、期限の前に直す。**出ているのは「いまのデータのまま日付だけ進めたら落ちる」
+  という予告で、直し方は検査ごとに違う（保留ならリンクを足すか新しい根拠で延長、定点観測なら実施、
+  確認日なら実物と突き合わせて台帳を更新）。期限が無くなれば、次の回が Issue を閉じる
+- **手元で測る**: `sudo apt-get install -y faketime` のあと `node scripts/date-lookahead.mjs --run`
+  （検査を1周するので15〜25分）。1本だけ確かめるなら
+  `faketime '2026-11-15 00:30:00' node scripts/check-content-graph.mjs`（時刻は UTC で渡す）
+- **ジョブが赤いときは「測れなかった」**（faketime が入らない・導出が壊れた等）。期限が無いという
+  意味ではない。Issue はその回は触らない
+- **Issue の「この先読みのジョブの中では、本物の時計でも落ちた検査」は、main が赤いという意味ではない。**
+  先読みのジョブはブラウザ（playwright-core）を入れないので、`viewport-pool-browser.test.mjs` は
+  毎回その行に出る（その検査は CI=true のとき playwright-core を要る。日付の期限は無い）。
+  その行に見慣れない検査が増えたら、main の日次検証でその検査が落ちていないかを見る
+- **実ランナーの初回（2026-11-11 00:32 JST、run 42845301207）**: 248本を20分で回し、期限4件
+  （11-15 00:30 JST の `seo-check.js` と `check-content-graph.mjs`、11-17 09:30 JST の
+  `check-store-facts.mjs --check` と `check-generators.mjs --run`）を、同じ main を手元で測った結果と
+  同じ時刻で出した。CI だけで出る時計ずらしの副作用は無かった（除外は台帳の1件のまま）
+- **時計ずらしの副作用で落ちる検査**は `data/date-lookahead.json` の `known_artifacts` に理由つきで
+  名指しする（子プロセスを環境変数を絞って起動する自己テストは、親だけ時計が進む）。
+  **期限のある検査をここへ入れると、その期限は誰にも見えなくなる**
+- **見ないもの**: `if:` つきの段（運転台帳の当日行など、データが毎日入る前提の検査）。
+  固定したデータで日付だけ進めると必ず落ちるので、先読みの対象にしていない
+
 ## /autopilot/ の自律スコアは日付で動く（2026-09-19）
 
 > **【2026-10-27 提案、同日オーナー承認（選択肢「Claudeにマージを任せる」）】**
@@ -427,6 +464,37 @@ woff2 参照 8→8 でしかない。差し替えたフォント3本は本番で
 
 **予算を割るまでは規則（`escalation-rules.json` の post-merge-performance-budget /
 stop_automation: false）は発火しない。**いま失っているのは余裕であって、未達ではない。
+
+### 2026-11-10 — TBT の予算を割り始めた。ページの変化では説明できない（計測機の速さを要約に出した）
+
+**上の「未達ではない」は 10-31 に失効した。**日次の監査は 10-31 以降の10回のうち7回が落ちている。
+各回のジョブログの FAILURE 行は7回とも `production-en: median TBT exceeds 200 ms`（うち2回は
+production-ja の同じ行も）で、スコア・LCP・CLS の行は無い。その前の 10-29〜10-30 の3回は別の失敗で、
+`CHROME_VERSION_CHANGED` のため計測そのものが無い。
+
+**ページの側は動いていない。**最後に通った 10-27 の回から、落ち始めた 10-31 の回までの
+間に、`index.html`・`en/index.html`・`js/`・`assets/home-perf/`・`assets/css/` を変えたコミットは無い
+（`git log` で確認。この間に配信に触れたのは #2220 の `functions/_middleware.js` だけ）。
+TBT の閾値（200ms）も 09-16 から変わっていない。
+
+**同じ期間に動いたのは計測の側。**#2218（10-31）が監査のブラウザをランナーの Chrome から
+Chrome for Testing 155.0.8059.39 に固定し、その数日前にランナーのイメージが替わっている
+（10-29・10-30 の `CHROME_VERSION_CHANGED` がその跡）。**どちらが効いたかは分けられていない。**
+
+**読み（未確定）:** 計測機が遅い日に、simulate の TBT が閾値をまたぐ。Lighthouse は計測の前に計測機の
+CPU を測り（`environment.benchmarkIndex`。高いほど速い）、1000 以下だと「slower CPU」の警告を
+`runWarnings` に入れる（12.8.2 の `core/gather/driver/environment.js` を読んで確認）。
+**この値はこれまで要約に出しておらず**、ログからは確かめようが無かった。
+
+いまは `scripts/perf/summarize.py` が、各回の benchmarkIndex と警告の有無を
+「Measuring machine」の節に出す。**判定には使わない**（遅い計測機を理由に予算の失敗を通さない。
+`test_summarize.py` の `test_a_slow_measuring_machine_never_excuses_a_budget_failure`）。
+
+- **数日ぶん並べてから読む。**落ちる日の benchmarkIndex が通る日より低ければ、この読みが当たり。
+  そのときの選択肢は計測の較正（`cpuSlowdownMultiplier`）か判定の扱いで、**オーナーが決める**
+- **反証条件:** 落ちる日と通る日で benchmarkIndex が変わらなければ、この読みは外れ。
+  ブラウザの固定版（Chrome for Testing）の側か、まだ見ていない要因を疑う
+- **閾値を上げて緑にしない。**規則 `post-merge-performance-budget` は発火している状態
 
 ## Site Structure
 
