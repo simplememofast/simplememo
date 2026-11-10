@@ -40,6 +40,14 @@ jobs:
       - name: Web and CI security boundaries
         run: node --test scripts/ci-security.test.mjs
 
+      # No tracked file carries a credential-shaped value (2026-11-10 audit). The
+      # PR is already public when this runs; what it stops is the merge and the deploy.
+      - name: Secret shapes self-test
+        run: node scripts/check-secret-shapes.mjs --selftest
+
+      - name: No credential-shaped values in tracked files
+        run: node scripts/check-secret-shapes.mjs
+
       - name: Locked tools dependency advisory gate
         working-directory: tools
         run: |

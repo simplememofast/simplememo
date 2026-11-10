@@ -622,6 +622,12 @@
       "broke": "閉じ忘れた <script>（2026-08-13 に本番へ出た形）／属性つき開始タグ／</script > の空白ゆらぎ を落とし、createElement(\"script\") には当たらないことも固定"
     },
     {
+      "script": "scripts/check-secret-shapes.mjs",
+      "state": "demonstrated",
+      "at": "2026-11-10",
+      "broke": "自己テスト（形ごとの陽性・値を出さないこと・陰性6件・全形に検体）。隔離コピーで5変異 —— scanText が何も返さない／github_token の下限を {99,} に上げる／該当に行の値を入れる（ログへ写る形）／google_oauth_secret の検体を消す／github_token を `_` 込み {20,} へ緩める（テスト用センチネルに当たる） —— いずれも --selftest が exit 1。--check 側は合成の AWS キー形を1行入れたファイルを追跡に加えると exit 1 で『leaked.txt:2 aws_access_key』だけを出し、値は出さなかった。公開前の経路（autopilot-publish の verifyHandoff）にも同じ走査を置き、6変異 —— blob の走査を外す／最終差分だけ読む（足して消した値が履歴に残る形）／コミットメッセージを読まない／依頼文を読まない／依頼を1行の JSON で読む（`\\\\n` の直後で語境界が消える）／push_only の return より後ろへ移す —— を autopilot-publish.test.mjs がそれぞれ名指しで落とした"
+    },
+    {
       "script": "scripts/check-selftests.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",

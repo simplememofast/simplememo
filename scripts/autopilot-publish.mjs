@@ -35,6 +35,7 @@ import { OUTCOMES, validate as validateRuns } from './autopilot-runs.mjs';
 import { hardDenyReason, MAX_COMMITS, MAX_TOTAL_BYTES, RECORD_PATHS } from './lib/autopilot-paths.mjs';
 import { GATED_LEDGERS, ledgerChange } from './lib/ledger-append-only.mjs';
 import { needsTranslationCheck, runTranslationCheck } from './lib/translation-check.mjs';
+import { scanText } from './lib/secret-shapes.mjs';
 import { TIME_BOX, checkTimeBoxRunbook, checkTimeBoxWiring } from './lib/autopilot-progress.mjs';
 import { EXPRESSION_BUDGET_BYTES, EXPRESSION_MARGIN_BYTES, GITHUB_EXPRESSION_LIMIT, checkExpressionLengths, templateExpression, templateStrings }
   from './lib/workflow-expression-length.mjs';
@@ -514,6 +515,27 @@ function mainEntry(repo, cache, file) {
   return cache.map.get(file) ?? null;
 }
 
+/**
+ * True when a text blob carries a credential-shaped value (scripts/lib/secret-shapes.mjs). Says neither which
+ * blob nor what matched: the caller fails with one fixed code, so no value reaches a log or a summary.
+ * Binary blobs (a NUL byte) are skipped, the same rule as check-secret-shapes.mjs.
+ */
+function blobsCarrySecretShape(repo, shas) {
+  if (!shas.length) return false;
+  const out = git(repo, ['cat-file', '--batch'], { input: Buffer.from(shas.join('\n') + '\n'), encoding: 'buffer' });
+  let at = 0;
+  for (let i = 0; i < shas.length; i += 1) {
+    const nl = out.indexOf(0x0a, at);
+    if (nl < 0) fail('rejected_object_type');
+    const [, type, size] = out.subarray(at, nl).toString('latin1').split(' ');
+    if (type !== 'blob' || !/^\d+$/.test(size ?? '')) fail('rejected_object_type');
+    const body = out.subarray(nl + 1, nl + 1 + Number(size));
+    at = nl + 1 + Number(size) + 1;
+    if (!body.includes(0) && scanText(body.toString('utf8')).length) return true;
+  }
+  return false;
+}
+
 function commitPrincipals(repo, commits) {
   const out = git(repo, ['show', '-s', '--format=%H%x00%an%x00%ae%x00%cn%x00%ce%x00%B%x1e', ...commits]);
   return out.split('\x1e').map(part => part.replace(/^\n/, '')).filter(Boolean).map(part => {
@@ -600,7 +622,14 @@ export async function verifyHandoff({ handoff, repo, day, takeover = false, forc
   checkEntries(repo, parseRaw(git(repo, ['diff', '-z', '--raw', '--no-abbrev', '--no-renames', '--no-ext-diff', '--no-textconv', base, head])), gscDay);
 
   // A forbidden identity must never reach a public branch (same rule as auto-merge).
-  if (findUnapprovedPrincipals(commitPrincipals(repo, commits)).length) fail('rejected_identity');
+  const principals = commitPrincipals(repo, commits);
+  if (findUnapprovedPrincipals(principals).length) fail('rejected_identity');
+
+  // Nor a credential-shaped value (2026-11-10 audit): every blob any pushed commit adds or changes (a value added
+  // and then removed is still in the public history) and every commit message. Checked on push_only days too.
+  if (blobsCarrySecretShape(repo, [...seen]) || principals.some(p => scanText(p.commit.message).length)) {
+    fail('rejected_secret_shape');
+  }
 
   // The ledgers that gate the Autopilot (containment, budget) change only the way the runbook asks for
   // (scripts/lib/ledger-append-only.mjs), compared with the merge base. Checked on push_only days too: the branch is public.
@@ -615,6 +644,9 @@ export async function verifyHandoff({ handoff, repo, day, takeover = false, forc
   if (!raw.value) fail(`rejected_request_${raw.reason}`);
   const checked = validateRequest(raw.value, day);
   if (!checked.request) fail(`rejected_${checked.code}`);
+  // The PR title and body are public too. Fields one by one: a JSON line would join "\n" to the next word.
+  if ([checked.request.title, checked.request.body, JSON.stringify(checked.request.run ?? {})]
+    .some(text => scanText(text).length)) fail('rejected_secret_shape');
   // A repair names failures already on main (just fetched), never rows the branch itself added.
   const repairCode = checked.request.run?.repair_of ? repairOfCode(checked.request.run, baseRunIds(repo)) : null;
   if (repairCode) fail(`rejected_request_${repairCode}`);
