@@ -69,6 +69,13 @@ jobs:
       - name: QR check dependencies
         run: npm i --no-save --ignore-scripts qrcode@1.5.4 jsqr@1.4.0
 
+      # 【ブラウザは入れない】SEO Validation は viewport-pool-browser.test.mjs の直前で playwright-core を
+      # 入れて Chrome を起こす。ここでは入れない —— 時計をずらした Chrome を起こして確かめたことが無く、
+      # 止まればジョブごと60分の上限まで待つ。その検査に日付の期限は無いので、確かめる利得も無い。
+      # その検査は CI=true のとき playwright-core を要るので、**このジョブの中では本物の時計でも落ち**、
+      # 報告の「この先読みのジョブの中では、本物の時計でも落ちた検査」の行に毎回出る
+      # （2026-11-11 の初回 run 42845301207 で確認）。**main が赤いという意味ではない。**
+
       - name: Install libfaketime
         timeout-minutes: 10
         run: |

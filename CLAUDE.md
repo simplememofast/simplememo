@@ -200,6 +200,14 @@ Issue（label `ops/date-lookahead`）に出す。`scripts/health-intake.mjs` が
   `faketime '2026-11-15 00:30:00' node scripts/check-content-graph.mjs`（時刻は UTC で渡す）
 - **ジョブが赤いときは「測れなかった」**（faketime が入らない・導出が壊れた等）。期限が無いという
   意味ではない。Issue はその回は触らない
+- **Issue の「この先読みのジョブの中では、本物の時計でも落ちた検査」は、main が赤いという意味ではない。**
+  先読みのジョブはブラウザ（playwright-core）を入れないので、`viewport-pool-browser.test.mjs` は
+  毎回その行に出る（その検査は CI=true のとき playwright-core を要る。日付の期限は無い）。
+  その行に見慣れない検査が増えたら、main の日次検証でその検査が落ちていないかを見る
+- **実ランナーの初回（2026-11-11 00:32 JST、run 42845301207）**: 248本を20分で回し、期限4件
+  （11-15 00:30 JST の `seo-check.js` と `check-content-graph.mjs`、11-17 09:30 JST の
+  `check-store-facts.mjs --check` と `check-generators.mjs --run`）を、同じ main を手元で測った結果と
+  同じ時刻で出した。CI だけで出る時計ずらしの副作用は無かった（除外は台帳の1件のまま）
 - **時計ずらしの副作用で落ちる検査**は `data/date-lookahead.json` の `known_artifacts` に理由つきで
   名指しする（子プロセスを環境変数を絞って起動する自己テストは、親だけ時計が進む）。
   **期限のある検査をここへ入れると、その期限は誰にも見えなくなる**
