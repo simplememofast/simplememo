@@ -320,7 +320,7 @@
 
       <!-- Japanese Content -->
       <div class="lang-body">
-        <p class="page-content__date">最後更新日期：<time datetime="2026-10-15">2026年10月15日</time></p>
+        <p class="page-content__date">最後更新日期：<time datetime="2026-11-10">2026年11月10日</time></p>
         <div class="page-content__body">
           <p>YURIKA, K.K.（以下簡稱“本公司”）對“SimpleMemo”（以下簡稱“本服務”）中使用者資訊的處理，規定如下隱私政策。</p>
 
@@ -447,7 +447,7 @@
             <li><strong>加密、保管、通訊路的依賴關係</strong>：備忘錄正文的加密（CryptoKit）、鑰匙保管（Keychain Services）、通訊（URLSession / Network.framework）全部用Apple純正框架完成，不透過第三方SDK。</li>
             <li><strong>登入和防止非法使用的SDK</strong>：作為任意的入職縮短功能，從Google賬戶匯入郵箱地址時，使用GoogleSignIn-iOS SDK和Firebase Authentication SDK。 Firebase App Check SDK在啟動時初始化，使用Apple App Attest防止後端API的非法訪問。</li>
             <li><strong>本公司的使用分析</strong>：為了改善質量和掌握使用情況，向本公司的<code>/v1/analytics/event</code>傳送事件。 專案包括隨機安裝識別符號、會話識別符號、事件種類、識別符號、時間、應用程式的版本、構建、語言、傳送結果等允許的屬性。 雖然設計不直接包含郵箱地址、備忘錄正文、驗證碼，但可以透過傳送ID與收件人郵箱地址的雜湊聯絡起來。 這個安裝識別符號儲存在終端的鑰匙鏈中。 在iOS的構造上，鑰匙鏈的專案即使刪除應用程式也會留在終端上，在這種情況下，重新安裝後也會使用相同的識別符號（以下的舊版AppsFlyer合作中，Customer User ID也使用相同的識別符號）。</li>
-            <li><strong>透過AppsFlyer獲得、使用分析</strong>：在沒有上述1（E）選擇畫面的應用程式版中，啟動AppsFlyer SDK，將首次備忘錄傳送成功、認證成功、收費畫面顯示、方案選擇、購買成功作為事件傳送。 從應用程式設定的屬性，在適用的情況下，包括購買金額、貨幣、訂閱期間、畫面的區分。 因為將與本公司分析相同的安裝識別符號設定為AppsFlyer的Customer User ID，所以可以將獲得的資訊和使用記錄聯絡起來。 從應用程式設定的活動專案中不直接包含郵箱地址、備忘錄正文、驗證碼。 這裡列舉的專案是應用程式明確設定的，並不是列出SDK獲取的技術資訊的所有專案。 識別符號和可關聯的記錄不會被視為完全匿名的資訊。 在有使用情況分析選擇的版本中，停止SDK，僅限於對應上述（F）的版本，在有其他目的的同意和iPhone的追蹤許可的情況下，只開始獲取測量。</li>
+            <li><strong>透過AppsFlyer獲得、使用分析</strong>：在沒有上述1（E）選擇畫面的應用程式版中，啟動AppsFlyer SDK，將首次備忘錄傳送成功、首次儲存成功、備忘錄儲存成功（每次傳送郵件以及儲存到Obsidian・Notion時）、認證成功、收費畫面顯示、方案選擇、購買成功作為事件傳送。 從應用程式設定的屬性，在適用的情況下，包括輸入方式（鍵盤、語音輸入等）、傳送路徑、記錄位置（iPhone應用程式、Apple Watch、Siri捷徑、分享表單）、儲存目標的類型（郵件、Obsidian、Notion）、應用程式的顯示語言、測量定義的版本、建置和執行環境的類型、已驗證交易的購買金額和貨幣、訂閱期間、優惠的類型、收費畫面的版本和顯示的契機。 因為將與本公司分析相同的安裝識別符號設定為AppsFlyer的Customer User ID，所以可以將獲得的資訊和使用記錄聯絡起來。 從應用程式設定的活動專案中不直接包含郵箱地址、備忘錄正文、驗證碼。 這裡列舉的專案是應用程式明確設定的，並不是列出SDK獲取的技術資訊的所有專案。 識別符號和可關聯的記錄不會被視為完全匿名的資訊。 在有使用情況分析選擇的版本中，停止SDK，僅限於對應上述（F）的版本，在有其他目的的同意和iPhone的追蹤許可的情況下，只開始獲取測量。</li>
           </ul>
           <p><strong>注意</strong>：本服務不提供<strong>End-to-End加密（E2EE）</strong>。 為了在收件人使用者自己的郵件客戶端上正常閱讀正文，郵件正文將透過標準的SMTP協議傳送。 對於需要E2EE的用途，請考慮Standard Notes、Signal、ProtonMail等專用服務。</p>
           <p>本節的內容，作為面向Obsidian使用者的“資料通道”的圖解，重新整理在<a href="/zh-Hant/privacy-architecture/">隱私設計</a>頁面。</p>
