@@ -423,6 +423,35 @@ await notFound("/growth/");
   }
 }
 
+// ── 7b. Percent-encoded spellings of the blocked paths (2026-11-10 監査) ──
+// The middleware reads the raw pathname, but the Pages asset server decodes it
+// once before finding the file, so each of these was served with 200.
+for (const encoded of [
+  "/%64ocs/seo/FULL-AUDIT-REPORT-2026-07-07.md",
+  "/docs%2Fseo%2FFULL-AUDIT-REPORT-2026-07-07.md",
+  "/CLAUDE%2Emd",
+  "/data%2Fcredential-expiry.json",
+  "/data/credential-expiry%2Ejson",
+  "/data%2Fi18n%2Fpages.json",
+  "/%67rowth/data/gsc/2026-08-09/queries.json",
+  "/scripts%2Fseo-check.js",
+  "/fixtures%2Fengine-divergence.html",
+  "/admin%2Fbrand/",
+  "/%61dmin/",
+  "/admin%2F",
+  // Dot segments that only appear once decoded.
+  "/zz/%2E%2E%2Fdocs/seo/FULL-AUDIT-REPORT-2026-07-07.md",
+  "/%2E%2Fgrowth/x.json",
+  PAGES_ALIAS + "/docs%2Fseo%2FFULL-AUDIT-REPORT-2026-07-07.md",
+]) {
+  await notFound(encoded);
+}
+// Encoded spellings of public paths are not affected: only the blocked
+// destinations change, and a malformed escape is left to the asset server.
+await servesDirectly("/bl%6Fg/instant-capture-workflow");
+await servesDirectly("/x%ZZ/docs");
+await servesDirectly("/assets/downloads/obsidian-publish/%E5%8F%82%E8%80%83.md");
+
 // ── 8. /admin/* keeps its Cloudflare Access auth chain ───────────────────
 await servesDirectly("/admin/");
 await servesDirectly("/admin/api/upload");
