@@ -428,6 +428,37 @@ woff2 参照 8→8 でしかない。差し替えたフォント3本は本番で
 **予算を割るまでは規則（`escalation-rules.json` の post-merge-performance-budget /
 stop_automation: false）は発火しない。**いま失っているのは余裕であって、未達ではない。
 
+### 2026-11-10 — TBT の予算を割り始めた。ページの変化では説明できない（計測機の速さを要約に出した）
+
+**上の「未達ではない」は 10-31 に失効した。**日次の監査は 10-31 以降の10回のうち7回が落ちている。
+各回のジョブログの FAILURE 行は7回とも `production-en: median TBT exceeds 200 ms`（うち2回は
+production-ja の同じ行も）で、スコア・LCP・CLS の行は無い。その前の 10-29〜10-30 の3回は別の失敗で、
+`CHROME_VERSION_CHANGED` のため計測そのものが無い。
+
+**ページの側は動いていない。**最後に通った 10-27 の回から、落ち始めた 10-31 の回までの
+間に、`index.html`・`en/index.html`・`js/`・`assets/home-perf/`・`assets/css/` を変えたコミットは無い
+（`git log` で確認。この間に配信に触れたのは #2220 の `functions/_middleware.js` だけ）。
+TBT の閾値（200ms）も 09-16 から変わっていない。
+
+**同じ期間に動いたのは計測の側。**#2218（10-31）が監査のブラウザをランナーの Chrome から
+Chrome for Testing 155.0.8059.39 に固定し、その数日前にランナーのイメージが替わっている
+（10-29・10-30 の `CHROME_VERSION_CHANGED` がその跡）。**どちらが効いたかは分けられていない。**
+
+**読み（未確定）:** 計測機が遅い日に、simulate の TBT が閾値をまたぐ。Lighthouse は計測の前に計測機の
+CPU を測り（`environment.benchmarkIndex`。高いほど速い）、1000 以下だと「slower CPU」の警告を
+`runWarnings` に入れる（12.8.2 の `core/gather/driver/environment.js` を読んで確認）。
+**この値はこれまで要約に出しておらず**、ログからは確かめようが無かった。
+
+いまは `scripts/perf/summarize.py` が、各回の benchmarkIndex と警告の有無を
+「Measuring machine」の節に出す。**判定には使わない**（遅い計測機を理由に予算の失敗を通さない。
+`test_summarize.py` の `test_a_slow_measuring_machine_never_excuses_a_budget_failure`）。
+
+- **数日ぶん並べてから読む。**落ちる日の benchmarkIndex が通る日より低ければ、この読みが当たり。
+  そのときの選択肢は計測の較正（`cpuSlowdownMultiplier`）か判定の扱いで、**オーナーが決める**
+- **反証条件:** 落ちる日と通る日で benchmarkIndex が変わらなければ、この読みは外れ。
+  ブラウザの固定版（Chrome for Testing）の側か、まだ見ていない要因を疑う
+- **閾値を上げて緑にしない。**規則 `post-merge-performance-budget` は発火している状態
+
 ## Site Structure
 
 - 静的HTMLサイト（日本語/英語の2言語対応）
