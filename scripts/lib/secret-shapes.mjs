@@ -35,19 +35,39 @@ export const SECRET_SHAPES = [
 
 /**
  * JSON と JS の文字列は改行やタブを `\n` `\t` の2文字で持つ。値がその直後に来ると、手前が語の文字（n, t）に
- * なって先頭の `\b` が効かない（JSON.stringify が書く複数行のメモが、まさにこの形になる）。各行をもう一度、
- * エスケープを空白に（`\/` は `/` に）戻して読む。空白を足すだけなので、元の行で当たらなかったものが
- * 語境界の分だけ当たるようになるほかは変わらない。
+ * なって先頭の `\b` が効かない（JSON.stringify が書く複数行のメモが、まさにこの形になる）。URL の
+ * クエリも同じで、`Bearer%20ghp_…` や `k%3DAKIA…` では値の手前が `0` や `D` になる。各行をあと2回読む:
+ *   - blank:  エスケープ（JSON/JS の `\n` `\t` … `\uXXXX` `\xXX` と URL の `%XX`）を空白に（`\/` は `/` に）
+ *   - decode: 同じエスケープを、それが表す文字に戻す（`ghp_…` は `ghp_…`。値の1文字目を
+ *     エスケープで書いた形は、空白にすると値が欠ける。`%XX` は ASCII だけ戻し、ほかは空白）
+ * どちらも、元の行で当たらなかったものが当たるようになる方向にしか変えない（当たりは3回の和）。
+ *
+ * 【2026-11-10 再レビュー】最初の版は JSON/JS のエスケープを空白にするだけで、`%XX` を読まず、
+ * `\uXXXX` も空白にしていた（`ghp_…` は `hp_…` になって拾えない）。
  */
-const ESCAPES = /\\(?:[nrtbfv0]|u[0-9a-fA-F]{4}|x[0-9a-fA-F]{2})/g;
+const ESCAPES = /\\(?:[nrtbfv0]|u[0-9a-fA-F]{4}|x[0-9a-fA-F]{2})|%[0-9a-fA-F]{2}/g;
+const decodeEscape = (m) => {
+  if (m[0] === '%') {
+    const code = parseInt(m.slice(1), 16);
+    return code < 0x80 ? String.fromCharCode(code) : ' ';
+  }
+  return m[1] === 'u' || m[1] === 'x' ? String.fromCharCode(parseInt(m.slice(2), 16)) : ' ';
+};
+
+/** 1行の読み方（元の行・エスケープを空白にした行・エスケープを戻した行）。重複は除く。 */
+export function lineReadings(line) {
+  if (!line.includes('\\') && !line.includes('%')) return [line];
+  const slashes = line.replace(/\\\//g, '/');
+  return [...new Set([line, slashes.replace(ESCAPES, ' '), slashes.replace(ESCAPES, decodeEscape)])];
+}
 
 /** text の中の該当を `{ line, kind }` で返す。値は返さない。 */
 export function scanText(text) {
   const hits = [];
   String(text ?? '').split('\n').forEach((line, i) => {
-    const unescaped = line.replace(/\\\//g, '/').replace(ESCAPES, ' ');
+    const readings = lineReadings(line);
     for (const [kind, re] of SECRET_SHAPES) {
-      if (re.test(line) || (unescaped !== line && re.test(unescaped))) hits.push({ line: i + 1, kind });
+      if (readings.some((r) => re.test(r))) hits.push({ line: i + 1, kind });
     }
   });
   return hits;
@@ -78,6 +98,14 @@ export const SHAPE_SAMPLES = {
     ['token_in_api_url', '{"url":"https:\\/\\/mcp.example.com\\/sse\\/' + 'e'.repeat(40) + '"}'],
     // 同じホスト名で始まる別のホストは除外しない。
     ['token_in_api_url', 'https://api.github.com.example.net/x/' + 'f'.repeat(40)],
+    // URL のクエリの %XX の直後（2026-11-10 再レビュー: \b が効かず素通りしていた）。
+    ['github_token', 'https://example.com/?h=Bearer%20' + 'ghp_' + 'a1B2c3D4e5'.repeat(4)],
+    ['aws_access_key', 'https://example.com/?k%3D' + 'AKIA' + 'Q'.repeat(16)],
+    ['anthropic_key', 'note%0Ask-ant-' + 'api03-' + 'x'.repeat(30)],
+    // 値の1文字目をエスケープで書いた形（空白にすると値が欠ける。戻して読む）。
+    ['github_token', '{"t":"' + String.fromCharCode(92) + 'u0067hp_' + 'a1B2c3D4e5'.repeat(4) + '"}'],
+    ['aws_access_key', "'" + String.fromCharCode(92) + 'x41KIA' + 'Q'.repeat(16) + "'"],
+    ['github_token', 'https://example.com/?t=%67hp_' + 'a1B2c3D4e5'.repeat(4)],
   ],
   negative: [
     'ghp_TEST_SENTINEL_TOKEN_never_on_disk',
@@ -95,5 +123,8 @@ export const SHAPE_SAMPLES = {
     // エスケープを空白に戻しても、正規表現の本文や語の途中は当たらない。
     'const re = /\\bAKIA[0-9A-Z]{16}\\b/;',
     '{"note":"line1\\nsee docs"}',
+    // %XX を戻しても、URL の普通のクエリや語の途中は当たらない。
+    'https://example.com/search?q=%E3%83%A1%E3%83%A2&page=2',
+    'https://example.com/a%20b/AKIA0000',
   ],
 };
