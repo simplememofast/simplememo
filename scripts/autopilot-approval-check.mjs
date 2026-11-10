@@ -386,7 +386,8 @@ async function selftest() {
   };
   // catchError: return what the body threw (with the calls made before it) instead of throwing.
   const runAutoMerge = async ({ branch = 'claude/obsidian-auto-20261020', files = [file('index.html')], pr: prOver = {},
-    extraOpen = [], fail = {}, behindBy = 1, ledgers = {}, workspace = ROOT, catchError = false } = {}) => {
+    extraOpen = [], fail = {}, behindBy = 1, ledgers = {}, workspace = ROOT, catchError = false,
+    runRepo = `${OWNER}/${REPO_NAME}` } = {}) => {
     const pr = fixturePr({ branch, files, pr: prOver });
     const { github, calls } = mockGithub({ pr, files, extraOpen, fail, behindBy, ledgers });
     const { core, out } = mockCore(fail);
@@ -395,7 +396,8 @@ async function selftest() {
     try {
       await new AsyncFunction('context', 'github', 'core', 'require', autoMerge)(
         { repo: { owner: OWNER, repo: REPO_NAME }, payload: { workflow_run: {
-          head_branch: branch, head_sha: SHA, event: 'pull_request', created_at: '2026-10-20T01:02:03Z' } } },
+          head_branch: branch, head_sha: SHA, event: 'pull_request', created_at: '2026-10-20T01:02:03Z',
+          head_repository: { full_name: runRepo } } } },
         github, core, requireIdentity);
     } catch (error) {
       if (!catchError) throw error;
@@ -407,6 +409,14 @@ async function selftest() {
   let r = await runAutoMerge({ files: ledgerOnly });
   t(r.calls.merged.length === 1 && !r.out.outputs.approval_pr && r.out.failed.length === 0, 'autopilot ledger-only PR merges');
   t(r.calls.listArgs[0]?.base === 'main', 'PR lookup is limited to main');
+  // 2026-11-10 監査: フォークの head で走った検証の成功を、こちらの PR の検証として数えない。
+  for (const runRepo of ['someone/simplememo', null]) {
+    r = await runAutoMerge({ files: ledgerOnly, runRepo });
+    t(r.calls.merged.length === 0 && !r.out.outputs.approval_pr && r.out.failed.length === 0
+      && (r.calls.listArgs?.length ?? 0) === 0, `validation run from ${runRepo ?? 'an unknown head'} merges nothing`);
+  }
+  t(/\n    if: >-\n      github\.event\.workflow_run\.conclusion == 'success'\n      && github\.event\.workflow_run\.head_repository\.full_name == github\.repository\n/.test(workflow),
+    'auto-merge job only runs for validation of this repository\'s head');
   for (const files of [[file('index.html')], [file('autopilot/index.html'), file('sitemap.xml')],
     [file('scripts/x.mjs'), file('data/autopilot-runs.json')]]) {
     r = await runAutoMerge({ files });

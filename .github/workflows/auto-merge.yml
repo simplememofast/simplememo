@@ -33,15 +33,18 @@ permissions: {}
 
 jobs:
   auto-merge:
-    # 検証が通っていないものは触らない。
-    if: github.event.workflow_run.conclusion == 'success'
+    # 検証が通っていないものは触らない。フォークの head で走った検証も数えない
+    # （2026-11-10 監査。cron-health.yml と同じ照合。スクリプト側でも確かめ直す）。
+    if: >-
+      github.event.workflow_run.conclusion == 'success'
+      && github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
     # 再実行やReadyへの遷移で同じブランチの検証完了が重なるため、直列化する。
     concurrency:
-      group: auto-merge-${{ github.event.workflow_run.head_branch }}
+      group: auto-merge-${{ github.event.workflow_run.head_repository.full_name }}-${{ github.event.workflow_run.head_branch }}
       cancel-in-progress: false
     # 承認待ちにした自律運転の PR を merge-after-approval へ渡す（それ以外は空）。
     outputs:
@@ -80,6 +83,14 @@ jobs:
             // workflows may still emit push results during this migration.
             if (run.event !== 'pull_request') {
               core.info('PRのマージ内容を照合した pull_request 検証の成功を待つ');
+              return;
+            }
+
+            // 検証の run がこのリポジトリの head で走ったものか（2026-11-10 監査）。
+            // フォークは同じブランチ名・同じ head SHA で PR を開けるので、その検証の
+            // 成功をこちらの PR の検証として数えない。読めないときもマージしない。
+            if (run.head_repository?.full_name !== `${owner}/${repo}`) {
+              core.info('検証の run がこのリポジトリの head ではないため何もしない');
               return;
             }
 

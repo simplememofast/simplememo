@@ -297,6 +297,9 @@ async function selftest() {
     // reaches the per-PR base check.
     ['Codex/user-directed', 'pull_request', 0, { base: 'other' }],
     ['Codex/user-directed', 'pull_request', 0, { repo: 'other/repo' }],
+    // A fork's PR with the same branch name and head SHA: its validation run does not count (2026-11-10).
+    ['Codex/user-directed', 'pull_request', 0, { runRepo: 'someone/simplememo' }],
+    ['claude/obsidian-auto-test', 'pull_request', 0, { runRepo: null }],
     ['Codex/user-directed', 'pull_request', 0, { authorName: 'Private Person', failed: 1 }],
     ['Codex/user-directed', 'pull_request', 0, { openerName: 'SimpleMemo Developer (Private Person)', failed: 1 }],
     ['Codex/user-directed', 'pull_request', 0, { commitCount: 2, failed: 1 }],
@@ -315,7 +318,7 @@ async function selftest() {
       user: { login: 'simplememofast' }, commits: overrides.commitCount ?? 1 };
     const open = [pr, ...(overrides.others ?? []).map(o =>
       ({ ...pr, number: o.number, base: { ref: o.base }, user: { login: o.opener } }))];
-    await executeMerge({ repo: { owner: 'simplememofast', repo: 'simplememo' }, payload: { workflow_run: { head_branch: branch, head_sha: sha, event } } },
+    await executeMerge({ repo: { owner: 'simplememofast', repo: 'simplememo' }, payload: { workflow_run: { head_branch: branch, head_sha: sha, event, head_repository: { full_name: 'runRepo' in overrides ? overrides.runRepo : REPO } } } },
       { rest: { pulls: {
         // Like GitHub: every fixture PR has this head; filter by base when given,
         // newest first, one page (30 by default). listingIgnoresBase returns a PR
