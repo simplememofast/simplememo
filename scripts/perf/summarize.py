@@ -178,6 +178,55 @@ def render_public_diagnostics(rows):
     return lines
 
 
+# Lighthouse 12.8.2 core/gather/driver/environment.js: the run warning added when the
+# measuring machine's benchmarkIndex is at or below SLOW_CPU_BENCHMARK_INDEX_THRESHOLD.
+SLOW_HOST_WARNING = 'appears to have a slower CPU than'
+SLOW_HOST_THRESHOLD = 1000
+
+
+def host_evidence(report):
+    """Report-only evidence about the measuring machine; never used to decide a budget result.
+
+    Lighthouse benchmarks the host CPU before it measures (`environment.benchmarkIndex`,
+    higher is faster) and, at or below 1000 with the default simulated throttling, adds a
+    run warning that the host is slower than the simulation assumes. A slow runner raises
+    simulated TBT with no page change, so the summary shows the machine beside the result.
+    Only the number and two counts are kept: warning text is never copied.
+    Missing or malformed values stay unknown (None), not zero.
+    """
+    environment = report.get('environment')
+    value = environment.get('benchmarkIndex') if isinstance(environment, dict) else None
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0:
+        value = None
+    warnings = report.get('runWarnings')
+    known = isinstance(warnings, list) and all(isinstance(w, str) for w in warnings)
+    return {'benchmark_index': value,
+            'run_warnings': len(warnings) if known else None,
+            'slow_host_warning': any(SLOW_HOST_WARNING in w for w in warnings) if known else None}
+
+
+def render_host_evidence(runs):
+    if not runs:
+        return []
+    lines = ['', 'Measuring machine (report-only; Lighthouse benchmarkIndex, higher is faster; '
+             f'Lighthouse warns at or below {SLOW_HOST_THRESHOLD}; never used for a budget result):']
+    for group in GROUPS:
+        selected = [r.get('host') or {} for r in runs if r.get('group') == group]
+        if not selected:
+            continue
+        values = [h.get('benchmark_index') for h in selected]
+        shown = ', '.join('unavailable' if v is None else f'{v:.0f}' for v in values)
+        known = [v for v in values if v is not None]
+        median = f'; median {statistics.median(known):.0f}' if len(known) == len(values) else ''
+        flags = [h.get('slow_host_warning') for h in selected]
+        if any(flag is None for flag in flags):
+            warned = 'slow-host warning unavailable'
+        else:
+            warned = f'slow-host warning in {sum(flags)} of {len(flags)} runs'
+        lines.append(f'- {group}: benchmarkIndex {shown}{median}; {warned}')
+    return lines
+
+
 def number(value, name, maximum=None):
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
         raise ValueError(f'{name}: expected a finite, nonnegative number')
@@ -209,7 +258,8 @@ def read_run(path):
     metrics = {key: number(report['audits'][key]['numericValue'], f'{path.name}: {key}') for key in METRICS}
     return {'file': path.name, 'group': group, 'performance': categories['performance'] * 100,
             'categories': categories, 'metrics': metrics, 'warnings': report.get('runWarnings', []),
-            'trace_diagnostics': diagnostics(report), 'public_diagnostics': public_diagnostics(report)}
+            'trace_diagnostics': diagnostics(report), 'public_diagnostics': public_diagnostics(report),
+            'host': host_evidence(report)}
 
 
 def summarize(root: Path, *, require_production=False, expected_commit=None):
@@ -267,6 +317,7 @@ def render(summary):
         a = row['metrics']
         lines.append(f"| {row['file']} | {row['performance']:.0f} | {a[METRICS[0]]/1000:.2f} | {a[METRICS[1]]/1000:.2f} | {a[METRICS[2]]:.0f} | {a[METRICS[3]]:.4f} |")
     lines += render_variability(summary.get('variability', {}))
+    lines += render_host_evidence(summary.get('runs', []))
     lines += render_public_diagnostics(summary.get('runs', []))
     lines += ['', MEASUREMENT, '', 'Enforced groups: ' + ', '.join(summary.get('enforced_groups', []))]
     if summary.get('production_verified') is False:
