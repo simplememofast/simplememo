@@ -319,6 +319,9 @@ if (isMain) {
 
   if (process.argv.includes('--check')) {
     const problems = verify(b);
+    // CI runs only --check, so the JST boundary is pinned here too (UTC 16:00 is JST 01:00 of the next day).
+    const boundary = build(new Date('2026-11-09T16:00:00Z')).date_jst;
+    if (boundary !== '2026-11-10') problems.push(`date_jst が JST の暦日でない（JST 2026-11-10 01:00 に ${boundary}）`);
     if (problems.length) {
       console.error('\n1枚が台帳と食い違っている:');
       for (const p of problems) console.error(`  - ${p}`);
