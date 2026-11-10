@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 const source = readFileSync(new URL('../functions/admin/_middleware.js', import.meta.url), 'utf8');
 const { onRequest } = await import('data:text/javascript,' + encodeURIComponent(source));
 
@@ -54,7 +55,9 @@ test('the site-wide CSP no longer allows cdnjs, and only retired admin pages ref
   assert.match(csp, /frame-ancestors 'none'/);
   assert.match(csp, /form-action 'self'/);
   const { execFileSync } = await import('node:child_process');
-  const root = new URL('..', import.meta.url).pathname;
+  // fileURLToPath, not .pathname: .pathname keeps percent-escapes (a space is
+  // %20), so git would be handed a directory that does not exist.
+  const root = fileURLToPath(new URL('..', import.meta.url));
   const files = execFileSync('git', ['-C', root, 'ls-files', '-z', '*.html'], { encoding: 'utf8' }).split('\0').filter(Boolean);
   const offenders = files.filter((f) => !f.startsWith('admin/')
     && readFileSync(new URL('../' + f, import.meta.url), 'utf8').includes('cdnjs.cloudflare.com'));
