@@ -38,55 +38,82 @@ export const TRUST = ['none', 'partial', 'own'];
  *
  * 【2026-11-10 監査】以前は `${{` の直後に来る6種だけを run: の中で見ていた。
  * workflow_run の head_branch（フォークの PR が決められる）や inputs、
- * format() で包んだ式、github-script の script: は素通りしていた。いまは各行の
+ * format() で包んだ式、github-script の script: は素通りしていた。いまはブロックの
  * `${{ … }}` の中身だけを取り出して照合する（地の文の "inputs." は拾わない）。
+ *
+ * 【同日の再レビュー】同じ値を別の書き方で展開する形も拾う:
+ *   - 第三者が書ける**オブジェクトを丸ごと**渡す形（`toJSON(github.event.pull_request)`、
+ *     `toJSON(github.event.workflow_run)`、`toJSON(inputs)` など）。プロパティを続けずに
+ *     その名前を書いた時点で、中のどの欄でも展開される
+ *   - 角括弧の参照（`github['head_ref']`、`inputs['dry_run']`）—— normalizeExpr が
+ *     `.` の形へ直してから照合する
+ *   - `${{ env.X }}`。env: で渡しても、`${{ env.X }}` と書けば値がスクリプトへ展開される。
+ *     安全なのはシェルの `"$X"` と github-script の `process.env.X` だけ
+ *   - 行をまたいで書いた `${{ … }}`（ブロック全体をつないでから照合する）
+ *   - 大文字小文字の違い（GitHub の式は文脈名・プロパティ名の大文字小文字を区別しない）
  */
 export const UNTRUSTED_EXPR = [
-  /\bgithub\.event\.issue\.(title|body)\b/,
-  /\bgithub\.event\.comment\.body\b/,
-  /\bgithub\.event\.pull_request\.(title|body)\b/,
-  /\bgithub\.event\.review\.body\b/,
-  /\bgithub\.head_ref\b/,
-  /\bgithub\.event\.discussion\./,
-  /\bgithub\.event\.workflow_run\.(head_branch|head_commit|display_title|head_repository|pull_requests)\b/,
-  /\bgithub\.event\.pull_request\.head\.(ref|label|repo)\b/,
-  /\bgithub\.event\.(head_commit|commits|pages)\b/,
-  /\bgithub\.ref_name\b/,
-  /\bgithub\.event\.(inputs|client_payload)\b/,
-  /(?<![\w.])inputs\./,
-  /\btoJSON\(\s*github\.event\s*\)/,
+  /\bgithub\.event\.issue\.(title|body)\b/i,
+  /\bgithub\.event\.comment\.body\b/i,
+  /\bgithub\.event\.pull_request\.(title|body)\b/i,
+  /\bgithub\.event\.review\.body\b/i,
+  /\bgithub\.head_ref\b/i,
+  /\bgithub\.event\.discussion\./i,
+  /\bgithub\.event\.workflow_run\.(head_branch|head_commit|display_title|head_repository|pull_requests)\b/i,
+  /\bgithub\.event\.pull_request\.head\.(ref|label|repo)\b/i,
+  /\bgithub\.event\.(head_commit|commits|pages)\b/i,
+  /\bgithub\.ref_name\b/i,
+  /\bgithub\.event\.(inputs|client_payload)\b/i,
+  // The whole object (toJSON(), join(), format(), an index) carries every field above.
+  /(?<![\w.])github(\.event(\.(issue|pull_request(\.head)?|comment|review|discussion|workflow_run))?)?(?![\w-]|\.\w)/i,
+  /(?<![\w.])inputs(?![\w-])/i,
+  /(?<![\w.])env(?![\w-])/i,
 ];
 
 /**
+ * 照合の前に式を整える。`x['y']` を `x.y` に直し、残った文字列リテラルを空にし
+ * （`'inputs.'` のような地の文を拾わない）、`.` の前後の空白を詰める。
+ */
+export function normalizeExpr(s) {
+  return s
+    .replace(/\[\s*'((?:[^']|'')*)'\s*\]/g, (_, k) => `.${k.replace(/''/g, "'")}`)
+    .replace(/'(?:[^']|'')*'/g, "''")
+    .replace(/\s*\.\s*/g, '.');
+}
+
+/**
  * ワークフローの `run:` と github-script の `script:` のブロックだけを取り出す。
- * env: 経由で渡すのは安全（シェル変数・process.env になるので展開されない）ので、
+ * env: 経由で渡し、シェル変数・process.env として読むのは安全（展開されない）ので、
  * **ブロックの中に直接書かれている場合だけを問題にする。**
+ *
+ * ブロックの終わりは、キー（`run` / `script`）自身の桁より深くない行。`- run: …` と
+ * 書いたステップでは、同じステップの env: / if: / with: が `run` と同じ桁に並ぶので、
+ * そこでブロックが終わる（ダッシュの桁で測ると、env: に移した値まで run: の中身として
+ * 読んでいた）。
  */
 export function scanWorkflow(text, file) {
   const hits = [];
   const lines = text.split('\n');
-  let inBlock = false, blockIndent = 0;
+  let block = null; // { indent, rows: [[lineNo, text], …] }
+  const flush = () => { if (block) checkBlock(block.rows); block = null; };
   lines.forEach((line, i) => {
-    if (inBlock) {
-      const indent = line.search(/\S/);
-      if (line.trim() === '') return;
-      if (indent > blockIndent) { checkLine(line, i + 1); return; }
-      inBlock = false; // the block ended; this line may start the next one
+    if (block) {
+      if (line.trim() === '') { block.rows.push([i + 1, '']); return; }
+      if (line.search(/\S/) > block.indent) { block.rows.push([i + 1, line]); return; }
+      flush(); // the block ended; this line may start the next one
     }
     const m = /^(\s*)(-?\s*)(run|script):\s*(\|[-+]?|>[-+]?)?\s*(.*)$/.exec(line);
-    if (m) {
-      inBlock = true;
-      blockIndent = m[1].length;
-      checkLine(m[5] ?? '', i + 1);
-    }
+    if (m) block = { indent: m[1].length + m[2].length, rows: [[i + 1, m[5] ?? '']] };
   });
-  function checkLine(s, ln) {
-    for (const [, inner] of s.matchAll(/\$\{\{([\s\S]*?)\}\}/g)) {
-      for (const re of UNTRUSTED_EXPR) {
-        if (re.test(inner)) {
-          hits.push({ file, line: ln, expr: String(re), text: s.trim().slice(0, 90) });
-        }
-      }
+  flush();
+  function checkBlock(rows) {
+    const joined = rows.map(([, s]) => s).join('\n');
+    for (const mm of joined.matchAll(/\$\{\{([\s\S]*?)\}\}/g)) {
+      const inner = normalizeExpr(mm[1]);
+      const re = UNTRUSTED_EXPR.find((r) => r.test(inner));
+      if (!re) continue;
+      const [ln, s] = rows[joined.slice(0, mm.index).split('\n').length - 1];
+      hits.push({ file, line: ln, expr: String(re), text: s.trim().slice(0, 90) });
     }
   }
   return hits;
@@ -106,8 +133,36 @@ export const SCAN_SELFTEST = [
     'jobs:\n  a:\n    steps:\n      - run: |\n          echo ok\n      - run: echo "${{ github.head_ref }}"\n'],
   ['env: 経由は拾わない', 0,
     'jobs:\n  a:\n    steps:\n      - env:\n          B: ${{ github.event.workflow_run.head_branch }}\n        run: echo "$B"\n'],
+  ['`- run:` の後ろの env: は拾わない', 0,
+    'jobs:\n  a:\n    steps:\n      - run: echo "$B"\n        env:\n          B: ${{ github.event.workflow_run.head_branch }}\n'],
+  ['`- run:` の後ろの if: は拾わない', 0,
+    'jobs:\n  a:\n    steps:\n      - run: x\n        if: ${{ inputs.go }}\n'],
+  ['`- run: |` の中は、後ろに env: があっても拾う', 1,
+    'jobs:\n  a:\n    steps:\n      - run: |\n          echo "${{ github.ref_name }}"\n        env:\n          A: 1\n'],
   ['地の文の "inputs." は拾わない', 0,
     'jobs:\n  a:\n    steps:\n      - uses: actions/github-script@x\n        with:\n          script: |\n            core.notice("This PR changes waiting-progress inputs. The waiting");\n'],
+  ['toJSON() でイベントの部分オブジェクトを丸ごと渡す形を拾う', 1,
+    'jobs:\n  a:\n    steps:\n      - run: echo \'${{ toJSON(github.event.pull_request) }}\' | jq .\n'],
+  ['toJSON(github.event.pull_request.head) を拾う', 1,
+    'jobs:\n  a:\n    steps:\n      - run: echo \'${{ toJSON(github.event.pull_request.head) }}\'\n'],
+  ['toJSON(inputs) を拾う', 1,
+    'jobs:\n  a:\n    steps:\n      - run: echo \'${{ toJSON(inputs) }}\'\n'],
+  ['角括弧の参照 github[\'head_ref\'] を拾う', 1,
+    'jobs:\n  a:\n    steps:\n      - run: echo "${{ github[\'head_ref\'] }}"\n'],
+  ['角括弧の参照 github.event[\'issue\'][\'title\'] を拾う', 1,
+    'jobs:\n  a:\n    steps:\n      - run: echo "${{ github.event[ \'issue\' ][\'title\'] }}"\n'],
+  ['env: で渡しても ${{ env.X }} と書けば拾う', 1,
+    'jobs:\n  a:\n    steps:\n      - env:\n          B: ${{ github.event.workflow_run.head_branch }}\n        run: git checkout "${{ env.B }}"\n'],
+  ['行をまたいだ ${{ … }} を拾う', 1,
+    'jobs:\n  a:\n    steps:\n      - run: |\n          echo "${{\n            github.event.issue.title }}"\n'],
+  ['大文字で書いた GITHUB.HEAD_REF を拾う', 1,
+    'jobs:\n  a:\n    steps:\n      - run: echo "${{ GITHUB.HEAD_REF }}"\n'],
+  ['第三者が書けない欄（番号・ID）は拾わない', 0,
+    'jobs:\n  a:\n    steps:\n      - run: |\n          echo "${{ github.event.pull_request.number }} ${{ github.event.workflow_run.id }}"\n'],
+  ['角括弧で書いても、第三者が書けない欄は拾わない', 0,
+    'jobs:\n  a:\n    steps:\n      - run: echo "${{ github.event[\'pull_request\'][\'number\'] }}"\n'],
+  ['文字列リテラルの中の "env." / "inputs." は拾わない', 0,
+    'jobs:\n  a:\n    steps:\n      - run: echo "${{ format(\'env.{0} inputs.\', github.run_id) }}"\n'],
 ];
 export function scanSelftest(log = console.log) {
   let failed = 0;
@@ -179,7 +234,8 @@ if (isMain) {
   if (hits.length) {
     for (const h of hits) console.log(`    ${h.file}:${h.line}  ${h.text}`);
     problems.push(`run: / script: に第三者が書ける式を直接展開している ${hits.length}件`
-      + ' — **env: 経由で渡すこと**（シェル変数になるので展開されない）');
+      + ' — **env: 経由で渡し、シェルでは "$X"、github-script では process.env.X で読むこと**'
+      + '（`${{ env.X }}` と書くと、env: で渡しても値が展開される）');
   } else {
     console.log('    run: / script: に第三者が書ける式の直接展開なし。');
   }
