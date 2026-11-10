@@ -67,7 +67,7 @@ function actBlock() {
   }
   return body.join('\n');
 }
-function replay(exit, badTee = false, dryRun) {
+function runAct(exit, badTee, extraEnv) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'act-failure-contract-'));
   try {
     const bin = path.join(dir, 'bin'); fs.mkdirSync(bin);
@@ -76,15 +76,20 @@ function replay(exit, badTee = false, dryRun) {
     const summary = path.join(dir, 'summary');
     const script = actBlock().replaceAll('/tmp/act.txt', path.join(dir, 'act.txt'));
     const argsFile = path.join(dir, 'args');
-    const env = { PATH: `${bin}:/usr/bin:/bin`, FAKE_EXIT: String(exit), GITHUB_STEP_SUMMARY: summary, ARGS_FILE: argsFile };
-    // The workflow passes inputs.dry_run through env (unset on schedule).
-    if (dryRun !== undefined) env.DRY_RUN = dryRun;
+    // The workflow passes inputs.dry_run through env (unset on schedule): extraEnv.
+    const env = { PATH: `${bin}:/usr/bin:/bin`, FAKE_EXIT: String(exit), GITHUB_STEP_SUMMARY: summary, ARGS_FILE: argsFile, ...extraEnv };
     const run = spawnSync('bash', ['-e', '-c', script], { cwd: dir, encoding: 'utf8', timeout: 5000, env });
     assert.ifError(run.error);
-    const result = { status: run.status, summary: fs.existsSync(summary) ? fs.readFileSync(summary, 'utf8') : null };
-    if (dryRun !== undefined) result.args = fs.existsSync(argsFile) ? fs.readFileSync(argsFile, 'utf8').trim() : null;
-    return result;
+    return {
+      status: run.status,
+      summary: fs.existsSync(summary) ? fs.readFileSync(summary, 'utf8') : null,
+      args: fs.existsSync(argsFile) ? fs.readFileSync(argsFile, 'utf8').trim() : null,
+    };
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+}
+function replay(exit, badTee = false) {
+  const { status, summary } = runAct(exit, badTee, {});
+  return { status, summary };
 }
 test('act producer failure survives tee and does not publish a summary', () => {
   assert.deepEqual(replay(42), { status: 42, summary: null });
@@ -96,9 +101,11 @@ test('successful act still writes its exact output once', () => {
   assert.deepEqual(replay(0), { status: 0, summary: 'synthetic report\n' });
 });
 test('DRY_RUN=true (workflow_dispatch input via env) runs without --apply; otherwise --apply', () => {
-  assert.equal(replay(0, false, 'true').args.includes('--apply'), false);
-  assert.equal(replay(0, false, 'false').args.includes('--apply'), true);
-  assert.match(replay(0).summary, /synthetic report/); // DRY_RUN unset on schedule: set -u must not trip
+  assert.equal(runAct(0, false, { DRY_RUN: 'true' }).args.includes('--apply'), false);
+  assert.equal(runAct(0, false, { DRY_RUN: 'false' }).args.includes('--apply'), true);
+  const scheduled = runAct(0, false, {}); // DRY_RUN unset on schedule: set -u must not trip
+  assert.equal(scheduled.status, 0);
+  assert.equal(scheduled.args.includes('--apply'), true);
 });
 test('the act step reads the dry-run input from env, not from an expression in run:', () => {
   assert.equal(actBlock().includes('${{'), false);
