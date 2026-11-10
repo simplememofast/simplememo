@@ -432,8 +432,15 @@ await servesDirectly("/.well-known/apple-app-site-association");
 }
 
 // ── 7b. Percent-encoded spellings of the blocked paths (2026-11-10 監査) ──
-// The middleware reads the raw pathname, but the Pages asset server decodes it
-// once before finding the file, so each of these was served with 200.
+// The middleware used to decide from the raw pathname only, but the Pages
+// asset server decodes the path once before it looks up the file. Run through
+// the pre-fix middleware, none of these was stopped: the .html one and the
+// pages.dev one got a 301 that kept the encoded spelling, and the rest passed
+// straight through. Every target names a file in the repo. These cases pin
+// the middleware's decision, not what the asset server answers: the two
+// dot-segment ones reach their file only where the lookup resolves `.` / `..`
+// after decoding, which wrangler's local asset server does (path.resolve) and
+// production was not probed for.
 for (const encoded of [
   "/%64ocs/seo/FULL-AUDIT-REPORT-2026-07-07.md",
   "/docs%2Fseo%2FFULL-AUDIT-REPORT-2026-07-07.md",
@@ -449,7 +456,7 @@ for (const encoded of [
   "/admin%2F",
   // Dot segments that only appear once decoded.
   "/zz/%2E%2E%2Fdocs/seo/FULL-AUDIT-REPORT-2026-07-07.md",
-  "/%2E%2Fgrowth/x.json",
+  "/%2E%2Fgrowth/data/gsc/2026-08-09/queries.json",
   PAGES_ALIAS + "/docs%2Fseo%2FFULL-AUDIT-REPORT-2026-07-07.md",
 ]) {
   await notFound(encoded);
