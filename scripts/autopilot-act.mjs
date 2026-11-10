@@ -581,6 +581,7 @@ export function derive(ctx) {
   appendWorkflowIntakeAction(ctx, runs, out);
   appendOrphanActions(ctx, out);
   appendCostIntakeAction(ctx, runs, out);
+  appendBranchDispatchCostActions(ctx, out);
   appendCredentialFailureActions(runs, out);
   appendShippingActions(runs, out);
   appendStatusFreshnessAction(ctx, out);
@@ -861,6 +862,38 @@ function appendCostIntakeAction(ctx, runs, out) {
           .filter(r => r.cost_observation && costSyncNeeded(r, costed.get(String(r.external_ref)))).map(r => r.cost_observation) } },
       });
     }
+  }
+}
+
+function appendBranchDispatchCostActions(ctx, out) {
+  // --- D4b: main 以外で手動起動した主系の run の実費（2026-11-10 再レビュー） ---
+  //
+  // isProductionAutopilotRun はこの run を台帳の材料にしない（ブランチ側の定義とスクリプトで
+  // 走るので、ステップ名やログの行を選べる）。**ところが実費は掛かっている。**台帳に書かないと、
+  // 実費台帳にも、それを積む月次上限（autopilot-budget --check、主系の予算ゲート）にも入らない。
+  // 日次の出力に1行出すだけでは、読まれなければ消える。数えるかどうかはオーナーが決める
+  // （規則が無い）ので、決まるまでは run ごとに人の依頼として残す。閉じるのは人だけ（manual）——
+  // run が一覧の窓（各起動種別30件）から落ちても、依頼は残る。値は識別子だけで、ログは読まない。
+  for (const r of ctx.droppedRuns ?? []) {
+    if (!isBranchDispatch(r)) continue;
+    const id = plainRunField(r.id);
+    const branch = plainRunField(r.head_branch);
+    out.push({
+      id: `act-branch-dispatch-cost-${id}`,
+      title: `main 以外（${branch}）で手動起動した主系の run ${id} の実費が、実費台帳にも月次上限にも入っていない`,
+      detail: `run ${id}（event=workflow_dispatch / branch=${branch} / head=${plainRunField(r.head_repository)}）。`
+        + 'ブランチ側の定義で走るので、運転台帳・実費台帳の材料にしていない（ステップ名やログの行を選べる）。'
+        + '**実費は掛かっている**が、autopilot-budget --check（主系の予算ゲート）の月次の積算には入らない。\n'
+        + '決めること: この種類の run を月次上限に数えるか（数えるなら、実費の取り方と台帳への入れ方も）。'
+        + '決まるまで、この依頼は人が閉じるまで残る。',
+      source: 'cost',
+      domain: null,
+      force_owner: 'human',
+      force_owner_why: 'main 以外の手動起動の実費を月次上限に数えるかは、規則の無いオーナー判断（数え方の既定を AI が決めない）',
+      touches: ['data/autopilot-cost.json'],
+      auto: null,
+      close_check: { kind: 'manual', params: { observed: `run ${id} は ${branch} の定義で走った（実費は月次上限の外）` } },
+    });
   }
 }
 
@@ -1942,14 +1975,21 @@ export function isProductionAutopilotRun(r, repo) {
  */
 export function droppedRunsNote(dropped) {
   if (!Array.isArray(dropped) || !dropped.length) return '';
-  const plain = (shownField) => String(shownField ?? '?').replace(/[^\w./-]/g, '?').slice(0, 80);
+  const plain = plainRunField;
   const shown = dropped.slice(0, 10).map((r) =>
     `id=${plain(r.id)} event=${plain(r.event)} branch=${plain(r.head_branch)} head=${plain(r.head_repository)}`);
   return `出自を確かめられず台帳の材料にしなかった run: ${dropped.length}件（${shown.join(' / ')}`
     + `${dropped.length > shown.length ? ` ほか${dropped.length - shown.length}件` : ''}）。`
-    + (dropped.some((r) => r.event === 'workflow_dispatch' && r.head_branch !== 'main')
-      ? 'main 以外で手動起動した回の実費は実費台帳に載らない（数えるかはオーナー判断）。' : '');
+    + (dropped.some(isBranchDispatch)
+      ? 'main 以外で手動起動した回の実費は実費台帳にも月次上限にも入らない（数えるかはオーナー判断。'
+        + 'run ごとにオーナーへの依頼として残す）。' : '');
 }
+
+/** One identifier of a dropped run, reduced to [\w./-] (it may come from a branch name). */
+export const plainRunField = (field) => String(field ?? '?').replace(/[^\w./-]/g, '?').slice(0, 80);
+
+/** A manual run started on a branch other than main: it spends, but runs that branch's definition. */
+export const isBranchDispatch = (r) => r?.event === 'workflow_dispatch' && r?.head_branch !== 'main';
 
 /**
  * Runs for each production event, merged newest first and cut to `limit`. Throws if any read fails.
@@ -3131,10 +3171,28 @@ async function selftest() {
     t('出自: 捨てた run は黙って消さず、日次の出力に識別子だけを出す',
       JSON.stringify(dropped.map(r => r.id).sort()) === '[7,8,9]'
       && note.includes('3件') && note.includes('id=7') && note.includes('branch=claude/x')
-      && note.includes('実費台帳に載らない')
-      && !droppedRunsNote([{ id: 9, event: 'pull_request', head_branch: 'main' }]).includes('実費台帳に載らない')
+      && note.includes('実費台帳にも月次上限にも入らない')
+      && !droppedRunsNote([{ id: 9, event: 'pull_request', head_branch: 'main' }]).includes('月次上限')
       && droppedRunsNote([]) === '' && droppedRunsNote(null) === ''
       && !droppedRunsNote([{ id: 1, head_branch: 'x\n## 偽の見出し' }]).includes('\n'));
+    // 2026-11-10 再レビュー: 捨てた手動起動の実費を、1行の表示だけで消さない。
+    const branchDispatch = derive({ droppedRuns: dropped }).filter(a => a.id.startsWith('act-branch-dispatch-cost-'));
+    t('出自: main 以外の手動起動は、実費を月次上限に数えるかを run ごとに人へ上げる（閉じるのは人）',
+      branchDispatch.length === 1 && branchDispatch[0].id === 'act-branch-dispatch-cost-7'
+      && branchDispatch[0].force_owner === 'human' && branchDispatch[0].auto === null
+      && branchDispatch[0].close_check.kind === 'manual'
+      && CLOSE_CHECKS.manual(branchDispatch[0].close_check.params, {}).closed === false
+      && JSON.stringify(branchDispatch[0].touches) === '["data/autopilot-cost.json"]'
+      && classify(branchDispatch[0], {}).owner === 'human');
+    t('出自: PR・フォーク・main の run からは実費の依頼を立てない',
+      derive({ droppedRuns: [{ id: 9, event: 'pull_request', head_branch: 'claude/x' },
+        { id: 10, event: 'workflow_dispatch', head_branch: 'main', head_repository: 'someone/simplememo' }] })
+        .every(a => !a.id.startsWith('act-branch-dispatch-cost-'))
+      && derive({}).every(a => !a.id.startsWith('act-branch-dispatch-cost-')));
+    t('出自: 依頼の id と題は識別子だけで、ブランチ名の記号を通さない',
+      derive({ droppedRuns: [{ id: 11, event: 'workflow_dispatch', head_branch: 'x\n## 偽 `b`' }] })
+        .filter(a => a.id.startsWith('act-branch-dispatch-cost-'))
+        .every(a => !/[\n`#]/.test(a.title) && a.id === 'act-branch-dispatch-cost-11'));
     const failing = async () => ({ ok: false, status: 502, json: async () => ({}) });
     let failed = false;
     try { await listProductionRuns(repo, {}, 30, failing); } catch { failed = true; }
