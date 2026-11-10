@@ -866,24 +866,22 @@ function appendCostIntakeAction(ctx, runs, out) {
 }
 
 function appendBranchDispatchCostActions(ctx, out) {
-  // --- D4b: main 以外で手動起動した主系の run の実費（2026-11-10 再レビュー） ---
+  // --- D4b: main 以外で手動起動した主系の run（2026-11-10 再レビュー） ---
   //
   // isProductionAutopilotRun はこの run を台帳の材料にしない（ブランチ側の定義とスクリプトで
-  // 走るので、ステップ名やログの行を選べる）。**ところが実費は掛かっている。**台帳に書かないと、
-  // 実費台帳にも、それを積む月次上限（autopilot-budget --check、主系の予算ゲート）にも入らない。
-  // 日次の出力に1行出すだけでは、読まれなければ消える。数えるかどうかはオーナーが決める
-  // （規則が無い）ので、決まるまでは run ごとに人の依頼として残す。閉じるのは人だけ（manual）——
-  // run が一覧の窓（各起動種別30件）から落ちても、依頼は残る。値は識別子だけで、ログは読まない。
+  // 走るので、ステップ名やログの行を選べる）。この種類の run を月次上限に数えるかはオーナーが
+  // 決める（規則が無い）ので、run ごとに人の依頼として残す（日次の出力の1行だけにしない）。
+  // 閉じるのは人だけ（manual）—— run が一覧の窓（各起動種別30件）から落ちても、依頼は残る。
+  // 値は識別子だけで、ログは読まない。
   for (const r of ctx.droppedRuns ?? []) {
     if (!isBranchDispatch(r)) continue;
     const id = plainRunField(r.id);
     const branch = plainRunField(r.head_branch);
     out.push({
       id: `act-branch-dispatch-cost-${id}`,
-      title: `main 以外（${branch}）で手動起動した主系の run ${id} の実費が、実費台帳にも月次上限にも入っていない`,
+      title: `main 以外（${branch}）で手動起動した主系の run ${id}: この種類の run を月次上限に数えるかを決める`,
       detail: `run ${id}（event=workflow_dispatch / branch=${branch} / head=${plainRunField(r.head_repository)}）。`
-        + 'ブランチ側の定義で走るので、運転台帳・実費台帳の材料にしていない（ステップ名やログの行を選べる）。'
-        + '**実費は掛かっている**が、autopilot-budget --check（主系の予算ゲート）の月次の積算には入らない。\n'
+        + 'ブランチ側の定義とスクリプトで走った run で、そのログは読んでいない。\n'
         + '決めること: この種類の run を月次上限に数えるか（数えるなら、実費の取り方と台帳への入れ方も）。'
         + '決まるまで、この依頼は人が閉じるまで残る。',
       source: 'cost',
@@ -892,7 +890,7 @@ function appendBranchDispatchCostActions(ctx, out) {
       force_owner_why: 'main 以外の手動起動の実費を月次上限に数えるかは、規則の無いオーナー判断（数え方の既定を AI が決めない）',
       touches: ['data/autopilot-cost.json'],
       auto: null,
-      close_check: { kind: 'manual', params: { observed: `run ${id} は ${branch} の定義で走った（実費は月次上限の外）` } },
+      close_check: { kind: 'manual', params: { observed: `run ${id} は ${branch} の定義で走った` } },
     });
   }
 }
@@ -1957,7 +1955,7 @@ export const AUTOPILOT_RUN_EVENTS = ['schedule', 'workflow_dispatch'];
  * そこで autopilot-completion.mjs の isRun・company-daily-gsc.mjs と同じく、
  * このリポジトリ自身の・main の・本来の起動種別の run だけを通す。
  * main 以外の手動起動は台帳に書かず、捨てたことを日次の出力（stdout →
- * ステップ要約と Act PR の本文）に出す。実費は掛かっているので、
+ * ステップ要約と Act PR の本文）に出し、run ごとにオーナーへの依頼にする（derive の D4b）。
  * 数えるかどうかはオーナーが名指しで決める（決まるまでは書かない側）。
  */
 export function isProductionAutopilotRun(r, repo) {
@@ -1981,14 +1979,14 @@ export function droppedRunsNote(dropped) {
   return `出自を確かめられず台帳の材料にしなかった run: ${dropped.length}件（${shown.join(' / ')}`
     + `${dropped.length > shown.length ? ` ほか${dropped.length - shown.length}件` : ''}）。`
     + (dropped.some(isBranchDispatch)
-      ? 'main 以外で手動起動した回の実費は実費台帳にも月次上限にも入らない（数えるかはオーナー判断。'
-        + 'run ごとにオーナーへの依頼として残す）。' : '');
+      ? 'main 以外で手動起動した回は、月次上限に数えるかをオーナーが決めるまで、'
+        + 'run ごとにオーナーへの依頼として残す。' : '');
 }
 
 /** One identifier of a dropped run, reduced to [\w./-] (it may come from a branch name). */
 export const plainRunField = (field) => String(field ?? '?').replace(/[^\w./-]/g, '?').slice(0, 80);
 
-/** A manual run started on a branch other than main: it spends, but runs that branch's definition. */
+/** A manual run started on a branch other than main: it runs that branch's definition. */
 export const isBranchDispatch = (r) => r?.event === 'workflow_dispatch' && r?.head_branch !== 'main';
 
 /**
@@ -3171,7 +3169,7 @@ async function selftest() {
     t('出自: 捨てた run は黙って消さず、日次の出力に識別子だけを出す',
       JSON.stringify(dropped.map(r => r.id).sort()) === '[7,8,9]'
       && note.includes('3件') && note.includes('id=7') && note.includes('branch=claude/x')
-      && note.includes('実費台帳にも月次上限にも入らない')
+      && note.includes('run ごとにオーナーへの依頼として残す')
       && !droppedRunsNote([{ id: 9, event: 'pull_request', head_branch: 'main' }]).includes('月次上限')
       && droppedRunsNote([]) === '' && droppedRunsNote(null) === ''
       && !droppedRunsNote([{ id: 1, head_branch: 'x\n## 偽の見出し' }]).includes('\n'));
@@ -3184,6 +3182,11 @@ async function selftest() {
       && CLOSE_CHECKS.manual(branchDispatch[0].close_check.params, {}).closed === false
       && JSON.stringify(branchDispatch[0].touches) === '["data/autopilot-cost.json"]'
       && classify(branchDispatch[0], {}).owner === 'human');
+    t('出自: 依頼と日次の出力は決めること（月次上限に数えるか）を問い、上限の扱いを断定しない',
+      [branchDispatch[0].title, branchDispatch[0].detail, branchDispatch[0].close_check.params.observed, note]
+        .every(s => !/入っていない|入らない|上限の外|掛かっている/.test(s))
+      && branchDispatch[0].title.includes('月次上限に数えるかを決める')
+      && branchDispatch[0].detail.includes('決めること: この種類の run を月次上限に数えるか'));
     t('出自: PR・フォーク・main の run からは実費の依頼を立てない',
       derive({ droppedRuns: [{ id: 9, event: 'pull_request', head_branch: 'claude/x' },
         { id: 10, event: 'workflow_dispatch', head_branch: 'main', head_repository: 'someone/simplememo' }] })

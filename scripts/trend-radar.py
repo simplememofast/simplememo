@@ -180,10 +180,9 @@ def parse(source, raw):
                          'url': fields.get('link')})
     for r in rows:
         r['title'] = clean_title(r['title'], limit=None)  # matched whole; cut in collect()
-    # Check each row, not the source. A failed source sends the session to the fixed feed,
-    # which this cleaning never touched, so one third-party row (a URL over URL_MAX, a
-    # title of invisible characters) must not fail it: that row is dropped and counted.
-    # Only an empty feed, or one where most rows are invalid, is a source failure.
+    # Check each row, not the source: one third-party row (a URL over URL_MAX, a title of
+    # invisible characters) must not fail the whole source, so that row is dropped and
+    # counted. Only an empty feed, or one where most rows are invalid, is a source failure.
     kept = [r for r in rows if r['id'] and r['title'] and valid_url(r['url'])]
     dropped = len(rows) - len(kept)
     if not kept or 2 * dropped > len(rows):

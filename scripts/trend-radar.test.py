@@ -35,8 +35,8 @@ class RadarTests(unittest.TestCase):
                 radar.parse('hatena', rss)
 
     def test_one_bad_row_is_dropped_and_counted_not_the_whole_source(self):
-        # A failed source sends the session to the uncleaned fixed feed, so one third-party
-        # row (a URL over URL_MAX, a title that is empty once cleaned) must drop only itself.
+        # One third-party row (a URL over URL_MAX, a title that is empty once cleaned) must
+        # drop only itself, not fail the whole source.
         good = ('<item><title>LINE メモ終了</title><link>https://example.org/article</link></item>'
                 '<item><title>天気</title><link>https://example.org/weather</link></item>')
         for bad in ['<item><title>メモ終了</title><link>https://example.org/' + 'a' * 2049 + '</link></item>',
