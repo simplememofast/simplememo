@@ -166,12 +166,18 @@ class RadarTests(unittest.TestCase):
                 or ch in '#*0123456789\u203c\u2049\u2139\u3030\u303d')
 
     @staticmethod
-    def is_zwj_end(ch):
-        # What a ZWJ may join: a symbol (So) at U+2000 or above, or a skin-tone modifier.
-        # Written out here rather than read from the script.
+    def is_zwj_start(ch):
+        # What a kept ZWJ may follow: a symbol (So) at U+2000 or above, or a skin-tone
+        # modifier. Written out here rather than read from the script.
         o = ord(ch)
         return ((radar.unicodedata.category(ch) == 'So' and o >= 0x2000 or 0x1F3FB <= o <= 0x1F3FF)
                 and ch not in BLANKS)
+
+    @classmethod
+    def is_zwj_end(cls, ch):
+        # What a kept ZWJ may precede: the same, or U+2194 LEFT RIGHT ARROW (Sm), which ends
+        # the RGI sequence head shaking horizontally.
+        return cls.is_zwj_start(ch) or ch == '\u2194'
 
     def test_hidden_payloads_in_default_ignorable_code_points_are_removed(self):
         # 2026-11-10 re-audit: variation selectors (Mn) and Hangul fillers (Lo) passed the
@@ -215,6 +221,9 @@ class RadarTests(unittest.TestCase):
                       '\U0001f3f3' + vs16 + zwj + '\U0001f308',             # rainbow flag
                       zwj.join(['\U0001f468', '\U0001f469', '\U0001f467']),  # family
                       '\U0001f469\U0001f3fd' + zwj + '\U0001f4bb',          # technologist, skin tone
+                      '\U0001f642' + zwj + '\u2194' + vs16,                 # head shaking horizontally
+                      '\U0001f642' + zwj + '\u2195' + vs16,                 # head shaking vertically
+                      '\U0001f6b6' + zwj + '\u27a1' + vs16,                 # walking facing right
                       '1' + vs16 + '\u20e3', '\u263a' + vs15, '\u2139' + vs16]:  # keycap, text style, Ll base
             self.assertEqual(radar.clean_title('メモ ' + emoji), 'メモ ' + emoji)
 
@@ -289,6 +298,7 @@ class RadarTests(unittest.TestCase):
                 'x', 'A', 'メ', '葛', ' ', '\u3000', '\u200d', '\u034f', '\u0301', '\u200b', '\u2800',
                 '\U0001d159', '^', '`', '\u00b0', '\u00a9',
                 '\u00a0', '\u1680', '\u2000', '\u2009', '\u200a', '\u202f', '\u205f',
+                '\u2194', '+', '<', '|',
                 '\ufe0e', '\ufe0f', '\ufe00', '\ufe0d', '\U000E0100', '\U000E01EF',
                 '\u180b', '\u180c', '\u180d', '\u180f']
         rng = random.Random(20261110)
@@ -305,7 +315,7 @@ class RadarTests(unittest.TestCase):
                 self.assertLessEqual(len(joins), radar.ZWJ_MAX, repr(title))
                 for i in joins:
                     before = cleaned[i - 2] if i > 1 and cleaned[i - 1] in '\ufe0e\ufe0f' else cleaned[i - 1]
-                    self.assertTrue(i and self.is_zwj_end(before), repr(title))
+                    self.assertTrue(i and self.is_zwj_start(before), repr(title))
                     self.assertTrue(i + 1 < len(cleaned) and self.is_zwj_end(cleaned[i + 1]), repr(title))
                 self.assertFalse(set(cleaned) & set(BLANKS), repr(title))
                 self.assertFalse({c for c in cleaned if radar.unicodedata.category(c) == 'Zs'}
@@ -334,6 +344,16 @@ class RadarTests(unittest.TestCase):
             self.assertEqual(radar.clean_title((sym + '\u200d') * 50 + sym), sym * 51, repr(sym))
             self.assertEqual(radar.clean_title((sym + '\ufe0f\u200d') * 8 + sym),
                              (sym + '\ufe0f') * 8 + sym, repr(sym))
+        # U+2194 LEFT RIGHT ARROW (Sm) only ends a sequence; no other Sm joins.
+        arrow = '\U0001F642\u200d\u2194\ufe0f'
+        self.assertEqual(radar.clean_title(arrow + ' メモ'), arrow + ' メモ')
+        self.assertEqual(radar.clean_title('\u2194\u200d\U0001F600'), '\u2194\U0001F600')
+        self.assertEqual(radar.clean_title('\u2194\ufe0f\u200d\U0001F600'), '\u2194\ufe0f\U0001F600')
+        self.assertEqual(radar.clean_title('\U0001F600\u200d\u2194\u200d\U0001F600'),
+                         '\U0001F600\u200d\u2194\U0001F600')
+        for sym in ('+', '<', '=', '>', '|', '~', '\u2192', '\u2212'):
+            self.assertEqual(radar.clean_title('\U0001F600\u200d' + sym), '\U0001F600' + sym, repr(sym))
+            self.assertEqual(radar.clean_title((sym + '\u200d') * 50 + sym), sym * 51, repr(sym))
         # At most ZWJ_MAX per title. A ZWJ that was dropped because no emoji followed it
         # does not count, so real sequences later in the title keep theirs.
         self.assertEqual(radar.clean_title('\U0001F600\u200d' * 40 + '\U0001F600').count('\u200d'),

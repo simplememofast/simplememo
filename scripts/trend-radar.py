@@ -41,6 +41,9 @@ BLANK = {'\u2800', '\U0001d159'}
 # nothing.
 WIDE_SPACE = '\u3000'
 ZWJ = '\u200d'
+# LEFT RIGHT ARROW is a math symbol (Sm), not So, yet it ends an RGI emoji ZWJ sequence
+# (head shaking horizontally: U+1F642 ZWJ U+2194 VS16). It is the only such code point.
+ZWJ_ARROW = '\u2194'
 # Per title, like SELECTORS_MAX: a ZWJ draws nothing, so a title keeps only a few. No
 # committed title carries one; a family emoji uses 3.
 ZWJ_MAX = 8
@@ -73,6 +76,12 @@ def _emoji(ch):
             and ch not in BLANK)
 
 
+def _zwj_end(ch):
+    """What may follow a kept ZWJ: an emoji (_emoji), or ZWJ_ARROW. The arrow only ends a
+    sequence (a ZWJ after it is not kept), and no other Sm (ASCII + < = > | ~) joins."""
+    return _emoji(ch) or ch == ZWJ_ARROW
+
+
 def clean_title(value, limit=TITLE_MAX):
     """Controls, line separators, every space separator (Zs) except U+3000 (NO-BREAK SPACE,
     EN QUAD to HAIR SPACE, NARROW NO-BREAK SPACE, ...) and the blanks (U+2800 BRAILLE
@@ -89,7 +98,8 @@ def clean_title(value, limit=TITLE_MAX):
     combining marks never survive. A kanji keeps its base character and loses its IVS.
     A ZWJ is kept only between two emoji (_emoji: a symbol at U+2000 or above, or a
     skin-tone modifier; an emoji, or an emoji and its VS15 / VS16, before it; an emoji
-    after it), and at most ZWJ_MAX per title, so ASCII ^ and ` or ° join nothing.
+    or U+2194 LEFT RIGHT ARROW after it), and at most ZWJ_MAX per title, so ASCII ^ and `
+    or ° join nothing.
     U+0020 and U+3000 (WIDE_SPACE) are the only spaces a title keeps.
     limit=None returns the whole title (parse matches on it; collect cuts what it stores).
 
@@ -104,8 +114,8 @@ def clean_title(value, limit=TITLE_MAX):
 
     def keep(ch):
         nonlocal joiners
-        if out and out[-1] == ZWJ and not _emoji(ch):
-            out.pop()  # a ZWJ stays only when an emoji follows it
+        if out and out[-1] == ZWJ and not _zwj_end(ch):
+            out.pop()  # a ZWJ stays only when an emoji (or ZWJ_ARROW) follows it
             joiners -= 1
         out.append(ch)
 
