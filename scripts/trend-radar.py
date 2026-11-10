@@ -137,10 +137,12 @@ def cut(title, limit=TITLE_MAX):
 
 
 def valid_url(value):
-    # Any C or Z category character fails, including code points the runner's Unicode
-    # tables call unassigned (a raw new emoji); percent-encoded URLs pass. A failing URL
-    # drops only its row (parse).
-    return (isinstance(value, str) and len(value) <= URL_MAX
+    # ASCII only, with no space or control: a URL is percent-encoded (the App Store's
+    # Japanese slugs are), so a raw non-ASCII code point (a variation selector, a CGJ, a
+    # Hangul filler, a blank, a ZWJ, a raw kana) fails. Every URL in the committed
+    # data/trend-radar.json is ASCII. url is also the RSS row's id. A failing URL drops
+    # only its row (parse).
+    return (isinstance(value, str) and len(value) <= URL_MAX and value.isascii()
             and value.startswith(('https://', 'http://'))
             and not any(ch.isspace() or unicodedata.category(ch)[0] in 'CZ' for ch in value))
 
