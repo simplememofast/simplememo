@@ -193,7 +193,9 @@ export async function verifyDecision({ branch, head, baseRef, pr = null, cwd = R
   const git = gitAt(cwd);
   const base = git('merge-base', baseRef, head);
   const metrics = JSON.parse(git('show', `${baseRef}:data/value-metrics.json`));
-  const files = git('diff', '--name-only', base, head).split('\n').filter(Boolean);
+  // --no-renames, as in verifyLocal: a move must show its deleted source too. With rename detection a
+  // declaration moved out of data/decision-intents/ was invisible to the count below (audit 2026-11-10).
+  const files = git('diff', '--name-only', '--no-renames', base, head).split('\n').filter(Boolean);
   if(files.includes('growth/experiments/experiments.json')) {
     const transitions=ref=>JSON.parse(git('show',ref+':growth/experiments/experiments.json')).experiments.filter(e=>e.coexistence).map(e=>({id:e.id,coexistence:e.coexistence}));
     assert.deepEqual(transitions(head),transitions(baseRef),'autonomous decision cannot add, remove or change an observation migration');
@@ -478,6 +480,27 @@ async function selftest() {
       error => error.message === misnamedError, 'a misnamed file under data/decision-intents/ is refused, not ignored');
     assert.deepEqual(local().problems, [misnamedError], 'and named before the PR');
     g('checkout', '-q', '-');
+    // A declaration already on main, moved out of data/decision-intents/ beside a valid declaration: with rename
+    // detection the diff listed only the destination, so the count saw one declaration and said 'bound' (audit
+    // 2026-11-10). A move is the delete it contains: both are refused alike.
+    const home = g('symbolic-ref', '--short', 'HEAD');
+    g('checkout', '-q', '--detach', baseRef);
+    save('data/decision-intents/old-shipped-contract.json', { ...c, id: 'old-shipped-contract' });
+    g('add', '.'); g('commit', '-q', '-m', 'fixture base with a shipped declaration');
+    const shippedBase = g('rev-parse', 'HEAD');
+    for (const leave of [['mv', 'data/decision-intents/old-shipped-contract.json', 'data/decision-rejections/old-shipped-contract.json'],
+      ['rm', '-q', 'data/decision-intents/old-shipped-contract.json']]) {
+      g('checkout', '-q', '--detach', shippedBase);
+      fs.mkdirSync(path.join(dir, 'data/decision-rejections'), { recursive: true });
+      g(...leave);
+      save(`data/decision-intents/${c.id}.json`, c); g('add', '.'); g('commit', '-q', '-m', `${leave[0]} the shipped declaration and declare`);
+      fs.writeFileSync(path.join(dir, 'index.html'), 'after\n');
+      save('data/autopilot-runs.json', { runs: [...before, run] }); g('add', '.'); g('commit', '-q', '-m', 'implement and record fixture run');
+      const left = g('rev-parse', 'HEAD');
+      await assert.rejects(verifyDecision({ ...options, baseRef: shippedBase, head: left, pr: { ...pr, head: { ...pr.head, sha: left } } }),
+        /exactly one prospective decision contract is required/, `a declaration on main that leaves by ${leave[0]} is counted`);
+    }
+    g('checkout', '-q', home);
     fs.writeFileSync(path.join(dir, 'index.html'), 'before\n'); g('add', '.'); g('commit', '-m', 'remove fixture implementation');
     const emptyHead = g('rev-parse', 'HEAD');
     await assert.rejects(verifyDecision({ ...options, head: emptyHead, pr: { ...pr, head: { ...pr.head, sha: emptyHead } } }), /no implemented change/);
