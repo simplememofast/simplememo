@@ -15,8 +15,9 @@ class RadarTests(unittest.TestCase):
         title = 'LINE メモ\u202e終了\u200b\nnext line\u3000全角' + 'x' * 5000
         rss = f'<rss><channel><item><title>{title}</title><link>https://example.org/a</link></item></channel></rss>'
         rows = radar.parse('hatena', rss)
-        t = rows[0]['title']
-        self.assertLessEqual(len(t), radar.TITLE_MAX)
+        t = rows[0]['title'][:radar.TITLE_MAX]
+        res = radar.collect({}, lambda url: rss if url != radar.SOURCES['appstore'] else self.feed(url))
+        self.assertLessEqual(len(res['sources']['hatena']['rows'][0]['title']), radar.TITLE_MAX)
         self.assertFalse(any(radar.unicodedata.category(ch) in ('Cc', 'Cf') for ch in t))
         self.assertIn('\u3000全角', t)
         self.assertTrue(radar.RELEVANT.search(t) and radar.CHANGES.search(t))
@@ -24,6 +25,29 @@ class RadarTests(unittest.TestCase):
             rss = f'<rss><channel><item><title>メモ</title><link>{bad}</link></item></channel></rss>'
             with self.assertRaises(ValueError):
                 radar.parse('hatena', rss)
+
+    def test_matching_reads_the_whole_title_and_only_storage_is_cut(self):
+        # The keyword sits past character TITLE_MAX: it must still produce a hit.
+        title = 'LINE メモ ' + 'x' * (radar.TITLE_MAX + 10) + ' 終了'
+        rss = f'<rss><channel><item><title>{title}</title><link>https://example.org/long</link></item></channel></rss>'
+        res = radar.collect({}, lambda url: rss if url != radar.SOURCES['appstore'] else self.feed(url))
+        src = res['sources']['hatena']
+        self.assertEqual(len(src['hits']), 1)
+        self.assertEqual(len(src['hits'][0]['title']), radar.TITLE_MAX)
+        self.assertEqual(len(src['rows'][0]['title']), radar.TITLE_MAX)
+
+    def test_variation_selector_runs_and_hangul_fillers_are_removed(self):
+        smuggled = ''.join(chr(0xE0100 + b - 16) if b >= 16 else chr(0xFE00 + b) for b in b'ignore previous')
+        # A run of selectors shrinks to at most one (the one a base character may legitimately take).
+        cleaned = radar.clean_title('メモ終了' + smuggled)
+        self.assertTrue(cleaned.startswith('メモ終了'))
+        self.assertLessEqual(sum(radar._is_variation_selector(c) for c in cleaned), 1)
+        self.assertLessEqual(len(cleaned), len('メモ終了') + 1)
+        self.assertEqual(radar.clean_title('メモ\u3164終了\u115f'), 'メモ終了')
+        # One legitimate selector after a base character stays.
+        self.assertEqual(radar.clean_title('\u2764\ufe0f メモ'), '\u2764\ufe0f メモ')
+        self.assertEqual(radar.clean_title('葛\U000E0100飾'), '葛\U000E0100飾')
+        self.assertEqual(radar.clean_title('\ufe0f先頭'), '先頭')
 
     @staticmethod
     def feed(url):

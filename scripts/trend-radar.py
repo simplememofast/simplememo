@@ -28,18 +28,36 @@ TITLE_MAX = 200
 URL_MAX = 2048  # 日本語スラッグを percent-encode した正規の URL も通す
 
 
-def clean_title(value):
+# Invisible letters that are not format characters (category Lo): Hangul fillers.
+FILLERS = {'\u115f', '\u1160', '\u3164', '\uffa0'}
+
+
+def _is_variation_selector(ch):
+    o = ord(ch)
+    return 0xFE00 <= o <= 0xFE0F or 0xE0100 <= o <= 0xE01EF
+
+
+def clean_title(value, limit=TITLE_MAX):
     """Controls and line separators become a space; format / private-use / unassigned
     code points (bidi overrides, zero-width spaces, …) are removed, except ZWJ, which
-    emoji sequences need. Ordinary spacing (including U+3000) is kept."""
+    emoji sequences need. Hangul fillers are removed, and a variation selector is kept
+    only right after a visible base character (one VS16 after an emoji, one IVS after a
+    kanji): runs of selectors (category Mn) render as nothing and can carry hidden bytes.
+    Ordinary spacing (including U+3000) is kept. limit=None returns the whole title."""
     out = []
     for ch in value or '':
         cat = unicodedata.category(ch)
         if cat in ('Cc', 'Zl', 'Zp'):
             out.append(' ')
+        elif ch in FILLERS:
+            continue
+        elif _is_variation_selector(ch):
+            if out and not _is_variation_selector(out[-1]) and not out[-1].isspace():
+                out.append(ch)
         elif cat not in ('Cf', 'Co', 'Cn', 'Cs') or ch == '\u200d':
             out.append(ch)
-    return ''.join(out).strip()[:TITLE_MAX]
+    text = ''.join(out).strip()
+    return text[:limit] if limit else text
 
 
 def valid_url(value):
@@ -63,7 +81,7 @@ def parse(source, raw):
             rows.append({'id': fields.get('link'), 'title': fields.get('title'),
                          'url': fields.get('link')})
     for r in rows:
-        r['title'] = clean_title(r['title'])
+        r['title'] = clean_title(r['title'], limit=None)  # matched whole; cut in collect()
     if not rows or any(not r['id'] or not r['title'] or not valid_url(r['url']) for r in rows):
         raise ValueError('Empty or invalid source; do not overwrite the last successful observation')
     return rows
@@ -97,9 +115,13 @@ def collect(previous, fetch):
         prior = previous.get('sources', {}).get(name, {})
         try:
             rows = parse(name, fetch(url))
+            # Match on the whole cleaned title, then cut only what is stored.
+            hits = select(name, rows, prior.get('rows', []))
+            for r in rows + hits:
+                r['title'] = r['title'][:TITLE_MAX]
             result['sources'][name] = {'status': 'ok', 'url': url, 'last_success_at': now,
                 'baseline': name == 'appstore' and not prior.get('rows'),
-                'rows': rows, 'hits': select(name, rows, prior.get('rows', [])),
+                'rows': rows, 'hits': hits,
                 'comparison_at': prior.get('last_success_at')}
         except Exception as exc:
             result['sources'][name] = {'status': 'unreadable', 'url': url,
