@@ -10,6 +10,15 @@
 
 const fs = require('fs');
 const path = require('path');
+
+// Node ends on an uncaught exception with exit 1, and 1 means "warnings only"
+// here: seo-check.yml fails the step only on `-ge 2`. A run that crashed
+// before checking anything must not pass as a warning (2026-11-10 audit).
+process.on('uncaughtException', (e) => {
+  console.error('seo-check crashed (no checks completed):', e && e.stack ? e.stack : e);
+  process.exit(2);
+});
+
 const { collectHtmlFiles, toUrlPath } = require('./lib/site-files');
 const { getMetaContent, validatePage } = require('./lib/seo-page');
 const { createSiteChecks } = require('./lib/seo-site');
@@ -510,6 +519,26 @@ function runSelfTest() {
     }],
   ];
   for (const [name, check] of deferralTests) t(`[DEFERRAL] ${name}`, check());
+
+  // A crash must end with 2, not Node's default 1 ("warnings only"). Run the real
+  // script on a copy whose only page is a dangling symlink: reading it throws.
+  {
+    const { spawnSync } = require('child_process');
+    const copy = fs.mkdtempSync(path.join(os.tmpdir(), 'seo-check-crash-'));
+    try {
+      for (const rel of ['scripts/seo-check.js', 'scripts/lib/site-files.js', 'scripts/lib/seo-page.js',
+        'scripts/lib/seo-site.js', 'scripts/lib/link-deferrals.js', 'data/site-constants.json']) {
+        fs.mkdirSync(path.dirname(path.join(copy, rel)), { recursive: true });
+        fs.copyFileSync(path.join(ROOT_DIR, rel), path.join(copy, rel));
+      }
+      fs.symlinkSync(path.join(copy, 'missing-target'), path.join(copy, 'x.html'));
+      const r = spawnSync(process.execPath, ['scripts/seo-check.js'], { cwd: copy, encoding: 'utf8' });
+      t('[CRASH] 途中で落ちた回は exit 2（警告のみの 1 で緑にしない）',
+        r.status === 2 && r.stderr.includes('seo-check crashed'));
+    } finally {
+      fs.rmSync(copy, { recursive: true, force: true });
+    }
+  }
 
   fs.rmSync(dir, { recursive: true, force: true });
 
