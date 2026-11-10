@@ -1,19 +1,18 @@
 # Captio式シンプルメモ (Simple Memo - Captio-style) Landing Page
 
-> **⏸ SNS自動投稿は運用停止中（2026-08-11〜）**
-> X日英・TikTokの scheduled 自動投稿（サイト管理画面 /admin/api 経由）はオーナー判断で停止。
+> **⏹ サイト管理画面（/admin）経由のSNS自動投稿は退役済み（2026-10-20・オーナー判断）**
+> X日英・TikTokの scheduled 自動投稿は 2026-08-11 に運用停止し、2026-10-20 に退役した。
+> - `/admin/*` は `functions/admin/_middleware.js` が全メソッドに 410 を返す（`functions/admin/api/*` も同じ応答）
+> - `.github/workflows/x-post-scheduled.yml` / `x-post-en-scheduled.yml` / `auto-post-tiktok.yml` は
+>   `if: ${{ false }}` で、**手動実行（workflow_dispatch）でも何も走らない**。資格情報・依存・投稿コマンドは残っていない
+> - この形は `scripts/admin-retirement.test.mjs` が固定している
+>
+> 停止時（2026-08-11）の理由:
 > - **X日本語**: Claude定期タスク（Cowork）でのバッチ運用に一本化したため（二重運用の防止）
-> - **X英語**: アカウントバン1回目を受けたため（回復とライブラリ鮮度化が先）
+> - **X英語**: アカウントバン1回目を受けたため
 > - **TikTok**: 画像系コンテンツの品質が基準未達のため（privacy_level問題も未解決）
 >
-> **C2（scheduled失敗）の原因は判明済み（2026-08-18）**: 投稿ロジックではなく認証。
-> `/admin/*` が Cloudflare Access の背後にあるのに、ワークフローは Basic 認証しか
-> 送っていないため、投稿本文を出す前に302でログイン画面へ飛ばされている。
-> 再開にはAccessのサービストークンが要る（詳細は `x-post-scheduled.yml` 冒頭）。
->
-> 詳細な理由・再開条件は各workflowファイル冒頭に記載:
-> `.github/workflows/x-post-scheduled.yml` / `x-post-en-scheduled.yml` / `auto-post-tiktok.yml`。
-> `workflow_dispatch` による手動実行（dry_run含む）は引き続き可能。
+> 当時の詳細（scheduled 失敗の原因が認証だったことを含む）は Git 履歴と PR #2121 にある。
 
 The website for the Simple Memo iOS app (simplememofast.com): static HTML and CSS served by Cloudflare Pages, with Pages Functions (`functions/`) for redirects and for blocking internal paths.
 

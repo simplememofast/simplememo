@@ -42,3 +42,21 @@ test('direct legacy API exports return 410 without fetching or reading credentia
     }
   } finally { globalThis.fetch = previousFetch; }
 });
+
+// 2026-11-10 audit: cdnjs was allowed in script-src only for the retired admin
+// tools. It must not come back into the site-wide CSP, and no served page
+// outside admin/ may load from it.
+test('the site-wide CSP no longer allows cdnjs, and only retired admin pages reference it', async () => {
+  const headers = readFileSync(new URL('../_headers', import.meta.url), 'utf8');
+  const csp = headers.split('\n').find((l) => /^\s+Content-Security-Policy:/.test(l)) ?? '';
+  assert.ok(csp.includes("script-src 'self'"), 'CSP line must be found');
+  assert.doesNotMatch(csp, /cdnjs\.cloudflare\.com/);
+  assert.match(csp, /frame-ancestors 'none'/);
+  assert.match(csp, /form-action 'self'/);
+  const { execFileSync } = await import('node:child_process');
+  const root = new URL('..', import.meta.url).pathname;
+  const files = execFileSync('git', ['-C', root, 'ls-files', '-z', '*.html'], { encoding: 'utf8' }).split('\0').filter(Boolean);
+  const offenders = files.filter((f) => !f.startsWith('admin/')
+    && readFileSync(new URL('../' + f, import.meta.url), 'utf8').includes('cdnjs.cloudflare.com'));
+  assert.deepEqual(offenders, []);
+});

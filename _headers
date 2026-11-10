@@ -80,6 +80,13 @@
 # but this rule covers any static asset under /admin/ (e.g. /admin/bg/*.jpg)
 # that bypasses the function. Authenticated content must never be cached by
 # the CDN — otherwise one user's response could be served to another.
+# Since 2026-10-20 the middleware answers every /admin/* request with 410
+# (retired; pinned by scripts/admin-retirement.test.mjs) and still sets these
+# two headers. Access stays in front: older deployments keep their own code
+# (see functions/admin/_middleware.js; Access login observed 2026-10-31,
+# functions/_middleware.js). Nothing authenticated is served any more; this
+# rule is the fallback for an /admin/ response that does not come from the
+# function.
 /admin/*
   Cache-Control: private, no-store
   X-Robots-Tag: noindex, nofollow
