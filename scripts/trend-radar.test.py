@@ -138,6 +138,18 @@ class RadarTests(unittest.TestCase):
             self.assertEqual(len(rules), 1, doc)
             self.assertIn('dropped_rows', rules[0], doc)
 
+    def test_the_dropped_rows_definition_names_every_cause_parse_drops_for(self):
+        # parse() drops a row for a bad URL (an RSS row's id is its URL), a title that is empty
+        # once cleaned, or an App Store id that is not 1 to 20 ASCII digits. The prompt and
+        # Runbook section 6 define dropped_rows for the session, so each must name all three.
+        root = Path(__file__).resolve().parents[1]
+        for doc in ('docs/obsidian/AUTOPILOT_RUNBOOK.md', 'docs/trend-radar-prompt.md'):
+            text = (root / doc).read_text(encoding='utf-8')
+            defs = re.findall(r'dropped_rows[^。\n]*?捨てた行の数', text)
+            self.assertEqual(len(defs), 1, doc)
+            for cause in ('URL', '題名', 'App Store の id'):
+                self.assertIn(cause, defs[0], doc)
+
     def test_unassigned_code_points_are_removed_whatever_the_runner(self):
         # Noncharacters are unassigned in every Unicode version; plane 4 has nothing on the
         # roadmap. Kept on purpose (see clean_title), so this pins the choice.
