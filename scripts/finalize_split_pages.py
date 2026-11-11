@@ -15,6 +15,7 @@ from inject_faq_schema import (
     extract_faqs, hand_written_faqpage, managed_payload, build_payload,
     replace_or_insert,
 )
+from json_script import json_for_script
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = "https://simplememofast.com"
@@ -234,7 +235,7 @@ def finish_faq(text: str, page_url: str) -> str:
                 start = marker.start()
             out = ""
         else:
-            out = match[0].replace(match[1], json.dumps(cleaned, ensure_ascii=False, separators=(",", ":")))
+            out = match[0].replace(match[1], json_for_script(cleaned, ensure_ascii=False, separators=(",", ":")))
         edits.append((start, match.end(), out))
     for start, end, out in reversed(edits):
         text = text[:start] + out + text[end:]
@@ -252,7 +253,7 @@ def rewrite_jsonld(text: str, localize) -> str:
         localize(payload)
         if json.dumps(payload, ensure_ascii=False) == before:
             return match[0]
-        return match[0].replace(match[1], json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+        return match[0].replace(match[1], json_for_script(payload, ensure_ascii=False, separators=(",", ":")))
     return JSONLD_RE.sub(rewrite, text)
 
 

@@ -47,7 +47,9 @@ def brand(home, locale, footer=False):
     name = "シンプルメモ" if locale == "ja" else "Simple Memo"
     sub = CHROME[locale][0]
     size = 48 if footer else 36
-    return f'<a class="site-brand" href="{home}"><img src="/assets/img/app-icon-56.png" width="{size}" height="{size}" alt="" loading="{"lazy" if footer else "eager"}"><span><small>{sub}</small><strong>{name}</strong></span></a>'
+    # HTMLParser hands transform() the decoded logo href; re-encode it so an
+    # existing `&quot;` cannot close the attribute when written back.
+    return f'<a class="site-brand" href="{escape(home, quote=True)}"><img src="/assets/img/app-icon-56.png" width="{size}" height="{size}" alt="" loading="{"lazy" if footer else "eager"}"><span><small>{sub}</small><strong>{name}</strong></span></a>'
 def intro(home, locale):
     _, heading, copy, _ = CHROME[locale]
     return f'<div class="site-footer-intro" lang="{locale}" dir="{"rtl" if locale == "ar" else "ltr"}">{brand(home,locale,True)}<div><p class="site-footer-title">{heading}</p><p class="site-footer-description">{copy}</p></div></div>'
@@ -186,6 +188,14 @@ def selftest():
         def test_idempotence(self):
             once=transform(self.fixture(),"index.html")
             self.assertEqual(once,transform(once,"index.html"))
+        def test_logo_href_is_escaped(self):
+            # The parser decodes attribute values, so the existing logo href
+            # must be re-encoded in both the header logo and the footer intro.
+            before=self.fixture().replace('<a class="global-nav__logo" href="/">','<a class="global-nav__logo" href="/&quot; onmouseover=&quot;x">')
+            after=transform(before,"index.html")
+            self.assertNotIn(' onmouseover="x"',after)
+            self.assertEqual(after.count('href="/&quot; onmouseover=&quot;x"'),2)
+            self.assertEqual(after,transform(after,"index.html"))
         def test_comment_is_not_a_head_close(self):
             before=self.fixture().replace('<title>', '<!-- insert before </head> -->\n<title>')
             after=transform(before,"index.html")

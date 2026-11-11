@@ -107,6 +107,9 @@ test('path classes', () => {
   assert.deepEqual(classifyAutopilotChange(['data/autopilot-status.json', 'ko/autopilot/index.html']), { class: 'ledger', reasons: [] });
   assert.equal(classifyAutopilotChange([{ path: 'data/decision-intents/x.json', status: 'A' }]).class, 'ledger');
   assert.equal(classifyAutopilotChange([{ path: 'data/decision-intents/x.json', status: 'M' }]).class, 'approval');
+  // Audit 2026-11-10: a name decision-ci does not count as a declaration is not a ledger append.
+  assert.equal(classifyAutopilotChange([{ path: 'data/decision-intents/Zz_extra.json', status: 'A' }]).class, 'approval');
+  assert.equal(classifyAutopilotChange([{ path: 'data/decision-rejections/Zz_extra.json', status: 'A' }]).class, 'approval');
   assert.equal(classifyAutopilotChange(['obsidian/index.html']).class, 'approval');
 });
 
@@ -199,6 +202,49 @@ test('forbidden identities are never published', async () => {
     sh(f.work, ['commit', '-q', '-m', 'x'], BOT, { GIT_COMMITTER_NAME: 'Someone', GIT_COMMITTER_EMAIL: 'someone@example.com' });
     assert.equal(await verdictOf(f), 'rejected_identity');
   } finally { f.cleanup(); }
+});
+
+test('credential-shaped values are never published: any pushed blob, commit messages and the request', async () => {
+  // Synthetic, built at run time so no file in this repository carries the shape (check-secret-shapes.mjs).
+  const bare = 'ghp_' + 'a1B2c3D4e5'.repeat(4);
+  const shape = `token: ${bare}`;
+  const cases = [
+    ['page', f => commitPage(f, BOT, 'feat', 'obsidian/new/index.html', `<p>${shape}</p>\n`), {}],
+    ['added then removed (still in the public history)', f => {
+      commitPage(f, BOT, 'x', 'obsidian/new/index.html', `${shape}\n`); commitPage(f, BOT, 'y'); }, {}],
+    ['commit message', f => commitPage(f, BOT, `feat\n\n${shape}`), {}],
+    // At the start of a line: as one JSON line it would read "\\nghp_…", with no word boundary before the value.
+    ['PR body', f => commitPage(f), { req: request({ body: `本文\n${bare}` }) }],
+    ['PR title', f => commitPage(f), { req: request({ title: shape }) }],
+    ['request run field', f => commitPage(f), { req: request({ run: { ...request().run, artifact: `/obsidian/${shape}/` } }) }],
+    ['push_only day', f => commitPage(f, BOT, 'x', 'obsidian/new/index.html', shape), { outcome: 'failure' }],
+    // After a JSON / JS escape the value follows the word character "n" or "t", and "\b" alone would not match.
+    ['JSON-LD after an escaped newline', f => commitPage(f, BOT, 'x', 'obsidian/new/index.html',
+      `<script type="application/ld+json">${JSON.stringify({ note: 'line1\n' + bare })}</script>\n`), {}],
+    ['a JS string literal after an escaped tab', f => commitPage(f, BOT, 'x', 'obsidian/new/app.js',
+      `const note = ${JSON.stringify('a\t' + bare)};\n`), {}],
+    // A tree entry name is public as soon as the branch is pushed.
+    ['path name', f => commitPage(f, BOT, 'x', `obsidian/${bare}/index.html`), {}],
+    ['path name on a push_only day', f => commitPage(f, BOT, 'x', `obsidian/${bare}/index.html`), { outcome: 'failure' }],
+  ];
+  for (const [name, mutate, options] of cases) {
+    const f = fixture();
+    try {
+      mutate(f);
+      let message = '';
+      const verdict = await handoff(f, options).then(r => r.verdict, e => { message = String(e?.message); return e?.code; });
+      assert.equal(verdict, 'rejected_secret_shape', name);
+      assert(!message.includes('a1B2c3D4e5'), `${name}: the value is never echoed`);
+    } finally { f.cleanup(); }
+  }
+  for (const [name, mutate, expected] of [
+    ['a binary blob is not read as text', f => commitPage(f, BOT, 'x', 'obsidian/a.bin', Buffer.concat([Buffer.from([0]), Buffer.from(shape)])), 'publish'],
+    ['the test sentinel and placeholders are not shapes', f => commitPage(f, BOT, 'x', 'obsidian/new/index.html',
+      `<p>${TOKEN} sk-proj-your-key-here</p>\n`), 'publish'],
+  ]) {
+    const f = fixture();
+    try { mutate(f); assert.equal(await verdictOf(f), expected, name); } finally { f.cleanup(); }
+  }
 });
 
 test('the ledgers that gate the Autopilot change only as the runbook asks, push_only days included', async () => {

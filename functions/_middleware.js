@@ -106,6 +106,7 @@ const UNSERVED_DATA = new Set([
   "cpp-map.json",
   "credential-expiry.json",
   "crossrepo-probes.json",
+  "date-lookahead.json",
   "editorial-internal-links.json",
   "emergency-stop.json",
   "escalation-rules.json",
@@ -157,6 +158,54 @@ function isBlockedDataPath(pathname) {
   return UNSERVED_DATA.has(pathname.slice("/data/".length));
 }
 
+// Internal working files must not be publicly served — see INTERNAL_PREFIXES
+// for what and why.
+//
+// 【2026-08-26】**data/*.json の遮断はここでしか効かない。**
+//
+// 2026-08-25 に _redirects へ `/data/x.json /404.html 404` を並べたが、
+// **一度も効いていなかった。**Cloudflare Pages は実在する静的ファイルを
+// 優先し、そのパスの _redirects を無視する。対照実験（2026-08-26・本番）:
+//
+//   /privacy-policy               → 301  （ファイルが無い → _redirects が効く）
+//   /data/credential-expiry.json  → 200  （ファイルが在る → 無視される）
+//   /growth/experiments/...json   → 404  （この middleware は効く）
+//
+// Functions は静的アセットより先に走るので、ここに置けば実在しても止まる。
+// check-publication.mjs は「_redirects にブロックが在ること」を検査していたが、
+// **在ることと効くことは別だった。**設定を grep する検査は、効果を確かめない。
+function isUnservedPath(p) {
+  return (
+    INTERNAL_PREFIXES.some((x) => p === x || p.startsWith(x + "/")) ||
+    p === "/CLAUDE.md" ||
+    isBlockedDataPath(p)
+  );
+}
+
+// 【2026-11-10 監査】The path the static asset server actually looks up, when
+// it differs from the raw one. The checks in onRequest read
+// `new URL(request.url).pathname`, which keeps percent-escapes, but the Pages
+// asset server decodes the path once before it finds the file. So
+// `/docs%2Fx.md`, `/%64ocs/x.md`, `/CLAUDE%2Emd` or `/%61dmin/` walked past
+// every block here and the asset server served the file (reproduced locally on
+// wrangler's pages-shared asset server). Decode once, like it does; on a
+// malformed escape it keeps the raw path, so there is nothing to compare.
+// `.` / `..` segments that only appear after decoding (`/a/%2E%2E%2Fdocs/x`)
+// are resolved as well. Returns null when decoding changes nothing.
+function decodedLookupPath(rawPath) {
+  let decoded;
+  try { decoded = decodeURIComponent(rawPath); } catch { return null; }
+  if (decoded === rawPath) return null;
+  const out = [];
+  for (const seg of decoded.replace(/\\/g, "/").split("/")) {
+    if (seg === "" || seg === ".") continue;
+    if (seg === "..") out.pop();
+    else out.push(seg);
+  }
+  const joined = "/" + out.join("/");
+  return decoded.endsWith("/") && joined !== "/" ? joined + "/" : joined;
+}
+
 // Hosts that answer with the production site under another name (step 0).
 // Each is folded into the canonical host inside the same single 301.
 //
@@ -202,7 +251,12 @@ const HOST_ALIASES = new Set([
 // `noindex,nofollow` は索引だけを止める。配信を止めるのはここ。
 // Translation catalogs are build inputs; browsers use generated HTML and
 // localized JS. They remain readable in the public repository.
-const INTERNAL_PREFIXES = ["/docs", "/scripts", "/tools", "/growth", "/fixtures", "/data/i18n"];
+// 2026-11-10 監査: `/.github` と `/.agents` を追加。Pages のアップロードは
+// ドット始まりのディレクトリも除かない（`.well-known` が配信されるのはその
+// ためで、AASA は _headers が Content-Type を付けて配っている）。ワークフローと
+// エージェント向けの手順書はサイトの一部ではないので、他の作業ファイルと同じく
+// サイトからは配信しない。`.well-known` はここに入れない。
+const INTERNAL_PREFIXES = ["/docs", "/scripts", "/tools", "/growth", "/fixtures", "/data/i18n", "/.github", "/.agents"];
 
 // Referral/attribution params that carry no content meaning (step 1b).
 // Each one mints a distinct crawlable URL for the same page — GSC has
@@ -295,6 +349,20 @@ export const onRequest = async (context) => {
     return context.next();
   }
 
+  // A percent-encoded spelling of a path blocked below (or of /admin/, whose
+  // retirement handler only matches the raw path) gets the same 404. See
+  // decodedLookupPath. Paths without escapes are untouched.
+  const decodedPath = decodedLookupPath(path);
+  if (
+    decodedPath !== null &&
+    (decodedPath === "/admin" || decodedPath.startsWith("/admin/") || isUnservedPath(decodedPath))
+  ) {
+    return new Response("Not Found", {
+      status: 404,
+      headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex" },
+    });
+  }
+
   let needsRedirect = false;
 
   // 0. Host: www and the bare Pages alias → apex, folded into the same 301 as
@@ -323,28 +391,9 @@ export const onRequest = async (context) => {
   //    walked around with an extra slash.
   let pathname = path.includes("//") ? path.replace(/\/{2,}/g, "/") : path;
 
-  // Internal working files must not be publicly served — see
-  // INTERNAL_PREFIXES (module scope) for what and why.
-  if (
-    INTERNAL_PREFIXES.some(
-      (p) => pathname === p || pathname.startsWith(p + "/")
-    ) ||
-    pathname === "/CLAUDE.md" ||
-    // 【2026-08-26】**data/*.json の遮断はここでしか効かない。**
-    //
-    // 2026-08-25 に _redirects へ `/data/x.json /404.html 404` を並べたが、
-    // **一度も効いていなかった。**Cloudflare Pages は実在する静的ファイルを
-    // 優先し、そのパスの _redirects を無視する。対照実験（2026-08-26・本番）:
-    //
-    //   /privacy-policy               → 301  （ファイルが無い → _redirects が効く）
-    //   /data/credential-expiry.json  → 200  （ファイルが在る → 無視される）
-    //   /growth/experiments/...json   → 404  （この middleware は効く）
-    //
-    // Functions は静的アセットより先に走るので、ここに置けば実在しても止まる。
-    // check-publication.mjs は「_redirects にブロックが在ること」を検査していたが、
-    // **在ることと効くことは別だった。**設定を grep する検査は、効果を確かめない。
-    isBlockedDataPath(pathname)
-  ) {
+  // Internal working files must not be publicly served — see isUnservedPath
+  // and INTERNAL_PREFIXES (module scope) for what and why.
+  if (isUnservedPath(pathname)) {
     return new Response("Not Found", {
       status: 404,
       headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex" },
@@ -422,12 +471,15 @@ export const onRequest = async (context) => {
   // keep their existing indexing policy. Mirror these paths in _headers.
   // Set noindex on the final response too: unchanged assets can retain cached
   // responses with old headers, and _headers does not cover Function responses.
-  if (
-    (pathname.startsWith("/data/") && /\.(?:json|csv)$/.test(pathname)) ||
-    (pathname.startsWith("/assets/downloads/") && /\.(?:md|json|csv|swift|canvas)$/.test(pathname)) ||
-    (pathname.startsWith("/assets/evidence/") && /\.(?:md|json)$/.test(pathname)) ||
-    pathname === "/memo-inbox/LICENSE"
-  ) {
+  // Test the decoded spelling as well (see decodedLookupPath): the asset server
+  // serves `/data%2Fx.json` or `/%64ata/x.json` as /data/x.json, but matches
+  // _headers against the raw spelling, so only this header reaches them.
+  const isRawTextFile = (p) =>
+    (p.startsWith("/data/") && /\.(?:json|csv)$/.test(p)) ||
+    (p.startsWith("/assets/downloads/") && /\.(?:md|json|csv|swift|canvas)$/.test(p)) ||
+    (p.startsWith("/assets/evidence/") && /\.(?:md|json)$/.test(p)) ||
+    p === "/memo-inbox/LICENSE";
+  if (isRawTextFile(pathname) || (decodedPath !== null && isRawTextFile(decodedPath))) {
     const asset = await context.next();
     // A conditional request can return 304 with no body. It still needs the
     // new directive so an older cached 200 does not hide the indexing policy.

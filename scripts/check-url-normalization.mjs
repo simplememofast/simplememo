@@ -103,6 +103,29 @@ async function servesDirectly(urlPath) {
   }
 }
 
+/**
+ * Assert a pass-through whose final response carries X-Robots-Tag: noindex.
+ * The asset here answers 200 with no headers of its own, as the asset server
+ * does when no _headers rule matched the spelling, so only the middleware can
+ * supply the header. With `noindex: false`, assert that it does not.
+ */
+async function servesWithNoindex(urlPath, { noindex = true } = {}) {
+  checked++;
+  const absolute = urlPath.startsWith("https://") ? urlPath : ORIGIN + urlPath;
+  const res = await onRequest({
+    request: new Request(absolute),
+    next: async () => new Response("asset body", { status: 200 }),
+  });
+  const robots = res.headers.get("X-Robots-Tag");
+  const hasNoindex = /\bnoindex\b/i.test(robots ?? "");
+  if (res.status !== 200 || hasNoindex !== noindex) {
+    fail(
+      `${urlPath} → expected 200 ${noindex ? "with" : "without"} X-Robots-Tag: noindex, ` +
+        `got ${res.status} with X-Robots-Tag ${JSON.stringify(robots)}`,
+    );
+  }
+}
+
 // ── 自己テスト（**この検査が落ちることを確かめる**） ─────────────────
 //
 // 本体は本番の middleware をそのまま走らせているので、「middleware が正しいか」は
@@ -130,7 +153,9 @@ if (process.argv.includes("--selftest")) {
   const blocked = `/data/${blockedName}`;
 
   let bad = 0;
+  let ran = 0;
   const expect = async (name, fn, shouldFail) => {
+    ran += 1;
     failures.length = 0;
     await fn();
     const failed = failures.length > 0;
@@ -155,8 +180,10 @@ if (process.argv.includes("--selftest")) {
   await expect("**410 でないものを gone 扱いすると落ちる**", () => gone(served), true);
   await expect("**存在しない転送先は落ちる**", () => redirects("/__normalization-test-missing.html", "/__normalization-test-missing"), true);
   await expect("**Pages で再転送されるディレクトリは落ちる**", () => redirects("/en?lang=ja", "/en"), true);
+  await expect(`符号化した配信データは noindex 付きで通る（/%64ata/${servedName}）`, () => servesWithNoindex(`/%64ata/${servedName}`), false);
+  await expect("**noindex の無い応答を noindex 扱いすると落ちる**（/faq）", () => servesWithNoindex("/faq"), true);
 
-  console.log(`\n  自己テスト 9 件中 ${bad} 件失敗`);
+  console.log(`\n  自己テスト ${ran} 件中 ${bad} 件失敗`);
   process.exit(bad === 0 ? 0 : 1);
 }
 
@@ -383,6 +410,14 @@ await notFound("/CLAUDE.md");
 await notFound("/growth/data/gsc/2026-08-09/queries.json");
 await notFound("//growth//experiments/experiments.json");
 await notFound("/growth/");
+// Dot directories are uploaded by Pages too (2026-11-10 監査). Workflows and
+// agent instructions are not part of the site; /.well-known stays served.
+await notFound("/.github/workflows/auto-merge.yml");
+await notFound("//.github//workflows/auto-merge.yml");
+await notFound("/.agents/skills/autonomy-audit/SKILL.md");
+await notFound("/%2Egithub/workflows/auto-merge.yml");
+await notFound(PAGES_ALIAS + "/.github/workflows/auto-merge.yml");
+await servesDirectly("/.well-known/apple-app-site-association");
 
 // data/*.json のうち「配信しない」と決めたもの。
 //
@@ -421,6 +456,71 @@ await notFound("/growth/");
   for (const f of served) {
     await redirects(`${PAGES_ALIAS}/data/${f}`, `/data/${f}`, { checkStaticDestination: false });
   }
+}
+
+// ── 7b. Percent-encoded spellings of the blocked paths (2026-11-10 監査) ──
+// The middleware used to decide from the raw pathname only, but the Pages
+// asset server decodes the path once before it looks up the file. Run through
+// the pre-fix middleware, none of these was stopped: the .html one and the
+// pages.dev one got a 301 that kept the encoded spelling, and the rest passed
+// straight through. Every target names a file in the repo. These cases pin
+// the middleware's decision, not what the asset server answers: the two
+// dot-segment ones reach their file only where the lookup resolves `.` / `..`
+// after decoding, which wrangler's local asset server does (path.resolve) and
+// production was not probed for.
+for (const encoded of [
+  "/%64ocs/seo/FULL-AUDIT-REPORT-2026-07-07.md",
+  "/docs%2Fseo%2FFULL-AUDIT-REPORT-2026-07-07.md",
+  "/CLAUDE%2Emd",
+  "/data%2Fcredential-expiry.json",
+  "/data/credential-expiry%2Ejson",
+  "/data%2Fi18n%2Fpages.json",
+  "/%67rowth/data/gsc/2026-08-09/queries.json",
+  "/scripts%2Fseo-check.js",
+  "/fixtures%2Fengine-divergence.html",
+  "/admin%2Fbrand/",
+  "/%61dmin/",
+  "/admin%2F",
+  // Dot segments that only appear once decoded.
+  "/zz/%2E%2E%2Fdocs/seo/FULL-AUDIT-REPORT-2026-07-07.md",
+  "/%2E%2Fgrowth/data/gsc/2026-08-09/queries.json",
+  PAGES_ALIAS + "/docs%2Fseo%2FFULL-AUDIT-REPORT-2026-07-07.md",
+]) {
+  await notFound(encoded);
+}
+// Encoded spellings of public paths are not affected: only the blocked
+// destinations change, and a malformed escape is left to the asset server.
+await servesDirectly("/bl%6Fg/instant-capture-workflow");
+await servesDirectly("/x%ZZ/docs");
+await servesDirectly("/assets/downloads/obsidian-publish/%E5%8F%82%E8%80%83.md");
+
+// Served raw text/data files keep their noindex under an encoded spelling too.
+// The asset server decodes once to find the file but matches _headers against
+// the raw spelling, so `/data%2Fx.json` gets no _headers rule and the
+// middleware's header is the only one it can get. HTML pages carry their own
+// meta robots and are left alone.
+{
+  const policy = JSON.parse(
+    readFileSync(path.join(ROOT, "data/publication-policy.json"), "utf8"),
+  );
+  if (policy.files["autopilot-status.json"]?.served_by_site !== true) {
+    fail("publication-policy no longer serves autopilot-status.json; pick another served file here");
+  }
+  for (const p of [
+    "/data/autopilot-status.json",
+    "/data%2Fautopilot-status.json",
+    "/%64ata/autopilot-status.json",
+    "/data/autopilot-status%2Ejson",
+    "/assets/downloads/obsidian-publish/%E5%8F%82%E8%80%83.md",
+    "/assets%2Fdownloads/obsidian-publish/%E5%8F%82%E8%80%83.md",
+    "/assets%2Fevidence/uri-scheme-20260930/cases/S-N02.json",
+    "/memo-inbox%2FLICENSE",
+    "/memo-inbox/LICENS%45",
+  ]) {
+    await servesWithNoindex(p);
+  }
+  await servesWithNoindex("/bl%6Fg/instant-capture-workflow", { noindex: false });
+  await servesWithNoindex("/assets%2Fdownloads/example.pdf", { noindex: false });
 }
 
 // ── 8. /admin/* keeps its Cloudflare Access auth chain ───────────────────

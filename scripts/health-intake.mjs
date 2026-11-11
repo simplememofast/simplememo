@@ -17,6 +17,7 @@
  *
  *   autopilot-health.yml … 出荷が止まったら `ops/autopilot-stale` の Issue を立てる
  *   cron-health.yml      … 定期実行が落ちたら `ops/cron-failure` の Issue を立てる
+ *   date-lookahead.yml   … 数日以内に暦だけで落ちる検査があれば `ops/date-lookahead` の Issue を立てる（2026-11-10）
  *
  * **繋がっていなかったのは、その先だけ。**レーンF（自己修復）が読むのは
  * `data/autopilot-actions.json` で、**Issue は誰も読んでいなかった。**
@@ -55,6 +56,12 @@ export const HEALTH_LABELS = {
   'ops/cron-failure': {
     domain: null,
     what: '定期実行の失敗または起動欠落がある',
+  },
+  // date-lookahead.yml が立てる。**まだ落ちていない**が、いまのまま日付が進むと全PRの検証が落ちる。
+  // 何を直すかは期限ごとに違う（保留の判断・定点観測・公開表示の確認）ので、領域は決め打ちしない。
+  'ops/date-lookahead': {
+    domain: null,
+    what: '数日以内に、暦が進むだけで SEO Validation が落ちる検査がある（期限と検査名は Issue 本文）',
   },
 };
 

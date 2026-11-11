@@ -33,18 +33,23 @@ permissions: {}
 
 jobs:
   auto-merge:
-    # 検証が通っていないものは触らない。
-    if: github.event.workflow_run.conclusion == 'success'
+    # 検証が通っていないものは触らない。フォークの head で走った検証も数えない
+    # （2026-11-10 監査。cron-health.yml と同じ照合。スクリプト側でも確かめ直す）。
+    if: >-
+      github.event.workflow_run.conclusion == 'success'
+      && github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
     # 再実行やReadyへの遷移で同じブランチの検証完了が重なるため、直列化する。
     concurrency:
-      group: auto-merge-${{ github.event.workflow_run.head_branch }}
+      group: auto-merge-${{ github.event.workflow_run.head_repository.full_name }}-${{ github.event.workflow_run.head_branch }}
       cancel-in-progress: false
     # 承認待ちにした自律運転の PR を merge-after-approval へ渡す（それ以外は空）。
     outputs:
+      merged_sha: ${{ steps.merge.outputs.merged_sha }}
+      merged_count: ${{ steps.merge.outputs.merged_count }}
       approval_pr: ${{ steps.merge.outputs.approval_pr }}
       approval_sha: ${{ steps.merge.outputs.approval_sha }}
       approval_files: ${{ steps.merge.outputs.approval_files }}
@@ -80,6 +85,14 @@ jobs:
             // workflows may still emit push results during this migration.
             if (run.event !== 'pull_request') {
               core.info('PRのマージ内容を照合した pull_request 検証の成功を待つ');
+              return;
+            }
+
+            // 検証の run がこのリポジトリの head で走ったものか（2026-11-10 監査）。
+            // フォークは同じブランチ名・同じ head SHA で PR を開けるので、その検証の
+            // 成功をこちらの PR の検証として数えない。読めないときもマージしない。
+            if (run.head_repository?.full_name !== `${owner}/${repo}`) {
+              core.info('検証の run がこのリポジトリの head ではないため何もしない');
               return;
             }
 
@@ -316,29 +329,37 @@ jobs:
             }
             core.setOutput('merged_count', String(mergedCount));
 
-      # GITHUB_TOKEN によるマージ push はワークフローを発火させない（GitHub の
-      # 再帰防止仕様）ため、seo-check.yml の「main push で IndexNow 通知」は
-      # auto-merge 経由のデプロイでは一度も走らない。マージを実行したこの run が
-      # 通知まで責任を持つ。通知の失敗はマージ結果に影響させない。
+  # GITHUB_TOKEN によるマージ push はワークフローを発火させない（GitHub の
+  # 再帰防止仕様）ため、seo-check.yml の「main push で IndexNow 通知」は
+  # auto-merge 経由のデプロイでは一度も走らない。マージを実行したこの run が
+  # 通知まで責任を持つ。通知の失敗はマージ結果に影響させない。
+  # マージした tree のスクリプトを動かすので、書き込み権限のあるジョブとは別のランナーで、
+  # 読み取りだけのトークンで動かす（2026-11-10 監査。indexnow-after-approval と同じ形）。
+  indexnow-after-merge:
+    needs: auto-merge
+    if: needs.auto-merge.outputs.merged_sha != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
       - name: Checkout merged commit
-        if: steps.merge.outputs.merged_count != '0' && steps.merge.outputs.merged_count != ''
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ steps.merge.outputs.merged_sha }}
+          ref: ${{ needs.auto-merge.outputs.merged_sha }}
           persist-credentials: false
           fetch-depth: 10
 
       - name: Setup Node
-        if: steps.merge.outputs.merged_count != '0' && steps.merge.outputs.merged_count != ''
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24.22.1'
           package-manager-cache: false
 
       - name: IndexNow notify (merged diff)
-        if: steps.merge.outputs.merged_count != '0' && steps.merge.outputs.merged_count != ''
         continue-on-error: true
-        run: node scripts/indexnow-notify.js --since ${{ steps.merge.outputs.merged_count }}
+        env:
+          MERGED_COUNT: ${{ needs.auto-merge.outputs.merged_count }}
+        run: node scripts/indexnow-notify.js --since "$MERGED_COUNT"
 
   # 承認待ちにした自律運転の PR を、オーナーの承認の後にだけマージする（2026-10-20 オーナー判断）。
   # Environment autopilot-approval（Required reviewers: simplememofast）は 2026-10-20 にオーナーが作成済み。

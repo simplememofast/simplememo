@@ -254,10 +254,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          # 入力は env 経由で渡す（run: に式を直接展開しない — check-injection-surface.mjs）。
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
         run: |
           set -euo pipefail
           MODE=--apply
-          [ "${{ inputs.dry_run }}" = "true" ] && MODE=""
+          [ "${DRY_RUN:-false}" = "true" ] && MODE=""
           node scripts/autopilot-act.mjs $MODE \
             --emit-report data/autopilot-actions-report.json | tee /tmp/act.txt
           cat /tmp/act.txt >> "$GITHUB_STEP_SUMMARY"

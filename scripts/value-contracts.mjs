@@ -312,6 +312,27 @@ export function loadIntents() {
 }
 
 /**
+ * The file name is a declaration's identity everywhere but the monitor: decision-ci counts one declaration
+ * per PR by path, verifyHistory reads intentPath(c.id), auto-merge classes <id>.json as an added ledger file.
+ * The monitor (loadIntents) reads every *.json and keys on the content's id. A file whose name is not a
+ * contract id, or whose id differs from its name (which also covers a second file with an existing id), is
+ * read by the monitor without those checks having seen it (audit 2026-11-10). --check runs this on the
+ * merged tree, whatever route the PR came from.
+ */
+export function intentFileProblems(dir = path.join(ROOT, 'data/decision-intents')) {
+  if (!fs.existsSync(dir)) return [];
+  const problems = [];
+  for (const f of fs.readdirSync(dir).filter(name => name.endsWith('.json')).sort()) {
+    const where = `data/decision-intents/${f}`, stem = f.slice(0, -'.json'.length);
+    if (!/^[a-z0-9][a-z0-9-]{2,99}$/.test(stem)) { problems.push(`${where}: file name must be <contract id>.json`); continue; }
+    let declared;
+    try { declared = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); } catch { problems.push(`${where}: unreadable declaration`); continue; }
+    if (declared?.id !== stem) problems.push(`${where}: id ${JSON.stringify(declared?.id)} differs from the file name`);
+  }
+  return problems;
+}
+
+/**
  * Paths a declared run may change without listing them in `touches`.
  * The report's generated translations are derived from autopilot/index.html, so
  * they are bookkeeping on the same terms (decision-monitor --publish-report writes both).
@@ -511,6 +532,23 @@ export async function selftest() {
   const mixed = [choices[0], { ...choices[1], metric: publishing.id }];
   assert.equal((await selectContract(mixed, feasible, { selections: [] }, [])).selection.selected, 'runner-up');
   await assert.rejects(selectContract(choices, saturated, { selections: [] }, []), /test-contract:.*directional improvement is impossible.*runner-up:/);
+  // Audit 2026-11-10: the monitor reads every *.json by its content's id; the gates know a declaration by its name.
+  const names = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'decision-intent-names-')));
+  try {
+    const put = (f, text) => fs.writeFileSync(path.join(names, f), text);
+    put(intentPath(c.id).split('/').pop(), JSON.stringify(c));
+    put('notes.txt', 'not a declaration');
+    assert.deepEqual(intentFileProblems(names), [], 'a declaration named by its id passes');
+    put('Zz_extra.json', JSON.stringify({ ...c, id: 'zz-extra' }));
+    put('other-name.json', JSON.stringify(c));
+    put('broken-file.json', '{');
+    assert.deepEqual(intentFileProblems(names), [
+      'data/decision-intents/Zz_extra.json: file name must be <contract id>.json',
+      'data/decision-intents/broken-file.json: unreadable declaration',
+      `data/decision-intents/other-name.json: id ${JSON.stringify(c.id)} differs from the file name`,
+    ], 'a misnamed file, an unreadable one and an id under another name (a duplicate) are named');
+    assert.deepEqual(intentFileProblems(path.join(names, 'absent')), [], 'no directory, no declarations');
+  } finally { fs.rmSync(names, { recursive: true }); }
   const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'decision-history-test-')));
   const g = (...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
   try {
@@ -629,6 +667,10 @@ export async function selftest() {
     const declared = JSON.parse(fs.readFileSync(path.join(dir, selected.intent), 'utf8'));
     assert.equal(declared.selection.calibration.snapshot_sha256, packet.snapshot_sha256);
     assert.equal(declared.candidates[0].calibration.reason, cliChoices[0].calibration.reason);
+    // The actual --check (SEO Validation) reads the declaration names, not only their contents (audit 2026-11-10).
+    assert.match(cli('--check'), /value-contracts OK; 1 declarations/);
+    fs.copyFileSync(path.join(dir, selected.intent), path.join(dir, 'data/decision-intents/Zz_extra.json'));
+    assert.throws(() => cli('--check'), /data\/decision-intents\/Zz_extra\.json: file name must be <contract id>\.json/);
   } finally { fs.rmSync(dir, { recursive: true }); }
   console.log('value-contracts: prospective contracts, approval, missing data, maturity, raw Brier and retirement checks passed');
 }
@@ -688,7 +730,9 @@ async function main() {
     console.log(JSON.stringify({ retired: file, rejection: target, reason: rejection.reason }, null, 2)); return;
   }
   if (args.includes('--feedback')) { console.log(JSON.stringify(predictionFeedback(read('data/value-contracts.json').contracts), null, 2)); return; }
-  const problems = loadIntents().flatMap(c => contractProblems(c, metrics).map(p => `${c.id}: ${p}`));
+  const problems = intentFileProblems();
+  if (problems.length) throw new Error(problems.join('\n'));
+  problems.push(...loadIntents().flatMap(c => contractProblems(c, metrics).map(p => `${c.id}: ${p}`)));
   for (const row of read('data/value-contracts.json').contracts) if (row.settlement?.state === 'settled' && !verifiedSettlement(row)) problems.push(`${row.id}: unverified settlement`);
   if (problems.length) throw new Error(problems.join('\n'));
   console.log(`value-contracts OK; ${loadIntents().length} declarations; approved metrics: ${METRICS.filter(id => approvedMetric(metrics, id)).length}`);

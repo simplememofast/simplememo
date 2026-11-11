@@ -373,6 +373,76 @@ class SummaryTests(unittest.TestCase):
         self.assertEqual(len(summary['runs']), 12)
         self.assertIn('production-ja-1.report.json: LCP selector', audit.render(summary))
 
+    def test_measuring_machine_is_reported_without_changing_budget_results(self):
+        before = audit.summarize(self.root)
+        slow = 'The tested device appears to have a slower CPU than  Lighthouse expects. PRIVATE_WARNING_TAIL'
+        self.patch_run('production-en', lambda r: r.update(
+            environment={'benchmarkIndex': 742, 'hostUserAgent': 'PRIVATE_UA'}, runWarnings=[slow]))
+        self.patch_run('production-ja', lambda r: r.update(environment={'benchmarkIndex': 1812.4}, runWarnings=[]))
+        self.patch_run('local-en', lambda r: r.update(environment={'benchmarkIndex': 1500}, runWarnings=['PRIVATE_OTHER']), runs=(2,))
+        after = audit.summarize(self.root)
+        for key in ('status', 'failures', 'medians', 'enforced_groups', 'production_verified', 'variability'):
+            self.assertEqual(after[key], before[key])
+        host = {row['file']: row['host'] for row in after['runs']}
+        self.assertEqual(host['production-en-1.report.json'],
+                         {'benchmark_index': 742, 'run_warnings': 1, 'slow_host_warning': True})
+        self.assertEqual(host['production-ja-3.report.json'],
+                         {'benchmark_index': 1812.4, 'run_warnings': 0, 'slow_host_warning': False})
+        self.assertEqual(host['local-ja-1.report.json'],
+                         {'benchmark_index': None, 'run_warnings': None, 'slow_host_warning': None})
+        text = audit.render(after)
+        self.assertIn('never used for a budget result', text)
+        self.assertIn('- production-en: benchmarkIndex 742, 742, 742; median 742; slow-host warning in 3 of 3 runs', text)
+        self.assertIn('- production-ja: benchmarkIndex 1812, 1812, 1812; median 1812; slow-host warning in 0 of 3 runs', text)
+        # A partly observed group shows what is missing and no median of an incomplete sample.
+        self.assertIn('- local-en: benchmarkIndex unavailable, 1500, unavailable; slow-host warning unavailable', text)
+        self.assertIn('- local-ja: benchmarkIndex unavailable, unavailable, unavailable; slow-host warning unavailable', text)
+        # Warning text and the host user agent are never copied into the rendered summary.
+        self.assertNotIn('PRIVATE_', text)
+
+    def test_missing_or_malformed_machine_evidence_is_unknown_not_zero(self):
+        edits = [lambda r: r.update(environment=None), lambda r: r.update(environment='fast'),
+                 lambda r: r.update(environment={'benchmarkIndex': 'fast'}),
+                 lambda r: r.update(environment={'benchmarkIndex': True}),
+                 lambda r: r.update(environment={'benchmarkIndex': 0}),
+                 lambda r: r.update(environment={'benchmarkIndex': -5}),
+                 lambda r: r.update(environment={'benchmarkIndex': float('inf')}),
+                 lambda r: r.update(environment={'benchmarkIndex': 1200}, runWarnings='slower CPU'),
+                 lambda r: r.update(environment={'benchmarkIndex': 1200}, runWarnings=[1, None])]
+        for index, edit in enumerate(edits):
+            with self.subTest(case=index):
+                self.patch_run('local-ja', edit)
+                summary = audit.summarize(self.root)
+                self.assertEqual(summary['status'], 'success')
+                host = [row['host'] for row in summary['runs'] if row['group'] == 'local-ja']
+                if index < 7:
+                    self.assertTrue(all(h['benchmark_index'] is None for h in host))
+                    self.assertIn('- local-ja: benchmarkIndex unavailable, unavailable, unavailable', audit.render(summary))
+                else:
+                    self.assertTrue(all(h == {'benchmark_index': 1200, 'run_warnings': None, 'slow_host_warning': None} for h in host))
+                    self.assertIn('- local-ja: benchmarkIndex 1200, 1200, 1200; median 1200; slow-host warning unavailable',
+                                  audit.render(summary))
+
+    def test_a_slow_measuring_machine_never_excuses_a_budget_failure(self):
+        slow = 'The tested device appears to have a slower CPU than  Lighthouse expects.'
+
+        def edit(r):
+            r['audits'][audit.METRICS[2]]['numericValue'] = 250
+            r.update(environment={'benchmarkIndex': 480}, runWarnings=[slow])
+        self.patch_run('production-en', edit)
+        summary = audit.summarize(self.root)
+        self.assertEqual(summary['status'], 'failure')
+        self.assertIn('production-en: median TBT exceeds 200 ms', summary['failures'])
+        text = audit.render(summary)
+        self.assertIn('- production-en: benchmarkIndex 480, 480, 480; median 480; slow-host warning in 3 of 3 runs', text)
+        self.assertIn('production-en: median TBT exceeds 200 ms', text)
+
+    def test_only_the_known_slow_host_warning_is_counted(self):
+        self.patch_run('production-ja', lambda r: r.update(
+            environment={'benchmarkIndex': 900}, runWarnings=['Some other warning about CPU usage']))
+        text = audit.render(audit.summarize(self.root))
+        self.assertIn('- production-ja: benchmarkIndex 900, 900, 900; median 900; slow-host warning in 0 of 3 runs', text)
+
 
 if __name__ == '__main__':
     unittest.main()

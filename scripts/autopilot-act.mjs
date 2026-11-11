@@ -581,6 +581,7 @@ export function derive(ctx) {
   appendWorkflowIntakeAction(ctx, runs, out);
   appendOrphanActions(ctx, out);
   appendCostIntakeAction(ctx, runs, out);
+  appendBranchDispatchCostActions(ctx, out);
   appendCredentialFailureActions(runs, out);
   appendShippingActions(runs, out);
   appendStatusFreshnessAction(ctx, out);
@@ -861,6 +862,36 @@ function appendCostIntakeAction(ctx, runs, out) {
           .filter(r => r.cost_observation && costSyncNeeded(r, costed.get(String(r.external_ref)))).map(r => r.cost_observation) } },
       });
     }
+  }
+}
+
+function appendBranchDispatchCostActions(ctx, out) {
+  // --- D4b: main 以外で手動起動した主系の run（2026-11-10 再レビュー） ---
+  //
+  // isProductionAutopilotRun はこの run を台帳の材料にしない（ブランチ側の定義とスクリプトで
+  // 走るので、ステップ名やログの行を選べる）。この種類の run を月次上限に数えるかはオーナーが
+  // 決める（規則が無い）ので、run ごとに人の依頼として残す（日次の出力の1行だけにしない）。
+  // 閉じるのは人だけ（manual）—— run が一覧の窓（各起動種別30件）から落ちても、依頼は残る。
+  // 値は識別子だけで、ログは読まない。
+  for (const r of ctx.droppedRuns ?? []) {
+    if (!isBranchDispatch(r)) continue;
+    const id = plainRunField(r.id);
+    const branch = plainRunField(r.head_branch);
+    out.push({
+      id: `act-branch-dispatch-cost-${id}`,
+      title: `main 以外（${branch}）で手動起動した主系の run ${id}: この種類の run を月次上限に数えるかを決める`,
+      detail: `run ${id}（event=workflow_dispatch / branch=${branch} / head=${plainRunField(r.head_repository)}）。`
+        + 'ブランチ側の定義とスクリプトで走った run で、そのログは読んでいない。\n'
+        + '決めること: この種類の run を月次上限に数えるか（数えるなら、実費の取り方と台帳への入れ方も）。'
+        + '決まるまで、この依頼は人が閉じるまで残る。',
+      source: 'cost',
+      domain: null,
+      force_owner: 'human',
+      force_owner_why: 'main 以外の手動起動の実費を月次上限に数えるかは、規則の無いオーナー判断（数え方の既定を AI が決めない）',
+      touches: ['data/autopilot-cost.json'],
+      auto: null,
+      close_check: { kind: 'manual', params: { observed: `run ${id} は ${branch} の定義で走った` } },
+    });
   }
 }
 
@@ -1909,28 +1940,103 @@ export async function fetchOrphanedCommits(repo, token, today, { fetchImpl = fet
 
 const WORKFLOW_FILE = 'obsidian-autopilot.yml';
 
-async function fetchWorkflowRuns(repo, token, limit = 30) {
+/** The events the production obsidian-autopilot.yml is started by (its `on:`). */
+export const AUTOPILOT_RUN_EVENTS = ['schedule', 'workflow_dispatch'];
+
+/**
+ * **出自を確かめた run だけを運転台帳・実費台帳の材料にする**（2026-11-10 監査）。
+ *
+ * 同じワークフローの一覧には、PR やブランチ側で定義を書き換えた版の run も並ぶ
+ * （`on: pull_request` を足した改変版など）。ステップ名・結果・ログの1行を選べる
+ * ので、それを読むと「失敗した回」や任意の実費を台帳に入れられた。
+ * **main 以外のブランチで手動起動した run も同じ形になる** —— workflow_dispatch は
+ * 起動したブランチ側の定義とスクリプトで走るので、パス・リポジトリ・起動種別は
+ * 本番と同じでも中身は改変版でありうる（AI のセッションも手動起動できる）。
+ * そこで autopilot-completion.mjs の isRun・company-daily-gsc.mjs と同じく、
+ * このリポジトリ自身の・main の・本来の起動種別の run だけを通す。
+ * main 以外の手動起動は台帳に書かず、捨てたことを日次の出力（stdout →
+ * ステップ要約と Act PR の本文）に出し、run ごとにオーナーへの依頼にする（derive の D4b）。
+ * 数えるかどうかはオーナーが名指しで決める（決まるまでは書かない側）。
+ */
+export function isProductionAutopilotRun(r, repo) {
+  return Number.isSafeInteger(r?.id)
+    && r.path === `.github/workflows/${WORKFLOW_FILE}`
+    && r.repository?.full_name === repo
+    && r.head_repository?.full_name === repo
+    && r.head_branch === 'main'
+    && AUTOPILOT_RUN_EVENTS.includes(r.event);
+}
+
+/**
+ * The runs left out of the ledgers, as one line for the daily output; '' when none were left out.
+ * Identifiers only (id, event, branch, head repository): enough to find the run, nothing from its log.
+ */
+export function droppedRunsNote(dropped) {
+  if (!Array.isArray(dropped) || !dropped.length) return '';
+  const plain = plainRunField;
+  const shown = dropped.slice(0, 10).map((r) =>
+    `id=${plain(r.id)} event=${plain(r.event)} branch=${plain(r.head_branch)} head=${plain(r.head_repository)}`);
+  return `出自を確かめられず台帳の材料にしなかった run: ${dropped.length}件（${shown.join(' / ')}`
+    + `${dropped.length > shown.length ? ` ほか${dropped.length - shown.length}件` : ''}）。`
+    + (dropped.some(isBranchDispatch)
+      ? 'main 以外で手動起動した回は、月次上限に数えるかをオーナーが決めるまで、'
+        + 'run ごとにオーナーへの依頼として残す。' : '');
+}
+
+/** One identifier of a dropped run, reduced to [\w./-] (it may come from a branch name). */
+export const plainRunField = (field) => String(field ?? '?').replace(/[^\w./-]/g, '?').slice(0, 80);
+
+/** A manual run started on a branch other than main: it runs that branch's definition. */
+export const isBranchDispatch = (r) => r?.event === 'workflow_dispatch' && r?.head_branch !== 'main';
+
+/**
+ * Runs for each production event, merged newest first and cut to `limit`. Throws if any read fails.
+ * Runs that fail isProductionAutopilotRun are pushed to `dropped` (when given) instead of vanishing.
+ */
+export async function listProductionRuns(repo, headers, limit = 30, fetchImpl = fetch, dropped = null) {
+  const byId = new Map();
+  for (const event of AUTOPILOT_RUN_EVENTS) {
+    const url = `https://api.github.com/repos/${repo}/actions/workflows/${WORKFLOW_FILE}/runs?event=${event}&per_page=${limit}`;
+    let res;
+    try {
+      res = await fetchImpl(url, { headers, signal: AbortSignal.timeout(20_000) });
+    } catch (e) {
+      throw new Error(`Actions API に到達できず: ${e.message}`);
+    }
+    if (!res.ok) throw new Error(`Actions API が HTTP ${res.status}`);
+    for (const r of (await res.json()).workflow_runs ?? []) {
+      if (!isProductionAutopilotRun(r, repo)) {
+        // 黙って消さない。捨てた理由を追えるように、識別子と起動種別だけ出す。
+        console.error(`# 出自を確かめられない run を台帳の材料にしない: id=${r?.id} event=${r?.event} branch=${r?.head_branch} head=${r?.head_repository?.full_name}`);
+        if (Array.isArray(dropped) && !dropped.some((d) => d.id === r?.id)) {
+          dropped.push({ id: r?.id, event: r?.event, head_branch: r?.head_branch, head_repository: r?.head_repository?.full_name });
+        }
+        continue;
+      }
+      byId.set(r.id, r);
+    }
+  }
+  return [...byId.values()]
+    .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
+    .slice(0, limit);
+}
+
+async function fetchWorkflowRuns(repo, token, limit = 30, dropped = null) {
   if (!token) return null;
-  const url = `https://api.github.com/repos/${repo}/actions/workflows/${WORKFLOW_FILE}/runs?per_page=${limit}`;
   const headers = {
     authorization: `Bearer ${token}`,
     accept: 'application/vnd.github+json',
     'user-agent': 'simplememo-autopilot-act',
   };
-  let res;
+  let runs;
   try {
-    res = await fetch(url, { headers, signal: AbortSignal.timeout(20_000) });
+    runs = await listProductionRuns(repo, headers, limit, fetch, dropped);
   } catch (e) {
-    console.error(`# Actions API に到達できず: ${e.message}（台帳が完全という意味ではない）`);
+    console.error(`# ${e.message}（台帳が完全という意味ではない）`);
     return null;
   }
-  if (!res.ok) {
-    console.error(`# Actions API が HTTP ${res.status}（台帳が完全という意味ではない）`);
-    return null;
-  }
-  const body = await res.json();
   const out = [];
-  for (const r of body.workflow_runs ?? []) {
+  for (const r of runs) {
     // Gateでスキップした回（＝そもそも着手していない）と、着手して落ちた回を
     // 区別するにはジョブの step まで見る必要がある。ここで一緒に取る。
     let steps = null;
@@ -3018,6 +3124,83 @@ async function selftest() {
   let count = 0;
   const t = (name, cond) => { count += 1; if (!cond) fails.push(name); };
   t('成果物PRの確定は2つの形だけで、他はすべて保留する（lib/artifact-settlement.mjs の自己検査を通過）', true);
+  {
+    // 2026-11-10 監査: 改変版の定義で起動した run を台帳の材料にしない。
+    const repo = 'simplememofast/simplememo';
+    const run = (over) => ({
+      id: 1, path: '.github/workflows/obsidian-autopilot.yml', event: 'schedule',
+      repository: { full_name: repo }, head_repository: { full_name: repo }, head_branch: 'main',
+      created_at: '2026-11-09T00:00:00Z', ...over,
+    });
+    t('出自: main の schedule / workflow_dispatch の run は通す',
+      isProductionAutopilotRun(run({}), repo) && isProductionAutopilotRun(run({ event: 'workflow_dispatch' }), repo));
+    t('出自: pull_request / push で起動した run は通さない',
+      !isProductionAutopilotRun(run({ event: 'pull_request' }), repo) && !isProductionAutopilotRun(run({ event: 'push' }), repo));
+    t('出自: main 以外のブランチで手動起動した run（ブランチ側の定義で走る）は通さない',
+      !isProductionAutopilotRun(run({ event: 'workflow_dispatch', head_branch: 'claude/modified-def' }), repo)
+      && !isProductionAutopilotRun(run({ head_branch: undefined }), repo));
+    t('出自: フォークの run は head_branch が main でも通さない',
+      !isProductionAutopilotRun(run({ head_repository: { full_name: 'someone/simplememo' } }), repo));
+    t('出自: 別のワークフローのパスや識別子の無い run は通さない',
+      !isProductionAutopilotRun(run({ path: '.github/workflows/other.yml' }), repo)
+      && !isProductionAutopilotRun(run({ id: '1' }), repo) && !isProductionAutopilotRun(null, repo));
+    const urls = [];
+    const pages = {
+      schedule: [run({ id: 3, created_at: '2026-11-09T00:00:00Z' }), run({ id: 9, event: 'pull_request', created_at: '2026-11-09T05:00:00Z' })],
+      workflow_dispatch: [run({ id: 4, event: 'workflow_dispatch', created_at: '2026-11-09T03:00:00Z' }),
+        run({ id: 8, event: 'workflow_dispatch', head_repository: { full_name: 'someone/simplememo' }, created_at: '2026-11-09T06:00:00Z' }),
+        run({ id: 7, event: 'workflow_dispatch', head_branch: 'claude/x', created_at: '2026-11-09T07:00:00Z' })],
+    };
+    const fakeFetch = async (url) => {
+      urls.push(url);
+      const event = new URL(url).searchParams.get('event');
+      return { ok: true, json: async () => ({ workflow_runs: pages[event] }) };
+    };
+    const quiet = console.error; console.error = () => {};
+    let listed;
+    const dropped = [];
+    try { listed = await listProductionRuns(repo, {}, 30, fakeFetch, dropped); } finally { console.error = quiet; }
+    t('出自: 起動種別ごとにサーバ側で絞り、PR の run を除く指定は使わない',
+      urls.length === 2 && urls.some(u => u.includes('event=schedule')) && urls.some(u => u.includes('event=workflow_dispatch'))
+      && urls.every(u => !u.includes('exclude_pull_requests')));
+    t('出自: 混ざった応答から本番の run だけを新しい順に返す',
+      JSON.stringify(listed.map(r => r.id)) === '[4,3]');
+    const note = droppedRunsNote(dropped);
+    t('出自: 捨てた run は黙って消さず、日次の出力に識別子だけを出す',
+      JSON.stringify(dropped.map(r => r.id).sort()) === '[7,8,9]'
+      && note.includes('3件') && note.includes('id=7') && note.includes('branch=claude/x')
+      && note.includes('run ごとにオーナーへの依頼として残す')
+      && !droppedRunsNote([{ id: 9, event: 'pull_request', head_branch: 'main' }]).includes('月次上限')
+      && droppedRunsNote([]) === '' && droppedRunsNote(null) === ''
+      && !droppedRunsNote([{ id: 1, head_branch: 'x\n## 偽の見出し' }]).includes('\n'));
+    // 2026-11-10 再レビュー: 捨てた手動起動の実費を、1行の表示だけで消さない。
+    const branchDispatch = derive({ droppedRuns: dropped }).filter(a => a.id.startsWith('act-branch-dispatch-cost-'));
+    t('出自: main 以外の手動起動は、実費を月次上限に数えるかを run ごとに人へ上げる（閉じるのは人）',
+      branchDispatch.length === 1 && branchDispatch[0].id === 'act-branch-dispatch-cost-7'
+      && branchDispatch[0].force_owner === 'human' && branchDispatch[0].auto === null
+      && branchDispatch[0].close_check.kind === 'manual'
+      && CLOSE_CHECKS.manual(branchDispatch[0].close_check.params, {}).closed === false
+      && JSON.stringify(branchDispatch[0].touches) === '["data/autopilot-cost.json"]'
+      && classify(branchDispatch[0], {}).owner === 'human');
+    t('出自: 依頼と日次の出力は決めること（月次上限に数えるか）を問い、上限の扱いを断定しない',
+      [branchDispatch[0].title, branchDispatch[0].detail, branchDispatch[0].close_check.params.observed, note]
+        .every(s => !/入っていない|入らない|上限の外|掛かっている/.test(s))
+      && branchDispatch[0].title.includes('月次上限に数えるかを決める')
+      && branchDispatch[0].detail.includes('決めること: この種類の run を月次上限に数えるか'));
+    t('出自: PR・フォーク・main の run からは実費の依頼を立てない',
+      derive({ droppedRuns: [{ id: 9, event: 'pull_request', head_branch: 'claude/x' },
+        { id: 10, event: 'workflow_dispatch', head_branch: 'main', head_repository: 'someone/simplememo' }] })
+        .every(a => !a.id.startsWith('act-branch-dispatch-cost-'))
+      && derive({}).every(a => !a.id.startsWith('act-branch-dispatch-cost-')));
+    t('出自: 依頼の id と題は識別子だけで、ブランチ名の記号を通さない',
+      derive({ droppedRuns: [{ id: 11, event: 'workflow_dispatch', head_branch: 'x\n## 偽 `b`' }] })
+        .filter(a => a.id.startsWith('act-branch-dispatch-cost-'))
+        .every(a => !/[\n`#]/.test(a.title) && a.id === 'act-branch-dispatch-cost-11'));
+    const failing = async () => ({ ok: false, status: 502, json: async () => ({}) });
+    let failed = false;
+    try { await listProductionRuns(repo, {}, 30, failing); } catch { failed = true; }
+    t('出自: 1本でも読めなければ失敗にする（台帳が完全とは言わない）', failed);
+  }
   {
     const { appendRun } = await import('./autopilot-budget.mjs');
     const job = { id: 97262077233, run_id: 32667079679, run_attempt: 1, status: 'completed',
@@ -5426,7 +5609,8 @@ async function buildContext(today, ledger = null) {
   } catch (e) {
     console.error(`# 実費ゲートの判定を取得できなかった: ${e.message}`);
   }
-  const workflowRuns = await fetchWorkflowRuns(repo, token);
+  const droppedRuns = [];
+  const workflowRuns = await fetchWorkflowRuns(repo, token, 30, droppedRuns);
   const orphans = await fetchOrphanedCommits(repo, token, today,
     { watchSince: orphanWatchSince(ledger) });
   // **issue_closed の材料。**取れなければ null のまま渡す（判定不能を回復と読ませない）。
@@ -5437,7 +5621,7 @@ async function buildContext(today, ledger = null) {
   if (issues === null) console.error('# 監視Issueの一覧を取得できず判定不能（台帳を解決扱いにしない）');
   // 台帳そのものも渡す。**handler が積んだ状態（除外一覧）を導出が読めないと、
   // 題と根拠で違う件数が出る。**判定には使わない —— 使うのは件数の表示だけ。
-  return { today, runsDoc, matrix, costDoc, statusDoc, routineDoc, selfheal, budget, workflowRuns, orphans, issues, viewport,
+  return { today, runsDoc, matrix, costDoc, statusDoc, routineDoc, selfheal, budget, workflowRuns, droppedRuns, orphans, issues, viewport,
     ledgerDoc: ledger, repo, token, eventName: process.env.GITHUB_EVENT_NAME, completion,
     // 採点の方針（L4・読むだけ）。D8 の月次追認と、その閉じ条件が accepted_modes を見る
     scorePolicy: readJson(path.join(ROOT, 'data/autonomy-score.json')) };
@@ -5607,6 +5791,9 @@ async function main() {
   if (retirementStatus(ctx.routineDoc).present) {
     console.log(`副系の観測: retired — not observed since ${ctx.routineDoc.observed_at}（退役中。routine の状態は判定しない）\n`);
   }
+  // 台帳に書かなかった run を、ステップ要約と Act PR の本文に出す（stderr だけだと誰も読まない）。
+  const dropNote = droppedRunsNote(ctx.droppedRuns);
+  if (dropNote) console.log(`${dropNote}\n`);
   console.log(render(sum, applied, today));
 }
 

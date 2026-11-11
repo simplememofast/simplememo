@@ -516,8 +516,9 @@ function literalCount(raw, canonical) {
 
 // ── 3. ワークフロー ──────────────────────────────────────────────
 
-const scalarText = (node) => (node && node.t === 's' ? node.v : null);
-const isKey = (node, name) => {
+export const scalarText = (node) => (node && node.t === 's' ? node.v : null);
+/** 鍵の名前（空白を詰め、大文字小文字を区別しない。迷う書き方は当てる側に倒す）。 */
+export const isKey = (node, name) => {
   const v = scalarText(node);
   return v !== null && v.replace(SPACE_RUN, '').toLowerCase() === name;
 };
@@ -535,7 +536,7 @@ function* strings(node, parentKey = null) {
 const textOf = (nodes) => nodes.flatMap((n) => [...strings(n)].map(({ node }) => node.v)).join('\n');
 
 /** 木の中のすべての対応表の組 [鍵, 値]（入れ子も）。 */
-function* allPairs(node) {
+export function* allPairs(node) {
   if (!node || node.t === 's') return;
   if (node.t === 'q') { for (const item of node.items) yield* allPairs(item); return; }
   for (const [k, v] of node.pairs) {

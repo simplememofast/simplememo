@@ -33,6 +33,8 @@ export const protectedPaths = ['data/value-metrics.json', 'data/autonomy-score.j
   'scripts/autopilot-publish.mjs', 'scripts/lib/autopilot-paths.mjs', 'scripts/merge-identity-check.js',
   // The owner-approval rule auto-merge.yml applies to these same branches.
   'scripts/autopilot-approval-check.mjs'];
+// The only name a declaration may have: data/decision-intents/<id>.json (value-contracts' intentPath).
+const DECLARATION_PATH = /^data\/decision-intents\/[a-z0-9-]+\.json$/;
 export const contractExempt = p => ['data/autopilot-runs.json', 'data/autopilot-status.json', 'docs/obsidian/AUTOPILOT_LOG.md'].includes(p) || p.startsWith('data/decision-rejections/');
 export function required(branch, paths, metrics) {
   if (!/^claude\/obsidian-auto-/.test(branch)) return false;
@@ -148,7 +150,10 @@ export function verifyLocal({ cwd = ROOT, baseRef = 'origin/main', translations 
   const forbidden = /^claude\/obsidian-auto-/.test(branch)
     ? touched.filter(p => protectedPaths.includes(p) || p.startsWith('.github/workflows/')) : [];
   if (forbidden.length) problems.push(`autonomous decision cannot change its gate or policy: ${forbidden.join(', ')}`);
-  const intents = committed.filter(p => /^data\/decision-intents\/[a-z0-9-]+\.json$/.test(p));
+  // The same name rule as verifyDecision, reported before the PR.
+  const misnamed = touched.filter(p => p.startsWith('data/decision-intents/') && !DECLARATION_PATH.test(p));
+  if (misnamed.length) problems.push(`declaration path must be data/decision-intents/<id>.json: ${misnamed.join(', ')}`);
+  const intents = committed.filter(p => DECLARATION_PATH.test(p));
   // A committed declaration edited in the work tree is immutable, not "not committed yet".
   const uncommittedIntents = pending.filter(p => p.startsWith('data/decision-intents/') && !intents.includes(p));
   if (uncommittedIntents.length) problems.push(`declaration not committed and pushed first: ${uncommittedIntents.join(', ')}`);
@@ -188,7 +193,9 @@ export async function verifyDecision({ branch, head, baseRef, pr = null, cwd = R
   const git = gitAt(cwd);
   const base = git('merge-base', baseRef, head);
   const metrics = JSON.parse(git('show', `${baseRef}:data/value-metrics.json`));
-  const files = git('diff', '--name-only', base, head).split('\n').filter(Boolean);
+  // --no-renames, as in verifyLocal: a move must show its deleted source too. With rename detection a
+  // declaration moved out of data/decision-intents/ was invisible to the count below (audit 2026-11-10).
+  const files = git('diff', '--name-only', '--no-renames', base, head).split('\n').filter(Boolean);
   if(files.includes('growth/experiments/experiments.json')) {
     const transitions=ref=>JSON.parse(git('show',ref+':growth/experiments/experiments.json')).experiments.filter(e=>e.coexistence).map(e=>({id:e.id,coexistence:e.coexistence}));
     assert.deepEqual(transitions(head),transitions(baseRef),'autonomous decision cannot add, remove or change an observation migration');
@@ -229,7 +236,12 @@ export async function verifyDecision({ branch, head, baseRef, pr = null, cwd = R
     const generated = required(branch, files, metrics) ? generatedPublication({ base, baseRef, head, files, git, cwd, context }) : new Set();
     if (!required(branch, files.filter(p => !generated.has(p)), metrics)) return { state: 'not_required' };
   }
-  const intents = files.filter(p => /^data\/decision-intents\/[a-z0-9-]+\.json$/.test(p));
+  // Every file under data/decision-intents/ is a declaration, whatever its name: the monitor reads them all
+  // (loadIntents). Counting only well-named ones let a second contract under another name pass as 'bound'
+  // beside a valid declaration (audit 2026-11-10), so a misnamed one is refused by name.
+  const intents = files.filter(p => p.startsWith('data/decision-intents/'));
+  const misnamed = intents.filter(p => !DECLARATION_PATH.test(p));
+  if (misnamed.length) throw new Error(`declaration path must be data/decision-intents/<id>.json: ${misnamed.join(', ')}`);
   if (intents.length !== 1) throw new Error('exactly one prospective decision contract is required');
   const c = JSON.parse(git('show', `${head}:${intents[0]}`));
   const problems = contractProblems(c, metrics);
@@ -297,6 +309,9 @@ async function selftest() {
     // reaches the per-PR base check.
     ['Codex/user-directed', 'pull_request', 0, { base: 'other' }],
     ['Codex/user-directed', 'pull_request', 0, { repo: 'other/repo' }],
+    // A fork's PR with the same branch name and head SHA: its validation run does not count (2026-11-10).
+    ['Codex/user-directed', 'pull_request', 0, { runRepo: 'someone/simplememo' }],
+    ['claude/obsidian-auto-test', 'pull_request', 0, { runRepo: null }],
     ['Codex/user-directed', 'pull_request', 0, { authorName: 'Private Person', failed: 1 }],
     ['Codex/user-directed', 'pull_request', 0, { openerName: 'SimpleMemo Developer (Private Person)', failed: 1 }],
     ['Codex/user-directed', 'pull_request', 0, { commitCount: 2, failed: 1 }],
@@ -315,7 +330,7 @@ async function selftest() {
       user: { login: 'simplememofast' }, commits: overrides.commitCount ?? 1 };
     const open = [pr, ...(overrides.others ?? []).map(o =>
       ({ ...pr, number: o.number, base: { ref: o.base }, user: { login: o.opener } }))];
-    await executeMerge({ repo: { owner: 'simplememofast', repo: 'simplememo' }, payload: { workflow_run: { head_branch: branch, head_sha: sha, event } } },
+    await executeMerge({ repo: { owner: 'simplememofast', repo: 'simplememo' }, payload: { workflow_run: { head_branch: branch, head_sha: sha, event, head_repository: { full_name: 'runRepo' in overrides ? overrides.runRepo : REPO } } } },
       { rest: { pulls: {
         // Like GitHub: every fixture PR has this head; filter by base when given,
         // newest first, one page (30 by default). listingIgnoresBase returns a PR
@@ -451,6 +466,41 @@ async function selftest() {
     assert.throws(() => boundRun(c, [...before, run], [...before, run]), /historical run/);
     assert.throws(() => boundRun(c, before, [...before, run, run]), /exactly one run/);
     assert.throws(() => boundRun(c, before, [...before, run, { ...run, run_id: 'uncovered' }]), /multiple new shipped/);
+    // Audit 2026-11-10: a second contract under another name, added with the declaration, was not counted
+    // ('bound'), while auto-merge took it as a ledger file and the monitor read it as a contract.
+    g('checkout', '-q', '--detach', baseRef);
+    save(`data/decision-intents/${c.id}.json`, c);
+    save('data/decision-intents/Zz_extra.json', { ...c, id: 'zz-extra' });
+    g('add', '.'); g('commit', '-q', '-m', 'declare fixture beside a misnamed second contract');
+    fs.writeFileSync(path.join(dir, 'index.html'), 'after\n');
+    save('data/autopilot-runs.json', { runs: [...before, run] }); g('add', '.'); g('commit', '-q', '-m', 'implement and record fixture run');
+    const smuggled = g('rev-parse', 'HEAD');
+    const misnamedError = 'declaration path must be data/decision-intents/<id>.json: data/decision-intents/Zz_extra.json';
+    await assert.rejects(verifyDecision({ ...options, head: smuggled, pr: { ...pr, head: { ...pr.head, sha: smuggled } } }),
+      error => error.message === misnamedError, 'a misnamed file under data/decision-intents/ is refused, not ignored');
+    assert.deepEqual(local().problems, [misnamedError], 'and named before the PR');
+    g('checkout', '-q', '-');
+    // A declaration already on main, moved out of data/decision-intents/ beside a valid declaration: with rename
+    // detection the diff listed only the destination, so the count saw one declaration and said 'bound' (audit
+    // 2026-11-10). A move is the delete it contains: both are refused alike.
+    const home = g('symbolic-ref', '--short', 'HEAD');
+    g('checkout', '-q', '--detach', baseRef);
+    save('data/decision-intents/old-shipped-contract.json', { ...c, id: 'old-shipped-contract' });
+    g('add', '.'); g('commit', '-q', '-m', 'fixture base with a shipped declaration');
+    const shippedBase = g('rev-parse', 'HEAD');
+    for (const leave of [['mv', 'data/decision-intents/old-shipped-contract.json', 'data/decision-rejections/old-shipped-contract.json'],
+      ['rm', '-q', 'data/decision-intents/old-shipped-contract.json']]) {
+      g('checkout', '-q', '--detach', shippedBase);
+      fs.mkdirSync(path.join(dir, 'data/decision-rejections'), { recursive: true });
+      g(...leave);
+      save(`data/decision-intents/${c.id}.json`, c); g('add', '.'); g('commit', '-q', '-m', `${leave[0]} the shipped declaration and declare`);
+      fs.writeFileSync(path.join(dir, 'index.html'), 'after\n');
+      save('data/autopilot-runs.json', { runs: [...before, run] }); g('add', '.'); g('commit', '-q', '-m', 'implement and record fixture run');
+      const left = g('rev-parse', 'HEAD');
+      await assert.rejects(verifyDecision({ ...options, baseRef: shippedBase, head: left, pr: { ...pr, head: { ...pr.head, sha: left } } }),
+        /exactly one prospective decision contract is required/, `a declaration on main that leaves by ${leave[0]} is counted`);
+    }
+    g('checkout', '-q', home);
     fs.writeFileSync(path.join(dir, 'index.html'), 'before\n'); g('add', '.'); g('commit', '-m', 'remove fixture implementation');
     const emptyHead = g('rev-parse', 'HEAD');
     await assert.rejects(verifyDecision({ ...options, head: emptyHead, pr: { ...pr, head: { ...pr.head, sha: emptyHead } } }), /no implemented change/);

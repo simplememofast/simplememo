@@ -18,6 +18,7 @@ from urllib.parse import urljoin, urlsplit, urlunsplit
 from localization_registry import ROOT, groups, page_url, localized_fragment, indexed
 from site_translation_units import collect, collect_extra, prepare_source, source_language, examples_for, Parser, all_nodes
 from site_translation_validation import render
+from json_script import json_for_script
 from site_translation_dynamic import bindings, locale_assets, inline_code, initial_demo_note
 from site_translation_literals import literal_filenames
 from site_translation_dates import source_dates, localize_dates, leftover_dates
@@ -85,8 +86,12 @@ def document_routes():
     return routes
 
 
-def map_reference(value, source, locale, routes, document=False):
-    value = html.unescape(value)
+def map_reference(value, source, locale, routes, document=False, decode=True):
+    # Attribute values are entity-encoded and their callers escape the result
+    # again. Raw text (a <style> element) is not decoded by browsers, so a
+    # caller that writes the result back as raw text passes decode=False.
+    if decode:
+        value = html.unescape(value)
     if not value or value.startswith(('#', 'data:', 'mailto:', 'tel:', 'obsidian:', 'javascript:')):
         return value
     url = urlsplit(urljoin(SITE + '/' + source, value))
@@ -113,11 +118,32 @@ def map_srcset(value, source, locale, routes):
     return ', '.join(candidates)
 
 
-def map_css_urls(value, source, locale, routes):
+def map_css_urls(value, source, locale, routes, decode=True):
     def replace(match):
-        mapped = map_reference(match[2], source, locale, routes)
+        mapped = map_reference(match[2], source, locale, routes, decode=decode)
+        if not decode and mapped != match[2] and '<' in mapped:
+            # Raw text is written back unescaped (see map_style_element).
+            raise ValueError(source + ' → ' + locale + ': <style> url() would write a raw "<" '
+                             'that could close the element: ' + repr(mapped))
         return 'url(' + match[1] + mapped + match[1] + ')'
     return re.sub(r'url\(\s*(["\']?)(.*?)\1\s*\)', replace, value)
+
+
+def map_style_element(css, source, locale, routes):
+    """Map url() locations inside a <style> element, which is raw text.
+
+    Browsers do not decode character references there, so values are mapped
+    as written: `&lt;` stays the text `&lt;` instead of becoming `<`. URL
+    resolution can still assemble an end tag from inert text (`</x/../style>`
+    resolves to `/</style>`). Which end tag matters depends on the container,
+    not on this parser: inside <noscript> a scripting browser ends the raw
+    text at `</noscript`, and inside <svg> or <math> the <style> is not raw
+    text at all, so any tag (`</x/../p>` becomes `/</p>`) leaves foreign
+    content. A real URL never holds a raw `<`, so a url() value that mapping
+    changed and that now contains one stops the build, whatever the
+    container; unchanged values are byte-identical to the source page.
+    """
+    return map_css_urls(css, source, locale, routes, decode=False)
 
 
 ROBOTS_META = re.compile(r'<meta\b(?=[^>]*\bname\s*=\s*["\']robots["\'])[^>]*>', re.I)
@@ -209,7 +235,7 @@ def translate_document(group, locale, catalog, routes, script_paths=None, dynami
                     return SITE + map_reference(value, group['source'], locale, routes, document=True)
         return value
     for (start, end), payload in payloads.items():
-        changes.append((start, end, json.dumps(localized_schema(payload), ensure_ascii=False, indent=2)))
+        changes.append((start, end, json_for_script(localized_schema(payload), ensure_ascii=False, indent=2)))
     # Inline attributes remain in preserved start tags. Merge their translated
     # values into the outer block replacement rather than losing either edit.
     collapsed = []
@@ -284,7 +310,7 @@ def translate_document(group, locale, catalog, routes, script_paths=None, dynami
     for node in all_nodes(Parser(source).root):
         if node.tag == 'style':
             css = source[node.inner:node.end]
-            mapped = map_css_urls(css, group['source'], locale, routes)
+            mapped = map_style_element(css, group['source'], locale, routes)
             if mapped != css:
                 css_changes.append((node.inner, node.end, mapped))
     for start, end, value in reversed(css_changes):

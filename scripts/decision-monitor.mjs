@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { loadIntents, contractProblems, verifyHistory, settle, staticPath, verifiedSettlement, METRICS, approvedMetric } from './value-contracts.mjs';
@@ -164,6 +164,24 @@ export function pendingPublication(request = api, ignored = reportIgnoredPublica
   return verified;
 }
 
+// What --check holds data/decision-recovery.json to. The monitor writes only verified commit SHAs and positive PR
+// numbers into an incident, and they reach git (fetch, diff) as revisions; a field absent at an earlier state is
+// fine, a present one of another shape is not the monitor's (audit 2026-11-10).
+export function recoveryLedgerProblems(doc) {
+  if (!Array.isArray(doc?.incidents)) return ['incidents must be a list'];
+  const problems = [];
+  doc.incidents.forEach((incident, n) => {
+    if (!incident || typeof incident !== 'object' || Array.isArray(incident)) { problems.push(`incident ${n}: not an object`); return; }
+    for (const key of ['target_sha', 'head_sha', 'execution_head', 'revert_sha'].filter(k => Object.hasOwn(incident, k))) {
+      if (!shaOK(incident[key])) problems.push(`incident ${n}: ${key} is not a commit SHA`);
+    }
+    if (Object.hasOwn(incident, 'revert_pr') && !(Number.isSafeInteger(incident.revert_pr) && incident.revert_pr > 0)) {
+      problems.push(`incident ${n}: revert_pr is not a pull request number`);
+    }
+  });
+  return problems;
+}
+
 export function recoveryAttribution(previous, origin) {
   const current = typeof origin === 'string' ? { trigger: origin } : origin;
   const priorHuman = previous?.detected_at && !(previous.human_interventions === 0 && automatedDecisionOrigin(previous)) ? 1 : 0;
@@ -225,13 +243,20 @@ export function recoveryPullRequest(branch, request = api) {
   return { number: pr.number, body: pr.body, state: pr.state === 'open' ? 'OPEN' : pr.merged_at ? 'MERGED' : 'CLOSED' };
 }
 
+// staticPath includes images, so a rollback patch can be binary. It carries both sides (base85), and the
+// contract's budget bounds only the new side: a 450 KB image already overflowed execFileSync's 1 MiB default.
+const PATCH_BUFFER = 128 * 1024 * 1024;
+// One diff form for the patch verified here and the patch applied (applyRevert): binary, full blob ids, no rename
+// detection, and no external diff driver or text conversion from the runner's git configuration.
+const PATCH_DIFF = ['diff', '--binary', '--full-index', '--no-renames', '--no-ext-diff', '--no-textconv'];
+
 export function verifyRollback(incident, revertHead, paths, cwd = ROOT) {
-  const command = (...args) => execFileSync('git', args, { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }).trim();
+  const command = (...args) => execFileSync('git', args, { cwd, encoding: 'utf8', maxBuffer: PATCH_BUFFER }).trim();
   assert(shaOK(incident.execution_head) && shaOK(incident.target_sha) && shaOK(revertHead), 'rollback commits required');
   assert.equal(command('rev-parse', `${revertHead}^`), incident.execution_head, 'rollback PR was changed after creation');
-  const expected = command('diff', '--binary', '--full-index', '--no-renames', incident.target_sha, `${incident.target_sha}^`, '--', ...paths);
+  const expected = command(...PATCH_DIFF, incident.target_sha, `${incident.target_sha}^`, '--', ...paths);
   assert(expected, 'empty declared rollback');
-  const actual = command('diff', '--binary', '--full-index', '--no-renames', incident.execution_head, revertHead);
+  const actual = command(...PATCH_DIFF, incident.execution_head, revertHead);
   assert.equal(actual, expected, 'rollback PR differs from the declared reverse patch');
 }
 
@@ -325,16 +350,24 @@ export function pageHealth(html, status, expected) {
   return { known: true, healthy: Boolean(title && canonical && title === expected.title && canonical === expected.canonical), reason: 'title_and_canonical' };
 }
 
-async function probe(p) {
-  const local = fs.readFileSync(path.join(ROOT, p), 'utf8');
-  const expected = { title: local.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim(),
-    canonical: local.match(/<link\b[^>]*rel=["']canonical["'][^>]*>/i)?.[0]?.match(/href=["']([^"']+)/)?.[1] };
-  if (!expected.title || !expected.canonical) return { path: p, known: false, healthy: false, reason: 'local_baseline_invalid' };
-  const u = new URL(expected.canonical);
-  if (u.origin !== 'https://simplememofast.com') return { path: p, known: false, reason: 'nonproduction_canonical' };
+// A page the contract touched may be gone from this checkout (deleted by the contract itself, declared but
+// never written, renamed by a later PR within the 28 days) or carry a relative canonical. Reading or parsing
+// that baseline used to throw out of Promise.all and stop main() for every contract until the window passed
+// (audit 2026-11-10). It is an unknown, held like any other unknown (recoveryPlan: 'unknown_transport'), and
+// never a healthy page after a recovery.
+export async function probe(p, { root = ROOT, request = fetch } = {}) {
+  let expected, u;
+  try {
+    const local = fs.readFileSync(path.join(root, p), 'utf8');
+    expected = { title: local.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim(),
+      canonical: local.match(/<link\b[^>]*rel=["']canonical["'][^>]*>/i)?.[0]?.match(/href=["']([^"']+)/)?.[1] };
+    if (!expected.title || !expected.canonical) return { path: p, known: false, healthy: false, reason: 'local_baseline_invalid' };
+    u = new URL(expected.canonical);
+  } catch { return { path: p, known: false, healthy: false, reason: 'local_baseline_unavailable' }; }
+  if (u.origin !== 'https://simplememofast.com') return { path: p, known: false, healthy: false, reason: 'nonproduction_canonical' };
   u.searchParams.set('decision_probe', String(Date.now()));
   try {
-    const r = await fetch(u, { signal: AbortSignal.timeout(15000), redirect: 'error', headers: { 'cache-control': 'no-cache' } });
+    const r = await request(u, { signal: AbortSignal.timeout(15000), redirect: 'error', headers: { 'cache-control': 'no-cache' } });
     return { path: p, ...pageHealth(await r.text(), r.status, expected) };
   } catch { return { path: p, known: false, healthy: false, reason: 'transport_or_redirect_unknown' }; }
 }
@@ -388,7 +421,8 @@ export function applyRevert(plan, cwd = ROOT) {
   const command = (...args) => execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
   assert.equal(command('rev-parse', 'HEAD'), plan.expected_head, 'HEAD moved before rollback');
   assert.equal(command('status', '--porcelain', '--untracked-files=no'), '', 'rollback requires a clean tracked tree');
-  const diff = execFileSync('git', ['diff', `${plan.target}^`, plan.target, '--', ...plan.paths], { cwd });
+  // Without --binary an image is only "Binary files differ", and git apply refuses it on every run (audit 2026-11-10).
+  const diff = execFileSync('git', [...PATCH_DIFF, `${plan.target}^`, plan.target, '--', ...plan.paths], { cwd, maxBuffer: PATCH_BUFFER });
   if (!diff.length) throw new Error('empty rollback');
   execFileSync('git', ['apply', '--reverse', '--check'], { cwd, input: diff });
   execFileSync('git', ['apply', '--reverse'], { cwd, input: diff });
@@ -462,6 +496,9 @@ async function main() {
     if (!row) { row = { id: c.id, run_id: c.run_id, horizon_days: c.horizon_days, intent: c }; ledger.contracts.push(row); }
     row.delivery ??= await delivery(c, run);
     if (!row.delivery) continue;
+    // The ledger's merge SHA reaches git diff below as a revision, before recoveryPlan checks its shape. A value
+    // like --output=<path> is read as an option there (audit 2026-11-10); the monitor itself writes only SHAs.
+    if (!shaOK(row.delivery.merge_sha)) { warnings.push({ id: c.id, reasons: ['invalid delivery merge_sha'] }); continue; }
     if (c.selection) strategy = recordSelection(strategy, c.id, c.selection);
     if (!verifiedSettlement(row)) row.settlement = settle(c, row.delivery, ctx);
     const merge = row.delivery.merge_sha;
@@ -480,11 +517,13 @@ async function main() {
     if (incident?.revert_pr && incident.state !== 'recovered') {
       const pr = api(`pulls/${incident.revert_pr}`);
       if (pr.merged && (await deployment(pr.merge_commit_sha))?.conclusion === 'success') {
+        // Same shape check as verifyRollback, before these values reach git fetch (audit 2026-11-10).
+        assert(shaOK(pr.head.sha) && shaOK(incident.execution_head) && shaOK(incident.target_sha), 'rollback commits required');
         git('fetch', 'origin', pr.head.sha, incident.execution_head);
         verifyRollback(incident, pr.head.sha, c.touches.filter(staticPath));
         const checks = decisionCheckRuns(pr.head.sha, 'seo-check');
         const seo = checks.find(x => x.name === 'seo-check' && x.conclusion === 'success');
-        const after = await Promise.all(c.touches.filter(p => staticPath(p) && p.endsWith('.html')).map(probe));
+        const after = await Promise.all(c.touches.filter(p => staticPath(p) && p.endsWith('.html')).map(p => probe(p)));
         if (seo && after.length && after.every(p => p.known && p.healthy)) Object.assign(incident,
           recoveryAttribution(incident, origin), {
           state: 'recovered', revert_sha: pr.merge_commit_sha, validation: 'success', deployment_verified: true,
@@ -497,7 +536,7 @@ async function main() {
     const changedSince = git('diff', '--name-only', merge, head).split('\n').filter(Boolean);
     const changedAtMerge = git('diff', '--name-only', `${merge}^`, merge).split('\n').filter(Boolean);
     const checks = await deployment(head);
-    const probes = await Promise.all(c.touches.filter(p => staticPath(p) && p.endsWith('.html')).map(probe));
+    const probes = await Promise.all(c.touches.filter(p => staticPath(p) && p.endsWith('.html')).map(p => probe(p)));
     const plan = recoveryPlan({ intent: c, mergeSha: merge, headSha: head, changedSince, changedAtMerge, checks,
       probes, previous: incident, now: now.toISOString(), stopped: stop() });
     if (plan.action === 'observe') {
@@ -534,7 +573,7 @@ async function main() {
   }
 }
 
-function selftest() {
+async function selftest() {
   const checkSha = 'a'.repeat(40);
   const check = (id, name = 'Cloudflare Pages', conclusion = 'success') => ({ id, name, head_sha: checkSha, conclusion });
   const buriedChecks = [...Array.from({ length: 41 }, (_, i) => check(100 + i, 'unrelated')), check(1)];
@@ -873,6 +912,32 @@ function selftest() {
   assert.equal(pageHealth('<title>good</title><link rel="canonical" href="https://simplememofast.com/">', 200,
     { title: 'good', canonical: 'https://simplememofast.com/' }).healthy, true);
   assert.equal(pageHealth('<title>bad</title>', 200, { title: 'good' }).healthy, false);
+  // Audit 2026-11-10: a touched page missing from this checkout, or one with a relative canonical, is an
+  // unknown that holds. It used to throw out of main() and stop every contract for up to 28 days.
+  const probeRoot = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'decision-probe-test-')));
+  try {
+    const page = (file, canonical) => {
+      fs.mkdirSync(path.dirname(path.join(probeRoot, file)), { recursive: true });
+      fs.writeFileSync(path.join(probeRoot, file), `<title>live</title><link rel="canonical" href="${canonical}">`);
+    };
+    page('blog/relative.html', '/blog/relative');
+    page('blog/live.html', 'https://simplememofast.com/blog/live');
+    const noRequest = () => assert.fail('a probe without a local baseline must not reach production');
+    const unknowns = await Promise.all(['blog/missing.html', 'blog/relative.html'].map(file => probe(file, { root: probeRoot, request: noRequest })));
+    assert.deepEqual(unknowns, ['blog/missing.html', 'blog/relative.html'].map(file =>
+      ({ path: file, known: false, healthy: false, reason: 'local_baseline_unavailable' })), 'no local baseline is an unknown, not an exception');
+    const requested = [];
+    const live = await probe('blog/live.html', { root: probeRoot, request: async (url, init) => {
+      requested.push(url); assert.equal(init.redirect, 'error');
+      return { status: 200, text: async () => fs.readFileSync(path.join(probeRoot, 'blog/live.html'), 'utf8') };
+    } });
+    assert.deepEqual(live, { path: 'blog/live.html', known: true, healthy: true, reason: 'title_and_canonical' }, 'a present page is still probed');
+    assert.deepEqual(requested.map(url => `${url.origin}${url.pathname}:${url.searchParams.has('decision_probe')}`), ['https://simplememofast.com/blog/live:true']);
+    const missing = { ...p, intent: { ...p.intent, touches: ['blog/missing.html'] }, changedAtMerge: ['blog/missing.html'], probes: unknowns.slice(0, 1) };
+    assert.deepEqual(recoveryPlan(missing), { action: 'hold', reason: 'unknown_transport' }, 'an R0 contract without its page holds');
+    assert.deepEqual(recoveryPlan({ ...missing, intent: { ...missing.intent, eligibility: { reversibility_class: 'R1' } } }),
+      { action: 'hold', reason: 'R1_requires_recovery_evidence_and_owner_boundary' });
+  } finally { fs.rmSync(probeRoot, { recursive: true }); }
   const sample = { total: 42.5, generated_jst: '2026-09-04', components: {
     vdc: { n: 2, hit: 1, points: 15 }, umr: { points: 10 }, ra: { n: 1, points: 5, detect: { hit: 1 }, recover: { hit: 0 }, auto_revert_count: 0 },
     ep: { points: 5, precision: { judged: 0 } }, tuc: { points: 7.5, per_week: 5.3, target: 7 },
@@ -934,18 +999,30 @@ function selftest() {
   const g = (...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
   try {
     g('init'); g('config', 'user.name', 'Test'); g('config', 'user.email', 'test@example.invalid');
+    // staticPath includes images (audit 2026-11-10): an incompressible image starting with NUL, about 600 KB on
+    // each side, so the reverse patch is binary and larger than execFileSync's 1 MiB default buffer; and an image
+    // the regression added, which the rollback deletes.
+    const image = () => { const bytes = randomBytes(600 * 1024); bytes[0] = 0; return bytes; };
+    const healthyImage = image(), imagePaths = ['assets/img/x.png', 'assets/img/new.png'];
+    fs.mkdirSync(path.join(dir, 'assets/img'), { recursive: true });
     fs.writeFileSync(path.join(dir, 'index.html'), 'healthy\n'); fs.writeFileSync(path.join(dir, 'other.txt'), 'keep\n');
+    fs.writeFileSync(path.join(dir, imagePaths[0]), healthyImage);
     g('add', '.'); g('commit', '-m', 'baseline');
-    fs.writeFileSync(path.join(dir, 'index.html'), 'broken\n'); g('add', '.'); g('commit', '-m', 'regression');
+    fs.writeFileSync(path.join(dir, 'index.html'), 'broken\n');
+    fs.writeFileSync(path.join(dir, imagePaths[0]), image()); fs.writeFileSync(path.join(dir, imagePaths[1]), image());
+    g('add', '.'); g('commit', '-m', 'regression');
     const target = g('rev-parse', 'HEAD');
-    applyRevert({ target, expected_head: target, paths: ['index.html'] }, dir);
+    const rollbackPaths = ['index.html', ...imagePaths];
+    applyRevert({ target, expected_head: target, paths: rollbackPaths }, dir);
     assert.equal(fs.readFileSync(path.join(dir, 'index.html'), 'utf8'), 'healthy\n');
     assert.equal(fs.readFileSync(path.join(dir, 'other.txt'), 'utf8'), 'keep\n');
+    assert(fs.readFileSync(path.join(dir, imagePaths[0])).equals(healthyImage), 'a changed image is restored byte for byte');
+    assert.equal(fs.existsSync(path.join(dir, imagePaths[1])), false, 'an image the regression added is removed');
     assert.throws(() => applyRevert({ target, expected_head: '0'.repeat(40), paths: ['index.html'] }, dir));
     g('add', '.'); g('commit', '-m', 'restore');
     const restored = g('rev-parse', 'HEAD');
     const incident = { target_sha: target, execution_head: target };
-    verifyRollback(incident, restored, ['index.html'], dir);
+    verifyRollback(incident, restored, rollbackPaths, dir);
     fs.writeFileSync(path.join(dir, 'other.txt'), 'unexpected change\n');
     g('add', '.'); g('commit', '--amend', '--no-edit');
     assert.throws(() => verifyRollback(incident, g('rev-parse', 'HEAD'), ['index.html'], dir), /declared reverse patch/);
@@ -996,14 +1073,85 @@ function selftest() {
       fs.rmSync(publicationTest, { recursive: true });
     }
   } finally { fs.rmSync(dir, { recursive: true }); }
+  // Audit 2026-11-10: ledger values reach git only as commit SHAs. --check holds the recovery ledger to the
+  // shapes the monitor writes; fields absent at an earlier state are fine.
+  const sha = ch => ch.repeat(40);
+  const observing = { contract_id: 'x', state: 'observing', head_sha: sha('b'), target_sha: sha('a'), probes: [] };
+  const recovered = { ...observing, state: 'recovered', execution_head: sha('b'), revert_pr: 12, revert_sha: sha('c') };
+  assert.deepEqual(recoveryLedgerProblems({ incidents: [] }), []);
+  assert.deepEqual(recoveryLedgerProblems({ incidents: [observing, recovered] }), [], 'the shapes the monitor writes pass');
+  assert.deepEqual(recoveryLedgerProblems({ incidents: [{ ...recovered, execution_head: '--output=x', revert_pr: 0 }, null] }),
+    ['incident 0: execution_head is not a commit SHA', 'incident 0: revert_pr is not a pull request number', 'incident 1: not an object']);
+  assert.deepEqual(recoveryLedgerProblems({ incidents: [{ ...observing, target_sha: null, head_sha: 'main' }] }),
+    ['incident 0: target_sha is not a commit SHA', 'incident 0: head_sha is not a commit SHA']);
+  assert.deepEqual(recoveryLedgerProblems({}), ['incidents must be a list']);
+  // The production entry point (dry run, GitHub replaced) over ledgers that carry option-shaped values.
+  const shapes = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'decision-ledger-shape-test-')));
+  try {
+    const sg = (...a) => execFileSync('git', a, { cwd: shapes, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+    const put = (file, value) => { fs.mkdirSync(path.dirname(path.join(shapes, file)), { recursive: true }); fs.writeFileSync(path.join(shapes, file), JSON.stringify(value, null, 2) + '\n'); };
+    fs.cpSync(path.join(ROOT, 'scripts'), path.join(shapes, 'scripts'), { recursive: true });
+    const metric = { id: 'shipping_day_rate', tier: 'A', approved_by: 'test-owner', approved_at: '2026-08-01', direction: 'up',
+      null_model: { kind: 'trailing_median', window_days: 3 } };
+    const intent = { id: 'shape-test', run_id: 'shape-run', metric: metric.id, created_at: '2026-09-04T00:00:00.000Z', metric_policy_hash: hash(metric),
+      horizon_days: 1, baseline: 0, null_model: { kind: 'trailing_median', value: 0 }, predicted_delta: .1, p: .8, rank_gap: .1,
+      counterfactual: { id: 'runner-up', reason: 'Independent candidate comparison' },
+      eligibility: { criteria: Object.fromEntries(['a', 'b', 'c', 'd', 'e'].map(k => [k, { result: 'pass' }])), reversibility_class: 'R0' },
+      touches: ['index.html'], max_changed_lines: 100, max_binary_bytes: 0, predicted_usd: 0 };
+    assert.deepEqual(contractProblems(intent, { metrics: [metric] }), [], 'fixture: a valid declaration');
+    put('data/emergency-stop.json', { stopped: false, agents: { act: { stopped: false } } });
+    put('data/value-metrics.json', { metrics: [metric] });
+    put('data/autopilot-runs.json', { runs: [{ run_id: intent.run_id, date_jst: '2026-09-04', outcome: 'shipped', lane: 'A', action: 'refresh', pr: 7 }] });
+    put('data/autopilot-cost.json', { runs: [] });
+    put('data/decision-review.json', { selections: [] });
+    put(`data/decision-intents/${intent.id}.json`, intent);
+    const bin = path.join(shapes, 'bin'); fs.mkdirSync(bin);
+    // gh answers only the routes a test names (SHAPE_GH: route fragment -> JSON); any other call fails the run.
+    fs.writeFileSync(path.join(bin, 'gh'), `#!${process.execPath}\nconst route = process.argv.at(-1);\n`
+      + `for (const [part, value] of Object.entries(JSON.parse(process.env.SHAPE_GH))) if (route.includes(part)) { console.log(JSON.stringify(value)); process.exit(0); }\n`
+      + `console.error('unexpected gh route: ' + route); process.exit(1);\n`, { mode: 0o700 });
+    const monitor = (ledgers, replies = {}, args = []) => {
+      put('data/value-contracts.json', { contracts: [{ id: intent.id, run_id: intent.run_id, horizon_days: 1, intent,
+        delivery: { verified: true, intent_hash: hash(intent), merge_sha: sha('a'), deployed_at: new Date().toISOString(), pr: 7, ...ledgers.delivery } }] });
+      put('data/decision-recovery.json', { incidents: ledgers.incidents ?? [] });
+      sg('add', '-A'); sg('commit', '-q', '--allow-empty', '-m', 'ledger shape fixture');
+      const env = { ...process.env, PATH: `${bin}:${process.env.PATH}`, GITHUB_EVENT_NAME: 'workflow_dispatch', SHAPE_GH: JSON.stringify(replies) };
+      delete env.DECISION_MONITOR_NATIVE_TIMER;
+      try {
+        return { code: 0, stdout: execFileSync(process.execPath, [path.join(shapes, 'scripts/decision-monitor.mjs'), ...args], { cwd: shapes, env, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }) };
+      } catch (error) { return { code: error.status, stdout: error.stdout, stderr: error.stderr }; }
+    };
+    sg('init'); sg('config', 'user.name', 'Test'); sg('config', 'user.email', 'test@example.invalid');
+    // (1) data/value-contracts.json: a merge SHA shaped like a git option is a warning (the run is red, nothing is
+    // saved), never a git argument. Unfixed, git diff took it as --output and wrote this file.
+    const written = path.join(shapes, 'written-by-git');
+    const optionMerge = monitor({ delivery: { merge_sha: `--output=${written}` } });
+    assert.equal(fs.existsSync(written), false, 'a ledger value must not reach git as an option');
+    assert.equal(optionMerge.code, 1);
+    assert.deepEqual(JSON.parse(optionMerge.stdout).warnings, [{ id: intent.id, reasons: ['invalid delivery merge_sha'] }]);
+    assert.match(optionMerge.stderr, /invalid declarations require attention/);
+    // (2) data/decision-recovery.json: a rollback execution head of the wrong shape stops before git fetch.
+    const pending = { contract_id: intent.id, state: 'revert_pending', mode: 'production', target_sha: sha('a'), head_sha: sha('d'),
+      execution_head: '--upload-pack=not-a-commit', revert_pr: 8 };
+    const replies = { 'pulls/8': { number: 8, merged: true, merge_commit_sha: sha('b'), head: { sha: sha('c') } },
+      '/check-runs': { total_count: 1, check_runs: [{ id: 1, name: 'Cloudflare Pages', head_sha: sha('b'), conclusion: 'success' }] } };
+    const optionHead = monitor({ incidents: [pending] }, replies);
+    assert.equal(optionHead.code, 1);
+    assert.equal(optionHead.stderr.trim(), 'rollback commits required', 'the shape check precedes git fetch');
+    // (3) The actual --check reads the same ledger.
+    const check = monitor({ incidents: [pending] }, {}, ['--check']);
+    assert.equal(check.code, 1);
+    assert.match(check.stderr, /incident 0: execution_head is not a commit SHA/);
+    assert.equal(monitor({ incidents: [{ ...pending, execution_head: sha('d') }] }, {}, ['--check']).code, 0);
+  } finally { fs.rmSync(shapes, { recursive: true }); }
   console.log('decision-monitor: repeated probes, safe scope, stop, stale HEAD, and real Git recovery drill passed');
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  if (process.argv.includes('--selftest')) selftest();
+  if (process.argv.includes('--selftest')) selftest().catch(e => { console.error(e); process.exitCode = 1; });
   else if (process.argv.includes('--publish-report')) publishReport().then(() => console.log('Public operating report synchronized.')).catch(e => { console.error(e.message); process.exitCode = 1; });
   else if (process.argv.includes('--check')) {
-    const d = read('data/decision-recovery.json');
-    assert(Array.isArray(d.incidents));
-    console.log('decision recovery ledger OK');
+    const problems = recoveryLedgerProblems(read('data/decision-recovery.json'));
+    if (problems.length) { console.error(`decision recovery ledger:\n${problems.join('\n')}`); process.exitCode = 1; }
+    else console.log('decision recovery ledger OK');
   } else main().catch(e => { console.error(e.message); process.exitCode = 1; });
 }

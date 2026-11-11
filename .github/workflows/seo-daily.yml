@@ -445,9 +445,23 @@ jobs:
             sh(`git push -u origin ${branch} --force-with-lease`);
 
             const { owner, repo } = context.repo;
-            const existing = await github.rest.pulls.list({ owner, repo, state: 'open', head: `${owner}:${branch}` });
-            if (existing.data.length) {
-              core.notice(`#${existing.data[0].number} は既に開いている`);
+            // Own PRs into main only (2026-11-10 audit; same filter as autopilot-act.yml).
+            // Anyone can open a PR from this branch into another base, and counting
+            // that as "already open" silently kept the weekly snapshot out of main.
+            // A PR into main opened by someone else is refused loudly, not skipped.
+            const { data: openIntoMain } = await github.rest.pulls.list({
+              owner, repo, state: 'open', head: `${owner}:${branch}`, base: 'main',
+            });
+            const existing = openIntoMain.filter((pr) => pr.base?.ref === 'main'
+              && pr.head?.repo?.full_name === `${owner}/${repo}`
+              && pr.base?.repo?.full_name === `${owner}/${repo}`
+              && (pr.user?.login === owner || pr.user?.login === 'github-actions[bot]'));
+            if (existing.length) {
+              core.notice(`#${existing[0].number} は既に開いている`);
+              return;
+            }
+            if (openIntoMain.length) {
+              core.setFailed(`main への PR が想定外の名義で開いている（#${openIntoMain[0].number}）`);
               return;
             }
 

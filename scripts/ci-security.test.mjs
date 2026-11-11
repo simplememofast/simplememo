@@ -1,4 +1,5 @@
 import '../tools/server-guard.test.js';
+import './delete-branch-workflow.test.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -80,6 +81,91 @@ test('security-sensitive actions use immutable revisions and supported Node; aud
   const check = read('.github/workflows/seo-check.yml');
   assert.match(check, /permissions:\n  contents: read/);
   assert.match(check, /npm ci --ignore-scripts --no-audit\n          npm audit --omit=dev --audit-level=moderate/);
+});
+
+// SEO Validation decides the production merge, and a version pin alone lets PyPI add a new file to that
+// version or fall back to an sdist that runs code at install time. So every pip install in a workflow
+// takes wheels only, from a requirements file that pins each package to one version and its file hashes.
+// The scan finds pip however it is named (`pip`, `pip3`, `pip3.12`, a quoted "$VENV/bin/pip", `python -m
+// pip`) and with general options before the subcommand (`pip -q install`, `pip --index-url URL install`).
+// Lines end at CR, CRLF, NEL, U+2028 and U+2029 as well as LF, as they do for YAML. An install is judged
+// on the words after `install` up to the next shell operator, without a trailing comment, and only on the
+// plain words before the first quote, backslash or redirection: flags in a `# …` comment, in a later
+// command or after a YAML `\n` escape do not count, and an install that cannot be read that way fails.
+const PIP = /(?<![\w.-])pip(?:3(?:\.\d+)?)?["']?(?=\s)/g;
+function pipInstallsIn(text, name) {
+  const installs = [];
+  const lines = text.replace(/\r\n?|[\u0085\u2028\u2029]/g, '\n').split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    if (/^\s*#/.test(lines[i])) continue; // YAML or shell comment line; a comment never continues
+    let line = lines[i];
+    while (line.endsWith('\\') && i + 1 < lines.length) line = line.slice(0, -1) + ' ' + lines[++i].trim();
+    for (const m of line.matchAll(PIP)) {
+      const words = line.slice(m.index + m[0].length).split(/[;&|)`]|\$\(/)[0].replace(/\s#.*$/s, '');
+      const sub = words.match(/(?:^|[\s"'])install(?=[\s"']|$)/);
+      if (sub) installs.push({ name, line: line.trim(), args: words.slice(sub.index + sub[0].length).split(/["'\\<>]/)[0] });
+    }
+  }
+  return installs;
+}
+function unpinned(c) {
+  const problems = [];
+  if (!/(?:^|\s)--require-hashes(?:\s|$)/.test(c.args)) problems.push('no --require-hashes');
+  if (!/(?:^|\s)--only-binary[= ]:all:(?:\s|$)/.test(c.args)) problems.push('no --only-binary=:all:');
+  const files = [...c.args.matchAll(/(?:^|\s)(?:-r|--requirement)(?:=|\s+)(\S+)/g)].map((m) => m[1]);
+  if (!files.length) problems.push('no requirements file');
+  for (const file of files) {
+    let text;
+    try { text = read(file); } catch { problems.push(`${file}: unreadable`); continue; }
+    const entries = text.replace(/\\\n/g, ' ').split('\n').map((l) => l.replace(/(?:^|\s)#.*$/, '').trim()).filter(Boolean);
+    if (!entries.length) problems.push(`${file}: empty`);
+    for (const entry of entries) {
+      if (!/^[A-Za-z0-9._-]+==[^\s;]+(?:\s+--hash=sha256:[0-9a-f]{64})+$/.test(entry)) problems.push(`${file}: ${entry.split(/\s/)[0]}`);
+    }
+  }
+  return problems;
+}
+
+test('workflows install Python packages only as hash-pinned wheels', () => {
+  const dir = path.join(fileURLToPath(new URL('..', import.meta.url)), '.github/workflows');
+  const installs = fs.readdirSync(dir).filter((n) => /\.ya?ml$/.test(n))
+    .flatMap((name) => pipInstallsIn(fs.readFileSync(path.join(dir, name), 'utf8'), name));
+  assert.ok(installs.some((c) => c.name === 'seo-check.yml' && c.args.includes('growth/tests/requirements-sql.txt')),
+    'the GA4 SQL test install in SEO Validation is found');
+  for (const c of installs) assert.deepEqual(unpinned(c), [], `${c.name}: ${c.line}`);
+});
+
+test('the pip scan finds an install in each form a step can write it, and judges only what pip receives', () => {
+  const req = '--require-hashes --only-binary=:all: -r growth/tests/requirements-sql.txt';
+  // Each installs something unpinned, or in a form the scan cannot read.
+  for (const text of [
+    'python -m pip --disable-pip-version-check install -r growth/tests/requirements-sql.txt',
+    'python -m pip -q install duckdb==1.5.5',
+    'pip3.12 install -r growth/tests/requirements-sql.txt',
+    'pip --index-url https://example.invalid/simple install duckdb==1.5.5',
+    '"$VENV/bin/pip" install duckdb==1.5.5',
+    `"$VENV/bin/python" -m pip install sqlglot==30.18.0 # ${req}`,
+    `pip install sqlglot==30.18.0 # ${req}\r\n`, // CRLF: the comment is still cut
+    `pip install sqlglot==30.18.0; echo ${req}`,
+    `run: "pip install sqlglot==30.18.0\\n# ${req} "`, // YAML escape: the flags are on a comment line
+    `pip install sqlglot==30.18.0 > ${req}`,
+    'pip install --require-hashes --only-binary=:all: -r growth/tests/missing.txt',
+    'pip install --require-hashes --only-binary=:all: duckdb==1.5.5',
+  ]) {
+    const installs = pipInstallsIn(text, 'fixture.yml');
+    assert.ok(installs.some((c) => unpinned(c).length), `${JSON.stringify(text)} -> ${JSON.stringify(installs)}`);
+  }
+  for (const text of [
+    `"$RUNNER_TEMP/ga4-sql-tests/bin/python" -m pip install --disable-pip-version-check ${req}`,
+    `python -m pip --disable-pip-version-check -q install ${req} # SQL tests\r\n`,
+    `pip3.12 install --require-hashes \\\n  --only-binary :all: -r growth/tests/requirements-sql.txt`,
+    'pip install --require-hashes --only-binary=:all: -r scripts/perf/requirements-fonts.txt',
+  ]) {
+    const installs = pipInstallsIn(text, 'fixture.yml');
+    assert.ok(installs.length === 1 && !unpinned(installs[0]).length, `${JSON.stringify(text)} -> ${JSON.stringify(installs)}`);
+  }
+  // Words that only contain "pip" are not pip.
+  assert.deepEqual(pipInstallsIn('set -euo pipefail\npython -m pip --version', 'fixture.yml'), []);
 });
 
 // Devlog Syndication: the real-name check uses only the IDENTITY_DENYLIST secret. Without it nothing is sent,

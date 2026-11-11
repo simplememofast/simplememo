@@ -8,6 +8,7 @@ import re
 from functools import lru_cache
 from faq_question_audit import Document, Element, compact, faq_nodes, question_elements
 from site_translation_units import Parser, all_nodes
+from json_script import json_for_script
 from inject_faq_schema import (MANAGED_MARKER, FAQ_DETAILS_RE, extract_faqs, build_faqpage,
                                replace_or_insert)
 
@@ -129,7 +130,7 @@ def synchronize(original, translated, url, locale):
                  'acceptedAnswer': {'@type': 'Answer', 'text': a}}
                 for q, a in (visible_pair(e) for e in source_faq['mainEntity'])]
         if old_faqs:
-            replacements.append((after.inner, after.end, json.dumps(new, ensure_ascii=False, indent=2)))
+            replacements.append((after.inner, after.end, json_for_script(new, ensure_ascii=False, indent=2)))
     replacements.extend((position, position, marker) for position, marker in question_markers.items())
     for start, end, value in sorted(replacements, reverse=True):
         translated = translated[:start] + value + translated[end:]

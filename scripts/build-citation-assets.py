@@ -16,6 +16,7 @@ from datetime import date
 from html import escape as e
 from pathlib import Path
 from normalize_i18n_head import build_block, replace_i18n_lines
+from json_script import json_for_script
 
 ROOT = Path(__file__).resolve().parent.parent
 BASE = "https://simplememofast.com"
@@ -124,7 +125,7 @@ def page(path, title, description, body, ja, en, lang, tool=False):
 <link rel="icon" href="/favicon.ico">
 <link rel="stylesheet" href="{asset('assets/css/editorial-resources.css')}">
 <link rel="stylesheet" href="{asset('assets/css/safety-net.css')}">
-<script type="application/ld+json">{json.dumps(schema, ensure_ascii=False)}</script>
+<script type="application/ld+json">{json_for_script(schema, ensure_ascii=False)}</script>
 {seed}
 {scripts}
 </head>
@@ -357,7 +358,14 @@ def selftest():
     assert 'Example &amp; Company' in rendered and '{{' not in rendered
     assert 'button{display:none!important}' in rendered
     assert asset('assets/css/capture-sixth.css') in rendered
-    print("Citation selftest: output drift, source propagation, tool IDs, no-JavaScript fallback, and asset versions verified.")
+    # A title is written into JSON-LD. "</script" or "<!--" in it must not end
+    # or escape the script element; JSON escapes keep the value the same.
+    hostile = '</script><img src=x onerror=alert(1)><!--'
+    rendered = page('/resources/example/', hostile, 'Description', '<p>Body</p>', '/resources/example/', '/en/resources/example/', 'en')
+    body = re.search(r'<script type="application/ld\+json">(.*?)</script(?=[\t\n\r\f />])', rendered, re.S | re.I)[1]
+    assert '</' not in body and '<!--' not in body, "a JSON-LD value must not end its script element"
+    assert json.loads(body)['name'] == hostile, "escaping must keep the JSON-LD value"
+    print("Citation selftest: output drift, source propagation, tool IDs, no-JavaScript fallback, asset versions, and JSON-LD script escaping verified.")
 
 
 if __name__ == "__main__":

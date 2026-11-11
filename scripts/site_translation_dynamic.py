@@ -1,5 +1,6 @@
 """Translate only approved program literals, never user-created note content."""
 import hashlib
+import html
 import json
 import posixpath
 import re
@@ -34,20 +35,34 @@ def translated_message(binding, locale, catalog):
         error = validate(unit['text'], entry['text'], locale)
         if error:
             raise ValueError('Invalid dynamic translation: ' + key + ': ' + error)
-        if unit['tag'] == '#text':
+        is_text = unit['tag'] == '#text'
+        if is_text:
             # Program fragments can display YAML/Markdown with significant
             # line breaks. Catalog prose is normalized, but the surrounding
             # whitespace belongs to the original fragment, not its translation.
             original = source[slice(*unit['range'])]
             unit = dict(unit, prefix=re.match(r'\s*', original)[0],
                         suffix=re.search(r'\s*$', original)[0])
-        changes.append((*unit['range'], render(unit, entry['text'], locale=locale)))
+        value = render(unit, entry['text'], locale=locale)
+        # Program strings are text, not HTML attributes, so translated text is
+        # decoded once. Protected markup (tags, attributes, code/kbd/pre and
+        # other skipped elements, comments) keeps its source encoding: decoding
+        # it would turn escaped sample text into live markup.
+        if is_text:
+            value = html.unescape(value)
+            # validate() looks at the translation with its ZXQ markers removed,
+            # so `<ZXQ0000 onmouseover=…>` passes there and only becomes
+            # `<brand onmouseover=…>` once the token value is restored. Escaped
+            # source text (`&lt;x …&gt;`) decodes the same way. A #text unit
+            # never holds markup (its tokens never start with '<'), and these
+            # messages reach innerHTML, so check the decoded value itself.
+            # `{` covers `<{0}`, which format() fills with a parameter.
+            if re.search(r'<[/!?A-Za-z{]', value):
+                raise ValueError('Invalid dynamic translation: ' + key + ': unknown_markup')
+        changes.append((*unit['range'], value))
     for start, end, value in reversed(changes):
         source = source[:start] + value + source[end:]
-    # Program strings are text, not HTML attributes. Rendering escapes only new
-    # markup; known HTML fragments retain their original tag structure.
-    import html
-    return html.unescape(source)
+    return source
 
 
 def initial_demo_note(source, file, locale, catalog, rows):
@@ -79,7 +94,20 @@ def wrap_code(code, rows):
         start, end = row['start'], row['end']
         if code[start:end] != row['literal']:
             raise ValueError('Dynamic text binding no longer matches: ' + row['file'])
+        # Parameters are inserted as code. Accept only expressions that already
+        # occur in the reviewed literal, one per placeholder in the message.
+        params = row.get('parameters') or []
+        if any(not isinstance(p, str) or not p or p not in row['literal'] for p in params):
+            raise ValueError('Dynamic text parameter is not an expression of its literal: ' + row['file'])
+        if params and sorted(set(int(i) for i in re.findall(r'\{(\d+)\}', row['text']))) != list(range(len(params))):
+            raise ValueError('Dynamic text placeholders do not match parameters: ' + row['file'])
         key = json.dumps(row['text'], ensure_ascii=False)
+        # The key also lands in inline <script> elements. Existing messages
+        # contain ordinary closing tags such as </span>, so reject only the
+        # sequences that can end or confuse a script element, without
+        # changing the bytes of any current output.
+        if re.search(r'<(?:/?script|!--)', key, re.I):
+            raise ValueError('Dynamic text cannot be embedded in a script: ' + row['file'])
         if row.get('parameters'):
             expression = 'globalThis.SimpleMemoI18n.format(' + key + ',[' + ','.join(row['parameters']) + '])'
         else:
