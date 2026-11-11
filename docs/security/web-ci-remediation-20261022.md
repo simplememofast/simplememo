@@ -126,6 +126,7 @@ node --input-type=module -e 'globalThis.fetch=async()=>{throw Error("External ne
 - **push/PRは未実施・保留。** GitHub Actions費用残枠が不明。Devlogが全4媒体で執筆する場合、従来5ランナー（4媒体+watch）に対して、分離後は手直しなし17、全媒体で手直しあり21。早期に門が閉じる媒体はprepareだけで終わる。ジョブ時間上限は媒体ごと合計90分以内を維持し、モデルのturn/budget/手直し回数も増やしていないが、通常時のランナー起動・成果物転送の時間/実費は未測定。SEO Validationにはnpm取得・audit・小規模テストが増える。費用影響の判断前にCIを発火させない。
 - **Cloudflare確認は未実施。** カスタムドメイン、production pages.dev、wildcard previewと過去デプロイのAccess封じ込め、および公開後410の確認が残る。現在のGitコードだけでは歴史的デプロイを停止できない。
 - **旧資格情報の失効/削除は未実施。** X/Postiz等の他利用者を確認し、発行元での失効とPages/Actions側の廃止コピー整理を、既存の所有者手順で行う必要がある。今回の指示ではtoken変更・権限変更・deployを行わない。
+  - **2026-11-11（JST）:** 所有者が次の写しを削除した。`simplememofast/simplememo` の repository secret `ADMIN_BASIC_AUTH`・`POSTIZ_API_KEY`・`POSTIZ_TIKTOK_ID`、Cloudflare Pages の X 関連の環境変数（Production。Preview には無かった）。repository secret 3つの記録は `data/credential-expiry.json` の `postiz_api_key`・`admin_basic_auth` の note。
 - #2136の保留判断は維持。API/iOSの変更・テスト、Apple申請、merge/deploy、実投稿、外部モデルAPI/Claude Codeの起動、顧客連絡は行っていない。GitHub securityの拒否を回避する操作も行っていない。
 
 ## デプロイ承認後の再確認（2026-10-22 UTC）
