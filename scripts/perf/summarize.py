@@ -26,6 +26,10 @@ BUDGETS = {
 }
 DIAGNOSTIC_LIMIT = 3
 DIAGNOSTIC_SCAN_LIMIT = 1000
+# TBT is the sum over long tasks, so one more row than the other tables is worth its line.
+LONG_TASK_LIMIT = 5
+# Lighthouse attributes a long task to a URL or to this fixed word. No other text is copied.
+UNATTRIBUTED = 'unattributed'
 
 
 def public_diagnostics(report):
@@ -92,7 +96,8 @@ def public_diagnostics(report):
         return isinstance(value, (int, float)) and not isinstance(value, bool) and 0 <= value <= 86400000 and finite(value)
 
     result = {'lcp_selector': None, 'main_thread': [], 'resources': [],
-              'bootup': [], 'render_blocking': [], 'unavailable': [], 'omitted': {}}
+              'bootup': [], 'render_blocking': [], 'long_tasks': [], 'third_party_blocking': [],
+              'unavailable': [], 'omitted': {}}
     for key in ('lcp-breakdown-insight', 'largest-contentful-paint-element'):
         for item in rows(key):
             node = item.get('node', item if item.get('type') == 'node' else {})
@@ -136,12 +141,39 @@ def public_diagnostics(report):
             if url and timing(item.get('wastedMs')):
                 result['render_blocking'].append({'url': url, 'estimated_savings_ms': item['wastedMs']})
 
-    for key, field in (('main_thread', 'duration_ms'), ('resources', 'duration_ms'),
-                       ('bootup', 'total_ms'), ('render_blocking', 'estimated_savings_ms')):
-        result[key].sort(key=lambda row: (-row[field], row.get('url', row.get('group', ''))))
-        result['omitted'][key] = max(0, len(result[key]) - DIAGNOSTIC_LIMIT)
-        result[key] = result[key][:DIAGNOSTIC_LIMIT]
-    result['unavailable'] = [key for key in ('lcp_selector', 'main_thread', 'resources', 'bootup', 'render_blocking') if not result[key]]
+    def declared_ms(audit_details, key):
+        table = audit_details.get('headings', [])
+        matches = [h.get('valueType') for h in table if isinstance(h, dict) and h.get('key') == key] if isinstance(table, list) else []
+        return matches == ['ms']
+
+    # [2026-11-11] TBT is made of long tasks, and the summary showed none of them: the tables
+    # above name groups and scripts but not which single task blocks, or when. Both values are
+    # Lighthouse's simulated ones (the same clock as the FCP/LCP columns), so a task that starts
+    # after FCP is one that counts. Units must be declared, as for the network table.
+    long_tasks = details('long-tasks')
+    if declared_ms(long_tasks, 'startTime') and declared_ms(long_tasks, 'duration'):
+        for item in rows('long-tasks'):
+            if 'url' not in item or not timing(item.get('startTime')) or not timing(item.get('duration')):
+                continue
+            # A non-URL attribution ("Unattributable") becomes one fixed word; its text is not copied.
+            result['long_tasks'].append({'url': public_url(item.get('url')) or UNATTRIBUTED,
+                                         'start_ms': item['startTime'], 'duration_ms': item['duration']})
+    third_party = details('third-party-summary')
+    if declared_ms(third_party, 'blockingTime'):
+        for item in rows('third-party-summary'):
+            entity = item.get('entity')
+            name = label(entity.get('text') if isinstance(entity, dict) else entity, 40)
+            if name and timing(item.get('blockingTime')):
+                result['third_party_blocking'].append({'group': name, 'blocking_ms': item['blockingTime']})
+
+    for key, field, limit in (('main_thread', 'duration_ms', DIAGNOSTIC_LIMIT), ('resources', 'duration_ms', DIAGNOSTIC_LIMIT),
+                              ('bootup', 'total_ms', DIAGNOSTIC_LIMIT), ('render_blocking', 'estimated_savings_ms', DIAGNOSTIC_LIMIT),
+                              ('long_tasks', 'duration_ms', LONG_TASK_LIMIT), ('third_party_blocking', 'blocking_ms', DIAGNOSTIC_LIMIT)):
+        result[key].sort(key=lambda row: (-row[field], row.get('url', row.get('group', '')), row.get('start_ms', 0)))
+        result['omitted'][key] = max(0, len(result[key]) - limit)
+        result[key] = result[key][:limit]
+    result['unavailable'] = [key for key in ('lcp_selector', 'main_thread', 'resources', 'bootup', 'render_blocking',
+                                             'long_tasks', 'third_party_blocking') if not result[key]]
     result['truncated_audits'] = sorted(truncated)
     return result
 
@@ -175,6 +207,15 @@ def render_public_diagnostics(rows):
             text = '; '.join(entries) if entries else 'unavailable'
             omitted = evidence['omitted'][key]
             lines.append(f'  {title}: {text}' + (f'; {omitted} more valid entries omitted' if omitted else ''))
+        # Simulated start + duration, in the same clock as the FCP/LCP columns of the table above.
+        tasks = [f"`{safe(item['url'])}` {ms(item['start_ms'])}+{ms(item['duration_ms'])}" for item in evidence['long_tasks']]
+        omitted = evidence['omitted']['long_tasks']
+        lines.append('  Long tasks (ms, simulated start+duration): ' + ('; '.join(tasks) if tasks else 'unavailable')
+                     + (f'; {omitted} more valid entries omitted' if omitted else ''))
+        blocking = [f"`{safe(item['group'])}` {ms(item['blocking_ms'])}" for item in evidence['third_party_blocking']]
+        omitted = evidence['omitted']['third_party_blocking']
+        lines.append('  Third-party blocking time (ms): ' + ('; '.join(blocking) if blocking else 'unavailable')
+                     + (f'; {omitted} more valid entries omitted' if omitted else ''))
     return lines
 
 

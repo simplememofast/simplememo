@@ -41,6 +41,14 @@ def with_public_diagnostics(r):
         'bootup-time': {'details': {'items': [{'url': 'https://cdn.example/analytics.js?v=PRIVATE_VERSION', 'total': 120}]}},
         'render-blocking-insight': {'details': {'items': [{'type': 'table', 'items': [
             {'url': 'https://simplememofast.com/assets/style.css?v=PRIVATE_CSS', 'wastedMs': 150}]}]}},
+        'long-tasks': {'details': {
+            'headings': [{'key': 'url', 'valueType': 'url'}, {'key': 'startTime', 'valueType': 'ms'}, {'key': 'duration', 'valueType': 'ms'}],
+            'items': [{'url': 'https://cdn.example/analytics.js?id=PRIVATE_ID', 'startTime': 2100.5, 'duration': 310},
+                      {'url': 'Unattributable PRIVATE_NOTE', 'startTime': 900, 'duration': 414}]}},
+        'third-party-summary': {'details': {
+            'headings': [{'key': 'entity', 'valueType': 'text'}, {'key': 'blockingTime', 'valueType': 'ms'}],
+            'items': [{'entity': 'Example Analytics', 'blockingTime': 120, 'mainThreadTime': 400,
+                       'subItems': {'type': 'subitems', 'items': [{'url': 'https://cdn.example/analytics.js?id=PRIVATE_ID', 'blockingTime': 120}]}}]}},
     })
     return r
 
@@ -253,6 +261,10 @@ class SummaryTests(unittest.TestCase):
         self.assertEqual(evidence['resources'], [{'url': 'https://simplememofast.com/assets/hero.avif', 'duration_ms': 600}])
         self.assertEqual(evidence['bootup'], [{'url': 'https://cdn.example/analytics.js', 'total_ms': 120}])
         self.assertEqual(evidence['render_blocking'], [{'url': 'https://simplememofast.com/assets/style.css', 'estimated_savings_ms': 150}])
+        self.assertEqual(evidence['long_tasks'], [
+            {'url': audit.UNATTRIBUTED, 'start_ms': 900, 'duration_ms': 414},
+            {'url': 'https://cdn.example/analytics.js', 'start_ms': 2100.5, 'duration_ms': 310}])
+        self.assertEqual(evidence['third_party_blocking'], [{'group': 'Example Analytics', 'blocking_ms': 120}])
         self.assertEqual(evidence['unavailable'], [])
         self.assertNotIn('PRIVATE_', json.dumps(evidence))
 
@@ -275,14 +287,18 @@ class SummaryTests(unittest.TestCase):
 
     def test_optional_missing_or_malformed_diagnostics_are_unavailable(self):
         optional_keys = ('largest-contentful-paint-element', 'lcp-breakdown-insight', 'mainthread-work-breakdown',
-                         'network-requests', 'bootup-time', 'render-blocking-insight', 'render-blocking-resources')
+                         'network-requests', 'bootup-time', 'render-blocking-insight', 'render-blocking-resources',
+                         'long-tasks', 'third-party-summary')
         for value in (None, [], 'unexpected', {}, {'details': None}, {'details': {'items': {}}},
                       {'details': {'items': [None, [], {'items': None}]}}):
             with self.subTest(value=value):
                 r = report('local-ja')
                 r['audits'].update({key: value for key in optional_keys})
                 evidence = audit.public_diagnostics(r)
-                self.assertEqual(set(evidence['unavailable']), {'lcp_selector', 'main_thread', 'resources', 'bootup', 'render_blocking'})
+                self.assertEqual(set(evidence['unavailable']), {'lcp_selector', 'main_thread', 'resources', 'bootup', 'render_blocking',
+                                                                'long_tasks', 'third_party_blocking'})
+                self.assertEqual(evidence['long_tasks'], [])
+                self.assertEqual(evidence['third_party_blocking'], [])
                 self.assertIsNone(evidence['lcp_selector'])
                 self.assertEqual(evidence['resources'], [])
                 json.dumps(evidence, allow_nan=False)
@@ -372,6 +388,83 @@ class SummaryTests(unittest.TestCase):
         self.assertEqual(summary['enforced_groups'], ['local-ja', 'local-en'])
         self.assertEqual(len(summary['runs']), 12)
         self.assertIn('production-ja-1.report.json: LCP selector', audit.render(summary))
+
+    def test_long_tasks_name_what_blocks_and_when(self):
+        # [2026-11-11] TBT is the sum over long tasks, and the summary named none of them.
+        r = report('production-en')
+        r['audits']['long-tasks'] = {'details': {
+            'headings': [{'key': 'url', 'valueType': 'url'}, {'key': 'startTime', 'valueType': 'ms'}, {'key': 'duration', 'valueType': 'ms'}],
+            'items': [{'url': f'https://simplememofast.com/js/task-{i}.js?v=PRIVATE_{i}', 'startTime': 1000 + i, 'duration': 60 + i} for i in range(8)]
+                     + [{'url': 'Unattributable', 'startTime': 869, 'duration': 414},
+                        {'url': 'https://www.googletagmanager.com/gtag/js?id=PRIVATE_ID', 'startTime': 2500, 'duration': 300},
+                        {'url': 'https://simplememofast.com/js/ignored.js', 'startTime': None, 'duration': 999},
+                        {'url': 'https://simplememofast.com/js/ignored.js', 'startTime': 10, 'duration': float('nan')},
+                        {'startTime': 10, 'duration': 998}]}}
+        evidence = audit.public_diagnostics(r)
+        # Largest first, five rows, the rest counted; a row with no attribution field or no timing is not a row.
+        self.assertEqual([(row['url'], row['start_ms'], row['duration_ms']) for row in evidence['long_tasks']], [
+            (audit.UNATTRIBUTED, 869, 414), ('https://www.googletagmanager.com/gtag/js', 2500, 300),
+            ('https://simplememofast.com/js/task-7.js', 1007, 67), ('https://simplememofast.com/js/task-6.js', 1006, 66),
+            ('https://simplememofast.com/js/task-5.js', 1005, 65)])
+        self.assertEqual(evidence['omitted']['long_tasks'], 5)
+        self.assertNotIn('PRIVATE_', json.dumps(evidence))
+        self.write('production-en-1.report.json', r)
+        text = audit.render(audit.summarize(self.root))
+        self.assertIn('Long tasks (ms, simulated start+duration): `unattributed` 869.0+414.0; '
+                      '`https://www.googletagmanager.com/gtag/js` 2500.0+300.0;', text)
+        self.assertIn('; 5 more valid entries omitted', text)
+        # The other eleven reports have no table: say so, never print an empty list as "none".
+        self.assertEqual(text.count('Long tasks (ms, simulated start+duration): unavailable'), 11)
+
+    def test_long_tasks_never_change_a_budget_result(self):
+        # Report-only. A page full of long tasks passes or fails on the TBT number alone.
+        clean = audit.summarize(self.root, require_production=True, expected_commit=COMMIT)
+        def heavy(r):
+            r['audits']['long-tasks'] = {'details': {
+                'headings': [{'key': 'startTime', 'valueType': 'ms'}, {'key': 'duration', 'valueType': 'ms'}],
+                'items': [{'url': 'https://simplememofast.com/', 'startTime': 2000, 'duration': 5000}]}}
+            r['audits']['third-party-summary'] = {'details': {
+                'headings': [{'key': 'blockingTime', 'valueType': 'ms'}], 'items': [{'entity': 'Heavy', 'blockingTime': 5000}]}}
+        for group in audit.GROUPS:
+            self.patch_run(group, heavy)
+        noisy = audit.summarize(self.root, require_production=True, expected_commit=COMMIT)
+        self.assertEqual(noisy['failures'], clean['failures'])
+        self.assertEqual(noisy['failures'], [])
+        self.assertEqual(noisy['runs'][0]['public_diagnostics']['long_tasks'][0]['duration_ms'], 5000)
+
+    def test_long_task_and_third_party_tables_require_declared_millisecond_units(self):
+        items = [{'url': 'https://simplememofast.com/', 'startTime': 2, 'duration': 3}]
+        blocking = [{'entity': 'Example', 'blockingTime': 3}]
+        for headings in ([], None, 'ms', [{'key': 'startTime', 'valueType': 'ms'}],
+                         [{'key': 'startTime', 'valueType': 'ms'}, {'key': 'duration', 'valueType': 'timespanMs'}],
+                         [{'key': 'startTime', 'valueType': 'ms'}, {'key': 'duration', 'valueType': 'ms'}, {'key': 'duration', 'valueType': 'ms'}]):
+            with self.subTest(headings=headings):
+                r = report('local-ja')
+                r['audits']['long-tasks'] = {'details': {'headings': headings, 'items': items}}
+                r['audits']['third-party-summary'] = {'details': {'headings': headings, 'items': blocking}}
+                evidence = audit.public_diagnostics(r)
+                self.assertEqual(evidence['long_tasks'], [])
+                self.assertEqual(evidence['third_party_blocking'], [])
+                self.assertIn('long_tasks', evidence['unavailable'])
+                self.assertIn('third_party_blocking', evidence['unavailable'])
+
+    def test_third_party_names_are_bounded_escaped_and_keep_a_real_zero(self):
+        r = report('local-ja')
+        r['audits']['third-party-summary'] = {'details': {
+            'headings': [{'key': 'entity', 'valueType': 'text'}, {'key': 'blockingTime', 'valueType': 'ms'}],
+            'items': [{'entity': {'text': '<b>`|\n::error::injected ' + 'x' * 200, 'url': 'https://example.com/?q=PRIVATE_Q'}, 'blockingTime': 7},
+                      {'entity': 'ahrefs.com', 'blockingTime': 0}, {'entity': '   ', 'blockingTime': 9},
+                      {'entity': 5, 'blockingTime': 9}, {'entity': 'no time', 'blockingTime': '9'}]}}
+        evidence = audit.public_diagnostics(r)
+        self.assertEqual([row['blocking_ms'] for row in evidence['third_party_blocking']], [7, 0])
+        self.assertTrue(all(len(row['group']) <= 40 for row in evidence['third_party_blocking']))
+        self.write('local-ja-1.report.json', r)
+        text = audit.render(audit.summarize(self.root))
+        self.assertNotIn('PRIVATE_', text)
+        self.assertNotIn('<b>', text)
+        self.assertNotIn('\n::error::', text)
+        self.assertIn('Third-party blocking time (ms): `&lt;b&gt;&#96;&#124; ::error::injected', text)
+        self.assertIn('`ahrefs.com` 0.0', text)
 
     def test_measuring_machine_is_reported_without_changing_budget_results(self):
         before = audit.summarize(self.root)
