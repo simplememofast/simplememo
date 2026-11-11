@@ -39,8 +39,9 @@ GOOGLE_TAG_HOSTS = frozenset({'www.googletagmanager.com', 'googletagmanager.com'
 PESSIMISTIC_WEIGHT = 0.5
 # Watch level for the tag itself. Its TBT impact scales with the measuring machine, so it is
 # compared as impact x benchmarkIndex / 1000: about 730 to 910 across the six runs of
-# 2026-11-10/11 (machines from 2026 to 3938, estimated from the totals). Set above every observed
-# value before measuring further. A watch level, not a budget: it fails only the scheduled run.
+# 2026-11-10/11 (machines from 2026 to 3938, estimated from the totals), and 730 to 914 measured
+# in the first run that printed it (run 42947273642). The level was set above the estimates
+# before that run. A watch level, not a budget: it fails only the scheduled run.
 GOOGLE_TAG_WATCH = 1200
 DIAGNOSTIC_LIMIT = 3
 DIAGNOSTIC_SCAN_LIMIT = 1000
