@@ -542,6 +542,35 @@ production-ja が 200・194ms —— **予算（200ms）の境目にいる。通
 - **変えていないこと:** 閾値（200ms）と判定。`test_a_slow_measuring_machine_never_excuses_a_budget_failure`
   （遅い計測機を理由に通さない）は、資料の読みとも合うのでそのまま
 
+### 2026-11-11（続き）— TBT を作っているのは Google タグ（gtag.js）の評価だった
+
+要約に long task と第三者の blocking time を出すようにして（#2303）、その PR 自身の実行（run 42937965524、
+benchmarkIndex 2443〜2528、TBT は en 154 / 163 / 156・ja 158 / 160 / 152）で読めた。
+
+| 群 | long task（模擬の開始＋長さ、ms） | 第三者の blocking time |
+| --- | --- | --- |
+| production-en（3本とも） | gtag.js 3532〜3580 + 145〜162、gtag.js 3680〜3742 + 242〜246、文書 1032〜1086 + 100〜101 | Google Tag Manager 287〜307、ほかは 0 |
+| production-ja（3本とも） | gtag.js 3693〜3921 + 155〜169、gtag.js 3852〜4076 + 244〜261、文書 1069〜1227 + 123〜126（2本には帰属の無い 50〜126 も。開始 1005〜1153） | Google Tag Manager 303〜319、ほかは 0 |
+| local（6本とも） | 文書 777〜914 + 97〜123（2本には帰属の無い 52〜82 も。開始 752）。gtag.js は無い | ahrefs.com 0（en は fazier.com 0 も） |
+
+- **本番の TBT は gtag.js の2つの作業だけで出来ている。**文書に帰属する作業と帰属の無い作業（50〜126ms）は開始が
+  1.0〜1.2s で、FCP（1.9〜2.0s）より前なので数えられていない
+- **TBT（152〜163ms）は Google Tag Manager の blocking time のほぼ半分。**Lantern は TBT を楽観と悲観の見積もりの
+  0.5 ずつで出す（12.8.2 が使う `lantern/metrics/TotalBlockingTime.js` の `coefficients` を読んで確認）
+- **手元（local）の TBT が 0 なのは、gtag のスニペットが本番のホスト名でしか動かないから**
+  （`index.html` の先頭の `location.hostname` の判定）。local が緑でも、本番の TBT については何も言っていない
+- 上の5本の「benchmarkIndex が低いほど TBT が高い」は、**gtag.js の評価時間が計測機の速さに比例している**と読める
+  （この回の2つの作業の長さを benchmarkIndex 2000 と 3900 に換算すると TBT は 約205ms と 約80ms で、実測の 194〜220・96 とおおよそ合う）
+
+**だから、CSS・レイアウト・自サイトのスクリプトを削っても本番の TBT は動かない。**動かせるのは Google タグの
+読み込み方だけで、それは計測の取り方を変える判断になる（`Do not remove analytics ... to improve scores` はそのまま）。
+
+- **手元で見えたこと（参考）:** 起動直後のブラウザの最初の Layout は1回で 77〜131ms かかり、同じブラウザで2回目に
+  開くと 4〜7ms（作業環境の Chromium 153・各5回の中央値）。Web フォントを止めても、sans-serif を強制しても
+  変わらない。上の表の「文書」の long task がこれにあたると読んでいるが、FCP より前なので TBT には入らない
+- **決めていないこと（オーナー判断）:** Google タグをそのままにして境目を受け入れるか、読み込みを遅らせるか
+  （すぐ離脱した訪問を取りこぼす）、ブラウザで実行しない形へ移すか。閾値は動かしていない
+
 ## Site Structure
 
 - 静的HTMLサイト（日本語/英語の2言語対応）
