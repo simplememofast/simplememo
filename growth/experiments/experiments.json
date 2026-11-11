@@ -2749,7 +2749,7 @@
       },
       "started_at": "2026-09-22",
       "evaluation_at": "2026-10-23",
-      "status": "running",
+      "status": "evaluated",
       "target_metric": "ctr",
       "baseline": {
         "metric": "ctr",
@@ -2801,19 +2801,71 @@
         "end": "2026-10-20",
         "days": 28
       },
-      "decision": null,
-      "evaluated_at": null,
+      "decision": "inconclusive",
+      "evaluated_at": "2026-11-11",
       "notes": [
         "2026-09-30: 第27弾 #1703（9/30 10:02）で /note-to-email/ の JSON-LD（Article の dateModified と SoftwareApplication の Free の offer の説明）とsitemap-ja.xml の lastmod が変わった。title・description・表示の本文・CTA は変えていない。第27弾の PR の本文ではこの実験を書き漏らしていたので、ここで補う。測定契約（page CTR、評価日 2026-10-23）は変更しない。",
         "2026-09-30: 第37弾 #1726（9/30 14:55）：App Store の公開版が 5.9.11 になった（9/30 08:54 JST 公開、iTunes Lookup の日本のストア）ので、data/site-constants.json の appVersion を 5.9.9 から 5.9.11 にし、sync_constants.js で JSON-LD（SoftwareApplication）の softwareVersion を26ページで更新した。`/note-to-email/` は JSON-LD の softwareVersion だけが変わった（sitemap の lastmod は変わらない）。title・description・表示の本文・CTA は変えていない。測定契約（page CTR、評価日 2026-10-23）は変更しない。",
         "2026-10-02: 第96弾 #1898（10/2 22:09）：App Store の公開版が 5.9.12 になった（10/2 10:19 JST 公開、iTunes Lookup の日本のストア）ので、data/site-constants.json の appVersion を 5.9.11 から 5.9.12 にし、sync_constants.js で JSON-LD（SoftwareApplication）の softwareVersion を26ページで更新した。`/note-to-email/` は JSON-LD の softwareVersion だけが変わり、内容の履歴から作る sitemap の lastmod も変わった。title・description・表示の本文・CTA は変えていない。測定契約（page CTR、評価日 2026-10-23）は変更しない。",
-        "2026-11-11: App Store の公開版が 5.9.25、評価件数が 28件 になっていた（2026-11-10 12:15 JST に SEO Daily の run 42748214360 が iTunes Lookup の日本のストアで確認。台帳はそのログからの転記）ので、data/site-constants.json の appVersion を 5.9.12 から 5.9.25 に、ratingCount を 27 から 28 にし、sync_constants.js で 105 ファイル（JSON-LD の softwareVersion と ratingCount、評価件数の表示、llms.txt）を更新した。`/note-to-email/` は JSON-LD の softwareVersion だけが変わった。title・description・表示の本文・CTA は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。"
+        "2026-11-11: App Store の公開版が 5.9.25、評価件数が 28件 になっていた（2026-11-10 12:15 JST に SEO Daily の run 42748214360 が iTunes Lookup の日本のストアで確認。台帳はそのログからの転記）ので、data/site-constants.json の appVersion を 5.9.12 から 5.9.25 に、ratingCount を 27 から 28 にし、sync_constants.js で 105 ファイル（JSON-LD の softwareVersion と ratingCount、評価件数の表示、llms.txt）を更新した。`/note-to-email/` は JSON-LD の softwareVersion だけが変わった。title・description・表示の本文・CTA は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
+        "2026-11-11: Exact-page WEB GSC /note-to-email/, no country/device filter. Baseline 2026-08-23..2026-09-19: 10 clicks / 549 imp / CTR 1.82% / pos 6.54. Post 2026-10-02..2026-10-29 (snapshot 2026-10-31, the earliest qualifying one; no snapshot covers the registered 2026-09-23..2026-10-20 window): 12 clicks / 955 imp / CTR 1.26% / pos 4.97. Later snapshots agree in direction: 2026-11-02 12 / 969 / 1.24% / 5.00, 2026-11-09 8 / 979 / 0.82% / 5.00. CTR fell by 0.56pp, past the registered 0.5pp investigate bar at the 500-impression floor, so the fall was read at query level (query-pages rows of snapshots 2026-09-21 and 2026-10-31, which list 19% and 42% of the page's impressions). Impressions on the ten generic self-email queries present in both grew from 96 to 356 at better positions (自分にメールを送る 27 imp @5.8 -> 123 imp @4.3) with 2 -> 1 clicks, while page clicks went 10 -> 12. The fall is a larger denominator at a materially changed position (6.54 -> 4.97) and query mix, which the rule excludes from a retain and which this data cannot separate from a change in snippet appeal. Not retained (CTR did not rise). No revert: the rule never reinstates the removed guarantees, and clicks did not fall in the earliest window. Interim changes: JSON-LD dateModified and offer text (#1703), softwareVersion (#1726, #1898, and #2292 after every window); title, description, body and CTA unchanged since 2026-09-23. Evaluated 19 days after the registered date by an owner-approved session (owner decision 2026-11-11); country and device composition per page is not in the snapshots and was not compared."
       ],
       "company_measurement": {
         "schema_version": 1,
         "plan_sha256": "d2274faa89e0b4677913983f52019712e6b69083aac104cc978229385d9dbc07",
         "company_run_id": "d6d5399f-13b7-4e96-9e53-0d2b24527a13",
         "decision_sha256": "69dbbd4a3db2ee1bfa8197a23c01e018b5564c731c4b0d49120b57422c48a799"
+      },
+      "evidence": {
+        "schema_version": 1,
+        "kind": "gsc_comparison",
+        "source": "gsc",
+        "target_metric": "ctr",
+        "scope": {
+          "kind": "page",
+          "page": "/note-to-email/"
+        },
+        "gsc_snapshots": [
+          "2026-10-31"
+        ],
+        "baseline": {
+          "start": "2026-08-23",
+          "end": "2026-09-19",
+          "days": 28,
+          "value": 0.018214936247723135,
+          "registered_baseline_sha256": "370c571e57cc1c6d481f887f9a771ec1d6b15855e2319b822ec1e436f6b9dc7e"
+        },
+        "post": {
+          "start": "2026-10-02",
+          "end": "2026-10-29",
+          "days": 28,
+          "value": 0.012565445026178011,
+          "clicks": 12,
+          "impressions": 955,
+          "position": 4.970680628272252
+        },
+        "artifacts": [
+          {
+            "name": "2026-10-31/meta.json",
+            "sha256": "c04242aaa5e227476331405289b757e3225a8c0047bc8adda44d657cb3e1fb94"
+          },
+          {
+            "name": "2026-10-31/dates.json",
+            "sha256": "e4f11f0615b867aab350b18922b7c34e534e9c624e5eb45af82c6bb119a9df39"
+          },
+          {
+            "name": "2026-10-31/pages.json",
+            "sha256": "d6fd1ff439c14e33001acda36da2130697c8091ec631dd5a5567c48a1cffe725"
+          }
+        ],
+        "validation": "metric, exact row, numeric values, complete post dates and comparable windows; decision interpretation is manual",
+        "limitations": [
+          "Baseline values are those registered in the ledger; their original extraction is not revalidated here.",
+          "Daily coverage is snapshot-wide, not per page. No test of significance, minimum sample adequacy or causality is performed.",
+          "Legacy snapshot has no search-type metadata; WEB is the store convention and must be checked against the export filters.",
+          "Legacy snapshot has no timezone metadata; verify Pacific dates in the source export."
+        ],
+        "rationale": "Exact-page WEB GSC /note-to-email/, no country/device filter. Baseline 2026-08-23..2026-09-19: 10 clicks / 549 imp / CTR 1.82% / pos 6.54. Post 2026-10-02..2026-10-29 (snapshot 2026-10-31, the earliest qualifying one; no snapshot covers the registered 2026-09-23..2026-10-20 window): 12 clicks / 955 imp / CTR 1.26% / pos 4.97. Later snapshots agree in direction: 2026-11-02 12 / 969 / 1.24% / 5.00, 2026-11-09 8 / 979 / 0.82% / 5.00. CTR fell by 0.56pp, past the registered 0.5pp investigate bar at the 500-impression floor, so the fall was read at query level (query-pages rows of snapshots 2026-09-21 and 2026-10-31, which list 19% and 42% of the page's impressions). Impressions on the ten generic self-email queries present in both grew from 96 to 356 at better positions (自分にメールを送る 27 imp @5.8 -> 123 imp @4.3) with 2 -> 1 clicks, while page clicks went 10 -> 12. The fall is a larger denominator at a materially changed position (6.54 -> 4.97) and query mix, which the rule excludes from a retain and which this data cannot separate from a change in snippet appeal. Not retained (CTR did not rise). No revert: the rule never reinstates the removed guarantees, and clicks did not fall in the earliest window. Interim changes: JSON-LD dateModified and offer text (#1703), softwareVersion (#1726, #1898, and #2292 after every window); title, description, body and CTA unchanged since 2026-09-23. Evaluated 19 days after the registered date by an owner-approved session (owner decision 2026-11-11); country and device composition per page is not in the snapshots and was not compared."
       }
     },
     {
@@ -3060,7 +3112,7 @@
       },
       "started_at": "2026-10-01",
       "evaluation_at": "2026-11-01",
-      "status": "running",
+      "status": "evaluated",
       "target_metric": "ctr",
       "baseline": {
         "metric": "ctr",
@@ -3112,17 +3164,69 @@
         "end": "2026-10-29",
         "days": 28
       },
-      "decision": null,
-      "evaluated_at": null,
+      "decision": "inconclusive",
+      "evaluated_at": "2026-11-11",
       "notes": [
         "2026-10-02: 第96弾 #1898（10/2 22:09）：App Store の公開版が 5.9.12 になった（10/2 10:19 JST 公開、iTunes Lookup の日本のストア）ので、data/site-constants.json の appVersion を 5.9.11 から 5.9.12 にし、sync_constants.js で JSON-LD（SoftwareApplication）の softwareVersion を26ページで更新した。`/voice-input/` は JSON-LD の softwareVersion だけが変わり、内容の履歴から作る sitemap の lastmod も変わった（この実験の開始の翌日）。title・description・表示の本文・CTA は変えていない。測定契約（page CTR、評価日 2026-11-01）は変更しない。",
-        "2026-11-11: App Store の公開版が 5.9.25、評価件数が 28件 になっていた（2026-11-10 12:15 JST に SEO Daily の run 42748214360 が iTunes Lookup の日本のストアで確認。台帳はそのログからの転記）ので、data/site-constants.json の appVersion を 5.9.12 から 5.9.25 に、ratingCount を 27 から 28 にし、sync_constants.js で 105 ファイル（JSON-LD の softwareVersion と ratingCount、評価件数の表示、llms.txt）を更新した。`/voice-input/` は JSON-LD の softwareVersion だけが変わった。title・description・表示の本文・CTA は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。"
+        "2026-11-11: App Store の公開版が 5.9.25、評価件数が 28件 になっていた（2026-11-10 12:15 JST に SEO Daily の run 42748214360 が iTunes Lookup の日本のストアで確認。台帳はそのログからの転記）ので、data/site-constants.json の appVersion を 5.9.12 から 5.9.25 に、ratingCount を 27 から 28 にし、sync_constants.js で 105 ファイル（JSON-LD の softwareVersion と ratingCount、評価件数の表示、llms.txt）を更新した。`/voice-input/` は JSON-LD の softwareVersion だけが変わった。title・description・表示の本文・CTA は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
+        "2026-11-11: Exact-page WEB GSC /voice-input/, no country/device filter. Baseline 2026-09-01..2026-09-28: 0 clicks / 185 imp / CTR 0.00% / pos 8.14. Post 2026-10-02..2026-10-29 (snapshot 2026-10-31, the registered window): 1 click / 119 imp / CTR 0.84% / pos 7.87. Later snapshots: 2026-11-02 0 / 114 / 0.00% / 7.96, 2026-11-09 0 / 84 / 0.00% / 8.89. Post impressions stay below the registered 150-impression floor in every window, so the rule's low-volume clause applies: inconclusive. Zero or one click per 28 days cannot show a CTR change in either direction. Impressions declined after the retitle (185 -> 119 -> 84); the post snapshots list no query rows for this page, so the cause cannot be read from this data. Interim changes: JSON-LD softwareVersion only (#1898 on 2026-10-02, #2292 on 2026-11-11 after every window); title, description, body and CTA unchanged since the 2026-10-02 retitle. Evaluated 10 days after the registered date by an owner-approved session (owner decision 2026-11-11); country and device composition per page is not in the snapshots and was not compared."
       ],
       "company_measurement": {
         "schema_version": 1,
         "plan_sha256": "9874dcc2b816bf491fbd26dde9229d080a084111fdbbfdf8c06965c19bdaaf57",
         "company_run_id": "377a1c88-c647-422c-ab0e-a7eafa7114e0",
         "decision_sha256": "b11dc229be36bd51dff464054341ad9726fb29a90b634df9ec9935d5e58bf88c"
+      },
+      "evidence": {
+        "schema_version": 1,
+        "kind": "gsc_comparison",
+        "source": "gsc",
+        "target_metric": "ctr",
+        "scope": {
+          "kind": "page",
+          "page": "/voice-input/"
+        },
+        "gsc_snapshots": [
+          "2026-10-31"
+        ],
+        "baseline": {
+          "start": "2026-09-01",
+          "end": "2026-09-28",
+          "days": 28,
+          "value": 0,
+          "registered_baseline_sha256": "03cc5bfa6ede10e1d5d5bcbb74874d2f45ebab01bad24364bb4d6d3c9df36472"
+        },
+        "post": {
+          "start": "2026-10-02",
+          "end": "2026-10-29",
+          "days": 28,
+          "value": 0.008403361344537815,
+          "clicks": 1,
+          "impressions": 119,
+          "position": 7.873949579831932
+        },
+        "artifacts": [
+          {
+            "name": "2026-10-31/meta.json",
+            "sha256": "c04242aaa5e227476331405289b757e3225a8c0047bc8adda44d657cb3e1fb94"
+          },
+          {
+            "name": "2026-10-31/dates.json",
+            "sha256": "e4f11f0615b867aab350b18922b7c34e534e9c624e5eb45af82c6bb119a9df39"
+          },
+          {
+            "name": "2026-10-31/pages.json",
+            "sha256": "d6fd1ff439c14e33001acda36da2130697c8091ec631dd5a5567c48a1cffe725"
+          }
+        ],
+        "validation": "metric, exact row, numeric values, complete post dates and comparable windows; decision interpretation is manual",
+        "limitations": [
+          "Baseline values are those registered in the ledger; their original extraction is not revalidated here.",
+          "Daily coverage is snapshot-wide, not per page. No test of significance, minimum sample adequacy or causality is performed.",
+          "Legacy snapshot has no search-type metadata; WEB is the store convention and must be checked against the export filters.",
+          "Legacy snapshot has no timezone metadata; verify Pacific dates in the source export."
+        ],
+        "rationale": "Exact-page WEB GSC /voice-input/, no country/device filter. Baseline 2026-09-01..2026-09-28: 0 clicks / 185 imp / CTR 0.00% / pos 8.14. Post 2026-10-02..2026-10-29 (snapshot 2026-10-31, the registered window): 1 click / 119 imp / CTR 0.84% / pos 7.87. Later snapshots: 2026-11-02 0 / 114 / 0.00% / 7.96, 2026-11-09 0 / 84 / 0.00% / 8.89. Post impressions stay below the registered 150-impression floor in every window, so the rule's low-volume clause applies: inconclusive. Zero or one click per 28 days cannot show a CTR change in either direction. Impressions declined after the retitle (185 -> 119 -> 84); the post snapshots list no query rows for this page, so the cause cannot be read from this data. Interim changes: JSON-LD softwareVersion only (#1898 on 2026-10-02, #2292 on 2026-11-11 after every window); title, description, body and CTA unchanged since the 2026-10-02 retitle. Evaluated 10 days after the registered date by an owner-approved session (owner decision 2026-11-11); country and device composition per page is not in the snapshots and was not compared."
       }
     },
     {
@@ -3158,7 +3262,7 @@
       },
       "started_at": "2026-10-02",
       "evaluation_at": "2026-11-02",
-      "status": "running",
+      "status": "evaluated",
       "target_metric": "ctr",
       "baseline": {
         "metric": "ctr",
@@ -3210,14 +3314,67 @@
         "end": "2026-10-30",
         "days": 28
       },
-      "decision": null,
-      "evaluated_at": null,
-      "notes": [],
+      "decision": "inconclusive",
+      "evaluated_at": "2026-11-11",
+      "notes": [
+        "2026-11-11: Exact-page WEB GSC /blog/email-yourself-memo, no country/device filter. Baseline 2026-09-02..2026-09-29: 9 clicks / 576 imp / CTR 1.56% / pos 5.99. Post 2026-10-03..2026-10-30 (snapshot 2026-11-02, the registered window): 9 clicks / 422 imp / CTR 2.13% / pos 7.02. Next snapshot 2026-11-09 (2026-10-10..2026-11-06): 3 / 430 / 0.70% / 7.07. Post impressions are below the registered 500-impression floor in both windows, and two overlapping windows give opposite CTR readings (2.13% and 0.70%) from 9 and 3 clicks: low sample, inconclusive. Position worsened by about one place and the query mix moved: the query 自分にメールを送る had 54 imp @6.8 on this page in the 2026-09-29 snapshot and 13 imp @10.4 in the 2026-11-02 one, while the sibling /note-to-email/ gained impressions on the same query, so the two self-email pages are not independent observations. Interim changes to this page: none (the 2026-11-11 softwareVersion sync #2292 did not touch it). Evaluated 9 days after the registered date by an owner-approved session (owner decision 2026-11-11); country and device composition per page is not in the snapshots and was not compared."
+      ],
       "company_measurement": {
         "schema_version": 1,
         "plan_sha256": "a3b0db29dc9494f49aa198ef84e67f1504877a7e4e39e866f21e8df1d4350406",
         "company_run_id": "f2bfe354-ab83-4ed6-998f-6213c9a8bd75",
         "decision_sha256": "3dce5f89dae09416b1eacc8ef5797bd2177b8658f708c0187d5e84dbae628192"
+      },
+      "evidence": {
+        "schema_version": 1,
+        "kind": "gsc_comparison",
+        "source": "gsc",
+        "target_metric": "ctr",
+        "scope": {
+          "kind": "page",
+          "page": "/blog/email-yourself-memo"
+        },
+        "gsc_snapshots": [
+          "2026-11-02"
+        ],
+        "baseline": {
+          "start": "2026-09-02",
+          "end": "2026-09-29",
+          "days": 28,
+          "value": 0.015625,
+          "registered_baseline_sha256": "2b782564f356d005efd01812459be3999e48242aed95b2a05c72845de4411cf1"
+        },
+        "post": {
+          "start": "2026-10-03",
+          "end": "2026-10-30",
+          "days": 28,
+          "value": 0.02132701421800948,
+          "clicks": 9,
+          "impressions": 422,
+          "position": 7.016587677725118
+        },
+        "artifacts": [
+          {
+            "name": "2026-11-02/meta.json",
+            "sha256": "7330ec347178c7b2d914c6b89f6f6972b3ebd00b3e4847680feb6c4bfb2c7a19"
+          },
+          {
+            "name": "2026-11-02/dates.json",
+            "sha256": "57535b52e9ec916f0892895ba66213ef1dd5b6058ef6a7b5c4ec303d543a7014"
+          },
+          {
+            "name": "2026-11-02/pages.json",
+            "sha256": "ef380f82c29b88c6f7462da91e357f020f7dc72c177fcd2288d57a88cf3d4737"
+          }
+        ],
+        "validation": "metric, exact row, numeric values, complete post dates and comparable windows; decision interpretation is manual",
+        "limitations": [
+          "Baseline values are those registered in the ledger; their original extraction is not revalidated here.",
+          "Daily coverage is snapshot-wide, not per page. No test of significance, minimum sample adequacy or causality is performed.",
+          "Legacy snapshot has no search-type metadata; WEB is the store convention and must be checked against the export filters.",
+          "Legacy snapshot has no timezone metadata; verify Pacific dates in the source export."
+        ],
+        "rationale": "Exact-page WEB GSC /blog/email-yourself-memo, no country/device filter. Baseline 2026-09-02..2026-09-29: 9 clicks / 576 imp / CTR 1.56% / pos 5.99. Post 2026-10-03..2026-10-30 (snapshot 2026-11-02, the registered window): 9 clicks / 422 imp / CTR 2.13% / pos 7.02. Next snapshot 2026-11-09 (2026-10-10..2026-11-06): 3 / 430 / 0.70% / 7.07. Post impressions are below the registered 500-impression floor in both windows, and two overlapping windows give opposite CTR readings (2.13% and 0.70%) from 9 and 3 clicks: low sample, inconclusive. Position worsened by about one place and the query mix moved: the query 自分にメールを送る had 54 imp @6.8 on this page in the 2026-09-29 snapshot and 13 imp @10.4 in the 2026-11-02 one, while the sibling /note-to-email/ gained impressions on the same query, so the two self-email pages are not independent observations. Interim changes to this page: none (the 2026-11-11 softwareVersion sync #2292 did not touch it). Evaluated 9 days after the registered date by an owner-approved session (owner decision 2026-11-11); country and device composition per page is not in the snapshots and was not compared."
       }
     },
     {
@@ -3253,7 +3410,7 @@
       },
       "started_at": "2026-10-03",
       "evaluation_at": "2026-11-03",
-      "status": "running",
+      "status": "evaluated",
       "target_metric": "ctr",
       "baseline": {
         "metric": "ctr",
@@ -3305,15 +3462,127 @@
         "end": "2026-10-31",
         "days": 28
       },
-      "decision": null,
-      "evaluated_at": null,
-      "notes": [],
+      "decision": "iterate",
+      "evaluated_at": "2026-11-11",
+      "notes": [
+        "2026-11-11: Exact-page WEB GSC /methods/second-brain/, no country/device filter. Baseline 2026-09-02..2026-09-29: 11 clicks / 815 imp / CTR 1.35% / pos 8.25. Post 2026-10-10..2026-11-06 (snapshot 2026-11-09, the only qualifying one): 1 click / 78 imp / CTR 1.28% / pos 8.56. Post impressions are far below the registered 500-impression floor, so the CTR comparison itself is unreadable (low sample). The adverse change is in volume, not CTR. The page's main query, second brain, had 295 and 266 imp with 9 and 10 clicks at pos 6.1 and 6.4 in the 28-day windows ending 2026-09-12 and 2026-09-19, 276 imp @7.8 in 2026-08-30..2026-09-26, 117 imp @9.8 in 2026-09-22..2026-10-19, and 4 imp with 0 clicks @11.5 in the post window; site-wide the same query went from 266 imp, 10 clicks @6.4 to 30 imp, 0 clicks @15.6. The retitle of 2026-10-04 (#1959) removed the Latin phrase Second Brain from title, og:title, twitter:title and both JSON-LD names, leaving one occurrence on the page where there had been six. The decline began earlier, in windows that include the 2026-09-19 separation of the Japanese and English pages (#1484), and reached near zero right after the retitle; this data cannot separate the two and no causal claim is made. Owner decision 2026-11-11: iterate. The phrase returns to the title fields with the CODE/PARA wording kept, and the query-page impressions are read again as title-2026-11-11-second-brain-term. Evaluated 8 days after the registered date by an owner-approved session; country and device composition per page is not in the snapshots and was not compared."
+      ],
       "company_measurement": {
         "schema_version": 1,
         "plan_sha256": "8d2df1af6e9d3b602b8ecfa07269f8dd7be4f16c2ec65e99120ff3c4fbadf47c",
         "company_run_id": "b0898ee2-79f3-40c8-9078-715106f1e91f",
         "decision_sha256": "9b49a8a4be2468a5138cafbf09fdcb1179c387eeaa987ce98a429329ff3edf98"
+      },
+      "evidence": {
+        "schema_version": 1,
+        "kind": "gsc_comparison",
+        "source": "gsc",
+        "target_metric": "ctr",
+        "scope": {
+          "kind": "page",
+          "page": "/methods/second-brain/"
+        },
+        "gsc_snapshots": [
+          "2026-11-09"
+        ],
+        "baseline": {
+          "start": "2026-09-02",
+          "end": "2026-09-29",
+          "days": 28,
+          "value": 0.013496932515337423,
+          "registered_baseline_sha256": "a8abd1bfc0ad5b13d6ee491f0e21573d370b7d524c361c6a5ba7723b6b1e7cbd"
+        },
+        "post": {
+          "start": "2026-10-10",
+          "end": "2026-11-06",
+          "days": 28,
+          "value": 0.01282051282051282,
+          "clicks": 1,
+          "impressions": 78,
+          "position": 8.564102564102564
+        },
+        "artifacts": [
+          {
+            "name": "2026-11-09/meta.json",
+            "sha256": "e66981781db8e1c2d724e38ae8487367f7488bd9c87cdc0621c04b81db10604b"
+          },
+          {
+            "name": "2026-11-09/dates.json",
+            "sha256": "12458ecca8ba632a40ffa3322587bcf46e3d045562410db8a833e8180da9b39f"
+          },
+          {
+            "name": "2026-11-09/pages.json",
+            "sha256": "5c33346745389ac3c5706511b556cbce0f24eb5a996bf1e5643da7e1b160fa1a"
+          }
+        ],
+        "validation": "metric, exact row, numeric values, complete post dates and comparable windows; decision interpretation is manual",
+        "limitations": [
+          "Baseline values are those registered in the ledger; their original extraction is not revalidated here.",
+          "Daily coverage is snapshot-wide, not per page. No test of significance, minimum sample adequacy or causality is performed.",
+          "Legacy snapshot has no search-type metadata; WEB is the store convention and must be checked against the export filters.",
+          "Legacy snapshot has no timezone metadata; verify Pacific dates in the source export."
+        ],
+        "rationale": "Exact-page WEB GSC /methods/second-brain/, no country/device filter. Baseline 2026-09-02..2026-09-29: 11 clicks / 815 imp / CTR 1.35% / pos 8.25. Post 2026-10-10..2026-11-06 (snapshot 2026-11-09, the only qualifying one): 1 click / 78 imp / CTR 1.28% / pos 8.56. Post impressions are far below the registered 500-impression floor, so the CTR comparison itself is unreadable (low sample). The adverse change is in volume, not CTR. The page's main query, second brain, had 295 and 266 imp with 9 and 10 clicks at pos 6.1 and 6.4 in the 28-day windows ending 2026-09-12 and 2026-09-19, 276 imp @7.8 in 2026-08-30..2026-09-26, 117 imp @9.8 in 2026-09-22..2026-10-19, and 4 imp with 0 clicks @11.5 in the post window; site-wide the same query went from 266 imp, 10 clicks @6.4 to 30 imp, 0 clicks @15.6. The retitle of 2026-10-04 (#1959) removed the Latin phrase Second Brain from title, og:title, twitter:title and both JSON-LD names, leaving one occurrence on the page where there had been six. The decline began earlier, in windows that include the 2026-09-19 separation of the Japanese and English pages (#1484), and reached near zero right after the retitle; this data cannot separate the two and no causal claim is made. Owner decision 2026-11-11: iterate. The phrase returns to the title fields with the CODE/PARA wording kept, and the query-page impressions are read again as title-2026-11-11-second-brain-term. Evaluated 8 days after the registered date by an owner-approved session; country and device composition per page is not in the snapshots and was not compared."
       }
+    },
+    {
+      "id": "title-2026-11-11-second-brain-term",
+      "page": "/methods/second-brain/",
+      "type": "title_test",
+      "hypothesis": "2026-10-04 の改題（#1959）で、タイトル欄（title・og:title・twitter:title・JSON-LD の headline と name）から英語の Second Brain が消えた。このページの主力の検索語 second brain は、28日あたり表示 266〜295・クリック 9〜10・約6位（2026-08-16..09-12 と 08-23..09-19 の窓）から、表示 4・クリック 0・11.5位（2026-10-10..11-06）まで落ちている。英語表記をタイトル欄へ戻せば、この検索語での表示が戻るかを見る。下がり始めは 2026-09-19 の日英ページ分離（#1484）を含む窓からで、原因がそちらなら表記を戻しても戻らない。CODE・PARA の文言は残すので、10/4 より前の状態への完全な戻しではない。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-11-11",
+      "evaluation_at": "2026-12-14",
+      "status": "running",
+      "before": {
+        "title": "セカンドブレインの作り方 — CODE・PARAを1件のメモから試す"
+      },
+      "after": {
+        "title": "セカンドブレイン（Second Brain）の作り方 — CODE・PARAを1件のメモから試す"
+      },
+      "baseline": {
+        "clicks": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 11.5,
+        "window": "2026-10-10..2026-11-06",
+        "source": "growth/data/gsc/2026-11-09 (query-pages.json) の、検索語 second brain × /methods/second-brain/ の行",
+        "note": "変更前の窓は開始日（2026-11-11）の5日前に閉じている。同じ窓のページ全体は 表示 78・クリック 1・8.56位、サイト全体の同じ検索語は 表示 30・クリック 0・15.6位。"
+      },
+      "target_metric": "impressions",
+      "decision": null,
+      "evaluated_at": null,
+      "control": {
+        "kind": "pre_post",
+        "note": "同じ検索語×同じページの、変更前28日と変更後28日を比べる。ホールドアウトは無い。",
+        "confounders": "2026-09-19 の日英ページ分離と hreflang、8言語の翻訳ページ（同じ欄に同じ括弧書きが入る）、検索アルゴリズムの更新、同じ検索語で表示される他のページ（/en/methods/second-brain/ など）を分離できない。単独では因果を主張しない。"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 1,
+        "rationale": "この実験は表示回数そのものを読むので、表示が少ないこと自体が結果になる。前提は、検索語×ページの行が GSC のスナップショットに出ていること（表示1回以上）だけ。行が無い回は 0 と読まず、計測できなかった回として扱う。"
+      },
+      "stop_conditions": [
+        "このページの title・description・H1・本文に、この実験以外の変更が入った → 表示の変化をこの実験の効果と読まず、notes に記録する",
+        "hreflang・canonical・日英ページの構成を変えた → 同上（原因の候補なので、別の変更として記録する）",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
+      ],
+      "measurement_scope": {
+        "kind": "query_page",
+        "page": "/methods/second-brain/",
+        "query": "second brain"
+      },
+      "guardrails": [
+        "変えるのはタイトル欄の5か所（title・og:title・twitter:title・JSON-LD の headline と name）だけ。description・H1・本文・CTA・計測は変えない。",
+        "8言語の翻訳ページの同じ欄は、日本語の原文に追従して同じ括弧書きを足す。英語ページ（/en/methods/second-brain/）は手書きで、変えない。"
+      ],
+      "decision_rule": "変更後28日（2026-11-12 以降で最初に揃う窓）の、検索語 second brain × このページの表示回数を、変更前の 4回と比べる。100回以上なら keep（表記を戻した後に表示が戻った、と記述的に読む。因果は主張しない）。30回未満なら「戻っていない」として、次の手（10/4 より前のタイトルへの完全な戻し、日英ページ分離の hreflang の見直し）をオーナーに諮る。30〜99回は inconclusive。クリック数・順位と、サイト全体の同じ検索語の行を併記する。",
+      "notes": [
+        "2026-11-11: gsc-second-brain-title-20261004 の評価（iterate）を受けて登録した。オーナーの判断（2026-11-11、選択肢「英語表記を戻す」）による。基準値は登録の時点で測ってあり、後から書き換えない。"
+      ]
     }
   ],
   "measurement_changes": [
