@@ -22,7 +22,30 @@ def report(group):
                                'throttling': {'rttMs': 150, 'throughputKbps': 1638.4, 'cpuSlowdownMultiplier': 4},
                                'disableStorageReset': False, 'blockedUrlPatterns': None},
             'categories': {k: {'score': .95 if k == 'performance' else 1} for k in audit.CATEGORIES},
-            'audits': {k: {'numericValue': v} for k, v in zip(audit.METRICS, (1700, 2400, 50, 0))}}
+            'audits': {**{k: {'numericValue': v} for k, v in zip(audit.METRICS, (1700, 2400, 50, 0))},
+                       # Lighthouse's shape when a run loaded no third-party code at all.
+                       'third-party-summary': {'score': None, 'scoreDisplayMode': 'notApplicable'}}}
+
+
+TAG = 'https://www.googletagmanager.com/gtag/js?id=G-PRIVATE_ID'
+
+
+def with_third_parties(r, *urls_and_impacts, tbt=None, benchmark=None):
+    """Synthetic third-party table in Lighthouse 12.8.2's shape (entity rows with per-URL sub-items)."""
+    if tbt is not None:
+        r['audits'][audit.METRICS[2]]['numericValue'] = tbt
+    if benchmark is not None:
+        r['environment'] = {'benchmarkIndex': benchmark}
+    r['audits']['third-party-summary'] = {'score': 0, 'details': {
+        'type': 'table', 'isEntityGrouped': True,
+        'headings': [{'key': 'entity', 'valueType': 'text'}, {'key': 'transferSize', 'valueType': 'bytes'},
+                     {'key': 'blockingTime', 'valueType': 'ms'}],
+        'items': [{'entity': f'Entity {index}', 'mainThreadTime': impact, 'blockingTime': impact, 'transferSize': 1,
+                   'tbtImpact': impact,
+                   'subItems': {'type': 'subitems', 'items': [
+                       {'url': url, 'mainThreadTime': impact, 'blockingTime': impact, 'transferSize': 1, 'tbtImpact': impact}]}}
+                  for index, (url, impact) in enumerate(urls_and_impacts)]}}
+    return r
 
 
 def with_public_diagnostics(r):
@@ -376,7 +399,7 @@ class SummaryTests(unittest.TestCase):
         result = subprocess.run([sys.executable, '-O', audit.__file__], env=env, capture_output=True, text=True)
         self.assertEqual(result.returncode, 1)
         saved = json.loads((self.root / 'summary.json').read_text())
-        self.assertEqual(saved['failures'], ['production-ja: median TBT exceeds 200 ms'])
+        self.assertEqual(saved['failures'], ['production-ja: median site TBT exceeds 200 ms'])
         self.assertEqual(len(saved['runs']), 12)
         self.assertEqual(result.stdout, (self.root / 'summary.md').read_text() + '\n')
         self.assertEqual((self.root / 'step.md').read_text(), (self.root / 'summary.md').read_text())
@@ -525,10 +548,182 @@ class SummaryTests(unittest.TestCase):
         self.patch_run('production-en', edit)
         summary = audit.summarize(self.root)
         self.assertEqual(summary['status'], 'failure')
-        self.assertIn('production-en: median TBT exceeds 200 ms', summary['failures'])
+        self.assertIn('production-en: median site TBT exceeds 200 ms', summary['failures'])
         text = audit.render(summary)
         self.assertIn('- production-en: benchmarkIndex 480, 480, 480; median 480; slow-host warning in 3 of 3 runs', text)
-        self.assertIn('production-en: median TBT exceeds 200 ms', text)
+        self.assertIn('production-en: median site TBT exceeds 200 ms', text)
+
+    def test_the_machine_speed_never_enters_the_site_budget(self):
+        # [2026-11-11] The benchmarkIndex scales the watched tag weight and nothing else: the same
+        # reports judged on a slow and on a fast machine give the same site share and the same failures.
+        results = []
+        for benchmark in (480, 4000):
+            self.patch_run('production-en', lambda r: with_third_parties(r, (TAG, 120), tbt=330, benchmark=benchmark))
+            summary = audit.summarize(self.root)
+            results.append((summary['status'], summary['failures'], summary['medians']['production-en']['site_tbt']))
+        self.assertEqual(results[0], results[1])
+        self.assertEqual(results[0], ('failure', ['production-en: median site TBT exceeds 200 ms'], 270))
+
+    def test_the_google_tag_share_is_not_charged_to_the_site_budget(self):
+        # The 2026-11-11 failure shape: total 220 on a slow machine, all of it the tag's two tasks.
+        def edit(r):
+            with_third_parties(r, (TAG, 180), ('https://www.googletagmanager.com/gtag/js?id=G-PRIVATE_ID&cx=c', 260),
+                               ('https://analytics.ahrefs.com/analytics.js', 0), tbt=220, benchmark=2026)
+        self.patch_run('production-en', edit)
+        summary = audit.summarize(self.root, enforce_watch=True)
+        self.assertEqual((summary['status'], summary['failures'], summary['notices']), ('success', [], []))
+        self.assertEqual(summary['medians']['production-en']['site_tbt'], 0)
+        self.assertEqual(summary['medians']['production-en'][audit.METRICS[2]], 220)
+        self.assertAlmostEqual(summary['medians']['production-en']['google_tag_index'], 440 * 2026 / 1000)
+        text = audit.render(summary)
+        self.assertIn('- production-en: total 220 / 220 / 220; Google tag impact 440 / 440 / 440; '
+                      'site at most 0 / 0 / 0 (median 0); tag weight index 891 / 891 / 891', text)
+        self.assertIn('- local-ja: total 50 / 50 / 50; Google tag impact 0 / 0 / 0; '
+                      'site at most 50 / 50 / 50 (median 50); tag weight index 0 / 0 / 0', text)
+        self.assertNotIn('Google tag watch', text)
+        self.assertNotIn('PRIVATE_', text + json.dumps(summary))
+
+    def test_site_work_beside_the_tag_still_fails_its_budget(self):
+        for tbt, expected in ((350, 'success'), (351, 'failure'), (400, 'failure')):
+            with self.subTest(tbt=tbt):
+                self.patch_run('production-ja', lambda r: with_third_parties(r, (TAG, 300), tbt=tbt, benchmark=2500))
+                summary = audit.summarize(self.root)
+                self.assertEqual(summary['status'], expected)
+                self.assertEqual(summary['failures'],
+                                 [] if expected == 'success' else ['production-ja: median site TBT exceeds 200 ms'])
+                self.assertEqual(summary['medians']['production-ja']['site_tbt'], tbt - 150)
+        # The median of the three runs is judged: one light run does not carry two heavy ones, nor the reverse.
+        for light, expected in (((1,), 'failure'), ((1, 2), 'success')):
+            with self.subTest(light_runs=light):
+                self.patch_run('production-ja', lambda r: with_third_parties(r, (TAG, 300), tbt=400, benchmark=2500))
+                self.patch_run('production-ja', lambda r: with_third_parties(r, (TAG, 300), tbt=250, benchmark=2500), runs=light)
+                summary = audit.summarize(self.root)
+                self.assertEqual(summary['status'], expected)
+                self.assertEqual(summary['medians']['production-ja']['site_tbt'], 250 if expected == 'failure' else 100)
+
+    def test_only_the_pessimistic_half_of_the_tag_impact_is_subtracted(self):
+        # Lighthouse weights its optimistic and pessimistic estimates 0.5 each and the table holds the
+        # pessimistic impact. Taking the whole impact off would hide site work behind the tag.
+        self.patch_run('local-en', lambda r: with_third_parties(r, (TAG, 300), tbt=300))
+        self.patch_run('production-en', lambda r: with_third_parties(r, (TAG, 400), tbt=100, benchmark=2000))
+        summary = audit.summarize(self.root)
+        self.assertEqual(summary['medians']['local-en']['site_tbt'], 150)
+        self.assertEqual(summary['medians']['production-en']['site_tbt'], 0)  # never negative
+        self.patch_run('local-en', lambda r: with_third_parties(r, (TAG, 300), tbt=360))
+        self.assertEqual(audit.summarize(self.root)['failures'], ['local-en: median site TBT exceeds 200 ms'])
+
+    def test_an_unreadable_tag_table_leaves_the_whole_tbt_with_the_site(self):
+        def table(r):
+            return with_third_parties(r, (TAG, 440), tbt=220, benchmark=2026)['audits']['third-party-summary']
+
+        def sub(r):
+            return table(r)['details']['items'][0]['subItems']['items'][0]
+        edits = [lambda r: (table(r), r['audits'].pop('third-party-summary')),
+                 lambda r: (table(r), r['audits'].update({'third-party-summary': 'none'})),
+                 lambda r: table(r).pop('details'),
+                 lambda r: table(r).update(scoreDisplayMode='error', details=None),
+                 lambda r: table(r).update(scoreDisplayMode='notApplicable', details={'items': 'none'}),
+                 lambda r: table(r)['details'].update(items={'0': {}}),
+                 lambda r: table(r)['details']['items'].append('row'),
+                 lambda r: table(r)['details']['items'][0].pop('subItems'),
+                 lambda r: table(r)['details']['items'][0]['subItems'].update(items='none'),
+                 lambda r: table(r)['details']['items'][0]['subItems']['items'].append(None),
+                 lambda r: sub(r).pop('url'),
+                 lambda r: sub(r).update(url=7),
+                 lambda r: sub(r).update(url='www.googletagmanager.com/gtag/js'),
+                 lambda r: sub(r).update(url='ftp://www.googletagmanager.com/gtag/js'),
+                 lambda r: sub(r).update(url='https://www.googletagmanager.com /gtag/js'),
+                 lambda r: sub(r).update(url='https://evil.example\\@www.googletagmanager.com/gtag/js'),
+                 lambda r: sub(r).update(url='https://user@www.googletagmanager.com/gtag/js'),
+                 lambda r: sub(r).update(url='https://www.googletagmanager.com:99999/gtag/js'),
+                 lambda r: sub(r).pop('tbtImpact'),
+                 lambda r: sub(r).update(tbtImpact='440'),
+                 lambda r: sub(r).update(tbtImpact=True),
+                 lambda r: sub(r).update(tbtImpact=-1),
+                 lambda r: sub(r).update(tbtImpact=float('nan')),
+                 lambda r: sub(r).update(tbtImpact=float('inf')),
+                 lambda r: table(r)['details']['items'][0]['subItems'].update(items=[
+                     {'url': TAG, 'tbtImpact': 1} for _ in range(audit.DIAGNOSTIC_SCAN_LIMIT + 1)])]
+        for index, edit in enumerate(edits):
+            with self.subTest(case=index):
+                self.patch_run('production-en', edit)
+                summary = audit.summarize(self.root)
+                self.assertEqual(summary['failures'], ['production-en: median site TBT exceeds 200 ms'])
+                self.assertEqual(summary['medians']['production-en']['site_tbt'], 220)
+                self.assertNotIn('google_tag_index', summary['medians']['production-en'])
+                self.assertEqual(summary['notices'], ['production-en: Google tag impact unavailable in 3 of 3 runs; '
+                                                      'their whole TBT was left with the site'])
+                self.assertIn('Google tag impact unavailable / unavailable / unavailable; site at most 220 / 220 / 220',
+                              audit.render(summary))
+        # One unreadable run is enough to say so, and its own total stays with the site.
+        self.patch_run('production-en', lambda r: with_third_parties(r, (TAG, 440), tbt=220, benchmark=2026))
+        self.patch_run('production-en', edits[0], runs=(2,))
+        summary = audit.summarize(self.root)
+        self.assertEqual((summary['status'], summary['medians']['production-en']['site_tbt']), ('success', 0))
+        self.assertEqual(summary['notices'], ['production-en: Google tag impact unavailable in 1 of 3 runs; '
+                                              'their whole TBT was left with the site'])
+
+    def test_only_scripts_from_the_google_tag_host_are_split_off(self):
+        others = ['https://analytics.ahrefs.com/analytics.js', 'https://www.googletagmanager.com.evil.example/gtag/js',
+                  'https://evil.example/www.googletagmanager.com/gtag/js', 'https://notgoogletagmanager.com/gtag/js',
+                  'https://cdn.www.googletagmanager.com/gtag/js', 'https://simplememofast.com/js/app-store-tracking.js',
+                  'http://127.0.0.1:8765/?u=https://www.googletagmanager.com/gtag/js']
+        for url in others:
+            with self.subTest(url=url):
+                self.patch_run('production-en', lambda r: with_third_parties(r, (url, 440), tbt=220, benchmark=2026))
+                summary = audit.summarize(self.root)
+                self.assertEqual(summary['failures'], ['production-en: median site TBT exceeds 200 ms'])
+                self.assertEqual((summary['medians']['production-en']['google_tag_index'], summary['notices']), (0, []))
+        for url in ('https://www.googletagmanager.com/gtag/js', 'https://googletagmanager.com/gtm.js?id=GTM-PRIVATE',
+                    'https://WWW.GoogleTagManager.com:443/gtag/js#PRIVATE_FRAGMENT'):
+            with self.subTest(url=url):
+                self.patch_run('production-en', lambda r: with_third_parties(r, (url, 440), tbt=220, benchmark=2026))
+                summary = audit.summarize(self.root)
+                self.assertEqual((summary['status'], summary['medians']['production-en']['site_tbt']), ('success', 0))
+
+    def test_a_heavier_google_tag_is_reported_and_fails_only_the_scheduled_run(self):
+        message = 'production-ja: Google tag weight index 1400 exceeds the watch level 1200'
+        self.patch_run('production-ja', lambda r: with_third_parties(r, (TAG, 700), tbt=350, benchmark=2000))
+        observed = audit.summarize(self.root)
+        self.assertEqual((observed['status'], observed['failures'], observed['notices']), ('success', [], [message]))
+        self.assertIs(observed['watch_enforced'], False)
+        scheduled = audit.summarize(self.root, enforce_watch=True)
+        self.assertEqual((scheduled['status'], scheduled['failures'], scheduled['notices']), ('failure', [message], [message]))
+        for text in (audit.render(observed), audit.render(scheduled)):
+            self.assertIn('Google tag watch (fails the scheduled run only; never a site budget result):\n- ' + message, text)
+        self.assertTrue(audit.render(scheduled).rstrip().endswith('FAILURE\n' + message))
+        self.assertTrue(audit.render(observed).rstrip().endswith('SUCCESS'))
+        # The same reports through the CLI: only the scheduled event turns the watch into a failure.
+        for event, code in (('pull_request', 0), ('push', 0), ('workflow_dispatch', 0), ('schedule', 1)):
+            with self.subTest(event=event):
+                result = subprocess.run([sys.executable, '-O', audit.__file__], env=self.cli_env(GITHUB_EVENT_NAME=event),
+                                        capture_output=True, text=True)
+                self.assertEqual(result.returncode, code)
+                saved = json.loads((self.root / 'summary.json').read_text())
+                self.assertEqual(saved['failures'], [message] if code else [])
+                self.assertEqual(saved['notices'], [message])
+        # The watch level itself is not above the level, and an unverified production is still watched.
+        self.patch_run('production-ja', lambda r: with_third_parties(r, (TAG, 600), tbt=300, benchmark=2000))
+        self.assertEqual(audit.summarize(self.root, enforce_watch=True)['status'], 'success')
+        self.patch_run('production-ja', lambda r: with_third_parties(r, (TAG, 700), tbt=350, benchmark=2000))
+        self.write('production-deployment.json', {'verified': False})
+        unverified = audit.summarize(self.root, enforce_watch=True)
+        self.assertEqual((unverified['enforced_groups'], unverified['failures']), (['local-ja', 'local-en'], [message]))
+
+    def test_the_watch_says_when_it_cannot_weigh_the_tag(self):
+        self.patch_run('production-en', lambda r: with_third_parties(r, (TAG, 300), tbt=150))
+        message = 'production-en: Google tag weight index unavailable in 3 of 3 runs (no benchmarkIndex)'
+        summary = audit.summarize(self.root)
+        self.assertEqual((summary['status'], summary['notices']), ('success', [message]))
+        self.assertNotIn('google_tag_index', summary['medians']['production-en'])
+        self.assertIn('tag weight index unavailable / unavailable / unavailable', audit.render(summary))
+        self.assertEqual(audit.summarize(self.root, enforce_watch=True)['failures'], [message])
+        # No tag in the run needs no machine speed, and local pages are never watched.
+        self.patch_run('production-en', lambda r: with_third_parties(r, ('https://analytics.ahrefs.com/analytics.js', 9)))
+        self.patch_run('local-ja', lambda r: with_third_parties(r, (TAG, 9000), tbt=150, benchmark=4000))
+        summary = audit.summarize(self.root, enforce_watch=True)
+        self.assertEqual((summary['status'], summary['notices']), ('success', []))
+        self.assertNotIn('google_tag_index', summary['medians']['local-ja'])
 
     def test_only_the_known_slow_host_warning_is_counted(self):
         self.patch_run('production-ja', lambda r: r.update(
