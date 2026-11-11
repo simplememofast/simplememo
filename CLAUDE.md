@@ -568,8 +568,32 @@ benchmarkIndex 2443〜2528、TBT は en 154 / 163 / 156・ja 158 / 160 / 152）�
 - **手元で見えたこと（参考）:** 起動直後のブラウザの最初の Layout は1回で 77〜131ms かかり、同じブラウザで2回目に
   開くと 4〜7ms（作業環境の Chromium 153・各5回の中央値）。Web フォントを止めても、sans-serif を強制しても
   変わらない。上の表の「文書」の long task がこれにあたると読んでいるが、FCP より前なので TBT には入らない
-- **決めていないこと（オーナー判断）:** Google タグをそのままにして境目を受け入れるか、読み込みを遅らせるか
-  （すぐ離脱した訪問を取りこぼす）、ブラウザで実行しない形へ移すか。閾値は動かしていない
+- **決めていないこと（オーナー判断）:** Google タグの重さをどう扱うか。候補と、それぞれが変えるものは次の節。
+  閾値は動かしていない
+
+### 2026-11-11（続き2）— 直し方の候補を一次資料で読んだ。**どの案も、計測か判定のどちらかを変える判断になる**
+
+- **較正の行き先は読めない。**`docs/throttling.md` が案内する計算機（`patrickhulce/lighthouse-cpu-throttling-calculator`
+  の `pages/index.js`）は benchmarkIndex 1533 で4倍・2000 で6倍、その先は 233 ごとに1倍ずつ上げる。上の6本
+  （2026〜3938）なら 6.1〜14.3倍で、Lantern の掛け算でそのまま換算すると production-en の TBT の中央値は
+  約320〜500ms（計算機が自分で付ける幅の下限でも 約230〜300ms）。**額面どおりなら、上の節の「約2000 の計測機は境目」は甘い**
+  —— 表の幅（1500〜2000）だけを読み、同じ文書が案内する計算機を読んでいなかった。ただし対応表は Chrome 86
+  （2020年）の時点のままで（11-11 の main の文書も同じ）、その後に同じ機械の benchmarkIndex がどれだけ
+  上がったかは分からない。**換算は計算で、測っていない。較正後の水準は上にも下にも外れうる**
+- **Lighthouse 自身も第三者コードを不合格にしている。**`third-party-summary` は blocking time の合計が 250ms を
+  超えると不合格（12.8.2 の `PASS_THRESHOLD_IN_MS`）。本番は 287〜319ms
+- **Cloudflare Zaraz へ移す案は、GA4 の取り方の作り直しになる。**Cloudflare の文書（`cloudflare-docs` の
+  `zaraz/faq.mdx`・`advanced/datalayer-compatibility.mdx`・`pricing-info.mdx`）: 拡張計測の自動イベントは出ない
+  （Page View・Session Start・First Visit だけ）。`dataLayer.push` の互換は `event` キーを持つオブジェクトだけで、
+  このサイトの `dataLayer.push(arguments)`（`js/app-store-tracking.js`）は通らない。無料は月100万イベントまでで、
+  超えると有料に切り替えない限り翌月まで止まる。公開されている GA4 部品（`managed-components/google-analytics-4` の
+  `src/requestBuilder.ts`）は、client id の無い訪問者に UUID を振り、engaged の判定が「10秒以上・コンバージョン
+  1件以上・2ページ以上」の**全部**（GA4 の定義はどれか1つ）。Zaraz が gtag の `_ga` を引き継ぐか、動いている版が
+  公開ソースと同じかは確かめていない
+- **読み込みを遅らせる案も計測が変わる。**最初の操作や一定秒数まで待つと、その前に離脱した訪問の `session_start`・
+  `page_view` が記録されない。GA4 ファネル（`growth/` の `measurement_version=2026-09-05`）の分母が動き、進行中の
+  実験と比べられなくなる。主スレッドの仕事そのものは減らず、起きる時刻が後ろへずれるだけ
+- **自サイトの側で減らせる分は無い。**本番の TBT に入っている自サイトの作業は 0（上の節）
 
 ## Site Structure
 
