@@ -24,6 +24,25 @@ BUDGETS = {
     'local-ja': (90, 3000), 'local-en': (95, 2500),
     'production-ja': (90, 3500), 'production-en': (90, 3000),
 }
+# [2026-11-11 owner decision] The TBT budget is judged on the site's own share.
+# Production TBT is made of the Google tag's long tasks alone (CLAUDE.md), so the total passed or
+# failed with the speed of the measuring machine while the site's own code added nothing. The
+# tag's share is recorded and watched below; it is still measured (MEASUREMENT: no suppression).
+SITE_TBT_BUDGET = 200
+GOOGLE_TAG_HOSTS = frozenset({'www.googletagmanager.com', 'googletagmanager.com'})
+# Lighthouse 12.8.2 reports simulated TBT as 0.5 x optimistic + 0.5 x pessimistic estimate
+# (Lantern TotalBlockingTime.coefficients), and the third-party table's tbtImpact is the
+# pessimistic one (same task timings, same FCP..TTI window). The optimistic window lies inside the
+# pessimistic one, so a task counts no more there: subtracting only the pessimistic half never
+# understates what is left for the site. read_run() rejects every other Lighthouse version;
+# re-read those coefficients before changing the pinned version.
+PESSIMISTIC_WEIGHT = 0.5
+# Watch level for the tag itself. Its TBT impact scales with the measuring machine, so it is
+# compared as impact x benchmarkIndex / 1000: about 730 to 910 across the six runs of
+# 2026-11-10/11 (machines from 2026 to 3938, estimated from the totals), and 730 to 914 measured
+# in the first run that printed it (run 42947273642). The level was set above the estimates
+# before that run. A watch level, not a budget: it fails only the scheduled run.
+GOOGLE_TAG_WATCH = 1200
 DIAGNOSTIC_LIMIT = 3
 DIAGNOSTIC_SCAN_LIMIT = 1000
 # TBT is the sum over long tasks, so one more row than the other tables is worth its line.
@@ -268,6 +287,103 @@ def render_host_evidence(runs):
     return lines
 
 
+def strict_host(value):
+    """Host of an http(s) request URL as the report serialized it, or None.
+
+    Userinfo, whitespace and a malformed port are rejected: those are where this parser and a
+    browser could name different hosts for the same text.
+    """
+    if not isinstance(value, str) or len(value) > 4096 or any(c.isspace() or not c.isprintable() for c in value):
+        return None
+    try:
+        parts = urlsplit(value)
+        if parts.scheme not in ('http', 'https') or not parts.hostname or parts.username is not None or parts.password is not None:
+            return None
+        parts.port  # Reject malformed ports, including out-of-range values.
+    except ValueError:
+        return None
+    return parts.hostname.lower()
+
+
+def google_tag_impact(report):
+    """Lighthouse's TBT impact (ms) of scripts served from the Google tag host; None when unreadable.
+
+    Unreadable is not zero. The caller then leaves the whole TBT with the site, so a missing
+    or malformed table can make the site's budget fail but can never make it pass.
+    """
+    audits = report.get('audits')
+    audit = audits.get('third-party-summary') if isinstance(audits, dict) else None
+    if not isinstance(audit, dict):
+        return None
+    if audit.get('scoreDisplayMode') == 'notApplicable' and 'details' not in audit:
+        return 0.0  # Lighthouse saw no third-party code in this run.
+    details = audit.get('details')
+    entities = details.get('items') if isinstance(details, dict) else None
+    if not isinstance(entities, list):
+        return None
+    total, seen = 0.0, 0
+    for entity in entities:
+        sub = entity.get('subItems') if isinstance(entity, dict) else None
+        urls = sub.get('items') if isinstance(sub, dict) else None
+        if not isinstance(urls, list):
+            return None
+        for item in urls:
+            seen += 1
+            if seen > DIAGNOSTIC_SCAN_LIMIT or not isinstance(item, dict):
+                return None
+            host = strict_host(item.get('url'))
+            if host is None:
+                return None
+            if host not in GOOGLE_TAG_HOSTS:
+                continue
+            value = item.get('tbtImpact')
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
+                return None
+            total += value
+    return total
+
+
+def tbt_split(report, tbt, benchmark_index):
+    """One run's TBT as the site's share (judged) and the Google tag's share (recorded)."""
+    impact = google_tag_impact(report)
+    if impact is None:
+        return {'google_tag_impact_ms': None, 'site_tbt_ms': tbt, 'google_tag_index': None}
+    if impact == 0:
+        index = 0.0
+    else:
+        index = impact * benchmark_index / 1000 if benchmark_index is not None else None
+    return {'google_tag_impact_ms': impact, 'site_tbt_ms': max(0.0, tbt - PESSIMISTIC_WEIGHT * impact),
+            'google_tag_index': index}
+
+
+def render_tbt_split(summary):
+    runs = summary.get('runs', [])
+    if not runs:
+        return []
+    lines = ['', f"TBT split (the {SITE_TBT_BUDGET} ms budget is judged on the site's share: total minus "
+             f"{PESSIMISTIC_WEIGHT:g} x the Google tag's TBT impact, never less than the site's real share; "
+             f'tag weight index = impact x benchmarkIndex / 1000, watch level {GOOGLE_TAG_WATCH}):']
+
+    def shown(values, digits=0):
+        return ' / '.join('unavailable' if v is None else f'{v:.{digits}f}' for v in values)
+
+    for group in GROUPS:
+        selected = [r for r in runs if r.get('group') == group]
+        if not selected:
+            continue
+        split = [r['tbt_split'] for r in selected]
+        site = [s['site_tbt_ms'] for s in split]
+        lines.append(f"- {group}: total {shown([r['metrics'][METRICS[2]] for r in selected])}; "
+                     f"Google tag impact {shown([s['google_tag_impact_ms'] for s in split])}; "
+                     f'site at most {shown(site)} (median {statistics.median(site):.0f}); '
+                     f"tag weight index {shown([s['google_tag_index'] for s in split])}")
+    notices = summary.get('notices', [])
+    if notices:
+        lines += ['', 'Google tag watch (fails the scheduled run only; never a site budget result):']
+        lines += [f'- {notice}' for notice in notices]
+    return lines
+
+
 def number(value, name, maximum=None):
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
         raise ValueError(f'{name}: expected a finite, nonnegative number')
@@ -297,13 +413,14 @@ def read_run(path):
         raise ValueError(f'{path.name}: unexpected requested or displayed URL')
     categories = {key: number(report['categories'][key]['score'], f'{path.name}: {key}', 1) for key in CATEGORIES}
     metrics = {key: number(report['audits'][key]['numericValue'], f'{path.name}: {key}') for key in METRICS}
+    host = host_evidence(report)
     return {'file': path.name, 'group': group, 'performance': categories['performance'] * 100,
             'categories': categories, 'metrics': metrics, 'warnings': report.get('runWarnings', []),
             'trace_diagnostics': diagnostics(report), 'public_diagnostics': public_diagnostics(report),
-            'host': host_evidence(report)}
+            'host': host, 'tbt_split': tbt_split(report, metrics[METRICS[2]], host['benchmark_index'])}
 
 
-def summarize(root: Path, *, require_production=False, expected_commit=None):
+def summarize(root: Path, *, require_production=False, expected_commit=None, enforce_watch=False):
     found = {p.name for p in root.glob('*.report.json')}
     if found != EXPECTED:
         raise ValueError(f'Expected exactly twelve reports. Missing: {sorted(EXPECTED - found)}; unexpected: {sorted(found - EXPECTED)}')
@@ -324,11 +441,29 @@ def summarize(root: Path, *, require_production=False, expected_commit=None):
             raise ValueError('Verified receipt lacks asset verification')
     if require_production and not verified:
         raise ValueError('Main-push audit requires a verified production deployment')
-    medians, failures, enforced = {}, [], []
+    medians, failures, enforced, notices = {}, [], [], []
     for group in GROUPS:
         selected = [r for r in rows if r['group'] == group]
         medians[group] = {'performance': statistics.median(r['performance'] for r in selected),
-                          **{key: statistics.median(r['metrics'][key] for r in selected) for key in METRICS}}
+                          **{key: statistics.median(r['metrics'][key] for r in selected) for key in METRICS},
+                          'site_tbt': statistics.median(r['tbt_split']['site_tbt_ms'] for r in selected)}
+        # The tag is the same script whatever this checkout changes, so it is watched on every
+        # production measurement, verified or not. Local pages never load it (hostname guard).
+        if group.startswith('production-'):
+            split = [r['tbt_split'] for r in selected]
+            unread = sum(s['google_tag_impact_ms'] is None for s in split)
+            unscaled = sum(s['google_tag_index'] is None for s in split) - unread
+            if unread:
+                notices.append(f'{group}: Google tag impact unavailable in {unread} of {len(split)} runs; '
+                               'their whole TBT was left with the site')
+            elif unscaled:
+                notices.append(f'{group}: Google tag weight index unavailable in {unscaled} of {len(split)} runs '
+                               '(no benchmarkIndex)')
+            else:
+                medians[group]['google_tag_index'] = statistics.median(s['google_tag_index'] for s in split)
+                if medians[group]['google_tag_index'] > GOOGLE_TAG_WATCH:
+                    notices.append(f"{group}: Google tag weight index {medians[group]['google_tag_index']:.0f} "
+                                   f'exceeds the watch level {GOOGLE_TAG_WATCH}')
         # PRs observe the old public revision. Never label it as this PR's
         # deployment or fail the candidate on that revision's performance.
         if group.startswith('production-') and not verified:
@@ -339,16 +474,19 @@ def summarize(root: Path, *, require_production=False, expected_commit=None):
             failures.append(f'{group}: median performance below {score}')
         if medians[group][METRICS[1]] > lcp:
             failures.append(f'{group}: median LCP exceeds {lcp} ms')
-        if medians[group][METRICS[2]] > 200:
-            failures.append(f'{group}: median TBT exceeds 200 ms')
+        if medians[group]['site_tbt'] > SITE_TBT_BUDGET:
+            failures.append(f'{group}: median site TBT exceeds {SITE_TBT_BUDGET} ms')
         if any(r['metrics'][METRICS[3]] > 0.1 for r in selected):
             failures.append(f'{group}: a run exceeds CLS 0.1')
         for category in CATEGORIES[1:]:
             if any(r['categories'][category] != 1 for r in selected):
                 failures.append(f'{group}: {category} fell below 100')
+    if enforce_watch:
+        failures.extend(notices)
     return {'measurement': MEASUREMENT, 'runs': rows, 'medians': medians,
             'variability': group_variability(rows, BUDGETS, METRICS),
             'production_verified': verified, 'enforced_groups': enforced,
+            'notices': notices, 'watch_enforced': enforce_watch,
             'status': 'failure' if failures else 'success', 'failures': failures}
 
 
@@ -359,6 +497,7 @@ def render(summary):
         lines.append(f"| {row['file']} | {row['performance']:.0f} | {a[METRICS[0]]/1000:.2f} | {a[METRICS[1]]/1000:.2f} | {a[METRICS[2]]:.0f} | {a[METRICS[3]]:.4f} |")
     lines += render_variability(summary.get('variability', {}))
     lines += render_host_evidence(summary.get('runs', []))
+    lines += render_tbt_split(summary)
     lines += render_public_diagnostics(summary.get('runs', []))
     lines += ['', MEASUREMENT, '', 'Enforced groups: ' + ', '.join(summary.get('enforced_groups', []))]
     if summary.get('production_verified') is False:
@@ -372,8 +511,11 @@ def main():
     root = Path(os.environ['PERF_RESULTS'])
     root.mkdir(parents=True, exist_ok=True)
     required = (os.environ.get('GITHUB_EVENT_NAME') == 'push' and os.environ.get('GITHUB_REF') == 'refs/heads/main')
+    # The daily run is the one that reports on the Google tag; a pull request is not failed for it.
+    watch = os.environ.get('GITHUB_EVENT_NAME') == 'schedule'
     try:
-        summary = summarize(root, require_production=required, expected_commit=os.environ.get('PERF_EXPECTED_COMMIT'))
+        summary = summarize(root, require_production=required, expected_commit=os.environ.get('PERF_EXPECTED_COMMIT'),
+                            enforce_watch=watch)
     except (ValueError, KeyError, TypeError, OSError) as error:
         summary = {'measurement': MEASUREMENT, 'status': 'failure', 'failures': [str(error)], 'runs': [], 'enforced_groups': []}
     (root / 'summary.json').write_text(json.dumps(summary, indent=2, allow_nan=False) + '\n')

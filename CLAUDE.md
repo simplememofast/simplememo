@@ -542,6 +542,100 @@ production-ja が 200・194ms —— **予算（200ms）の境目にいる。通
 - **変えていないこと:** 閾値（200ms）と判定。`test_a_slow_measuring_machine_never_excuses_a_budget_failure`
   （遅い計測機を理由に通さない）は、資料の読みとも合うのでそのまま
 
+### 2026-11-11（続き）— TBT を作っているのは Google タグ（gtag.js）の評価だった
+
+要約に long task と第三者の blocking time を出すようにして（#2303）、その PR 自身の実行（run 42937965524、
+benchmarkIndex 2443〜2528、TBT は en 154 / 163 / 156・ja 158 / 160 / 152）で読めた。
+
+| 群 | long task（模擬の開始＋長さ、ms） | 第三者の blocking time |
+| --- | --- | --- |
+| production-en（3本とも） | gtag.js 3532〜3580 + 145〜162、gtag.js 3680〜3742 + 242〜246、文書 1032〜1086 + 100〜101 | Google Tag Manager 287〜307、ほかは 0 |
+| production-ja（3本とも） | gtag.js 3693〜3921 + 155〜169、gtag.js 3852〜4076 + 244〜261、文書 1069〜1227 + 123〜126（2本には帰属の無い 50〜126 も。開始 1005〜1153） | Google Tag Manager 303〜319、ほかは 0 |
+| local（6本とも） | 文書 777〜914 + 97〜123（2本には帰属の無い 52〜82 も。開始 752）。gtag.js は無い | ahrefs.com 0（en は fazier.com 0 も） |
+
+- **本番の TBT は gtag.js の2つの作業だけで出来ている。**文書に帰属する作業と帰属の無い作業（50〜126ms）は開始が
+  1.0〜1.2s で、FCP（1.9〜2.0s）より前なので数えられていない
+- **TBT（152〜163ms）は Google Tag Manager の blocking time のほぼ半分。**Lantern は TBT を楽観と悲観の見積もりの
+  0.5 ずつで出す（12.8.2 が使う `lantern/metrics/TotalBlockingTime.js` の `coefficients` を読んで確認）
+- **手元（local）の TBT が 0 なのは、gtag のスニペットが本番のホスト名でしか動かないから**
+  （`index.html` の先頭の `location.hostname` の判定）。local が緑でも、本番の TBT については何も言っていない
+- 上の5本の「benchmarkIndex が低いほど TBT が高い」は、**gtag.js の評価時間が計測機の速さに比例している**と読める
+  （この回の2つの作業の長さを benchmarkIndex 2000 と 3900 に換算すると TBT は 約205ms と 約80ms で、実測の 194〜220・96 とおおよそ合う）
+
+**だから、CSS・レイアウト・自サイトのスクリプトを削っても本番の TBT は動かない。**動かせるのは Google タグの
+読み込み方だけで、それは計測の取り方を変える判断になる（`Do not remove analytics ... to improve scores` はそのまま）。
+
+- **手元で見えたこと（参考）:** 起動直後のブラウザの最初の Layout は1回で 77〜131ms かかり、同じブラウザで2回目に
+  開くと 4〜7ms（作業環境の Chromium 153・各5回の中央値）。Web フォントを止めても、sans-serif を強制しても
+  変わらない。上の表の「文書」の long task がこれにあたると読んでいるが、FCP より前なので TBT には入らない
+- **オーナーの判断（2026-11-11）:** 判定を自サイトの分と Google タグの分に分ける。候補とそれぞれが変えるものは
+  次の節、決めた形はその次の節。閾値は動かしていない
+
+### 2026-11-11（続き2）— 直し方の候補を一次資料で読んだ。**どの案も、計測か判定のどちらかを変える判断になる**
+
+- **較正の行き先は読めない。**`docs/throttling.md` が案内する計算機（`patrickhulce/lighthouse-cpu-throttling-calculator`
+  の `pages/index.js`）は benchmarkIndex 1533 で4倍・2000 で6倍、その先は 233 ごとに1倍ずつ上げる。上の6本
+  （2026〜3938）なら 6.1〜14.3倍で、Lantern の掛け算でそのまま換算すると production-en の TBT の中央値は
+  約320〜500ms（計算機が自分で付ける幅の下限でも 約230〜300ms）。**額面どおりなら、上の節の「約2000 の計測機は境目」は甘い**
+  —— 表の幅（1500〜2000）だけを読み、同じ文書が案内する計算機を読んでいなかった。ただし対応表は Chrome 86
+  （2020年）の時点のままで（11-11 の main の文書も同じ）、その後に同じ機械の benchmarkIndex がどれだけ
+  上がったかは分からない。**換算は計算で、測っていない。較正後の水準は上にも下にも外れうる**
+- **Lighthouse 自身も第三者コードを不合格にしている。**`third-party-summary` は blocking time の合計が 250ms を
+  超えると不合格（12.8.2 の `PASS_THRESHOLD_IN_MS`）。本番は 287〜319ms
+- **Cloudflare Zaraz へ移す案は、GA4 の取り方の作り直しになる。**Cloudflare の文書（`cloudflare-docs` の
+  `zaraz/faq.mdx`・`advanced/datalayer-compatibility.mdx`・`pricing-info.mdx`）: 拡張計測の自動イベントは出ない
+  （Page View・Session Start・First Visit だけ）。`dataLayer.push` の互換は `event` キーを持つオブジェクトだけで、
+  このサイトの `dataLayer.push(arguments)`（`js/app-store-tracking.js`）は通らない。無料は月100万イベントまでで、
+  超えると有料に切り替えない限り翌月まで止まる。公開されている GA4 部品（`managed-components/google-analytics-4` の
+  `src/requestBuilder.ts`）は、client id の無い訪問者に UUID を振り、engaged の判定が「10秒以上・コンバージョン
+  1件以上・2ページ以上」の**全部**（GA4 の定義はどれか1つ）。Zaraz が gtag の `_ga` を引き継ぐか、動いている版が
+  公開ソースと同じかは確かめていない
+- **読み込みを遅らせる案も計測が変わる。**最初の操作や一定秒数まで待つと、その前に離脱した訪問の `session_start`・
+  `page_view` が記録されない。GA4 ファネル（`growth/` の `measurement_version=2026-09-05`）の分母が動き、進行中の
+  実験と比べられなくなる。主スレッドの仕事そのものは減らず、起きる時刻が後ろへずれるだけ
+- **自サイトの側で減らせる分は、あっても小さい。**上の節の回では本番の TBT に入る自サイトの作業は読めなかった
+  （0 と書いたのは言い過ぎで、下の実測では英語トップに最大 57〜64ms が残る）
+
+### 2026-11-11（決定）— TBT の判定を、自サイトの分と Google タグの分に分けた（オーナー判断）
+
+オーナーが選んだのは「判定を2つに分ける」。**GA4 の取り方も、計測（Google タグ込みで測る）も変えていない。**
+変えたのは `scripts/perf/summarize.py` の判定だけ。
+
+- **自サイトの分（予算は 200ms のまま）:** 各回の `TBT − 0.5 × Google タグの TBT impact` の中央値で判定する。
+  impact は、Lighthouse の `third-party-summary` が URL ごとに出す `tbtImpact` のうち、ホストが
+  `www.googletagmanager.com`（と `googletagmanager.com`）のものの合計。**半分だけ引くのは、Lighthouse 12.8.2 の
+  TBT が楽観と悲観の見積もりを 0.5 ずつで混ぜた値で、表の `tbtImpact` は悲観の側だから**（Lantern の
+  `TotalBlockingTime.js` と `core/computed/tbt-impact-tasks.js` を読んで確認）。楽観の窓は悲観の窓の内側に
+  あるので、こう引いた残りは自サイトの本当の分より小さくならない（大きく出ることはある）
+- **表が読めない回は、何も引かない。**監査が無い・形が違う・URL や数値が読めないときは、その回の TBT を丸ごと
+  自サイトの分にする。読めないことで通ることは無い
+- **Google タグの分（記録と見張り）:** 要約の「TBT split」に、合計・タグの impact・自サイトの分・重さの指数
+  （impact × benchmarkIndex ÷ 1000）を毎回出す。指数の中央値が 1200 を超えたとき・量れないときは
+  「Google tag watch」に出し、**日次（schedule）の回だけ落とす。**PR の回は落とさない
+  （Google のスクリプトが重くなったことで、関係の無い PR を止めない）
+- **見張りの水準 1200 の置き方:** 11-10・11-11 の6本を合計から換算すると、指数は 約730〜910
+  （benchmarkIndex 2026〜3938）。観測の最大より約3割上に、測り足す前に置いた。**予算ではなく見張りの水準**で、
+  超えたら「タグが重くなった」という知らせ。水準を動かすのはオーナー
+- **最初の実測（この変更の PR の回、run 42947273642、benchmarkIndex 1926〜2058）:**
+
+  | 群 | TBT の合計 | Google タグの impact | 自サイトの分（最大） | 重さの指数 |
+  | --- | --- | --- | --- | --- |
+  | production-ja | 225 / 197 / 244 | 450 / 394 / 444 | 0 / 0 / 22 | 904 / 796 / 914 |
+  | production-en | 243 / 240 / 253 | 370 / 366 / 379 | 58 / 57 / 64 | 733 / 739 / 730 |
+  | local-ja | 0 / 0 / 38 | 0 | 0 / 0 / 38 | 0 |
+  | local-en | 0 / 0 / 0 | 0 | 0 | 0 |
+
+  **合計で判定していたら、この回は英語（中央値 243）も日本語（225）も落ちていた。**日本語の2本は合計が impact の
+  ちょうど半分で、全部が Google タグ。英語に残る 57〜64ms は、自サイトの作業か、Google タグの作業が楽観の窓にも
+  入った分かを、この要約からは分けられない（どちらでも「最大」の中に入る）。local-ja の1本の 38ms は
+  `js/app-store-tracking.js` の作業（FCP の後に 125ms）で、**自サイトの作業が TBT に入る回はある**
+- **benchmarkIndex は自サイトの判定に入らない**（`test_the_machine_speed_never_enters_the_site_budget`）。
+  使うのは、タグの重さを計測機の速さで揃えるところだけ
+- **残る限界:** (a) Performance スコア（90 以上）には今も Google タグの分が入っている。遅い計測機の日にスコアの側で
+  落ちたら、この分割では通らない（その形はまだ起きていない） (b) 0.5 は Lighthouse 12.8.2 の係数。`read_run()` は
+  ほかの版を受け付けないので、版を上げるときに係数を読み直す (c) 利用者の端末で Google タグが主スレッドを使う
+  時間は減っていない。減らす案（読み込みの遅延・Zaraz）は上の節で、計測を作り直す判断になる
+
 ## Site Structure
 
 - 静的HTMLサイト（日本語/英語の2言語対応）
