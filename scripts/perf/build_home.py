@@ -19,7 +19,9 @@ PAGES = ('index.html', 'en/index.html')
 OUT = 'assets/home-perf'
 HERO = 'assets/img/voice-airpods-pro-bright-1536.webp'
 HERO_SIZES = '(max-width: 1023px) 100vw, 64vw'
-BANNER_SIZES = '(min-width: 1280px) 505px, (min-width: 1024px) 450px, (min-width: 768px) 340px, (min-width: 480px) 438px, calc(100vw - 42px)'
+# The four stills sit in two-column chapters on the Japanese homepage: one column of
+# min(100vw - 2 x gutter, 1160px) at 768px and wider, the full content width below.
+BANNER_SIZES = '(min-width: 1240px) 568px, (min-width: 768px) calc(50vw - 56px), calc(100vw - 40px)'
 BANNERS = ('airpods', 'tags', 'watch', 'obsidian')
 
 
