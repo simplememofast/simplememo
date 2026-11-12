@@ -426,8 +426,8 @@ Medium の「Simple Memo」アカウント（`medium.com/@simplememo.com`）の�
 1. **検索に出す範囲 → 案A。**運営・会社情報7話題（`/about/`・`/press/`・`/roadmap/`・`/privacy`・`/terms`・`/devlog/`・`/contact`）の
    生成8言語、56ページを登録簿の `noindex` 欄で外した（この判断の PR）。原文と訳は変えていない。日英14ページの hreflang から生成8言語が抜け、
    サイトマップから56件が消え、lastmod が動いたのは日英14ページだけ。進行中の実験10件とは重ならない（`ownershipConflict()`）。
-   - `/autopilot/` の生成8言語（残り8ページ）は、**11-14 の Autopilot の試運転の後**に回す。日次の同期（Autopilot Act）の PR が
-     `autopilot/index.html` とその訳を毎日書き換えていて、試運転の日に同じファイルを動かさないため。
+   - `/autopilot/` の生成8言語（残り8ページ）は、12月上旬の案Bの当て直しと一緒に行う。日次の同期（Autopilot Act）の PR が
+     `autopilot/index.html` とその訳を毎日書き換えていて、11-14 の試運転の前後に同じファイルを動かさないため。
    - 案B は、12月上旬に同じ規則で当て直す。
 2. **HTML の ETag → いまは変えない。**
    - 2026-11-13 の実測: ブラウザと同じ `Accept: text/html` で取ると、Web Analytics の自動挿入が HTML の末尾に計測用の script を足している
@@ -447,6 +447,8 @@ Medium の「Simple Memo」アカウント（`medium.com/@simplememo.com`）の�
    - 欠陥5（コード例・配布テンプレート・フォルダ名が日本語のまま）: 変えない。配布しているファイルと名前を一致させるため。
      ページ冒頭の機械翻訳の注記で足りる。
    - 文言の見直しの範囲: 各言語の表示の80%を占める305ページ・887単位の title・h1・description から。11-12 と同じく、訳と反証の2段で作る。
+   - ページ単位の訂正（構造化データの公開日24本、`/vs/ticktick/`、`/vs/apple-notes/`）と CI の見張りの追加は、全ページには効かないので
+     まとめを待たない。11-14 の試運転の公開が済んでから行う（試運転の日は公開リポジトリへ書き込まない運用のため）。
 4. **Medium の記事の canonical → 2026-11-13 に3本とも直した。**
    - 記事の設定の「This story was originally published elsewhere」はチェックを外しても保存されず（通信が出ない）、空欄の保存は「Invalid URL」で拒まれる。
      そこで canonical に各記事自身の Medium の URL を入れて保存した。古い7本と同じ状態。公開ページ（ログインあり・なし）で読み直して確認した。
