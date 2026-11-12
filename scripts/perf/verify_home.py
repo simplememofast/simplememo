@@ -95,7 +95,11 @@ def selftest() -> None:
         assert any('inline base' in e for e in validate(root)), f'Newly used class .{dropped} was not detected'
         page.write_text(before.replace('<style data-perf-source="/assets/css/site-design.css">\n', '<style data-perf-source="/assets/css/site-design.css">\nbody{}', 1))
         assert any('site-design' in e for e in validate(root)), 'Edited inline site-design CSS was not detected'
-        filler = ''.join(f'<!-- {digest(str(i).encode())} -->' for i in range(400))
+        # Grow the filler until the page is just past the budget, so the case holds whatever the headroom is.
+        filler, count = '', 0
+        while len(gzip.compress(before.replace('</body>', filler + '</body>', 1).encode(), compresslevel=6, mtime=0)) <= HOME_BODY_BUDGET:
+            filler += ''.join(f'<!-- {digest(str(i).encode())} -->' for i in range(count, count + 50))
+            count += 50
         page.write_text(before.replace('</body>', filler + '</body>', 1))
         assert any('after gzip-6' in e for e in validate(root)), 'A document past the two-round-trip budget was not detected'
         page.write_text(before)
