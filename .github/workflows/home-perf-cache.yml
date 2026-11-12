@@ -1,140 +1,69 @@
 name: Homepage Asset Cache Verification
+# Production only (since 2026-11-12). This run measures the real edge after deployment:
+# asset bytes and hashes, Cache-Control, the 404 policy and bodyless 304 responses.
+# - Before merge, the same contract is checked offline inside SEO Validation
+#   (scripts/cache-contract.test.mjs). Pages previews sit behind Cloudflare Access
+#   since 2026-10-20 and CI holds no credentials for them, so PRs no longer fetch a preview.
+# - Auto-merge merges with GITHUB_TOKEN, which starts no push run. The daily schedule
+#   is therefore the main watch; Cron Health turns a failed scheduled run into an issue.
 on:
-  pull_request:
-    paths:
-      - 'functions/assets/home-perf/**'
-      - 'scripts/perf/cache_headers*'
-      - 'assets/home-perf/manifest.json'
-      - '.github/workflows/home-perf-cache.yml'
+  schedule:
+    - cron: '41 21 * * *'
+  workflow_dispatch:
   push:
-    branches: [main, claude/pagespeed-asset-cache-20260917]
+    branches: [main]
     paths:
-      - 'functions/assets/home-perf/**'
+      - '_headers'
+      - 'functions/**'
+      - 'assets/home-perf/**'
       - 'scripts/perf/cache_headers*'
-      - 'assets/home-perf/manifest.json'
       - '.github/workflows/home-perf-cache.yml'
 permissions:
   contents: read
   checks: read
-  pull-requests: read
-  actions: read
 concurrency:
-  group: asset-cache-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  group: asset-cache-production
+  cancel-in-progress: false
 jobs:
-  candidate-regressions:
-    runs-on: ubuntu-latest
-    timeout-minutes: 3
-    permissions:
-      contents: read
+  production-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24.22.3'
           package-manager-cache: false
-      - name: Scope privacy response and inventory regressions
-        run: node --test scripts/perf/cache_headers*.test.mjs scripts/perf/cache_access*.test.cjs
-
-  cache-contract:
-    needs: candidate-regressions
-    if: ${{ always() }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 8
-    steps:
-      - name: Require successful candidate regressions
-        env:
-          CANDIDATE_RESULT: ${{ needs.candidate-regressions.result }}
-        run: test "$CANDIDATE_RESULT" = success
-      # This fresh runner has never executed candidate code. Resolve main once,
-      # check out its immutable SHA, then bind the consumer to the measured HEAD.
-      - name: Resolve trusted main verifier
-        if: github.event_name == 'pull_request' && github.event.pull_request.number == 2175
-        id: trusted
+      # A push run measures production only after this exact commit is live there.
+      - name: Wait for this commit's successful production deployment
+        if: github.event_name == 'push'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
-            try {
-              const { status, data } = await github.rest.repos.getBranch({
-                owner: 'simplememofast', repo: 'simplememo', branch: 'main',
-                request: { timeout: 10000 },
-              });
-              const sha = data?.commit?.sha;
-              if (status !== 200 || data.name !== 'main' || typeof sha !== 'string'
-                  || sha.length !== 40 || !/^[a-f0-9]{40}$/.test(sha)) throw new Error();
-              core.setOutput('sha', sha);
-            } catch { core.setFailed('TRUSTED_MAIN_RESOLUTION_FAILED'); }
-      - name: Checkout trusted main verifier
-        if: github.event_name == 'pull_request' && github.event.pull_request.number == 2175
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ steps.trusted.outputs.sha }}
-          persist-credentials: false
-      - name: Checkout public cache target
-        if: github.event_name != 'pull_request' || github.event.pull_request.number != 2175
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          persist-credentials: false
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: '24.22.3'
-          package-manager-cache: false
-      - name: Record verifier checkout
-        if: github.event_name == 'pull_request' && github.event.pull_request.number == 2175
-        id: checkout
-        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-      - name: Verify approved preview proof
-        if: github.event_name == 'pull_request' && github.event.pull_request.number == 2175
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        env:
-          TRUSTED_CHECKOUT_SHA: ${{ steps.checkout.outputs.sha }}
-        with:
-          script: |
-            const fs = require('node:fs');
-            const path = require('node:path');
-            const { verifyPublishedProof } = require('./scripts/perf/cache_access_consumer.cjs');
-            try {
-              const receipt = await verifyPublishedProof({ github,
-                headSha: context.payload.pull_request.head.sha,
-                checkoutSha: process.env.TRUSTED_CHECKOUT_SHA, now: Date.now });
-              const output = path.join(process.env.RUNNER_TEMP, 'cache-results');
-              fs.mkdirSync(output, { recursive: true });
-              fs.writeFileSync(path.join(output, 'approved-cache-proof.json'), JSON.stringify(receipt, null, 2) + '\n');
-              core.info(JSON.stringify(receipt));
-              if (receipt.verified !== true) core.setFailed('Exact reviewed preview has no complete successful cache proof');
-            } catch { core.setFailed('Approved preview proof could not be verified'); }
-      - name: Resolve the exact successful deployment
-        if: github.event_name != 'pull_request' || github.event.pull_request.number != 2175
-        id: deployment
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        with:
-          script: |
-            const sha = context.payload.pull_request?.head.sha || context.sha;
-            const production = context.eventName === 'push' && context.ref === 'refs/heads/main';
-            for (let i = 0; i < 30; i++) {
-              const {data} = await github.rest.checks.listForRef({...context.repo, ref: sha, per_page: 100, filter: 'all'});
-              const run = data.check_runs.find(r => r.name === 'Cloudflare Pages' && r.head_sha === sha && r.conclusion === 'success');
-              const url = run?.output?.summary?.match(/https:\/\/[a-z0-9-]+\.simplememo-596\.pages\.dev/);
-              if (url) { core.setOutput('origin', production ? 'https://simplememofast.com' : url[0]); return; }
-              await new Promise(resolve => setTimeout(resolve, 5000));
+            for (let i = 0; i < 60; i++) {
+              const { data } = await github.rest.checks.listForRef({ ...context.repo, ref: context.sha, per_page: 100, filter: 'latest' });
+              const run = data.check_runs.find(r => r.name === 'Cloudflare Pages' && r.head_sha === context.sha);
+              if (run?.status === 'completed') {
+                if (run.conclusion === 'success') return;
+                throw new Error('Cloudflare Pages did not deploy this commit: ' + run.conclusion);
+              }
+              await new Promise(resolve => setTimeout(resolve, 10000));
             }
-            throw new Error('No successful exact-SHA Cloudflare deployment; do not test an old revision.');
+            throw new Error('No completed Cloudflare Pages deployment for this commit; do not measure an older revision.');
       - name: Install pinned browser client
-        if: github.event_name != 'pull_request' || github.event.pull_request.number != 2175
         run: |
           mkdir -p "$RUNNER_TEMP/cache-results"
           npm install --prefix "$RUNNER_TEMP/perf-tools" --no-save playwright@1.55.0
-      - name: Verify real response bodies and cache policies
-        if: github.event_name != 'pull_request' || github.event.pull_request.number != 2175
+      # One delayed retry: right after a deployment the edge can still answer with the
+      # previous policy for a few minutes (#1434). A real regression fails both attempts.
+      - name: Verify production response bodies and cache policies
         env:
           NODE_PATH: ${{ runner.temp }}/perf-tools/node_modules
           PERF_RESULTS: ${{ runner.temp }}/cache-results
-          PERF_ORIGIN: ${{ steps.deployment.outputs.origin }}
-        run: node scripts/perf/cache_headers.cjs
+          PERF_ORIGIN: https://simplememofast.com
+        run: node scripts/perf/cache_headers.cjs || { sleep 300; node scripts/perf/cache_headers.cjs; }
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
