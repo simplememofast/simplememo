@@ -27,6 +27,15 @@
   #
   # `no-cache` は「キャッシュするな」ではなく「**使う前に必ず確かめろ**」。
   # 変わっていなければ 304 が返るので、転送量はほぼ増えない。
+  #
+  # 【2026-11-12 実測】**HTML では、この前提が成り立っていない。**HTML の 200 応答に
+  # ETag も Last-Modified も無い（/obsidian/backup/ ほか。/assets/downloads/*.txt には ETag がある）。
+  # ゾーンでは HTML だけを書き換える機能（Automatic HTTPS Rewrites・Server-side Excludes・
+  # Web Analytics の自動挿入）が有効で、Cloudflare はこうした機能があるとオリジンの ETag を外す
+  # （Cloudflare Docs「Using ETag Headers」。どの機能が外しているかは切り分けていない）。
+  # だからブラウザも Googlebot も HTML では 304 を受け取れず、毎回全体を取り直している。
+  # 直す場所はゾーンの設定（オーナー判断）で、この規則ではない。
+  # 経緯と選択肢は docs/seo/gsc-page-indexing-2026-11-12.md。
   # 静的アセットは別ルール（/assets/*・/*.css・/*.js）で 1週間 immutable のまま ——
   # あちらは中身が変わるとクエリ（?v=ハッシュ）が変わるので、長く持たせて安全。
   Cache-Control: public, no-cache
@@ -159,6 +168,11 @@
   X-Robots-Tag: noindex
 
 /assets/downloads/*.canvas
+  X-Robots-Tag: noindex
+
+# 2026-11-12: the press-kit descriptions (simplememo-facts-ja/en.txt) are linked
+# from /press/ in every language. /press/ is the page for search results.
+/assets/downloads/*.txt
   X-Robots-Tag: noindex
 
 /assets/evidence/*.md
