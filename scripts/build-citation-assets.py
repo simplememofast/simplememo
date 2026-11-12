@@ -146,9 +146,11 @@ def page(path, title, description, body, ja, en, lang, tool=False):
 </body></html>"""
     if tool and lang == "ja":
         html = capture_inbox_page(html, body, copyright_line)
-    from localization_registry import alternates_for
+    # hreflang lists only the routes in search: a registry `noindex` locale keeps
+    # its language-menu link but is not an alternate (same rule as normalize_i18n_head).
+    from localization_registry import indexed_alternates_for
     rel = path.lstrip('/') + ('index.html' if path.endswith('/') else '.html')
-    alternatives = alternates_for(rel) or {"ja": ja, "en": en}
+    alternatives = indexed_alternates_for(rel) or {"ja": ja, "en": en}
     return replace_i18n_lines(html, build_block(lang, BASE + path,
         [(locale, BASE + url) for locale, url in alternatives.items()], BASE + ja))
 
@@ -365,7 +367,28 @@ def selftest():
     body = re.search(r'<script type="application/ld\+json">(.*?)</script(?=[\t\n\r\f />])', rendered, re.S | re.I)[1]
     assert '</' not in body and '<!--' not in body, "a JSON-LD value must not end its script element"
     assert json.loads(body)['name'] == hostile, "escaping must keep the JSON-LD value"
-    print("Citation selftest: output drift, source propagation, tool IDs, no-JavaScript fallback, asset versions, and JSON-LD script escaping verified.")
+    # A locale in the registry's `noindex` stays in the language menu but must not
+    # be advertised as an hreflang alternate (2026-11-13: /press/ lost its generated
+    # locales from search, and this builder wrote them back into the head).
+    import localization_registry as registry
+    group = {"noindex": ["ko"], "pages": {"ja": "resources/example/index.html",
+             "en": "en/resources/example/index.html", "ko": "ko/resources/example/index.html"}}
+    published = registry.published_groups
+    registry.published_groups = lambda: iter([(group, group["pages"])])
+    # Clear both caches so either lookup sees only this group (the menu's
+    # published_alternates() lists ko; hreflang must not).
+    registry.published_alternates.cache_clear()
+    registry.indexed_alternates.cache_clear()
+    try:
+        rendered = page('/resources/example/', 'Title', 'Description', '<p>Body</p>', '/resources/example/', '/en/resources/example/', 'ja')
+    finally:
+        registry.published_groups = published
+        registry.published_alternates.cache_clear()
+        registry.indexed_alternates.cache_clear()
+    head = rendered.split('</head>', 1)[0]
+    assert 'hreflang="en" href="https://simplememofast.com/en/resources/example/"' in head, "an indexed locale must stay an alternate"
+    assert 'hreflang="ko"' not in head, "a registry noindex locale must not be an hreflang alternate"
+    print("Citation selftest: output drift, source propagation, tool IDs, no-JavaScript fallback, asset versions, JSON-LD script escaping, and noindex locales left out of hreflang verified.")
 
 
 if __name__ == "__main__":
