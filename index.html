@@ -621,7 +621,9 @@
    this block only styles the homepage's own sections and refines the hero. */
 body.home-photo{--hp-ink:#08070c;--hp-panel:#100f17;--hp-panel-2:#16141f;--hp-line:rgba(222,208,250,.12);--hp-line-2:rgba(222,208,250,.24);--hp-paper:#f5f1fb;--hp-text:#d8d2e4;--hp-muted:#aaa3bb;--hp-am:#c9b8ff;--hp-am-2:#a78bfa;--hp-mail:#a8cfff;--hp-gold:#f4c86a;--hp-r:24px;--hp-r-s:16px;--hp-pad:20px;--hp-edge:max(var(--hp-pad),(100% - 1176px)/2);--hp-g:var(--hp-pad);--hp-ease:cubic-bezier(.2,.75,.25,1);--hp-head:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo UI",system-ui,sans-serif;background:var(--hp-ink);color-scheme:dark}
 @media (min-width:768px){body.home-photo{--hp-pad:32px}}
-html{scroll-padding-top:96px}
+/* The shared CSS scrolls smoothly; against lazily rendered sections a smooth focus scroll stops short
+   (Tab to the closing badge ended 1,300-4,000px off screen). In-page links still choose smooth for near targets. */
+html{scroll-padding-top:96px;scroll-behavior:auto}
 @media (max-width:767px){html{scroll-padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
 body.home-photo main [id]{scroll-margin-top:12px}
 body.home-photo::before,body.home-photo::after{display:none}

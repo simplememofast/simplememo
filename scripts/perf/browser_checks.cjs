@@ -187,6 +187,34 @@ async function checkInPageLinks(browser, base, width, height, output) {
         `${href} at ${width}px lands ${Math.round(landing.top)}px from the top, expected ${landing.expected}px`);
       assert(landing.focusInside, `${href} at ${width}px must move focus into its target`);
     }
+    // Keyboard focus crossing into a later section must stay on screen (WCAG 2.4.7 / 2.4.11).
+    // With smooth scrolling, Tab from #details to the closing badge once stopped 1,300-4,000px short.
+    // Each boundary gets a freshly loaded page: sections rendered earlier remember their real height
+    // and would hide the failure.
+    record.tabs = [];
+    const sections = await page.evaluate(() => [...document.querySelectorAll('main > section')]
+      .filter(section => [...section.querySelectorAll('a[href], button, summary')].some(el => el.getClientRects().length))
+      .map(section => section.id || section.className.split(' ')[0]));
+    for (const section of sections) {
+      const fresh = await context.newPage();
+      await fresh.route('**/*', route => allowedRequest(route.request().url(), route.request().method(), base) ? route.continue() : route.abort());
+      await fresh.goto(base + '/', { waitUntil: 'networkidle', timeout: 30000 });
+      await fresh.evaluate(name => {
+        const section = document.getElementById(name) || document.querySelector(`main > section.${name}`);
+        const items = [...section.querySelectorAll('a[href], button, summary')].filter(el => el.getClientRects().length);
+        items[items.length - 1].focus();
+      }, section);
+      await fresh.waitForTimeout(300);
+      await fresh.keyboard.press('Tab');
+      await fresh.waitForTimeout(1500);
+      const after = await fresh.evaluate(() => {
+        const el = document.activeElement, rect = el.getBoundingClientRect();
+        return { label: (el.getAttribute('aria-label') || el.textContent || el.tagName).trim().slice(0, 40), top: rect.top, bottom: rect.bottom, viewport: innerHeight, inMain: !!el.closest('main') };
+      });
+      await fresh.close();
+      record.tabs.push({ from: section, ...after });
+      if (after.inMain) assert(after.bottom > 0 && after.top < after.viewport, `Tab after #${section} at ${width}px leaves "${after.label}" off screen (${Math.round(after.top)}px)`);
+    }
     record.pass = true;
     return record;
   } catch (error) {
