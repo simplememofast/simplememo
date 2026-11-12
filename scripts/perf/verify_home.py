@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Fast dependency-free guard, also called by the existing SEO CSS check."""
 from __future__ import annotations
+import gzip
 import hashlib
 import json
 import re
@@ -8,7 +9,15 @@ import shutil
 import sys
 import tempfile
 from pathlib import Path
-from build_home import ROOT, OUT, PAGES, characters, digest, page_tokens, purge_unused
+from build_home import ROOT, OUT, PAGES, DESIGN, characters, digest, page_tokens, purge_unused
+
+
+# Lighthouse 12.8.2 (simulate) over scripts/perf/server.py (gzip-6, 190-byte HTTP/1.0 headers)
+# receives 14,600 + 29,200 bytes in two round trips; one byte more costs a third round trip,
+# +150 ms on FCP and LCP. Measured 2026-11-13: body 43,560 B -> FCP 902 / LCP 1,502 ms;
+# 43,700 B -> 1,052 / 1,652 ms. The Japanese page keeps 200 B of headroom below the edge.
+TWO_ROUND_TRIP_BODY = 14_600 + 29_200 - 190
+HOME_BODY_BUDGET = TWO_ROUND_TRIP_BODY - 200
 
 
 def glyph_signature(codes: set[int]) -> str:
@@ -41,6 +50,17 @@ def validate(root: Path = ROOT) -> list[str]:
             match = re.search(rf'<style data-home-perf="{kind}">\n(.*?)\n</style>', html, re.S)
             if not match or (strip_faces(match[1]) if kind == 'base' else match[1]) != expected:
                 errors.append(f'Stale inline {kind} CSS: {page}')
+        if page == 'index.html':
+            body = len(gzip.compress(html.encode(), compresslevel=6, mtime=0))
+            if body > HOME_BODY_BUDGET:
+                errors.append(f'index.html is {body} B after gzip-6; keep it at or below {HOME_BODY_BUDGET} B '
+                              f'(above {TWO_ROUND_TRIP_BODY} B the lab document needs a third round trip: +150 ms FCP and LCP)')
+            # The Japanese page carries site-design.css inline, purged the same way, in place of its link.
+            design = re.search(rf'<style data-perf-source="/{re.escape(DESIGN)}">\n(.*?)\n</style>', html, re.S)
+            if not design or design[1] != purge_unused((root / DESIGN).read_text(encoding='utf-8'), page_tokens(html, root)):
+                errors.append(f'Stale inline site-design CSS: {page}')
+            if re.search(rf'<link rel="stylesheet" href="/{re.escape(DESIGN)}', html):
+                errors.append(f'site-design.css is both linked and inlined: {page}')
         for asset in set(re.findall(r'/assets/home-perf/[^\s\'"<>),]+', html)):
             if asset.lstrip('/') not in manifest['assets']:
                 errors.append(f'Untracked asset URL: {asset}')
@@ -73,6 +93,11 @@ def selftest() -> None:
                        if name not in page_tokens(before, root) and f'.{name}' not in inline_base)
         page.write_text(before.replace('</main>', f'<p class="{dropped}"></p></main>', 1))
         assert any('inline base' in e for e in validate(root)), f'Newly used class .{dropped} was not detected'
+        page.write_text(before.replace('<style data-perf-source="/assets/css/site-design.css">\n', '<style data-perf-source="/assets/css/site-design.css">\nbody{}', 1))
+        assert any('site-design' in e for e in validate(root)), 'Edited inline site-design CSS was not detected'
+        filler = ''.join(f'<!-- {digest(str(i).encode())} -->' for i in range(400))
+        page.write_text(before.replace('</body>', filler + '</body>', 1))
+        assert any('after gzip-6' in e for e in validate(root)), 'A document past the two-round-trip budget was not detected'
         page.write_text(before)
         asset = root / next(iter(manifest['assets']))
         saved = asset.read_bytes()
@@ -83,7 +108,7 @@ def selftest() -> None:
         source.write_text(source.read_text() + '\n/* changed */')
         assert any('Changed source' in e for e in validate(root)), 'Changed shared CSS was not detected'
     purge_selftest()
-    print('PASS: homepage guard accepts valid output and rejects five regression cases; purge rules hold.')
+    print('PASS: homepage guard accepts valid output and rejects seven regression cases; purge rules hold.')
 
 
 def purge_selftest() -> None:
@@ -96,8 +121,9 @@ def purge_selftest() -> None:
         (':is(.zz,.a) p{x:1}', ':is(.zz,.a) p{x:1}'),            # alternatives never require a name
         ('a[href$=".zz"]{x:1}', 'a[href$=".zz"]{x:1}'),          # attribute values are not classes
         ('p::before{content:"}{.zz"}', 'p::before{content:"}{.zz"}'),  # braces inside strings
-        ('/* .zz{} */.a{x:1}', '/* .zz{} */.a{x:1}'),            # comments kept, never parsed as rules
-        ('/* a, b */.a{x:1}/* c */', '/* a, b */.a{x:1}/* c */'),  # commas inside comments do not split
+        ('/* .zz{} */.a{x:1}', '.a{x:1}'),                       # comments dropped, never parsed as rules
+        ('/* a, b */.a{x:1}/* c */', '.a{x:1}'),                 # commas inside comments do not split
+        ('@media (min-width:1px){/* x */.a{x:2}}', '@media (min-width:1px){.a{x:2}}'),
         ('.a /* .zz */ p{x:1}', '.a /* .zz */ p{x:1}'),          # names inside comments are not required
         ('@media (min-width:1px){.zz{x:1}}', ''),                # emptied grouping rule dropped
         ('@media (min-width:1px){.zz{x:1}.a{x:2}}', '@media (min-width:1px){.a{x:2}}'),

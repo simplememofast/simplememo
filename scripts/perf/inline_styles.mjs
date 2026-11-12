@@ -5,8 +5,9 @@
  * The Japanese homepage inlines a purged copy (scripts/perf/build_home.py purge_unused):
  * only the rules whose class and id names occur on the page. It is accepted when it is
  * an ordered selection of the source's own rules, copied verbatim, that still holds every
- * comment, statement and non-grouping at-rule and every selector that requires no class
- * or id, so element-level safety rules such as img{max-width:100%} cannot go missing.
+ * statement and non-grouping at-rule and every selector that requires no class or id, so
+ * element-level safety rules such as img{max-width:100%} cannot go missing. Comments carry
+ * no rules: the purged copy drops them, and the comparison ignores them on both sides.
  * verify_home.py recomputes the exact selection from the page and the scripts it loads.
  */
 export function hasCurrentInlineSharedCss(html, sharedCss) {
@@ -101,7 +102,7 @@ function leaves(css, context = '') {
   const out = [];
   for (const [prelude, body] of blocks(css)) {
     const head = prelude.trim();
-    if (body === null) out.push({ context, text: head });
+    if (body === null) { if (!head.startsWith('/*')) out.push({ context, text: head }); }
     else if (GROUPING.test(head)) out.push(...leaves(body, `${context}${head}{`));
     else if (head.startsWith('@')) out.push({ context, text: `${prelude}{${body}}` });
     else out.push({ context, selectors: selectors(prelude), body });

@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[2]
 PAGES = ('index.html', 'en/index.html')
 OUT = 'assets/home-perf'
 HERO = 'assets/img/voice-airpods-pro-bright-1536.webp'
+DESIGN = 'assets/css/site-design.css'
 HERO_SIZES = '(max-width: 1023px) 100vw, 64vw'
 # The four stills sit in two-column chapters on the Japanese homepage: one column of
 # min(100vw - 2 x gutter, 1160px) at 768px and wider, the full content width below.
@@ -59,13 +60,14 @@ class Text(HTMLParser):
 # The Japanese homepage inlines only the shared rules that can apply to it. Gzipped,
 # the full copy put the document at 45.5 KB on 2026-11-12: past the ~43.8 KB that TCP
 # slow start (initial window of 10 segments) delivers in two round trips, so the lab
-# FCP and LCP each moved one simulated round trip (+150 ms). The purged copy is 41 KB.
+# FCP and LCP each moved one simulated round trip (+150 ms). The purged copy is 41 KB;
+# with site-design.css inlined the same way and the unused Noto faces dropped, 40.9 KB.
 # A rule is dropped only when a class or id it requires appears nowhere in the page
 # outside <style> and nowhere in the scripts the page loads; names inside :not(),
 # :is(), :where(), :has() and similar never count as required. Statements, comments
-# and other at-rules (@font-face, @keyframes, ...) are always kept, and kept rules are
-# copied verbatim (only the whitespace between rules is dropped), so the result is
-# reproducible from the same three inputs.
+# and other at-rules (@font-face, @keyframes, ...) are always kept, comments are dropped
+# (1.1 KB gzip of notes the sources keep), and kept rules are copied verbatim (only the
+# whitespace between rules goes), so the result is reproducible from the same three inputs.
 GROUPING_AT_RULES = ('@media', '@supports', '@layer', '@container')
 NAME_NEUTRAL_FUNCTIONS = re.compile(r':(?:not|is|where|has|matches|-webkit-any|-moz-any|nth-child|nth-last-child|lang|dir|host|host-context|slotted)\(')
 
@@ -161,7 +163,8 @@ def purge_unused(css: str, tokens: set[str]) -> str:
     for prelude, body in css_blocks(css):
         head = prelude.strip()
         if body is None:
-            out.append(prelude)
+            if not head.startswith('/*'):  # comments carry no rules; the source files keep them
+                out.append(prelude)
         elif head.startswith(GROUPING_AT_RULES):
             inner = purge_unused(body, tokens)
             if inner.strip():
@@ -188,20 +191,6 @@ def page_tokens(html: str, root: Path = ROOT) -> set[str]:
         if path.is_file():
             text += '\n' + path.read_text(encoding='utf-8')
     return set(re.findall(r'[A-Za-z0-9_-]+', text))
-
-
-def unicode_ranges(codes: set[int]) -> str:
-    """Consecutive code points as U+start-end; identical coverage, about 2 KB shorter."""
-    parts: list[str] = []
-    ordered = sorted(codes)
-    i = 0
-    while i < len(ordered):
-        j = i
-        while j + 1 < len(ordered) and ordered[j + 1] == ordered[j] + 1:
-            j += 1
-        parts.append(f'U+{ordered[i]:X}' if i == j else f'U+{ordered[i]:X}-{ordered[j]:X}')
-        i = j + 1
-    return ','.join(parts)
 
 
 def characters(html: str, css: str) -> set[int]:
@@ -276,18 +265,30 @@ def build() -> dict[str, bytes]:
         images[key] = '/' + name
         return '/' + name
 
-    hero_srcset = ', '.join(f'{image(HERO, w)} {w}w' for w in (600, 750, 900, 1200, 1536))
+    hero_srcsets = {
+        'en': ', '.join(f'{image(HERO, w)} {w}w' for w in (600, 750, 900, 1200, 1536)),
+        # 402-440pt iPhones at 3x need 1,206-1,320px and would otherwise take the 1536w file
+        # (53.8 KB): 1320w is 42.3 KB. English keeps its unchanged candidates (R10).
+        'ja': ', '.join(f'{image(HERO, w)} {w}w' for w in (600, 750, 900, 1200, 1320, 1536)),
+    }
     manifest: dict[str, object] = {'version': 1, 'pages': {}, 'inputs': {}}
-    for source in ('assets/css/style.min.css', 'assets/css/home-hero.css', HERO):
+    design_css = (ROOT / DESIGN).read_text(encoding='utf-8')
+    for source in ('assets/css/style.min.css', 'assets/css/home-hero.css', DESIGN, HERO):
         manifest['inputs'][source] = digest((ROOT / source).read_bytes())
 
     for page in PAGES:
         html = (ROOT / page).read_text()
         lang = 'ja' if page == 'index.html' else 'en'
+        hero_srcset = hero_srcsets[lang]
         needed = characters(html, shared + hero_css)
+        tokens = page_tokens(html)
         faces: list[str] = []
         font_bytes = 0
-        for weight, css_weight in (('Regular', '400'), ('Bold', '500 800')):
+        # Japanese text is set in Hiragino / Yu Gothic UI / Meiryo UI: site-design.css and the
+        # page design override the shared Noto stack, so on 2026-11-13 no text run resolved to
+        # 'Noto Sans JP' and no WOFF2 was requested. Its Noto faces (7.2 KB inline) are dropped.
+        # English renders in Noto and keeps its subsets.
+        for weight, css_weight in ((('Regular', '400'), ('Bold', '500 800')) if lang == 'en' else ()):
             remaining = set(needed)
             # The delta fonts were themselves subset from ext. Source priority
             # matches the original cascade: main subset, then extended glyphs.
@@ -314,10 +315,9 @@ def build() -> dict[str, bytes]:
                 name = f'{OUT}/noto-{lang}-{weight.lower()}-{part}-{digest(data)}.woff2'
                 result[name] = data
                 font_bytes += len(data)
-                # English keeps its complete, unchanged output while R10 holds EN investment at zero.
-                ranges = unicode_ranges(use) if lang == 'ja' else ','.join(f'U+{cp:X}' for cp in sorted(use))
+                ranges = ','.join(f'U+{cp:X}' for cp in sorted(use))
                 faces.append(f"@font-face{{font-family:'Noto Sans JP';src:url('/{name}') format('woff2');font-weight:{css_weight};font-style:normal;font-display:optional;unicode-range:{ranges}}}")
-        inline = ''.join(faces) + (purge_unused(layout, page_tokens(html)) if lang == 'ja' else layout)
+        inline = ''.join(faces) + (purge_unused(layout, tokens) if lang == 'ja' else layout)
         for key, pattern, css in (
             ('base', r'<link rel="stylesheet" href="/assets/css/style\.min\.css(?:\?[^\"]*)?"\s*>', inline),
             ('hero', r'<link rel="stylesheet" href="/assets/css/home-hero\.css(?:\?[^\"]*)?"\s*>', hero_css),
@@ -329,6 +329,17 @@ def build() -> dict[str, bytes]:
             else:
                 html, count = re.subn(pattern, lambda _: block, html)
             assert count == 1, f'{page}: expected one {key} stylesheet, found {count}'
+        if lang == 'ja':
+            # site-design.css was the last render-blocking stylesheet (301 ms in the lab). Its
+            # rules for this page go inline at the link's own position, so the cascade order is
+            # unchanged; sync_page_design.py adds no link while data-perf-source is present.
+            design = f'<style data-perf-source="/{DESIGN}">\n{purge_unused(design_css, tokens)}\n</style>'
+            previous = rf'<style data-perf-source="/{re.escape(DESIGN)}">.*?</style>'
+            if re.search(previous, html, re.S):
+                html, count = re.subn(previous, lambda _: design, html, flags=re.S)
+            else:
+                html, count = re.subn(rf'<link rel="stylesheet" href="/{re.escape(DESIGN)}(?:\?[^"]*)?">', lambda _: design, html)
+            assert count == 1, f'{page}: expected one site-design stylesheet, found {count}'
         html = re.sub(r'\s*<link rel="preload"[^>]*href="/assets/fonts/NotoSansJP-[^>]+>', '', html)
         html = re.sub(r'\n?<!-- home-perf preload -->.*?<!-- /home-perf preload -->', '', html, flags=re.S)
         preload = f'\n<!-- home-perf preload -->\n<link rel="preload" as="image" type="image/avif" imagesrcset="{hero_srcset}" imagesizes="{HERO_SIZES}" fetchpriority="high">\n<!-- /home-perf preload -->'
