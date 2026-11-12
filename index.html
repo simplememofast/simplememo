@@ -705,7 +705,10 @@ body.home-photo::before,body.home-photo::after{display:none}
 .hp-step h3{margin:0;color:var(--hp-paper);font-size:1.25rem;font-weight:700;line-height:1.6;font-feature-settings:"palt" 1}
 .hp-step p{margin:0;line-height:1.9}
 .hp-phone{justify-self:center;width:min(300px,74vw);margin:0}
-.hp-phone img{display:block;width:100%;height:auto;border:10px solid #17151f;border-radius:46px;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 50px 100px -40px rgba(124,92,240,.55)}
+/* The bezel lives on a wrapper: a border on the <img> itself makes the box 23px taller before a lazy
+   image loads (the width/height ratio applies to the border box until the natural ratio is known). */
+.hp-phone__frame{overflow:hidden;border:10px solid #17151f;border-radius:46px;box-shadow:0 0 0 1px rgba(255,255,255,.1),0 50px 100px -40px rgba(124,92,240,.55)}
+.hp-phone img{display:block;width:100%;height:auto}
 .hp-phone figcaption{margin-top:18px;color:var(--hp-muted);font-size:.8125rem;text-align:center}
 
 /* Film (markup and copy are verified by scripts/check_home_film.py) */
@@ -1080,7 +1083,7 @@ main>.next-step{width:min(100% - 2*var(--hp-g),800px);margin:0 auto clamp(64px,8
         </ol>
       </div>
       <figure class="hp-phone">
-        <img src="/assets/img/obsidian-voice-input/01-compose.webp" width="640" height="1389" alt="シンプルメモのメモ入力画面。上に「新しいメモ」と送信ボタン、右下に音声入力のマイクボタン、その下に日本語キーボード。" loading="lazy" decoding="async">
+        <div class="hp-phone__frame"><img src="/assets/img/obsidian-voice-input/01-compose.webp" width="640" height="1389" alt="シンプルメモのメモ入力画面。上に「新しいメモ」と送信ボタン、右下に音声入力のマイクボタン、その下に日本語キーボード。" loading="lazy" decoding="async"></div>
         <figcaption>実際のメモ入力画面</figcaption>
       </figure>
     </div>
