@@ -87,7 +87,7 @@ test('a genuinely broken image still fails after contained-section traversal', a
 });
 
 
-test('responsive hero hints share five widths and retain original fallback and decoding', () => {
+test('responsive hero hints share their widths and retain original fallback and decoding', () => {
   const fs = require('node:fs'), path = require('node:path');
   for (const name of ['index.html', 'en/index.html']) {
     const html = fs.readFileSync(path.join(__dirname, '../..', name), 'utf8');
@@ -96,7 +96,9 @@ test('responsive hero hints share five widths and retain original fallback and d
     assert(preload && picture, 'Both native image hints must remain');
     const source = picture[1].match(/<source data-home-perf="image"[^>]*srcset="([^"]+)"[^>]*sizes="([^"]+)"/);
     assert(source); assert.equal(source[1], preload[1]); assert.equal(source[2], preload[2]);
-    assert.deepEqual([...source[1].matchAll(/ (\d+)w/g)].map(m => Number(m[1])), [600, 750, 900, 1200, 1536]);
+    // Japanese adds 1320w for 402-440pt iPhones at 3x; English keeps its five candidates (R10).
+    const widths = name === 'index.html' ? [600, 750, 900, 1200, 1320, 1536] : [600, 750, 900, 1200, 1536];
+    assert.deepEqual([...source[1].matchAll(/ (\d+)w/g)].map(m => Number(m[1])), widths);
     assert(picture[1].includes('decoding="async"'), 'Rejected decoding change must not ship');
     assert(picture[1].includes('.webp'), 'Original native fallback must survive');
   }

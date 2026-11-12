@@ -13,6 +13,10 @@ test('rejects a stale copy, missing rules, empty source and a marker alone', () 
   for (const html of [inline(layout.replace('100%', '200%')), inline(''), '<p data-home-perf="base">assets/css/style.min.css</p>']) assert.equal(hasCurrentInlineSharedCss(html, css), false);
   assert.equal(hasCurrentInlineSharedCss(inline(layout), ''), false);
 });
+test('a comment-only difference carries no rules and does not make a copy stale', () => {
+  assert.equal(hasCurrentInlineSharedCss(inline('p{x:1}'), '/* note */p{x:1}/* end */'), true);
+  assert.equal(hasCurrentInlineSharedCss(inline('p{x:1}'), '/* note */p{x:2}'), false);
+});
 test('accepts a purged copy that keeps every nameless rule verbatim and in order', () => {
   const source = "@font-face{font-family:'Noto Sans JP';src:url('/original.woff2')}body{margin:0}.wrap,.gone{max-width:100%}@media (min-width:1px){.gone{x:1}img{max-width:100%}}.gone:hover{x:2}@keyframes spin{to{transform:rotate(1turn)}}";
   const purged = 'body{margin:0}.wrap{max-width:100%}@media (min-width:1px){img{max-width:100%}}@keyframes spin{to{transform:rotate(1turn)}}';
@@ -37,6 +41,6 @@ test('both real homepages receive the current shared layout, and corruption is d
     const html = fs.readFileSync(new URL(file, import.meta.url), 'utf8');
     assert.equal(hasCurrentInlineSharedCss(html, shared), true, file);
     assert.equal(hasCurrentInlineSharedCss(html.replace('data-home-perf="base"', 'data-home-perf="missing"'), shared), false, file);
-    assert.equal(hasCurrentInlineSharedCss(html, shared + '\n/* source changed */'), false, file);
+    assert.equal(hasCurrentInlineSharedCss(html, shared + '\nbody{margin:1px}'), false, file);
   }
 });

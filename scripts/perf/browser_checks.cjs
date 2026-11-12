@@ -122,7 +122,9 @@ async function main() {
             assert(/-1200-[a-f0-9]{12}\.avif$/.test(hero.url), 'Use the correctly sized 1200px hero');
           }
           if (width === 412 && dpr === 3) {
-            assert(/-1536-[a-f0-9]{12}\.avif$/.test(hero.url), 'Wider triple-density displays retain full detail');
+            // 412pt at 3x needs 1,236px: Japanese has a 1320w candidate (402-440pt iPhones), English does not.
+            const wide = locale ? 1536 : 1320;
+            assert(new RegExp(`-${wide}-[a-f0-9]{12}\\.avif$`).test(hero.url), `Wider triple-density displays use the ${wide}w hero`);
           }
           record.heroResources = await page.evaluate(() => performance.getEntriesByType('resource').filter(entry => /\/voice-airpods-pro-bright-/.test(entry.name)).map(entry => ({url: entry.name, encodedBodySize: entry.encodedBodySize, transferSize: entry.transferSize, initiatorType: entry.initiatorType})));
           assert.equal(record.heroResources.length, 1, 'Responsive preload and picture must reuse one request');
