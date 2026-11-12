@@ -23,6 +23,12 @@ HERO_SIZES = '(max-width: 1023px) 100vw, 64vw'
 # min(100vw - 2 x gutter, 1160px) at 768px and wider, the full content width below.
 BANNER_SIZES = '(min-width: 1240px) 568px, (min-width: 768px) calc(50vw - 56px), calc(100vw - 40px)'
 BANNERS = ('airpods', 'tags', 'watch', 'obsidian')
+# The hero and the four stills are photographs with no fine text, so 4:2:0 chroma is
+# invisible at their display sizes. Compared at 100% crops on 2026-11-12: hero 1200w
+# 51,713 -> 36,412 B, tags 1200w 55,481 -> 40,368 B. The profile is part of the reuse key
+# below, so changing it re-encodes once and CI then reuses the committed bytes.
+PHOTO_ENCODING = (55, '4:2:0')
+LEGACY_ENCODING = 'q65-4:4:4'
 
 
 def digest(data: bytes) -> str:
@@ -78,6 +84,7 @@ def build() -> dict[str, bytes]:
     layout = re.sub(r'@font-face\s*\{[^{}]*\}', lambda m: '' if "font-family:'Noto Sans JP';" in m[0] else m[0], shared)
     assert layout != shared and "Noto Sans JP Fallback" in layout
     images: dict[tuple[str, int], str] = {}
+    encodings: dict[str, str] = {}
 
     def image(source: str, width: int) -> str:
         key = (source, width)
@@ -88,9 +95,12 @@ def build() -> dict[str, bytes]:
         # If the source image itself is unchanged, preserve the already
         # content-addressed, manifest-verified bytes rather than churning every
         # homepage image during an unrelated CSS/font rebuild.
+        profile = f'q{PHOTO_ENCODING[0]}-{PHOTO_ENCODING[1]}'
+        encodings[source] = profile
         if previous_manifest:
             source_digest = digest((ROOT / source).read_bytes())
-            if previous_manifest.get('inputs', {}).get(source) == source_digest:
+            previous_profile = previous_manifest.get('encodings', {}).get(source, LEGACY_ENCODING)
+            if previous_manifest.get('inputs', {}).get(source) == source_digest and previous_profile == profile:
                 stem = Path(source).stem.replace('@2x', '')
                 prefix = f'{OUT}/{stem}-{width}-'
                 candidates = [
@@ -111,8 +121,7 @@ def build() -> dict[str, bytes]:
             assert width <= rgb.width, 'Never upscale source images'
             scaled = rgb.resize((width, round(rgb.height * width / rgb.width)), Image.Resampling.LANCZOS)
             buf = io.BytesIO()
-            # 4:4:4 keeps fine Japanese banner text and UI details legible.
-            scaled.save(buf, format='AVIF', quality=65, speed=6, subsampling='4:4:4', max_threads=2)
+            scaled.save(buf, format='AVIF', quality=PHOTO_ENCODING[0], speed=6, subsampling=PHOTO_ENCODING[1], max_threads=2)
         data = buf.getvalue()
         name = f'{OUT}/{Path(source).stem.replace("@2x", "")}-{width}-{digest(data)}.avif'
         result[name] = data
@@ -212,6 +221,7 @@ def build() -> dict[str, bytes]:
         html = re.sub(r'<a\b[^>]*>', stable_placement, html)
         result[page] = html.encode()
         manifest['pages'][page] = {'font_bytes': font_bytes, 'requested_codepoints': len(needed), 'glyphs_sha256': digest(','.join(map(str, sorted(needed))).encode())}
+    manifest['encodings'] = dict(sorted(encodings.items()))
     manifest['assets'] = {name: {'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()} for name, data in sorted(result.items()) if name.startswith(OUT + '/')}
     result[f'{OUT}/manifest.json'] = (json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + '\n').encode()
     return result
