@@ -311,7 +311,7 @@ function verifyBrowserInstallation() {
 }
 
 function requireVersions(tools) {
-  need(tools.node === 'v24.22.1', 'NODE_VERSION_CHANGED');
+  need(tools.node === 'v24.22.3', 'NODE_VERSION_CHANGED');
   need(tools.lighthouse === '12.8.2', 'LIGHTHOUSE_VERSION_CHANGED');
   need(tools.chromeLauncher === '1.2.2', 'LAUNCHER_VERSION_CHANGED');
   need(tools.chromeVersion === CHROME.version, 'CHROME_VERSION_CHANGED');
