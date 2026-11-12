@@ -178,6 +178,9 @@ function isUnservedPath(p) {
   return (
     INTERNAL_PREFIXES.some((x) => p === x || p.startsWith(x + "/")) ||
     p === "/CLAUDE.md" ||
+    // 2026-11-12: the repository README (operations notes) was live 200 at
+    // /README.md. It is read on GitHub; the site has no page for it.
+    p === "/README.md" ||
     isBlockedDataPath(p)
   );
 }
@@ -476,7 +479,7 @@ export const onRequest = async (context) => {
   // _headers against the raw spelling, so only this header reaches them.
   const isRawTextFile = (p) =>
     (p.startsWith("/data/") && /\.(?:json|csv)$/.test(p)) ||
-    (p.startsWith("/assets/downloads/") && /\.(?:md|json|csv|swift|canvas)$/.test(p)) ||
+    (p.startsWith("/assets/downloads/") && /\.(?:md|json|csv|swift|canvas|txt)$/.test(p)) ||
     (p.startsWith("/assets/evidence/") && /\.(?:md|json)$/.test(p)) ||
     p === "/memo-inbox/LICENSE";
   if (isRawTextFile(pathname) || (decodedPath !== null && isRawTextFile(decodedPath))) {

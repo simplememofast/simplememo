@@ -404,6 +404,7 @@ await notFound("/data/i18n/pages.json");
 await notFound("/data/i18n/translations/en.json");
 await notFound("/tools/");
 await notFound("/CLAUDE.md");
+await notFound("/README.md");
 // growth/ carries committed GSC snapshots and App Store exports. Pages deploys
 // every tracked file, so without the block these are click, impression and
 // revenue figures sitting at a guessable URL.
@@ -472,6 +473,7 @@ for (const encoded of [
   "/%64ocs/seo/FULL-AUDIT-REPORT-2026-07-07.md",
   "/docs%2Fseo%2FFULL-AUDIT-REPORT-2026-07-07.md",
   "/CLAUDE%2Emd",
+  "/README%2Emd",
   "/data%2Fcredential-expiry.json",
   "/data/credential-expiry%2Ejson",
   "/data%2Fi18n%2Fpages.json",
