@@ -74,6 +74,26 @@ def alternates_for(file):
     return published_alternates().get(file)
 
 
+@lru_cache(maxsize=1)
+def indexed_alternates():
+    """published_alternates() minus each group's `noindex` locales (see indexed).
+
+    Use this for hreflang. The language menu keeps published_alternates(), so a
+    noindex locale stays readable without being advertised as an alternate.
+    """
+    result = {}
+    for group, pages in published_groups():
+        listed = indexed(group, pages)
+        alternatives = {locale: page_url(path) for locale, path in listed.items()}
+        for file in listed.values():
+            result[file] = alternatives
+    return result
+
+
+def indexed_alternates_for(file):
+    return indexed_alternates().get(file)
+
+
 def localized_fragment(group, fragment, locale):
     for anchors in group.get('anchors', {}).values():
         if fragment in anchors.values():

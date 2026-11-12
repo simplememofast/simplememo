@@ -331,7 +331,7 @@
       "script": "scripts/build-citation-assets.py",
       "state": "demonstrated",
       "at": "2026-09-05",
-      "broke": "出力比較の条件を常にFalseへ置換したメモリ上の実スクリプトで --selftest を実行し、missing outputs must fail のAssertionErrorを観測。元の検査では欠落・本文の分母変更・CSVの件数変更を拒否し、一致したファイルのみ通る。比較を無効化した検体は保存・コミットしていない。\n\n**[2026-11-10 追記]** JSON-LD の name に `</script>` と `<!--` を入れた検体を足した。素の json.dumps に戻すと --selftest が JSONDecodeError で、`<!--` の置き換えだけを外すと AssertionError で落ちることを観測した。"
+      "broke": "出力比較の条件を常にFalseへ置換したメモリ上の実スクリプトで --selftest を実行し、missing outputs must fail のAssertionErrorを観測。元の検査では欠落・本文の分母変更・CSVの件数変更を拒否し、一致したファイルのみ通る。比較を無効化した検体は保存・コミットしていない。\n\n**[2026-11-10 追記]** JSON-LD の name に `</script>` と `<!--` を入れた検体を足した。素の json.dumps に戻すと --selftest が JSONDecodeError で、`<!--` の置き換えだけを外すと AssertionError で落ちることを観測した。\n\n**[2026-11-13 追記]** 登録簿の `noindex` 欄にある言語を hreflang に書かない検体を足した（/press/ の生成8言語を検索から外したとき、この生成器が日英ページの head に8言語を書き戻し、seo-core の --check が落ちた）。作業コピーで1か所ずつ壊して、どれでも --selftest が非0終了することを観測した —— (1) hreflang の元を言語メニュー用の published_alternates() に戻す (2) indexed_alternates() で noindex を除かない (3) 載せるべき言語（en）まで落とす。直した版は成功し、--check は 17 ファイル一致。"
     },
     {
       "script": "scripts/check-audit-independence.mjs",
