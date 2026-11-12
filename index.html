@@ -1804,7 +1804,14 @@ main>.next-step{max-width:none!important;margin:0 var(--hp-edge) clamp(64px,8vw,
       if (!target || target.id === 'main-content') return;
       link.addEventListener('click', function (event) {
         event.preventDefault();
-        target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+        // Sections below the hero render lazily against 600px placeholders, so a smooth scroll to a
+        // far target aims at placeholder geometry and stops short as the sections it passes render.
+        // Far targets jump (the shared CSS sets scroll-behavior:smooth on html, hence the override).
+        var far = Math.abs(target.getBoundingClientRect().top) > innerHeight * 1.5;
+        var root = document.documentElement;
+        if (far) root.style.scrollBehavior = 'auto';
+        target.scrollIntoView({ behavior: reduce || far ? 'auto' : 'smooth', block: 'start' });
+        if (far) root.style.scrollBehavior = '';
         var heading = target.querySelector('h2') || target;
         heading.setAttribute('tabindex', '-1');
         heading.focus({ preventScroll: true });
