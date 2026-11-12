@@ -145,8 +145,85 @@ async function main() {
         }
       }
     }
+    for (const [width, height] of [[390, 664], [1440, 900]]) results.push(await checkInPageLinks(browser, base, width, height, output));
+    fs.writeFileSync(path.join(output, 'browser-checks.json'), JSON.stringify(results, null, 2) + '\n');
     console.log(`PASS: ${results.length} homepage viewport/density/JavaScript scenarios at ${base}.`);
   } finally { await browser.close(); }
+}
+
+/**
+ * Every in-page link in the Japanese <main> must land its target under the fixed header,
+ * with motion allowed. Sections below the hero render lazily against 600px placeholders,
+ * so a smooth scroll to a far target once stopped 2,000-5,000px short (2026-11-13) while
+ * focus moved to the off-screen heading. The scenarios above all run with reduced motion,
+ * which takes the instant path and could not see it.
+ */
+async function checkInPageLinks(browser, base, width, height, output) {
+  const record = { origin: base, locale: 'ja', width, height, check: 'in-page links, motion allowed', pass: false, links: [] };
+  const context = await browser.newContext({ viewport: { width, height }, reducedMotion: 'no-preference', isMobile: width < 768, hasTouch: width < 768 });
+  const page = await context.newPage();
+  await page.route('**/*', route => allowedRequest(route.request().url(), route.request().method(), base) ? route.continue() : route.abort());
+  try {
+    await page.goto(base + '/', { waitUntil: 'networkidle', timeout: 30000 });
+    const hrefs = await page.evaluate(() => [...new Set([...document.querySelectorAll('main a[href^="#"]')].map(a => a.getAttribute('href')))]
+      .filter(href => href.length > 1 && href !== '#main-content' && document.getElementById(href.slice(1))));
+    for (const href of hrefs) {
+      await page.evaluate(() => scrollTo({ top: 0, behavior: 'instant' }));
+      await page.waitForTimeout(200);
+      const link = page.locator(`main a[href="${href}"]`).first();
+      await link.scrollIntoViewIfNeeded();
+      await link.click();
+      await page.waitForTimeout(2200);
+      const landing = await page.evaluate(id => {
+        const target = document.getElementById(id);
+        const padding = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+        const margin = parseFloat(getComputedStyle(target).scrollMarginTop) || 0;
+        const top = target.getBoundingClientRect().top;
+        const atEnd = Math.abs(scrollY - (document.documentElement.scrollHeight - innerHeight)) < 2;
+        return { top, expected: padding + margin, atEnd, focusInside: target.contains(document.activeElement) };
+      }, href.slice(1));
+      record.links.push({ href, ...landing });
+      assert(Math.abs(landing.top - landing.expected) <= 2 || (landing.atEnd && landing.top >= landing.expected - 2),
+        `${href} at ${width}px lands ${Math.round(landing.top)}px from the top, expected ${landing.expected}px`);
+      assert(landing.focusInside, `${href} at ${width}px must move focus into its target`);
+    }
+    // Keyboard focus crossing into a later section must stay on screen (WCAG 2.4.7 / 2.4.11).
+    // With smooth scrolling, Tab from #details to the closing badge once stopped 1,300-4,000px short.
+    // Each boundary gets a freshly loaded page: sections rendered earlier remember their real height
+    // and would hide the failure.
+    record.tabs = [];
+    const sections = await page.evaluate(() => [...document.querySelectorAll('main > section')]
+      .filter(section => [...section.querySelectorAll('a[href], button, summary')].some(el => el.getClientRects().length))
+      .map(section => section.id || section.className.split(' ')[0]));
+    for (const section of sections) {
+      const fresh = await context.newPage();
+      await fresh.route('**/*', route => allowedRequest(route.request().url(), route.request().method(), base) ? route.continue() : route.abort());
+      await fresh.goto(base + '/', { waitUntil: 'networkidle', timeout: 30000 });
+      await fresh.evaluate(name => {
+        const section = document.getElementById(name) || document.querySelector(`main > section.${name}`);
+        const items = [...section.querySelectorAll('a[href], button, summary')].filter(el => el.getClientRects().length);
+        items[items.length - 1].focus();
+      }, section);
+      await fresh.waitForTimeout(300);
+      await fresh.keyboard.press('Tab');
+      await fresh.waitForTimeout(1500);
+      const after = await fresh.evaluate(() => {
+        const el = document.activeElement, rect = el.getBoundingClientRect();
+        return { label: (el.getAttribute('aria-label') || el.textContent || el.tagName).trim().slice(0, 40), top: rect.top, bottom: rect.bottom, viewport: innerHeight, inMain: !!el.closest('main') };
+      });
+      await fresh.close();
+      record.tabs.push({ from: section, ...after });
+      if (after.inMain) assert(after.bottom > 0 && after.top < after.viewport, `Tab after #${section} at ${width}px leaves "${after.label}" off screen (${Math.round(after.top)}px)`);
+    }
+    record.pass = true;
+    return record;
+  } catch (error) {
+    record.error = String(error);
+    await page.screenshot({ path: path.join(output, `ja-${width}-in-page-links-failure.png`) }).catch(() => {});
+    throw error;
+  } finally {
+    await context.close();
+  }
 }
 
 module.exports = { CASES, allowedRequest, loadLazyImages };

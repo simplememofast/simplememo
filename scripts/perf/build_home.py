@@ -56,6 +56,154 @@ class Text(HTMLParser):
             self.parts.append(data)
 
 
+# The Japanese homepage inlines only the shared rules that can apply to it. Gzipped,
+# the full copy put the document at 45.5 KB on 2026-11-12: past the ~43.8 KB that TCP
+# slow start (initial window of 10 segments) delivers in two round trips, so the lab
+# FCP and LCP each moved one simulated round trip (+150 ms). The purged copy is 41 KB.
+# A rule is dropped only when a class or id it requires appears nowhere in the page
+# outside <style> and nowhere in the scripts the page loads; names inside :not(),
+# :is(), :where(), :has() and similar never count as required. Statements, comments
+# and other at-rules (@font-face, @keyframes, ...) are always kept, and kept rules are
+# copied verbatim (only the whitespace between rules is dropped), so the result is
+# reproducible from the same three inputs.
+GROUPING_AT_RULES = ('@media', '@supports', '@layer', '@container')
+NAME_NEUTRAL_FUNCTIONS = re.compile(r':(?:not|is|where|has|matches|-webkit-any|-moz-any|nth-child|nth-last-child|lang|dir|host|host-context|slotted)\(')
+
+
+def _css_scan(css: str, i: int, stop: str) -> int:
+    """Index of the first character in `stop` at bracket depth 0, outside strings and comments."""
+    depth, quote, n = 0, '', len(css)
+    while i < n:
+        c = css[i]
+        if quote:
+            if c == '\\':
+                i += 2
+                continue
+            if c == quote:
+                quote = ''
+        elif css.startswith('/*', i):
+            end = css.find('*/', i + 2)
+            i = n if end < 0 else end + 2
+            continue
+        elif c in '"\'':
+            quote = c
+        elif c in '([':
+            depth += 1
+        elif c in ')]':
+            depth = max(0, depth - 1)
+        elif depth == 0 and c in stop:
+            return i
+        i += 1
+    return n
+
+
+def css_blocks(css: str) -> list[tuple[str, str | None]]:
+    """Top-level (prelude, body) pairs; body is None for statements and comments."""
+    out: list[tuple[str, str | None]] = []
+    i, n = 0, len(css)
+    while i < n:
+        if css[i].isspace():
+            i += 1
+            continue
+        if css.startswith('/*', i):
+            end = css.find('*/', i + 2)
+            end = n if end < 0 else end + 2
+            out.append((css[i:end], None))
+            i = end
+            continue
+        j = _css_scan(css, i, '{;')
+        if j >= n:
+            out.append((css[i:], None))
+            break
+        if css[j] == ';':
+            out.append((css[i:j + 1], None))
+            i = j + 1
+            continue
+        k, level = j + 1, 1
+        while k < n and level:
+            k = _css_scan(css, k, '{}')
+            if k < n:
+                level += 1 if css[k] == '{' else -1
+                k += 1
+        out.append((css[i:j], css[j + 1:k - 1]))
+        i = k
+    return out
+
+
+def css_selectors(prelude: str) -> list[str]:
+    out, i = [], 0
+    while True:
+        j = _css_scan(prelude, i, ',')
+        out.append(prelude[i:j])
+        if j >= len(prelude):
+            return out
+        i = j + 1
+
+
+def required_names(selector: str) -> list[str]:
+    s = re.sub(r'/\*.*?\*/', '', selector, flags=re.S)
+    s = re.sub(r'"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'', '', s)
+    s = re.sub(r'\[[^\]]*\]', '', s)
+    while True:
+        match = NAME_NEUTRAL_FUNCTIONS.search(s)
+        if not match:
+            break
+        depth, k = 1, match.end()
+        while k < len(s) and depth:
+            depth += {'(': 1, ')': -1}.get(s[k], 0)
+            k += 1
+        s = s[:match.start()] + s[k:]
+    return re.findall(r'[.#](-?[A-Za-z_][\w-]*)', s)
+
+
+def purge_unused(css: str, tokens: set[str]) -> str:
+    out: list[str] = []
+    for prelude, body in css_blocks(css):
+        head = prelude.strip()
+        if body is None:
+            out.append(prelude)
+        elif head.startswith(GROUPING_AT_RULES):
+            inner = purge_unused(body, tokens)
+            if inner.strip():
+                out.append(prelude + '{' + inner + '}')
+        elif head.startswith('@'):
+            out.append(prelude + '{' + body + '}')
+        else:
+            selectors = css_selectors(prelude)
+            kept = [s for s in selectors if all(name in tokens for name in required_names(s))]
+            if len(kept) == len(selectors):
+                out.append(prelude + '{' + body + '}')
+            elif kept:
+                out.append(','.join(s.strip() for s in kept) + '{' + body + '}')
+    return ''.join(out)
+
+
+def page_tokens(html: str, root: Path = ROOT) -> set[str]:
+    """Every word of the page outside <style> and generated preloads, plus its scripts."""
+    text = re.sub(r'<style\b[^>]*>.*?</style>', '', html, flags=re.S)
+    text = re.sub(r'<!-- home-perf preload -->.*?<!-- /home-perf preload -->', '', text, flags=re.S)
+    text = re.sub(r'<source data-home-perf="image"[^>]*>', '', text)
+    for src in re.findall(r'<script\b[^>]*\bsrc="(/[^"?#]+)', text):
+        path = root / src.lstrip('/')
+        if path.is_file():
+            text += '\n' + path.read_text(encoding='utf-8')
+    return set(re.findall(r'[A-Za-z0-9_-]+', text))
+
+
+def unicode_ranges(codes: set[int]) -> str:
+    """Consecutive code points as U+start-end; identical coverage, about 2 KB shorter."""
+    parts: list[str] = []
+    ordered = sorted(codes)
+    i = 0
+    while i < len(ordered):
+        j = i
+        while j + 1 < len(ordered) and ordered[j + 1] == ordered[j] + 1:
+            j += 1
+        parts.append(f'U+{ordered[i]:X}' if i == j else f'U+{ordered[i]:X}-{ordered[j]:X}')
+        i = j + 1
+    return ','.join(parts)
+
+
 def characters(html: str, css: str) -> set[int]:
     parser = Text()
     parser.feed(html)
@@ -166,9 +314,10 @@ def build() -> dict[str, bytes]:
                 name = f'{OUT}/noto-{lang}-{weight.lower()}-{part}-{digest(data)}.woff2'
                 result[name] = data
                 font_bytes += len(data)
-                ranges = ','.join(f'U+{cp:X}' for cp in sorted(use))
+                # English keeps its complete, unchanged output while R10 holds EN investment at zero.
+                ranges = unicode_ranges(use) if lang == 'ja' else ','.join(f'U+{cp:X}' for cp in sorted(use))
                 faces.append(f"@font-face{{font-family:'Noto Sans JP';src:url('/{name}') format('woff2');font-weight:{css_weight};font-style:normal;font-display:optional;unicode-range:{ranges}}}")
-        inline = ''.join(faces) + layout
+        inline = ''.join(faces) + (purge_unused(layout, page_tokens(html)) if lang == 'ja' else layout)
         for key, pattern, css in (
             ('base', r'<link rel="stylesheet" href="/assets/css/style\.min\.css(?:\?[^\"]*)?"\s*>', inline),
             ('hero', r'<link rel="stylesheet" href="/assets/css/home-hero\.css(?:\?[^\"]*)?"\s*>', hero_css),
