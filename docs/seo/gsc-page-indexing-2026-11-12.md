@@ -195,10 +195,10 @@
 - 新しい7件（`ios-outbox-survives-airplane-mode` など）は、全参照の全オブジェクトを走査して一致0件。
 - **7件は410へ揃えない。**Google は404と410をほぼ同じに扱い、件数も変わらない。
   一方、410 の応答には GA4 のタグが無く、どこから人が来たかが見えなくなる。発生源が分かるまで404のまま観測できる形を残す。
-- **発生源は不明のまま。**これまで「外部からの攻撃」と推定してきたが、リンク元は一度も調べていない。
-  スラッグは、この製品の実装を開発者の一人称で語る英語記事の題名に見える。GA4 には、同じ型の存在しない URL
-  （一覧には無い `/blog/ai-define-failure-before-code`）を直接開いた訪問が 2026-09-06 に1件ある。自社の自動投稿
-  （外部の開発ブログ等）が存在しない自社記事へのリンクを書いた可能性を、否定も肯定もできない（下の「オーナーの作業」）。
+- **発生源は自社の Medium アカウントだった（2026-11-12 夜、下の「Search Console の読み取り」で確認）。**
+  7月から「外部からの攻撃」と推定してきたが、誤り。Medium の「Simple Memo」アカウントの記事が、canonical に
+  simplememofast.com の存在しない `/blog/` の URL を書いていた。GA4 で見つかった `/blog/ai-define-failure-before-code` の直接訪問も、
+  同じアカウントの記事「I Make AI Define Failure Before It Writes the Code」と題が対応する。
 
 ## noindex タグによって除外されました（13件）
 
@@ -294,6 +294,88 @@
   `growth/lib/experiment-overlap.mjs` の `ownershipConflict()` で進行中の実験10件と重ならないことを確かめた。
   `/ko/blog/best-memo-apps-2026` は共有単位（比較表の見出し）の訂正で1行変わるが、実験の対象は日本語の原文で、原文は変えていない（#2285 と同じ扱い）。
 
+## Search Console の読み取りと操作（2026-11-12 夜、オーナーの依頼で実施）
+
+オーナーの依頼（「Chrome操作あなたやって」）で、上の「オーナーの作業」1〜3 を Search Console で行った。
+プロパティ `sc-domain:simplememofast.com` は、サイトの運営アカウントで開く。
+
+### 1. インデックス登録のリクエスト（7件）
+
+| URL | URL 検査の状態（リクエスト前） | 前回のクロール | 結果 |
+|---|---|---|---|
+| `/vs/memo-post/` | クロール済み - 未登録 | 2026/08/05 | リクエスト済み |
+| `/blog/work-efficiency-memo` | クロール済み - 未登録（Google が選んだ正規 URL は検査対象の URL） | 2026/10/10 | リクエスト済み（訂正版の公開後） |
+| `/en/siri/iphone/` | 検出 - 未登録 | なし | リクエスト済み |
+| `/blog/ios26-speechanalyzer-custom-vocabulary` | 検出 - 未登録（参照元は ko 版だけ） | なし | リクエスト済み |
+| `/en/obsidian/publish/` | 「URL が Google に認識されていません」（サイトマップ・参照元とも検出なし） | なし | リクエスト済み |
+| `/en/obsidian/markdown-guide/` | 検出 - 未登録 | なし | リクエスト済み |
+| `/en/vs/ticktick/` | 検出 - 未登録 | なし | リクエスト済み |
+| `/en/obsidian/use-cases/` | **登録済み**（11-09 の一覧の後にクロールされた） | 2026/11/11 | リクエスト不要 |
+
+リクエストは優先クロールのキューに入れるだけで、登録を保証しない（Search Console の表示どおり）。
+
+### 2. 404 の参照元 — 自社の Medium の記事の canonical
+
+| 404 の URL | 「参照元ページ」 |
+|---|---|
+| `/blog/ios-outbox-survives-airplane-mode` | 表示なし（「レポートされていない他のソース」） |
+| `/blog/obsidian-inbox-note-rag-source` | Medium で第三者が作った読書リストのページ（2件） |
+| `/blog/solo-work-is-serial-work` | Medium のタグページ（`api.medium.com/tag/indiehackers`） |
+
+Medium の「Simple Memo」アカウント（`medium.com/@simplememo.com`）の記事10本の `rel=canonical` を、公開ページから読んだ。
+
+| 記事（公開日） | canonical |
+|---|---|
+| My iOS Share Extension Isn't Really Mine. I Took It Apart.（2026-10-01） | `https://simplememofast.com/blog/ios-share-extension-teardown`（**404**） |
+| Your To-Do List Is a Balance Sheet, Not a Confession（2026-09-22） | `https://simplememofast.com/blog/todo-list-balance-sheet`（**404**。まだ一覧に出ていない） |
+| Six Rules for an iOS Outbox That Survives Airplane Mode（2026-09-17） | `https://simplememofast.com/blog/ios-outbox-survives-airplane-mode`（**404**） |
+| ほか7本（2026-08-12〜09-02） | Medium 自身の URL |
+
+- 新しい3本は canonical で「本来の記事はサイトにある」と宣言しているが、その URL はサイトに一度も存在しない。
+  Google はこの canonical から URL を見つけて取りに来て、404 を受け取っている。
+- 古い7本の canonical は今は Medium 自身だが、題が一覧の別のスラッグと対応する（例: 「The iOS Mail Composer Has Four Results. None Means Delivered.」と
+  `/blog/mfmailcompose-sent-is-not-delivered`、「I Let AI Label My Notes. I Don't Let It Rewrite Them.」と `/blog/ai-label-not-rewrite-notes`）。
+  以前は canonical かリンクが付いていたか、別の転載先にあったと読んでいる（未確認）。
+- **このリポジトリの外部配信（dev.to・はてなブログ・ライブドア、`scripts/devlog-syndication.mjs`）は Medium を使っておらず、
+  本文に書ける自サイトのリンクはサイトマップにある URL だけ。**いまは止まっている（`devlog-syndication.yml` の `PRIVATE_HANDOFF_REQUIRED`）。
+  Medium へ投稿している仕組みは、手元のスキル・定期タスク・関連リポジトリには見つからなかった。
+- 害: サイト側は 404 を返すだけで、検索での害は小さい。Medium 側の3本は、存在しないページを正規と宣言しているので、
+  Google が Medium の記事を重複として扱い、検索に出しにくくしている可能性がある（推定）。
+- 直し方は Medium 側にある（オーナー判断。外部の公開物の変更なので、こちらでは変えていない）:
+  1. 3本の記事の設定で canonical を外す（Medium 自身を正規にする）。
+  2. Medium へ投稿している仕組みに「canonical と本文の自サイトのリンクは、サイトマップにある URL だけ」を足す（このリポジトリの配信と同じ規則）。
+- サイト側は 404 のまま（2026-07-02 の判断どおり転送しない）。2026-07-02 の「外部の攻撃由来」という推定は、この記録で置き換える。
+
+### 3. クロールの統計情報（2026-08-14〜11-10、最終更新 11/10）
+
+| 項目 | 値 |
+|---|---|
+| クロールリクエストの合計 | 14,833（simplememofast.com 14,803・www 30） |
+| 平均応答時間 | 168 ms |
+| ホストのステータス | 問題なし（robots.txt・DNS・サーバー接続） |
+| レスポンス別 | 200 95%・301 4%・404 1%・ページアクセスエラー 1%未満 |
+| 目的別 | 更新 70%・**検出 30%（4,476）** |
+| ファイル形式別 | HTML 62%・その他 13%・画像 9%・CSS 7%・JavaScript 6% |
+| Googlebot の種類別 | スマートフォン 44%・ページリソースの読み込み 21%・その他 15%・PC 12%・画像 6% |
+
+日ごとの値は画面のグラフの線から復元した（合計が上の値と一致するよう目盛りを合わせた。誤差は1日数件）。
+
+| 期間 | クロール/日（全体） | うち検出/日 |
+|---|---:|---:|
+| 08-14〜10-07（多言語化の前） | 119 | 19 |
+| 10-08〜10-10（#2031 の公開直後） | 1,193（10-08 は 2,219） | 627 |
+| 10-11〜11-03 | 143 | 44（10月末には 10〜20） |
+| 11-04〜11-10 | 184（11-04 は 424） | 67（11-04 は 222、11-07〜11-10 は 8〜25） |
+
+- **URL は 10-08 に約5.5倍になったが、1日の巡回量はほとんど増えていない（119 → 143）。**サーバーは速く、エラーも無いので、
+  巡回の上限はサーバーの能力ではなく、Google がこのサイトに割り当てる需要の側で決まっている。
+- 未クロールの509件を取りに来る「検出」は、10月末には1日10〜20件まで落ちていた。この速さが続けば、509件がはけるのに数週間〜2か月かかる。
+  BigQuery で見た「新しく表示が付くページは週78〜94件」とも合う。
+- 「検出」の例（Search Console が出す最大約1,000件、08-14〜11-11）の内訳: 生成8言語の HTML 514・日本語 HTML 130・英語 HTML 87・
+  `/assets/`・`/data/` 247（画像 約125、`.md`・`.json`・`.csv` などの生ファイル 約90）。**検出の約9%が生ファイルに使われている。**
+- 次の判断の材料（オーナー判断）: 生ファイル140件が「noindex で除外」へ移ったのを確かめた後なら、`/assets/downloads/`・`/assets/evidence/`・`/data/` を
+  robots.txt で止めると、その分の巡回を HTML に回せる。いま止めると Google が noindex を読めないので、11-05 の判断どおりまだ止めない。
+
 ## 「修正を検証」について
 
 | 区分 | 押すか | 理由 |
@@ -303,6 +385,8 @@
 | リダイレクト・404・noindex・代替 | 押さない | どれも意図した応答で、件数が減らないのは正常 |
 
 ## オーナーの作業（Search Console、任意）
+
+> **2026-11-12 夜: 1〜3 は済んだ（上の「Search Console の読み取りと操作」）。**4 の言語別プロパティは未着手（アカウントの設定を変えるので、依頼があれば行う）。
 
 1. **URL 検査 →「インデックス登録をリクエスト」**（1日の上限内。順に）:
    - `https://simplememofast.com/vs/memo-post/`（08/05 から未クロール。訂正後の版を Google はまだ読んでいない）
@@ -331,6 +415,8 @@
    - Email Address Obfuscation は有効にしない（メールアドレスを含む HTML が130ファイルあり、`/cdn-cgi/` へのリンクに置き換わる）。
 3. **全ページに効く変更の出し方**: 未クロールが減るまでのあいだ、ナビ・フッター・言語切替・著者や発行者の構造化データ・機械翻訳の注記のような
    全ページに効く変更を、1回のデプロイにまとめるか、急がないものは見送る。lastmod の定義は変えない。
+4. **Medium の記事の canonical（2026-11-12 夜に追加）**: 自社の Medium の3本が、canonical に存在しない `/blog/` の URL を書いている。
+   記事の設定で canonical を外すか、投稿している仕組みを直す（上の「404 の参照元」）。外部の公開物の変更なので、こちらでは変えていない。
 
 ## 意図的にやっていないこと
 
