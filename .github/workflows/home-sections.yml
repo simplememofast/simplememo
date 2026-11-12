@@ -22,7 +22,10 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   section-rendering:
-    runs-on: ubuntu-latest
+    # ubuntu-latest は 2026-11-12 ごろ ubuntu-26.04 に変わり、固定している playwright@1.55.0 が
+    # 対応していない（"Playwright does not support chromium on ubuntu26.04-x64" で install が止まる）。
+    # Playwright を 26.04 対応版へ上げて検証し直すまで、通っていた ubuntu-24.04 に固定する。
+    runs-on: ubuntu-24.04
     timeout-minutes: 12
     strategy:
       fail-fast: false
