@@ -5,12 +5,18 @@ on:
       - 'scripts/perf/cache_access*'
       - '.github/workflows/home-perf-cache-approved.yml'
       - '.github/workflows/preview-cache-security-tests.yml'
+      # These regressions also import the home-perf middleware, manifest and assets.
+      - 'functions/assets/home-perf/**'
+      - 'assets/home-perf/**'
   push:
     branches: [main]
     paths:
       - 'scripts/perf/cache_access*'
       - '.github/workflows/home-perf-cache-approved.yml'
       - '.github/workflows/preview-cache-security-tests.yml'
+      # These regressions also import the home-perf middleware, manifest and assets.
+      - 'functions/assets/home-perf/**'
+      - 'assets/home-perf/**'
 permissions:
   contents: read
 concurrency:
