@@ -39,7 +39,7 @@ function fixture(t) {
 
 const defaults = Object.freeze(['--disable-background-networking',
   '--disable-features=Translate,RenderDocument,MediaRouter']);
-const versions = Object.freeze({node: 'v24.22.1', lighthouse: '12.8.2',
+const versions = Object.freeze({node: 'v24.22.3', lighthouse: '12.8.2',
   chromeLauncher: '1.2.2', chromeVersion: 'Google Chrome for Testing 155.0.8059.39',
   chromeSha256: 'ed05e73a2cdf875326fcfa438b31c71a6a885a353610731dd52090dfc476f778'});
 

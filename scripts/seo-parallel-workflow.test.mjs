@@ -38,7 +38,7 @@ test('each lane has an unconditional isolated full-history checkout and pinned r
     assert.match(jobs[lane], /fetch-depth: 0/);
     assert.match(jobs[lane], /persist-credentials: false/);
     assert.match(jobs[lane], /actions\/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1/);
-    assert.match(jobs[lane], /node-version: '24.22.1'/);
+    assert.match(jobs[lane], /node-version: '24.22.3'/);
     assert.match(jobs[lane], /package-manager-cache: false/);
   }
   assert.match(text, /permissions:\n  contents: read/);
