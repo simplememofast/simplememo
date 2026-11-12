@@ -1,7 +1,7 @@
 name: Homepage Asset Cache Verification
 # Production only (since 2026-11-12). This run measures the real edge after deployment:
 # asset bytes and hashes, Cache-Control, the 404 policy and bodyless 304 responses.
-# - Before merge, the same contract is checked offline inside SEO Validation
+# - Before merge, the cache contract is checked offline inside SEO Validation
 #   (scripts/cache-contract.test.mjs). Pages previews sit behind Cloudflare Access
 #   since 2026-10-20 and CI holds no credentials for them, so PRs no longer fetch a preview.
 # - Auto-merge merges with GITHUB_TOKEN, which starts no push run. The daily schedule
@@ -22,12 +22,14 @@ permissions:
   contents: read
   checks: read
 concurrency:
-  group: asset-cache-production
+  # One group per trigger, so a push or manual run never replaces a pending scheduled run.
+  group: asset-cache-production-${{ github.event_name }}
   cancel-in-progress: false
 jobs:
   production-contract:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    # Deployment wait (35) + edge settle (8) + two measurements with the delay (25) + setup.
+    timeout-minutes: 80
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -37,28 +39,42 @@ jobs:
           node-version: '24.22.3'
           package-manager-cache: false
       # A push run measures production only after this exact commit is live there.
+      # Production deployments come from the Cloudflare Workers and Pages app (id 85455)
+      # and, unlike branch previews, carry no "Branch Preview URL" in the check summary.
       - name: Wait for this commit's successful production deployment
         if: github.event_name == 'push'
+        timeout-minutes: 35
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
-            for (let i = 0; i < 60; i++) {
-              const { data } = await github.rest.checks.listForRef({ ...context.repo, ref: context.sha, per_page: 100, filter: 'latest' });
-              const run = data.check_runs.find(r => r.name === 'Cloudflare Pages' && r.head_sha === context.sha);
-              if (run?.status === 'completed') {
-                if (run.conclusion === 'success') return;
-                throw new Error('Cloudflare Pages did not deploy this commit: ' + run.conclusion);
+            for (let i = 0; i < 180; i++) {
+              try {
+                const { data } = await github.rest.checks.listForRef({ ...context.repo, ref: context.sha, check_name: 'Cloudflare Pages', filter: 'latest', per_page: 100 });
+                const run = data.check_runs.find(r => r.app?.id === 85455 && r.head_sha === context.sha && !(r.output?.summary || '').includes('Branch Preview URL'));
+                if (run?.status === 'completed') {
+                  if (run.conclusion === 'success') return;
+                  throw Object.assign(new Error('Cloudflare Pages did not deploy this commit: ' + run.conclusion), { final: true });
+                }
+              } catch (e) {
+                if (e.final) throw e;
+                core.info('Deployment status not readable yet: ' + (e.status || e.message));
               }
               await new Promise(resolve => setTimeout(resolve, 10000));
             }
-            throw new Error('No completed Cloudflare Pages deployment for this commit; do not measure an older revision.');
+            throw new Error('No completed production deployment for this commit after 30 minutes; do not measure an older revision.');
+      # Right after a deployment the edge can still answer with the previous policy for
+      # minutes (#1434: the old policy 7 s after success, the new one 7.5 min later).
+      - name: Let the edge settle after the deployment
+        if: github.event_name == 'push'
+        run: sleep 480
       - name: Install pinned browser client
         run: |
           mkdir -p "$RUNNER_TEMP/cache-results"
           npm install --prefix "$RUNNER_TEMP/perf-tools" --no-save playwright@1.55.0
-      # One delayed retry: right after a deployment the edge can still answer with the
-      # previous policy for a few minutes (#1434). A real regression fails both attempts.
+      # One delayed retry for the same reason. A real regression fails both attempts.
+      # A step timeout is recorded as a failure, which Cron Health reports.
       - name: Verify production response bodies and cache policies
+        timeout-minutes: 25
         env:
           NODE_PATH: ${{ runner.temp }}/perf-tools/node_modules
           PERF_RESULTS: ${{ runner.temp }}/cache-results
