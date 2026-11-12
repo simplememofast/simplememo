@@ -95,6 +95,11 @@ export const QR_PAGES = [
   { slug: 'autopilot', en: false },
   // Preserve the older campaign labels when bringing these two codes under verification.
   { slug: 'ai-tags', en: true, campaigns: { jp: 'ai-tags-qr-ja', en: 'ai-tags-qr-en' } },
+  // Added 2026-11-12 with the homepage redesign. Search visits to the site are split
+  // roughly evenly between desktop and mobile, and the homepage had no way onto a phone
+  // for a desktop reader. The same code sits in the hero and the closing CTA (desktop
+  // widths only). Japanese only: the English homepage is unchanged in this release.
+  { slug: 'home', en: false },
 ];
 
 /** Campaign token follows the site convention: <slug>-<lang>__<placement>. */
