@@ -2300,6 +2300,9 @@ function interpretFailedRun(claude, step) {
       // 上の切り分け（資格情報かどうか）は種別を immediate_failure のまま
       // 据え置く —— あちらは原因を1つに絞れておらず、絞れないものを種別に
       // 書くと再発の数え方が壊れるから。**429 は絞れている。**
+      // 【2026-11-12 追記】この2行は書いた時点（切り分けが2値だった頃）の説明。
+      // いまの切り分けは 401 のときだけ failure で終わるので、資格情報の拒否も
+      // 5秒規則に当たらない回は下で原因（auth_or_credential）を書く。
       // かつ形では書けない: Claude Code の導入だけで10秒使うので、429で
       // 弾かれても5秒規則には引っかからず `null` になる。**failed なのに
       // failure_class が無い行は autopilot-selfheal が落とす**（再発を
@@ -2334,7 +2337,18 @@ function interpretFailedRun(claude, step) {
   if (probe?.conclusion === 'failure') {
     return {
       outcome: 'failed', attempted: true,
-      failure_class: immediate ? 'immediate_failure' : null,
+      // 【2026-11-12】**5秒規則に当たらない回は、形ではなく原因を種別に書く。**
+      // 使用量上限（上の usage_limit）と同じ理由。11-12 の試運転（run 43146371788）は
+      // Claude Code ステップが12秒で落ち（導入だけで約10秒使う）、単独実行は
+      // HTTP 401 だった。ここが `null` を返し needs_triage も false なので、
+      // **failed なのに種別も調査の印も無い行**になり、autopilot-selfheal --check が
+      // 日次の同期PR（#2311）を落とした。台帳の同期が止まると、落ちた回ほど記録されない。
+      // 切り分けステップが failure で終わるのは、SDKの構造化応答が 401 のときだけ
+      // （429 と判定不能は別ステップへ分かれていて、上で先に読む）。**原因は絞れている。**
+      // 種別 auth_or_credential は data/escalation-rules.json に既にあり who は owner
+      // なので、selfheal は修理対象に数えず人へ渡す（直せないものを直そうとしない）。
+      // 5秒以内の即死は従来どおり形（immediate_failure）のまま —— 連続判定の数え方を変えない。
+      failure_class: immediate ? 'immediate_failure' : 'auth_or_credential',
       // **セッションが調べ直す必要が無い。**答えは出ていて、残りはオーナー作業。
       needs_triage: false,
       failure_reason: `Claude Code ステップが ${ms ?? '不明'}ms で失敗し、`
@@ -5414,6 +5428,58 @@ async function selftest() {
     ],
   });
   t('上限は速くても遅くても同じ種別（形で揺れない）', withLimitFast.failure_class === 'usage_limit');
+
+  // 【2026-11-12】資格情報の拒否（401）も、5秒規則に当たらない回は原因を種別に書く。
+  // 実際の形（run 43146371788）: Claude Code ステップ 12秒・切り分け=failure・
+  // 判定不能と使用量上限のステップは skipped。ここが種別 null・needs_triage false を
+  // 返していて、自己修復の検査が日次の同期PRを落とした。
+  const credSlowSteps = [
+    { name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'failure',
+      started_at: '2026-11-12T03:11:53Z', completed_at: '2026-11-12T03:12:05Z' },
+    { name: '即死が資格情報かを切り分ける', conclusion: 'failure',
+      started_at: '2026-11-12T03:12:08Z', completed_at: '2026-11-12T03:12:11Z' },
+    { name: '資格情報の診断は判定不能', conclusion: 'skipped' },
+    { name: '使用量上限で止まっている', conclusion: 'skipped' },
+  ];
+  const credSlow = interpretRun({ status: 'completed', conclusion: 'failure', steps: credSlowSteps });
+  t('5秒を超えた資格情報の拒否は原因を種別に書く', credSlow.failure_class === 'auth_or_credential');
+  t('5秒を超えた資格情報の拒否もトリアージへ回さない', credSlow.needs_triage === false);
+  t('5秒を超えた資格情報の拒否もオーナー作業を名指しする',
+    credSlow.failure_reason.includes('資格情報が通っていない')
+      && credSlow.failure_reason.includes('claude setup-token'));
+  // **失敗の行は、種別か調査の印のどちらかを必ず持つ。**持たない行は
+  // autopilot-selfheal --check が落とし、その日の台帳の同期が丸ごと止まる。
+  // 切り分けの段の組み合わせと所要時間（即死／12秒／20分）を総当たりで見る。
+  for (const [label, seconds] of [['即死', 0.4], ['12秒', 12], ['20分', 1200]]) {
+    for (const probeConclusion of ['failure', 'success', 'skipped', undefined]) {
+      for (const extra of [null, '資格情報の診断は判定不能', '使用量上限で止まっている',
+        '実行中の支出閾値で停止', 'ターン上限で停止']) {
+        const steps = [{ name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'failure',
+          started_at: '2026-11-12T03:11:53.000Z',
+          completed_at: new Date(Date.parse('2026-11-12T03:11:53.000Z') + seconds * 1000).toISOString() }];
+        if (probeConclusion) steps.push({ name: '即死が資格情報かを切り分ける', conclusion: probeConclusion });
+        if (extra) steps.push({ name: extra, conclusion: 'failure' });
+        const r = interpretRun({ status: 'completed', conclusion: 'failure', steps });
+        t(`失敗の行は種別か調査の印を持つ: ${label}・切り分け=${probeConclusion ?? '無し'}・${extra ?? '追加なし'}`,
+          r.outcome !== 'failed' || Boolean(r.failure_class) || r.needs_triage === true);
+      }
+    }
+  }
+  {
+    const { validate: validateRepair, analyze: analyzeRepair } = await import('./autopilot-selfheal.mjs');
+    const matrix = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/authority-matrix.json'), 'utf8'));
+    const rules = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/escalation-rules.json'), 'utf8')).rules;
+    const observation = { id: 43146371788, created_at: '2026-11-12T03:10:17Z', status: 'completed',
+      conclusion: 'failure', event: 'schedule', steps: credSlowSteps };
+    const row = { run_id: 'fixture-credential', date_jst: '2026-11-12', route: 'actions',
+      external_ref: String(observation.id), ...interpretRun(observation),
+      ...detectionEvidence(observation, 'workflow_run', new Date('2026-11-12T03:14:43Z')) };
+    t('5秒を超えた資格情報の拒否の行が自己修復検査を通る',
+      row.failure_class === 'auth_or_credential' && validateRepair({ runs: [row] }, matrix).length === 0);
+    const routed = analyzeRepair({ runs: [row] }, matrix, rules);
+    t('資格情報の拒否は人へ渡し、修理対象に数えない（未修理の件数には残す）',
+      routed.unrepaired_count === 1 && routed.owner_routed.length === 1 && routed.lane_f_required === false);
+  }
   // このステップを持たない過去の run は、従来どおりの判定に落ちる
   t('上限ステップが無い回は従来どおり', credBad.failure_reason.includes('資格情報が通っていない'));
   // step() は名前の部分一致なので、**別のステップに巻き込まれないこと**を見る。
