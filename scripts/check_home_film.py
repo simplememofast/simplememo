@@ -84,6 +84,8 @@ def validate(files):
         need(video.get('contentUrl')=='https://simplememofast.com'+video_url and
              video.get('thumbnailUrl')==['https://simplememofast.com'+poster_url], 'VideoObject asset URLs are stale')
         need(video.get('duration')=='PT18S' and f'入力開始まで{ready}秒' in video.get('description',''), 'VideoObject timing is stale')
+        need(not re.search(r'&(?:[A-Za-z][A-Za-z0-9]*|#[0-9]+|#x[0-9A-Fa-f]+);', json.dumps(video, ensure_ascii=False)),
+             'VideoObject carries an HTML entity (JSON-LD text is not HTML-decoded)')
     return errors
 
 
@@ -102,6 +104,7 @@ def main():
         change('index.html',b'PT18S',b'PT20S')
         change('index.html','図解動画 · 18秒'.encode(),'図解動画 · 22秒'.encode())
         change('index.html',b'capture-home.mp4?v=',b'capture-home.mp4?v=stale')
+        change('index.html','はiPhone 16e・ウォーム起動の実測で'.encode(),'はiPhone&nbsp;16e・ウォーム起動の実測で'.encode())
         change('assets/video/capture-home.mp4',files['assets/video/capture-home.mp4'][:8],b'BROKEN!!')
         change('scripts/build_home_film.py',b'FPS, DURATION',b'FPS,  DURATION')
         changed=deepcopy(json.loads(files['data/benchmark.json']))
