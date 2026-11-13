@@ -3,9 +3,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<!-- home-perf preload -->
-<link rel="preload" as="image" type="image/avif" imagesrcset="/assets/home-perf/voice-airpods-pro-bright-1536-600-b0a4763bc802.avif 600w, /assets/home-perf/voice-airpods-pro-bright-1536-750-3771b6e81fdb.avif 750w, /assets/home-perf/voice-airpods-pro-bright-1536-900-abdb7039527b.avif 900w, /assets/home-perf/voice-airpods-pro-bright-1536-1200-3fd86a4c6609.avif 1200w, /assets/home-perf/voice-airpods-pro-bright-1536-1320-f0ceb2b25362.avif 1320w, /assets/home-perf/voice-airpods-pro-bright-1536-1536-5a8fa4f43d00.avif 1536w" imagesizes="(max-width: 1023px) 100vw, 64vw" fetchpriority="high">
-<!-- /home-perf preload -->
 <!-- style preload -->
 <link rel="preload" as="style" href="/assets/css/site-chrome.css?v=1b96511de3">
 <link rel="preload" as="image" href="/assets/img/app-store-badge-ja.svg">
@@ -606,16 +603,15 @@ body.home-photo::before,body.home-photo::after{display:none}
 .hp-sr{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
 
 .home-photo .hero--photo{position:relative;background:var(--hp-ink)}
-.home-photo .hero__shade{background:linear-gradient(90deg,var(--hp-ink) 22%,rgba(8,7,12,.9) 34%,rgba(8,7,12,.3) 47%,rgba(8,7,12,0) 60%),linear-gradient(0deg,var(--hp-ink),rgba(8,7,12,0) 24%)}
-.home-photo .hero__eyebrow{color:#cdbcff;letter-spacing:.24em}
+.home-photo .hero__eyebrow{color:var(--hp-muted);letter-spacing:.24em}
 .home-photo .hero--photo .hero__title{font-weight:800;line-height:1.24;letter-spacing:-.025em;font-feature-settings:"palt" 1}
 @media (min-width:1024px){
 body.home-photo{--hp-copy:min(38rem,42vw)}
 .home-photo .hero--photo>.container,.home-photo .hero__footer{max-width:none;padding-inline:var(--hp-edge)}
 .home-photo .hero__copy{width:var(--hp-copy)}
 .home-photo .hero--photo .hero__title{font-size:clamp(2.5rem,4.4vw,4rem)}
-.home-photo .hero__photograph{inset:0 0 0 calc(var(--hp-edge) + var(--hp-copy) + 16px);-webkit-mask-image:linear-gradient(90deg,transparent,#000 22%);mask-image:linear-gradient(90deg,transparent,#000 22%)}
-.home-photo .hero__shade{background:linear-gradient(0deg,var(--hp-ink),rgba(8,7,12,0) 26%)}
+.home-photo .hero--photo>.container{display:grid;grid-template-columns:var(--hp-copy) minmax(0,1fr);align-items:center;column-gap:clamp(40px,4.5vw,88px)}
+.hp-stage{justify-self:end;max-width:600px}
 }
 .home-photo .hero__title-line+.hero__title-line{margin-top:.1em}
 .home-photo .hero__title-line:last-child{color:#cdb9ff}
@@ -637,32 +633,49 @@ body.home-photo{--hp-copy:min(38rem,42vw)}
 .hp-qr p{max-width:15em;margin:0;color:var(--hp-text);font-size:.8125rem;line-height:1.75}
 .hp-qr strong{display:block;color:var(--hp-paper);font-size:.9375rem}
 }
-.hp-memo{position:absolute;z-index:2;right:max(24px,calc(var(--hp-edge) + 8px));bottom:clamp(96px,14vh,150px);width:min(336px,30vw);padding:16px 18px 18px;border-radius:6px 6px 22px 6px;background:#f3efe7;box-shadow:0 32px 70px -26px rgba(0,0,0,.9);color:#16141f}
-.hp-memo__bar{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px;color:#615b6c;font-size:.75rem}
-.hp-memo__send{padding:4px 12px;border-radius:999px;background:#0b62cc;color:#fff;font-weight:700;animation:hp-press .5s var(--hp-ease) 2.1s both}
-.hp-memo__text{margin:0 0 14px;font-size:1rem;font-weight:600;line-height:1.6;white-space:nowrap}
+.hp-stage{position:relative;display:grid;grid-template-columns:var(--hp-indent,1.5em) minmax(0,1fr);width:100%;margin:0;container-type:inline-size}
+.hp-memo,.hp-sheet{font-size:clamp(13px,min(3.3cqi,2.6svh),18px)}
+.hp-memo{position:relative;z-index:2;grid-area:1/1/2/3;justify-self:start;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:1em;padding:.95em 1.1em 1em 1.15em;border-radius:6px 6px 20px 6px;background:#f3efe7;box-shadow:0 26px 60px -22px #000;color:#16141f}
+.hp-memo__bar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:2em;margin:0 0 .55em;color:#615b6c;font-size:max(.8em,11px)}
+.hp-memo__send{padding:.3em .9em;border-radius:999px;background:#0b62cc;color:#fff;font-weight:700;animation:hp-press .5s var(--hp-ease) 1.95s both}
+.hp-memo__text{margin:0;font-size:1.15em;font-weight:600;line-height:1.6}
 .hp-memo__text span{display:inline-block;animation:hp-word .35s var(--hp-ease) both}
-.hp-memo__text span:nth-child(1){animation-delay:.6s}
-.hp-memo__text span:nth-child(2){animation-delay:.95s}
-.hp-memo__text span:nth-child(3){animation-delay:1.3s}
-.hp-memo__text span:nth-child(4){animation-delay:1.75s}
-.hp-memo__to{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
-.hp-memo__to li{display:inline-flex;align-items:center;gap:7px;padding:5px 11px 5px 9px;border:1px solid rgba(22,20,31,.16);border-radius:999px;background:rgba(22,20,31,.04);font-size:.75rem;font-weight:600;animation:hp-rise .6s var(--hp-ease) both}
-.hp-memo__to li::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
-.hp-memo__to li:first-child{color:#0b57b8;animation-delay:2.4s}
-.hp-memo__to li:last-child{color:#5a3ed0;animation-delay:2.6s}
+.hp-memo__text span:nth-child(1){animation-delay:.55s}
+.hp-memo__text span:nth-child(2){animation-delay:.85s}
+.hp-memo__text span:nth-child(3){animation-delay:1.15s}
+.hp-memo__text span:nth-child(4){animation-delay:1.5s}
+.hp-memo__mic{display:grid;place-items:center;width:2.2em;height:2.2em;border-radius:50%;background:#0b62cc;animation:hp-press .45s var(--hp-ease) .2s both}
+.hp-memo__mic svg{width:1.15em;height:1.15em;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
+.hp-memo__mic rect{fill:#fff;stroke:none}
+.hp-sheet{grid-area:2/2;margin-top:-1.4em;padding:2.8em 1.8em 1.6em;border:1px solid var(--hp-line-2);border-radius:16px;background:var(--hp-panel);color:var(--hp-paper)}
+.hp-sheet p{margin:0;line-height:1.55}
+.hp-sheet__head{display:flex;align-items:center;gap:.6em;color:var(--hp-muted);font-size:max(.78em,11px);font-weight:600;letter-spacing:.05em}
+.hp-sheet__head::before{content:"";width:.62em;height:.62em;border-radius:50%;background:var(--hp-am)}
+.hp-sheet code{margin-right:.45em;color:var(--hp-muted);font:500 .86em/1 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap}
+.hp-sheet .hp-sheet__prev{display:flex;align-items:center;height:1.55em;margin-top:.3em;font-size:1.15em}
+.hp-sheet__head+.hp-sheet__prev{margin-top:.6em}
+.hp-sheet__prev i{width:52%;height:.42em;border-radius:.21em;background:var(--hp-line-2)}
+.hp-sheet__prev+.hp-sheet__prev i{width:34%}
+.hp-sheet .hp-sheet__line{margin-top:.3em;font-size:1.15em;font-weight:700;animation:hp-type .9s var(--hp-ease) 2.3s both}
+.hp-sheet .hp-sheet__head--mail{margin-top:1.4em;padding-top:1.2em;border-top:1px solid var(--hp-line)}
+.hp-sheet__head--mail::before{background:var(--hp-mail)}
+.hp-sheet .hp-sheet__mail{margin-top:.4em;font-weight:700;animation:hp-rise .5s var(--hp-ease) 2.8s both}
+.hp-sheet__mail span{margin-right:.8em;color:var(--hp-muted);font-size:.86em;font-weight:500}
 @keyframes hp-word{from{clip-path:inset(0 100% 0 0);transform:translateY(4px)}to{clip-path:inset(0);transform:none}}
 @keyframes hp-press{0%{transform:scale(1)}40%{transform:scale(.9)}100%{transform:scale(1)}}
 @keyframes hp-rise{from{clip-path:inset(0 100% 0 0);transform:translateY(8px)}to{clip-path:inset(0);transform:none}}
+@keyframes hp-type{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0)}}
 @media (max-width:1023px){
 .home-photo .hero--photo .hero-cta-row{gap:14px 22px}
 .hp-trust{gap:4px 16px;margin-top:18px;font-size:.75rem}
 .home-photo .hero--photo>.container{padding-inline:var(--hp-pad)}
 .home-photo .hero__footer{padding-inline:var(--hp-pad)}
-.hp-memo{position:relative;right:auto;bottom:auto;order:2;width:min(300px,calc(100% - 2*var(--hp-pad)));margin:0 var(--hp-pad) -44px auto;padding:14px 16px 16px;border-radius:6px 6px 20px 6px}
-.home-photo .hero__photograph{order:3}
+.home-photo .hero--photo>.container{flex-direction:column}
+.hp-stage{--hp-indent:1em;max-width:440px;margin-top:24px}
+.hp-sheet{padding-inline:1.3em}
+.hp-sheet__prev+.hp-sheet__prev{display:none}
+.hp-sheet .hp-sheet__line{font-size:1.1em}
 .home-photo .hero__footer{order:4}
-.hp-memo__text{font-size:.9375rem}
 .home-photo .hero__eyebrow{font-size:.6875rem;letter-spacing:.2em}
 .home-photo .hero__scene{font-size:.6875rem}
 .home-photo .hero__airpods{font-size:.8125rem}
@@ -977,8 +990,9 @@ body.home-photo .hp-faq .faq-summary:focus-visible{outline-offset:4px;border-rad
 body.home-photo [data-site-header][data-site-header]{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:#0a090f!important}
 .hp-pricing .pricing-card{-webkit-backdrop-filter:none;backdrop-filter:none}
 
-.home-photo .hero__footer{align-items:center}
-.hp-photo-note{margin:0 0 0 auto;color:#bdb6cc;font-size:.75rem}
+.home-photo .hero__footer{justify-content:flex-start}
+@media (min-width:1024px){.home-photo .hero__footer{align-items:center}}
+@media (min-width:768px) and (max-width:1023px){.home-photo .hero--photo .hero__subtitle{font-size:1rem}}
 .hp-qr-float{display:none}
 @media (min-width:1024px){
 .hp-sec>.hp-wrap,main>.home-film{margin-right:max(var(--hp-edge),140px)}
@@ -1006,13 +1020,13 @@ main>.next-step a{padding-inline:0!important;border:0!important;border-top:1px s
 @media (max-width:639px){.hp-reviews,.hp-grid,.hp-entries,.hp-dests,.hp-setup,.hp-links,.hp-kpis,.hp-chapters,.hp-fit__lists,.hp-pricing .pricing-cards{grid-template-columns:minmax(0,1fr)}}
 
 @media (prefers-reduced-motion:reduce){
-.hp-memo *{animation:none!important}
+.hp-stage *{animation:none!important}
 .hp-qr-float{transition:none!important}
 .hp-route__hub::before,.hp-route__hub::after{display:none}
 .hp-chapter .hb-art img,.hp-phone__alt{transition:none}
 }
 @media print{
-.hp-memo,.hp-route,.sticky-cta,.hp-qr,.hp-qr-float{display:none!important}
+.hp-stage,.hp-route,.sticky-cta,.hp-qr,.hp-qr-float{display:none!important}
 }
 
 .hp-pricing .pricing-card--premium::after{content:none}
@@ -1030,8 +1044,6 @@ main>.next-step a{padding-inline:0!important;border:0!important;border-top:1px s
 .home-photo .hero--photo .hero__subtitle{margin-bottom:clamp(18px,3svh,32px)}
 .hp-trust{margin-top:clamp(12px,2svh,22px)}
 .hero .hp-qr{margin-top:clamp(16px,2.6svh,30px)}
-.home-photo .hero__photograph{inset:0 0 0 calc(var(--hp-edge) + var(--hp-copy) - 40px);-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%);mask-image:linear-gradient(90deg,transparent,#000 12%)}
-.home-photo .hero__photograph img{object-position:36% 40%}
 }
 @media (min-width:1024px) and (max-height:760px){.home-photo .hero--photo .hero__title{font-size:clamp(2.25rem,3.6vw,3.25rem)}}
 .hp-trust li:first-child{flex-basis:100%}
@@ -1116,21 +1128,25 @@ body.site-designed {
           <p><strong>iPhoneで続ける</strong>iPhoneのカメラで読み取ると、App&nbsp;Storeのページが開きます。</p>
         </div>
       </div>
+      <div class="hp-stage" aria-hidden="true">
+        <div class="hp-memo">
+          <p class="hp-memo__bar"><span>新しいメモ</span><span class="hp-memo__send">送信</span></p>
+          <p class="hp-memo__text"><span>帰り道に、</span><span>企画の</span><span>タイトル案を</span><span>三つ</span></p>
+          <span class="hp-memo__mic"><svg viewBox="0 0 24 24"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></span>
+        </div>
+        <div class="hp-sheet">
+          <p class="hp-sheet__head">Obsidian・デイリーノート</p>
+          <p class="hp-sheet__prev"><code>- 08:12</code><i></i></p>
+          <p class="hp-sheet__prev"><code>- 12:30</code><i></i></p>
+          <p class="hp-sheet__line"><code>- 20:48</code><span class="nb">帰り道に、</span><wbr><span class="nb">企画のタイトル案を三つ</span></p>
+          <p class="hp-sheet__head hp-sheet__head--mail">メール・自分宛て</p>
+          <p class="hp-sheet__mail"><span>差出人</span>シンプルメモ</p>
+        </div>
+      </div>
     </div>
-    <div class="hp-memo" aria-hidden="true">
-      <p class="hp-memo__bar"><span>新しいメモ</span><span class="hp-memo__send">送信</span></p>
-      <p class="hp-memo__text"><span>帰り道に、</span><span>企画の</span><span>タイトル案を</span><span>三つ</span></p>
-      <ul class="hp-memo__to"><li>メールへ送信</li><li>Obsidianに追記</li></ul>
-    </div>
-    <picture class="hero__photograph">
-      <source data-home-perf="image" type="image/avif" srcset="/assets/home-perf/voice-airpods-pro-bright-1536-600-b0a4763bc802.avif 600w, /assets/home-perf/voice-airpods-pro-bright-1536-750-3771b6e81fdb.avif 750w, /assets/home-perf/voice-airpods-pro-bright-1536-900-abdb7039527b.avif 900w, /assets/home-perf/voice-airpods-pro-bright-1536-1200-3fd86a4c6609.avif 1200w, /assets/home-perf/voice-airpods-pro-bright-1536-1320-f0ceb2b25362.avif 1320w, /assets/home-perf/voice-airpods-pro-bright-1536-1536-5a8fa4f43d00.avif 1536w" sizes="(max-width: 1023px) 100vw, 64vw">
-      <img src="/assets/img/voice-airpods-pro-bright-1536.webp" srcset="/assets/img/voice-airpods-pro-bright-600.webp 600w, /assets/img/voice-airpods-pro-bright-900.webp 900w, /assets/img/voice-airpods-pro-bright-1536.webp 1536w" sizes="(max-width: 1023px) 100vw, 64vw" alt="夜の並木道で、AirPods Proを着けてiPhoneを見る女性（イメージ）" width="1536" height="1024" fetchpriority="high" loading="eager" decoding="async">
-    </picture>
-    <div class="hero__shade" aria-hidden="true"></div>
     <div class="hero__footer">
       <a class="hero__airpods" href="/obsidian/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 6v15M3 3h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5v16h-5a4 4 0 0 0-4 2 4 4 0 0 0-4-2H3V3Z"/></svg><span>Obsidian連携の特集</span></a>
       <a class="hero__airpods hp-installed" href="#start"><span>入れた方へ：最初にすること</span></a>
-      <p class="hp-photo-note">写真はイメージです</p>
     </div>
   </section>
 

@@ -20,6 +20,11 @@ OUT = 'assets/home-perf'
 HERO = 'assets/img/voice-airpods-pro-bright-1536.webp'
 DESIGN = 'assets/css/site-design.css'
 HERO_SIZES = '(max-width: 1023px) 100vw, 64vw'
+# Pages whose hero is the photograph. The Japanese hero has no photo since the owner's decision
+# of 2026-11-13 (the generated person, iPhone and AirPods go; there is no real photo): it shows
+# the memo and the note it lands in, drawn in HTML/CSS, so it gets no image preload, no AVIF
+# source and no picture/shade reordering. The English hero keeps its photo for now.
+PHOTO_PAGES = ('en/index.html',)
 # The four stills sit in two-column chapters on the Japanese homepage: one column of
 # min(100vw - 2 x gutter, 1160px) at 768px and wider, the full content width below.
 BANNER_SIZES = '(min-width: 1240px) 568px, (min-width: 768px) calc(50vw - 56px), calc(100vw - 40px)'
@@ -265,12 +270,9 @@ def build() -> dict[str, bytes]:
         images[key] = '/' + name
         return '/' + name
 
-    hero_srcsets = {
-        'en': ', '.join(f'{image(HERO, w)} {w}w' for w in (600, 750, 900, 1200, 1536)),
-        # 402-440pt iPhones at 3x need 1,206-1,320px and would otherwise take the 1536w file
-        # (53.8 KB): 1320w is 42.3 KB. English keeps its unchanged candidates (R10).
-        'ja': ', '.join(f'{image(HERO, w)} {w}w' for w in (600, 750, 900, 1200, 1320, 1536)),
-    }
+    # English keeps its unchanged candidates (R10). The Japanese-only 1320w file went with the
+    # Japanese photo (2026-11-13).
+    hero_srcset = ', '.join(f'{image(HERO, w)} {w}w' for w in (600, 750, 900, 1200, 1536))
     manifest: dict[str, object] = {'version': 1, 'pages': {}, 'inputs': {}}
     design_css = (ROOT / DESIGN).read_text(encoding='utf-8')
     for source in ('assets/css/style.min.css', 'assets/css/home-hero.css', DESIGN, HERO):
@@ -279,7 +281,9 @@ def build() -> dict[str, bytes]:
     for page in PAGES:
         html = (ROOT / page).read_text()
         lang = 'ja' if page == 'index.html' else 'en'
-        hero_srcset = hero_srcsets[lang]
+        photo = page in PHOTO_PAGES
+        # Fail loudly if a page gains or loses its photo without this list changing with it.
+        assert ('<picture class="hero__photograph">' in html) == photo, f'{page}: hero photograph present must be {photo}'
         needed = characters(html, shared + hero_css)
         tokens = page_tokens(html)
         faces: list[str] = []
@@ -342,14 +346,16 @@ def build() -> dict[str, bytes]:
             assert count == 1, f'{page}: expected one site-design stylesheet, found {count}'
         html = re.sub(r'\s*<link rel="preload"[^>]*href="/assets/fonts/NotoSansJP-[^>]+>', '', html)
         html = re.sub(r'\n?<!-- home-perf preload -->.*?<!-- /home-perf preload -->', '', html, flags=re.S)
-        preload = f'\n<!-- home-perf preload -->\n<link rel="preload" as="image" type="image/avif" imagesrcset="{hero_srcset}" imagesizes="{HERO_SIZES}" fetchpriority="high">\n<!-- /home-perf preload -->'
-        html, count = re.subn(r'(<meta name="viewport"[^>]*>)', lambda m: m[0] + preload, html, count=1)
-        assert count == 1
+        if photo:
+            preload = f'\n<!-- home-perf preload -->\n<link rel="preload" as="image" type="image/avif" imagesrcset="{hero_srcset}" imagesizes="{HERO_SIZES}" fetchpriority="high">\n<!-- /home-perf preload -->'
+            html, count = re.subn(r'(<meta name="viewport"[^>]*>)', lambda m: m[0] + preload, html, count=1)
+            assert count == 1
         # Only the new AVIF source is managed. All original WebP/JPEG fallbacks,
         # intrinsic dimensions, alt text, srcsets and loading attributes remain.
         html = re.sub(r'\s*<source data-home-perf="image"[^>]*>', '', html)
-        html, count = re.subn(r'(<picture class="hero__photograph">)', lambda m: m[0] + f'\n      <source data-home-perf="image" type="image/avif" srcset="{hero_srcset}" sizes="{HERO_SIZES}">', html)
-        assert count == 1
+        if photo:
+            html, count = re.subn(r'(<picture class="hero__photograph">)', lambda m: m[0] + f'\n      <source data-home-perf="image" type="image/avif" srcset="{hero_srcset}" sizes="{HERO_SIZES}">', html)
+            assert count == 1
         if lang == 'ja':
             for banner in BANNERS:
                 source = f'assets/img/home-banners/{banner}.webp'
@@ -364,12 +370,13 @@ def build() -> dict[str, bytes]:
         # Parse the copy before the photograph, matching the mobile visual order.
         # With early inline CSS, a preloaded photo can otherwise paint before the
         # following copy is parsed and then jump down by the entire copy height.
-        photo = re.search(r'    <picture class="hero__photograph">.*?</picture>\n    <div class="hero__shade" aria-hidden="true"></div>\n', html, re.S)
-        assert photo, f'{page}: hero picture and shade must remain together'
-        html = html[:photo.start()] + html[photo.end():]
-        marker = '    <div class="hero__footer">'
-        assert html.count(marker) == 1
-        html = html.replace(marker, photo[0] + marker, 1)
+        if photo:
+            block = re.search(r'    <picture class="hero__photograph">.*?</picture>\n    <div class="hero__shade" aria-hidden="true"></div>\n', html, re.S)
+            assert block, f'{page}: hero picture and shade must remain together'
+            html = html[:block.start()] + html[block.end():]
+            marker = '    <div class="hero__footer">'
+            assert html.count(marker) == 1
+            html = html.replace(marker, block[0] + marker, 1)
         # Performance-only srcsets must not shift existing analytics identities
         # across the CTA checker's byte-position thresholds.
         def stable_placement(match: re.Match) -> str:

@@ -25,7 +25,15 @@ function pageMatches(html, expected) {
     && styles.length === 2 && sources.length > 0
     && styles.every(style => html.includes(style)) && sources.every(source => html.includes(source))
     && html.indexOf('id="hero-title"') > 0
-    && html.indexOf('id="hero-title"') < html.indexOf('<picture class="hero__photograph">');
+    && heroOrder(html, expected);
+}
+
+// English parses the title before its photograph. The Japanese hero has no photograph since
+// 2026-11-13, so a response that still carries one is the previous release.
+function heroOrder(html, expected) {
+  const photo = '<picture class="hero__photograph">';
+  if (!expected.includes(photo)) return !html.includes(photo);
+  return html.indexOf('id="hero-title"') < html.indexOf(photo);
 }
 
 async function observe(browser, output) {
