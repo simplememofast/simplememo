@@ -157,7 +157,9 @@ async function main() {
         }
       }
     }
-    for (const [width, height] of [[390, 664], [1440, 900]]) results.push(await checkInPageLinks(browser, base, width, height, output));
+    // 960×900: a mouse window between the phone and desktop layouts, where the in-page QRs show since
+    // 2026-11-14 (hover:hover and pointer:fine) and make the hero taller.
+    for (const [width, height] of [[390, 664], [960, 900], [1440, 900]]) results.push(await checkInPageLinks(browser, base, width, height, output));
     fs.writeFileSync(path.join(output, 'browser-checks.json'), JSON.stringify(results, null, 2) + '\n');
     console.log(`PASS: ${results.length} homepage viewport/density/JavaScript scenarios at ${base}.`);
   } finally { await browser.close(); }
