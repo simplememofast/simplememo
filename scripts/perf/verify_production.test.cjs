@@ -39,6 +39,12 @@ test('unterminated or unmatched native video markup cannot verify a release', ()
     assert.equal(pageMatches(fixture(broken), fixture(nativeVideo)), false);
   }
 });
+test('a page without a hero photograph is not verified by a response that still has one', () => {
+  const withPhoto = fixture(nativeVideo);
+  const without = withPhoto.replace(/<picture class="hero__photograph">[\s\S]*?<\/picture>/, '<source data-home-perf="image" srcset="/assets/home-perf/banner.avif">');
+  assert.equal(pageMatches(without, without), true);
+  assert.equal(pageMatches(withPhoto.replace('<source data-home-perf="image" srcset="/assets/home-perf/example.avif">', '<source data-home-perf="image" srcset="/assets/home-perf/banner.avif">'), without), false);
+});
 test('unrelated platform-injected script does not invalidate unchanged native media', () => {
   const expected = fixture(nativeVideo);
   assert.equal(pageMatches(expected.replace('</html>', '<script defer src="/injected.js"></script></html>'), expected), true);

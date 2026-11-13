@@ -73,7 +73,13 @@ async function main() {
           await page.evaluate(() => document.fonts.ready);
           assert(await page.locator('h1').isVisible(), 'Heading is visible');
           assert(await page.locator('.hero a[href*="apps.apple.com"]').first().isVisible(), 'Primary conversion link is visible');
-          assert(await page.locator('.hero__photograph img').evaluate(img => img.complete && img.naturalWidth > 0), 'Hero image loaded');
+          if (locale) {
+            assert(await page.locator('.hero__photograph img').evaluate(img => img.complete && img.naturalWidth > 0), 'Hero image loaded');
+          } else {
+            // The Japanese hero has no photo since 2026-11-13 (owner decision): the memo and the note it lands in.
+            assert.equal(await page.locator('.hero__photograph').count(), 0, 'Japanese hero has no photograph');
+            assert(await page.locator('.hero .hp-stage').isVisible(), 'Japanese hero shows the memo and the note');
+          }
           assert(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth <= 1), `${label}: horizontal overflow`);
           if (locale) {
             assert.equal(await page.locator('.global-nav__logo img').getAttribute('alt'), '', 'Decorative logo must not repeat the adjacent accessible link text');
@@ -115,24 +121,28 @@ async function main() {
             assert(record.images.every(image => /-750-[a-f0-9]{12}\.avif$/.test(image.url)), 'Intermediate-density viewport uses 750px assets rather than 900px');
           }
           const heroRequests = await page.evaluate(() => performance.getEntriesByType('resource').filter(entry => /\/voice-airpods-pro-bright-/.test(entry.name)).map(entry => entry.name));
-          assert.equal(heroRequests.length, 1, 'Responsive preload and picture must reuse one hero request');
-          const hero = record.images.find(image => /voice-airpods-pro-bright-/.test(image.url));
-          assert(hero, 'The displayed hero must be in the checked inventory');
-          if ((width === 390 && dpr === 3) || (width === 1440 && dpr === 1)) {
-            assert(/-1200-[a-f0-9]{12}\.avif$/.test(hero.url), 'Use the correctly sized 1200px hero');
+          if (!locale) {
+            // No photo, so no stale preload may fetch one either.
+            assert.deepEqual(heroRequests, [], 'The Japanese page requests no hero photograph');
+          } else {
+            assert.equal(heroRequests.length, 1, 'Responsive preload and picture must reuse one hero request');
+            const hero = record.images.find(image => /voice-airpods-pro-bright-/.test(image.url));
+            assert(hero, 'The displayed hero must be in the checked inventory');
+            if ((width === 390 && dpr === 3) || (width === 1440 && dpr === 1)) {
+              assert(/-1200-[a-f0-9]{12}\.avif$/.test(hero.url), 'Use the correctly sized 1200px hero');
+            }
+            if (width === 412 && dpr === 3) {
+              // 412pt at 3x needs 1,236px; English has no 1320w candidate (R10).
+              assert(/-1536-[a-f0-9]{12}\.avif$/.test(hero.url), 'Wider triple-density displays use the 1536w hero');
+            }
+            record.heroResources = await page.evaluate(() => performance.getEntriesByType('resource').filter(entry => /\/voice-airpods-pro-bright-/.test(entry.name)).map(entry => ({url: entry.name, encodedBodySize: entry.encodedBodySize, transferSize: entry.transferSize, initiatorType: entry.initiatorType})));
+            assert.equal(record.heroResources.length, 1, 'Responsive preload and picture must reuse one request');
+            assert.equal(record.heroResources[0].url, hero.url, 'Measured request must be the displayed hero');
+            const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '../../assets/home-perf/manifest.json'), 'utf8'));
+            const expected = manifest.assets[new URL(hero.url).pathname.slice(1)];
+            assert(expected, 'Displayed hero must be in the verified manifest');
+            assert.equal(record.heroResources[0].encodedBodySize, expected.bytes, 'Encoded response bytes must match the immutable asset');
           }
-          if (width === 412 && dpr === 3) {
-            // 412pt at 3x needs 1,236px: Japanese has a 1320w candidate (402-440pt iPhones), English does not.
-            const wide = locale ? 1536 : 1320;
-            assert(new RegExp(`-${wide}-[a-f0-9]{12}\\.avif$`).test(hero.url), `Wider triple-density displays use the ${wide}w hero`);
-          }
-          record.heroResources = await page.evaluate(() => performance.getEntriesByType('resource').filter(entry => /\/voice-airpods-pro-bright-/.test(entry.name)).map(entry => ({url: entry.name, encodedBodySize: entry.encodedBodySize, transferSize: entry.transferSize, initiatorType: entry.initiatorType})));
-          assert.equal(record.heroResources.length, 1, 'Responsive preload and picture must reuse one request');
-          assert.equal(record.heroResources[0].url, hero.url, 'Measured request must be the displayed hero');
-          const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '../../assets/home-perf/manifest.json'), 'utf8'));
-          const expected = manifest.assets[new URL(hero.url).pathname.slice(1)];
-          assert(expected, 'Displayed hero must be in the verified manifest');
-          assert.equal(record.heroResources[0].encodedBodySize, expected.bytes, 'Encoded response bytes must match the immutable asset');
           await page.evaluate(() => scrollTo(0, 0));
           if (width === 390 || width === 1440 || dpr === 1.75) await page.screenshot({ path: path.join(output, label + '.png') });
           record.pass = true;

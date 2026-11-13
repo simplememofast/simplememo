@@ -8,7 +8,7 @@ Lighthouse の模擬環境で3往復目に入り、FCP と LCP が約150ms 遅�
 
 生成器が読むコメントだけは `index.html` に残している。消すと生成器が壊れる。
 
-- `<!-- home-perf preload -->` 〜 `<!-- /home-perf preload -->`（`scripts/perf/build_home.py`）
+- `<!-- home-perf preload -->` 〜 `<!-- /home-perf preload -->`（`scripts/perf/build_home.py`。2026-11-13 にヒーロー写真を外してからは英語トップにだけある。日本語トップには生成器が入れない）
 - `<!-- style preload -->` 〜 `<!-- /style preload -->`（site-chrome.css と App Store バッジの preload を囲む。リポジトリの生成器は読まないが、差し替えの目印として残す）
 - `<!-- i18n: managed by scripts/normalize_i18n_head.py -->`
 - `<!-- site-chrome:bootstrap -->`、`quick`、`intro` の開閉（`scripts/sync_shared_chrome.py`）
@@ -37,14 +37,32 @@ Lighthouse の模擬環境で3往復目に入り、FCP と LCP が約150ms 遅�
 
 ## ヒーロー（`.hero--photo`）
 
-- 構造は `scripts/perf/build_home.py` が持つ。**picture → shade → footer の順に依存している。**
-  PageSpeed のブラウザ検査は `.hero a[href*="apps.apple.com"]` と
-  `.hero__photograph img` を読む。
+- **人物写真は使わない**（2026-11-13 のオーナー判断。画像生成の iPhone・AirPods を着けた人物を外した。
+  実写が無いので人物そのものを外す）。人物・生成した端末・傾けた端末・Siri の球や波形・Obsidian を
+  思わせる結晶も置かない。新しい画像を足すなら実際のアプリ画面か、HTML/CSS で描いたものに限る。
+- 写真の代わりに `.hp-stage`（aria-hidden）が、紙のメモ（入力）と、それが残った先
+  （Obsidian のデイリーノートの1行と、自分宛てのメール）を HTML/CSS で描く。1024px 以上はコピーの右、
+  1023px 以下はコピーの下。文字の大きさはステージ幅（cqi）と画面の高さ（svh）の小さい方で決める（13〜18px）。
+  - 紙色はメモの紙だけ。ノートは #how 04 の例（`figure.hp-vault`）と同じ暗いパネル（`--hp-panel`）。
+    藤色はデイリーノートの見出しの小さな点だけ。青はアプリの送信とマイクの青。
+  - 文面は公開ページの範囲：メモと「- 20:48 …」は #how 04 の例、マイクのボタンは #how の画面と alt、
+    「自分宛て」は #how 03、差出人「シンプルメモ」は #start。メールの件名は描かない（既定の件名はサイトに
+    書いていない）。時刻つきの追記は、設定「タイムスタンプを付けて追記」がオンのときの形。
+  - 動きは1回だけで約3.3秒で止まる（マイク→語→送信→ノートの行→メール）。prefers-reduced-motion では
+    動かさず完成形を出す。print では隠す。
+- 写真が無いので、日本語トップには `<picture class="hero__photograph">`・`div.hero__shade`・写真の preload が無い。
+  `scripts/perf/build_home.py` は `PHOTO_PAGES`（英語トップだけ）にだけ写真の preload と AVIF の source を入れ、
+  picture と shade を footer の前へ動かす。PageSpeed のブラウザ検査は、日本語では写真のリクエストが0件で
+  `.hero .hp-stage` が見えることを、英語では `.hero__photograph img` を確かめる。共有の `home-hero.css`
+  （英語と共用）の写真と shade の規則は、日本語では使われないまま残る。
+- H1 の CSS は 2026-11-20 のタイトル評価まで変えない（2行は display:block のまま）。LCP はデスクトップで
+  H1 の行、狭いモバイルと 1024×640 ではサブの段落。どちらも最初の描画の文字で、時刻は同じ。
 - 見出しの語は **clip-path で出し、opacity は使わない。** 半透明の途中で監査が色を測ると、
   コントラスト不足と判定される（A11y が 96 に落ちた）。
 - 1024px 以上では、ヒーローが初画面で終わるように縦の寸法を `svh` で詰めてある
   （1366×768・1280×800・1024×768 で 136〜177px はみ出し、QR とメモカードが隠れていた）。
-  写真は左から出し、AirPods が写るようにしている。
+  11サイズ（1024×640〜1920×960）で、QR とメモとノートが初画面に全部入る。
+- アイブロウは飾りの文字なので `--hp-muted`。768〜1023px のサブは 1rem（それまでは 13.4px で、全幅で一番小さかった）。
 
 ## 使い方（`#how`）
 
