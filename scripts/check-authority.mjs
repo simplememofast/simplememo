@@ -24,12 +24,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ledgerScenarios, run } from './lib/selftest.mjs';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const MATRIX_PATH = path.join(ROOT, 'data/authority-matrix.json');
 
 const STATUSES = ['active', 'suspended', 'not_implemented', 'policy_only'];
+/** 期限つきの委任が失効したときの扱い。**人へ戻す以外を置かない。** */
+const EXPIRY_BEHAVIORS = ['new_decision_required'];
 /** 金額が動く領域。threshold の有無を強制する。 */
 const MONEY = ['AI実費（開発・運用のトークン費）', '広告出稿・広告予算の変更', '契約・支払い・送金',
                '価格・プラン・無料枠の変更',
@@ -151,6 +153,32 @@ export function validate(doc, {
 
     if (!Array.isArray(d.ai_may)) problems.push(`${at}: ai_may must be an array`);
     if (!Array.isArray(d.human_only)) problems.push(`${at}: human_only must be an array`);
+
+    // 4. 期限つきの委任（owner_delegation に期限の欄がある行）は、**日付に依らずに**形を見る。
+    //    失効そのものでは CI を落とさない —— 日付だけで main と全 PR が同時に落ちる形になる
+    //    （CLAUDE.md の /autopilot/ の節）。失効は人へ戻す運用で扱う。ここで見るのは、
+    //    範囲と期限が項目から読めること・失効後に人へ戻る書き方であること・消した委任を根拠に残さないこと。
+    const od = d.owner_delegation;
+    const aiMay = Array.isArray(d.ai_may) ? d.ai_may.filter((x) => typeof x === 'string') : [];
+    if (od && ['effective_from', 'effective_until', 'expiry_behavior'].some((k) => k in od)) {
+      const from = Date.parse(od.effective_from ?? ''); const until = Date.parse(od.effective_until ?? '');
+      if (typeof od.id !== 'string' || !od.id) problems.push(`${at}: 期限つきの owner_delegation に id が無い — ai_may の項目から指せない`);
+      if (!Number.isFinite(from) || !Number.isFinite(until)) {
+        problems.push(`${at}: owner_delegation の effective_from / effective_until が日時として読めない`);
+      } else if (!(from < until)) {
+        problems.push(`${at}: owner_delegation の effective_until が effective_from より前 — 期限が成り立っていない`);
+      }
+      if (!EXPIRY_BEHAVIORS.includes(od.expiry_behavior)) {
+        problems.push(`${at}: owner_delegation.expiry_behavior は ${EXPIRY_BEHAVIORS.join('|')} のどれか — 失効したら人へ戻す`);
+      }
+      if (typeof od.id === 'string' && od.id && !aiMay.some((x) => x.includes(od.id))) {
+        problems.push(`${at}: 期限つきの owner_delegation（${od.id}）を指す ai_may の項目が無い — 範囲と期限が項目から読めない`);
+      }
+    }
+    for (const x of aiMay) {
+      const ref = x.match(/owner_delegation ([A-Za-z0-9-]+)/)?.[1];
+      if (ref && od?.id !== ref) problems.push(`${at}: ai_may が存在しない owner_delegation（${ref}）を根拠にしている`);
+    }
     // AIが何もできず人間専任でもない領域は、書き漏れの可能性が高い
     if (d.status === 'active' && d.ai_may.length === 0 && d.human_only.length === 0) {
       problems.push(`${at}: active なのに ai_may も human_only も空 — 誰が何をするのか書けていない`);
@@ -216,6 +244,14 @@ function render(doc) {
 // 壊し方は実データを複製して作る（固定フィクスチャだと台帳と形がずれても気づけない）。
 /** ゲート付き例外を持つ行。**壊し方はここを狙う。** */
 const gated = (d) => d.domains.find((x) => x.machine_gate);
+/** 先頭の行に正しい形の期限つき委任を付けて返す。**壊し方はここを狙う。** */
+const timed = (d) => {
+  const r = d.domains[0];
+  r.owner_delegation = { id: 'selftest-delegation', effective_from: '2026-01-01T00:00:00+09:00',
+    effective_until: '2026-02-01T00:00:00+09:00', expiry_behavior: 'new_decision_required' };
+  r.ai_may = [...(Array.isArray(r.ai_may) ? r.ai_may : []), 'owner_delegation selftest-delegation の範囲内の作業'];
+  return r;
+};
 
 const SELFTEST_BREAKAGES = [
   ['**不可逆なのに承認不要**は落ちる（承認なしで取り返しがつかない変更ができる）', (d) => { d.domains[0].reversible = false; d.domains[0].requires_approval = false; }],
@@ -231,12 +267,27 @@ const SELFTEST_BREAKAGES = [
   ['**export していない関数名を指すと落ちる**（表に書いただけで実装が無い）',
    (d) => { gated(d).machine_gate.function = 'thisIsNotExported'; }],
   ['ゲートの必須欄が欠けると落ちる', (d) => { delete gated(d).machine_gate.kill_switch_path; }],
+  // ── 期限つきの委任（2026-09-25） ──
+  // 実データの委任に頼らず、先頭の行に正しい形の委任を付けてから1か所ずつ壊す
+  // （実データの委任を人が外しても、この自己テストは同じ意味のまま残る）。
+  ['期限つき委任の失効日が日時でなければ落ちる', (d) => { timed(d).owner_delegation.effective_until = 'not-a-date'; }],
+  ['**失効日が発効日より前**なら落ちる（期限が成り立っていない）', (d) => { timed(d).owner_delegation.effective_until = '2020-01-01T00:00:00+09:00'; }],
+  ['**失効したら人へ戻す以外の扱い**は落ちる', (d) => { timed(d).owner_delegation.expiry_behavior = 'auto_renew'; }],
+  ['期限つき委任を指す ai_may が無ければ落ちる', (d) => { const r = timed(d); r.ai_may = r.ai_may.filter((x) => !x.includes(r.owner_delegation.id)); }],
+  ['**委任を消したのに、それを根拠にする ai_may が残る**と落ちる', (d) => { delete timed(d).owner_delegation; }],
 ];
 const SCENARIOS = ledgerScenarios(
   () => JSON.parse(fs.readFileSync(MATRIX_PATH, 'utf8')),
   (d) => validate(d),
   SELFTEST_BREAKAGES,
 );
+// 対照: 壊す前の期限つき委任は通る（壊し方が「元から落ちる形」を壊して通っていないこと）。
+SCENARIOS.push(['正しい形の期限つき委任は通る（壊し方の対照）', () => {
+  const copy = JSON.parse(fs.readFileSync(MATRIX_PATH, 'utf8'));
+  timed(copy);
+  const problems = validate(copy);
+  assert(problems.length === 0, `正しい形の委任で落ちた: ${problems[0]}`);
+}]);
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
