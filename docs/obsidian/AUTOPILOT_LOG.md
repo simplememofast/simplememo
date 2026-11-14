@@ -4223,3 +4223,60 @@ p=0.20。`publishing_day_rate` は5件の決済のうち p=0.70/0.55/0.35/0.25 �
 - 期限の段の `if` がモデルの段の `if` と一字一句同じであることも検査に足した（条件を足して期限の段だけ止める変更を拾う）。
 - 期限に当たった日の台帳の行は2通りになる（Runbook §5-1a）。status/LOG だけの PR を依頼できた日は `time_box` の行になり、修理が入るまで試運転の許可は `repair_pending`。`push_only` で終わった日は Act が `no_artifact` と記帳し、許可は `containment_changed` で止まる（オーナーの判断が要る）。台帳を書き換えない模擬で確かめた。
 - **まだ確かめていないこと:** 押し直した head が GitHub に有効と判定されるか。push の後、その SHA に「workflow file issue」の run が出ていないことを確かめるまで Ready にしない。
+
+## 2026-11-14（GitHub Actions主系・一回限りの試運転 run 43546873901） — 保守のみ。2候補ともboundedness不適格
+
+### 判断根拠
+
+レーンF（自己修復）: `autopilot-selfheal.mjs` に未修理対象なし。🤝 usage_limit 複数件と ⛔ no_artifact 6件（10-05・10-06・10-22・10-24・10-25・10-27）は既存のまま、修理対象から外れている。`ap-20261112-actions`（auth_or_credential）は本日も「未修理」として残っているが、本日のセッション自体が Claude Code ステップで正常に起動・完走しており、この経路での再発は観測されなかった（閉じ条件は次回のselfheal走査が判定する）。`health-intake.mjs --dry-run` は既存のopen監視Issueを読むだけに留めた（台帳へはコミットしていない）。
+
+`AUTOPILOT_DATA_REPORT` は `state: ready` / `bq_checked: true` / 最新 data_date 2026-11-10 / **28日（full_window: true）** / lag 4日。一時スナップショットは公開リポジトリへ写していない。
+
+レーンA/B: `growth/scripts/analyze.mjs --only unanswered` の唯一のObsidianクラスタ行は「obsidian ダウンロード」（383 imp・pos 6.8・期待CTR 3.0%・期待11.5クリック・実クリック0・既ランキング /obsidian/getting-started/）。同ページの本文を確認すると、title・H1・meta description・専用セクション「01 公式ダウンロード先とOS別の手順」・FAQ2件（「Obsidianはどこからダウンロードできますか？」ほか）がすでにこの語を直接・繰り返し扱っている。`refresh-queue.json` のR1（文字起こし）の2026-08-09訂正と同じ形 —— 内容はすでに語を直接扱っており、0クリックは「欠落の証拠」ではなく「通常の結果」と判断し、見送った。他の unanswered 行（LINE keepメモ・Google Keep等）はObsidianクラスタ外でこの運用のスコープ外。`conversational` は該当クエリ無し。
+
+レーンC: 前回実施が2026-09-04（`/obsidian/plugins/` テーマのダーク/ライト内訳）で、本日まで71日経過（7日以上・本来は優先レーン）。公式レジストリを実際に再取得した: `community-plugins.json` 10,355件（前回7,242件から+3,113・71日で1日あたり約44件）、`community-css-themes.json` 1,019件（前回729件から+290）。`/obsidian/plugins/` の「実測 — 公式レジストリの推移」表へ本日の行を追加する想定で、価値契約の候補化へ進んだ。
+
+レーンE: `coverage-queue.json` の pending 先頭は C29 `/obsidian/compare/craft/`（P3・「obsidian craft」9imp/pos5.3/0クリック・collides_with `/vs/craft/`）。
+
+### 価値契約（§2-1）— 2候補ともboundedness不適格。出荷を捏造せず保守のみ
+
+承認済み指標6件（`publishing_day_rate` が forecast_available）があるため、2候補を `/tmp/decision-candidates.json` へ書いた:
+
+1. `lane-c-plugin-theme-recount-20261114`（レーンC・上記の登録数再計測・publishing_day_rate・p=0.3）
+2. `lane-e-compare-craft-20261114`（レーンE・C29新規ページ・publishing_day_rate・p=0.2）
+
+`node scripts/value-contracts.mjs --select` を実行すると、**両方とも ineligible** と判定された:
+
+```
+lane-c-plugin-theme-recount-20261114: ineligible: boundedness: どの許可リストにも収まらない:
+  data/i18n/translations/ar.json, es.json, id.json, ko.json, pt-BR.json, tr.json, zh-Hans.json, zh-Hant.json
+lane-e-compare-craft-20261114: ineligible: boundedness: どの許可リストにも収まらない: data/i18n/pages.json
+```
+
+`/obsidian/plugins/` は2026-10-08以降8言語の生成翻訳を持つ登録ページ（`data/i18n/pages.json`）で、本文へ新しい表の行・数値を足すと新しい翻訳単位が生じ、`docs/site-localization.md` の手順どおり `data/i18n/translations/<locale>.json` への取り込みが要る。しかし `data/eligibility-policy.json` の `criteria.boundedness.scopes.content` は `data/*.json`（フラット・直下のみ）しか許可しておらず、`data/i18n/translations/*.json` や `data/i18n/pages.json`（新規ページ登録に必須）はどちらも範囲外。`scripts/value-contracts.mjs` の `prepare()` は5基準すべて `pass` でなければ無条件で候補を reject する（`require(...Object.values(c.eligibility.criteria).every(x => x.result === 'pass')...)`、L123付近）ため、回避手段が無い。
+
+**これは2026-09-06（`sitemap-ja.xml`等3ファイルが `criteria.boundedness.scopes.content` に無く、C09 Capacities実装が同じ理由でboundedness不適格になった一件）と同型の構造的ギャップ。** 当時はオーナーが `sitemap-*.xml` のglobを追加して解消した。今回は i18n カタログ関連パスが同じ形で抜けている。`data/eligibility-policy.json` は `policy_owner: human` で AI は書き換えない（`self_repair.may_modify` の外）ため、自分で穴を塞ぐことはできない。09-06の教訓（実装を完了させてから気づき、ブランチごと捨てる羽目になった）を踏まえ、**今回は候補化の時点で止め、実装（HTML編集・翻訳抽出）には着手しなかった。**
+
+2候補とも ineligible のため `--select` は候補なしで終了し、`data/decision-rejections/batch-9fcf5334c4dce207.json` に却下記録が残った（コミットに含めた）。保守のみ（status JSON・本ログ・却下記録）とし、記事・ページの出荷はしていない。
+
+### やったこと
+
+- `data/autopilot-status.json` を本日の内容で上書き（`action: maintenance`・`article: null`）
+- 本ログへの追記
+- `data/decision-rejections/batch-9fcf5334c4dce207.json`（上記の却下記録。`--select` が自動生成）
+- owner_requests に、上記のboundedness構造ギャップの詳細（実測値つき）とオーナーによる `eligibility-policy.json` スコープ拡張の依頼を新規追加
+
+### 検証
+
+- `node scripts/autopilot-selfheal.mjs` — 対象なし
+- `node scripts/value-contracts.mjs --readiness` / `--feedback`（snapshot sha256 `9f1e5a6abff662fc5fb12424669201ebd6ed4a8516a7e844d21305ce3450685c`） / `--select`（2候補とも ineligible・却下記録を確認）
+- `growth/scripts/analyze.mjs --only unanswered/clusters/conversational`
+- `node scripts/decision-ci.mjs --verify-local` → `problems: []`（status JSON・LOG・decision-rejectionsはすべて記帳扱いの例外パス）
+- `node scripts/autopilot-runs.mjs --check` は exit 1（運転台帳の最終記入が2026-10-30のまま・status JSONの日付2026-11-14と食い違う）。**この経路（書き込み資格情報の無いActionsセッション）では運転台帳への追記はpublishジョブの仕事**（Runbook §5-4）のため、ローカルのこの不一致は想定どおりで、publishが台帳へ本日分を記帳すれば解消される見込み
+- このセッションには書き込み資格情報が無いため、push・PR作成はしていない。コミットは当日ブランチ `claude/obsidian-auto-20261114` へのローカルコミットに留めた
+
+### 残る弱さ・申し送り
+
+- レーンCの実測値（plugins 10,355・themes 1,019・2026-11-14取得）はこのログに残した。オーナーが `data/eligibility-policy.json` の `criteria.boundedness.scopes.content` へ `data/i18n/translations/*.json`・`data/i18n/overrides/*.json`・`data/i18n/pages.json` を通す許可を足せば、次回セッションは再計測からやり直さずこの数値で `/obsidian/plugins/` の表に行を追加できる
+- このギャップは `/obsidian/` 配下の既存ページ全般（8言語生成翻訳を持つページ）への数値・日付更新に等しく効くため、承認済み指標がある日のレーンC/Eは今後も同じ理由で構造的に不適格になる可能性が高い
+- C29 `/obsidian/compare/craft/` は `pending` のまま変更していない

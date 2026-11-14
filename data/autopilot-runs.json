@@ -3179,6 +3179,23 @@
       "eligibility_verdict": "declined_by_design",
       "gate_code": "skip_repair_limit",
       "stage_note": "封じ込めのステップで止まった（通常は同じ故障種別の修理が上限に達した状態。判定そのものの例外でも同じ形になるので、原因は run のログで確かめる。node scripts/autopilot-selfheal.mjs --contain）。解除は実修理の repair_of か、オーナーの判断"
+    },
+    {
+      "run_id": "ap-20261114-actions-43546873901",
+      "date_jst": "2026-11-14",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "no_artifact",
+      "lane": "C",
+      "action": "maintenance",
+      "pr": 2349,
+      "artifact": null,
+      "failure_reason": "Both the lane C registry-recount candidate and the lane E C29 new-page candidate were rejected by value-contracts.mjs --select with 'ineligible: boundedness' because their touches include data/i18n/translations/*.json and data/i18n/pages.json respectively, neither of which is covered by eligibility-policy.json's criteria.boundedness.scopes.content (same gap shape as the 2026-09-06 sitemap-*.xml incident). No candidate could be legitimately shipped today without the owner expanding that scope.",
+      "external_ref": "43546873901",
+      "interventions": null,
+      "source": "session",
+      "failure_class": "eligibility_boundedness_scope_gap",
+      "failure_stage": "execution"
     }
   ],
   "retracted_observations": [

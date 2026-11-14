@@ -1,82 +1,54 @@
 {
-  "date_jst": "2026-10-30",
-  "generated_at": "2026-10-30T05:52:36.634Z",
+  "date_jst": "2026-11-14",
+  "generated_at": "2026-11-14T02:42:00.000Z",
   "action": "maintenance",
   "article": null,
   "pr": null,
   "streak": {
-    "consecutive_no_article_days": 25,
+    "consecutive_no_article_days": 40,
     "last_article_date_jst": "2026-10-05",
-    "last_production_change_date_jst": "2026-10-05",
-    "days_since_production_change": 25
+    "last_production_change_date_jst": "2026-11-14",
+    "days_since_production_change": 0
   },
   "data_freshness": {
-    "bq_export_last_data_date": null,
-    "bq_export_days_accumulated": null,
-    "bq_checked": false,
-    "note": "外からの修理の記帳（オーナー判断）。この回は BigQuery を読んでいない。最後の観測は 2026-10-26 の status（最終データ日 2026-10-23・28/28日）。"
+    "bq_export_last_data_date": "2026-11-10",
+    "bq_export_days_accumulated": 28,
+    "bq_checked": true,
+    "manual_snapshot_label": "2026-11-14"
   },
-  "cost": {
-    "month": "2026-10",
-    "cap_usd": 280,
-    "spent_usd": 64.0781,
-    "remaining_usd": null,
-    "remaining_usd_upper_bound": 215.9219,
-    "spent_usd_is_lower_bound": true,
-    "over": false,
-    "runs": 7,
-    "shipped": 1,
-    "usd_per_shipped": 64.0781,
-    "by_route": {
-      "actions": {
-        "runs": 7,
-        "spent": 64.0780545
-      },
-      "ccr": {
-        "runs": 0,
-        "spent": 0
-      }
-    },
-    "ccr_measured": false,
-    "run_caps": {
-      "overruns": [],
-      "unreviewed": [],
-      "runs_without_kind": 0
-    },
-    "models": {
-      "counts": {},
-      "runs_with_models": 0,
-      "runs_without_models": 7
-    },
-    "anomaly": {
-      "enabled": true,
-      "judged": true,
-      "median": 6.859844700000002,
-      "threshold": 27.439378800000007,
-      "samples": 14,
-      "anomalies": []
-    },
-    "cap_set_by": "ai",
-    "cap_basis": "extrapolation"
+  "reason": "【連続無記事40日目・本番最終変更 2026-11-14・BQ 28/28日（full window）】一回限りの試運転（TRIAL_RUN=actions_once）。レーンF: autopilot-selfheal に未修理対象なし。レーンA/B: analyze.mjs --only unanswered で唯一のObsidianクラスタ行「obsidian ダウンロード」(383 imp, pos 6.8, 期待11.5クリック, 実クリック0) を検討したが、/obsidian/getting-started/ は既にtitle・H1・専用セクション・FAQ2件でこの語を直接扱っており、0クリックはRunbookの既存ヒューリスティック通り「通常の結果であり欠落の証拠ではない」と判断し見送った。レーンC: 前回実施2026-09-04から40日超過で本来は優先レーンだが、候補（公式レジストリ再計測・/obsidian/plugins/ への行追加）はobsidian/plugins/が8言語生成翻訳の対象ページで、新しい表の行や数値更新は新規translation unitを要する。value-contracts --select で実際に候補化して検証した結果、touchesに含まれる data/i18n/translations/*.json が data/eligibility-policy.json の criteria.boundedness.scopes.content に無く、boundedness基準がfailして不適格と判定された（2026-09-06のsitemap-*.xml欠落と同型の構造的ギャップ）。レーンE: coverage-queue pending先頭のC29 (/obsidian/compare/craft/) も data/i18n/pages.json を touches に含むため同じ理由で不適格。2候補とも --select が自動却下し data/decision-rejections/batch-9fcf5334c4dce207.json に記録済み。出荷を捏造せず保守のみとした。",
+  "verified": "autopilot-selfheal.mjs（未修理対象なし）・health-intake.mjs --dry-run（既存のopen監視Issueのみ、台帳へのコミットなし）・value-contracts.mjs --readiness/--feedback/--select（2候補とも boundedness で ineligible と実測）・growth/scripts/analyze.mjs --only unanswered/clusters/conversational（新規BQスナップショット 2026-11-14・28/28日full window）・decision-ci.mjs --verify-local。/obsidian/getting-started/ の既存本文を目視確認（ダウンロード関連の見出し・FAQ・専用セクションが既出）。community-plugins.json/community-css-themes.json を raw.githubusercontent.com から再取得し現在値（plugins 10,355・themes 1,019）を把握したが出荷はしていない。",
+  "checks": {
+    "seo_check": "not run (no HTML changed this session)",
+    "mobile_qa": "not applicable; no public page changed",
+    "decision_ci_verify_local": "problems: [] (status/LOG/decision-rejections only; all three are decision-ci bookkeeping-exempt paths)",
+    "autopilot_selfheal": "レーンF対象なし（usage_limit/auth_or_credentialの既知依頼は据え置き）"
   },
+  "owner_requests": [
+    "10-05・10-06・10-22・10-24・10-25・10-27 の no_artifact 6件は封じ込めの対象のまま（上限3・修理5回・許可の対象は変えていない。既存の繰り越し）。",
+    "【新規】data/eligibility-policy.json の criteria.boundedness.scopes.content に data/i18n/translations/*.json・data/i18n/overrides/*.json・data/i18n/pages.json を通す許可が無く、8言語生成翻訳を持つ /obsidian/ 配下の既存ページへの数値・日付更新（レーンC）や新規ページ登録（レーンE）が、承認済み指標がある限り --select で構造的に全件 boundedness ineligible になる。2026-09-06 に sitemap-*.xml が同じ形で欠落し判明した際と同型のギャップ（当時はオーナーが glob を追加して解消）。今回は /obsidian/plugins/ の公式レジストリ再計測（plugins 7,242→10,355・themes 729→1,019・前回2026-09-04から71日超過）を候補化して実測で確認した（data/decision-rejections/batch-9fcf5334c4dce207.json）。オーナーによる eligibility-policy.json のスコープ拡張が無い限り、承認済み指標がある日のレーンC/Eは今後も毎日この理由で不適格になる見込み。",
+    "ap-20261112-actions（auth_or_credential）: 本日のセッションは Claude Code ステップが正常に起動・完走しており、この経路での再発は観測されなかった。次回のselfheal走査でこの観測が閉じ条件（当該経路の着手かつ再発なし）を満たすはず。"
+  ],
+  "next": "オーナーが eligibility-policy.json の boundedness スコープへ i18n カタログ関連パスを追加すれば、繰り越し中のレーンC候補（/obsidian/plugins/ 公式レジストリ再計測）をそのまま次回実装できる（実測値は本LOGに残した）。それまではレーンA/B/C/Eとも承認済み指標がある日は構造的に不適格が続く可能性が高い。",
+  "observation_scope": "GitHub Actions 主系・一回限りの試運転（TRIAL_RUN=actions_once）。書き込み資格情報なしのため push/PR作成/台帳記帳/公開運転表再生成はしていない。コミットはローカルの当日ブランチのみ（status JSON・LOG・decision-rejections）。記事・ページの出荷は無い。",
   "runs": {
     "window": {
       "from": "2026-08-11",
-      "to": "2026-11-13",
-      "days": 95
+      "to": "2026-11-14",
+      "days": 96
     },
-    "completion_rate": 0.5946,
-    "change_failure_rate": 0.4054,
+    "completion_rate": 0.5867,
+    "change_failure_rate": 0.4133,
     "human_intervention_rate": null,
     "intervention_observation": {
       "attempted": {
         "scope": "recorded_intervention_fields; not complete human-activity or native-origin proof",
-        "total_runs": 74,
+        "total_runs": 75,
         "recorded_zero_runs": 43,
         "recorded_positive_runs": 24,
-        "unknown_runs": 7,
+        "unknown_runs": 8,
         "unknown_by_reason": {
-          "not_observed": 7
+          "not_observed": 8
         },
         "recorded_event_count": 25,
         "complete_recorded_fields": false,
@@ -98,41 +70,41 @@
       "artifact": {
         "runs": 0,
         "rate": null,
-        "unknown_runs": 7,
+        "unknown_runs": 8,
         "count_scope": "recorded positive events"
       },
       "infra": {
         "runs": 6,
         "rate": null,
-        "unknown_runs": 7,
+        "unknown_runs": 8,
         "count_scope": "recorded positive events"
       },
       "substitute": {
         "runs": 1,
         "rate": null,
-        "unknown_runs": 7,
+        "unknown_runs": 8,
         "count_scope": "recorded positive events"
       },
       "bootstrap": {
         "runs": 4,
         "rate": null,
-        "unknown_runs": 7,
+        "unknown_runs": 8,
         "count_scope": "recorded positive events"
       },
       "request": {
         "runs": 14,
         "rate": null,
-        "unknown_runs": 7,
+        "unknown_runs": 8,
         "count_scope": "recorded positive events"
       }
     },
     "artifact_autonomy_rate": 1,
-    "shipping_day_rate": 0.4105,
+    "shipping_day_rate": 0.4063,
     "totals": {
-      "runs": 151,
-      "attempted": 74,
+      "runs": 152,
+      "attempted": 75,
       "shipped": 44,
-      "failed": 30,
+      "failed": 31,
       "no_run": 2
     },
     "by_route": {
@@ -142,8 +114,8 @@
         "shipped": 29
       },
       "primary": {
-        "runs": 114,
-        "attempted": 41,
+        "runs": 115,
+        "attempted": 42,
         "shipped": 15
       }
     },
@@ -154,16 +126,16 @@
     ],
     "streaks": {
       "current": {
-        "days": 88,
+        "days": 89,
         "from": "2026-08-18"
       },
       "longest": {
-        "days": 88,
+        "days": 89,
         "from": "2026-08-18",
-        "to": "2026-11-13"
+        "to": "2026-11-14"
       },
-      "active_days": 93,
-      "last_day": "2026-11-13"
+      "active_days": 94,
+      "last_day": "2026-11-14"
     },
     "shipping_streaks": {
       "current": {
@@ -176,7 +148,7 @@
         "to": "2026-09-08"
       },
       "active_days": 39,
-      "last_day": "2026-11-13"
+      "last_day": "2026-11-14"
     },
     "hands_off_streaks": {
       "current": {
@@ -189,7 +161,7 @@
         "to": null
       },
       "active_days": null,
-      "last_day": "2026-11-13",
+      "last_day": "2026-11-14",
       "measurement_state": "unknown",
       "unknown_days": [
         "2026-10-02",
@@ -207,7 +179,7 @@
           "to": "2026-09-05"
         },
         "active_days": 19,
-        "last_day": "2026-11-13"
+        "last_day": "2026-11-14"
       },
       "scope": "recorded fields only; unknown days cannot establish zero intervention"
     },
@@ -222,7 +194,7 @@
         "to": "2026-08-23"
       },
       "active_days": 23,
-      "last_day": "2026-11-13"
+      "last_day": "2026-11-14"
     },
     "last_publishing": {
       "date_jst": "2026-10-26",
@@ -565,18 +537,5 @@
         }
       ]
     }
-  },
-  "reason": "【レーンF・外からの修理（オーナー判断）】10-29 の試運転（run 40803103665）がモデルの段の75分の上限で切られた故障（ap-20261029-actions・failed・種別は未確定）を修理した。封じ込め中のレーンFは中から直せないため、オーナーの判断で外から PR を出した。Gate の時刻から60分で切り上げ・70分で引き渡しの期限をモデルに伝え、残り時間を工程記録の道具が返す。記事・ページの出荷は無い。",
-  "verified": "autopilot-publish（--selftest 436項目・--check）、autopilot-diagnostics（--selftest 111項目・--check）、autopilot-selfheal・autopilot-runs・check-model-routing・autopilot-data の --check、autopilot-publish.test.mjs（30件・E2E 3件は既定どおり省略）が通った。新しい検査は隔離した写しで壊して落ちることを確かめた。実際の Actions の run で期限が効くか（モデルが期限に従うか）は確かめていない。実モデルの起動・workflow の起動はしていない。",
-  "checks": {
-    "autopilot_publish": "selftest 436 passed; --check OK (time box inside the 75-minute main step limit and the resume rule)",
-    "autopilot_diagnostics": "selftest 111 passed (TMPDIR set to a real path on macOS; the same suite fails on origin/main without it); --check OK",
-    "selfheal_dry_run": "with the PR number filled in: the recovery permit is no longer refused for repair_pending (simulated locally; not run on GitHub)",
-    "mobile_qa": "not applicable; no Obsidian hub page changed (only the generated /autopilot/ report pages)"
-  },
-  "owner_requests": [
-    "10-05・10-06・10-22・10-24・10-25・10-27 の no_artifact 6件は封じ込めの対象のまま（上限3・修理5回・許可の対象は変えていない）。次の試運転の日付（AUTOPILOT_RECOVERY_ONCE）は、この修理のマージ後に main の台帳で模擬して許可が効くことを確かめてから決める。"
-  ],
-  "next": "マージ後、main の台帳で --contain --dry-run を模擬して許可が効くことを確かめてから、試運転の日付を決める。次の試運転では、途中の工程記録（progress artifact）と終了時刻で、期限より前に引き渡しが出たかを確かめる。",
-  "observation_scope": "外からの修理（owner-session）。Actions 経路のワークフロー・スクリプト・Runbook・台帳を変えた。記事・ページの出荷は無い。実モデルの起動・workflow の起動・リポジトリ変数の設定はしていない。"
+  }
 }
