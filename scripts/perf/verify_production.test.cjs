@@ -117,4 +117,9 @@ test('asset verification fetches the exact versioned stylesheet seen in the resp
   assert(!assets['assets/css/home-editorial.css'], 'Never verify a different unversioned cache key');
   assert.equal(assets[href.slice(1)].sha256, require('node:crypto').createHash('sha256').update(fs.readFileSync(path.join(root,'assets/css/home-editorial.css'))).digest('hex'));
   assert.throws(() => deliveryAssetsFor(manifest, html.replace(/home-editorial\.css\?v=[a-f0-9]+/, 'home-editorial.css'), root), /versioned stylesheet/);
+  const safety = html.match(/href="(\/assets\/css\/safety-net\.css\?v=[a-f0-9]{10})"/)[1];
+  assert(assets[safety.slice(1)], 'Neutral overflow protection is verified at its real cache key');
+  assert(!assets['assets/css/safety-net.css']);
+  assert.equal(assets[safety.slice(1)].sha256, require('node:crypto').createHash('sha256').update(fs.readFileSync(path.join(root,'assets/css/safety-net.css'))).digest('hex'));
+  assert.throws(() => deliveryAssetsFor(manifest, html.replace(/safety-net\.css\?v=[a-f0-9]+/, 'safety-net.css'), root), /versioned stylesheet/);
 });

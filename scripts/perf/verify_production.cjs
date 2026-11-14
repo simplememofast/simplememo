@@ -134,15 +134,18 @@ function heroOrder(html, expected) {
 function deliveryAssetsFor(manifest, html, root = ROOT) {
   const assets = { ...manifest.assets };
   if (editorialProfile(html)) {
-    const link = (html.match(/<link\b[^>]*rel="stylesheet"[^>]*>/g) || [])
-      .find(tag => /href="\/assets\/css\/home-editorial\.css\?v=[a-f0-9]{10}"/.test(tag));
-    if (!link) throw new Error('Verified editorial response has no versioned stylesheet');
-    const href = link.match(/href="([^"]+)"/)[1];
-    const url = new URL(href, ORIGIN);
-    const name = url.pathname.slice(1);
-    const bytes = fs.readFileSync(path.join(root, name));
-    // Key is the exact href from the verified public response, not pathname.
-    assets[url.pathname.slice(1) + url.search] = { bytes: bytes.length, sha256: crypto.createHash('sha256').update(bytes).digest('hex') };
+    const hrefs = (html.match(/<link\b[^>]*rel="stylesheet"[^>]*>/g) || [])
+      .map(tag => tag.match(/href="([^"]+)"/)?.[1]).filter(Boolean);
+    for (const stylesheet of ['home-editorial.css', 'safety-net.css']) {
+      const prefix = '/assets/css/' + stylesheet;
+      const href = hrefs.find(value => value.startsWith(prefix + '?v=') && /^[a-f0-9]{10}$/.test(value.slice(prefix.length + 3)));
+      if (!href) throw new Error('Verified editorial response has no versioned stylesheet: ' + stylesheet);
+      const url = new URL(href, ORIGIN);
+      const name = url.pathname.slice(1);
+      const bytes = fs.readFileSync(path.join(root, name));
+      // Use the exact public cache key, including the version query.
+      assets[name + url.search] = { bytes: bytes.length, sha256: crypto.createHash('sha256').update(bytes).digest('hex') };
+    }
   }
   return assets;
 }

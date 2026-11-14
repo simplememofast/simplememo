@@ -148,7 +148,7 @@ def transform(source,rel):
                 if chapter:cls(chapter,'ce-chapter--wide')
     # Add a single family-independent finishing layer; existing assets stay in place.
     if editorial:
-        needed = ['assets/css/home-editorial.css']
+        needed = ['assets/css/home-editorial.css', 'assets/css/safety-net.css']
         if unprefixed_file(rel) == 'blog/obsidian-voice-input.html':
             needed.append('assets/css/article-editorial.css')
         # Legacy shared layout rules must not compete with this explicit page profile.
@@ -215,7 +215,7 @@ def selftest():
             import tempfile
             with tempfile.TemporaryDirectory() as directory:
                 root=Path(directory); (root/'assets/css').mkdir(parents=True)
-                for name in ('home-editorial.css','article-editorial.css'):
+                for name in ('home-editorial.css','article-editorial.css','safety-net.css'):
                     (root/'assets/css'/name).write_text('/* reviewed editorial stylesheet */')
                 before=self.fixture('ja').replace('<body>','<body class="sm-editorial">')
                 with patch(__name__+'.ROOT', root):
@@ -224,6 +224,13 @@ def selftest():
                 self.assertIn('data-design-family="editorial"',once)
                 self.assertIn('/assets/css/home-editorial.css?v=',once)
                 self.assertIn('/assets/css/article-editorial.css?v=',once)
+                self.assertIn('/assets/css/safety-net.css?v=',once)
+                self.assertEqual(once.count('/assets/css/safety-net.css?v='),1)
+                with patch(__name__+'.ROOT', root):
+                    missing=re.sub(r'<link[^>]*safety-net\.css[^>]*>', '', once)
+                    repaired=transform(missing,'blog/obsidian-voice-input.html')
+                    self.assertEqual(repaired.count('/assets/css/safety-net.css?v='),1)
+                    self.assertEqual(transform(repaired,'blog/obsidian-voice-input.html'),repaired)
                 self.assertNotIn('site-design.css',once)
                 self.assertNotIn('ce-chapter',once)
                 self.assertIn('Original title',once)

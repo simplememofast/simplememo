@@ -1,7 +1,7 @@
 'use strict';
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { CASES, allowedRequest, loadLazyImages, assertHitTarget, portraitCoverage } = require('./browser_checks.cjs');
+const { CASES, allowedRequest, loadLazyImages, assertHitTarget, portraitCoverage, readableTextGeometry, assertReadableTextGeometry } = require('./browser_checks.cjs');
 
 test('functional requests cannot submit analytics or reach a look-alike origin', () => {
   for (const base of ['https://simplememofast.com', 'http://127.0.0.1:8765']) {
@@ -130,4 +130,35 @@ test('portrait coverage detects a face cropped by a shallow or off-center frame'
   assert(!portraitCoverage({ width: 600, height: 100, objectFit: 'cover', objectPosition: '50% 50%' }).fits);
   assert(!portraitCoverage({ width: 150, height: 600, objectFit: 'cover', objectPosition: '100% 50%' }).fits);
   assert.throws(() => portraitCoverage({ width: 600, height: 400, objectFit: 'fill', objectPosition: '50% 50%' }), /aspect ratio/);
+});
+
+
+test('text geometry detects content hidden by body clip even when document width fits', () => {
+  const previous = Object.fromEntries(['document','NodeFilter','getComputedStyle','innerWidth'].map(key => [key, globalThis[key]]));
+  let measured;
+  const body = { parentElement: null, scrollWidth: 320, clientWidth: 320, clip: 'clip' };
+  const parent = { parentElement: body, scrollWidth: 320, clientWidth: 320, clip: 'visible', closest: () => null };
+  const node = { parentElement: parent, textContent: 'Readable copy' };
+  const rect = { left: 20, right: 340, width: 320, height: 20 };
+  try {
+    globalThis.innerWidth = 320;
+    globalThis.NodeFilter = { SHOW_TEXT: 4 };
+    globalThis.getComputedStyle = element => ({ overflowX: element.clip });
+    globalThis.document = {
+      documentElement: { scrollWidth: 320, clientWidth: 320 },
+      querySelectorAll: () => [{}],
+      createTreeWalker: () => { let visited = false; return { nextNode() { if (visited) return null; visited = true; return node; } }; },
+      createRange: () => ({ selectNodeContents(value) { measured = value; }, getClientRects: () => [rect] }),
+    };
+    const geometry = readableTextGeometry();
+    assert.equal(measured, node, 'The real text range is inspected, not its containing box');
+    assert.throws(() => assertReadableTextGeometry(geometry), /clipped/);
+    rect.right = 300; rect.width = 280;
+    assert.doesNotThrow(() => assertReadableTextGeometry(readableTextGeometry()));
+    assert.throws(() => assertReadableTextGeometry({ viewport: 320, rects: [] }), /actually measured/);
+  } finally {
+    for (const [key,value] of Object.entries(previous)) {
+      if (value === undefined) delete globalThis[key]; else globalThis[key] = value;
+    }
+  }
 });

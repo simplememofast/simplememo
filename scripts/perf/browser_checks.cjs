@@ -42,6 +42,37 @@ function portraitCoverage({ width, height, objectFit, objectPosition }) {
   return { ...face, width, height, fits };
 }
 
+// Measure text itself: body overflow-x:clip may hide a wide child while
+// document.scrollWidth looks healthy. Real horizontal scrollers are excluded.
+function readableTextGeometry() {
+  const rects = [];
+  for (const region of document.querySelectorAll('header[data-site-header], main, footer[data-site-footer]')) {
+    const walker = document.createTreeWalker(region, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      const parent = node.parentElement;
+      if (!node.textContent.trim() || !parent || parent.closest('script,style,noscript')) continue;
+      let scrollable = false;
+      for (let ancestor = parent; ancestor; ancestor = ancestor.parentElement) {
+        if (['auto', 'scroll'].includes(getComputedStyle(ancestor).overflowX) && ancestor.scrollWidth > ancestor.clientWidth + 1) {
+          scrollable = true; break;
+        }
+      }
+      if (scrollable) continue;
+      const range = document.createRange(); range.selectNodeContents(node);
+      for (const rect of range.getClientRects()) {
+        if (rect.width > 0 && rect.height > 0) rects.push({ left: rect.left, right: rect.right });
+      }
+    }
+  }
+  return { viewport: innerWidth, rects };
+}
+function assertReadableTextGeometry(measurement) {
+  assert(measurement.rects.length > 0, 'Editorial readable text was actually measured');
+  const overflow = measurement.rects.filter(rect => rect.left < -1 || rect.right > measurement.viewport + 1);
+  assert.equal(overflow.length, 0, `Editorial text is clipped despite the body safety net: ${JSON.stringify(overflow.slice(0, 5))}`);
+}
+
 async function checkEditorialControls(page) {
   const navigation = page.locator('header[data-site-header] nav a[href]');
   assert(await navigation.count() >= 4, 'Editorial navigation retains every visible route');
@@ -164,6 +195,7 @@ async function main() {
             }
           }
           await loadLazyImages(page);
+          if (editorial) assertReadableTextGeometry(await page.evaluate(readableTextGeometry));
           // A PR audit can still see the previous homepage in production.
           if (!locale && !editorial && await page.locator('body.capture-full').count()) {
             await page.locator('.capture-full .pricing-cards').scrollIntoViewIfNeeded();
@@ -320,5 +352,5 @@ async function checkInPageLinks(browser, base, width, height, output) {
   }
 }
 
-module.exports = { CASES, allowedRequest, loadLazyImages, assertHitTarget, checkEditorialControls, portraitCoverage };
+module.exports = { CASES, allowedRequest, loadLazyImages, assertHitTarget, checkEditorialControls, portraitCoverage, readableTextGeometry, assertReadableTextGeometry };
 if (require.main === module) main().catch(error => { console.error(error); process.exitCode = 1; });
