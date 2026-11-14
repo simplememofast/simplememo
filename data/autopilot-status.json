@@ -30,5 +30,512 @@
     "ap-20261112-actions（auth_or_credential）: 本日のセッションは Claude Code ステップが正常に起動・完走しており、この経路での再発は観測されなかった。次回のselfheal走査でこの観測が閉じ条件（当該経路の着手かつ再発なし）を満たすはず。"
   ],
   "next": "オーナーが eligibility-policy.json の boundedness スコープへ i18n カタログ関連パスを追加すれば、繰り越し中のレーンC候補（/obsidian/plugins/ 公式レジストリ再計測）をそのまま次回実装できる（実測値は本LOGに残した）。それまではレーンA/B/C/Eとも承認済み指標がある日は構造的に不適格が続く可能性が高い。",
-  "observation_scope": "GitHub Actions 主系・一回限りの試運転（TRIAL_RUN=actions_once）。書き込み資格情報なしのため push/PR作成/台帳記帳/公開運転表再生成はしていない。コミットはローカルの当日ブランチのみ（status JSON・LOG・decision-rejections）。記事・ページの出荷は無い。"
+  "observation_scope": "GitHub Actions 主系・一回限りの試運転（TRIAL_RUN=actions_once）。書き込み資格情報なしのため push/PR作成/台帳記帳/公開運転表再生成はしていない。コミットはローカルの当日ブランチのみ（status JSON・LOG・decision-rejections）。記事・ページの出荷は無い。",
+  "runs": {
+    "window": {
+      "from": "2026-08-11",
+      "to": "2026-11-14",
+      "days": 96
+    },
+    "completion_rate": 0.5867,
+    "change_failure_rate": 0.4133,
+    "human_intervention_rate": null,
+    "intervention_observation": {
+      "attempted": {
+        "scope": "recorded_intervention_fields; not complete human-activity or native-origin proof",
+        "total_runs": 75,
+        "recorded_zero_runs": 43,
+        "recorded_positive_runs": 24,
+        "unknown_runs": 8,
+        "unknown_by_reason": {
+          "not_observed": 8
+        },
+        "recorded_event_count": 25,
+        "complete_recorded_fields": false,
+        "actual_zero_touch_proven": null
+      },
+      "shipped": {
+        "scope": "recorded_intervention_fields; not complete human-activity or native-origin proof",
+        "total_runs": 44,
+        "recorded_zero_runs": 26,
+        "recorded_positive_runs": 18,
+        "unknown_runs": 0,
+        "unknown_by_reason": {},
+        "recorded_event_count": 19,
+        "complete_recorded_fields": true,
+        "actual_zero_touch_proven": null
+      }
+    },
+    "intervention_by_kind": {
+      "artifact": {
+        "runs": 0,
+        "rate": null,
+        "unknown_runs": 8,
+        "count_scope": "recorded positive events"
+      },
+      "infra": {
+        "runs": 6,
+        "rate": null,
+        "unknown_runs": 8,
+        "count_scope": "recorded positive events"
+      },
+      "substitute": {
+        "runs": 1,
+        "rate": null,
+        "unknown_runs": 8,
+        "count_scope": "recorded positive events"
+      },
+      "bootstrap": {
+        "runs": 4,
+        "rate": null,
+        "unknown_runs": 8,
+        "count_scope": "recorded positive events"
+      },
+      "request": {
+        "runs": 14,
+        "rate": null,
+        "unknown_runs": 8,
+        "count_scope": "recorded positive events"
+      }
+    },
+    "artifact_autonomy_rate": 1,
+    "shipping_day_rate": 0.4063,
+    "totals": {
+      "runs": 152,
+      "attempted": 75,
+      "shipped": 44,
+      "failed": 31,
+      "no_run": 2
+    },
+    "by_route": {
+      "secondary": {
+        "runs": 37,
+        "attempted": 33,
+        "shipped": 29
+      },
+      "primary": {
+        "runs": 115,
+        "attempted": 42,
+        "shipped": 15
+      }
+    },
+    "primary_ever_shipped": true,
+    "no_run_days": [
+      "2026-08-16",
+      "2026-08-17"
+    ],
+    "streaks": {
+      "current": {
+        "days": 89,
+        "from": "2026-08-18"
+      },
+      "longest": {
+        "days": 89,
+        "from": "2026-08-18",
+        "to": "2026-11-14"
+      },
+      "active_days": 94,
+      "last_day": "2026-11-14"
+    },
+    "shipping_streaks": {
+      "current": {
+        "days": 0,
+        "from": null
+      },
+      "longest": {
+        "days": 8,
+        "from": "2026-09-01",
+        "to": "2026-09-08"
+      },
+      "active_days": 39,
+      "last_day": "2026-11-14"
+    },
+    "hands_off_streaks": {
+      "current": {
+        "days": 0,
+        "from": null
+      },
+      "longest": {
+        "days": null,
+        "from": null,
+        "to": null
+      },
+      "active_days": null,
+      "last_day": "2026-11-14",
+      "measurement_state": "unknown",
+      "unknown_days": [
+        "2026-10-02",
+        "2026-10-03",
+        "2026-10-04"
+      ],
+      "recorded_lower_bound": {
+        "current": {
+          "days": 0,
+          "from": null
+        },
+        "longest": {
+          "days": 5,
+          "from": "2026-09-01",
+          "to": "2026-09-05"
+        },
+        "active_days": 19,
+        "last_day": "2026-11-14"
+      },
+      "scope": "recorded fields only; unknown days cannot establish zero intervention"
+    },
+    "publishing_streaks": {
+      "current": {
+        "days": 0,
+        "from": null
+      },
+      "longest": {
+        "days": 5,
+        "from": "2026-08-19",
+        "to": "2026-08-23"
+      },
+      "active_days": 23,
+      "last_day": "2026-11-14"
+    },
+    "last_publishing": {
+      "date_jst": "2026-10-26",
+      "lane": "A",
+      "artifact": null
+    },
+    "intervention_count": null,
+    "recorded_intervention_count": 25,
+    "timings": {
+      "time_to_detect_hours": {
+        "median": 0.02928611111111111,
+        "max": 197.8525,
+        "n": 63
+      },
+      "time_to_repair_hours": {
+        "median": 6.683333333333334,
+        "max": 25.633333333333333,
+        "n": 6
+      },
+      "unresolved": [
+        {
+          "run_id": "ap-20260827-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260828-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260829-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260829-ccr0920",
+          "failure_class": "claim_without_completion"
+        },
+        {
+          "run_id": "ap-20260830-actions",
+          "failure_class": "usage_limit"
+        },
+        {
+          "run_id": "ap-20260831-actions",
+          "failure_class": "usage_limit"
+        },
+        {
+          "run_id": "ap-20260831-ccr0920",
+          "failure_class": "usage_limit"
+        },
+        {
+          "run_id": "ap-20260903-actions-33706886868",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260905-actions",
+          "failure_class": "usage_limit"
+        },
+        {
+          "run_id": "ap-20260905-actions-33931560258",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260906-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260906-actions-34022754964",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260908-ccr-0920-codex-01a07e63-4255-7be2-8623-3ab271db643b",
+          "failure_class": "usage_limit"
+        },
+        {
+          "run_id": "ap-20260916-actions-codex-01a0a6e0-4080-7ec0-953e-cff70fbeaa09",
+          "failure_class": "usage_limit"
+        },
+        {
+          "run_id": "ap-20260918-actions-codex-01a0b12d-3339-76f1-9627-c1add8c8dad1",
+          "failure_class": "usage_limit"
+        },
+        {
+          "run_id": "ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac",
+          "failure_class": "usage_limit"
+        },
+        {
+          "run_id": "ap-20260920-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260921-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260921-actions-codex-01a0c09f-441c-7241-b87b-10cd6f5d014b",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260922-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260922-actions-codex-01a0c5c5-32d5-7601-93da-85ce4c6df386",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260923-actions-codex-01a0caeb-9b7d-7902-aad2-3b15e256a803",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260923-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260924-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260924-actions-codex-01a0d012-0042-7a10-ab0b-c04051a9254e",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260925-actions-codex-01a0d539-52d7-76a1-8e8e-15c4fb67ec5e",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260925-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260926-actions-codex-01a0da5e-cd92-7223-89b4-1f2d8797624a",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260926-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260927-actions-codex-01a0df85-ffe3-7333-9195-c126e6186b68",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260927-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260928-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562",
+          "failure_class": "usage_limit"
+        },
+        {
+          "run_id": "ap-20260929-actions-codex-01a0e9d1-a939-7013-a5c7-d905763f9cb9",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260929-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260930-actions-codex-01a0eef8-e991-74d0-863e-5ac8a7698966",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260930-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261001-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261002-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261003-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261004-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261005-actions-37249907984",
+          "failure_class": "no_artifact"
+        },
+        {
+          "run_id": "ap-20261006-actions",
+          "failure_class": "no_artifact"
+        },
+        {
+          "run_id": "ap-20261007-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261008-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261009-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261010-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261011-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261012-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261013-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261014-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261015-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261016-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261017-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261018-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261019-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261020-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261021-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261022-actions",
+          "failure_class": "no_artifact"
+        },
+        {
+          "run_id": "ap-20261023-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261024-actions",
+          "failure_class": "no_artifact"
+        },
+        {
+          "run_id": "ap-20261025-actions",
+          "failure_class": "no_artifact"
+        },
+        {
+          "run_id": "ap-20261027-actions",
+          "failure_class": "no_artifact"
+        },
+        {
+          "run_id": "ap-20261028-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261029-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261030-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261031-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261101-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261102-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261103-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261104-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261105-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261106-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261107-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261108-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261109-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261110-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261111-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261112-actions",
+          "failure_class": "auth_or_credential"
+        },
+        {
+          "run_id": "ap-20261113-actions",
+          "failure_class": null
+        }
+      ]
+    }
+  }
 }
