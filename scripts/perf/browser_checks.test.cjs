@@ -1,7 +1,8 @@
 'use strict';
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { CASES, allowedRequest, loadLazyImages, assertHitTarget, portraitCoverage, readableTextGeometry, assertReadableTextGeometry } = require('./browser_checks.cjs');
+const { CASES, OBSIDIAN_CASES, allowedRequest, loadLazyImages, assertHitTarget, portraitCoverage,
+  assertPortraitPresentation, readableTextGeometry, assertReadableTextGeometry } = require('./browser_checks.cjs');
 
 test('functional requests cannot submit analytics or reach a look-alike origin', () => {
   for (const base of ['https://simplememofast.com', 'http://127.0.0.1:8765']) {
@@ -17,13 +18,15 @@ test('functional requests cannot submit analytics or reach a look-alike origin',
 });
 
 test('the matrix retains all old widths and adds real mobile density cases', () => {
-  assert.deepEqual(CASES.filter(c => c.dpr === 1 && c.javascript !== false).map(c => c.width), [320, 390, 412, 768, 1440]);
+  assert.deepEqual(CASES.filter(c => c.dpr === 1 && c.javascript !== false).map(c => c.width), [320, 375, 390, 412, 430, 768, 1440]);
   assert(CASES.some(c => c.width === 412 && c.dpr === 1.75));
   assert(CASES.some(c => c.width === 390 && c.dpr === 2));
   assert(CASES.some(c => c.width === 390 && c.dpr === 3));
   assert.equal(CASES.filter(c => c.javascript === false).length, 1);
   assert(CASES.some(c => c.width === 412 && c.dpr === 3));
-  assert.equal(CASES.length, 10);
+  assert.equal(CASES.length, 12);
+  assert.deepEqual(OBSIDIAN_CASES.filter(c => c.javascript).map(c => c.width), [320, 375, 390, 430, 768, 1440]);
+  assert(OBSIDIAN_CASES.some(c => c.width === 390 && c.javascript === false));
 });
 
 
@@ -130,6 +133,23 @@ test('portrait coverage detects a face cropped by a shallow or off-center frame'
   assert(!portraitCoverage({ width: 600, height: 100, objectFit: 'cover', objectPosition: '50% 50%' }).fits);
   assert(!portraitCoverage({ width: 150, height: 600, objectFit: 'cover', objectPosition: '100% 50%' }).fits);
   assert.throws(() => portraitCoverage({ width: 600, height: 400, objectFit: 'fill', objectPosition: '50% 50%' }), /aspect ratio/);
+});
+
+test('portrait presentation rejects covered faces and a detached or offscreen mobile first view', () => {
+  const measurement = {
+    image: { width: 350, height: 234, left: 20, top: 100, right: 370, bottom: 334,
+      objectFit: 'cover', objectPosition: '32% 50%' },
+    copy: { top: 316 }, heading: { top: 340, bottom: 430 }, cta: { bottom: 620 },
+    obstacles: [{ left: 20, right: 370, top: 340, bottom: 430 }],
+    viewport: { width: 390, height: 900 },
+  };
+  assert.doesNotThrow(() => assertPortraitPresentation(measurement));
+  assert.throws(() => assertPortraitPresentation({ ...measurement,
+    obstacles: [...measurement.obstacles, { left: 100, right: 150, top: 150, bottom: 180 }] }), /cover the portrait face/);
+  assert.throws(() => assertPortraitPresentation({ ...measurement, obstacles: [] }), /actually measured/);
+  assert.throws(() => assertPortraitPresentation({ ...measurement, copy: { top: 400 } }), /remain adjacent/);
+  assert.throws(() => assertPortraitPresentation({ ...measurement, heading: { top: 20, bottom: 80 } }), /precedes/);
+  assert.throws(() => assertPortraitPresentation({ ...measurement, cta: { bottom: 920 } }), /initial viewport/);
 });
 
 

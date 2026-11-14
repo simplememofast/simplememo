@@ -4,10 +4,14 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const CASES = [
-  ...[320, 390, 412, 768, 1440].map(width => ({ width, dpr: 1 })),
+  ...[320, 375, 390, 412, 430, 768, 1440].map(width => ({ width, dpr: 1 })),
   { width: 390, dpr: 2 }, { width: 390, dpr: 3 }, { width: 412, dpr: 1.75 },
   { width: 412, dpr: 3 },
   { width: 390, dpr: 1, javascript: false },
+];
+const OBSIDIAN_CASES = [
+  ...[320, 375, 390, 430, 768, 1440].map(width => ({ width, javascript: true })),
+  { width: 390, javascript: false },
 ];
 
 function allowedRequest(url, method, base) {
@@ -42,11 +46,91 @@ function portraitCoverage({ width, height, objectFit, objectPosition }) {
   return { ...face, width, height, fits };
 }
 
+// Text ranges and control surfaces, rather than the copy's enclosing box,
+// distinguish harmless overlap with the photograph's fade from covering a face.
+function portraitPresentation() {
+  const hero = document.querySelector('main .hero');
+  const image = hero.querySelector('.hero__photograph img');
+  const rect = element => {
+    const r = element.getBoundingClientRect();
+    return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height };
+  };
+  const style = getComputedStyle(image), obstacles = [];
+  const walker = document.createTreeWalker(hero, NodeFilter.SHOW_TEXT);
+  let node;
+  while ((node = walker.nextNode())) {
+    if (!node.textContent.trim() || node.parentElement.closest('script,style')) continue;
+    const range = document.createRange(); range.selectNodeContents(node);
+    for (const r of range.getClientRects()) {
+      if (r.width && r.height) obstacles.push({ left: r.left, top: r.top, right: r.right, bottom: r.bottom });
+    }
+  }
+  for (const control of hero.querySelectorAll('a,button')) {
+    const r = rect(control);
+    if (r.width && r.height) obstacles.push(r);
+  }
+  return { image: { ...rect(image), objectFit: style.objectFit, objectPosition: style.objectPosition },
+    copy: rect(hero.querySelector('.hero-copy')), heading: rect(hero.querySelector('h1')),
+    cta: rect(hero.querySelector('.hero-actions .store-link')), obstacles,
+    viewport: { width: innerWidth, height: innerHeight } };
+}
+
+function assertPortraitPresentation(measurement) {
+  const { image, copy, heading, cta, obstacles, viewport } = measurement;
+  const face = portraitCoverage(image);
+  assert(face.fits, 'Portrait face remains inside the crop');
+  const visibleFace = { left: image.left + face.left, right: image.left + face.right,
+    top: image.top + face.top, bottom: image.top + face.bottom };
+  assert(obstacles.length > 0, 'Portrait text and controls were actually measured');
+  const overlaps = obstacles.filter(r => r.left < visibleFace.right && r.right > visibleFace.left
+    && r.top < visibleFace.bottom && r.bottom > visibleFace.top);
+  assert.equal(overlaps.length, 0, `Text or controls cover the portrait face: ${JSON.stringify(overlaps.slice(0, 3))}`);
+  if (viewport.width <= 820) {
+    assert(image.top < heading.top, 'Mobile photograph precedes the headline visually');
+    assert(copy.top <= image.bottom + 32, 'Mobile portrait and copy remain adjacent');
+  }
+  if (viewport.width <= 430) {
+    assert(image.top >= 0 && heading.bottom <= viewport.height && cta.bottom <= viewport.height,
+      'Mobile portrait, headline and download share the initial viewport');
+  }
+  return { ...face, copyGap: copy.top - image.bottom };
+}
+
+async function checkControl(page, control, label) {
+  await control.scrollIntoViewIfNeeded();
+  assertHitTarget(await control.evaluate(el => {
+    const r = el.getBoundingClientRect(), hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return { visible: r.width > 0 && r.height > 0, hit: hit === el || el.contains(hit),
+      width: r.width, height: r.height, left: r.left, right: r.right, viewport: innerWidth };
+  }), label);
+  await control.focus();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab');
+  assert(await control.evaluate(el => {
+    const s = getComputedStyle(el);
+    return document.activeElement === el && (parseFloat(s.outlineWidth) > 0 || s.boxShadow !== 'none');
+  }), `${label}: keyboard focus remains visible`);
+}
+
+async function checkLanguageMenu(page) {
+  const languages = page.locator('[data-site-header] .site-languages');
+  const summary = languages.locator('summary');
+  await checkControl(page, summary, 'language disclosure');
+  await summary.press('Enter');
+  assert.equal(await languages.getAttribute('open'), '', 'Language choices open from the keyboard');
+  const english = languages.locator('a[data-site-locale="en"]');
+  await checkControl(page, english, 'English language route');
+  assert(await english.isVisible(), 'Language route is visible');
+  assertReadableTextGeometry(await page.evaluate(readableTextGeometry));
+  await summary.press('Enter');
+  assert.equal(await languages.getAttribute('open'), null, 'Language choices close from the keyboard');
+}
+
 // Measure text itself: body overflow-x:clip may hide a wide child while
 // document.scrollWidth looks healthy. Real horizontal scrollers are excluded.
 function readableTextGeometry() {
   const rects = [];
-  for (const region of document.querySelectorAll('header[data-site-header], main, footer[data-site-footer]')) {
+  for (const region of document.querySelectorAll('[data-site-header], main, [data-site-footer]')) {
     const walker = document.createTreeWalker(region, NodeFilter.SHOW_TEXT);
     let node;
     while ((node = walker.nextNode())) {
@@ -99,6 +183,7 @@ async function checkEditorialControls(page) {
   assert.equal(await faq.getAttribute('open'), '', 'Native FAQ opens on click');
   await summary.press('Enter');
   assert.equal(await faq.getAttribute('open'), null, 'Native FAQ closes from the keyboard');
+  await checkLanguageMenu(page);
 }
 
 // Drive timers from the runner: page timers do not fire when JavaScript is
@@ -171,12 +256,7 @@ async function main() {
           }
           assert(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth <= 1), `${label}: horizontal overflow`);
           if (editorial) {
-            const dimensions = await page.locator('.hero__photograph img').evaluate(img => {
-              const rect = img.getBoundingClientRect(), style = getComputedStyle(img);
-              return { width: rect.width, height: rect.height, objectFit: style.objectFit, objectPosition: style.objectPosition };
-            });
-            record.portrait = portraitCoverage(dimensions);
-            assert(record.portrait.fits, `Portrait face remains inside the crop: ${JSON.stringify(record.portrait)}`);
+            record.portrait = assertPortraitPresentation(await page.evaluate(portraitPresentation));
           }
           if (locale) {
             assert.equal(await page.locator('.global-nav__logo img').getAttribute('alt'), '', 'Decorative logo must not repeat the adjacent accessible link text');
@@ -256,7 +336,8 @@ async function main() {
             assert.equal(record.heroResources[0].encodedBodySize, expected.bytes, 'Encoded response bytes must match the immutable asset');
           }
           await page.evaluate(() => scrollTo(0, 0));
-          if (width === 390 || width === 1440 || dpr === 1.75) await page.screenshot({ path: path.join(output, label + '.png') });
+          if (dpr === 1 || dpr === 1.75) await page.screenshot({ path: path.join(output, label + '.png') });
+          if (editorial && dpr === 1) await page.screenshot({ path: path.join(output, label + '-full.png'), fullPage: true });
           record.pass = true;
         } catch (error) {
           record.error = String(error);
@@ -272,9 +353,86 @@ async function main() {
     // 960×900: a mouse window between the phone and desktop layouts, where the in-page QRs show since
     // 2026-11-14 (hover:hover and pointer:fine) and make the hero taller.
     for (const [width, height] of [[390, 664], [960, 900], [1440, 900]]) results.push(await checkInPageLinks(browser, base, width, height, output));
+    for (const scenario of OBSIDIAN_CASES) {
+      const record = { origin: base, route: '/obsidian/', ...scenario, pass: false };
+      results.push(record);
+      try { await checkObsidian(browser, base, scenario, output, record); }
+      finally { fs.writeFileSync(path.join(output, 'browser-checks.json'), JSON.stringify(results, null, 2) + '\n'); }
+    }
     fs.writeFileSync(path.join(output, 'browser-checks.json'), JSON.stringify(results, null, 2) + '\n');
-    console.log(`PASS: ${results.length} homepage viewport/density/JavaScript scenarios at ${base}.`);
+    console.log(`PASS: ${results.length} homepage/Obsidian viewport/density/JavaScript scenarios at ${base}.`);
   } finally { await browser.close(); }
+}
+
+async function checkObsidian(browser, base, { width, javascript }, output, record) {
+  const label = `obsidian-${width}${javascript ? '' : '-nojs'}`;
+  const context = await browser.newContext({ viewport: { width, height: 900 },
+    javaScriptEnabled: javascript, reducedMotion: 'reduce' });
+  const page = await context.newPage(), failures = [];
+  page.on('pageerror', error => failures.push(String(error)));
+  page.on('response', response => {
+    if (new URL(response.url()).origin === new URL(base).origin && response.status() >= 400) failures.push(`${response.status()} ${response.url()}`);
+  });
+  await page.route('**/*', route => allowedRequest(route.request().url(), route.request().method(), base) ? route.continue() : route.abort());
+  try {
+    assert.equal((await page.goto(base + '/obsidian/', { waitUntil: 'networkidle', timeout: 30000 })).status(), 200);
+    await page.evaluate(() => document.fonts.ready);
+    assert.equal(await page.locator('h1').count(), 1);
+    assert(await page.locator('h1').isVisible(), 'Obsidian heading remains visible');
+    const cta = page.locator('.lpr-hero a[data-cta-placement="hero"]').first();
+    assert.equal(new URL(await cta.getAttribute('href'), page.url()).hostname, 'simplememofast.onelink.me', 'Obsidian pilot route is preserved');
+    assert.equal(await cta.getAttribute('data-cta-cluster'), 'obsidian');
+    await checkControl(page, cta, 'Obsidian hero download');
+    await page.evaluate(() => scrollTo(0, 0));
+    const menu = page.locator('#navLinks'), toggle = page.locator('.global-nav__hamburger');
+    if (javascript && await toggle.isVisible()) {
+      await checkControl(page, toggle, 'navigation disclosure');
+      await toggle.press('Enter');
+      assert.equal(await toggle.getAttribute('aria-expanded'), 'true');
+      assert(await menu.locator('a').first().isVisible(), 'Expanded navigation links are visible');
+      assertReadableTextGeometry(await page.evaluate(readableTextGeometry));
+      await page.keyboard.press('Escape');
+      assert.equal(await toggle.getAttribute('aria-expanded'), 'false');
+      assert(await toggle.evaluate(el => document.activeElement === el), 'Escape returns focus to the navigation toggle');
+    } else {
+      assert(await menu.locator('a').first().isVisible(), 'Navigation remains available without JavaScript');
+    }
+    await checkLanguageMenu(page);
+    const faq = page.locator('.lpr-faq-item').first(), summary = faq.locator('summary');
+    await checkControl(page, summary, 'Obsidian FAQ');
+    await summary.press('Enter');
+    assert.equal(await faq.getAttribute('open'), '', 'FAQ opens without a script dependency');
+    assert(await faq.locator('.lpr-faq-a').isVisible());
+    await summary.press('Enter');
+    assert.equal(await faq.getAttribute('open'), null);
+    const panel = page.locator('#lprDemoContent'), inbox = page.locator('#lpr-tab-inbox');
+    await panel.scrollIntoViewIfNeeded();
+    if (javascript) {
+      await inbox.click();
+      assert.equal(await inbox.getAttribute('aria-selected'), 'true');
+      assert.equal(await panel.getAttribute('aria-labelledby'), 'lpr-tab-inbox');
+      assert((await panel.innerText()).includes('Inbox'));
+      await inbox.press('ArrowRight');
+      assert.equal(await panel.getAttribute('aria-labelledby'), 'lpr-tab-mail');
+      assert(await page.locator('#lpr-tab-mail').evaluate(el => document.activeElement === el));
+      assertReadableTextGeometry(await page.evaluate(readableTextGeometry));
+      await page.locator('#lpr-tab-mail').press('Home');
+    } else {
+      assert((await panel.innerText()).includes('朝の散歩'), 'Static demo example remains readable without JavaScript');
+    }
+    await loadLazyImages(page);
+    assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'Obsidian has no horizontal overflow');
+    assertReadableTextGeometry(await page.evaluate(readableTextGeometry));
+    assert.deepEqual(failures, [], 'Obsidian has no JavaScript errors or missing same-origin resources');
+    await page.evaluate(() => scrollTo(0, 0));
+    await page.screenshot({ path: path.join(output, label + '.png') });
+    await page.screenshot({ path: path.join(output, label + '-full.png'), fullPage: true });
+    record.pass = true;
+  } catch (error) {
+    record.error = String(error); record.failures = failures;
+    await page.screenshot({ path: path.join(output, label + '-failure.png') }).catch(() => {});
+    throw error;
+  } finally { await context.close(); }
 }
 
 /**
@@ -352,5 +510,6 @@ async function checkInPageLinks(browser, base, width, height, output) {
   }
 }
 
-module.exports = { CASES, allowedRequest, loadLazyImages, assertHitTarget, checkEditorialControls, portraitCoverage, readableTextGeometry, assertReadableTextGeometry };
+module.exports = { CASES, OBSIDIAN_CASES, allowedRequest, loadLazyImages, assertHitTarget, checkEditorialControls,
+  portraitCoverage, portraitPresentation, assertPortraitPresentation, readableTextGeometry, assertReadableTextGeometry };
 if (require.main === module) main().catch(error => { console.error(error); process.exitCode = 1; });
