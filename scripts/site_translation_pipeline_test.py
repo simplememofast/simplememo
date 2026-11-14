@@ -62,6 +62,35 @@ class TranslationPipelineTests(unittest.TestCase):
                 self.assertEqual(data['url'], 'https://simplememofast.com/'+locale+'/source')
         self.assertIn('説明', source)
 
+    def test_editorial_language_menu_keeps_visible_locale_in_accessible_name(self):
+        from site_locales import language_menu, NAMES
+        from site_translation_units import Parser, all_nodes
+        group = {'source': 'blog/obsidian-voice-input.html', 'sourceLocale': 'ja',
+                 'existing': {'ja': 'blog/obsidian-voice-input.html'},
+                 'pages': {'ja': 'blog/obsidian-voice-input.html',
+                           **{locale: locale+'/blog/obsidian-voice-input.html'
+                              for locale in ('es', 'ar', 'zh-Hant')}}}
+        for body_class in ('sm-editorial sm-article', 'capture-editorial capture-full'):
+            source = ('<html lang="ja"><head><title>Guide</title></head><body class="'+body_class+'">'
+                      '<header><details class="site-languages"><summary>JA</summary></details></header>'
+                      '<main><h1>Guide</h1><div class="sm-editorial">Body class selects the menu.</div></main>'
+                      '</body></html>')
+            for locale in ('es', 'ar', 'zh-Hant'):
+                with self.subTest(body_class=body_class, locale=locale):
+                    with patch.object(build, 'units_for', return_value=(source, [])), patch('sync_shared_chrome.transform', side_effect=lambda s, f:s), patch('sync_page_design.transform', side_effect=lambda s, f:s):
+                        output = build.translate_document(group, locale, {}, {})
+                    nodes = list(all_nodes(Parser(output).root))
+                    menu = next(n for n in nodes if 'site-languages' in (n.attrs.get('class') or '').split())
+                    summary = next(n for n in nodes if n.tag == 'summary' and menu.start < n.start < menu.stop)
+                    if body_class.startswith('sm-editorial'):
+                        self.assertTrue(summary.attrs['aria-label'].startswith(NAMES[locale][0]+' · '))
+                        self.assertEqual(output.count('class="site-languages"'), 1)
+                        self.assertIn('href="/blog/obsidian-voice-input"', output[menu.start:menu.stop])
+                    else:
+                        expected = language_menu(group['pages'][locale], locale,
+                            {language: build.page_url(file) for language, file in group['pages'].items()})
+                        self.assertEqual(output[menu.start:menu.stop], expected, 'legacy menu stays byte-for-byte unchanged')
+
     def test_inline_no_binding_fast_path_does_not_parse(self):
         source = '<html><script>const x = "unchanged";</script><p>Content</p></html>'
         with patch.object(dynamic, 'Parser', side_effect=AssertionError('unnecessary parse')):

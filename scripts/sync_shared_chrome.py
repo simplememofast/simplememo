@@ -13,7 +13,7 @@ import argparse
 import hashlib
 import re
 import subprocess
-from site_locales import language_menu, LABELS, CHROME, UI, unprefixed_file
+from site_locales import language_menu, LABELS, NAMES, CHROME, UI, unprefixed_file
 from i18n_config import TOP_CLUSTER
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -92,6 +92,14 @@ def sync_languages(source, rel):
         pos = row[4]-len(row[0])-3 if row else header[4]-len(header[0])-3
     return source[:pos] + snippet + source[pos:]
 
+def editorial_language_menu(rel, locale, available=None):
+    # Include the visible label in its accessible name (WCAG 2.5.3). The
+    # editorial translation generator also calls this after link localization.
+    snippet = language_menu(rel, locale, available)
+    return snippet.replace('<summary aria-label="',
+                           f'<summary aria-label="{escape(NAMES[locale][0], quote=True)} · ', 1)
+
+
 def editorial_chrome(source, rel):
     """Keep the authored editorial chrome, with the same registry-backed languages.
 
@@ -130,7 +138,10 @@ def editorial_chrome(source, rel):
     locale = next(e for e in els if e[0] == "html")[1].get("lang", "ja")
     cta = next((e for e in els if e[0] == "a" and header[2] < e[2] < header[4] and has(e, "header-cta")), None)
     pos = cta[2] if cta else header[4] - len(header[0]) - 3
-    return source[:pos] + language_menu(rel, locale) + source[pos:]
+    # The accessible name must include the visible locale abbreviation (WCAG
+    # 2.5.3), so voice-control users can activate the label they actually see.
+    # Scope this correction to the editorial family; legacy output is stable.
+    return source[:pos] + editorial_language_menu(rel, locale) + source[pos:]
 
 
 def transform(source, rel):
@@ -308,6 +319,19 @@ def selftest():
             after=transform(before,'index.html')
             self.assertLess(after.index('</nav>'),after.index('<details class="site-languages">'))
             self.assertLess(after.index('<details class="site-languages">'),after.index('<a class="header-cta"'))
+        def test_editorial_language_accessible_name_contains_visible_label(self):
+            for locale in ("ja", "en", "zh-Hans", "ar"):
+                with self.subTest(locale=locale):
+                    before=self.editorial_fixture().replace('lang="ja"',f'lang="{locale}"')
+                    rel=dict(TOP_CLUSTER)[locale].lstrip("/")+"blog/obsidian-voice-input.html"
+                    after=transform(before,rel)
+                    code,name=NAMES[locale]
+                    self.assertIn(f'<summary aria-label="{code} · {name} · ',after)
+                    self.assertEqual(after,transform(after,rel))
+        def test_legacy_language_label_is_unchanged(self):
+            after=transform(self.fixture().replace('lang="ja"','lang="en"'),"en/index.html")
+            self.assertIn('<summary aria-label="English · ',after)
+            self.assertNotIn('<summary aria-label="EN · English · ',after)
         def test_editorial_chrome_is_scoped(self):
             with self.assertRaisesRegex(ValueError,'not registered'):
                 transform(self.editorial_fixture(),'other/index.html')
