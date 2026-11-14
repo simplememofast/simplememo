@@ -78,7 +78,10 @@ test('original validated AIO values and independent candidates survive admission
 test('migrated global observation admits AIO selection while legacy and frozen ownership still block', t => {
   const {root}=source(t),aio=companyAio({root,now});
   const file=path.join(ROOT,'growth/experiments/experiments.json'),bytes=fs.readFileSync(file);
-  const original=JSON.parse(bytes).experiments.find(e=>e.id==='brand-2026-08-11-entity-merge');
+  // A real-shaped global row as of the 2026-09-15 view. The ledger row was evaluated on 2026-11-14,
+  // so test a reopened copy (the ledger itself stays byte-identical, asserted below).
+  const row=JSON.parse(bytes).experiments.find(e=>e.id==='brand-2026-08-11-entity-merge');
+  const original={...row,status:'running',decision:null,evaluated_at:null};
   const global=experimentView(original,'2026-09-15');
   const admitted=candidates(aio,{experiments:[global]}).find(c=>c.id==='content:ai-visibility-gap');
   assert.equal(admitted.executable,true);
