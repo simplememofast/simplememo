@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {fileURLToPath} from 'node:url';
-import {removeSectionRule} from './section_control.mjs';
+import {removeSectionRule,controlDocument,assertEditorialSectionPolicy} from './section_control.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 test('control removes only normal deferral and preserves the nested escapes',()=>{
  const css=fs.readFileSync(root+'assets/css/home-hero.css','utf8');
@@ -13,7 +13,7 @@ test('control removes only normal deferral and preserves the nested escapes',()=
  assert(!without.includes('contain-intrinsic-block-size: auto 600px;'));
  const assignment=/html\[lang="ja"\] main > section:not\(\.hero\):not\(\.press-band\) \{\s*content-visibility: auto;\s*contain-intrinsic-block-size: auto 600px;\s*\}/;
  assert.equal(without,css.replace(assignment,''),'All other CSS must remain byte-identical');
- for(const file of ['index.html','en/index.html']){
+ for(const file of ['en/index.html']){
   const html=fs.readFileSync(root+file,'utf8');
   const control=removeSectionRule(html);
   assert.equal(html.length-control.length,css.length-without.length);
@@ -45,5 +45,22 @@ test('native fragment guard preserves preceding geometry without changing print 
  assert(css.includes('html[lang="ja"] main > section:not(.hero):not(.press-band):focus-within,'));
  assert(css.includes('html[lang="ja"] main > section:not(.hero):not(.press-band):target {'));
  assert(!css.includes('html[lang="ja"] main > section:target {'),'A lower-specificity escape cannot override the deferred selector');
- for(const file of ['index.html','en/index.html'])assert.equal(fs.readFileSync(root+file,'utf8').split(selector).length,2);
+ for(const file of ['en/index.html'])assert.equal(fs.readFileSync(root+file,'utf8').split(selector).length,2);
+});
+
+test('editorial control preserves all copy and scripts; deferral is explicitly not applicable',()=>{
+ const html=fs.readFileSync(root+'index.html','utf8');
+ const css=fs.readFileSync(root+'assets/css/home-editorial.css','utf8');
+ assert.equal(controlDocument(html,'index.html'),html);
+ assert.doesNotThrow(()=>assertEditorialSectionPolicy(css));
+ assert.throws(()=>controlDocument(html.replace('sm-editorial','legacy-home'),'index.html'),/exactly one/);
+ assert.throws(()=>controlDocument(html.replace('home-editorial.css?v=','missing.css?v='),'index.html'),/reviewed external/);
+ assert.throws(()=>controlDocument(html+'/* Progressive enhancement only: native search, focus and print keep full content. */','index.html'),/legacy deferral/);
+});
+test('editorial policy rejects hidden, deferred and variable section rendering',()=>{
+ for(const value of ['auto','hidden','var(--render-policy)','auto !important']){
+  assert.throws(()=>assertEditorialSectionPolicy(`.section{content-visibility:${value}}`),/must remain visible/);
+ }
+ assert.doesNotThrow(()=>assertEditorialSectionPolicy('/* content-visibility:auto */.section{content-visibility:visible}'));
+ assert.doesNotThrow(()=>assertEditorialSectionPolicy('.section{content-visibility:visible !important}'));
 });
