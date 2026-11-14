@@ -15,6 +15,61 @@ function allowedRequest(url, method, base) {
   return parsed.origin === new URL(base).origin && method === 'GET' && !parsed.pathname.startsWith('/cdn-cgi/rum');
 }
 
+// Check the actual clickable surface, not just a matching href. A decorative
+// overlay once left the homepage App Store badge visually present but inert.
+function assertHitTarget(target, label) {
+  assert(target && target.visible, `${label}: visible clickable target`);
+  assert(target.hit, `${label}: another element intercepts the center`);
+  assert(target.width >= 24 && target.height >= 44, `${label}: readable touch target`);
+  assert(target.left >= -1 && target.right <= target.viewport + 1, `${label}: clipped horizontally`);
+}
+
+// The reviewed portrait's face area is expressed in the original 1536×1024
+// image coordinates. Check the CSS crop rather than trusting object-position.
+function portraitCoverage({ width, height, objectFit, objectPosition }) {
+  assert(['cover', 'contain'].includes(objectFit), 'Portrait preserves its aspect ratio');
+  const position = objectPosition.split(/\s+/).map(value => {
+    assert(/^[0-9.]+%$/.test(value), 'Portrait uses auditable percentage positioning');
+    return Number.parseFloat(value) / 100;
+  });
+  assert.equal(position.length, 2, 'Portrait position has two axes');
+  const scale = Math[objectFit === 'cover' ? 'max' : 'min'](width / 1536, height / 1024);
+  const offsetX = (width - 1536 * scale) * position[0];
+  const offsetY = (height - 1024 * scale) * position[1];
+  const face = { left: offsetX + 300 * scale, right: offsetX + 700 * scale,
+    top: offsetY + 100 * scale, bottom: offsetY + 560 * scale };
+  const fits = face.left >= -1 && face.top >= -1 && face.right <= width + 1 && face.bottom <= height + 1;
+  return { ...face, width, height, fits };
+}
+
+async function checkEditorialControls(page) {
+  const navigation = page.locator('header[data-site-header] nav a[href]');
+  assert(await navigation.count() >= 4, 'Editorial navigation retains every visible route');
+  for (let i = 0; i < await navigation.count(); i++) {
+    const link = navigation.nth(i);
+    // Native language choices remain hidden until their disclosure is opened.
+    if (await link.evaluate(el => !!el.closest('details'))) continue;
+    assert(await link.isVisible(), 'Primary navigation remains available without a hamburger');
+  }
+  for (const selector of ['header .header-cta', '.hero a[href*="apps.apple.com"]']) {
+    const link = page.locator(selector).first();
+    await link.scrollIntoViewIfNeeded();
+    const target = await link.evaluate(el => {
+      const r = el.getBoundingClientRect(), hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return { visible: r.width > 0 && r.height > 0, hit: hit === el || el.contains(hit), width: r.width, height: r.height, left: r.left, right: r.right, viewport: innerWidth };
+    });
+    assertHitTarget(target, selector);
+    assert(new URL(await link.getAttribute('href'), page.url()).pathname.includes('id6758438948'), 'Download target retains the published app ID');
+  }
+  const faq = page.locator('.faqs details').first();
+  assert(await faq.count(), 'Editorial page retains native FAQ controls');
+  const summary = faq.locator('summary');
+  await summary.click();
+  assert.equal(await faq.getAttribute('open'), '', 'Native FAQ opens on click');
+  await summary.press('Enter');
+  assert.equal(await faq.getAttribute('open'), null, 'Native FAQ closes from the keyboard');
+}
+
 // Drive timers from the runner: page timers do not fire when JavaScript is
 // disabled. Bound the scroll using one height snapshot and poll image state
 // from Node rather than waiting on an in-page async loop or animation frame.
@@ -70,10 +125,13 @@ async function main() {
         try {
           const response = await page.goto(base + '/' + locale, { waitUntil: 'networkidle', timeout: 30000 });
           assert.equal(response.status(), 200);
+          const editorial = !!await page.locator('body.sm-editorial').count();
+          record.layout = editorial ? 'editorial' : 'legacy';
+          assert(!editorial || !locale, 'Editorial homepage profile is Japanese only');
           await page.evaluate(() => document.fonts.ready);
           assert(await page.locator('h1').isVisible(), 'Heading is visible');
           assert(await page.locator('.hero a[href*="apps.apple.com"]').first().isVisible(), 'Primary conversion link is visible');
-          if (locale) {
+          if (locale || editorial) {
             assert(await page.locator('.hero__photograph img').evaluate(img => img.complete && img.naturalWidth > 0), 'Hero image loaded');
           } else {
             // The Japanese hero has no photo since 2026-11-13 (owner decision): the memo and the note it lands in.
@@ -81,11 +139,21 @@ async function main() {
             assert(await page.locator('.hero .hp-stage').isVisible(), 'Japanese hero shows the memo and the note');
           }
           assert(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth <= 1), `${label}: horizontal overflow`);
+          if (editorial) {
+            const dimensions = await page.locator('.hero__photograph img').evaluate(img => {
+              const rect = img.getBoundingClientRect(), style = getComputedStyle(img);
+              return { width: rect.width, height: rect.height, objectFit: style.objectFit, objectPosition: style.objectPosition };
+            });
+            record.portrait = portraitCoverage(dimensions);
+            assert(record.portrait.fits, `Portrait face remains inside the crop: ${JSON.stringify(record.portrait)}`);
+          }
           if (locale) {
             assert.equal(await page.locator('.global-nav__logo img').getAttribute('alt'), '', 'Decorative logo must not repeat the adjacent accessible link text');
             assert((await page.locator('.global-nav__logo').innerText()).trim().length > 0, 'Navigation link retains its accessible text');
           }
-          if (javascript) {
+          if (editorial) {
+            await checkEditorialControls(page);
+          } else if (javascript) {
             const toggle = page.locator('.global-nav__hamburger');
             assert.equal(await toggle.count(), 1);
             if (await toggle.isVisible()) {
@@ -97,7 +165,7 @@ async function main() {
           }
           await loadLazyImages(page);
           // A PR audit can still see the previous homepage in production.
-          if (!locale && await page.locator('body.capture-full').count()) {
+          if (!locale && !editorial && await page.locator('body.capture-full').count()) {
             await page.locator('.capture-full .pricing-cards').scrollIntoViewIfNeeded();
             const prices = await page.locator('.capture-full .pricing-card').evaluateAll(cards => cards.map(card => {
               const price = card.querySelector('.pricing-card__price,.pricing-card__price-row');
@@ -110,6 +178,18 @@ async function main() {
             assert.equal(prices.length, 3, 'All three Japanese price cards are checked');
             assert(prices.every(price => price.fits), `Price text must remain readable inside each card: ${JSON.stringify(prices)}`);
           }
+          if (editorial) {
+            const prices = await page.locator('.plans .plan').evaluateAll(cards => cards.map(card => {
+              const price = card.querySelector('.price'), bounds = card.getBoundingClientRect();
+              const range = document.createRange(); range.selectNodeContents(price);
+              return { text: price.textContent.trim(), fits: price.scrollWidth <= price.clientWidth + 1 &&
+                [...range.getClientRects()].every(rect => rect.left >= bounds.left && rect.right <= bounds.right),
+                fontSize: parseFloat(getComputedStyle(price).fontSize) };
+            }));
+            assert.equal(prices.length, 2, 'Editorial Free and Premium prices are both checked');
+            assert(prices.every(price => price.fits && price.fontSize >= 32), `Editorial price text remains readable: ${JSON.stringify(prices)}`);
+            record.prices = prices;
+          }
           assert.deepEqual(failures, [], 'No JavaScript errors or missing same-origin resources');
           record.images = await page.locator('picture:has(source[data-home-perf="image"]) img').evaluateAll(images => images.map(img => ({ url: img.currentSrc, cssWidth: img.getBoundingClientRect().width, dpr: devicePixelRatio })));
           for (const image of record.images) {
@@ -121,17 +201,17 @@ async function main() {
             assert(record.images.every(image => /-750-[a-f0-9]{12}\.avif$/.test(image.url)), 'Intermediate-density viewport uses 750px assets rather than 900px');
           }
           const heroRequests = await page.evaluate(() => performance.getEntriesByType('resource').filter(entry => /\/voice-airpods-pro-bright-/.test(entry.name)).map(entry => entry.name));
-          if (!locale) {
+          if (!locale && !editorial) {
             // No photo, so no stale preload may fetch one either.
             assert.deepEqual(heroRequests, [], 'The Japanese page requests no hero photograph');
           } else {
             assert.equal(heroRequests.length, 1, 'Responsive preload and picture must reuse one hero request');
             const hero = record.images.find(image => /voice-airpods-pro-bright-/.test(image.url));
             assert(hero, 'The displayed hero must be in the checked inventory');
-            if ((width === 390 && dpr === 3) || (width === 1440 && dpr === 1)) {
+            if (!editorial && ((width === 390 && dpr === 3) || (width === 1440 && dpr === 1))) {
               assert(/-1200-[a-f0-9]{12}\.avif$/.test(hero.url), 'Use the correctly sized 1200px hero');
             }
-            if (width === 412 && dpr === 3) {
+            if (!editorial && width === 412 && dpr === 3) {
               // 412pt at 3x needs 1,236px; English has no 1320w candidate (R10).
               assert(/-1536-[a-f0-9]{12}\.avif$/.test(hero.url), 'Wider triple-density displays use the 1536w hero');
             }
@@ -240,5 +320,5 @@ async function checkInPageLinks(browser, base, width, height, output) {
   }
 }
 
-module.exports = { CASES, allowedRequest, loadLazyImages };
+module.exports = { CASES, allowedRequest, loadLazyImages, assertHitTarget, checkEditorialControls, portraitCoverage };
 if (require.main === module) main().catch(error => { console.error(error); process.exitCode = 1; });

@@ -9,7 +9,8 @@ import shutil
 import sys
 import tempfile
 from pathlib import Path
-from build_home import ROOT, OUT, PAGES, DESIGN, characters, digest, page_tokens, purge_unused
+from build_home import (ROOT, OUT, PAGES, DESIGN, characters, digest, page_tokens, purge_unused,
+                        is_editorial_home, editorial_contract_errors, build_editorial_home)
 
 
 # Lighthouse 12.8.2 (simulate) over scripts/perf/server.py (gzip-6, 190-byte HTTP/1.0 headers)
@@ -42,25 +43,45 @@ def validate(root: Path = ROOT) -> list[str]:
         html = (root / page).read_text()
         if glyph_signature(characters(html, shared + hero)) != manifest['pages'][page]['glyphs_sha256']:
             errors.append(f'Changed glyph inventory: {page}')
-        # Japanese inlines the rules that can apply to the page (build_home.purge_unused),
-        # recomputed here from the current stylesheet, page and scripts: a stale copy, or a
-        # page that starts using a dropped class, fails the same way a changed source does.
-        base = purge_unused(strip_faces(shared), page_tokens(html, root)) if page == 'index.html' else strip_faces(shared)
-        for kind, expected in [('base', base), ('hero', hero)]:
-            match = re.search(rf'<style data-home-perf="{kind}">\n(.*?)\n</style>', html, re.S)
-            if not match or (strip_faces(match[1]) if kind == 'base' else match[1]) != expected:
-                errors.append(f'Stale inline {kind} CSS: {page}')
+        editorial = is_editorial_home(html, page)
+        if editorial != (manifest['pages'][page].get('profile') == 'editorial'):
+            errors.append(f'Homepage profile differs from manifest: {page}')
+        if editorial:
+            errors.extend(f'{page}: {error}' for error in editorial_contract_errors(html))
+            css_name = 'assets/css/home-editorial.css'
+            expected_hash = hashlib.sha256((root / css_name).read_bytes()).hexdigest()[:10]
+            if not re.search(r'<link\b[^>]*href="/' + re.escape(css_name) + r'\?v=' + expected_hash + r'"', html):
+                errors.append(f'Stale editorial CSS link: {page}')
+            # Re-apply the same deterministic native hints without Pillow/font
+            # dependencies: a changed preload, sizes or source must fail here.
+            source = re.search(r'<source data-home-perf="image"[^>]*srcset="([^"]+)"', html)
+            if not source:
+                errors.append(f'Missing editorial generated image source: {page}')
+            else:
+                try:
+                    if build_editorial_home(html, source[1]) != html:
+                        errors.append(f'Stale editorial image hints: {page}')
+                except (AssertionError, ValueError) as exc:
+                    errors.append(f'Invalid editorial image hints: {page}: {exc}')
+        else:
+            # Legacy layouts retain the same inline CSS contracts. The new
+            # editorial family has its own source-hashed stylesheet above.
+            base = purge_unused(strip_faces(shared), page_tokens(html, root)) if page == 'index.html' else strip_faces(shared)
+            for kind, expected in [('base', base), ('hero', hero)]:
+                match = re.search(rf'<style data-home-perf="{kind}">\n(.*?)\n</style>', html, re.S)
+                if not match or (strip_faces(match[1]) if kind == 'base' else match[1]) != expected:
+                    errors.append(f'Stale inline {kind} CSS: {page}')
+            if page == 'index.html':
+                design = re.search(rf'<style data-perf-source="/{re.escape(DESIGN)}">\n(.*?)\n</style>', html, re.S)
+                if not design or design[1] != purge_unused((root / DESIGN).read_text(encoding='utf-8'), page_tokens(html, root)):
+                    errors.append(f'Stale inline site-design CSS: {page}')
+                if re.search(rf'<link rel="stylesheet" href="/{re.escape(DESIGN)}', html):
+                    errors.append(f'site-design.css is both linked and inlined: {page}')
         if page == 'index.html':
             body = len(gzip.compress(html.encode(), compresslevel=6, mtime=0))
             if body > HOME_BODY_BUDGET:
                 errors.append(f'index.html is {body} B after gzip-6; keep it at or below {HOME_BODY_BUDGET} B '
                               f'(above {TWO_ROUND_TRIP_BODY} B the lab document needs a third round trip: +150 ms FCP and LCP)')
-            # The Japanese page carries site-design.css inline, purged the same way, in place of its link.
-            design = re.search(rf'<style data-perf-source="/{re.escape(DESIGN)}">\n(.*?)\n</style>', html, re.S)
-            if not design or design[1] != purge_unused((root / DESIGN).read_text(encoding='utf-8'), page_tokens(html, root)):
-                errors.append(f'Stale inline site-design CSS: {page}')
-            if re.search(rf'<link rel="stylesheet" href="/{re.escape(DESIGN)}', html):
-                errors.append(f'site-design.css is both linked and inlined: {page}')
         for asset in set(re.findall(r'/assets/home-perf/[^\s\'"<>),]+', html)):
             if asset.lstrip('/') not in manifest['assets']:
                 errors.append(f'Untracked asset URL: {asset}')
@@ -84,17 +105,30 @@ def selftest() -> None:
         before = page.read_text()
         page.write_text(before.replace('</body>', '𠮷</body>'))
         assert any('glyph inventory' in e for e in validate(root)), 'New glyph was not detected'
-        page.write_text(before.replace('data-home-perf="hero"', 'data-home-perf="broken"'))
-        assert any('inline hero' in e for e in validate(root)), 'Missing CSS was not detected'
-        # A class the purged copy dropped, once used by the page, must make the copy stale.
-        shared_css = (root / 'assets/css/style.min.css').read_text()
-        inline_base = re.search(r'<style data-home-perf="base">\n(.*?)\n</style>', before, re.S)[1]
-        dropped = next(name for name in sorted(set(re.findall(r'\.([A-Za-z_][\w-]*)', shared_css)))
-                       if name not in page_tokens(before, root) and f'.{name}' not in inline_base)
-        page.write_text(before.replace('</main>', f'<p class="{dropped}"></p></main>', 1))
-        assert any('inline base' in e for e in validate(root)), f'Newly used class .{dropped} was not detected'
-        page.write_text(before.replace('<style data-perf-source="/assets/css/site-design.css">\n', '<style data-perf-source="/assets/css/site-design.css">\nbody{}', 1))
-        assert any('site-design' in e for e in validate(root)), 'Edited inline site-design CSS was not detected'
+        if is_editorial_home(before):
+            page.write_text(before.replace('home-editorial.css?v=', 'missing-editorial.css?v=', 1))
+            assert any('editorial CSS' in e for e in validate(root)), 'Missing editorial CSS was not detected'
+            page.write_text(before.replace('imagesizes="', 'imagesizes="99vw, ', 1))
+            assert any('editorial image' in e for e in validate(root)), 'Mismatched responsive preload was not detected'
+            page.write_text(before.replace('class="hero__photograph"', 'class="missing-photograph"', 1))
+            assert validate(root), 'Missing editorial portrait was not detected'
+            page.write_text(before)
+            css = root / 'assets/css/home-editorial.css'
+            saved_css = css.read_text()
+            css.write_text(saved_css + '\n/* changed */')
+            assert any('Changed source' in e for e in validate(root)), 'Changed editorial CSS was not detected'
+            css.write_text(saved_css)
+        else:
+            page.write_text(before.replace('data-home-perf="hero"', 'data-home-perf="broken"'))
+            assert any('inline hero' in e for e in validate(root)), 'Missing CSS was not detected'
+            shared_css = (root / 'assets/css/style.min.css').read_text()
+            inline_base = re.search(r'<style data-home-perf="base">\n(.*?)\n</style>', before, re.S)[1]
+            dropped = next(name for name in sorted(set(re.findall(r'\.([A-Za-z_][\w-]*)', shared_css)))
+                           if name not in page_tokens(before, root) and f'.{name}' not in inline_base)
+            page.write_text(before.replace('</main>', f'<p class="{dropped}"></p></main>', 1))
+            assert any('inline base' in e for e in validate(root)), f'Newly used class .{dropped} was not detected'
+            page.write_text(before.replace('<style data-perf-source="/assets/css/site-design.css">\n', '<style data-perf-source="/assets/css/site-design.css">\nbody{}', 1))
+            assert any('site-design' in e for e in validate(root)), 'Edited inline site-design CSS was not detected'
         # Grow the filler until the page is just past the budget, so the case holds whatever the headroom is.
         filler, count = '', 0
         while len(gzip.compress(before.replace('</body>', filler + '</body>', 1).encode(), compresslevel=6, mtime=0)) <= HOME_BODY_BUDGET:
@@ -112,7 +146,7 @@ def selftest() -> None:
         source.write_text(source.read_text() + '\n/* changed */')
         assert any('Changed source' in e for e in validate(root)), 'Changed shared CSS was not detected'
     purge_selftest()
-    print('PASS: homepage guard accepts valid output and rejects seven regression cases; purge rules hold.')
+    print('PASS: homepage guard accepts valid output and rejects CSS, glyph, image, budget and asset regressions; purge rules hold.')
 
 
 def purge_selftest() -> None:

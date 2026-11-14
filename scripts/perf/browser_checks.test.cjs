@@ -1,7 +1,7 @@
 'use strict';
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { CASES, allowedRequest, loadLazyImages } = require('./browser_checks.cjs');
+const { CASES, allowedRequest, loadLazyImages, assertHitTarget, portraitCoverage } = require('./browser_checks.cjs');
 
 test('functional requests cannot submit analytics or reach a look-alike origin', () => {
   for (const base of ['https://simplememofast.com', 'http://127.0.0.1:8765']) {
@@ -101,10 +101,33 @@ test('responsive hero hints share their widths and retain original fallback and 
   assert(picture[1].includes('.webp'), 'Original native fallback must survive');
 });
 
-test('the Japanese hero has no photograph, so no responsive image preload either (2026-11-13)', () => {
+test('the Japanese editorial hero shares preload/source hints and keeps generated-photo disclosure', () => {
   const fs = require('node:fs'), path = require('node:path');
   const html = fs.readFileSync(path.join(__dirname, '../..', 'index.html'), 'utf8');
-  assert(!html.includes('<picture class="hero__photograph">'), 'No hero photograph');
-  assert(!/<link rel="preload" as="image"[^>]*imagesrcset=/.test(html), 'No hero image preload');
-  assert(!html.includes('voice-airpods-pro-bright'), 'No reference to the removed photo');
+  assert(/<body[^>]*class="[^"]*\bsm-editorial\b/.test(html), 'Explicit reviewed profile');
+  const preload = html.match(/<link rel="preload" as="image"[^>]*imagesrcset="([^"]+)"[^>]*imagesizes="([^"]+)"/);
+  const picture = html.match(/<picture class="hero__photograph">([\s\S]*?)<\/picture>/);
+  assert(preload && picture, 'Native responsive image hints');
+  const source = picture[1].match(/<source data-home-perf="image"[^>]*srcset="([^"]+)"[^>]*sizes="([^"]+)"/);
+  assert(source); assert.equal(source[1], preload[1]); assert.equal(source[2], preload[2]);
+  assert(source[2].includes('820px'), 'Editorial breakpoint is independent of English');
+  assert(html.includes('写真はイメージです'), 'Generated portrait must not imply a testimonial');
+  assert(picture[1].includes('loading="eager"') && picture[1].includes('fetchpriority="high"'));
+});
+
+test('visible-but-covered and clipped downloads fail the same hit-target contract', () => {
+  const valid = { visible: true, hit: true, width: 150, height: 55, left: 20, right: 170, viewport: 390 };
+  assert.doesNotThrow(() => assertHitTarget(valid, 'download'));
+  assert.throws(() => assertHitTarget({ ...valid, hit: false }, 'download'), /intercepts/);
+  assert.throws(() => assertHitTarget({ ...valid, visible: false }, 'download'), /visible/);
+  assert.throws(() => assertHitTarget({ ...valid, height: 18 }, 'download'), /touch target/);
+  assert.throws(() => assertHitTarget({ ...valid, right: 410 }, 'download'), /clipped/);
+});
+
+test('portrait coverage detects a face cropped by a shallow or off-center frame', () => {
+  assert(portraitCoverage({ width: 600, height: 400, objectFit: 'cover', objectPosition: '50% 50%' }).fits);
+  assert(portraitCoverage({ width: 350, height: 234, objectFit: 'cover', objectPosition: '43% 50%' }).fits);
+  assert(!portraitCoverage({ width: 600, height: 100, objectFit: 'cover', objectPosition: '50% 50%' }).fits);
+  assert(!portraitCoverage({ width: 150, height: 600, objectFit: 'cover', objectPosition: '100% 50%' }).fits);
+  assert.throws(() => portraitCoverage({ width: 600, height: 400, objectFit: 'fill', objectPosition: '50% 50%' }), /aspect ratio/);
 });

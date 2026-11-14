@@ -92,8 +92,52 @@ def sync_languages(source, rel):
         pos = row[4]-len(row[0])-3 if row else header[4]-len(header[0])-3
     return source[:pos] + snippet + source[pos:]
 
+def editorial_chrome(source, rel):
+    """Keep the authored editorial chrome, with the same registry-backed languages.
+
+    This profile has an always-visible navigation and native details, so it does
+    not load the hamburger controller or inject a second footer brand. It is an
+    explicit contract for the reviewed landing/article family, not a skip flag.
+    """
+    base = unprefixed_file(rel)
+    if not (rel == "index.html" or base == "blog/obsidian-voice-input.html"):
+        raise ValueError(f"Editorial chrome is not registered for {rel}")
+    for kind in ("bootstrap", "quick", "intro"):
+        source = re.sub(r'<!-- site-chrome:'+kind+r' -->.*?<!-- /site-chrome:'+kind+r' -->', '', source, flags=re.S)
+    source = re.sub(r'\s*<link rel="stylesheet" href="/assets/css/site-chrome.css[^"]*">', '', source)
+    source = re.sub(r'\s*<script src="/js/site-chrome.js[^"]*"[^>]*></script>', '', source)
+    els = Elements(source).elements
+    headers = [e for e in els if e[0] == "header" and ("data-site-header" in e[1] or has(e, "header"))]
+    footers = [e for e in els if e[0] == "footer"]
+    if len(headers) != 1 or len(footers) != 1:
+        raise ValueError(f"{rel}: editorial chrome requires one header and footer")
+    header, footer = headers[0], footers[0]
+    if not any(e[0] == "nav" and header[2] < e[2] < header[4] for e in els):
+        raise ValueError(f"{rel}: editorial header needs visible navigation")
+    for element, marker in sorted(((header, "data-site-header"), (footer, "data-site-footer")), key=lambda item: item[0][2], reverse=True):
+        if marker not in element[1]:
+            opening = source[element[2]:element[3]][:-1] + f' {marker}="">'
+            source = source[:element[2]] + opening + source[element[3]:]
+    # The editorial header's language control belongs between navigation and
+    # its CTA, not inside the tight always-visible mobile navigation row.
+    els = Elements(source).elements
+    header = next(e for e in els if "data-site-header" in e[1])
+    existing = [e for e in els if header[2] < e[2] < header[4] and has(e, "site-languages")]
+    for element in sorted(existing, key=lambda e: e[2], reverse=True):
+        source = source[:element[2]] + source[element[4]:]
+    els = Elements(source).elements
+    header = next(e for e in els if "data-site-header" in e[1])
+    locale = next(e for e in els if e[0] == "html")[1].get("lang", "ja")
+    cta = next((e for e in els if e[0] == "a" and header[2] < e[2] < header[4] and has(e, "header-cta")), None)
+    pos = cta[2] if cta else header[4] - len(header[0]) - 3
+    return source[:pos] + language_menu(rel, locale) + source[pos:]
+
+
 def transform(source, rel):
     if rel.startswith(("fixtures/", "admin/", "docs/")): return source
+    body = next((e for e in Elements(source).elements if e[0] == "body"), None)
+    if body and has(body, "sm-editorial"):
+        return editorial_chrome(source, rel)
     base_rel = unprefixed_file(rel)
     utility = base_rel in ("404.html", "compose.html", "verify.html", "memo-inbox/index.html", "memo-inbox/guide.html")
     # Rebuild managed pieces so later design updates have one source of truth.
@@ -242,6 +286,40 @@ def selftest():
             self.assertEqual(after.count('<details class="site-languages">'),1)
             self.assertNotIn('data-lang-btn',after)
             self.assertEqual(after,transform(after,"index.html"))
+        def editorial_fixture(self):
+            return '<html lang="ja"><head><script type="application/ld+json">{"x":1}</script></head><body class="sm-editorial"><header class="header"><a class="brand" href="/">Authored brand</a><nav aria-label="Main"><a href="#how">How</a></nav></header><main><h1>Original heading</h1></main><footer><nav><a href="/privacy">Privacy</a></nav></footer><script src="/js/app-store-tracking.js"></script></body></html>'
+        def test_editorial_chrome_keeps_authored_layout_and_tracking(self):
+            before=self.editorial_fixture(); after=transform(before,"index.html")
+            self.assertEqual(after,transform(after,"index.html"))
+            self.assertIn('Authored brand',after)
+            self.assertIn('<h1>Original heading</h1>',after)
+            self.assertIn('/js/app-store-tracking.js',after)
+            self.assertEqual(after.count('<details class="site-languages">'),1)
+            self.assertNotIn('site-chrome.js',after)
+            self.assertNotIn('site-chrome.css',after)
+            self.assertNotIn('site-footer-intro',after)
+        def test_editorial_article_headers_are_not_global_headers(self):
+            before=self.editorial_fixture().replace('<h1>Original heading</h1>', '<header><h1>Original heading</h1></header><article><header>Card title</header></article>')
+            after=transform(before,'blog/obsidian-voice-input.html')
+            self.assertEqual(after.count('data-site-header=""'),1)
+            self.assertIn('<article><header>Card title</header></article>',after)
+        def test_editorial_language_is_outside_primary_navigation(self):
+            before=self.editorial_fixture().replace('</header>', '<a class="header-cta" href="https://apps.apple.com/app">Download</a></header>')
+            after=transform(before,'index.html')
+            self.assertLess(after.index('</nav>'),after.index('<details class="site-languages">'))
+            self.assertLess(after.index('<details class="site-languages">'),after.index('<a class="header-cta"'))
+        def test_editorial_chrome_is_scoped(self):
+            with self.assertRaisesRegex(ValueError,'not registered'):
+                transform(self.editorial_fixture(),'other/index.html')
+        def test_editorial_chrome_rejects_missing_navigation(self):
+            before=self.editorial_fixture().replace('<nav aria-label="Main"><a href="#how">How</a></nav>','')
+            with self.assertRaisesRegex(ValueError,'visible navigation'):
+                transform(before,'index.html')
+        def test_editorial_chrome_repairs_missing_language_control(self):
+            after=transform(self.editorial_fixture(),'blog/obsidian-voice-input.html')
+            self.assertIn('hreflang="en"',after)
+            self.assertIn('data-site-header=""',after)
+            self.assertIn('data-site-footer=""',after)
         def test_utility_preserves_app(self):
             before='<html lang="en"><head></head><body><header><a href="/memo-inbox/">Memo Inbox</a></header><main><input id="note"><button id="save">Save</button></main></body></html>'
             after=transform(before,"memo-inbox/index.html")

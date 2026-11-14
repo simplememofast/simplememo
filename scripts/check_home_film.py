@@ -9,6 +9,8 @@ import re
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / 'scripts' / 'perf'))
+from build_home import is_editorial_home, editorial_contract_errors
 FILES = ('index.html', 'data/benchmark.json', 'scripts/build_home_film.py',
          'assets/video/capture-home.json', 'assets/video/capture-home.mp4',
          'assets/video/capture-home-poster.jpg')
@@ -52,8 +54,6 @@ def validate(files):
     meta=json.loads(files['assets/video/capture-home.json'])
     page=files['index.html'].decode()
     figure=re.search(r'<figure\b[^>]*class="lp-video home-film"[^>]*>(.*?)</figure>',page,re.S)
-    if not figure:return ['Homepage film is missing']
-    film=figure[1]
     ready=shown(ledger['apps']['Simple Memo - for Obsidian']['ready'])
     need(meta['measurement']==measurement_snapshot(ledger),'Film measurement snapshot is stale')
     need(meta['ready_s']==ledger['apps']['Simple Memo - for Obsidian']['ready'],'Film timing is stale')
@@ -62,6 +62,15 @@ def validate(files):
     need(meta['poster_sha256']==digest(files['assets/video/capture-home-poster.jpg']),'Poster differs from its export record')
     need(meta['bytes']==len(files['assets/video/capture-home.mp4']),'Video byte size differs')
     need(meta['duration_s']==18 and meta['fps']==30 and (meta['width'],meta['height'])==(2560,1600),'Film format changed; review visible metadata')
+    # The new Japanese layout deliberately contains no film. Its explicit page
+    # contract replaces only the visible film contract; the measured/exported
+    # video remains a maintained asset and still passes all ledger/hash checks.
+    if is_editorial_home(page):
+        errors.extend(editorial_contract_errors(page))
+        return errors
+    if not figure:
+        return errors + ['Homepage film is missing']
+    film=figure[1]
     need('図解動画 · 18秒 · 音声なし' in film and '18秒の図解動画を再生' in film,'Visible film duration is stale')
     need(f'<strong>{ready}秒</strong>' in film,'Visible timing differs from ledger')
     need('iPhone 16e' in film and 'ウォーム起動' in film and
@@ -89,11 +98,40 @@ def validate(files):
     return errors
 
 
+def legacy_fixture(files):
+    """A minimal complete film contract, independent of the selected homepage."""
+    ledger=json.loads(files['data/benchmark.json'])
+    ready=shown(ledger['apps']['Simple Memo - for Obsidian']['ready'])
+    rows=''.join('<tr><th scope="row">'+('シンプルメモ' if name=='Simple Memo - for Obsidian' else name)
+                 +'</th><td>'+shown(data['ready'])+'秒'+(' ※' if data.get('ready_basis') else '')+'</td></tr>'
+                 for name,data in sorted(ledger['apps'].items(),key=lambda item:item[1]['ready']))
+    video_url='/assets/video/capture-home.mp4?v='+digest(files['assets/video/capture-home.mp4'])[:10]
+    poster_url='/assets/video/capture-home-poster.jpg?v='+digest(files['assets/video/capture-home-poster.jpg'])[:10]
+    schema={'@context':'https://schema.org','@type':'VideoObject','duration':'PT18S',
+            'contentUrl':'https://simplememofast.com'+video_url,
+            'thumbnailUrl':['https://simplememofast.com'+poster_url],
+            'description':f'入力開始まで{ready}秒はiPhone 16e・ウォーム起動の実測で、書く時間・送信時間は含みません'}
+    return ('<!doctype html><html lang="ja"><head><script type="application/ld+json">'
+            +json.dumps(schema,ensure_ascii=False)+'</script></head><body>'
+            +'<figure class="lp-video home-film"><video poster="'+poster_url+'"><source src="'+video_url+'"></video>'
+            +'<button aria-label="18秒の図解動画を再生">再生</button><figcaption>'
+            +'図解動画 · 18秒 · 音声なし <strong>'+ready+'秒</strong> iPhone 16e ウォーム起動 '
+            +'書く時間・送信時間は含みません。実機画面の録画ではありません。※Draftsのみ、5回中の最速値です'
+            +'<table>'+rows+'</table></figcaption></figure></body></html>').encode()
+
+
 def main():
     files={name:(ROOT/name).read_bytes() for name in FILES}
     errors=validate(files)
     if errors:raise SystemExit('\n'.join(errors))
     if '--selftest' in sys.argv:
+        # Always exercise the old positive/negative contract, even when the live
+        # page uses the editorial layout; a missing legacy film must still fail.
+        editorial = files.copy() if is_editorial_home(files['index.html'].decode()) else None
+        if editorial:
+            files = files.copy()
+            files['index.html'] = legacy_fixture(files)
+            if validate(files):raise SystemExit('Legacy film regression fixture is invalid')
         assert shown(.35)=='0.4' and shown(1.45)=='1.5'
         mutants=[]
         def change(name, old, new):
@@ -121,7 +159,16 @@ def main():
         for i, mutant in enumerate(mutants):
             if not validate(mutant):raise SystemExit(f'Film guard missed mutation {i}')
         print(f'PASS: {len(mutants)} stale film mutations rejected')
-    print('PASS: film, benchmark ledger, visible comparison, schema and asset versions agree')
+        if editorial:
+            for old,new in ((b'sm-editorial',b'sm-editorial-missing'),
+                            (b'</main>',b'<video></video></main>'),
+                            (b'</head>',b'<meta name="robots" content="noindex"></head>')):
+                candidate=editorial.copy()
+                if old not in candidate['index.html']:raise SystemExit('Editorial selftest marker missing')
+                candidate['index.html']=candidate['index.html'].replace(old,new,1)
+                if not validate(candidate):raise SystemExit('Editorial film guard missed mutation')
+            print('PASS: editorial marker, indexability and absent-video mutations rejected')
+    print('PASS: selected homepage contract and benchmark/video asset integrity agree')
 
 
 if __name__=='__main__':main()

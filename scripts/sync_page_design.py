@@ -56,18 +56,21 @@ def transform(source,rel):
     body=next((n for n in nodes if n.tag=='body'),None)
     head=next((n for n in nodes if n.tag=='head'),None)
     if not body or not head: return source
+    editorial = body.has('sm-editorial')
+    if editorial and not (rel == 'index.html' or unprefixed_file(rel) == 'blog/obsidian-voice-input.html'):
+        raise ValueError(f'Editorial design is not registered for {rel}')
     changes=[];attrs={};inserts={}
     def add(pos,value): inserts[pos]=inserts.get(pos,'')+value
     def attr(n,key,value): attrs.setdefault(n.start,(n,{}))[1][key]=value
     def cls(n,*values):
         current=attrs.get(n.start,(n,{}))[1].get('class',n.attrs.get('class','')).split()
         attr(n,'class',' '.join(dict.fromkeys(current+list(values))))
-    cls(body,'site-designed')
+    if not editorial: cls(body,'site-designed')
     main=next((n for n in nodes if n.tag=='main'),None)
-    refined=any(body.has(x) for x in ['capture-full','capture-home','capture-editorial'])
+    refined=editorial or any(body.has(x) for x in ['capture-full','capture-home','capture-editorial'])
     home=rel in ['index.html','en/index.html','ar/index.html','es/index.html','id/index.html','ko/index.html','pt-BR/index.html','tr/index.html','zh-Hant/index.html','zh/index.html']
     utility=not main or unprefixed_file(rel).startswith('memo-inbox/')
-    family=body.attrs.get('data-design-family') or ('refined' if refined else ('home' if home else 'utility' if utility else 'reading'))
+    family='editorial' if editorial else body.attrs.get('data-design-family') or ('refined' if refined else ('home' if home else 'utility' if utility else 'reading'))
     attr(body,'data-design-family',family)
     locale=next((n.attrs.get('lang') for n in nodes if n.tag=='html'),'ja')
     ja=locale=='ja'
@@ -144,7 +147,18 @@ def transform(source,rel):
                 chapter=next((a for a in ancestors(n) if a.has('sd-chapter')),None)
                 if chapter:cls(chapter,'ce-chapter--wide')
     # Add a single family-independent finishing layer; existing assets stay in place.
-    needed=ASSETS if family in ['reading','home'] else [ASSETS[-1]]
+    if editorial:
+        needed = ['assets/css/home-editorial.css']
+        if unprefixed_file(rel) == 'blog/obsidian-voice-input.html':
+            needed.append('assets/css/article-editorial.css')
+        # Legacy shared layout rules must not compete with this explicit page profile.
+        for n in nodes:
+            if n.tag == 'link' and n.attrs.get('href', '').split('?')[0].lstrip('/') in ASSETS:
+                changes.append((n.start, n.inner, ''))
+            elif n.tag == 'style' and n.attrs.get('data-perf-source', '').lstrip('/') in ASSETS:
+                changes.append((n.start, n.end, ''))
+    else:
+        needed=ASSETS if family in ['reading','home'] else [ASSETS[-1]]
     for asset in needed:
         href='/'+asset+'?v='+hashlib.sha256((ROOT/asset).read_bytes()).hexdigest()[:10]
         existing=next((n for n in nodes if n.tag=='link' and n.attrs.get('href','').split('?')[0]=='/'+asset),None)
@@ -196,6 +210,27 @@ def selftest():
             output=transform(self.fixture(),'example/index.html')
             self.assertIn('class="sd-table" tabindex="0" role="region"',output)
             self.assertNotIn('sd-hero--media',output)
+        def test_editorial_profile_preserves_copy_and_updates_assets(self):
+            from unittest.mock import patch
+            import tempfile
+            with tempfile.TemporaryDirectory() as directory:
+                root=Path(directory); (root/'assets/css').mkdir(parents=True)
+                for name in ('home-editorial.css','article-editorial.css'):
+                    (root/'assets/css'/name).write_text('/* reviewed editorial stylesheet */')
+                before=self.fixture('ja').replace('<body>','<body class="sm-editorial">')
+                with patch(__name__+'.ROOT', root):
+                    once=transform(before,'blog/obsidian-voice-input.html')
+                    self.assertEqual(once,transform(once,'blog/obsidian-voice-input.html'))
+                self.assertIn('data-design-family="editorial"',once)
+                self.assertIn('/assets/css/home-editorial.css?v=',once)
+                self.assertIn('/assets/css/article-editorial.css?v=',once)
+                self.assertNotIn('site-design.css',once)
+                self.assertNotIn('ce-chapter',once)
+                self.assertIn('Original title',once)
+                self.assertIn('ct=original',once)
+        def test_editorial_profile_cannot_silence_other_pages(self):
+            with self.assertRaisesRegex(ValueError,'not registered'):
+                transform(self.fixture().replace('<body>','<body class="sm-editorial">'),'example/index.html')
         def test_private_pages_excluded(self):
             self.assertEqual(self.fixture(),transform(self.fixture(),'admin/index.html'))
         def test_authored_numbering_is_not_duplicated(self):
