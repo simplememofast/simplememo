@@ -213,6 +213,15 @@
       "within_hours": 24,
       "stop_automation": false,
       "note": "公開後の速度監査で既存の性能基準を満たさなかったという観測の分類であり、原因の断定ではない。まずAIが同一コミットの公開確認・全測定結果・表示と画像取得を調査し、既存の権限内で修復する。24時間以内の日報で報告し、単発では自動運用全体を停止しない。既存self_repair.stop_after_failed_repairsに達した場合はrepair_limitによる停止・オーナー移管を適用し、停止解除は人間のみ。性能基準やCIを緩めず、失敗記録を成功へ書き換えず、原因未確定のneeds_triageを根拠なく消さない。【2026-09-18 オーナー承認】この種別に限る上記の通知・停止ルール追加の明示確認に、オーナーが「はい」と回答。PR #1449の承認記録: https://github.com/simplememofast/simplememo/pull/1449#issuecomment-5726292280 。今回限りの承認であり、このファイルをself_repair.may_modifyへ追加せず、他の規則・権限・予算・修理上限・再開条件は変更しない。"
+    },
+    {
+      "trigger": "eligibility_boundedness_scope_gap",
+      "kind": "failure_class",
+      "who": "owner",
+      "channel": "daily_report",
+      "within_hours": 24,
+      "stop_automation": false,
+      "note": "適格性の門（value-contracts.mjs --select）が、許可リスト（data/eligibility-policy.json の criteria.boundedness.scopes）に無いパスを理由に候補をすべて不適格にし、成果物が出なかったという観測の分類。モデルの誤りでも門の故障でもなく、許可範囲の不足を示す。許可範囲を広げるかどうかはオーナーが決め、AI は eligibility-policy.json を自分では広げない。24時間以内の日報で知らせ、単発では自動運用全体を止めない（候補を見送るのは門の設計どおりの動き）。失敗の記録を成功へ書き換えない。【2026-11-14 オーナー承認】Actions 経路の試運転（run 43546873901・PR #2349）で初めて現れたこの種別に限り、規則の追加をオーナーが選択肢質問で選んだ（Claude Code セッション）。今回限りの承認であり、このファイルを self_repair.may_modify へ追加せず、他の規則・権限・予算・修理上限・再開条件は変更しない。同じ日に、原因になった許可リストの不足（data/i18n/ の3パス）も、オーナーの選択で eligibility-policy.json に足した。"
     }
   ]
 }

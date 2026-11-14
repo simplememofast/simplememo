@@ -59,9 +59,11 @@
           "*.html", "**/*.html",
           "growth/content/**", "growth/data/**", "growth/experiments/**",
           "assets/**", "docs/**", "data/*.json", "blog/**", "use-cases/**",
-          "obsidian/**", "en/**", "sitemap.xml", "sitemap-*.xml", "robots.txt"
+          "obsidian/**", "en/**", "sitemap.xml", "sitemap-*.xml", "robots.txt",
+          "data/i18n/translations/*.json", "data/i18n/overrides/*.json", "data/i18n/pages.json"
         ],
         "$content_sitemap_note": "**`sitemap-*.xml` は 2026-09-06 に足した。**`generate_sitemap.py` は sitemap.xml だけでなく sitemap-ja.xml / sitemap-en.xml / sitemap-locales.xml も書き換えるので、**新規URLを1本足すと必ずこの3本に触る。**許可リストが sitemap.xml しか持っていなかったため、2026-09-06 の主系は実装を終えた /obsidian/compare/capacities/ を boundedness 不適格として出荷せずに捨てた（PR #969・run 33996430959）。**門は設計どおり fail-closed に働いており、足りなかったのは許可リストの1行。**8月まで露出しなかったのは L2 契約が必須になったのが 09-04 以降だからで、構造的な穴。オーナーが4択で選択（2026-09-06・Claude Code セッション session_013C7zrtf3P369vK7dyRiZdF）。**ワイルドカードにしたのは分割が増えた日に同じ詰まりを再発させないため** —— このパターンが拾うのは generate_sitemap.py が所有するファイル群で、人が書く内容ではない。",
+        "$content_i18n_note": "**`data/i18n/translations/*.json`・`data/i18n/overrides/*.json`・`data/i18n/pages.json` は 2026-11-14 に足した。**/obsidian/ のハブは 2026-10-08（#2031）から8言語の生成翻訳を持つので、翻訳の付いたページの表を1行増やす（翻訳の単位が1つ増える）か、新しいページを登録すると、必ずこの3つのどれかに触る。2026-11-14 の Actions 経路の試運転（run 43546873901・PR #2349）は、レーン C（/obsidian/plugins/ の登録数の更新）とレーン E（/obsidian/compare/craft/ の新設）の候補を、どちらも boundedness 不適格として着手前に見送った。**門は設計どおり fail-closed に働いており、足りなかったのは許可リストの行。**2026-09-06 の sitemap-*.xml と同じ形。オーナーが選択肢質問で「範囲に足す」を選択（2026-11-14・Claude Code セッション）。足したのは翻訳の台帳・上書き・ページの登録の3つだけで、data/i18n/ の他のファイル（生成器の設定や語彙など）は含めない。生成翻訳の品質と noindex の判定は従来どおり別の検査と台帳で扱う。",
         "actuator": [
           "data/autopilot-runs.json", "data/autopilot-actions.json",
           "data/autopilot-status.json", "data/autopilot-cost.json",
