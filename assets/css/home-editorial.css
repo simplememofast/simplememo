@@ -111,3 +111,39 @@
   .sm-editorial .hero-image picture img{object-position:32% 0%}
   .sm-editorial .hero-image::after{inset:84% 0 0}
 }
+
+/* Restore the pre-editorial homepage palette (29e7a369^), retaining the
+   responsive portrait composition. Article and print palettes stay separate. */
+@media screen {
+  body.sm-editorial:not(.sm-article) {
+    --paper:#08070c;--ink:#f5f1fb;--sub:#aaa3bb;--line:rgba(222,208,250,.12);
+    --green:#c9b8ff;--green-soft:#16141f;--warm:#100f17;
+    color-scheme:dark;
+  }
+  body.sm-editorial:not(.sm-article) :is(a,button,summary):focus-visible { outline-color:#dccbff; }
+  body.sm-editorial:not(.sm-article) .skip-link { color:var(--paper); }
+  body.sm-editorial:not(.sm-article) .hero-image { background:var(--paper); }
+  body.sm-editorial:not(.sm-article) .hero-image figcaption { color:#f5f1fb; }
+  body.sm-editorial:not(.sm-article) .wave i { background:#f5f1fb; }
+  body.sm-editorial:not(.sm-article) .rating>span { color:#f4c86a; }
+  body.sm-editorial:not(.sm-article) .strip-dot { color:var(--sub); }
+  body.sm-editorial:not(.sm-article) .real-screen { background:var(--warm); }
+  body.sm-editorial:not(.sm-article) .real-screen figcaption { color:var(--sub); }
+  body.sm-editorial:not(.sm-article) .screen-frame { box-shadow:0 24px 45px #0006,0 2px 4px #0008; }
+  body.sm-editorial:not(.sm-article) .step-number { color:var(--green); }
+  body.sm-editorial:not(.sm-article) .note-example { background:var(--warm);box-shadow:3px 5px 0 #16141f; }
+  body.sm-editorial:not(.sm-article) .destination { border-color:var(--line); }
+  body.sm-editorial:not(.sm-article) .destination p { color:#d8d2e4; }
+  body.sm-editorial:not(.sm-article) .destination-condition { color:var(--sub);border-color:var(--line); }
+  body.sm-editorial:not(.sm-article) .plan { background:var(--warm); }
+  body.sm-editorial:not(.sm-article) .plan-premium { background:var(--green-soft);border-color:rgba(222,208,250,.24); }
+  body.sm-editorial:not(.sm-article) .final-cta { background:var(--warm);color:var(--ink);border-top:1px solid var(--line); }
+  body.sm-editorial:not(.sm-article) .final-cta>div>p:not(.eyebrow) { color:#d8d2e4; }
+  body.sm-editorial:not(.sm-article) .site-language-panel { box-shadow:0 8px 24px #0006; }
+}
+@media screen and (max-width:820px) {
+  body.sm-editorial:not(.sm-article) .hero-image figcaption { background:#08070ce6; }
+}
+@media screen and (min-width:821px) {
+  body.sm-editorial:not(.sm-article) .hero-image::after { background:linear-gradient(transparent,#08070ccc); }
+}
