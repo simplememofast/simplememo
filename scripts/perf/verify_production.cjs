@@ -41,8 +41,11 @@ function knownPlatformScript(script) {
     attrs[name] = attribute[2] ?? attribute[3] ?? attribute[4] ?? '';
     rest = rest.slice(attribute[0].length);
   }
-  if (!Object.keys(attrs).every(name => ['src', 'defer', 'integrity', 'data-cf-beacon', 'crossorigin'].includes(name))) return false;
-  if (!('defer' in attrs) || !attrs.src) return false;
+  if (!Object.keys(attrs).every(name => ['src', 'defer', 'type', 'integrity', 'data-cf-beacon', 'crossorigin'].includes(name))) return false;
+  // Cloudflare deploys both deferred classic and intrinsically deferred module
+  // beacons. Accept only that exact module type, never arbitrary script types.
+  const moduleScript = attrs.type === 'module';
+  if (('type' in attrs && !moduleScript) || (!('defer' in attrs) && !moduleScript) || !attrs.src) return false;
   try {
     const url = new URL(attrs.src);
     return url.protocol === 'https:' && url.hostname === 'static.cloudflareinsights.com'

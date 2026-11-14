@@ -107,6 +107,33 @@ test('only the existing Cloudflare beacon shape is exempted, at most once', () =
   }
 });
 
+test('the observed Cloudflare module beacon preserves the same strict boundary', () => {
+  const expected = fs.readFileSync(path.resolve(__dirname, '../../index.html'), 'utf8');
+  const beacon = `<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-test" data-cf-beacon='{"version":"2024.11.0","token":"public-analytics-id","r":1,"spa":2}' crossorigin="anonymous"></script>`;
+  assert(knownPlatformScript(beacon));
+  assert(pageMatches(expected.replace('</body>', beacon + '</body>'), expected));
+  const classic = beacon.replace('type="module"', 'defer');
+  assert(!pageMatches(expected.replace('</body>', beacon + beacon + '</body>'), expected));
+  assert(!pageMatches(expected.replace('</body>', beacon + classic + '</body>'), expected));
+  for (const invalid of [
+    beacon.replace('type="module"', ''),
+    beacon.replace('type="module"', 'type="text/javascript"'),
+    beacon.replace('type="module"', 'defer type="text/javascript"'),
+    beacon.replace('type="module"', 'type="module" type="module"'),
+    beacon.replace('type="module"', 'type="module" async'),
+    beacon.replace('type="module"', 'type="module" onload="run()"'),
+    beacon.replace('static.cloudflareinsights.com', 'static.cloudflareinsights.com.attacker.invalid'),
+    beacon.replace('/beacon.min.js/', '/other.min.js/'),
+    beacon.replace('https:', 'http:'),
+    beacon.replace('crossorigin="anonymous"', 'crossorigin="anonymous" nonce="extra"'),
+    beacon.replace('vce701823e78c4301a35b7e07294d87301792088814092', 'vce701823e78c4301a35b7e07294d87301792088814092?extra=1'),
+    beacon.replace('</script>', 'run()</script>'),
+  ]) {
+    assert(!knownPlatformScript(invalid));
+    assert(!pageMatches(expected.replace('</body>', invalid + '</body>'), expected));
+  }
+});
+
 test('asset verification fetches the exact versioned stylesheet seen in the response', () => {
   const root = path.resolve(__dirname, '../..');
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
