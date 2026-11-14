@@ -1220,7 +1220,7 @@
       },
       "started_at": "2026-08-11",
       "evaluation_at": "2026-11-11",
-      "status": "running",
+      "status": "evaluated",
       "before": null,
       "after": null,
       "baseline": {
@@ -1232,8 +1232,8 @@
         "source": "ブランド検索14クエリ合計(可視分) — docs/SEO_AIO_PLAN_2026-08.md §2-4。AIO表示 6,947(全表示の10.2%)・会話型クエリ27件/343imp/平均順位6.8 も同時に追う"
       },
       "target_metric": "brand_search_impressions",
-      "decision": null,
-      "evaluated_at": null,
+      "decision": "measurement_failed",
+      "evaluated_at": "2026-11-14",
       "notes": [
         "2026-08-11: 7ページに data-answer-block を挿入。対象は会話型クエリ 「セキュリティとコラボレーションの両立(54imp/pos4.7)」「apple watchで音声入力するには(49imp/pos9.0)」「2026年に社会人に最も評価されている(31imp/pos6.5)」「お金を払う価値がある(31imp/pos7.2)」「デジタルと手書きどちらが優れているか(18imp/pos5.9)」「標準的な議事録テンプレート(7imp/pos4.1)」「AIでタグを自動提案(7imp/pos6.4)」。セキュリティ比較の回答は他社(CryptPad/Notion/Standard Notes)を推し、自社は該当しないと明記している。短期CVを下げうるが現状クリック0のため下げる余地がない。判定はクリックではなく、ブランド検索表示数・AIO表示数・会話型クエリ件数と平均順位で行う。",
         "2026-09-05: measurement_changesを参照。GA4の自社App Store計測とブランド分類の定義変更をまたいだ単純な前後差で効果を判定しない。旧期間を同一定義で復元できなければ比較不能とする。",
@@ -1256,7 +1256,8 @@
         "2026-10-03: 対象ページのうち /blog/digital-vs-handwritten-notes は、第114弾 #1934（10/3 22:28）で、条件の書いていない0.4秒の3か所（「アイデアキャプチャ → デジタル」のカード、「通勤・移動中のアイデアキャプチャ」の段落、CTA の説明）に「（iPhone 16e・ウォーム起動の実測）」を足した（オーナー判断 §7 #61 ①）。回答ブロック（data-answer-block）の中は変えていない。dateModified とサイトマップの lastmod はすでに 10/3。#61 の作業では実行中の実験の対象ページを避けていたが、その一覧からこの実験の `pages` の欄の3ページ（このページ・/blog/meeting-memo-template・/blog/best-memo-apps-2026）が抜けていて、第114弾の PR の本文でもこの実験を書き漏らした。戻すとまた変更が増えるので戻さず、ここで補う。ほかの対象ページは第113〜118弾（#1933〜#1938）で変えていない（/apple-watch/・/ai-tags/ の #61 の分は評価のあとに回す）。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
         "2026-09-30: 第27弾 #1703（9/30 10:02）で /ai-tags/ の FAQ（表示と FAQPage の JSON-LD）の料金の答えの「ずっと無料」を「利用期間の制限なし」に、SoftwareApplication の JSON-LD の Free の offer の説明も同じ言い方にした。回答ブロック（data-answer-block）の文は変えていない。第27弾の PR の本文ではこの実験を書き漏らしていたので、ここで補う。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
         "2026-09-30: 対象ページのうち `/ai-tags/` は第49弾 #1744（9/30 17:51）で冒頭の答え（answer block にあたる段落）と FAQ の2問（表示と JSON-LD）が変わった。AIタグ自動追加はアプリでは既定オフで、Obsidian 連携を設定してから設定でオンにしたときだけ動く（`simplememo-ios` の `SettingsManager.aiFormatEnabled` と `MemoFormatPipeline.isActive`）のに、「新しい操作はゼロ」「Obsidian を使っていなくても件名に使われる」と書いていた。ほかの対象ページは変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
-        "2026-11-11: App Store の公開版が 5.9.25、評価件数が 28件 になっていた（2026-11-10 12:15 JST に SEO Daily の run 42748214360 が iTunes Lookup の日本のストアで確認。台帳はそのログからの転記）ので、data/site-constants.json の appVersion を 5.9.12 から 5.9.25 に、ratingCount を 27 から 28 にし、sync_constants.js で 105 ファイル（JSON-LD の softwareVersion と ratingCount、評価件数の表示、llms.txt）を更新した。対象ページのうち `/ai-tags/` は評価件数の表示2か所（27件 → 28件）が変わった。回答ブロック（data-answer-block）の文は変えていない。ほかの対象ページは変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。"
+        "2026-11-11: App Store の公開版が 5.9.25、評価件数が 28件 になっていた（2026-11-10 12:15 JST に SEO Daily の run 42748214360 が iTunes Lookup の日本のストアで確認。台帳はそのログからの転記）ので、data/site-constants.json の appVersion を 5.9.12 から 5.9.25 に、ratingCount を 27 から 28 にし、sync_constants.js で 105 ファイル（JSON-LD の softwareVersion と ratingCount、評価件数の表示、llms.txt）を更新した。対象ページのうち `/ai-tags/` は評価件数の表示2か所（27件 → 28件）が変わった。回答ブロック（data-answer-block）の文は変えていない。ほかの対象ページは変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
+        "2026-11-14: brand-2026-08-11-entity-merge と同じ基準の欠落を主な理由として計測不能と記録（オーナーの選択）。基準の元の行が保存されておらず同じ分類で再集計できず、改訂後の仮説の主眼（AI 回答での言及・引用）には基準が無い。画面からの再書き出しの道はあったが、行わないと判断した。主ページの回答ブロックは途中で削除された（#1167）。効果なし・ゼロ件とは判定しない。"
       ],
       "pages": [
         "/blog/memo-app-security-comparison",
@@ -1291,7 +1292,15 @@
           "original_hypothesis": "会話型(AI Mode fan-out)クエリに、質問文そのままのh2と2文以内の断定的な答えを置くと、AIの回答内で名指しされる頻度が上がり、2-3ヶ月遅れでブランド検索とAIO表示が増える。クリックはこの面では発生しないため指標にしない。",
           "reason": "自然文だけでAI由来と判定できず、専用AIレポートにクリックが無いことはクリック自体が発生しない証拠ではない。"
         }
-      ]
+      ],
+      "evidence": {
+        "schema_version": 1,
+        "kind": "private_reference",
+        "source_kind": "measurement_diagnostic",
+        "artifact": "experiment-evidence-d328aab7115d4816829213b9796858fcf7483451f78af579839c05b049e7b7ea.json",
+        "sha256": "d328aab7115d4816829213b9796858fcf7483451f78af579839c05b049e7b7ea",
+        "validation": "Original evidence admission completed before private storage; resolve and verify this artifact before interpreting the outcome."
+      }
     },
     {
       "id": "brand-2026-08-11-entity-merge",
@@ -1304,7 +1313,7 @@
       },
       "started_at": "2026-08-11",
       "evaluation_at": "2026-11-11",
-      "status": "running",
+      "status": "evaluated",
       "before": null,
       "after": null,
       "baseline": {
@@ -1316,8 +1325,8 @@
         "source": "ブランド検索14クエリ合計(可視分) — docs/SEO_AIO_PLAN_2026-08.md §2-4"
       },
       "target_metric": "brand_search_impressions",
-      "decision": null,
-      "evaluated_at": null,
+      "decision": "measurement_failed",
+      "evaluated_at": "2026-11-14",
       "notes": [
         "2026-08-11: オーナーがサイト外（App Store・note・Zenn・X）の表示名統一を完了。サイト側はOrganizationを持つ223ページ全数が正準@id https://simplememofast.com/#organization を指しており元から連結済みだったため、施策案の「sameAsを全240ページに展開」は不要と判明していた（§4 P0-4追記）。これでエンティティ分割は内外とも解消し、施策は投入完了。あとは評価日にブランド検索表示数を読むだけ。",
         "2026-08-12: 「エンティティ分割は内外とも解消」は Organization については正しいが、SoftwareApplication では成り立っていなかった。自社の SoftwareApplication ノート6件（ai-tags 日英・apple-watch 日英・voices・en/send-email-to-yourself）が @id を持たず、#app と結合していない状態で残っていた。223ページの Organization を数えた確認はこの面を見ていない。2026-08-12 に6件へ #app を付与し、自社28ノート全数が#app に揃ったことを確認済み。評価日に読むときの注意: エンティティ統一が完全に効いていた期間は 08-12 以降であって08-11 以降ではない。施策投入日は面によって1日ずれている。",
@@ -1363,7 +1372,8 @@
         "2026-10-01：manual Goal EN A1 TechArticle事実同期。source_key page:/en/blog/ios26-speechanalyzer-live-mic を同名A1の他3query行と区別する。既存extensionless canonical/実.htmlのtitle/meta/bodyは既に現行説明で、古いTechArticle headline/descriptionだけを既存title/metaへ、dateModifiedを既存本文の更新日2026-09-09へ合わせる。本文・可視更新日・元サンプルの四converter tests/Simulator build/Xcode helper検証日Sept9・実機未再検証の境界を全bytes保持し、新しい動作/精度/速度/実機証明にしない。EN sitemap当該lastmod2026-10-01は現実のmetadata content-signature更新であり、原検証日を新しくしない。GSC2026-09-29 snapshot Aug30–Sep26 WEBの当該page1084表示/0click/順位6.970479704797048、理論期待click約6.549は候補の診断でsession/因果効果ではない。A7と同じ既存PRの最終headへ統合し全8変更元：glossary/pkm/index.html, en/blog/ios26-speechanalyzer-live-mic.html, sitemap-ja.xml, sitemap-en.xml, scripts/gsc-crawled-indexing.mjs, docs/seo/OCTOBER-TRAFFIC-GROWTH-2026.md, growth/data/annotations.json, growth/experiments/experiments.json。元85+元比較60+独立A7ordinal61を保持し、A1の3meta/TechArticle3field実値照合を62番目に追加（HTML22/素材40）。最終head通常CI/actual merge/対応main Pages/origin62/fullraw299別gateまでA7queued/EN A1staleを保持。準備日を公開UTCに代用せずactual PR/readback receiptで追記する。originalCompany13/owner/stop/budget/windows/coexistence保持、lock免除/新実験/paid probe/account/key/sender identity追加0。Company無人率・自然schedule・10月効果加点0、実費unknown、欠測非0。",
         "2026-11-11: App Store の公開版が 5.9.25、評価件数が 28件 になっていた（2026-11-10 12:15 JST に SEO Daily の run 42748214360 が iTunes Lookup の日本のストアで確認。台帳はそのログからの転記）ので、data/site-constants.json の appVersion を 5.9.12 から 5.9.25 に、ratingCount を 27 から 28 にし、sync_constants.js で 105 ファイル（JSON-LD の softwareVersion と ratingCount、評価件数の表示、llms.txt）を更新した。サイト全体のうち、日本語・英語の24ページと生成翻訳のページで、SoftwareApplication の JSON-LD の softwareVersion・ratingCount と評価件数の表示が変わった。名称・alternateName・sameAs・publisher は変えていない。同じ PR で /obsidian/ の「関連ページ」にリンク21本を足した。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
         "2026-11-13: App Store の公開版が 5.9.27 になっていた（2026-11-13 10:43 JST に SEO Daily の run 43346944022 が iTunes Lookup の日本のストアで確認。台帳はそのログからの転記。評価 4.1・28件は変わっていない）ので、data/site-constants.json の appVersion を 5.9.25 から 5.9.27 にし、sync_constants.js で 101 ファイル（JSON-LD の softwareVersion 100ページと、llms.txt の版・確認日）を更新した。サイト全体のうち、日本語・英語の20ページと生成翻訳の80ページで、SoftwareApplication の JSON-LD の softwareVersion だけが変わった。名称・alternateName・sameAs・publisher・評価の表示は変えていない。変更後の窓（2026-08-12..11-11）が閉じた後の変更なので、この実験の評価の窓には入らない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの変更だけ、または既存施策だけの効果と断定しない。",
-        "2026-11-14: #2347（本番のマージ SHA 29e7a369402f4f91a7704ede8eda19107242cec6、マージ 2026-11-14T02:41:07Z／2026-11-14 11:41:07 JST）。Cloudflare Pages の配備チェック完了 2026-11-14T02:42:04Z（2026-11-14 11:42:04 JST）。旧版の最終観測 2026-11-14T02:29:06.063047Z（2026-11-14 11:29:06 JST）から下記の新版本文照合までの間に切り替わった。チェック記録: https://github.com/simplememofast/simplememo/runs/132302878081。本番HTMLの採取は 2026-11-14T02:43:03.924743Z〜2026-11-14T02:43:53.184913Z（2026-11-14 11:43:03 JST〜2026-11-14 11:43:53 JST）、ホームで新版本文を最初に観測したのは 2026-11-14T02:43:07.646874Z（2026-11-14 11:43:07 JST）。保存応答の再照合では、既知のCloudflareの空のmodule beacon 1本だけを除き、変更対象10ページのHTML全体がマージ版と一致し、英語トップも従来版を保持していた。読み戻し済みの対象は /・/en/・/blog/obsidian-voice-input・/ar/blog/obsidian-voice-input・/es/blog/obsidian-voice-input・/id/blog/obsidian-voice-input・/ko/blog/obsidian-voice-input・/pt-BR/blog/obsidian-voice-input・/tr/blog/obsidian-voice-input・/zh/blog/obsidian-voice-input・/zh-Hant/blog/obsidian-voice-input。マージ時刻・作業の準備時刻と、配備チェック完了・本文観測の時刻を混同しない。日本語トップと音声入力記事9言語、計10URLの見た目・本文・導線を変更した。ブランド観測の登録済みpost窓（2026-08-12〜2026-11-11）の後の変更で、その窓の施策へ遡って混入させない。観測を延長して読む場合は今回の全範囲と公開時刻を区切りとして残し、単独のブランド効果と読まない。 オーナーの明示依頼によるデザイン更新で、新規の介入実験として登録していない。既存の開始日・評価日・状態・baseline・比較方法・母数・停止条件・判定基準は変更しない。前後差を今回の変更または既存施策だけの成果、自律運転の成功へ加点しない。"
+        "2026-11-14: #2347（本番のマージ SHA 29e7a369402f4f91a7704ede8eda19107242cec6、マージ 2026-11-14T02:41:07Z／2026-11-14 11:41:07 JST）。Cloudflare Pages の配備チェック完了 2026-11-14T02:42:04Z（2026-11-14 11:42:04 JST）。旧版の最終観測 2026-11-14T02:29:06.063047Z（2026-11-14 11:29:06 JST）から下記の新版本文照合までの間に切り替わった。チェック記録: https://github.com/simplememofast/simplememo/runs/132302878081。本番HTMLの採取は 2026-11-14T02:43:03.924743Z〜2026-11-14T02:43:53.184913Z（2026-11-14 11:43:03 JST〜2026-11-14 11:43:53 JST）、ホームで新版本文を最初に観測したのは 2026-11-14T02:43:07.646874Z（2026-11-14 11:43:07 JST）。保存応答の再照合では、既知のCloudflareの空のmodule beacon 1本だけを除き、変更対象10ページのHTML全体がマージ版と一致し、英語トップも従来版を保持していた。読み戻し済みの対象は /・/en/・/blog/obsidian-voice-input・/ar/blog/obsidian-voice-input・/es/blog/obsidian-voice-input・/id/blog/obsidian-voice-input・/ko/blog/obsidian-voice-input・/pt-BR/blog/obsidian-voice-input・/tr/blog/obsidian-voice-input・/zh/blog/obsidian-voice-input・/zh-Hant/blog/obsidian-voice-input。マージ時刻・作業の準備時刻と、配備チェック完了・本文観測の時刻を混同しない。日本語トップと音声入力記事9言語、計10URLの見た目・本文・導線を変更した。ブランド観測の登録済みpost窓（2026-08-12〜2026-11-11）の後の変更で、その窓の施策へ遡って混入させない。観測を延長して読む場合は今回の全範囲と公開時刻を区切りとして残し、単独のブランド効果と読まない。 オーナーの明示依頼によるデザイン更新で、新規の介入実験として登録していない。既存の開始日・評価日・状態・baseline・比較方法・母数・停止条件・判定基準は変更しない。前後差を今回の変更または既存施策だけの成果、自律運転の成功へ加点しない。",
+        "2026-11-14: 登録した基準の元の検索語の行が保存されておらず、2026-09-05 に定めた同じ分類での再集計ができないため計測不能と記録（オーナーの選択）。画面からの再書き出しで基準を作り直す道はあったが、行わないと判断した。どの読み方でも計画書の目標には届かない見込みで、keep の条件は満たさない。効果なし・ゼロ件とは判定しない。"
       ],
       "control": {
         "kind": "pre_post",
@@ -1399,6 +1409,14 @@
         "original_contract_sha256": "7fe92d2001e5f19dd15b9109b807234fea2d88ca5568ae3c017bd150e1756f85",
         "interpretation": "descriptive_only_no_isolated_causal_claim",
         "reason": "Explicit owner-approved prospective migration: retain the original contract and evaluation date; observe aggregate changes without isolated causal attribution while separately admitted page interventions can proceed."
+      },
+      "evidence": {
+        "schema_version": 1,
+        "kind": "private_reference",
+        "source_kind": "measurement_diagnostic",
+        "artifact": "experiment-evidence-864e9f99ecb62d8df29768bfc2bc442cbb420ae0140e4e76a7e6296827639799.json",
+        "sha256": "864e9f99ecb62d8df29768bfc2bc442cbb420ae0140e4e76a7e6296827639799",
+        "validation": "Original evidence admission completed before private storage; resolve and verify this artifact before interpreting the outcome."
       }
     },
     {
@@ -1433,7 +1451,8 @@
         "2026-09-06: 元のWEB・3URL・2026-05-09〜08-08の基準をCSVで回収し、ページ3行と日別92行の57クリック・8,482表示を照合。元の丸め値・日付・判定条件は維持し、CTRの分子分母からbaseline.metric/valueと手動レビュー用measurement_contractを追記。国・端末・クエリの不一致は未解決。11/11は元の確認日として保持し、変更翌日以降の同じ92日間（最短8/12〜11/11）と3日遅延を満たす比較は最短11/14。対象の単一ページ化や未成熟データによる判定は行わない。詳細: growth/reports/2026-09-06-english-review-readiness.md。",
         "2026-10-03: 第103弾 #1920（10/3 17:12）で `/en/vs/` の見出しの古いアプリ数「Simple Memo vs 16 Popular Apps」を「Simple Memo vs Other Memo Apps」にした。英語の比較ページのパンくず（BreadcrumbList の2番目の名前）はこの見出しから作られる（scripts/finalize_split_pages.py）ため、対象の `/en/vs/google-keep-vs-apple-notes/` もパンくずの名前だけが変わった。本文・title・description・CTA・dateModified は変えていない。サイトマップの lastmod は JSON-LD を含む内容の履歴から 10/3 になる。対象の他の2ページは変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
         "2026-09-19: PR #1484の日英URL分離がサイト内リンク・hreflang・英語FAQ/CTA/campaign/QRに重なる。変更範囲と公開時刻の参照先はdocs/i18n-split-2026-09-19.mdおよびgrowth/data/annotations.json。明示依頼の移行修正で、新たな介入実験の登録ではない。前後のURL・言語・campaignを同条件と扱わず、既存施策単独の因果を主張しない。元の開始日・評価日・母数・停止条件は維持する。",
-        "2026-10-01: 対象の3ページのフッターの社名が、第83弾 #1839（10/1 18:48）で「Yurika Inc.」から「YURIKA, K.K.」になった（英語の全209ページ）。本文・題・CTA は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。"
+        "2026-10-01: 対象の3ページのフッターの社名が、第83弾 #1839（10/1 18:48）で「Yurika Inc.」から「YURIKA, K.K.」になった（英語の全209ページ）。本文・題・CTA は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
+        "2026-11-14: 事前の宣言（3ページ合計の CTR が 1.5% を超えなければ英語圏への追加投資を止める）について、変更後の28日の窓の CTR はどれも閾値の半分に届かず、オーナーは宣言どおりの適用を選んだ。止めるのは英語ページの新規追加・英語の書き直し・英語向けの告知で、既存の英語ページの事実の訂正と保守は続ける。機械翻訳の多言語ページはこの宣言の対象に含めない。評価の記録（経路B）は、基準と同じ画面の書き出しを受け取ってから行うので、この実験はまだ running のまま。docs/GROWTH_ROI_PLAN_2026-08-20.md の R10 にも書いた。"
       ],
       "control": {
         "kind": "pre_post",
@@ -1659,7 +1678,7 @@
       },
       "started_at": "2026-08-11",
       "evaluation_at": "2026-11-11",
-      "status": "running",
+      "status": "evaluated",
       "before": null,
       "after": null,
       "baseline": {
@@ -1671,12 +1690,13 @@
         "source": "GSC 3ヶ月ページ次元。AIO表示25件。被リンク数は未計測のため、評価時にAhrefsで参照する"
       },
       "target_metric": "impressions",
-      "decision": null,
-      "evaluated_at": null,
+      "decision": "measurement_failed",
+      "evaluated_at": "2026-11-14",
       "notes": [
         "2026-09-19: PR #1484の日英URL分離がサイト内リンク・hreflang・英語FAQ/CTA/campaign/QRに重なる。変更範囲と公開時刻の参照先はdocs/i18n-split-2026-09-19.mdおよびgrowth/data/annotations.json。明示依頼の移行修正で、新たな介入実験の登録ではない。前後のURL・言語・campaignを同条件と扱わず、既存施策単独の因果を主張しない。元の開始日・評価日・母数・停止条件は維持する。",
         "2026-09-26: 言い過ぎの修正 第9弾 #1621（9/26 14:14）。記録の無い体験談（比較ページ11本（日英）の冒頭「1週間ずつ使い比べた」ほか、ブログの「私自身…」「半年間運用した結果」、利用者の声として書かれた「成約率が2割上がった」）と、出典の無い数字（「HBR：生産性23%」「McKinsey：再利用40%・抜け漏れ60%」「成約率42%」「Buffer 2026：67%」ほか）を外し、研究の取り違え（「ワーキングメモリがアイデアを保持できるのは約18秒」、忘却曲線の数字、「習慣化は平均66日、メモは21日」）を直した。題を2本変えた（「朝活×メモ習慣で生産性3倍にする方法」→「朝活メモで1日の段取りを決める」、「…開発効率を2倍にする整理術」→「…即メモ・タグ・検索・共有の4つの手法」、OG 画像も作り直し）。英語21ページの meta description のナビ文字列を除去。URL・canonical・CTAの宛先と計測属性は変えていない（en/vs/craft の中ほどの CTA は data-cta-position=\"mid\" で計測上の位置を固定し、ct=en__mid のまま）。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。このページ（/blog/fastest-memo-app-benchmark）の「ワーキングメモリがアイデアを保持できるのは約18秒」（リード・TL;DR・本文・FAQ）と「使える時間の約13%」を、Peterson & Peterson（1959）の条件どおりの書き方に直した。表・計測値・待ちの部品は変えていない。",
-        "2026-09-26: 言い過ぎの修正 第13弾 #1626（9/26 16:36）。/blog/fastest-memo-app-benchmark（日英）の「シンプルメモの利用者は1日平均5〜8通、Notion は1〜2通」「行動科学の研究では摩擦の削減が最も効果的」「1日10個のアイデアのうち8個と3〜4個、年間約1,500個の差」（集計していない利用データと根拠の無い数字）を外し、ホット・コールド共感ギャップの取り違え、ツァイガルニク効果を「未完了のタスクが脳のリソースを消費し続ける」とした説明（GTD・ポモドーロ）、リレーの「いかなる攻撃パターンにも」、バレットジャーナルの「数百万人」、「科学的根拠と実務経験に基づく」、ウォータールー大学の学習支援ページを「研究」とした記述を直した。URL・題・CTAの宛先と計測属性は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。このページの「速さは習慣を変え、習慣はアイデアを変える」の欄の4段落を書き直した（利用者のメモ数・Notion の利用者の数字・年間1,500個の差を外した）。表・計測値・待ちの部品・FAQ は変えていない。"
+        "2026-09-26: 言い過ぎの修正 第13弾 #1626（9/26 16:36）。/blog/fastest-memo-app-benchmark（日英）の「シンプルメモの利用者は1日平均5〜8通、Notion は1〜2通」「行動科学の研究では摩擦の削減が最も効果的」「1日10個のアイデアのうち8個と3〜4個、年間約1,500個の差」（集計していない利用データと根拠の無い数字）を外し、ホット・コールド共感ギャップの取り違え、ツァイガルニク効果を「未完了のタスクが脳のリソースを消費し続ける」とした説明（GTD・ポモドーロ）、リレーの「いかなる攻撃パターンにも」、バレットジャーナルの「数百万人」、「科学的根拠と実務経験に基づく」、ウォータールー大学の学習支援ページを「研究」とした記述を直した。URL・題・CTAの宛先と計測属性は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。このページの「速さは習慣を変え、習慣はアイデアを変える」の欄の4段落を書き直した（利用者のメモ数・Notion の利用者の数字・年間1,500個の差を外した）。表・計測値・待ちの部品・FAQ は変えていない。",
+        "2026-11-14: 計測している URL の中身が日英分離（#1484）と多言語化（#2031）で変わり、基準の画面 CSV も保存されていないため、登録した基準と同じ定義の比較を作れず計測不能と記録（オーナーの選択）。標本不足は補足の理由。効果なし・ゼロ件とは判定せず、元の基準と限界を保持。"
       ],
       "control": {
         "kind": "pre_post",
@@ -1695,7 +1715,15 @@
         "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
         "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
         "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
-      ]
+      ],
+      "evidence": {
+        "schema_version": 1,
+        "kind": "private_reference",
+        "source_kind": "measurement_diagnostic",
+        "artifact": "experiment-evidence-7cb105191aca53fd90e012b9a6c10e7594d69f43cbf5ac48343f8067e9ab9bf2.json",
+        "sha256": "7cb105191aca53fd90e012b9a6c10e7594d69f43cbf5ac48343f8067e9ab9bf2",
+        "validation": "Original evidence admission completed before private storage; resolve and verify this artifact before interpreting the outcome."
+      }
     },
     {
       "id": "video-2026-08-11-five-clips",
@@ -1849,7 +1877,7 @@
       },
       "started_at": "2026-08-12",
       "evaluation_at": "2026-11-12",
-      "status": "running",
+      "status": "evaluated",
       "before": null,
       "after": null,
       "baseline": {
@@ -1858,15 +1886,19 @@
         "ctr": 0,
         "position": 9.2,
         "window": "2026-07-13..2026-08-09",
-        "source": "会話型クエリ「logseqとobsidian どちらが 良い」単体 (growth/data/gsc/2026-08-11)。ページ自体は2026-08-11公開でベースライン期間の表示なし"
+        "source": "会話型クエリ「logseqとobsidian どちらが 良い」単体 (growth/data/gsc/2026-08-11)。ページ自体は2026-08-11公開でベースライン期間の表示なし",
+        "metric": "conversational_query_position",
+        "value": 9.22
       },
       "target_metric": "conversational_query_position",
-      "decision": null,
-      "evaluated_at": null,
+      "decision": "inconclusive",
+      "evaluated_at": "2026-11-14",
       "notes": [
         "2026-08-12: 既存の先頭tip-box「ひとことで言うと」を data-answer-block=\"logseq-or-obsidian\" のセクションへ置換（内容は同一主張の言い直し・新規主張なし、全て2026-08-11の実機検証済み事実）。タイトル・description・FAQ JSON-LDは不変更。判定は「logseqとobsidian どちらが 良い」の順位・対応ページ・AIO表示で行う。",
         "2026-09-05: QRのストア導線を修正。46画像を復号し、Obsidian・Siri・Watch・無料メモ・autopilotの27個を既存の承認済み・表示中CPPへ揃えた。残る19個は既定ページ。ページ内CTAのhref・QR配置・既存ctは維持し、AIタグ2個には欠けていたptを追加。出荷前後のCPP獲得を同条件とみなさず、QRとページ内ボタンのCPP合算からQR単独効果を推定しない。Apple側のCPP有効化は別のASO作業による同日介入。 mainのPR #958と統合し、ASC一覧33967344673（12:55:12Z）の配線済み8種すべてAPPROVED・visible=trueに更新。autopilotは既存HTMLと同じvs-draftsを共用する。",
-        "2026-09-19: PR #1484の日英URL分離がサイト内リンク・hreflang・英語FAQ/CTA/campaign/QRに重なる。変更範囲と公開時刻の参照先はdocs/i18n-split-2026-09-19.mdおよびgrowth/data/annotations.json。明示依頼の移行修正で、新たな介入実験の登録ではない。前後のURL・言語・campaignを同条件と扱わず、既存施策単独の因果を主張しない。元の開始日・評価日・母数・停止条件は維持する。"
+        "2026-09-19: PR #1484の日英URL分離がサイト内リンク・hreflang・英語FAQ/CTA/campaign/QRに重なる。変更範囲と公開時刻の参照先はdocs/i18n-split-2026-09-19.mdおよびgrowth/data/annotations.json。明示依頼の移行修正で、新たな介入実験の登録ではない。前後のURL・言語・campaignを同条件と扱わず、既存施策単独の因果を主張しない。元の開始日・評価日・母数・停止条件は維持する。",
+        "2026-11-14: 評価日（2026-11-12）の後に、オーナーの承認を得て measurement_contract と baseline.metric・baseline.value を登録した（事後の登録）。値は既存の baseline.position の元の値で、growth/data/gsc/2026-08-11/queries.json の対象語の行を根拠にした。事前の登録ではないこと（変更後の値を見たあとの登録であること）を、非公開の評価資料の limitations にも書いた。",
+        "2026-11-14: 事後に登録した契約（同じ検索語・サイト単位・WEB・PT・同じ長さの窓）で比べた。順位は仮説の向きに動いたが、表示が min_sample に届かず、届く見込みも無いため、停止条件1の持ち越しではなく inconclusive で閉じる（オーナーの選択）。回答ブロックはページ新設と同じ日に入り、/vs/logseq/ の書き換えとも重なるので、単独の効果は分けられない。効果の有無は書かない。"
       ],
       "pages": [
         "/obsidian/compare/logseq/"
@@ -1888,7 +1920,43 @@
         "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
         "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
         "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
-      ]
+      ],
+      "measurement_contract": {
+        "source": "gsc",
+        "definition": "Search Console のサイト単位（プロパティ集計）の検索語行。検索語「logseqとobsidian どちらが 良い」の完全一致、search_type=WEB、匿名化検索語を除く。28日窓の平均掲載順位 = SUM(sum_top_position)/SUM(impressions)+1（基準側は UI の検索語表の CSV 書き出しの平均掲載順位）",
+        "unit": "position",
+        "time_zone": "America/Los_Angeles",
+        "scope": {
+          "query": "logseqとobsidian どちらが 良い",
+          "aggregation": "site",
+          "search_type": "WEB"
+        },
+        "lag_days": 3
+      },
+      "measurement_contract_evidence": {
+        "registered_at": "2026-11-14T05:47:14.955Z",
+        "source_kind": "repository_gsc_snapshot",
+        "baseline_window": "2026-07-13..2026-08-09",
+        "limitations": [
+          "Registered after the evaluation date (2026-11-12) with the owner's approval on 2026-11-14, after the post-change snapshot (2026-11-09) had been inspected; this is a post-hoc registration, not a preregistration.",
+          "The baseline row comes from a UI CSV export (growth/data/gsc/2026-08-11); its search type, country and device filters were not checked at ingestion."
+        ],
+        "artifacts": [
+          {
+            "name": "growth/data/gsc/2026-08-11/queries.json",
+            "sha256": "22c72c174dfe4a8174b0ffb6bc8270c47c0a467d62ed9c2c9f901e55ae95dadf",
+            "bytes": 87685
+          }
+        ]
+      },
+      "evidence": {
+        "schema_version": 1,
+        "kind": "private_reference",
+        "source_kind": "manual_comparison",
+        "artifact": "experiment-evidence-5b0a1204525ba4178f269e804558308799e12be34d24953deeedfbcf10fdbd9c.json",
+        "sha256": "5b0a1204525ba4178f269e804558308799e12be34d24953deeedfbcf10fdbd9c",
+        "validation": "Original evidence admission completed before private storage; resolve and verify this artifact before interpreting the outcome."
+      }
     },
     {
       "id": "cta-2026-08-12-download-page",
@@ -2303,7 +2371,7 @@
       },
       "started_at": "2026-08-28",
       "evaluation_at": "2026-10-12",
-      "status": "running",
+      "status": "evaluated",
       "before": {
         "inbound_internal_links_from_top_impression_pages": 0,
         "note": "/blog/{free-memo-apps-ranking, best-memo-apps-2026, offline-memo-apps, line-keep-alternative} の 4本はいずれもこのページへのリンクを1本も持っていなかった（実測 grep -c = 0）。被リンクはObsidianクラスタ内部の12ファイルのみ、つまり**既にObsidianを見ている読者からしか流れて来ない。**"
@@ -2319,11 +2387,13 @@
         "position": 5.77,
         "window": "2026-08-10..2026-08-22 (13d)",
         "source": "growth/data/gsc/2026-08-24 (pages.json)",
-        "note": "日次に直すと 1.62クリック/日・17.1表示/日。比較は日次で行う（窓の長さが揃わないため）。"
+        "note": "日次に直すと 1.62クリック/日・17.1表示/日。比較は日次で行う（窓の長さが揃わないため）。",
+        "metric": "impressions",
+        "value": 222
       },
       "target_metric": "impressions",
-      "decision": null,
-      "evaluated_at": null,
+      "decision": "inconclusive",
+      "evaluated_at": "2026-11-14",
       "notes": [
         "2026-08-28: **CTRを目標にしていない。**このページは CTR 9.46% / 順位 5.77 で、サイト内で最も高い。伸びない理由はSERPでの見え方ではなく、そもそも表示が 17回/日 しかないこと。同じ窓で /blog/free-memo-apps-ranking は 160表示/日 ある。**桁が違うのは順位ではなく面の広さ。**",
         "2026-08-28: リンク先を本文ではなく既存の関連記事ブロックにしたのは、**走っている実験を汚さないため。**このページには cta-2026-08-10-strongest-page-inline が走っており、4本の受け側にも snippet-2026-08-09-free-memo-ranking / title-2026-08-12-013 / engage-2026-08-11-next-step が乗っている。title・description・next-step のいずれも動かしていない。",
@@ -2333,7 +2403,9 @@
         "2026-09-30: 第60弾 #1771（9/30 22:53）で `/blog/obsidian-voice-input` の本文1か所（「Obsidianだけに保存するモードも選べます」→「Obsidianだけに保存するモード（Premium）も選べます」）が変わった。フィード・リンク・CTA・dateModified は変えていない。同じ PR で英語版 `/en/blog/obsidian-voice-input` を日本語版にそろえた（対象ページではない）。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
         "2026-09-30: 第41弾 #1731（9/30 15:48）で `/blog/obsidian-voice-input` の本文の設定名1つ（「音声自動入力」→「起動時に音声入力を自動オン」、アプリの表示どおり）と dateModified・見える最終更新・sitemap の lastmod が変わった。フィード・リンク・CTA は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
         "2026-09-30: 第51弾 #1752（9/30 19:28）で `/blog/obsidian-voice-input` の入口の一覧の文言1か所（自動録音は設定をオンにしたとき、と追記）が変わった。フィード・リンク・CTA は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
-        "2026-11-14: #2347（本番のマージ SHA 29e7a369402f4f91a7704ede8eda19107242cec6、マージ 2026-11-14T02:41:07Z／2026-11-14 11:41:07 JST）。Cloudflare Pages の配備チェック完了 2026-11-14T02:42:04Z（2026-11-14 11:42:04 JST）。旧版の最終観測 2026-11-14T02:29:06.063047Z（2026-11-14 11:29:06 JST）から下記の新版本文照合までの間に切り替わった。チェック記録: https://github.com/simplememofast/simplememo/runs/132302878081。本番HTMLの採取は 2026-11-14T02:43:03.924743Z〜2026-11-14T02:43:53.184913Z（2026-11-14 11:43:03 JST〜2026-11-14 11:43:53 JST）、ホームで新版本文を最初に観測したのは 2026-11-14T02:43:07.646874Z（2026-11-14 11:43:07 JST）。保存応答の再照合では、既知のCloudflareの空のmodule beacon 1本だけを除き、変更対象10ページのHTML全体がマージ版と一致し、英語トップも従来版を保持していた。読み戻し済みの対象は /・/en/・/blog/obsidian-voice-input・/ar/blog/obsidian-voice-input・/es/blog/obsidian-voice-input・/id/blog/obsidian-voice-input・/ko/blog/obsidian-voice-input・/pt-BR/blog/obsidian-voice-input・/tr/blog/obsidian-voice-input・/zh/blog/obsidian-voice-input・/zh-Hant/blog/obsidian-voice-input。マージ時刻・作業の準備時刻と、配備チェック完了・本文観測の時刻を混同しない。受信側 /blog/obsidian-voice-input のデザインと本文の導入・最初の送信案内を変更し、H1を「Obsidianに、声で残す。」にした。title・meta description・canonical と元の4本の流入側記事は変更していない。8言語の生成ページも同期。本文・導線・CTAの配置が同時に変わるため、後続の表示回数・クリック・獲得の変化を8/28の内部リンクだけの効果と読まない。10/12の評価期限が過ぎていても評価済みにはしない。 オーナーの明示依頼によるデザイン更新で、新規の介入実験として登録していない。既存の開始日・評価日・状態・baseline・比較方法・母数・停止条件・判定基準は変更しない。前後差を今回の変更または既存施策だけの成果、自律運転の成功へ加点しない。"
+        "2026-11-14: #2347（本番のマージ SHA 29e7a369402f4f91a7704ede8eda19107242cec6、マージ 2026-11-14T02:41:07Z／2026-11-14 11:41:07 JST）。Cloudflare Pages の配備チェック完了 2026-11-14T02:42:04Z（2026-11-14 11:42:04 JST）。旧版の最終観測 2026-11-14T02:29:06.063047Z（2026-11-14 11:29:06 JST）から下記の新版本文照合までの間に切り替わった。チェック記録: https://github.com/simplememofast/simplememo/runs/132302878081。本番HTMLの採取は 2026-11-14T02:43:03.924743Z〜2026-11-14T02:43:53.184913Z（2026-11-14 11:43:03 JST〜2026-11-14 11:43:53 JST）、ホームで新版本文を最初に観測したのは 2026-11-14T02:43:07.646874Z（2026-11-14 11:43:07 JST）。保存応答の再照合では、既知のCloudflareの空のmodule beacon 1本だけを除き、変更対象10ページのHTML全体がマージ版と一致し、英語トップも従来版を保持していた。読み戻し済みの対象は /・/en/・/blog/obsidian-voice-input・/ar/blog/obsidian-voice-input・/es/blog/obsidian-voice-input・/id/blog/obsidian-voice-input・/ko/blog/obsidian-voice-input・/pt-BR/blog/obsidian-voice-input・/tr/blog/obsidian-voice-input・/zh/blog/obsidian-voice-input・/zh-Hant/blog/obsidian-voice-input。マージ時刻・作業の準備時刻と、配備チェック完了・本文観測の時刻を混同しない。受信側 /blog/obsidian-voice-input のデザインと本文の導入・最初の送信案内を変更し、H1を「Obsidianに、声で残す。」にした。title・meta description・canonical と元の4本の流入側記事は変更していない。8言語の生成ページも同期。本文・導線・CTAの配置が同時に変わるため、後続の表示回数・クリック・獲得の変化を8/28の内部リンクだけの効果と読まない。10/12の評価期限が過ぎていても評価済みにはしない。 オーナーの明示依頼によるデザイン更新で、新規の介入実験として登録していない。既存の開始日・評価日・状態・baseline・比較方法・母数・停止条件・判定基準は変更しない。前後差を今回の変更または既存施策だけの成果、自律運転の成功へ加点しない。",
+        "2026-11-14: 評価日（2026-10-12）の後に、オーナーの承認を得て measurement_contract と baseline.metric・baseline.value を登録した（事後の登録）。値は既存の baseline.impressions と同じで、growth/data/gsc/2026-08-24 のスナップショットと analytics-read の取り直しの両方で再現した。事前の登録ではないこと（変更後の値を見たあとの登録であること）を、非公開の評価資料の limitations にも書いた。",
+        "2026-11-14: 評価日で終わる、基準と同じ長さの窓の表示が min_sample に届かず（停止条件1）、リンク元の題・説明の変更と一部のリンクの削除で停止条件3も成立していたため、inconclusive で閉じる（オーナーの選択）。契約と基準値は事後の登録で、変更後の値を見たあとに登録した。数値は非公開の証拠に記録。効果なしとは書かない。"
       ],
       "control": {
         "kind": "none",
@@ -2349,7 +2421,45 @@
         "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
         "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
         "受け側4本のいずれかで title / description が変わった → **表示回数の変化をこの実験の効果と読まない**"
-      ]
+      ],
+      "measurement_contract": {
+        "source": "gsc",
+        "definition": "Search Console の WEB 検索の、ページ単位の表示回数（impressions）。対象は /blog/obsidian-voice-input（日本語のページ）。書き出された URL を growth/lib/gsc.mjs の toPath でパスに正規化し、同じパスになる行（ページ内の見出しへのリンクなど # 付きの URL）を合算する。/en/ や機械翻訳の言語別 URL は別のパスなので含めない。国・端末・検索語は限定しない。期間は太平洋時間の日付で、13日の合計。",
+        "unit": "count",
+        "time_zone": "America/Los_Angeles",
+        "scope": {
+          "page": "/blog/obsidian-voice-input",
+          "search_type": "WEB",
+          "url_normalization": "growth/lib/gsc.mjs toPath（パスへの正規化。2026-08-24 のスナップショットと同じ作り方）",
+          "countries": "all",
+          "devices": "all",
+          "queries": "all"
+        },
+        "lag_days": 3
+      },
+      "measurement_contract_evidence": {
+        "registered_at": "2026-11-14T05:51:20.092Z",
+        "source_kind": "analytics_read_export_and_repository_gsc_snapshot",
+        "baseline_window": "2026-08-10..2026-08-22",
+        "limitations": [
+          "Registered after the evaluation date (2026-10-12) with the owner's approval on 2026-11-14, after the post-change values had been inspected; this is a post-hoc registration, not a preregistration.",
+          "The baseline value 222 matches both growth/data/gsc/2026-08-24/pages.json and a fresh analytics-read export (run 43563279518)."
+        ],
+        "artifacts": [
+          {
+            "name": "growth/data/gsc/2026-08-24/pages.json",
+            "sha256": "e027c29646041ed33e5b68cd9326f53d37c607d6c366e9883632466c92ead66e"
+          }
+        ]
+      },
+      "evidence": {
+        "schema_version": 1,
+        "kind": "private_reference",
+        "source_kind": "manual_comparison",
+        "artifact": "experiment-evidence-1b6c95c41b5aa1b63a7878dacdecaba26fac4abd0d2766b648618031d904edd8.json",
+        "sha256": "1b6c95c41b5aa1b63a7878dacdecaba26fac4abd0d2766b648618031d904edd8",
+        "validation": "Original evidence admission completed before private storage; resolve and verify this artifact before interpreting the outcome."
+      }
     },
     {
       "id": "cta-placement-2026-09-02-002",
