@@ -135,7 +135,10 @@ test('real AIO explicit scope and legacy video list both protect Apple Watch wit
   const file=new URL('../experiments/experiments.json',import.meta.url),before=fs.readFileSync(file,'utf8');
   const ledger=JSON.parse(before).experiments;
   const ids=['aio-2026-08-11-answer-blocks','video-2026-08-11-five-clips'];
-  const selected=ledger.filter(e=>ids.includes(e.id));
+  // The rows are real-shaped fixtures for scope parsing as of the 2026-09-14 view. Their ledger status
+  // moves on (aio-2026-08-11-answer-blocks was evaluated on 2026-11-14), so test a reopened copy: the
+  // ledger itself is never edited, and closed rows releasing a page is covered by the next test.
+  const selected=ledger.filter(e=>ids.includes(e.id)).map(e=>({...e,status:'running',decision:null,evaluated_at:null}));
   assert.equal(selected.length,2);
   assert.deepEqual(experimentView(selected[0],'2026-09-14').affected_pages,selected[0].pages);
   const rows=scopeCandidates(selected);
