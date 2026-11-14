@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
+import {editorialProfile} from './verify_production.cjs';
 const MARKER='/* Progressive enhancement only: native search, focus and print keep full content. */';
 export function removeSectionRule(text){
  const start=text.indexOf(MARKER);
@@ -21,13 +22,26 @@ export function removeSectionRule(text){
  // Keep native fragment/focus escapes common; compare only normal deferral.
  return text.slice(0,start)+rule.replace(deferred,'')+text.slice(end);
 }
+export function assertEditorialSectionPolicy(css){
+ const declarations=[...css.replace(/\/\*[\s\S]*?\*\//g,'').matchAll(/(?:^|[;{])\s*content-visibility\s*:\s*([^;}]+)/gi)];
+ if(declarations.some(match=>!/^visible(?:\s*!important)?\s*$/i.test(match[1])))throw Error('Editorial sections must remain visible; deferral is not part of this layout');
+}
+export function controlDocument(html,name){
+ if(name==='index.html'&&editorialProfile(html)){
+  if(html.includes(MARKER)||!/<link\b[^>]*href="\/assets\/css\/home-editorial\.css\?v=[a-f0-9]{10}"/.test(html))throw Error('Editorial control must use the reviewed external stylesheet without the legacy deferral rule');
+  return html;
+ }
+ return removeSectionRule(html);
+}
 export function main(){
  const source=fs.realpathSync(process.argv[2]),destination=path.resolve(process.argv[3]);
+ const editorial=editorialProfile(fs.readFileSync(path.join(source,'index.html'),'utf8'));
+ if(editorial)assertEditorialSectionPolicy(fs.readFileSync(path.join(source,'assets/css/home-editorial.css'),'utf8'));
  if(fs.existsSync(destination)||destination===source||destination.startsWith(source+path.sep))throw Error('Control destination must be new and outside the candidate');
  fs.cpSync(source,destination,{recursive:true,filter:p=>!p.split(path.sep).includes('.git')});
  for(const name of ['index.html','en/index.html','assets/css/home-hero.css']){
-  const file=path.join(destination,name);fs.writeFileSync(file,removeSectionRule(fs.readFileSync(file,'utf8')));
+  const file=path.join(destination,name);fs.writeFileSync(file,controlDocument(fs.readFileSync(file,'utf8'),name));
  }
- console.log('Control has identical content and native fragment/focus escapes, with only the new normal-screen deferral assignment removed. The candidate is not modified.');
+ console.log(editorial ? 'Editorial control is byte-identical: normal-screen deferral comparison is not applicable. Both copies must still pass actual visible-section, fragment, focus, print and unchanged-English checks. The candidate is not modified.' : 'Control has identical content and native fragment/focus escapes, with only the new normal-screen deferral assignment removed. The candidate is not modified.');
 }
 if(process.argv[1]&&fs.existsSync(process.argv[1])&&import.meta.url===pathToFileURL(fs.realpathSync(process.argv[1])).href)main();

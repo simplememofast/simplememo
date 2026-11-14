@@ -1,5 +1,30 @@
 # 日本語トップ（/index.html）の注記
 
+## 現行：2026-11-14 の editorial デザイン
+
+日本語トップは `body.sm-editorial`、`assets/css/home-editorial.css` の構成へ変更した。
+以下の2026-11-13版の記録は旧デザインの履歴であり、現行の編集手順には使わない。
+英語トップの生成と表示は従来のまま。
+
+- 女性の画像は既存の生成画像を再利用し、「写真はイメージです」を表示する。顔の範囲を
+  デスクトップとスマートフォン幅で確認する。写真に本文やボタンを重ねない。
+- ページ表示用のJavaScript、外部Webフォント、動画は追加しない。FAQと言語選択はnative details。
+- canonical、hreflang、FAQを含むJSON-LD、GA4・Ahrefs、App Store計測と既存のアプリIDを保持する。
+  料金と評価の根拠は既存台帳。運営情報の過去比較と採点条件は公開台帳の折りたたみに残す。
+- 日本語記事 `blog/obsidian-voice-input.html` は同じ基礎CSSと `article-editorial.css` を使う。
+  8言語の記事は既存translation catalogから生成する。見出し・導線の変更後は翻訳も同期する。
+- CSS変更後は `node scripts/check-css-version.mjs --write`。ホーム変更後は専用のhash固定venvで
+  `python scripts/perf/build_home.py --write`、続いて `--check` と `test_editorial_home.py` を実行する。
+  共通ナビ、デザイン、CTA、CPP、sitewide app routesの生成結果も同じコミットへ含める。
+- 新プロファイルは外部CSSのhash、画像source/preload、顔の切り抜き、CTAの遮蔽、FAQ操作を検査する。
+  旧動画の台帳・asset integrity検査は残すが、日本語トップには非表示動画やVideoObjectを残さない。
+- 現行デザインは通常表示でsectionを遅延描画しない。Section Renderingのcontrolも同一で、
+  deferralの効果比較は対象外と記録する。本文の表示、fragment、focus、printの実測は続ける。
+- 公開後は実HTMLと版付きCSS URLの実体を照合する。CI成功は実機インストール完了の証明ではない。
+  集客・継続利用・LTVの変化は未測定であり、デザインの効果として断定しない。
+
+## 旧デザインの記録（2026-11-13〜14）
+
 `index.html` の HTML コメントと `<style data-home-design>` の CSS コメントは、
 2026-11-13 の v3c でここへ移した。トップの HTML は gzip で 43,410B を超えると
 Lighthouse の模擬環境で3往復目に入り、FCP と LCP が約150ms 遅れる

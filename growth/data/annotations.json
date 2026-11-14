@@ -1208,6 +1208,12 @@
       "type": "feature",
       "label": "公開版の表示の更新（5.9.25 → 5.9.27）",
       "note": "日付はPRの作成日。公開日はマージ時刻を参照。data/site-constants.json の appVersion を、2026-11-13 の SEO Daily（run 43346944022）が iTunes Lookup の日本のストアで確かめた値に合わせ、sync_constants.js で 101 ファイル（JSON-LD の softwareVersion 100ページと、llms.txt の版・確認日）を更新した。評価 4.1・28件は変わっていない。実行中の実験への重なりは experiments.json の各 note に書いた。"
+    },
+    {
+      "date": "2026-11-14",
+      "type": "feature",
+      "label": "日本語トップと音声入力記事を刷新（#2347）— 女性画像の復元、導線整理、トップ動画の撤去",
+      "note": "2026-11-14: #2347（本番のマージ SHA 29e7a369402f4f91a7704ede8eda19107242cec6、マージ 2026-11-14T02:41:07Z／2026-11-14 11:41:07 JST）。Cloudflare Pages の配備チェック完了 2026-11-14T02:42:04Z（2026-11-14 11:42:04 JST）。旧版の最終観測 2026-11-14T02:29:06.063047Z（2026-11-14 11:29:06 JST）から下記の新版本文照合までの間に切り替わった。チェック記録: https://github.com/simplememofast/simplememo/runs/132302878081。本番HTMLの採取は 2026-11-14T02:43:03.924743Z〜2026-11-14T02:43:53.184913Z（2026-11-14 11:43:03 JST〜2026-11-14 11:43:53 JST）、ホームで新版本文を最初に観測したのは 2026-11-14T02:43:07.646874Z（2026-11-14 11:43:07 JST）。保存応答の再照合では、既知のCloudflareの空のmodule beacon 1本だけを除き、変更対象10ページのHTML全体がマージ版と一致し、英語トップも従来版を保持していた。読み戻し済みの対象は /・/en/・/blog/obsidian-voice-input・/ar/blog/obsidian-voice-input・/es/blog/obsidian-voice-input・/id/blog/obsidian-voice-input・/ko/blog/obsidian-voice-input・/pt-BR/blog/obsidian-voice-input・/tr/blog/obsidian-voice-input・/zh/blog/obsidian-voice-input・/zh-Hant/blog/obsidian-voice-input。マージ時刻・作業の準備時刻と、配備チェック完了・本文観測の時刻を混同しない。日本語トップの女性画像を復元し、本文・FAQ・価格・初回設定への導線を再構成した。日本語トップの図解動画とVideoObjectは撤去。音声入力記事と8言語の生成ページを同じデザインへ変更し、初回送信の案内を追加。英語トップ・英語音声入力記事は不変。対象URLはscopeの10件。関連する画像・CSS・生成器・検査コードも同一PRの全差分に含む。 CSS等の資産のbytes一致は未確認。直接取得がCloudflare 1010で拒否されたためで、本文一致やブラウザでの表示確認を資産bytes一致の代わりにはしていない。 通常ブラウザで本番トップ・音声入力記事のCSS表示、女性の顔が隠れない配置、AVIF画像の読み込みを確認し、CTAから正しいApp Store紹介ページへの遷移も確認した。 実機のインストール完了、集客・課金・LTV・因果効果は、この確認では認定していない。 オーナーの明示依頼によるデザイン更新で、新規の介入実験として登録していない。既存の開始日・評価日・状態・baseline・比較方法・母数・停止条件・判定基準は変更しない。前後差を今回の変更または既存施策だけの成果、自律運転の成功へ加点しない。"
     }
   ]
 }
