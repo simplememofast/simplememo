@@ -145,5 +145,12 @@
   body.sm-editorial:not(.sm-article) .hero-image figcaption { background:#08070ce6; }
 }
 @media screen and (min-width:821px) {
+  /* Leave room beside the face for a soft transition into the page background. */
+  body.sm-editorial:not(.sm-article) .hero-image picture img { object-position:24% 50%; }
+  body.sm-editorial:not(.sm-article) .hero-image::before {
+    content:"";position:absolute;inset:0 auto 0 0;z-index:1;pointer-events:none;
+    width:clamp(40px,calc(8vw - 26px),88px);
+    background:linear-gradient(90deg,#08070c 0%,#08070ce0 20%,#08070c80 48%,#08070c29 75%,#08070c00 100%);
+  }
   body.sm-editorial:not(.sm-article) .hero-image::after { background:linear-gradient(transparent,#08070ccc); }
 }
