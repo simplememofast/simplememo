@@ -7,10 +7,18 @@ import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {waitForFonts} from './sections_wait.mjs';
 import {assertSectionStates} from './sections_escape.mjs';
+import {editorialProfile} from './verify_production.cjs';
+import {assertEditorialSectionPolicy} from './section_control.mjs';
 export async function main(){
 const require=createRequire(import.meta.url),pw=require('playwright');
 const [baseline,candidate]=process.argv.slice(2).map(p=>fs.realpathSync(p));
 assert(baseline&&candidate&&baseline!==candidate,'Two distinct site checkouts are required');
+const editorial=editorialProfile(fs.readFileSync(path.join(candidate,'index.html'),'utf8'));
+if(editorial){
+ assert.equal(fs.readFileSync(path.join(baseline,'index.html'),'utf8'),fs.readFileSync(path.join(candidate,'index.html'),'utf8'),'Editorial control retains the entire document');
+ assert.equal(fs.readFileSync(path.join(baseline,'assets/css/home-editorial.css'),'utf8'),fs.readFileSync(path.join(candidate,'assets/css/home-editorial.css'),'utf8'),'Editorial control retains the same stylesheet');
+ assertEditorialSectionPolicy(fs.readFileSync(path.join(candidate,'assets/css/home-editorial.css'),'utf8'));
+}
 const engine=process.env.QA_BROWSER||'chromium';
 const output=process.env.QA_RESULTS||'/tmp/section-qa';fs.mkdirSync(output,{recursive:true});
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -47,10 +55,10 @@ async function measurePage(url,label,c){
   await page.close();page=await context.newPage();
   stage('screen-navigation');
   await page.goto(url+'/',{waitUntil:'networkidle'});await wait(500);
-  const escapeChecks={ordinary:0,fragments:[],focus:0};
+  const escapeChecks={ordinary:0,fragments:[],focus:0,policy:editorial?'eager-visible':'legacy-deferred',deferralComparison:editorial?'not applicable: no deferred rendering in this layout':'candidate auto versus nondeferred control'};
   const sectionStates=p=>p.locator('main > section:not(.hero):not(.press-band)').evaluateAll(nodes=>nodes.map(n=>({visibility:getComputedStyle(n).contentVisibility})));
-  if(label==='candidate'){
-   const states=await sectionStates(page);assertSectionStates(states,'auto','ordinary navigation');escapeChecks.ordinary=states.length;
+  if(label==='candidate'||editorial){
+   const states=await sectionStates(page);assertSectionStates(states,editorial?'visible':'auto','ordinary navigation');escapeChecks.ordinary=states.length;
   }
   const headings=await page.locator('h1,h2,h3').allTextContents();
   const hero=await page.locator('.hero').boundingBox();
@@ -94,8 +102,16 @@ async function measurePage(url,label,c){
   const printHeights=[];
   // Media emulation alone can retain offscreen placeholders; inspect each actually rendered print section.
   for(const section of await page.locator('main > section').all()){
-   await section.scrollIntoViewIfNeeded();await wait(100);
-   printHeights.push(await section.evaluate(n=>({height:n.getBoundingClientRect().height,visibility:getComputedStyle(n).contentVisibility})));
+   const policy=await section.evaluate(n=>({display:getComputedStyle(n).display,closingCta:n.classList.contains('final-cta')}));
+   if(editorial&&policy.display==='none'){
+    assert(policy.closingCta,'Only the redundant closing download CTA may be omitted from editorial print');
+   }else{await section.scrollIntoViewIfNeeded();await wait(100);}
+   const printed=await section.evaluate(n=>({height:n.getBoundingClientRect().height,visibility:getComputedStyle(n).contentVisibility,display:getComputedStyle(n).display}));
+   if(editorial){
+    assertSectionStates([printed],'visible','editorial print section');
+    if(policy.display!=='none')assert(printed.height>0,'Editorial print content is not empty');
+   }
+   printHeights.push(printed);
   }
   // Existing shared CSS already uses auto on four sections; compare actual print styles and geometry against the baseline below.
   await page.emulateMedia({media:'screen'});
@@ -132,7 +148,7 @@ try{
   a.printHeights.forEach((n,i)=>{assert.equal(b.printHeights[i].visibility,n.visibility,'Print style changed '+i);assert(Math.abs(n.height-b.printHeights[i].height)<1,'Print geometry changed '+i);});
   assert.equal(b.enHeights.length,a.enHeights.length,'English section inventory changed');
   a.enHeights.forEach((h,i)=>assert(Math.abs(h-b.enHeights[i])<1,'English rendered section geometry changed '+i));assert.equal(b.enDeferred,a.enDeferred,'English rendering policy changed');
-  const result={browser:engine,width:c.width,javascript:c.js,sections:a.heights.length,anchors:a.anchors.length,status:'success'};
+  const result={browser:engine,width:c.width,javascript:c.js,sections:a.heights.length,anchors:a.anchors.length,layout:editorial?'editorial':'legacy',deferralComparison:editorial?'not applicable: all sections eager-visible':'verified',status:'success'};
   results.push(result);console.log(JSON.stringify(result));
  }
 }catch(error){results.push({status:'failure',error:String(error)});throw error;}

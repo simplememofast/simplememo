@@ -342,14 +342,18 @@ def translate_document(group, locale, catalog, routes, script_paths=None, dynami
     if locale == 'en':
         from inject_locale_seed import transform as seed_english
         source, _ = seed_english(source)
-    from sync_shared_chrome import transform as chrome
+    from sync_shared_chrome import transform as chrome, editorial_language_menu
     from site_locales import language_menu
     from sync_page_design import transform as design
     file = group['pages'][locale]
     source = design(chrome(source, file), file)
-    menu = next(node for node in all_nodes(Parser(source).root)
+    nodes = list(all_nodes(Parser(source).root))
+    menu = next(node for node in nodes
                 if 'site-languages' in (node.attrs.get('class') or '').split())
-    source = source[:menu.start] + language_menu(file, locale,
+    editorial = any(node.tag == 'body' and 'sm-editorial' in
+                    (node.attrs.get('class') or '').split() for node in nodes)
+    render_menu = editorial_language_menu if editorial else language_menu
+    source = source[:menu.start] + render_menu(file, locale,
               {language: page_url(path) for language, path in group['pages'].items()}) + source[menu.stop:]
     # After link localization, so the note keeps pointing at the original.
     from site_translation_notice import add_machine_translation_note
