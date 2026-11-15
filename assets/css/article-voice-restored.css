@@ -10,3 +10,7 @@ body[data-voice-layout="restored"] .ce-first-note-actions img { width:164px;heig
 @media print {
  body[data-voice-layout="restored"] { background:#fff;color:#111;--text:#111;--text-secondary:#333;--text-muted:#444;--surface:#fff;--surface-hover:#fff;--border:#ccc; }
 }
+/* Theme transitions must not delay print colors or reduced-motion rendering. */
+@media print, (prefers-reduced-motion:reduce) {
+ body[data-voice-layout="restored"] { transition:none!important; }
+}
