@@ -22,7 +22,7 @@ HERO = 'assets/img/voice-airpods-pro-bright-1536.webp'
 DESIGN = 'assets/css/site-design.css'
 HERO_SIZES = '(max-width: 1023px) 100vw, 64vw'
 EDITORIAL_CSS = 'assets/css/home-editorial.css'
-EDITORIAL_HERO_SIZES = '(max-width: 820px) calc(100vw - 40px), (max-width: 1400px) 51vw, 700px'
+EDITORIAL_HERO_SIZES = '(max-width: 820px) calc(100vw - 40px), (max-width: 1100px) calc(60vw - 57.6px), (max-width: 1440px) calc(60vw - 91.2px), 773px'
 # Photograph pages in the legacy layout. Its 2026-11-13 Japanese version uses
 # HTML/CSS memo examples; English retains the photograph. The explicitly marked
 # editorial Japanese layout has its own photograph contract and generation branch.

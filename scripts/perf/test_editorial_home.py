@@ -30,7 +30,7 @@ def load_film_guard():
 
 
 film_guard = load_film_guard()
-SIZES = '(max-width: 820px) calc(100vw - 40px), (max-width: 1400px) 51vw, 700px'
+SIZES = '(max-width: 820px) calc(100vw - 40px), (max-width: 1100px) calc(60vw - 57.6px), (max-width: 1440px) calc(60vw - 91.2px), 773px'
 SRCSET = ', '.join(f'/assets/home-perf/voice-airpods-pro-bright-1536-{w}-0123456789ab.avif {w}w'
                    for w in (600, 750, 900, 1200, 1536))
 QUESTION = 'Obsidianを使っていなくても使えますか？'
