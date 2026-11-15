@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {waitForFonts} from './sections_wait.mjs';
+import {checkArticlePalette} from './article_palette.mjs';
 import {assertSectionStates} from './sections_escape.mjs';
 import {editorialProfile} from './verify_production.cjs';
 import {assertEditorialSectionPolicy} from './section_control.mjs';
@@ -135,6 +136,7 @@ async function measurePage(url,label,c){
  }finally{await context.close();}
 }
 try{
+ await checkArticlePalette(browser, servers[1].url, output, engine);
  for(const c of cases){
   const a=await measurePage(servers[0].url,'baseline',c);
   const b=await measurePage(servers[1].url,'candidate',c);

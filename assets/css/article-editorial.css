@@ -8,3 +8,22 @@
 .article-byline{font-size:12px}.article-byline span,.article-hero-screen figcaption{font-size:11px}.article-sidebar nav a{font-size:13px;min-height:36px}.method-picker>a>span,.method-picker small{font-size:12px}.first-note>.small{font-size:12px}.ce-screen-gallery figcaption{font-size:12px}
 @media(max-width:540px){.article-top{grid-template-columns:1fr;padding-block:30px;gap:26px}.article-top h1{font-size:44px;line-height:1.35}.article-top .eyebrow{font-size:10px}.article-deck{font-size:15px;line-height:1.9}.article-byline{font-size:12px;margin-top:19px}.article-byline span{font-size:11px}.article-hero-screen{flex-direction:row;gap:22px;align-items:center;padding:22px}.article-hero-screen .screen-frame{width:104px;flex-shrink:0}.article-hero-screen figcaption{font-size:12px;line-height:1.9;margin-top:0;max-width:130px}.method-picker>a>span,.method-picker small{font-size:11px}.method-picker b{font-size:14px}.article-sidebar nav a{font-size:12px;min-height:44px}.first-note li span{font-size:14px}.first-note-actions p{font-size:12px}.first-note>.small{font-size:12px}}
 @media(max-width:359px){.article-top h1{font-size:38px}.article-hero-screen{padding:18px;gap:18px}.article-hero-screen .screen-frame{width:93px}.method-picker b{font-size:13px}.method-picker>a>span,.method-picker small{font-size:10px}}
+
+/* Restore the Japanese guide's pre-editorial screen palette.
+   Colors come from site-design.css at 29e7a369^; preserve the current layout.
+   Locale and article scoping leave home, other articles and translations alone. */
+@media screen {
+  html[lang="ja"] body.sm-article {
+    --paper:#08070c;--ink:#eeeaf5;--sub:#bcb6c9;
+    --line:rgba(216,199,244,.17);--green:#c4b5fd;--green-soft:#191422;--warm:#100f17;
+    color-scheme:dark;
+  }
+  html[lang="ja"] body.sm-article :is(a,button,summary,[tabindex]):focus-visible { outline-color:#dccbff; }
+  html[lang="ja"] body.sm-article .skip-link { color:var(--paper); }
+  html[lang="ja"] body.sm-article .article-body a { color:var(--green); }
+  html[lang="ja"] body.sm-article .article-body pre { background:#0b0c12;color:#d8cdec; }
+  html[lang="ja"] body.sm-article .voice-table-wrap table { background:var(--warm); }
+  html[lang="ja"] body.sm-article .first-note li { border-color:var(--line); }
+  html[lang="ja"] body.sm-article .first-note li span { color:var(--sub); }
+  html[lang="ja"] body.sm-article .site-language-panel { box-shadow:0 8px 24px #0006; }
+}
