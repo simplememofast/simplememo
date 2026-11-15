@@ -29,7 +29,7 @@ export async function checkArticlePalette(browser, url, output, engine) {
       // Warm lazy images before the full-page visual review.
       for (const image of await page.locator('main img').all()) {
         await image.scrollIntoViewIfNeeded();
-        await image.evaluate(n => n.decode());
+        await page.waitForFunction(n => n.complete && n.naturalWidth > 0, await image.elementHandle(), {timeout:15000});
       }
       await page.evaluate(() => scrollTo(0, 0));
       await page.screenshot({path: path.join(output, `${engine}-article-${width}.png`), fullPage: true});
