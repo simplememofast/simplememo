@@ -311,7 +311,7 @@
       <div class="lang-body">
         <p class="page-content__date">最後更新日期：<time datetime="2026-11-16">2026年11月16日</time></p>
         <div class="page-content__body">
-          <p>YURIKA, K.K.（以下簡稱“本公司”）對“SimpleMemo”（以下簡稱“本服務”）中使用者資訊的處理，規定如下隱私政策。</p>
+          <p>日本法人YURIKA, K.K.（以下稱「本公司」）透過本政策，說明在 iOS App「Obsidian 整合語音 SimpleMemo」（在部分國家或地區，App Store 中顯示為「Simple Memo - Obsidian Voice」）及本公司網站 simplememofast.com（以下合稱「本服務」）中如何處理個人資料。本公司的所在地與聯絡方式請見下文第11節。</p>
 
           <h2 id="reading-01">1。 獲取的資訊</h2>
           <p>本公司可能會獲取以下資訊。</p>
@@ -320,15 +320,17 @@
           <ul>
             <li>收件人郵箱地址（To）</li>
             <li>標題設定（Subject）・簽名設定（Signature）</li>
-            <li>備忘錄正文（傳送郵件所需的範圍）</li>
+            <li>備忘錄內文（以送達使用者所選目的地所需的範圍為限）</li>
+            <li>連結 Notion 時：允許本公司伺服器在使用者所選的 Notion 工作區中建立頁面的授權（請見下文(I)）</li>
+            <li>使用聯絡表單、電子郵件或藍圖問卷時：所填寫的內容及輸入的聯絡方式（請見下文第14節）</li>
           </ul>
 
           <h3>(B) 關於終端、使用的資訊</h3>
           <ul>
-            <li>終端資訊（OS/終端種類等一般資訊）</li>
-            <li>傳送處理所需的日誌（傳送日期、結果狀態等）</li>
+            <li>裝置資訊（作業系統、裝置類型等一般資訊）</li>
+            <li>傳送處理所需的日誌（傳送時間、結果狀態等）</li>
             <li>使用事件（畫面顯示、操作、傳送結果）、終端單位的隨機識別符號、會話ID、傳送ID、啟動完成情況等診斷資訊</li>
-            <li>用於防止濫用和限制請求頻率的技術資訊，例如 IP 地址、請求資訊等</li>
+            <li>IP 位址與請求資訊。本公司伺服器在每次通訊時都會收到這些資訊，代管服務供應商會為了安全、防止濫用、速率限制與故障調查，將其記錄在伺服器日誌中（請見下文(J)）。</li>
           </ul>
 
           <p>使用活動中不包含郵箱地址和備忘錄正文，但透過傳送ID可以與傳送記錄的收件人郵箱地址的雜湊關聯。 因此，這些事件、終端識別符號、診斷資訊被當作與使用者聯絡起來的資訊。 終端識別符號的儲存位置和刪除應用程式後的處理情況記載在以下12中。</p>
@@ -337,25 +339,83 @@
           <p>為了掌握訂閱的運用情況和支付失敗，驗證從Apple收到的簽名通知，記錄訂閱開始、更新、自動更新設定變更、更新失敗、過期、退款等。 儲存的專案是通知和交易的識別符號、訂閱商品的識別符號、通知的種類、區分、生產或測試環境的區分、購買、有效期、取消、通知、接收等日期和時間，以及Apple通知的取消理由。 因為包含Apple側的識別符號，所以不作為完全匿名的資訊處理。 這個通知記錄不儲存郵箱地址、備忘錄正文、安裝識別符號，Apple的交易識別符號、安裝識別符號和收件人郵箱地址的對應表也不儲存。 以下（D）在處理中核對通知，製作其他分析記錄。 從僅基於郵箱地址的刪除請求中，無法確定原來的通知記錄。</p>
 
           <h3>(D) 訂閱狀態和持續使用的分析</h3>
-          <p>在對應的應用程式中，如果這個分析有效，從終端接收帶有Apple簽名的購買、更新資訊，將驗證的訂閱狀態與終端單位的識別符號一起記錄下來，與持續使用的事件進行核對。 記錄的專案是訂閱商品、本人購買或家庭共享的區分、價格、貨幣、購買、有效期、取消、簽名、觀測、接收等日期和時間、自動更新的狀態、請求重新嘗試、寬限期、過期理由、生產或測試環境的區分，以及應用程式的執行環境。 處理中用Apple的交易識別符號核對上述（C）的通知，同時記錄當時確認的通知種類數量和最終日期。 Apple的交易識別符號和簽名資訊的原文，不會和這個分析記錄一起儲存。 雖然不包括郵箱地址和備忘錄正文，但終端識別符號、商品、日期、價格等與使用資訊相關聯，所以不視為匿名資訊。</p>
-          <p>這個分析記錄從收到開始超過90天的定期刪除。 從對應的應用程式刪除時，會刪除終端保留的刪除用資訊對應的分析記錄，即使刪除的資訊延遲重新傳送也不會儲存。 此操作不會一次性刪除上述（C）的原始Apple通知記錄、其他終端的記錄或外部分析服務的記錄。 丟失終端刪除用資訊等情況，可能無法確定物件。</p>
+          <p>當 App 中啟用此分析時，本公司會透過裝置接收 Apple 簽署的購買與續訂資訊，將驗證後的訂閱狀態與裝置層級的識別碼一起記錄，並與持續使用事件進行比對。記錄的項目包括：訂閱商品、本人購買或家人共享的區分、價格與幣別、購買/到期/撤銷/簽署/觀測/接收等日期時間、自動續訂狀態、帳單重試/寬限期/到期原因、正式環境或測試環境的區分，以及 App 的執行環境。處理過程中，會以 Apple 的交易識別碼比對上文(C)中的通知，並記錄當時可確認的各類通知數量及最後日期時間。Apple 的交易識別碼與簽署資訊的原文不會與此分析記錄一起儲存。記錄中也不包含電子郵件地址或備忘錄內文，但裝置識別碼、商品、日期時間、價格等可與使用資訊相互連結，因此不視為匿名資訊。哪些版本會傳送這些資訊、能否選擇，請見下文(E)中的表格。</p>
+          <p>自接收起超過 90 天的分析記錄會定期刪除。透過 App 刪除時，會刪除與裝置所保存的刪除用資訊相對應的分析記錄；即使已刪除的資訊之後被重新傳送，也不會再儲存。此操作不會一併刪除上文(C)中的原始 Apple 通知記錄、其他裝置的記錄或外部分析服務中的記錄。若裝置上的刪除用資訊已遺失等，可能無法確定對象記錄。</p>
 
-          <h3>(E) 對應應用程式版的使用情況分析選擇</h3>
-          <p>在設定中提供“使用情況分析”選項的應用版本中，常規應用內使用事件及來自裝置的訂閱狀態分析預設關閉。只有使用者選擇“同意並開啟”後才開始收集；未選擇則不會開始。這項選擇獨立於郵件提醒的同意，也不同於 Apple 裝置的 App Analytics 共享設定。在應用內撤回同意後，我們會停止新的收集，並嘗試刪除裝置上尚未傳送的事件。若無法確認刪除，介面會顯示提示；之前同意期間生成的事件，不會在日後重新同意時再次傳送。已經開始傳輸的請求可能仍會完成，撤回本身不會刪除我們已經收到的記錄。內部驗證用 Capture 測試中，操作順序和傳送結果等測量也屬於使用情況分析與質量改進的目的。但參與測試還需要另行同意，屆時會說明測試範圍和期間。僅開啟此選項不會報名參加測試。撤回此選項後，新的測試測量也會停止。若需刪除已儲存的測試記錄，請使用測試的退出及刪除操作。沒有此選項的應用程式版本，會隨應用程式運作傳送下述 12 的使用事件及上述 (D) 的訂閱狀態分析。我們撤銷自 2026 年 9 月 28 日起實施的、不儲存舊方式請求的伺服器端限制，接收舊方式及提供此選項的版本雙方的分析請求。不會追溯補齊先前未能收集的事件。保留此選項的版本仍按應用程式內設定開始或停止收集。AppsFlyer SDK 的獲客與使用情況測量見下述 12。</p>
-          <p>這個選擇並不同意AppsFlyer的獲取測量。 在設定中有“知道應用程式的路徑測量”的版本中，只有在以下（F）的其他選擇和iPhone的跟蹤許可都同時存在的情況下，才會啟動AppsFlyer SDK。 在沒有其他選擇的使用情況分析對應版中，SDK會停止。 沒有選擇畫面的應用程式版的處理在以下12中記載。</p>
+          <h3>(E) 各 App 版本的使用情況分析與 AppsFlyer 測量</h3>
+          <p>App 傳送的資訊因所安裝的版本而異。在 iPhone 的「設定」&gt;「一般」&gt;「iPhone 儲存空間」中選擇本 App，即可查看已安裝的版本。5.9.10 版本未在 App Store 公開發布。</p>
+          <div class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格"><table>
+            <thead>
+              <tr><th>App 版本</th><th>本公司的使用事件（請見下文第12節）與訂閱狀態分析（請見上文(D)）</th><th>AppsFlyer SDK（請見下文第12節）</th><th>App 內的選擇</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>5.9.9 及更早版本</td><td>隨 App 運作傳送（訂閱狀態分析自 5.8.53 版本起）</td><td>啟動時即開始，不確認 iPhone 的追蹤許可。將本公司的安裝識別碼設為 AppsFlyer 的 Customer User ID。自 4.9.24 版本起也會傳送 App 內事件（包括購買）</td><td>無</td></tr>
+              <tr><td>5.9.11〜5.9.14</td><td>預設為關閉。僅在選擇「同意並開啟」時傳送</td><td>不啟動</td><td>設定中的「使用情況分析」</td></tr>
+              <tr><td>5.9.15</td><td>與 5.9.11～5.9.14 相同</td><td>僅在開啟「得知 App 途徑的測量」（App 內顯示為 App discovery measurement）並允許 iPhone 追蹤時，在上文(F)所述的較窄範圍內啟動</td><td>設定中的「使用情況分析」與「得知 App 途徑的測量」（App 內顯示為 App discovery measurement）</td></tr>
+              <tr><td>5.9.16～5.9.31（已公開發布的版本：5.9.16、5.9.17、5.9.18、5.9.23、5.9.24、5.9.25、5.9.27）</td><td>隨 App 運作傳送</td><td>開啟 App 時啟動。但若本 App 的追蹤未獲允許或受到限制，或您曾在 5.9.15 版本中拒絕「得知 App 途徑的測量」，則不啟動。將本公司的安裝識別碼設為 Customer User ID，並傳送 App 內事件（包括購買）</td><td>無</td></tr>
+              <tr><td>5.9.32（目前版本）</td><td>隨 App 運作傳送</td><td>與 5.9.16～5.9.31 相同。此外，停止與 AppsFlyer 的所有整合合作夥伴共享，不讓 SDK 讀取廣告識別碼（IDFA），並停止 Apple Ads 的歸因測量</td><td>無</td></tr>
+            </tbody>
+          </table></div>
+          <p>在 5.9.11～5.9.15 版本中，撤回「使用情況分析」後會停止新的收集，並嘗試刪除裝置內尚未傳送的事件。撤回時並未刪除本公司已接收的記錄。</p>
+          <p>5.9.16～5.9.32 版本中沒有可停止這些處理的 App 內設定。若 iOS 對本 App 的追蹤回報「不允許」或「受限制」，AppsFlyer 不會啟動。在這些版本中，本公司的使用事件與訂閱狀態分析無法停止。我們計畫在日後的版本中，於所有地區開始這些處理之前徵求您的同意。</p>
+          <p>從 2026年9月28日至10月7日，本公司伺服器將來自沒有選擇畫面之版本的使用事件與訂閱狀態分析直接捨棄，未予儲存。自 2026年10月7日起，接受所有版本傳送的資料。已捨棄的事件不會追溯補齊。</p>
+          <p>內部的 Capture 試驗曾在另行取得、載明對象與期間的參與同意下，測量操作順序與投遞成敗。自 5.9.10 版本起不再進行此試驗。</p>
 
-          <h3>(F) 對應APP版的獲取測量選擇</h3>
-          <p>“知道應用程式的路徑的測量”是任意的，初始狀態是關閉的。 同意此選擇和iPhone的追蹤許可同時，為了掌握下載連結的獲取情況，向AppsFlyer傳送應用程式的啟動、獲取來源、活動資訊、廣告識別符號、IP地址、終端型號、OS、應用程式版本等技術資訊。 雖然使用SDK固有的識別符號，但是不會將本公司的使用情況分析的識別符號作為Customer User ID傳遞。 為此目的，不傳送備忘錄正文、郵箱地址、購買活動、普通的應用內使用活動，與廣告合作伙伴共享和廣告的個別最佳化無效。 SKAdNetwork、IDFV和Apple Ads的測量也在這個路徑上無效。 因為包含識別符號，所以不作為匿名資訊處理。</p>
-          <p>即使不同意也可以使用應用程式。 在設定中撤回的話，會停止新的測量，刪除終端內獲得來源的確認記錄。 通訊中的請求可能會完成，AppsFlyer已經收到的資料的刪除和iPhone的追蹤設定的更改，不包含在這個操作中。 同意使用情況分析、同意郵件提醒、Apple的App Analytics共享設定是獨立的選擇。</p>
+          <h3>(F) 得知 App 途徑的測量（僅限 5.9.15 版本）</h3>
+          <p>「得知 App 途徑的測量」為選用項目，預設為關閉。僅在您同意此選項且允許 iPhone 追蹤時，為了解透過下載連結取得使用者的情況，才會向 AppsFlyer 傳送 App 啟動、取得來源與行銷活動資訊、廣告識別碼、IP 位址、裝置型號、作業系統與 App 版本，以及 SDK 專屬的識別碼。透過此途徑，本公司不會將自有使用情況分析的識別碼作為 Customer User ID 提供，也不傳送備忘錄內文、電子郵件地址、購買事件或一般的 App 內使用事件。與廣告合作夥伴的共享及廣告個人化、SKAdNetwork、IDFV 以及 Apple Ads 的測量均已停用。由於包含識別碼，不視為匿名資訊。</p>
+          <p>即使不同意也可以使用 App。在設定中撤回後，會停止新的測量，並刪除裝置內的取得來源確認記錄。進行中的請求可能會完成；此操作不包括刪除 AppsFlyer 已接收的資料，也不會變更 iPhone 的追蹤設定。這是與使用情況分析同意、郵件提醒同意以及 Apple 的 App Analytics 共享設定彼此獨立的選擇。更新至 5.9.16 或更新版本後的處理方式，請見上文(E)。</p>
+
+          <h3 id="email-verification">(G) 電子郵件地址的確認（驗證）</h3>
+          <p>為了能將備忘錄傳送到收件地址，我們會透過 6 位數的驗證碼、郵件中的連結，或透過 Apple 或 Google 登入（請見下文(H)），確認您可以使用該電子郵件地址。</p>
+          <ul>
+            <li>本公司伺服器（Cloudflare Workers KV）會在下列確認用記錄中，以可讀取的形式儲存電子郵件地址。 <ul>
+                <li>驗證碼記錄（與驗證碼一起）：10 分鐘</li>
+                <li>表示已使用郵件中連結的記錄：30 分鐘</li>
+                <li>允許傳送的、每支 iPhone 的已驗證記錄：自驗證起 365 天（再次驗證時，從該時起 365 天）。刪除帳號時，會刪除執行刪除操作的那支 iPhone 的記錄（請見下文第15節）。</li>
+              </ul>
+            </li>
+            <li>本公司的資料庫（Cloudflare D1）會儲存以 SHA-256 產生並截短的電子郵件地址雜湊：與傳送 ID 一起儲存 35 天，並與註冊及提醒記錄一起儲存（請見下文第5節、第9節）。這種雜湊不是匿名資訊，而是假名化資訊。知道該地址的人可以算出相同的值，因此本公司將其作為個人資料處理。</li>
+            <li>在您請求驗證碼、完成驗證、透過 Apple 或 Google 驗證，或透過郵件傳送備忘錄時，本公司會將該地址登錄為郵件傳送服務供應商 Resend（請見下文5(E)）的聯絡人。除非您開啟提醒，否則以「已取消訂閱」狀態登錄。無論是否開啟提醒都會登錄，只請求了驗證碼而未完成驗證的地址也會登錄。</li>
+            <li>若您請求了驗證碼但尚未完成驗證，我們可能會在大約 6 小時、24 小時與 72 小時後，寄送最多 3 封提醒您完成驗證的郵件。每封郵件中都有取消訂閱的連結。</li>
+          </ul>
+
+          <h3 id="sign-in">(H) 透過 Apple 或 Google 登入</h3>
+          <p>輸入與確認電子郵件地址時，您可以使用「使用 Apple 登入」或 Google 帳號。無論哪種方式，App 都會登入 Firebase Authentication（Google LLC）。Firebase Authentication 僅在美國的資料中心處理資料。</p>
+          <ul>
+            <li>使用 Apple 登入：App 會向 Apple 請求您的姓名與電子郵件地址。Apple 僅在首次登入時提供姓名；您可以在 Apple 的畫面上編輯姓名或隱藏電子郵件地址。App 會將姓名傳給 Firebase，Firebase 會將其用作帳號的顯示名稱。</li>
+            <li>Google：Google 會提供電子郵件地址，以及 Google 帳號附帶的基本個人檔案資訊。</li>
+            <li>Firebase 會儲存此登入記錄（電子郵件地址、若有提供的姓名、服務提供者與使用者的識別碼），直到本公司將其刪除。登入時使用的 IP 位址由 Firebase 保存數週。</li>
+            <li>目前，即使在 App 中刪除帳號，Firebase 中的記錄也不會刪除，Apple 帳號與本 App 的連結也不會解除。若您以電子郵件聯絡本公司（請見下文第11節），我們將刪除 Firebase 中的記錄。對於「使用 Apple 登入」，您可以隨時在 Apple 帳號設定中停止在本 App 中使用。</li>
+            <li>透過這些登入取得的電子郵件地址，用於本公司伺服器上的地址確認（請見上文(G)）。</li>
+          </ul>
+
+          <h3 id="notion">(I) Notion</h3>
+          <p>連結 Notion 時（5.8.12 及更新版本）：</p>
+          <ul>
+            <li>允許本公司伺服器寫入 Notion 的授權（OAuth 權杖），會與在工作區中建立的 Inbox 資料庫的 ID 一起，加密儲存在本公司伺服器（Cloudflare D1）上。權杖不會儲存在 iPhone 上。</li>
+            <li>將備忘錄儲存到 Notion 時，備忘錄內文、根據內文產生的標題、日期時間與記錄 ID 會經由本公司伺服器（Cloudflare Workers）傳送到 Notion 的 API。本公司不儲存備忘錄內文。為避免重複建立相同頁面，會保留投遞記錄（根據內容計算出的密碼學值與 Notion 頁面 ID），已完成儲存的記錄於 30 天後刪除。</li>
+            <li>在設定中選擇「Disconnect」（中斷連結）後，會撤銷本公司在 Notion 中的存取權，並刪除已儲存的權杖。為避免重新連結時產生重複，會保留 Inbox 的設定與最近的投遞記錄。在 App 中刪除帳號時，會刪除從該支 iPhone 建立的 Notion 連結記錄。</li>
+            <li>已儲存的頁面由 Notion Labs, Inc.（美國）依據 Notion 的條款與隱私權政策儲存在您的工作區中。如需刪除頁面，請在 Notion 中操作。</li>
+          </ul>
+
+          <h3 id="server-logs">(J) 伺服器日誌</h3>
+          <p>本公司的 API 在 Cloudflare Workers（Cloudflare, Inc.，美國）上運作。Cloudflare Workers Logs 會將每個請求的記錄保存 7 天。記錄包括：IP 位址、Cloudflare 根據 IP 位址推定的大致位置（國家、地區、城市、郵遞區號、經緯度）、網路業者的網路（ASN）、瀏覽器或 App 的資訊（使用者代理程式）、包含查詢參數的請求 URL、其他請求資訊，以及寄往本公司支援信箱之郵件的寄件人與收件人地址。這些記錄用於安全、防止濫用與故障調查。記錄可能儲存在使用者所在國家以外的 Cloudflare 資料中心。此外，為進行速率限制，本公司伺服器會將截短的 IP 位址雜湊最長保存 48 小時。</p>
 
           <h2 id="reading-02">2。 使用目的</h2>
           <p>獲取的資訊，用於以下目的。</p>
           <ul>
             <li>提供郵件傳送功能（傳送、未傳送管理/重新傳送、歷史顯示）</li>
-            <li>本服務的運用、維護、故障應對、質量改善</li>
+            <li>確認電子郵件地址與授權傳送（包括透過 Apple 或 Google 登入）</li>
+            <li>連結 Notion 時，將備忘錄儲存到 Notion</li>
+            <li>寄送您開啟的提醒郵件，以及下文第5節與上文1(G)所述的郵件</li>
+            <li>本服務的營運與維護、故障處理與品質改善（包括使用情況分析）</li>
+            <li>測量 App 是透過哪些連結或行銷活動安裝的（AppsFlyer，以及本公司網站上的 AppsFlyer 連結）</li>
+            <li>掌握訂閱的營運狀況與付款失敗</li>
             <li>將內部測試終端排除在使用統計之外，設定好的Obsidian功能的指南不要重複</li>
-            <li>防止非法使用、確保安全（限制短時間連續傳送、伺服器端速率限制等）</li>
-            <li>諮詢對應</li>
+            <li>防止濫用與確保安全（限制短時間內連續傳送、伺服器端速率限制、伺服器日誌等）</li>
+            <li>回應詢問以及與個人資料相關的請求</li>
+            <li>透過藍圖問卷改善日後的計畫</li>
+            <li>了解本公司網站的瀏覽情況（請見下文第13節）</li>
             <li>遵守法令</li>
           </ul>
 
@@ -364,12 +424,16 @@
 
           <h2 id="reading-04">4。 備忘錄內容的處理（重要）</h2>
           <ul>
-            <li>備忘錄正文透過使用者的操作傳送郵件。</li>
-            <li>為了傳送處理，備忘錄正文及收件人資訊可能會透過本公司使用的傳送基礎（包括外部服務）。</li>
-            <li>除履行法律要求、防止濫用、處理服務故障等正當必要情形外，我們不以長期儲存或檢視筆記內容為目的。</li>
+            <li>備忘錄內文會依使用者的操作，傳送到使用者所選的目的地。儲存到 Obsidian、提醒事項或行事曆的操作在 iPhone 內完成，不經過本公司伺服器。</li>
+            <li>電子郵件：備忘錄內文與收件地址會經過本公司伺服器（Cloudflare Workers）與郵件傳送服務供應商 Resend。本公司伺服器不儲存備忘錄內文。Resend 會在美國將已寄出的郵件（包括備忘錄內文、主旨與收件地址）及投遞記錄保存 30 天。本公司無法透過 API 刪除儲存在 Resend 中的個別郵件。</li>
+            <li>Notion：備忘錄內文經由本公司伺服器傳送到 Notion（請見上文1(I)）。</li>
+            <li>語音輸入：在 iPhone（iOS 26 或更新版本）上，語音會在裝置內轉換為文字。App 不會產生錄音檔，也不會將語音傳送給本公司。透過鍵盤、Apple Watch 或 Siri 進行的語音輸入由 Apple 處理。</li>
+            <li>iPhone 中會加密儲存已傳送的歷史記錄（最近 100 筆）、未傳送的備忘錄與草稿（請見下文第12節）。這些內容會一直保留，直到您將其刪除或刪除 App。刪除帳號不會刪除這些內容。</li>
+            <li>在 2026年8月25日之前，本公司伺服器與提醒記錄一起儲存的投遞事件記錄中，有時包含收件地址與郵件主旨。這些記錄自接收起 180 天後刪除。</li>
+            <li>除非基於遵守法令、防止濫用或故障處理等正當需要，本公司無意檢視備忘錄內容。</li>
           </ul>
 
-          <h2 id="reading-05">5。 郵件提醒功能（任意）</h2>
+          <h2 id="reading-05">5. 郵件提醒功能（選用）及其他郵件</h2>
           <p>本服務為了支援傳送備忘錄的習慣化，提供向希望的使用者傳送提醒郵件的任意功能。</p>
 
           <h3>(A) 獲得同意</h3>
@@ -377,14 +441,15 @@
             <li>本功能<strong>預設無效</strong>，只有在認證畫面或設定畫面上使用者明確啟用時才會傳送。</li>
             <li>即使尚未啟用提醒，如果您已驗證郵件地址，且一段時間沒有傳送筆記（參考：距上次傳送約 72 小時），我們也可能傳送<strong>僅 1 次</strong>的邀請郵件，詢問您是否願意接收提醒。除非您選擇接收，否則不會傳送提醒。</li>
             <li>啟用後，也可以在設定畫面點選1停止。 各個提醒郵件末尾的解除連結也可以停止。</li>
+            <li>未完成驗證時寄送的提醒郵件，請見上文1(G)。</li>
           </ul>
 
           <h3>(B)獲取、儲存的資訊</h3>
           <ul>
-            <li>郵箱地址的<strong>雜湊值</strong>（SHA-256）—儲存在本公司伺服器（Cloudflare D1）。</li>
+            <li>以 SHA-256 產生並截短的電子郵件地址雜湊——儲存在本公司伺服器（Cloudflare D1）上。</li>
             <li>同意狀態（有效/無效）、最終備忘錄傳送日期、累計傳送次數。</li>
             <li>提醒傳送記錄（傳送日期、傳送/開啟/點選/彈跳等活動）。</li>
-            <li><strong>我們的伺服器不儲存原始電子郵件地址</strong>。原始地址僅由郵件傳送平臺（Resend）的聯絡人 API 儲存。</li>
+            <li>可讀取形式的電子郵件地址——存在於 Resend 的聯絡人清單與本公司伺服器的確認用記錄中。無論是否開啟提醒，這些都會存在（請見上文1(G)）。</li>
           </ul>
 
           <h3>(C) 傳送頻率</h3>
@@ -398,8 +463,8 @@
             <li>郵件傳送時出現彈跳、投訴時，立即停止向該地址傳送，同意狀態無效。</li>
           </ul>
 
-          <h3>(E) 受委託的服務提供商</h3>
-          <p>提醒郵件傳送及聯絡人管理委託給美國的 Resend, Inc.。該公司遵守 <a href="https://resend.com/legal/dpa" rel="noopener">Data Processing Agreement</a> 及國際郵件傳送法規，包括 CAN-SPAM、GDPR 和日本《特定電子郵件法》等。</p>
+          <h3>(E) 郵件傳送服務供應商</h3>
+          <p>本公司伺服器寄出的郵件（包括您傳送的備忘錄、確認郵件與提醒）由 Plus Five Five, Inc.（美國）經營的 Resend 依據該公司的 <a href="https://resend.com/legal/dpa" rel="noopener">Data Processing Addendum</a>（資料處理附錄）進行投遞。本公司的聯絡人清單也由 Resend 保存。Resend 會在美國將郵件內容、中繼資料與投遞記錄保存 30 天（請見上文第4節）。</p>
 
           <h2 id="reading-06">6。 第三方提供</h2>
           <p>除以下情況外，本公司不會向第三方提供個人資訊。</p>
@@ -407,23 +472,69 @@
             <li>如果使用者同意的話</li>
             <li>根據法令的情況</li>
             <li>需要保護人命、財產等時</li>
-            <li>在業務所需範圍內向受委託的服務提供商提供資訊時（見下一節）</li>
+            <li>在必要範圍內提供給受託方時（請見下文第7節）</li>
           </ul>
 
-          <h2 id="reading-07">7。 委託（郵件傳送等）</h2>
-          <p>我們可能將郵件傳送、運維和分析等業務委託給外部服務提供商，並對受委託方進行適當監督。</p>
+          <h2 id="reading-07">7. 受託方及其所在國家</h2>
+          <p>本公司將業務委託給下列服務供應商，並對受託方進行適當監督。</p>
+          <div class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格"><table>
+            <thead>
+              <tr><th>受託方</th><th>所在國家</th><th>接收的資訊</th><th>目的</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Cloudflare, Inc.</td><td>美國。其網路遍布全球，本公司的主要資料庫位於亞太地區</td><td>經過本公司伺服器與網站的所有資訊：傳輸中的備忘錄內文、電子郵件地址（在確認用記錄與下文第14節所述的部分記錄中為可讀取形式，其他為雜湊）、裝置與安裝識別碼、使用事件、Notion 權杖（加密）、包含 IP 位址的伺服器日誌、聯絡表單內容、問卷回答、網站流量分析（請見下文13(D)）、寄往支援信箱的郵件</td><td>代管、資料庫、伺服器日誌、網站傳遞與分析、支援郵件轉寄</td></tr>
+              <tr><td>Plus Five Five, Inc.（Resend）</td><td>美國</td><td>每封郵件的收件地址、主旨與備忘錄內文，聯絡人清單，投遞事件</td><td>郵件傳送</td></tr>
+              <tr><td>Google LLC</td><td>美國</td><td>Firebase Authentication：登入記錄（請見上文1(H)）。Firebase App Check：證明 App 通訊的正當性。Google 登入。網站上的 Google 分析（請見下文13(A)）</td><td>登入、防止濫用、網站流量分析</td></tr>
+              <tr><td>Google LLC（Gmail）</td><td>美國</td><td>寄到支援信箱的郵件（請見下文14(B)）</td><td>支援收件匣</td></tr>
+              <tr><td>AppsFlyer（AppsFlyer Ltd. 及其包括 AppsFlyer Inc. 在內的集團公司）</td><td>以色列、美國。AppsFlyer 表示其資料代管地點為歐盟與美國</td><td>裝置識別碼、IP 位址、裝置與 App 資訊、App 內事件（請見下文第12節）、網站上 AppsFlyer 連結的點擊（請見下文13(C)）</td><td>安裝與取得途徑的測量</td></tr>
+              <tr><td>Ahrefs Pte. Ltd.</td><td>新加坡</td><td>網站瀏覽（請見下文13(B)）</td><td>網站流量分析</td></tr>
+            </tbody>
+          </table></div>
+          <p>若您選擇儲存到 Notion，本公司會將備忘錄傳送給 Notion Labs, Inc.（美國）。Notion 會依據 Notion 的條款與隱私權政策處理這些內容（請見上文1(I)）。</p>
+          <p>Apple（Apple Inc.；在歐洲經濟區、英國與瑞士為 Apple Distribution International Ltd.）依據 Apple 本身的隱私權政策，處理在 App Store 中的購買、透過 Apple 登入以及裝置認證。本公司會從 Apple 接收已簽署的購買資訊與通知（請見上文1(C)(D)），以及透過 Apple 登入時共享的資訊（請見上文1(H)）。</p>
 
           <h2 id="reading-08">8。 安全管理</h2>
-          <p>本公司為了防止資訊洩露、滅失、損毀等，採取合理的安全對策。</p>
+          <p>本公司採取合理的安全措施，以防止資訊外洩、滅失或毀損等。記錄中的雜湊屬於假名化資訊，作為個人資料加以保護。</p>
 
           <h2 id="reading-09">9。 保管期限</h2>
-          <p>我們努力避免將資訊儲存超過實現使用目的所需的期限。使用事件及上述 1(D) 中的訂閱狀態分析記錄超過 90 天后，會定期刪除；傳送 ID 與收件人雜湊值的對應記錄超過 35 天后，也會定期刪除。Apple 的訂閱與退款通知原始記錄在接收超過 180 天后，由每日任務刪除。由於每次處理數量有上限，如待刪除記錄較多，會在次日及之後繼續處理。其他日誌等可能因防止濫用或運營需要，在必要範圍內儲存一定時間。</p>
+          <p>本公司努力確保保存資訊的時間不超過使用目的所需的期間。</p>
+          <div class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格"><table>
+            <thead>
+              <tr><th>資訊</th><th>儲存地點</th><th>期間</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>備忘錄內文與主旨</td><td>不儲存在本公司伺服器上。Resend</td><td>Resend：30 天</td></tr>
+              <tr><td>驗證碼記錄（地址與驗證碼）</td><td>Cloudflare KV</td><td>10 分鐘</td></tr>
+              <tr><td>已使用郵件內連結的記錄（地址）</td><td>Cloudflare KV</td><td>30 分鐘</td></tr>
+              <tr><td>已驗證記錄（地址）</td><td>Cloudflare KV</td><td>自驗證起 365 天（再次驗證時，從該時起 365 天）。在該支 iPhone 上刪除帳號時刪除</td></tr>
+              <tr><td>傳送 ID 與地址雜湊的對應關係</td><td>Cloudflare D1</td><td>35 天</td></tr>
+              <tr><td>用於協調投遞的帶金鑰雜湊</td><td>Cloudflare</td><td>35 天</td></tr>
+              <tr><td>提醒同意變更的記錄</td><td>Cloudflare</td><td>180 天</td></tr>
+              <tr><td>提醒的設定與歷史記錄、註冊記錄（地址雜湊、Resend 聯絡人 ID、次數與日期時間）</td><td>Cloudflare D1</td><td>直到刪除帳號為止</td></tr>
+              <tr><td>Resend 聯絡人（地址）</td><td>Resend（美國）</td><td>直到刪除帳號為止</td></tr>
+              <tr><td>使用事件</td><td>Cloudflare D1</td><td>90 天</td></tr>
+              <tr><td>訂閱狀態分析（請見上文1(D)）</td><td>Cloudflare D1</td><td>90 天</td></tr>
+              <tr><td>Apple 通知的原始記錄（請見上文1(C)）</td><td>Cloudflare D1</td><td>180 天</td></tr>
+              <tr><td>停止寄送記錄與地址刪除記錄（雜湊與日期時間）</td><td>Cloudflare</td><td>為避免再次寄信至該地址而保存</td></tr>
+              <tr><td>伺服器日誌（請見上文1(J)）</td><td>Cloudflare Workers Logs</td><td>7 天</td></tr>
+              <tr><td>用於速率限制的 IP 位址雜湊</td><td>Cloudflare KV</td><td>最長 48 小時</td></tr>
+              <tr><td>Notion 權杖／連結記錄／投遞記錄（請見上文1(I)）</td><td>Cloudflare D1</td><td>直到中斷連結為止／直到刪除連結或帳號為止／儲存完成後 30 天</td></tr>
+              <tr><td>聯絡表單內容（請見下文14(A)）</td><td>Cloudflare D1</td><td>180 天</td></tr>
+              <tr><td>寄給支援團隊的郵件（請見下文14(B)）</td><td>Google LLC（Gmail，美國）</td><td>尚未決定期間</td></tr>
+              <tr><td>藍圖問卷的回答（請見下文14(C)）</td><td>Cloudflare D1</td><td>尚未決定期間</td></tr>
+              <tr><td>登入記錄（請見上文1(H)）</td><td>Firebase Authentication（美國）</td><td>直到本公司刪除為止。登入 IP 位址保存數週</td></tr>
+              <tr><td>AppsFlyer 的資料</td><td>AppsFlyer</td><td>依 AppsFlyer 規定的保存期間（請參閱下文13(C)中的 AppsFlyer 政策）</td></tr>
+              <tr><td>網站流量分析（請見下文第13節）</td><td>Google、Ahrefs、Cloudflare</td><td>請見下文第13節</td></tr>
+              <tr><td>用於資料庫時間點復原的資料</td><td>Cloudflare</td><td>最長 30 天</td></tr>
+            </tbody>
+          </table></div>
+          <p>定期刪除每天執行。由於每次處理的數量有上限，待刪除項目較多時，會在隔天及之後繼續處理。</p>
 
           <h2 id="reading-10">10。 修訂</h2>
-          <p>本公司根據需要修改本政策。 修改後會在本服務或本公司網站等上公佈。</p>
+          <p>本公司會視需要修訂本政策。修訂後將在本服務或本公司網站等處公告，並於本頁開頭標示最後更新日期。</p>
 
-          <h2 id="reading-11">11。 諮詢</h2>
-          <p><!--email_off--><a href="mailto:support@simplememofast.com">support@simplememofast.com</a><!--/email_off--></p>
+          <h2 id="reading-11">11. 本公司資訊與聯絡方式</h2>
+          <p>YURIKA, K.K.（YURIKA, K.K.）<br> 地址：日本東京都澀谷區道玄坂1丁目10番8號 澀谷道玄坂東急大樓2F-C<br> 電子郵件：<!--email_off--><a href="mailto:support@simplememofast.com">support@simplememofast.com</a><!--/email_off-->（原則上以電子郵件受理詢問）<br> 電話：050-1793-7505</p>
 
           <h2 id="technical">12。 關於加密的技術資訊（參考）</h2>
           <p>本服務為了保護使用者的隱私，採取了以下技術對策。 這些與其說是“安全”，不如說是為了“資料最小化”和“終端內保護”的實施。</p>
@@ -431,18 +542,18 @@
             <li><strong>裝置內儲存空間</strong>：離線待傳送訊息（Outbox）和傳送歷史記錄使用 Apple 原生 CryptoKit 提供的 <strong>AES-GCM-256</strong> 加密，儲存在裝置上（檔案保護類別：<code>completeFileProtectionUntilFirstUserAuthentication</code>）。</li>
             <li><strong>金鑰管理</strong>：256-bit 對稱金鑰存放在Apple Keychain Services（<code>kSecClassGenericPassword</code>），<a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly">重啟後首次解鎖後可以使用，使用不轉移到其他終端的保護類</a>。 應用程式在加密、解密時讀取金鑰。 備份中包含的金鑰副本由終端固有的金鑰保護，在其他終端無法使用（<a href="https://support.apple.com/ja-jp/guide/security/secb0694df1a/1/web/1">Apple的說明</a>）。 在更換機型之前，請確認必要的備忘錄是否已送達郵件或Obsidian等儲存地址。</li>
             <li><strong>通訊路</strong>：API通訊由TLS（HTTPS）保護。 傳送備忘錄用的<code>URLSessionConfiguration.ephemeral</code>是將該會話的快取、Cookie、認證資訊不永久儲存在磁碟上的構成。 與使用分析的儲存、傳送和外部SDK的通訊說明區分開來。</li>
-            <li><strong>郵件正文</strong>：為了傳送處理，透過本公司的Relay API（Cloudflare Workers）和外部傳送基礎（Resend），但不會進行持續儲存。 日誌也不記錄（開發時的DEBUG構建除外）。</li>
-            <li><strong>郵件地址的伺服器儲存</strong>：將傳送ID和收件人郵件地址的雜湊（從SHA-256生成）的對應儲存在Cloudflare D1中。 無論選擇加入提醒，都會建立這個對應記錄。 提醒用的聯絡人由Resend的Contact API進行管理。</li>
+            <li><strong>郵件內文</strong>：為進行傳送處理，郵件內文會經過本公司的 Relay API（Cloudflare Workers）與外部傳送基礎設施（Resend），但不會持久儲存在本公司的基礎設施中，也不會記錄在本公司的日誌中（開發時的 DEBUG 建置除外）。Resend 會將已寄出的郵件保存 30 天（請見上文第4節）。</li>
+            <li><strong>電子郵件地址在伺服器上的儲存</strong>：Cloudflare D1 中儲存傳送 ID 與以 SHA-256 產生並截短的收件地址雜湊之間的對應關係。無論是否選擇接收提醒，都會建立此對應記錄。Cloudflare KV 的確認用記錄中以可讀取形式儲存地址（請見上文1(G)），Resend 則將地址作為聯絡人保存（請見上文1(G)與第5節）。</li>
             <li><strong>加密、保管、通訊路的依賴關係</strong>：備忘錄正文的加密（CryptoKit）、鑰匙保管（Keychain Services）、通訊（URLSession / Network.framework）全部用Apple純正框架完成，不透過第三方SDK。</li>
-            <li><strong>登入和防止非法使用的SDK</strong>：作為任意的入職縮短功能，從Google賬戶匯入郵箱地址時，使用GoogleSignIn-iOS SDK和Firebase Authentication SDK。 Firebase App Check SDK在啟動時初始化，使用Apple App Attest防止後端API的非法訪問。</li>
-            <li><strong>本公司的使用分析</strong>：為了改善質量和掌握使用情況，向本公司的<code>/v1/analytics/event</code>傳送事件。 專案包括隨機安裝識別符號、會話識別符號、事件種類、識別符號、時間、應用程式的版本、構建、語言、傳送結果等允許的屬性。 雖然設計不直接包含郵箱地址、備忘錄正文、驗證碼，但可以透過傳送ID與收件人郵箱地址的雜湊聯絡起來。 這個安裝識別符號儲存在終端的鑰匙鏈中。 在iOS的構造上，鑰匙鏈的專案即使刪除應用程式也會留在終端上，在這種情況下，重新安裝後也會使用相同的識別符號（以下的舊版AppsFlyer合作中，Customer User ID也使用相同的識別符號）。</li>
-            <li><strong>透過AppsFlyer獲得、使用分析</strong>：在沒有上述1（E）選擇畫面的應用程式版中，啟動AppsFlyer SDK，將首次備忘錄傳送成功、首次儲存成功、備忘錄儲存成功（每次傳送郵件以及儲存到Obsidian・Notion時）、認證成功、收費畫面顯示、方案選擇、購買成功作為事件傳送。 從應用程式設定的屬性，在適用的情況下，包括輸入方式（鍵盤、語音輸入等）、傳送路徑、記錄位置（iPhone應用程式、Apple Watch、Siri捷徑、分享表單）、儲存目標的類型（郵件、Obsidian、Notion）、應用程式的顯示語言、測量定義的版本、建置和執行環境的類型、已驗證交易的購買金額和貨幣、訂閱期間、優惠的類型、收費畫面的版本和顯示的契機。 因為將與本公司分析相同的安裝識別符號設定為AppsFlyer的Customer User ID，所以可以將獲得的資訊和使用記錄聯絡起來。 從應用程式設定的活動專案中不直接包含郵箱地址、備忘錄正文、驗證碼。 這裡列舉的專案是應用程式明確設定的，並不是列出SDK獲取的技術資訊的所有專案。 識別符號和可關聯的記錄不會被視為完全匿名的資訊。 在有使用情況分析選擇的版本中，停止SDK，僅限於對應上述（F）的版本，在有其他目的的同意和iPhone的追蹤許可的情況下，只開始獲取測量。</li>
+            <li><strong>登入與防濫用 SDK</strong>：「使用 Apple 登入」使用 Apple 的 AuthenticationServices 與 Firebase Authentication；從 Google 帳號匯入電子郵件地址時，使用 GoogleSignIn-iOS SDK 與 Firebase Authentication SDK（請見上文1(H)）。Firebase App Check SDK 會在啟動時初始化，並使用 Apple App Attest 防止對後端 API 的未經授權存取。</li>
+            <li><strong>本公司自有的使用分析</strong>：為改善品質與了解使用情況，App 會向本公司的 <code>/v1/analytics/event</code> 傳送事件。欄位包括隨機的安裝識別碼、工作階段識別碼、事件的類型/識別碼/時間、App 的版本與建置編號、語言、傳送結果等允許的屬性。其設計不直接包含電子郵件地址、備忘錄內文或驗證碼，但可透過傳送 ID 與收件地址的雜湊相互連結。此安裝識別碼儲存在裝置的鑰匙圈中。由於 iOS 的機制，即使刪除 App，鑰匙圈中的項目也可能留在裝置上；在這種情況下，重新安裝後仍會使用相同的識別碼。在 5.9.9 及更早版本以及 5.9.16～5.9.32 版本中，此識別碼也會設為 AppsFlyer 的 Customer User ID（請見上文1(E)）。</li>
+            <li><strong>AppsFlyer 測量</strong>：在 5.9.9 及更早版本以及 5.9.16～5.9.32 版本中（SDK 的啟動條件請見上文1(E)），App 會將下列內容作為事件傳送：首次成功傳送備忘錄、首次成功儲存、每次成功儲存備忘錄（每次寄送郵件或儲存到 Obsidian、Notion 時）、驗證成功、顯示付費畫面、選擇方案與購買成功。App 設定的屬性在適用時包括：輸入方式（鍵盤、語音輸入等）、傳送途徑、記錄位置（iPhone App、Apple Watch、Siri 捷徑、分享表單）、儲存目的地類型（郵件、Obsidian、Notion）、App 顯示語言、測量定義的版本、建置與執行環境的類型、已驗證交易的購買金額與幣別、訂閱期間、優惠類型，以及付費畫面的版本與顯示契機。由於將與自有分析相同的安裝識別碼設為 AppsFlyer 的 Customer User ID，取得資訊與使用記錄可以相互連結。App 設定的事件欄位不直接包含電子郵件地址、備忘錄內文或驗證碼。SDK 本身也會取得 IP 位址、裝置型號、作業系統與 App 版本、廠商識別碼（IDFV）、AppsFlyer 專屬 ID 等技術資訊，並使用 Apple 的 SKAdNetwork 進行歸因測量。5.9.32 版本停止與 AppsFlyer 的所有整合合作夥伴共享，不讓 SDK 讀取廣告識別碼（IDFA），並停止 Apple Ads 的歸因測量；更早的版本沒有這 3 項設定。iOS 只會向已獲准追蹤的 App 提供 IDFA，而本 App 僅在 5.9.15 版本中請求過該許可。App 會接收 AppsFlyer 的測量結果，並只將粗略類別（是否為自然流量、本公司網站、其他等）與安裝識別碼一起傳送到本公司的自有使用分析。此處列出的項目並非 SDK 取得的全部技術資訊。識別碼與可連結的記錄不視為完全匿名的資訊。關於 5.9.15 版本，請見上文1(F)。</li>
           </ul>
           <p><strong>注意</strong>：本服務不提供<strong>End-to-End加密（E2EE）</strong>。 為了在收件人使用者自己的郵件客戶端上正常閱讀正文，郵件正文將透過標準的SMTP協議傳送。 對於需要E2EE的用途，請考慮Standard Notes、Signal、ProtonMail等專用服務。</p>
-          <p>本節的內容，作為面向Obsidian使用者的“資料通道”的圖解，重新整理在<a href="/zh-Hant/privacy-architecture/">隱私設計</a>頁面。</p>
+          <p>本節內容已針對 Obsidian 使用者，以「資料通道」圖解的形式重新整理於<a href="/zh-Hant/privacy-architecture/">隱私設計</a>頁面。兩者不一致時，以本政策為準。</p>
 
-          <h2 id="website-analytics">13。 本公司網站的訪問分析</h2>
-          <p>我們的網站（simplememofast.com）為了掌握瀏覽情況並改善內容，使用了以下訪問分析。 與上述應用程式（本服務）的使用資料是不同的。</p>
+          <h2 id="website-analytics">13. 本公司網站使用的服務</h2>
+          <p>本公司網站（simplememofast.com）使用下列服務。這些與上述 App（本服務）的使用資料是分開的。</p>
           <h3>(A) Google 分析（Google LLC・美國）</h3>
           <ul>
             <li>在Cookie（第一方Cookie“_ga”等）中，儲存每個瀏覽器的隨機識別符號，區分使用者數和會話。</li>
@@ -454,14 +565,94 @@
           <ul>
             <li>用於瀏覽數等的統計。 Ahrefs<a href="https://help.ahrefs.com/en/articles/10247870-about-ahrefs-web-analytics" target="_blank" rel="noopener">說明，這個工具不使用Cookie，不直接儲存IP地址</a>。</li>
           </ul>
-          <h3>(C) AppsFlyer OneLink（AppsFlyer Ltd.，以色列）</h3>
+          <h3>(C) AppsFlyer OneLink（AppsFlyer，請見上文第7節）</h3>
           <ul>
-            <li>本網站上部分前往 App Store 的按鈕（例如 Obsidian 整合頁面頂端的按鈕）會經由 AppsFlyer 的連結（simplememofast.onelink.me）開啟 App Store。只有在您點按此類按鈕時，AppsFlyer 才會記錄該點擊。僅瀏覽頁面不會向 AppsFlyer 傳送任何資訊。</li>
+            <li>本公司網站上許多開啟日本 App Store 的連結，以及 Obsidian 整合頁面頂端的按鈕，會經由 AppsFlyer 連結（simplememofast.onelink.me）開啟 App Store。只有在您點擊這類連結時，AppsFlyer 才會記錄點擊。僅瀏覽頁面不會向 AppsFlyer 傳送任何資訊。</li>
             <li>AppsFlyer 接收的資訊包括 IP 位址、瀏覽器、作業系統和裝置類型（使用者代理）、時間、所經由的連結和活動名稱，以及來源網站（僅限本網站的網域）等。</li>
             <li>AppsFlyer 會將該點擊與之後應用程式的首次啟動（由上述12中的 AppsFlyer SDK 測量）進行比對，以計算來自這些按鈕的安裝數。</li>
-            <li>我們從 AppsFlyer 取得的僅是依連結彙總的點擊數、安裝數等統計資料。應用程式所接收的獲客來源類別的處理方式，請見上述12。</li>
+            <li>本公司從 AppsFlyer 接收的是每個連結的點擊數與安裝數等彙總資料。App 只會將取得來源的粗略類別傳送到本公司的自有使用分析（請見上文第12節）。</li>
             <li>關於 AppsFlyer 如何處理這些資訊，請參閱「<a href="https://www.appsflyer.com/legal/services-privacy-policy/" target="_blank" rel="noopener">AppsFlyer 隱私權政策</a>」。該政策也說明了如何透過電子郵件向 AppsFlyer 提出申請以退出測量。如果您不希望被記錄，請直接在 App Store 中搜尋。</li>
           </ul>
+          <h3>(D) Cloudflare Web Analytics（Cloudflare, Inc.・美國）</h3>
+          <ul>
+            <li>代管服務供應商 Cloudflare 會在本公司的頁面中加入一段指令碼，用於測量頁面載入速度並統計瀏覽次數。記錄的內容包括頁面、參照網站、瀏覽器/作業系統/裝置類型、國家，以及頁面載入所需的時間。</li>
+            <li>Cloudflare <a href="https://www.cloudflare.com/web-analytics/" target="_blank" rel="noopener">表示</a>，Cloudflare Web Analytics 不使用 Cookie 或 localStorage，也不透過 IP 位址或使用者代理程式識別瀏覽者（指紋辨識）。</li>
+            <li>本公司已啟用 Cloudflare 的設定，將歐盟的瀏覽者排除在此測量之外。Cloudflare 會依處理該次瀏覽的 Cloudflare 資料中心所在地來套用此設定。</li>
+          </ul>
+          <h3>(E) 其他</h3>
+          <ul>
+            <li>Cloudflare 會要求瀏覽器回報載入本公司頁面時發生的網路錯誤（Network Error Logging）。瀏覽器可能會將這些回報傳送給 Cloudflare。</li>
+            <li>本公司網站會將您選擇的顯示語言儲存在瀏覽器的 localStorage（<code>simple-memo-lang</code>）中。此值不會傳送給本公司。</li>
+            <li>英文版首頁會顯示從 fazier.com 載入的徽章圖片。載入該圖片時，Fazier 會收到您的 IP 位址與瀏覽器資訊。</li>
+          </ul>
+
+          <h2 id="contact-and-survey">14. 聯絡表單、寄給支援團隊的郵件、藍圖問卷</h2>
+          <h3>(A) 聯絡表單</h3>
+          <ul>
+            <li>表單會傳送內文（最多 4,000 個字元）、電子郵件地址、顯示語言，以及您輸入的裝置、作業系統與 App 版本。</li>
+            <li>電子郵件地址及其網域僅以截短的雜湊形式儲存，因此我們無法透過表單個別回覆您。如需回覆，請寄送電子郵件至 <!--email_off--><a href="mailto:support@simplememofast.com">support@simplememofast.com</a><!--/email_off-->。</li>
+            <li>內容會在本公司的資料庫（Cloudflare D1）中保存 180 天。為進行速率限制，截短的 IP 位址雜湊最長保存 48 小時。</li>
+          </ul>
+          <h3>(B) 寄給支援團隊的郵件</h3>
+          <ul>
+            <li>寄至 <!--email_off--><a href="mailto:support@simplememofast.com">support@simplememofast.com</a><!--/email_off--> 的郵件會經由 Cloudflare Email Routing 與本公司伺服器，送達由 Google LLC（Gmail，美國）提供的支援收件匣。尚未決定在收件匣中刪除這些郵件的期限。</li>
+            <li>本公司伺服器可能會將郵件內文與地址雜湊在本公司資料庫中保存 180 天。對於來自企業的郵件，可能會將寄件人地址、顯示名稱與主旨保存 180 天。</li>
+            <li>伺服器日誌中會保留寄件人與收件人地址 7 天（請見上文1(J)）。</li>
+          </ul>
+          <h3>(C) 藍圖問卷</h3>
+          <ul>
+            <li>藍圖頁面上的問卷會儲存回答、自由填寫內容（最多 1,000 個字元）、顯示語言、頁面以及截短的 IP 位址雜湊。僅在您勾選並填寫時才會儲存電子郵件地址，且僅用於回覆與功能推出時的通知。</li>
+            <li>回答儲存在本公司的資料庫（Cloudflare D1）中。尚未決定刪除前的保存期間。</li>
+            <li>回答不與 App 帳號連結。如需刪除回答，請從您填寫的地址寄送電子郵件與我們聯絡。未填寫電子郵件地址的回答無法確定屬於哪位使用者。</li>
+          </ul>
+
+          <h2 id="account-deletion">15. 帳號與資料的刪除</h2>
+          <p>可在 App 的「設定」&gt;「帳號」&gt;「刪除帳號」中刪除。</p>
+          <p>刪除後，對於在該支 iPhone 上驗證的電子郵件地址，將刪除下列內容。</p>
+          <ul>
+            <li>本公司伺服器上該支 iPhone 的確認用記錄、提醒的設定與歷史記錄、註冊記錄、傳送記錄、透過傳送 ID 連結的使用事件，以及與該地址連結的聯絡表單與支援郵件記錄</li>
+            <li>Resend 中的聯絡人</li>
+            <li>從該支 iPhone 建立的 Notion 連結記錄（請見上文1(I)）</li>
+            <li>該支 iPhone 的安裝識別碼（會替換為新的識別碼）</li>
+          </ul>
+          <p>刪除後仍會保留的內容：</p>
+          <ul>
+            <li>停止寄送記錄（例如在退信、投訴或取消訂閱之後）與地址刪除記錄（雜湊與日期時間），用於避免再次寄信至該地址。</li>
+            <li>Apple 通知的原始記錄（請見上文1(C)）會保留到 180 天的期限屆滿，與地址無連結的使用事件會保留到 90 天的期限屆滿。</li>
+            <li>受託方處的副本會保留到各自的期限屆滿：Resend 中的郵件（30 天）、伺服器日誌（7 天）、用於資料庫時間點復原的資料（最長 30 天）。</li>
+          </ul>
+          <p>App 內的刪除無法涵蓋的內容：</p>
+          <ul>
+            <li>iPhone 中的備忘錄、歷史記錄與草稿（請逐一刪除或刪除 App）</li>
+            <li>App 儲存在 iPhone 鑰匙圈（Keychain）中的已驗證電子郵件地址與裝置權杖（即使刪除 App，鑰匙圈中的項目也可能保留）</li>
+            <li>在另一支 iPhone 上驗證同一地址的記錄（請在該支 iPhone 上同樣刪除帳號，或以電子郵件與我們聯絡）</li>
+            <li>請求過驗證碼但未完成驗證的地址記錄，以及其在 Resend 中的聯絡人（請以電子郵件與我們聯絡）</li>
+            <li>Firebase 的登入記錄（請見上文1(H)）、AppsFlyer 持有的資料、支援收件匣中的郵件、藍圖問卷的回答（請以電子郵件與我們聯絡）</li>
+          </ul>
+          <p>若您在刪除前變更或清除了收件地址，或 App 的處理未能完成，請以電子郵件與我們聯絡，我們將刪除剩餘的記錄。</p>
+          <p>在 5.9.16～5.9.32 版本中，若刪除後繼續使用 App，AppsFlyer 測量會以新的安裝識別碼重新開始（請見上文1(E)）。</p>
+          <p>刪除帳號不會取消 Premium 訂閱。請在 iPhone 的「設定」&gt;（您的名字）&gt;「訂閱項目」中取消。</p>
+
+          <h2 id="your-rights">16. 使用者的選擇與權利</h2>
+          <h3>(A) 可選擇的事項</h3>
+          <ul>
+            <li>提醒郵件：在設定中關閉，或使用郵件中的取消訂閱連結（請見上文第5節）。</li>
+            <li>Notion：在設定中中斷連結（請見上文1(I)）。</li>
+            <li>歷史記錄：在 App 中逐一刪除。</li>
+            <li>使用情況分析與 AppsFlyer：您所用版本可進行的操作，請見上文1(E)。</li>
+            <li>網站：Google 分析的選擇退出與 Cookie 設定（請見上文13(A)），AppsFlyer 的選擇退出（請見上文13(C)）。</li>
+          </ul>
+          <h3>(B) 與個人資料相關的請求</h3>
+          <p>您可以寄送電子郵件至 <!--email_off--><a href="mailto:support@simplememofast.com">support@simplememofast.com</a><!--/email_off-->，請求查閱、更正、刪除您的個人資料，或請求停止或限制其使用。如有可能，請從相關的電子郵件地址寄送。為保護您的資訊，我們可能會請您確認可以使用該地址。我們將在 1 個月內回覆；如需更多時間，會在該 1 個月內告知原因。</p>
+          <h3>(C) 申訴</h3>
+          <p>依您居住的地區，您也可能有權向資料保護監管機關提出申訴。</p>
+          <ul>
+            <li>歐洲經濟區（EEA）：您居住的國家、工作所在國家，或您認為發生問題之國家的監管機關（<a href="https://www.edpb.europa.eu/about-edpb/our-members_en" target="_blank" rel="noopener">監管機關清單</a>）</li>
+            <li>英國：Information Commission（前身為 Information Commissioner's Office，<a href="https://ico.org.uk/" target="_blank" rel="noopener">ico.org.uk</a>）</li>
+            <li>瑞士：聯邦資料保護暨資訊專員（<a href="https://www.edoeb.admin.ch/en" target="_blank" rel="noopener">edoeb.admin.ch</a>）</li>
+            <li>日本：個人資料保護委員會（<a href="https://www.ppc.go.jp/personalinfo/pipldial/" target="_blank" rel="noopener">個人資料保護法諮詢專線</a>）</li>
+          </ul>
+          <p>我們希望您能先與本公司聯絡（請見上文第11節）。</p>
         </div>
       </div>
 
