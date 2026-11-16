@@ -299,7 +299,7 @@
         <p>Scheduled cleanup deletes these analytics records more than 90 days after receipt. Deletion through the app removes records associated with the deletion information retained on that device and rejects delayed uploads under the erased information. This does not collectively delete the original Apple notification records in (C), another device's records, or records held by external analytics services. We may be unable to identify the affected records if, for example, the device's deletion information has been lost.</p>
 
         <h3>(E) Usage analytics and AppsFlyer measurement by app version</h3>
-        <p>What the app sends depends on the version installed. You can see the installed version in iPhone Settings &gt; General &gt; iPhone Storage, under the app. Version 5.9.10 was a test build and was not released on the App Store.</p>
+        <p>What the app sends depends on the version installed. You can see the installed version in iPhone Settings &gt; General &gt; iPhone Storage, under the app. Version 5.9.10 was not released on the App Store.</p>
         <div class="sd-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
           <thead>
             <tr><th>App version</th><th>First-party usage events (Section 12) and subscription-state analytics ((D))</th><th>AppsFlyer SDK (Section 12)</th><th>Choice in the app</th></tr>
@@ -308,7 +308,7 @@
             <tr><td>5.9.9 and earlier</td><td>Sent as part of app operation (subscription-state analytics from version 5.8.53)</td><td>Started at launch without checking iPhone tracking permission. Our installation identifier is set as AppsFlyer's Customer User ID. From version 4.9.24, in-app events (including purchases) are also sent</td><td>None</td></tr>
             <tr><td>5.9.11 to 5.9.14</td><td>Off by default. Sent only after you select "Agree and turn on"</td><td>Not started</td><td>"Usage analytics" in Settings</td></tr>
             <tr><td>5.9.15</td><td>Same as 5.9.11 to 5.9.14</td><td>Started only if you turned on "App discovery measurement" and allowed iPhone tracking, with the narrower scope described in (F)</td><td>"Usage analytics" and "App discovery measurement" in Settings</td></tr>
-            <tr><td>5.9.16 to 5.9.31 (released: 5.9.16, 5.9.17, 5.9.18, 5.9.23, 5.9.24, 5.9.25 and 5.9.27)</td><td>Sent as part of app operation</td><td>Started when the app opens, unless iPhone tracking for this app is set to not allowed or is restricted, or you declined "App discovery measurement" in 5.9.15. Our installation identifier is set as Customer User ID, and in-app events (including purchases) are sent</td><td>None</td></tr>
+            <tr><td>5.9.16 to 5.9.31 (released: 5.9.16, 5.9.17, 5.9.18, 5.9.23, 5.9.24, 5.9.25 and 5.9.27)</td><td>Sent as part of app operation</td><td>Started when the app opens, unless iOS reports that tracking is not allowed or is restricted for this app, or you declined "App discovery measurement" in 5.9.15. Our installation identifier is set as Customer User ID, and in-app events (including purchases) are sent</td><td>None</td></tr>
             <tr><td>5.9.32 (current)</td><td>Sent as part of app operation</td><td>Same as 5.9.16 to 5.9.31. In addition, the app blocks sharing with all AppsFlyer integrated partners, does not let the SDK read the advertising identifier (IDFA), and turns off Apple Ads attribution</td><td>None</td></tr>
           </tbody>
         </table></div>
