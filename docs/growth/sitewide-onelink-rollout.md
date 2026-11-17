@@ -51,8 +51,10 @@ rolled back in #2381, including the pages open experiments own.**
   (growth/ONELINK_PILOT.md 「この変更の記録（本番反映の後）」). They must carry the
   start of the period above as well.
 
-Remaining steps, in order: read back production and add the records; remove
-the sitewide and pilot/QA branches from the tracker; rebase draft #2373 onto
+Production was read back on 2026-11-17 (deploy 22:24:56 JST, SHA 6e8f7a39d)
+and recorded as measurement change `onelink-retired-2026-11-17`.
+Remaining steps, in order: remove the sitewide and pilot/QA branches from the
+tracker; rebase draft #2373 onto
 the privacy policy §13 (C) on main. #2381 itself rewrote §13 (C) in all ten
 languages as a record of what ended on 2026-11-17, so it no longer says that
 some buttons go through AppsFlyer. Draft #2373 rewrites the same paragraph.
