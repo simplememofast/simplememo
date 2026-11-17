@@ -3,6 +3,8 @@
     "OneLink pilot（#1047、2026-10-15 11:31 JST 公開）の冒頭ボタン9個を CI で固定するための正（スイッチ）。",
     "SEO Validation の「OneLink pilot hero anchors match growth/onelink-pilot.json」（node --test growth/lib/onelink-pilot.test.mjs）が、これと実際のチェックアウトを突き合わせる。",
     "",
+    "【2026-11-17 終了の決定】オーナー判断で OneLink はやめる（アプリが次の版で AppsFlyer SDK を外す。OneLink に帰属したインストールは0件）。ただし日本語 /obsidian/ は実験 video-2026-08-11-five-clips の対象で判定前なので、冒頭ボタン9個はまだ戻さない。state は active のまま。戻すPRで rolled_back にする（growth/ONELINK_PILOT.md「終了の決定」）。",
+    "",
     "state が active の間: pages の各ページに、href がちょうど short_url の <a> が1個だけあり、anchor.attributes をすべて同じ値で1回ずつ持ち、class に anchor.class_token を含む。pilot の短縮コードはそのページのほかの場所（コメント・本文・スクリプトを含む）にも、ほかのサイトのファイルにも無い。",
     "pilot の目印（anchor.attributes のうち data-app-route・data-app-traffic・data-cta-variant の値）を持つ <a> は、その冒頭ボタンのほかに無い。GA4 は短縮コードを問わず data-app-route=\"onelink\" と data-app-traffic=\"pilot\" で pilot と数える（js/app-store-tracking.js）ので、別の短縮コードや直接Appleのリンクに目印を写しても落ちる。",
     "state が rolled_back の間: pilot の短縮コードも目印も、サイトのファイルのどこにも無い（目印が見える範囲は次の行のとおり）。",

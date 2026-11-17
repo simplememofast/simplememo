@@ -10,6 +10,50 @@
 独立した英語編集ページ `/en/obsidian/` はこの候補の対象外。
 この9配置の検証だけで、公式サイト全体の計測改善を完了とはしない。
 
+## 終了の決定（2026-11-17）
+
+**結論: OneLink はやめる。冒頭ボタン9個は、実験の判定が済むまでそのまま残す。**
+
+- 2026-11-17、オーナーが決めた。アプリは次の版で AppsFlyer SDK を外す。
+  SDK が無ければ、OneLink のクリックをインストールに結び付けられない。
+- これまでの実績: OneLink に帰属したインストールは、pilot・全サイトとも0件。
+  2026-11-07 の28日窓の正式値で0件、2026-11-14 に毎日の見張りを終えた時点でも0件。
+- サイトの App Store ボタンは、直接 Apple へのリンクに戻す。
+
+### この変更で済んだこと
+
+- 全サイトの OneLink 変換（`owned_web` / `website_bridge_v1`）の opt-in を、2,361ページから外した。
+  素の日本の App Store リンク210本のうち183本（181ページ）は、直接 Apple のまま開く。
+  詳細は [全サイト導線の文書](../docs/growth/sitewide-onelink-rollout.md) の「Wind-down」。
+
+### まだ残っていること
+
+- **冒頭ボタン9個（pilot）。** 日本語 `/obsidian/` は実験 `video-2026-08-11-five-clips` の対象。
+  評価日（11-14）を過ぎたが、判定はまだ無い。ほかの8言語はこのページから生成する。
+  だから9個とも今は変えない。`growth/onelink-pilot.json` の `state` は `active` のまま。
+- **全サイト変換の残り27本。** 排他実験が持つ13ページとその生成翻訳（計88ページ）は opt-in を残した。
+  一覧は `scripts/enable-sitewide-app-routes.mjs` の `OPT_IN_HELD`。
+- **`js/app-store-tracking.js` の OneLink の処理。** 残りの opt-in と pilot が使うので残した。
+  両方を外した後、別の変更で消す。
+
+### 残りを戻す手順
+
+1. 実験の判定が記録されたら、その実験の行を `OPT_IN_HELD` から消し、
+   `node scripts/enable-sitewide-app-routes.mjs --write` を回す。
+2. `/obsidian/` が空いたら、下の「不具合時の戻し方」のとおり冒頭ボタンを戻す。
+   同じPRで `growth/onelink-pilot.json` の `state` を `rolled_back` にする。
+   生成8ページは `python3 scripts/build_site_translations.py --write` で作り直す（手で直さない）。
+3. 本番反映を確かめたら、時刻と本番SHAを `measurement_changes` と `growth/data/annotations.json` に足す。
+
+戻した冒頭ボタンの ct は `web_obsidian_v1` にする。`tag-cta-placements.js --check` が
+`/obsidian/` のボタンにこの値を求めるため。App Store Connect では、同じページのほかのボタンと
+区別できない。区別は GA4 の `data-cta-placement="hero"` と `page_path` で読む。
+冒頭ボタンだけ別の ct にするなら、`scripts/lib/cta-page-groups.js` に新しい版のトークンを足す別の変更になる。
+Apple は初回ダウンロードが少ない campaign を表示しないので、9個だけの ct は読めない見込みが高い。
+
+**AppsFlyer の解約や OneLink の無効化は、上の1〜3が済んで本番で確かめてからにする。**
+先に止めると、残ったリンクがストアへ届かなくなるおそれがある。
+
 ## 保存済み設定と変更範囲
 
 | 項目 | 値 |

@@ -1,5 +1,39 @@
 # Site-wide OneLink draft: scope and release boundary
 
+## Wind-down (2026-11-17)
+
+**The site stops routing App Store links through OneLink. Pages that an open
+experiment still owns keep the opt-in until that experiment is decided.**
+
+- Owner decision, 2026-11-17: the app drops the AppsFlyer SDK in its next
+  version. No install was attributed to OneLink, pilot or sitewide, from the
+  start through 2026-11-14 (growth/ONELINK_PILOT.md 「終了の決定」).
+- `data-sitewide-app-routes="true"` was removed from 2,361 pages by
+  `node scripts/enable-sitewide-app-routes.mjs --write`. On those pages the
+  tracker no longer rewrites anything: 183 of the 210 bare JP Store anchors
+  (181 pages) open the direct Apple URL again and report `app_store_click` /
+  `seo_cta_click` with `placement=reference` instead of `web_to_app_*`
+  (`sitewide`). They keep no `ct`: the site convention gives `ct` only to CTAs,
+  and adding one would turn these references into CTAs.
+- The opt-in stays on 88 pages: 13 source pages owned by open exclusive
+  experiments (`ownershipConflict`) and their generated translations
+  (`OPT_IN_HELD` in the same script). 27 anchors there still convert.
+- `js/app-store-tracking.js`, the nine pilot hero links, `ct`/`pt` links, QR
+  images and Smart App Banners are unchanged. The tracker change would reach
+  the held pages too, so it waits until the last held row is gone.
+- `sitewideAcquisitionReport` and the GA4 sitewide columns now count only the
+  held pages. Do not compare sitewide or direct-only rates across this
+  boundary. The boundary time is the production deployment of this change,
+  recorded after readback, not the PR date.
+
+Remaining steps, in order: delete each `OPT_IN_HELD` row once its experiment
+is decided and rerun the script; roll back the nine heroes
+(growth/ONELINK_PILOT.md); then remove the sitewide and pilot branches from the
+tracker. Do not close the AppsFlyer account or disable OneLink before all
+three are live.
+
+The rest of this document describes the 2026-10-16 draft and stays as written.
+
 This is a reviewable website implementation candidate, authorized separately from
 the nine-placement pilot on 2026-10-16. The owner has now authorized normal CI,
 merge and deployment. At this revision those steps have not yet been completed
