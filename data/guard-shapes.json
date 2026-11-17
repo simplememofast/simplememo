@@ -957,6 +957,12 @@
       "expr": "report.newest_data_date",
       "disposition": "安全側へ倒れる",
       "note": "2026-10-20: loadDigest の assert の中の等式。報告の最新日・日数がダイジェストの dates から導いた値と一致しなければ落ちて unavailable になる。値が無い（null）報告は ready として checkReport を通らないので、ここで欠けたまま一致することは無い。"
+    },
+    {
+      "file": "growth/scripts/check-experiments.mjs",
+      "expr": "releasedOptIns",
+      "disposition": "報告のみ",
+      "note": "2026-11-17: OPT_IN_HELD（scripts/enable-sitewide-app-routes.mjs）の消し忘れを知らせるジョブ要約の見出し。判定していない —— 警告（::warning）は直前の for が同じ配列から1行ずつ出し、要約はその写し。空なのは、どの行もまだ開いた排他実験に持たれているときと、一覧が空のとき（消す行が無い）だけ。台帳が読めないときは validate が先に exit 1 するのでここに来ない。CI はどの場合も落とさない（生成器は台帳を読まない設計）。releasedHolds の判定は scripts/enable-sitewide-app-routes.test.mjs の合成台帳で固定し、閉じた行・台帳に無い行が出ること、開いた行が出ないことを変異で確認した。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
