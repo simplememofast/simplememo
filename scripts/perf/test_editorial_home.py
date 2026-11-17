@@ -84,7 +84,7 @@ def fixture(payloads=None):
 <section id="faq" aria-labelledby="faq-title"><h2 id="faq-title">よくある質問</h2>
 <details class="faq-details"><summary>{QUESTION}</summary><p>{ANSWER}</p></details></section></main>
 <footer><a href="/privacy">プライバシー</a></footer>
-<script src="/js/app-store-tracking.js?v=0123456789" defer data-sitewide-app-routes="true"></script>
+<script src="/js/app-store-tracking.js?v=0123456789" defer></script>
 </body></html>"""
 
 
@@ -158,8 +158,8 @@ class EditorialContract(unittest.TestCase):
             'broken skip destination': ('href="#main"', 'href="#missing-main"'),
             'missing skip link': ('<a class="skip-link" href="#main">本文へスキップ</a>', ''),
             'missing tracker': ('/js/app-store-tracking.js?v=0123456789', '/js/other.js'),
-            'disabled tracker routing': ('data-sitewide-app-routes="true"', 'data-sitewide-app-routes="false"'),
-            'duplicate tracker': ('</body>', '<script src="/js/app-store-tracking.js" data-sitewide-app-routes="true"></script></body>'),
+            'retired OneLink opt-in': ('app-store-tracking.js?v=0123456789" defer>', 'app-store-tracking.js?v=0123456789" defer data-sitewide-app-routes="true">'),
+            'duplicate tracker': ('</body>', '<script src="/js/app-store-tracking.js"></script></body>'),
             'legacy inline style': ('</head>', '<style data-home-perf="base">body{color:black}</style></head>'),
         }
         for label, (before, after) in mutations.items():

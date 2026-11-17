@@ -380,7 +380,10 @@ async function checkObsidian(browser, base, { width, javascript }, output, recor
     assert.equal(await page.locator('h1').count(), 1);
     assert(await page.locator('h1').isVisible(), 'Obsidian heading remains visible');
     const cta = page.locator('.lpr-hero a[data-cta-placement="hero"]').first();
-    assert.equal(new URL(await cta.getAttribute('href'), page.url()).hostname, 'simplememofast.onelink.me', 'Obsidian pilot route is preserved');
+    // 2026-11-17: the OneLink pilot was rolled back; the hero opens the App Store directly (growth/onelink-pilot.json).
+    const hero = new URL(await cta.getAttribute('href'), page.url());
+    assert.equal(hero.hostname, 'apps.apple.com', 'Obsidian hero opens the App Store directly');
+    assert.equal(hero.searchParams.get('ct'), 'web_obsidian_v1', 'Obsidian hero keeps its campaign token');
     assert.equal(await cta.getAttribute('data-cta-cluster'), 'obsidian');
     await checkControl(page, cta, 'Obsidian hero download');
     await page.evaluate(() => scrollTo(0, 0));

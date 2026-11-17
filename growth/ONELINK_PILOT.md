@@ -10,6 +10,89 @@
 独立した英語編集ページ `/en/obsidian/` はこの候補の対象外。
 この9配置の検証だけで、公式サイト全体の計測改善を完了とはしない。
 
+## 終了の決定（2026-11-17）
+
+**結論: OneLink はやめる。サイトの App Store へのリンクは、すべて直接 Apple に戻した（#2381）。**
+
+- 2026-11-17、オーナーが決めた。アプリは次の版で AppsFlyer SDK を外す。
+  SDK が無ければ、OneLink のクリックをインストールに結び付けられない。
+- これまでの実績: OneLink に帰属したインストールは、pilot・全サイトとも0件。
+  2026-11-07 の28日窓の正式値で0件、2026-11-14 に毎日の見張りを終えた時点でも0件。
+- 同じ日、オーナーは実験中のページも変えてよいと明示した（「かえていい」）。
+  はじめはサイトの決まり（排他実験のページは変えない）に従って88ページと冒頭ボタン9個を残したが、
+  この明示依頼で同じPRに含めた。扱いは[共存方針](../docs/growth/measurement-coexistence-policy.md)の
+  「明示依頼による公開や事実訂正」の行と同じ。
+
+### この変更で済んだこと
+
+- **全サイトの OneLink 変換（`owned_web` / `website_bridge_v1`）の opt-in を、2,449ページすべてから外した。**
+  素の日本の App Store リンク210本（208ページ）は、どれも直接 Apple のまま開く。
+  生成器 `scripts/enable-sitewide-app-routes.mjs` は、どのページにも opt-in を残さない。
+  詳細は [全サイト導線の文書](../docs/growth/sitewide-onelink-rollout.md) の「Wind-down」。
+- **冒頭ボタン9個（pilot）を戻した。** 下の「不具合時の戻し方」のとおり、href を直接 Apple
+  （`ct=web_obsidian_v1`）にし、`data-app-route` / `data-app-traffic` を外して variant を `v1` に戻した。
+  生成8ページは `build_site_translations.py --write` で作り直した。
+  `growth/onelink-pilot.json` の `state` は `rolled_back`。
+- 見える文言・ボタンの位置・QR・Smart App Banner は変えていない。
+  冒頭ボタンの href が変わったので、`/obsidian/` と生成8ページのサイトマップの lastmod は 11-17。
+- **実験への併発変更の記録。** 変えたページを持つ実行中の実験5件
+  （`video-2026-08-11-five-clips`・`title-2026-08-20-home-grammar`・`aio-2026-08-12-entity-attribution`・
+  `en-2026-08-11-native-rewrite`・`title-2026-11-11-second-brain-term`）の notes に、明示依頼による変更として書いた。
+  実験の効果として数えない。
+- 日本語トップの検査（`scripts/perf/build_home.py`）は、計測スクリプトに opt-in が無いことを求めるようにした。
+- `scripts/site-route-inventory.mjs` は `growth/onelink-pilot.json` の `state` を読む。
+  `rolled_back` で、9ページがそろい、pilot のリンクも目印も無ければ `pilot.state` は `rolled_back`。
+  それ以外は `source_differs_from_rolled_back_contract`。
+
+### まだ残っていること
+
+- **`js/app-store-tracking.js` の OneLink の処理。** opt-in するページも pilot の目印も無いので、もう動かない。
+  消すと全ページの `?v=` が変わり、`scripts/site-route-inventory.mjs`・`growth/lib/cta-tracking.test.mjs`・
+  `growth/lib/onelink-pilot.test.mjs`（QA の分類を読む）も直す。別の変更にする。
+- **下書きの #2373（ポリシーの見直し）と §13（C）。** §13（C）の AppsFlyer OneLink の説明は、
+  OneLink を戻したこの #2381 の中で、終わったことの記録に書き換えた（10言語、2026-11-17）。
+  もう「一部のボタンは AppsFlyer のリンクを経由する」とは書いていない。
+  #2373 も同じ §13（C）を書き換えている。#2373 は main の §13（C）に合わせて rebase する。
+- **この変更の記録。** `measurement_changes` と `growth/data/annotations.json` にはまだ書いていない。
+  下の「この変更の記録（本番反映の後）」のとおり、本番反映を読み戻してから足す。
+
+### この変更の記録（本番反映の後）
+
+上の「準備日を開始日にしない」と同じ規則。境界は本番反映の時刻で、PRの日付ではない。
+版の名前は開始日を含むので、開始後に決める。
+
+- 版: `onelink-retired-<本番反映の日（JST）>`。`type` は `measurement_route_change`。全サイトと pilot を1件にまとめる。
+- `date` は本番反映の日（JST）。本番SHA、マージと配備の時刻（JST と UTC）、読み戻した時刻とページを書く。
+  読み戻すページには `/obsidian/` と生成翻訳1ページ（冒頭ボタンが直接 Apple）を含める。pilot の短縮URLは開かない。
+- 中身: オーナー判断と理由（AppsFlyer SDK の廃止、OneLink 帰属インストール0件、実験中のページも変えてよいという明示依頼）。
+  opt-in を外した2,449ページと、直接 Apple に戻った210本（208ページ）。
+  GA4 では `web_to_app_*`（`bridge_scope=sitewide`）から `app_store_click` / `seo_cta_*`（`placement=reference`、ct なし）へ移る。
+  pilot の9個は `web_to_app_*`（`bridge_scope=pilot`）から `app_store_click` / `seo_cta_*`（`placement=hero`、`ct=web_obsidian_v1`）へ移る。
+  `ct=web_obsidian_v1` の App Store Connect の数字には、この日から冒頭ボタンの分が戻る。
+  tracker・ct/pt 付きリンク・QR・Smart App Banner は不変。
+- **始まりも書く。** 全サイト変換は #2100 から（マージ 2026-10-17 23:28 JST。本番開始の読み戻し記録は無く、
+  `rollout_start` は `null`）。2026-10-17 から本変更の反映までの、直接Appleだけの率と sitewide の値は、
+  その前とも後とも比べない。この期間は約210本が `app_store_click` から `web_to_app_*` へ移っていた。
+  pilot は 2026-10-15 11:31 JST から（上の「開始記録」）。
+- annotations の行にも、同じ境界と上の「始まり」の1文を書く。
+- pilot の開始の記録（`onelink-obsidian-hub-hero-pilot-v1-2026-10-15`）は消さない。
+  `growth/onelink-pilot.json` の `measurement_change` と `pages` もそのまま
+  （`rolled_back` の間も、見張りは `pages` と記録の scope の一致を見る）。
+
+### 戻した後の手順
+
+1. 本番反映を読み戻し、上の記録を足す。
+2. `js/app-store-tracking.js` から OneLink の処理（全サイトと pilot/QA の分岐）を消す。上の「まだ残っていること」。
+3. 下書きの #2373 を、main の §13（C）（終わったことの記録に書き換え済み）に合わせて rebase する。
+4. **AppsFlyer の解約や OneLink の無効化は、1を本番で確かめてからにする。**
+   古いHTMLがキャッシュに残る間は、OneLink 経由のリンクが開かれることがある。
+
+戻した冒頭ボタンの ct は `web_obsidian_v1` にした。`tag-cta-placements.js --check` が
+`/obsidian/` のボタンにこの値を求めるため。App Store Connect では、同じページのほかのボタンと
+区別できない。区別は GA4 の `data-cta-placement="hero"` と `page_path` で読む。
+冒頭ボタンだけ別の ct にするなら、`scripts/lib/cta-page-groups.js` に新しい版のトークンを足す別の変更になる。
+Apple は初回ダウンロードが少ない campaign を表示しないので、9個だけの ct は読めない見込みが高い。
+
 ## 保存済み設定と変更範囲
 
 | 項目 | 値 |
@@ -151,6 +234,8 @@ installs/clicks比率、Appleのストア内CVRを区別する。期間比率を
 A24・R7・D35は実開始後の獲得条件と成熟期間を揃えて読む。
 
 ## 不具合時の戻し方
+
+2026-11-17、この手順で9個とも戻した（#2381、上の「終了の決定」）。
 
 日本語元ページと生成翻訳8ページのheroのhrefを次へ戻し、`data-app-route` / `data-app-traffic` を外してvariantを `v1` に戻す。
 

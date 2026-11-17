@@ -223,7 +223,8 @@ def editorial_contract_errors(html: str) -> list[str]:
             need(a.get('data-cta-cluster') == 'home' and a.get('data-cta-variant') == 'v1', 'hero CTA measurement identity must be preserved')
     need(bool(hero_ctas), 'tracked hero App Store CTA is required')
     tracking = [n for n in tags('script') if urlsplit(n['attrs'].get('src', '')).path == '/js/app-store-tracking.js']
-    need(len(tracking) == 1 and tracking[0]['attrs'].get('data-sitewide-app-routes') == 'true', 'the established App Store tracker must remain enabled')
+    # 2026-11-17: the sitewide OneLink opt-in is retired on every page (scripts/enable-sitewide-app-routes.mjs).
+    need(len(tracking) == 1 and 'data-sitewide-app-routes' not in tracking[0]['attrs'], 'the App Store tracker must stay, once, without the retired OneLink opt-in')
     schemas = []
     for script in tags('script'):
         if script['attrs'].get('type') == 'application/ld+json':
