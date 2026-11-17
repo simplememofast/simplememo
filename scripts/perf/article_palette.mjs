@@ -19,8 +19,21 @@ export async function checkArticlePalette(browser, url, output, engine) {
       assert.equal(state.background, 'rgb(8, 7, 12)', 'Original Japanese black background');
       assert.equal(state.color, 'rgb(238, 234, 245)', 'Readable original text color');
       assert(state.title && state.overflow <= 1, 'Article title present and no page overflow');
+      assert.equal(await page.locator('body').getAttribute('data-voice-layout'), 'restored', 'Historical article hierarchy restored');
+      assert.equal(await page.locator('.ce-stage--phone .ce-device img').count(), 1, 'Historical phone frame restored');
+      const route = page.locator('.ce-route').first();
+      assert.equal(await route.evaluate(n => getComputedStyle(n).transitionDuration), '0s', 'Reduced motion disables route transitions');
+      await page.emulateMedia({reducedMotion:'no-preference'});
+      assert(await route.evaluate(n => parseFloat(getComputedStyle(n).transitionDuration) > 0), 'Original hover transition restored');
+      await page.emulateMedia({reducedMotion:'reduce'});
+      // Warm lazy images before the full-page visual review.
+      for (const image of await page.locator('main img').all()) {
+        await image.scrollIntoViewIfNeeded();
+        await page.waitForFunction(n => n.complete && n.naturalWidth > 0, await image.elementHandle(), {timeout:15000});
+      }
+      await page.evaluate(() => scrollTo(0, 0));
       await page.screenshot({path: path.join(output, `${engine}-article-${width}.png`), fullPage: true});
-      const faq = page.locator('details').first();
+      const faq = page.locator('.faq-details').first();
       await faq.locator('summary').click();
       assert(await faq.evaluate(n => n.open), 'FAQ remains operable');
       await page.emulateMedia({media: 'print'});
