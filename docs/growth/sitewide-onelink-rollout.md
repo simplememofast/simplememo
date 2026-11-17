@@ -52,12 +52,12 @@ rolled back in #2381, including the pages open experiments own.**
   start of the period above as well.
 
 Remaining steps, in order: read back production and add the records; remove
-the sitewide and pilot/QA branches from the tracker; the owner decides on the
-AppsFlyer OneLink paragraph in privacy policy §13 (C), which still says some
-buttons go through AppsFlyer. #2381 leaves §13 unchanged, so merging it does
-not make that paragraph accurate; draft #2373 rewrites the same paragraph and
-any fix has to be reconciled with it. Do not close the AppsFlyer account or disable
-OneLink before the rollback is verified live.
+the sitewide and pilot/QA branches from the tracker; rebase draft #2373 onto
+the privacy policy §13 (C) on main. #2381 itself rewrote §13 (C) in all ten
+languages as a record of what ended on 2026-11-17, so it no longer says that
+some buttons go through AppsFlyer. Draft #2373 rewrites the same paragraph.
+Do not close the AppsFlyer account or disable OneLink before the rollback is
+verified live.
 
 The rest of this document describes the 2026-10-16 draft and stays as written.
 
