@@ -166,6 +166,25 @@ test('nine-hero contract detects changes, extra pilot uses and English being out
   assert.throws(() => buildRouteInventory({ pages: [pages[0], pages[0]] }), /Duplicate/);
 });
 
+test('a declared rollback reads as rolled_back only when all nine pages are direct and unlabeled', () => {
+  const files = ['obsidian/index.html', ...['ar', 'es', 'id', 'ko', 'pt-BR', 'tr', 'zh', 'zh-Hant'].map(l => `${l}/obsidian/index.html`)];
+  const direct = tracker + anchor(apple + '?ct=web_obsidian_v1', 'data-cta-placement="hero" data-cta-cluster="obsidian" data-cta-variant="v1"');
+  const pages = files.map(file => ({ file, html: direct }));
+  const state = (input, pilotState = 'rolled_back') => buildRouteInventory({ pages: input, pilotState }).pilot;
+  assert.deepEqual(state(pages), { declared_state: 'rolled_back', expected_placements: 0, state: 'rolled_back', placements: [] });
+  // Without the manifest the old nine-hero contract still applies, so the same source is a mismatch.
+  assert.equal(state(pages, null).state, 'source_differs_from_nine_hero_contract');
+  assert.equal(state(pages, null).declared_state, null);
+  const differs = 'source_differs_from_rolled_back_contract';
+  assert.equal(state(pages.slice(1)).state, differs, 'a missing page is not a rollback');
+  assert.equal(state([]).state, differs);
+  for (const html of [tracker + anchor(pilot), tracker + anchor(pilot + '?c=changed'),
+    tracker + anchor(apple, 'data-app-route="onelink" data-app-traffic="pilot"')]) {
+    assert.equal(state(pages.map((p, i) => i ? p : { ...p, html })).state, differs);
+    assert.equal(state([...pages, { file: 'other.html', html }]).state, differs);
+  }
+});
+
 test('CLI reads public HTML only, emits a report and refuses symlink sources and output overwrite', t => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'site-route-inventory-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
@@ -180,7 +199,13 @@ test('CLI reads public HTML only, emits a report and refuses symlink sources and
   const report = main(['--root', root, '--output', output, '--summary-only']);
   assert.equal(report.public_source.pages, 2); assert.equal(report.sitemap_listed.pages, 1);
   assert.equal(Object.hasOwn(report, 'pages'), false);
+  assert.equal(report.pilot.declared_state, null);
   assert.equal(JSON.parse(fs.readFileSync(output)).live_verified, false);
+  fs.mkdirSync(path.join(root, 'growth'));
+  fs.writeFileSync(path.join(root, 'growth', 'onelink-pilot.json'), '{"state":"rolled_back"}');
+  const declared = main(['--root', root, '--output', path.join(root, 'declared.json'), '--summary-only']);
+  assert.equal(declared.pilot.declared_state, 'rolled_back');
+  assert.equal(declared.pilot.state, 'source_differs_from_rolled_back_contract', 'the nine pages are absent here');
   assert.throws(() => main(['--root', root, '--output', output]), /EEXIST/);
   fs.symlinkSync(path.join(root, 'admin', 'private.html'), path.join(root, 'linked.html'));
   assert.throws(() => main(['--root', root, '--output', path.join(root, 'never.json')]), /regular file/);
