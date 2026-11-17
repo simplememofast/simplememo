@@ -5,14 +5,18 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
+import { activate } from './lib/ga4-static.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const TAG_URL = 'googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+// 2026-11-17 から静的な HTML は GA4 を持たず、目印だけを持つ（functions/lib/ga-geo.js）。
+// ここで確かめるのは、許可する地域へ middleware が返す本文（目印を原本に戻したもの）。
+const served = (file) => activate(fs.readFileSync(path.join(ROOT, file), 'utf8'));
 const paths = execFileSync('git', ['ls-files', '-z', '*.html'], { cwd: ROOT })
   .toString('utf8').split('\0').filter(Boolean);
 
 function loader(file) {
-  const html = fs.readFileSync(path.join(ROOT, file), 'utf8');
+  const html = served(file);
   const scripts = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)]
     .map((match) => match[1]).filter((body) => body.includes(TAG_URL));
   assert.equal(scripts.length, 1, `${file}: one GA4 loader`);
@@ -20,10 +24,10 @@ function loader(file) {
 }
 
 test('every tracked GA4 page queues its config before deferred loading and custom events', () => {
-  const tagged = paths.filter((file) => fs.readFileSync(path.join(ROOT, file), 'utf8').includes(TAG_URL));
+  const tagged = paths.filter((file) => served(file).includes(TAG_URL));
   assert.ok(tagged.length >= 400, 'the site-wide GA4 inventory should not silently shrink');
   for (const file of tagged) {
-    const html = fs.readFileSync(path.join(ROOT, file), 'utf8');
+    const html = served(file);
     assert.ok(!html.includes('/js/analytics.js'), `${file}: do not configure GA4 twice`);
     const script = loader(file);
     assert.equal((script.match(/gtag\('js'/g) || []).length, 1, file);

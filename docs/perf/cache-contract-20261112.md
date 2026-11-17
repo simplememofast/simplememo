@@ -54,7 +54,8 @@
    - クエリ付き
    - 条件付き（ETag が一致して 304）
    - 2026-11-16 から、上の 5 通りを、訪問者の場所 3 通り（`request.cf` が無い・JP・FR）でそれぞれ流す。
-     - root middleware が `request.cf.country` で GA4 を外すようになったため（EU 監査 E34。`functions/lib/ga-geo.js`）。
+     - root middleware が `request.cf.country` で GA4 の有無を変えるようになったため（EU 監査 E34。`functions/lib/ga-geo.js`）。
+     - 2026-11-17 から静的既定オフ: 静的な HTML は GA4 を持たず、EEA・英国・スイス・国不明以外の訪問にだけ middleware が足す。条件付きの見出しを外すのは、足す側（JP）になった。
      - 場所を 1 通りしか流さないと、片方の分岐にしか無い方針を見落とす。実際、`request.cf` が無いだけの模型では、EEA 扱いで条件付きの見出しが外れ、「304 にだけ長い方針」の抜け道が止まらなくなった。
      - Pages の振り分けの模型（`scripts/lib/pages-functions.mjs`）は、`request.cf` を次のハンドラへ渡す。
 4. **Functions を通らない場合**（`_routes.json` の除外、Functions の fail-open）に備えて、`_headers` だけの応答も確かめる。
@@ -84,7 +85,7 @@
 ## 分かっている限界
 
 - 時刻・Cookie・乱数で振る舞いを変える Function は、手元の 1 回の実行では見えない。`request.cf` は、国（無し・JP・FR）だけを流す。ほかの項目（ASN・都市など）や、ほかの国でだけ変わる振る舞いは見えない。
-- GA4 を外す処理そのもの（本文・CSP・国ごとの見出し）は、`scripts/ga4-consent-region.test.mjs` が確かめる。HTMLRewriter は模型（`scripts/lib/html-rewriter-model.mjs`）で動かす。
+- GA4 を足す処理そのもの（本文・CSP・国ごとの見出し）と、静的な HTML・`_headers` に GA4 が無いことは、`scripts/ga4-consent-region.test.mjs` が確かめる。HTMLRewriter は模型（`scripts/lib/html-rewriter-model.mjs`）で動かす。
 - Node で動かせない（`.ts`・`.tsx`・`.jsx`）ルートの Function が、文書以外の新しい URL で HTML を返す場合は、確かめられない。文書を受け持つ場合は落とす。
 - リポジトリの外の設定は、本番の後の確かめでしか見えない（Cloudflare の Cache Rules・Browser Cache TTL・Transform Rules など）。
 - エッジのキャッシュに固有の挙動も、本番の後の確かめでしか見えない。点検役の観測では、CDN がキャッシュする種類のファイルで、最後の規則の値だけが返る例があった。

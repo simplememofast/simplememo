@@ -87,6 +87,9 @@ def capture_inbox_page(html, body, copyright_line):
 
 
 def page(path, title, description, body, ja, en, lang, tool=False):
+    # GA4 is off in static HTML since 2026-11-17: the analytics bootstrap is an inert
+    # marker that the root middleware turns into the deferred loader only for visitors
+    # outside the EEA, the UK and Switzerland (functions/lib/ga-geo.js).
     english = lang == "en"
     name = constants["appNameEn"] if english else constants["appNameJa"]
     prefix = "/en" if english else ""
@@ -94,7 +97,7 @@ def page(path, title, description, body, ja, en, lang, tool=False):
     schema = {"@context": "https://schema.org", "@type": "WebPage", "@id": BASE + path + "#webpage", "name": title, "url": BASE + path, "inLanguage": lang, "description": description, "isPartOf": {"@id": BASE + "/#website"}, "about": {"@id": BASE + "/#app"}}
     seed = """<!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
 <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>""" if english else ""
-    scripts = f'<script src="{asset("js/obsidian-inbox-tool.js")}" defer></script>' if tool else f'<script src="{asset("js/analytics.js")}" defer></script>'
+    scripts = f'<script src="{asset("js/obsidian-inbox-tool.js")}" defer></script>' if tool else f'<script type="text/plain" data-ga4="deferred" data-src="{asset("js/analytics.js")}"></script>'
     og = "/assets/img/og/autopilot.png" if "autopilot" in path else "/assets/img/og/obsidian.png"
     copyright_line = constants["copyrightLineEn"] if english else constants["copyrightLine"]
     html = f"""<!DOCTYPE html>

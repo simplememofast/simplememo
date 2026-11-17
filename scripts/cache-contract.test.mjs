@@ -21,7 +21,8 @@
 // handlers that cannot run here, ambiguous routes, invalid `_headers` lines, URL
 // placeholders in freshness headers, a missing 404.html, an advanced-mode _worker.js.
 // Since 2026-11-16 the root middleware answers differently by `request.cf.country`
-// (GA4 is not loaded for EEA / UK / Switzerland or an unknown country; see
+// (GA4 is not loaded for EEA / UK / Switzerland or an unknown country; since 2026-11-17
+// static HTML carries no GA4 and the middleware adds it for other visitors; see
 // functions/lib/ga-geo.js), so every request shape is also tried for each of VISITORS.
 // Known limits (see docs/perf/cache-contract-20261112.md): behaviour that depends on
 // time, cookies or randomness, `request.cf` fields other than the ones in VISITORS, and
@@ -55,11 +56,11 @@ const HOME_ROOTS = ['/', '/en/'];
 const DOCUMENT_MAX_AGE = 3600;
 const SKIP_DIRS = new Set(['.git', 'node_modules']);
 const PROBE = 'cache-contract-probe';
-// `request.cf` of the visitor. The root middleware strips GA4 and the request's
-// validators for EEA / UK / Switzerland and for an unknown country (no cf), and passes
-// the rest through. Each branch must keep the contract, and a check that only ever ran
-// one branch would miss a policy that only the other reaches (a 304 seen only when the
-// validators are forwarded, for example).
+// `request.cf` of the visitor. Since 2026-11-17 the root middleware passes the static
+// file through for EEA / UK / Switzerland and for an unknown country (no cf), and for
+// everyone else adds GA4 and strips the request's validators. Each branch must keep the
+// contract, and a check that only ever ran one branch would miss a policy that only the
+// other reaches (a 304 seen only when the validators are forwarded, for example).
 const VISITORS = [
   ['no cf', undefined],
   ['JP', { country: 'JP' }],
