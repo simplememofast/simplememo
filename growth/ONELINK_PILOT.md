@@ -33,17 +33,39 @@
   だから9個とも今は変えない。`growth/onelink-pilot.json` の `state` は `active` のまま。
 - **全サイト変換の残り27本。** 排他実験が持つ13ページとその生成翻訳（計88ページ）は opt-in を残した。
   一覧は `scripts/enable-sitewide-app-routes.mjs` の `OPT_IN_HELD`。
+  行の実験がどれも開いていなければ、CI の「Experiment evaluation dates」
+  （`growth/scripts/check-experiments.mjs`）が警告を出す。落とさない。
 - **`js/app-store-tracking.js` の OneLink の処理。** 残りの opt-in と pilot が使うので残した。
   両方を外した後、別の変更で消す。
+- **この変更の記録。** `measurement_changes` と `growth/data/annotations.json` にはまだ書いていない。
+  下の「この変更の記録（本番反映の後）」のとおり、本番反映を読み戻してから足す。
+
+### この変更の記録（本番反映の後）
+
+上の「準備日を開始日にしない」と同じ規則。境界は本番反映の時刻で、PRの日付ではない。
+版の名前は開始日を含むので、開始後に決める。
+
+- 版: `sitewide-onelink-opt-out-<本番反映の日（JST）>`。`type` は `measurement_route_change`。
+- `date` は本番反映の日（JST）。本番SHA、マージと配備の時刻（JST と UTC）、読み戻した時刻とページを書く。
+- 中身: オーナー判断と理由（AppsFlyer SDK の廃止、OneLink 帰属インストール0件）。
+  opt-in を外した2,361ページと、直接 Apple に戻った183本（181ページ）。
+  GA4 では `web_to_app_*`（`bridge_scope=sitewide`）から `app_store_click` / `seo_cta_*`（`placement=reference`、ct なし）へ移る。
+  opt-in を残した13ページと生成翻訳（計88ページ、27本）。pilot・tracker・ct/pt 付きリンク・QR・Smart App Banner は不変。
+- **始まりも書く。** 全サイト変換は #2100 から（マージ 2026-10-17 23:28 JST。本番開始の読み戻し記録は無く、
+  `rollout_start` は `null`）。2026-10-17 から本変更の反映までの、直接Appleだけの率と sitewide の値は、
+  その前とも後とも比べない。この期間は約210本が `app_store_click` から `web_to_app_*` へ移っていた。
+- annotations の行にも、同じ境界と上の「始まり」の1文を書く。
 
 ### 残りを戻す手順
 
 1. 実験の判定が記録されたら、その実験の行を `OPT_IN_HELD` から消し、
    `node scripts/enable-sitewide-app-routes.mjs --write` を回す。
+   消し忘れは CI の警告で分かる（上の「全サイト変換の残り27本」）。
 2. `/obsidian/` が空いたら、下の「不具合時の戻し方」のとおり冒頭ボタンを戻す。
    同じPRで `growth/onelink-pilot.json` の `state` を `rolled_back` にする。
    生成8ページは `python3 scripts/build_site_translations.py --write` で作り直す（手で直さない）。
-3. 本番反映を確かめたら、時刻と本番SHAを `measurement_changes` と `growth/data/annotations.json` に足す。
+3. 1と2も、それぞれ本番反映を確かめてから、時刻と本番SHAを `measurement_changes` と
+   `growth/data/annotations.json` に足す。
 
 戻した冒頭ボタンの ct は `web_obsidian_v1` にする。`tag-cta-placements.js --check` が
 `/obsidian/` のボタンにこの値を求めるため。App Store Connect では、同じページのほかのボタンと

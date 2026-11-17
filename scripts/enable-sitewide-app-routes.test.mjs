@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { enableSitewideAppRoutes, setSitewideAppRoutes, updateExistingTrackerPages, optInHeld, OPT_IN_HELD }
   from './enable-sitewide-app-routes.mjs';
+import { releasedHolds } from '../growth/lib/ledger.mjs';
 
 const version = '012345abcd';
 test('only an existing tracker script gets opt-in and its own cache version', () => {
@@ -108,4 +109,29 @@ test('repository updater opts out every page but the held ones and defaults to a
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
+});
+
+test('a hold row is reported once none of its experiments is open, and only then', () => {
+  // Synthetic ledger: the generator never reads the real one; check-experiments.mjs warns from this.
+  const ledger = { experiments: [
+    { id: 'video-2026-01-01-open', status: 'running' },
+    { id: 'title-2026-01-02-frozen', status: 'frozen' },
+    { id: 'aio-2026-01-03-done', status: 'evaluated' },
+    { id: 'en-2026-01-04-dropped', status: 'cancelled' },
+  ] };
+  const holds = {
+    'a/index.html': 'video-2026-01-01-open',
+    'b/index.html': 'aio-2026-01-03-done, title-2026-01-02-frozen',
+    'c/index.html': 'aio-2026-01-03-done, en-2026-01-04-dropped',
+    'd/index.html': 'aio-2026-01-03-done, typo-2026-01-05-missing',
+  };
+  assert.deepEqual(releasedHolds(holds, ledger), [
+    { key: 'c/index.html', ids: ['aio-2026-01-03-done', 'en-2026-01-04-dropped'], missing: [] },
+    { key: 'd/index.html', ids: ['aio-2026-01-03-done', 'typo-2026-01-05-missing'], missing: ['typo-2026-01-05-missing'] },
+  ]);
+  // Every real row is read by the same parser: with all its ids open, nothing is reported.
+  const allOpen = { experiments: [...new Set(Object.values(OPT_IN_HELD).flatMap(ids => ids.split(', ')))]
+    .map(id => ({ id, status: 'running' })) };
+  assert.deepEqual(releasedHolds(OPT_IN_HELD, allOpen), []);
+  assert.equal(releasedHolds(OPT_IN_HELD, { experiments: [] }).length, Object.keys(OPT_IN_HELD).length);
 });

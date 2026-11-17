@@ -8,8 +8,10 @@
 // ones below: an open exclusive experiment still owns them (growth/lib/experiment-overlap.mjs ownershipConflict),
 // so their tracker tag is left as it was until that experiment is decided. Their generated translations follow
 // the source page (scripts/build_site_translations.py copies the tag), so they stay too.
-// When an experiment here is decided, delete its rows and run this with --write in the same PR. The rows are not
-// checked against the experiment's state on purpose: a closed experiment must not turn every PR red overnight.
+// When an experiment here is decided, delete its rows and run this with --write in the same PR. This script does not
+// read the ledger on purpose: a closed experiment must not turn every PR red overnight. Instead
+// growth/scripts/check-experiments.mjs prints a warning (never a failure) for each row that no open exclusive
+// experiment holds any more (releasedHolds in growth/lib/ledger.mjs).
 // Removing the last row is not the end of the work: the tracker's sitewide code and the nine hero pilot links
 // (growth/ONELINK_PILOT.md 「終了の決定」) go in their own change.
 import fs from 'node:fs';

@@ -25,9 +25,22 @@ experiment still owns keep the opt-in until that experiment is decided.**
   held pages. Do not compare sitewide or direct-only rates across this
   boundary. The boundary time is the production deployment of this change,
   recorded after readback, not the PR date.
+- The affected period also has a start: the sitewide route began with #2100
+  (merged 2026-10-17 23:28 JST; its production start was never read back, so
+  `rollout_start` stays `null`). Do not compare direct-Apple-only rates or
+  sitewide values from 2026-10-17 until this deployment with the periods
+  before or after it: about 210 anchors reported `web_to_app_*` instead of
+  `app_store_click` in between.
+- Not yet in `measurement_changes` or `growth/data/annotations.json`. Both rows
+  are added after the production readback, with the real deployment time (JST
+  and UTC), the production SHA and a version named after the real start date
+  (growth/ONELINK_PILOT.md 「この変更の記録（本番反映の後）」). They must carry the
+  start of the period above as well.
 
 Remaining steps, in order: delete each `OPT_IN_HELD` row once its experiment
-is decided and rerun the script; roll back the nine heroes
+is decided and rerun the script (the "Experiment evaluation dates" CI step,
+`growth/scripts/check-experiments.mjs`, warns without failing when no open
+exclusive experiment holds a row any more); roll back the nine heroes
 (growth/ONELINK_PILOT.md); then remove the sitewide and pilot branches from the
 tracker. Do not close the AppsFlyer account or disable OneLink before all
 three are live.
