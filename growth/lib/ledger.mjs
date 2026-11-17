@@ -19,7 +19,7 @@
  */
 
 import fs from 'node:fs';
-import {validateCoexistence,changeScope,nonexclusiveObservation} from './experiment-coexistence.mjs';
+import {validateCoexistence,changeScope} from './experiment-coexistence.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -145,29 +145,6 @@ export function daysOverdue(exp, asOf = today()) {
   if (!isDue(exp, asOf)) return 0;
   const ms = Date.parse(asOf) - Date.parse(exp.evaluation_at);
   return Math.max(0, Math.round(ms / 86400000));
-}
-
-/**
- * 固定の保留一覧（`{ key: 'id, id' }`）のうち、**もう誰も持っていない行。**
- *
- * 行の実験がすべて閉じた・承認済みの非排他観測になった・台帳に無い、のどれか。
- * 1つでも開いた排他実験が残っていれば、その行はまだ要る。
- *
- * [2026-11-17] `scripts/enable-sitewide-app-routes.mjs` の `OPT_IN_HELD` 用。
- * 生成器は台帳を読まない（実験が閉じた夜に全PRを赤にしない）ので、
- * 消し忘れは `check-experiments.mjs` が警告で知らせる。落とさない。
- */
-export function releasedHolds(holds, ledger, { now = new Date() } = {}) {
-  const byId = new Map((ledger?.experiments || []).map((e) => [e.id, e]));
-  const holding = (id) => {
-    const e = byId.get(id);
-    return !!e && isOpen(e) && !nonexclusiveObservation(e, { now });
-  };
-  return Object.entries(holds).flatMap(([key, list]) => {
-    const ids = String(list).split(',').map((s) => s.trim()).filter(Boolean);
-    if (ids.some(holding)) return [];
-    return [{ key, ids, missing: ids.filter((id) => !byId.has(id)) }];
-  });
 }
 
 /**

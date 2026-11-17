@@ -32,9 +32,8 @@
 
 import { run as runScenarios } from '../../scripts/lib/selftest.mjs';
 import fs from 'node:fs';
-import { loadLedger, validate, summarize, daysOverdue, today, DECISIONS, releasedHolds } from '../lib/ledger.mjs';
+import { loadLedger, validate, summarize, daysOverdue, today, DECISIONS } from '../lib/ledger.mjs';
 import { classifyDueOwnership } from '../lib/experiment-coexistence.mjs';
-import { OPT_IN_HELD } from '../../scripts/enable-sitewide-app-routes.mjs';
 
 const strict = process.argv.includes('--strict');
 const asOf = today();
@@ -141,27 +140,6 @@ const { total, open, due, overdue } = summarize(ledger, asOf);
 const { blocking, observations } = classifyDueOwnership(due);
 const observationIds = new Set(observations.map((e) => e.id));
 console.log(`Experiment ledger: ${total} total, ${open} open, ${due.length} due, ${overdue.length} overdue (as of ${asOf})`);
-
-// [2026-11-17] OneLink の opt-in を残す固定の一覧（OPT_IN_HELD）の消し忘れを知らせる。
-// 生成器は台帳を読まない。行の実験がすべて閉じたら警告だけ出し、落とさない（上の理由と同じ）。
-const releasedOptIns = releasedHolds(OPT_IN_HELD, ledger);
-for (const { key, ids, missing } of releasedOptIns) {
-  console.log(
-    `::warning file=scripts/enable-sitewide-app-routes.mjs::OPT_IN_HELD row ${key} is no longer held by an open exclusive experiment (${ids.join(', ')})` +
-    (missing.length ? ` (not in the ledger: ${missing.join(', ')})` : '') +
-    '; delete it and run node scripts/enable-sitewide-app-routes.mjs --write'
-  );
-}
-if (releasedOptIns.length && process.env.GITHUB_STEP_SUMMARY) {
-  fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, [
-    `### ${releasedOptIns.length} OPT_IN_HELD row(s) no longer held by an open experiment`,
-    '',
-    ...releasedOptIns.map(({ key, ids }) => `- \`${key}\`: ${ids.map((id) => `\`${id}\``).join(', ')}`),
-    '',
-    'Delete them in `scripts/enable-sitewide-app-routes.mjs` and run `node scripts/enable-sitewide-app-routes.mjs --write` in the same PR.',
-    '',
-  ].join('\n'));
-}
 
 if (!due.length) {
   console.log('No experiment is past its evaluation date.');

@@ -169,8 +169,8 @@
         "*.html",
         "**/*.html"
       ],
-      "why": "Keep existing tracker tags on the current tracker hash and the sitewide OneLink opt-in only on the pages an open experiment still owns (owner decision 2026-11-17: no more AppsFlyer OneLink routing). CI must exercise the writer and reject stale generated HTML.",
-      "deterministic_why": "Reads only local HTML, js/app-store-tracking.js and data/i18n/pages.json (generated translations follow their source page). Updates existing tracker script attributes using the content hash and a fixed list of held pages; no network, clock, credentials or external state."
+      "why": "Keep existing tracker tags on the current tracker hash and the retired sitewide OneLink opt-in off every page (owner decision 2026-11-17: no more AppsFlyer OneLink routing, experiment pages included). CI must exercise the writer and reject stale generated HTML.",
+      "deterministic_why": "Reads only local HTML and js/app-store-tracking.js. Updates existing tracker script attributes using the content hash and removes the opt-in attribute; no network, clock, credentials or external state."
     }
   ],
   "never_run": [
