@@ -19,6 +19,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 import {
   CONSENT_REGIONS, GA_MEASUREMENT_ID, GA_CSP_SOURCES, GA_MARKER_SELECTOR, EXPIRE_EXISTING_GA_COOKIES, GA_COOKIE_NAMES,
   isConsentRegion, skipsGoogleAnalytics, isGoogleAnalyticsHost, withGoogleAnalyticsSources, withoutGoogleAnalyticsSources,
@@ -216,6 +217,24 @@ test('the loader table holds pure GA4 loaders, and markers build nothing else', 
     [GA_DEFERRED, '/js/analytics.js?v=abcdef" onload="x'], [GA_DEFERRED, '/js/analytics.js?v=ABCDEF'], ['toString', undefined], ['__proto__', undefined], ['', undefined], [null, undefined], ['lang-path-4 ', undefined]]) {
     assert.equal(gaLoaderElement(name, src), null, `${name} ${src}`);
   }
+});
+
+// 原本の SHA-256。2026-11-17 に main の HTML（変換前）の全インラインローダーから計算した値と
+// 一致する（件数 2019・174・170・44・10・2）。表を変えると、許可する地域へ返す本文が変わる
+// （計測の継続）。往復の検査は表そのものを使うので、ここで固定しないと黙って通る。
+// 意図して変えるときは、変える理由と一緒にここを直す。
+const LOADER_SHA256 = {
+  'lang-path-4': '94fcc6bc95ac8770800ad3b2f02821559e06907cf9568e9032cc17ba06c6c409',
+  'lang-path-2': '8a5fd3a065e0087a401ae5560373b652090b2fd1ecea1cc0631e42f01c4ea839',
+  'lang-ja-2': '9efe4c217ce751b82d3fc0e9d9e3ad70aa3fdce2b01c32ebcbfbde21111d35e3',
+  'lang-en-4': '06181fc13db9a68901d6f230684a4d7983ea2317f60726fa0c2322aef47ff150',
+  'lang-none-4': 'cffc2827bfd732a6535a9885789d31456a01554e791c7e87c5da864a6e38a1d4',
+  'lang-home-4': 'e2ec3fb9de6d02f0bab519e9da86f0859aa69faea5d3e12d106db4c872d4f91d',
+};
+
+test('the loader table is the loaders the pages had until 2026-11-16, byte for byte', () => {
+  const actual = Object.fromEntries(Object.entries(GA_INLINE_LOADERS).map(([name, body]) => [name, createHash('sha256').update(body).digest('hex')]));
+  assert.deepEqual(actual, LOADER_SHA256);
 });
 
 test('every page: markers come back as the loader they replaced (string and HTMLRewriter model agree)', async () => {
