@@ -2,48 +2,60 @@
 
 ## Wind-down (2026-11-17)
 
-**The site stops routing App Store links through OneLink. Pages that an open
-experiment still owns keep the opt-in until that experiment is decided.**
+**The site no longer routes any App Store link through OneLink. Everything is
+rolled back in #2381, including the pages open experiments own.**
 
 - Owner decision, 2026-11-17: the app drops the AppsFlyer SDK in its next
   version. No install was attributed to OneLink, pilot or sitewide, from the
   start through 2026-11-14 (growth/ONELINK_PILOT.md 「終了の決定」).
-- `data-sitewide-app-routes="true"` was removed from 2,361 pages by
-  `node scripts/enable-sitewide-app-routes.mjs --write`. On those pages the
-  tracker no longer rewrites anything: 183 of the 210 bare JP Store anchors
-  (181 pages) open the direct Apple URL again and report `app_store_click` /
-  `seo_cta_click` with `placement=reference` instead of `web_to_app_*`
-  (`sitewide`). They keep no `ct`: the site convention gives `ct` only to CTAs,
-  and adding one would turn these references into CTAs.
-- The opt-in stays on 88 pages: 13 source pages owned by open exclusive
-  experiments (`ownershipConflict`) and their generated translations
-  (`OPT_IN_HELD` in the same script). 27 anchors there still convert.
-- `js/app-store-tracking.js`, the nine pilot hero links, `ct`/`pt` links, QR
-  images and Smart App Banners are unchanged. The tracker change would reach
-  the held pages too, so it waits until the last held row is gone.
-- `sitewideAcquisitionReport` and the GA4 sitewide columns now count only the
-  held pages. Do not compare sitewide or direct-only rates across this
-  boundary. The boundary time is the production deployment of this change,
-  recorded after readback, not the PR date.
+- The same day the owner explicitly approved changing the experiment pages too
+  (「かえていい」). A first revision of #2381 had kept 88 pages and the nine
+  pilot heroes because open exclusive experiments own them; that hold is gone.
+  The change is recorded as an explicitly requested concurrent change in the
+  notes of the five open experiments whose pages changed
+  (`video-2026-08-11-five-clips`, `title-2026-08-20-home-grammar`,
+  `aio-2026-08-12-entity-attribution`, `en-2026-08-11-native-rewrite`,
+  `title-2026-11-11-second-brain-term`), not as an experiment effect.
+- `data-sitewide-app-routes` is removed from all 2,449 tracker pages by
+  `node scripts/enable-sitewide-app-routes.mjs --write`, which now keeps the
+  opt-in off every page. All 210 bare JP Store anchors (208 pages) open the
+  direct Apple URL again and report `app_store_click` / `seo_cta_click` with
+  `placement=reference` instead of `web_to_app_*` (`sitewide`). They keep no
+  `ct`: the site convention gives `ct` only to CTAs, and adding one would turn
+  these references into CTAs.
+- The nine pilot heroes (`/obsidian/` and its eight generated translations)
+  point to the direct Apple URL with `ct=web_obsidian_v1` again, without
+  `data-app-route` / `data-app-traffic`, variant `v1`.
+  `growth/onelink-pilot.json` is `rolled_back`. Their clicks move from
+  `web_to_app_*` (`pilot`) to `app_store_click` / `seo_cta_click`
+  (`placement=hero`).
+- Visible text, button positions, `ct`/`pt` links, QR images and Smart App
+  Banners are unchanged. Only the nine hero pages get a new sitemap `lastmod`.
+- `js/app-store-tracking.js` is unchanged. Its sitewide and pilot/QA branches
+  no longer run (no page opts in, no anchor carries the pilot label). Removing
+  them changes every page's `?v=` and the route inventory and tracker tests,
+  so it is a separate change.
+- `sitewideAcquisitionReport`, the GA4 sitewide columns and the pilot columns
+  count nothing after the boundary. Do not compare sitewide, pilot or
+  direct-only rates across it. The boundary time is the production deployment
+  of #2381, recorded after readback, not the PR date.
 - The affected period also has a start: the sitewide route began with #2100
   (merged 2026-10-17 23:28 JST; its production start was never read back, so
   `rollout_start` stays `null`). Do not compare direct-Apple-only rates or
   sitewide values from 2026-10-17 until this deployment with the periods
   before or after it: about 210 anchors reported `web_to_app_*` instead of
-  `app_store_click` in between.
+  `app_store_click` in between. The pilot began 2026-10-15 11:31 JST.
 - Not yet in `measurement_changes` or `growth/data/annotations.json`. Both rows
   are added after the production readback, with the real deployment time (JST
   and UTC), the production SHA and a version named after the real start date
   (growth/ONELINK_PILOT.md 「この変更の記録（本番反映の後）」). They must carry the
   start of the period above as well.
 
-Remaining steps, in order: delete each `OPT_IN_HELD` row once its experiment
-is decided and rerun the script (the "Experiment evaluation dates" CI step,
-`growth/scripts/check-experiments.mjs`, warns without failing when no open
-exclusive experiment holds a row any more); roll back the nine heroes
-(growth/ONELINK_PILOT.md); then remove the sitewide and pilot branches from the
-tracker. Do not close the AppsFlyer account or disable OneLink before all
-three are live.
+Remaining steps, in order: read back production and add the records; remove
+the sitewide and pilot/QA branches from the tracker; the owner decides on the
+AppsFlyer OneLink paragraph in privacy policy §13 (C), which still says some
+buttons go through AppsFlyer. Do not close the AppsFlyer account or disable
+OneLink before the rollback is verified live.
 
 The rest of this document describes the 2026-10-16 draft and stays as written.
 
