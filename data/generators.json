@@ -171,6 +171,14 @@
       ],
       "why": "Keep existing tracker tags on the current tracker hash and the retired sitewide OneLink opt-in off every page (owner decision 2026-11-17: no more AppsFlyer OneLink routing, experiment pages included). CI must exercise the writer and reject stale generated HTML.",
       "deterministic_why": "Reads only local HTML and js/app-store-tracking.js. Updates existing tracker script attributes using the content hash and removes the opt-in attribute; no network, clock, credentials or external state."
+    },
+    {
+      "cmd": "scripts/ga4-static-default-off.mjs --write",
+      "writes": [
+        "*.html"
+      ],
+      "why": "静的な HTML の GA4 を、実行されない目印に変える（2026-11-17・EU 監査 E34）。**古いページから写したローダーが動く形のまま残ると、Functions を通らない経路（fail open）で EEA・英国・スイスの訪問者にも GA4 が出る**",
+      "deterministic_why": "子プロセスは git ls-files（同じチェックアウトの追跡 HTML の一覧）だけ。書く内容は各 HTML と functions/lib/ga-loaders.js の表だけで決まり、時計・ネット・外部APIは出力に入らない。冪等（目印は二度変えない）"
     }
   ],
   "never_run": [

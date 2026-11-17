@@ -1,57 +1,54 @@
-// GA4（Google アナリティクス）を、EEA・英国・スイスからの訪問では読み込ませない。
+// GA4（Google アナリティクス）は、許可する地域の訪問にだけ読み込ませる。
 // 2026-11-16 の EU 監査 E34（P0）と、その推奨案 D11 の実装。
+// 2026-11-17 に「静的既定オフ」へ作り直した（最初の形は、静的な HTML から GA4 を
+// 取り除くものだった。その形の限界は下の【障害のとき】）。
 //
-// functions/_middleware.js が、すべての応答の最後にこのモジュールの
-// applyAnalyticsPolicy() を通す。手を入れるのは HTML の応答だけ。
+// 【形】静的な HTML は、GA4 を持たない。
+//   - ローダーがあった位置には、中身の無い目印だけがある（functions/lib/ga-loaders.js）。
+//     <script type="text/plain"> なので、ブラウザは実行しない。
+//   - _headers の CSP にも、GA のホストは無い。
+//   - functions/_middleware.js が、すべての応答の最後に applyAnalyticsPolicy() を通す。
+//     許可する地域への HTML だけ、HTMLRewriter で目印を元のローダーへ置き換え、
+//     CSP に GA のホストを足す。置き換えた本文は、2026-11-16 までの静的な HTML と同じ。
 //
 // 【判定】request.cf.country（Cloudflare が接続元 IP から推定した国コード）。
-//   - 対象地域（CONSENT_REGIONS）なら、GA を読ませない。
+//   - 対象地域（CONSENT_REGIONS）なら、読ませない。静的なファイルを、本文に手を入れずに返す。
 //   - 国が分からないとき（cf が無い・XX・T1（Tor）・形の崩れた値）も、読ませない。
 //     安全側に倒す。取りこぼすのは計測であって、同意の無い保存ではない。
 //   - request.cf.isEUCountry が "1" なら、一覧に無くても読ませない（一覧の漏れの保険）。
 //   - 推定なので外れる（VPN など）。ポリシー §13 にもそう書いてある。
 //
-// 【取り除くもの】（HTMLRewriter。lol-html のストリーミング書き換え）
-//   - <script src> が GA のホスト（googletagmanager.com・google-analytics.com・
-//     analytics.google.com）か、/js/analytics.js（51 ページの遅延ローダー）。
-//   - インラインの <script> で、計測 ID（G-EPZVZKCVQG）か gtag.js の URL を含むもの。
-//     中身を溜めてから判定し、当たれば中身を空にする（<script></script> が残る。害は無い）。
-//     2026-11-16 時点で 2,419 ページ・5 通りの形があり、どれも純粋な GA ローダーで、
-//     ほかの処理と同じ script に混ざっていない。混ざった形が増えたら
-//     scripts/ga4-consent-region.test.mjs が落ちる（空にすると別の処理まで消えるため）。
+// 【障害のとき】どの経路でも、GA4 が出ない側に倒れる。
+//   - Functions を通らない（本番の Pages は fail_open: true。日次の上限を超えたときは、
+//     Functions を通さずに静的ファイルを返す。_routes.json の除外も同じ）:
+//     静的な HTML に GA4 は無く、CSP も GA のホストを許していない。許可する地域の計測が
+//     抜けるだけ。
+//   - HTMLRewriter が無い実行環境・知らない名前の目印・形の崩れた data-src: 置き換えない。
+//   - Functions が例外を投げた: Cloudflare のエラーの応答になる（passThroughOnException は
+//     使っていない）。静的な HTML へ落ちることは無い。
 //
-// 【CSP も狭める】同じ応答の Content-Security-Policy から GA のホストを外す。
-//   HTMLRewriter が取りこぼす形が将来できても、ブラウザは gtag.js を取りに行けない。
-//   CSP だけで止める案も比べたが、採らなかった。インラインのローダーが毎回 gtag.js を
-//   差し込んでは CSP に拒否され、コンソールに赤が出続ける（計測は止まるが、
-//   壊れているように見える）。本文から消すのが主、CSP は二重の止め。
-//
-// 【キャッシュ】国で中身が変わるので、URL 単位の共有キャッシュに載せない。
-//   - GA を読む応答・読まない応答のどちらにも `Cloudflare-CDN-Cache-Control: no-store`。
-//     Cloudflare のゾーンのキャッシュだけが読む見出しで、ブラウザへは渡らない
-//     （Cache-Control の `public, no-cache` は変えない。scripts/cache-contract.test.mjs の契約）。
-//     2026-11-16 の観測では HTML は cf-cache-status: DYNAMIC で、ゾーンは HTML を
-//     保存していない。この見出しは、あとで HTML を「キャッシュ対象」にする規則が
-//     足されたときの保険。Edge TTL を「Cache-Control を無視する」にした規則には効かない。
-//     HTML をエッジに載せたくなったら、先に国をキャッシュキーに入れる手段を決めること。
-//   - Vary は付けない。Cloudflare のキャッシュは既定で Vary を見ず、国は利用者の
-//     要求の見出しではない（CF-IPCountry は Cloudflare が足す）ので、ブラウザや途中の
-//     キャッシュにとっても意味を持たない。
-//   - 途中の共有キャッシュ（社内プロキシなど）は、Cloudflare から見ればその出口の
-//     IP の国の訪問者。キャッシュが無くても同じ国の版を受け取るので、混ざらない。
-//   - ブラウザのキャッシュ: GA を読まない版は本文が元の静的ファイルと違うので、
-//     ETag・Last-Modified を外す。対象地域の文書の要求からは If-None-Match・
-//     If-Modified-Since を外して先へ渡す。旅行者のブラウザに残った「GA を読む版」が
-//     304 で使い回されないようにするため（本番の HTML には、もともと ETag も
-//     Last-Modified も無い。_headers の 2026-11-12 の注記）。
-//
-// 【限界】Functions が動かないと、静的 HTML がそのまま出て GA を読む。
-//   - 本番の Pages の設定は fail_open: true（2026-11-16 に読み取りで確認）。Functions の
-//     日次の上限を超えたときなどは、Functions を通さずに静的ファイルを返す。
-//   - 確実に止めるには、静的 HTML から GA を外し、対象外の地域にだけ足す形が要る。
-//     2,470 ファイルの書き換えになるので、この変更には入れていない（オーナーの判断点）。
-//   - ポリシー §13 (A) は「EEA・英国・スイスからの閲覧では読み込みません」と言い切っている。
-//     この経路が本番で起きうるなら、文言か仕組みのどちらかを合わせること。
+// 【キャッシュ】GA4 を足した版を、エッジや共有キャッシュから対象地域へ返させない。
+//   - `Cloudflare-CDN-Cache-Control: no-store`: Cloudflare のゾーンのキャッシュに保存させない
+//     （Cloudflare だけが読む見出しで、ブラウザへは渡らない）。GA4 の無い版にも付ける。
+//     2026-11-16 の観測では HTML は cf-cache-status: DYNAMIC で、ゾーンは HTML を保存していない。
+//   - ETag・Last-Modified を外す。`Cache-Control: public, no-cache` のまま（キャッシュ契約。
+//     scripts/cache-contract.test.mjs）だが、検証子が無いので、ブラウザも途中の共有キャッシュも、
+//     使う前に必ず取り直す（no-cache は確かめずに使うことを禁じ、確かめる手段が無い）。
+//     取り直しは、その時点の接続元の国で判定される。
+//   - 許可する地域からの文書の要求は、If-None-Match・If-Modified-Since を外して先へ渡す。
+//     対象地域で保存した GA4 の無い版が 304 で使い回され、計測が抜けるのを防ぐため
+//     （計測の向き。プライバシーの向きの漏れではない）。
+//   - 対象地域への応答は、静的なファイルそのもの（検証子も元のまま）。これは、だれに
+//     返っても GA4 を読まない。
+//   - 防げないもの: Cache Rules の Edge TTL を「Cache-Control を無視」にした規則は、
+//     Cloudflare-CDN-Cache-Control より優先される（Cloudflare Docs「CDN-Cache-Control」）。
+//     HTML をエッジに保存する規則があると、GA4 を足した版が対象地域へ返りうる。2026-11-16 は
+//     トークンの権限が足りず、Cache Rules を読めていない（未確認）。HTML をエッジに載せたく
+//     なったら、先に国をキャッシュキーに入れる手段を決めること。
+//   - Vary は付けない。Cloudflare のキャッシュは既定で Vary を見ず、国は利用者の要求の
+//     見出しではないので、ブラウザや途中のキャッシュにとっても意味を持たない。
+
+import { GA_MARKER_TYPE, gaLoaderElement } from "./ga-loaders.js";
 
 export const GA_MEASUREMENT_ID = "G-EPZVZKCVQG";
 
@@ -118,47 +115,54 @@ export function isGoogleAnalyticsHost(host) {
   return typeof host === "string" && GA_HOST.test(host.replace(/\.$/, ""));
 }
 
-const SITE_HOSTS = new Set(["simplememofast.com", "www.simplememofast.com"]);
+// 許可する地域への HTML の CSP に足すもの。2026-11-16 まで _headers にあった値そのもの
+// （順は変わるが、集合は同じ。scripts/ga4-consent-region.test.mjs が当時の CSP と突き合わせる）。
+export const GA_CSP_SOURCES = Object.freeze({
+  "img-src": Object.freeze([
+    "https://www.googletagmanager.com", "https://www.google-analytics.com",
+    "https://*.google-analytics.com", "https://*.googletagmanager.com",
+  ]),
+  "script-src": Object.freeze([
+    "https://www.googletagmanager.com", "https://www.google-analytics.com",
+    "https://*.google-analytics.com", "https://*.googletagmanager.com",
+  ]),
+  "connect-src": Object.freeze([
+    "https://www.google-analytics.com", "https://*.google-analytics.com",
+    "https://*.analytics.google.com", "https://*.googletagmanager.com", "https://analytics.google.com",
+  ]),
+});
 
-/** <script src> の値が GA の読み込みか。 */
-export function isGoogleAnalyticsScriptSrc(src) {
-  if (typeof src !== "string" || src.trim() === "") return false;
-  let url;
-  try {
-    url = new URL(src.trim(), "https://simplememofast.com/");
-  } catch {
-    return false;
-  }
-  if (isGoogleAnalyticsHost(url.hostname)) return true;
-  return SITE_HOSTS.has(url.hostname) && url.pathname === "/js/analytics.js";
-}
-
-/** インラインの script の中身が GA のローダーか。 */
-export function isGoogleAnalyticsInlineScript(text) {
-  return typeof text === "string"
-    && (text.includes(GA_MEASUREMENT_ID) || /googletagmanager\.com\/gtag\/js/i.test(text));
+function directives(csp) {
+  return csp.split(";").map((d) => d.trim().split(/\s+/).filter(Boolean)).filter((parts) => parts.length > 0);
 }
 
 /**
- * CSP の source 式から、GA のホストを指すものを外す。
- * 'self' などのキーワード、data: などのスキームだけの式、他のホストはそのまま。
- * 外した結果、値が空になったディレクティブは 'none' にする（空のままでも意味は
- * 'none' だが、読み違えを避ける）。ディレクティブの順と他の値は変えない。
+ * CSP に GA のホストを足す（許可する地域への HTML だけ）。
+ * img-src・script-src・connect-src の末尾に、まだ無いものだけを足す。'none' だけの
+ * ディレクティブは GA のホストに置き換える。無いディレクティブは足さない（default-src に任せる）。
+ */
+export function withGoogleAnalyticsSources(csp) {
+  if (typeof csp !== "string") return csp;
+  return directives(csp).map(([name, ...sources]) => {
+    const add = GA_CSP_SOURCES[name.toLowerCase()];
+    if (!add) return [name, ...sources].join(" ");
+    const kept = sources.filter((source) => source !== "'none'");
+    return [name, ...kept, ...add.filter((source) => !kept.includes(source))].join(" ");
+  }).join("; ");
+}
+
+/**
+ * CSP から GA のホストを外す（対象地域への応答。_headers に GA のホストは無いので、
+ * ふだんは何も変わらない。誤って足されたときの保険）。
+ * 外した結果、値が空になったディレクティブは 'none' にする。
  */
 export function withoutGoogleAnalyticsSources(csp) {
   if (typeof csp !== "string") return csp;
-  return csp
-    .split(";")
-    .map((directive) => {
-      const parts = directive.trim().split(/\s+/).filter(Boolean);
-      if (parts.length === 0) return null;
-      const [name, ...sources] = parts;
-      const kept = sources.filter((source) => !isGoogleAnalyticsSource(source));
-      if (kept.length === sources.length) return parts.join(" ");
-      return [name, ...(kept.length ? kept : ["'none'"])].join(" ");
-    })
-    .filter((directive) => directive !== null)
-    .join("; ");
+  return directives(csp).map(([name, ...sources]) => {
+    const kept = sources.filter((source) => !isGoogleAnalyticsSource(source));
+    if (kept.length === sources.length) return [name, ...sources].join(" ");
+    return [name, ...(kept.length ? kept : ["'none'"])].join(" ");
+  }).join("; ");
 }
 
 function isGoogleAnalyticsSource(source) {
@@ -167,35 +171,19 @@ function isGoogleAnalyticsSource(source) {
   return Boolean(m) && isGoogleAnalyticsHost(m[1]);
 }
 
+/** HTMLRewriter のセレクタ。目印は data-ga4 を持つ script だけ。 */
+export const GA_MARKER_SELECTOR = "script[data-ga4]";
+
 /**
- * HTMLRewriter の "script" に渡すハンドラ。要素ごとに状態を持つので、
- * 応答 1 つにつき 1 回作ること。
+ * HTMLRewriter に渡すハンドラ。目印（type="text/plain"）を、ローダーの原本に置き換える。
+ * 型の違うもの・知らない名前は、そのまま残す（GA4 は出ない側）。
  */
-export function gaScriptHandlers() {
-  // 溜めているインライン script の中身。null は「溜めていない」。
-  let inline = null;
+export function gaInjectionHandlers() {
   return {
     element(element) {
-      const src = element.getAttribute("src");
-      if (src !== null) {
-        inline = null;
-        if (isGoogleAnalyticsScriptSrc(src)) element.remove();
-        return;
-      }
-      inline = [];
-    },
-    text(chunk) {
-      if (inline === null) return;
-      inline.push(chunk.text);
-      if (!chunk.lastInTextNode) {
-        chunk.remove();
-        return;
-      }
-      const body = inline.join("");
-      inline = null;
-      if (isGoogleAnalyticsInlineScript(body)) chunk.remove();
-      // script の中身は生のテキスト。html: true で、書き換えずにそのまま戻す。
-      else chunk.replace(body, { html: true });
+      if (element.getAttribute("type") !== GA_MARKER_TYPE) return;
+      const html = gaLoaderElement(element.getAttribute("data-ga4"), element.getAttribute("data-src"));
+      if (html !== null) element.replace(html, { html: true });
     },
   };
 }
@@ -218,48 +206,92 @@ function withoutValidators(request) {
   return new Request(request, { headers });
 }
 
-/** GA を読まない版。本文から GA を消し、CSP を狭め、検証子を外す。 */
-export function withoutGoogleAnalytics(response, Rewriter) {
+// GA4 を足す応答の状態。200 と、404（404.html にもローダーがある。2026-11-16 まで読んでいた）。
+// それ以外（206・304・5xx など）は足さない（GA4 は出ない側）。
+const INJECTABLE_STATUS = new Set([200, 404]);
+
+/**
+ * 公開前に対象地域から閲覧した人のブラウザには、_ga・_ga_EPZVZKCVQG が残る（既定で 2 年）。
+ * ドメイン全体の Cookie なので、期限まで、ブラウザは当社サイトへの要求にこれを付けて送る
+ * （当社のコードは読まない）。対象地域の HTML の応答で、期限切れの Set-Cookie を返して
+ * 消すことができる。**既定で無効。**利用者のブラウザのデータを消す動作で、オーナーの
+ * 承認事項（ポリシーの記載も要る）。有効にするには、この値を true にする PR を出す。
+ */
+export const EXPIRE_EXISTING_GA_COOKIES = false;
+
+export const GA_COOKIE_NAMES = Object.freeze(["_ga", `_ga_${GA_MEASUREMENT_ID.slice(2)}`]);
+
+/**
+ * 要求の Cookie に GA の Cookie があれば、それを消す Set-Cookie の値を返す。純粋関数。
+ * gtag.js は cookie_domain: auto で、登録可能なドメイン（simplememofast.com）に書く。
+ * 消すには、名前・Domain・Path が書いたときと同じである必要がある。
+ */
+export function gaCookieExpiry(cookieHeader) {
+  if (typeof cookieHeader !== "string" || cookieHeader === "") return [];
+  const present = new Set(cookieHeader.split(";").map((pair) => pair.split("=")[0].trim()));
+  return GA_COOKIE_NAMES.filter((name) => present.has(name)).map((name) =>
+    `${name}=; Domain=simplememofast.com; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; Secure; SameSite=Lax`);
+}
+
+/** 対象地域・国不明への HTML。静的なファイルの本文と検証子は、そのまま。 */
+export function servedWithoutAnalytics(response, request, { expireCookies = EXPIRE_EXISTING_GA_COOKIES } = {}) {
+  const out = new Response(response.body, response);
+  const csp = out.headers.get("Content-Security-Policy");
+  if (csp !== null) out.headers.set("Content-Security-Policy", withoutGoogleAnalyticsSources(csp));
+  out.headers.set("Cloudflare-CDN-Cache-Control", "no-store");
+  if (expireCookies && request) {
+    for (const value of gaCookieExpiry(request.headers.get("Cookie"))) out.headers.append("Set-Cookie", value);
+  }
+  return out;
+}
+
+/**
+ * 許可する地域への HTML。目印をローダーに置き換え、CSP に GA のホストを足し、検証子を外す。
+ * 本文が無い（HEAD）ときは、見出しだけ GET と同じにする。
+ * HTMLRewriter が無い・状態が 200/404 でないときは、GA4 の無い版を返す。
+ */
+export function withGoogleAnalytics(response, Rewriter) {
+  if (!INJECTABLE_STATUS.has(response.status) || typeof Rewriter !== "function") {
+    return servedWithoutAnalytics(response, null, { expireCookies: false });
+  }
   const headers = new Headers(response.headers);
   headers.delete("ETag");
   headers.delete("Last-Modified");
   headers.delete("Content-Length");
   const csp = headers.get("Content-Security-Policy");
-  if (csp !== null) headers.set("Content-Security-Policy", withoutGoogleAnalyticsSources(csp));
+  if (csp !== null) headers.set("Content-Security-Policy", withGoogleAnalyticsSources(csp));
   headers.set("Cloudflare-CDN-Cache-Control", "no-store");
   const shell = new Response(response.body, {
     status: response.status, statusText: response.statusText, headers,
   });
-  // 本文が無い（HEAD・204）か、HTMLRewriter が無い実行環境では、見出しだけ変える。
-  // そのときも CSP が gtag.js の取得を止める。
-  if (response.body === null || typeof Rewriter !== "function") return shell;
-  return new Rewriter().on("script", gaScriptHandlers()).transform(shell);
-}
-
-/** GA を読む版。本文はそのまま。国で中身が変わることだけをキャッシュに伝える。 */
-export function withGeoDependentCaching(response) {
-  const out = new Response(response.body, response);
-  out.headers.set("Cloudflare-CDN-Cache-Control", "no-store");
-  return out;
+  if (response.body === null) return shell;
+  return new Rewriter().on(GA_MARKER_SELECTOR, gaInjectionHandlers()).transform(shell);
 }
 
 /**
  * middleware の最後の context.next() の代わりに呼ぶ。
  * HTML 以外の応答は、受け取ったものをそのまま返す。
  * options.Rewriter は検査で差し替えるため（既定は Workers の HTMLRewriter）。
+ * options.expireCookies は検査のため（既定は EXPIRE_EXISTING_GA_COOKIES）。
  */
 export async function applyAnalyticsPolicy(context, options = {}) {
   const { request } = context;
+  if (skipsGoogleAnalytics(request)) {
+    const response = await context.next();
+    if (!isHtml(response)) return response;
+    return servedWithoutAnalytics(response, request, { expireCookies: options.expireCookies ?? EXPIRE_EXISTING_GA_COOKIES });
+  }
   const Rewriter = "Rewriter" in options ? options.Rewriter : globalThis.HTMLRewriter;
-  const skip = skipsGoogleAnalytics(request);
   const pathname = new URL(request.url).pathname;
-  const stripValidators = skip
-    && (request.method === "GET" || request.method === "HEAD")
+  const stripValidators = (request.method === "GET" || request.method === "HEAD")
     && looksLikeDocumentPath(pathname)
     && VALIDATORS.some((name) => request.headers.has(name));
   const response = stripValidators
     ? await context.next(withoutValidators(request))
     : await context.next();
   if (!isHtml(response)) return response;
-  return skip ? withoutGoogleAnalytics(response, Rewriter) : withGeoDependentCaching(response);
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return servedWithoutAnalytics(response, null, { expireCookies: false });
+  }
+  return withGoogleAnalytics(response, Rewriter);
 }

@@ -86,11 +86,12 @@
 // We must pass those requests through unmodified — root middleware runs
 // FIRST; pass these paths to the terminal retirement response.
 //
-// 5. 2026-11-16（EU 監査 E34・D11）: HTML の応答は、最後に
-//    applyAnalyticsPolicy()（functions/lib/ga-geo.js）を通る。EEA・英国・スイス、
-//    または国が分からない訪問では、GA4 の script を本文と CSP から外す。
+// 5. 2026-11-16（EU 監査 E34・D11）、2026-11-17 に静的既定オフへ: HTML の応答は、
+//    最後に applyAnalyticsPolicy()（functions/lib/ga-geo.js）を通る。静的な HTML は
+//    GA4 を持たない（実行されない目印だけ）。EEA・英国・スイスでも国不明でもない訪問に
+//    だけ、目印を GA4 のローダーに置き換え、CSP に GA のホストを足す。
 //    国で中身が変わるので、HTML の応答には Cloudflare-CDN-Cache-Control: no-store
-//    も付く。理由と、キャッシュについて確かめたことは ga-geo.js の冒頭。
+//    も付く。理由と、障害・キャッシュについて確かめたことは ga-geo.js の冒頭。
 
 import { applyAnalyticsPolicy } from "./lib/ga-geo.js";
 
@@ -500,7 +501,7 @@ export const onRequest = async (context) => {
     return response;
   }
 
-  // 5. GA4 for EEA / UK / Switzerland / unknown country — see ga-geo.js.
+  // 5. GA4 only outside EEA / UK / Switzerland / unknown country — see ga-geo.js.
   //    Non-HTML responses come back unchanged.
   return applyAnalyticsPolicy(context);
 };

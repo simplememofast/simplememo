@@ -4,9 +4,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { execFileSync } from 'node:child_process';
+import { activate } from '../../scripts/lib/ga4-static.mjs';
 
 const root = new URL('../../', import.meta.url);
 const source = fs.readFileSync(new URL('js/analytics.js', root), 'utf8');
+// 2026-11-17 から静的な HTML は GA4 を持たず、目印だけを持つ（functions/lib/ga-geo.js）。
+// GA4 の有無は、許可する地域へ middleware が返す本文（目印を原本に戻したもの）で確かめる。
+// 静的な HTML に GA4 が無いことは scripts/ga4-consent-region.test.mjs が確かめる。
+const served = file => activate(fs.readFileSync(path.join(root.pathname, file), 'utf8'));
 function browser(hostname) {
   const appended = [], listeners = [];
   const context = {
@@ -50,7 +55,7 @@ test('every indexable HTML page with an own-app CTA or next-step card includes t
   const files = execFileSync('git', ['ls-files', '*.html'], { cwd: root, encoding: 'utf8' }).trim().split('\n');
   const missing = [];
   for (const file of files) {
-    const html = fs.readFileSync(path.join(root.pathname, file), 'utf8');
+    const html = served(file);
     if (/<meta\b[^>]*name=["']robots["'][^>]*noindex/i.test(html)) continue;
     // The tracker also sends next_step_click/next_step_impression for the card.
     if (!/href=["']https:\/\/apps\.apple\.com\/[^"']*id6758438948(?:[?\/"'])/i.test(html)
@@ -85,7 +90,7 @@ test('every indexable public page loads GA4 unless it promised visitors no analy
   let tagged = 0;
   for (const file of files) {
     if (disallowed.some(prefix => file.startsWith(prefix))) continue;
-    const html = fs.readFileSync(path.join(root.pathname, file), 'utf8');
+    const html = served(file);
     if (/<meta\b(?=[^>]*\bname=["']?robots\b)(?=[^>]*\bcontent=["'][^"']*\bnoindex)[^>]*>/i.test(html)) continue;
     const key = file.replace(LOCALE_DIR, '');
     if (Object.hasOwn(NO_ANALYTICS, key)) {
@@ -104,7 +109,7 @@ test('every inline GA4 loader queues production config before deferred loading a
   const files = execFileSync('git', ['ls-files', '*.html'], { cwd: root, encoding: 'utf8' }).trim().split('\n');
   let checked = 0;
   for (const file of files) {
-    const html = fs.readFileSync(path.join(root.pathname, file), 'utf8');
+    const html = served(file);
     for (const match of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script\s*>/gi)) {
       if (!match[0].includes('G-EPZVZKCVQG')) continue;
       assert.ok(match[1].trim(), `${file}: unguarded external GA4 script`);
