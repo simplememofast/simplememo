@@ -79,6 +79,11 @@ The last is a formal observation only when the existing 28-day report and
 zero-missing-date conditions hold; earlier post-start observations remain
 diagnostic. The existing source and quality requirements still apply.
 
+2026-11-17: the pilot ended and the nine heroes were rolled back to direct
+App Store links in [#2381](https://github.com/simplememofast/simplememo/pull/2381)
+([ONELINK_PILOT.md](../../growth/ONELINK_PILOT.md) 「終了の決定」). Pilot rows
+after that PR's production deployment are not new observations.
+
 The additional site-wide PV and observed browser visitor totals are supporting
 web observations. A matched website-to-install cohort, coverage of all site
 routes, or a common GA4/AppsFlyer window is not an added completion requirement
@@ -209,10 +214,12 @@ denies or restricts tracking or an earlier in-app acquisition refusal is
 stored, and the app reports a bounded `acquisition_attribution_received` label
 to the API. That still does not produce a site-wide attributed install count.
 Only installs that arrive through the owned-web OneLink pilot link enter the
-pilot group above. That link is on the nine Obsidian hub hero buttons from
+pilot group above. That link was on the nine Obsidian hub hero buttons from
 the production start recorded in `measurement_changes`
 ([PR #1047](https://github.com/simplememofast/simplememo/pull/1047),
-[pilot handoff](../../growth/ONELINK_PILOT.md)). Installs from the site's other
+[pilot handoff](../../growth/ONELINK_PILOT.md)) until
+[#2381](https://github.com/simplememofast/simplememo/pull/2381) (2026-11-17)
+put them back on direct App Store links. Installs from the site's other
 plain App Store links are normally reported as Organic, mixed with every other
 unattributed install. The Apple collection handoff does not depend on the SDK.
 The owner waived the pilot's physical-device test on 2026-10-14, so pilot
@@ -225,6 +232,11 @@ suite covers collection locks and bounded retries. Revert the change to stop
 the added handoff; existing provider collectors and historical files remain.
 
 ## Separately authorized sitewide route draft (2026-10-16)
+
+2026-11-17: this route was wound down together with the pilot in
+[#2381](https://github.com/simplememofast/simplememo/pull/2381); no page opts
+in any more ([sitewide-onelink-rollout.md](sitewide-onelink-rollout.md)
+"Wind-down"). The rest of this section describes the 2026-10-16 draft.
 
 The reporting-only authorization above is distinct from the later website
 route draft in [sitewide-onelink-rollout.md](sitewide-onelink-rollout.md).

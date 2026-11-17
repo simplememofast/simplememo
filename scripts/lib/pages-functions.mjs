@@ -172,28 +172,45 @@ export function handlerChain(routes, method, requestPath) {
   return chain;
 }
 
+// `request.cf` as the Workers runtime exposes it. Node's Request has no `cf`, so the
+// model attaches it to every Request a handler receives.
+const withCf = (request, cf) => {
+  if (cf !== undefined) Object.defineProperty(request, 'cf', { value: cf, enumerable: true });
+  return request;
+};
+
 /**
  * Run a request through the chain like the template worker's `next()`, ending at
  * `assets(request)`. `env` is passed to every handler. Throws if a handler in the chain
  * could not be imported (its behaviour is unknown).
+ *
+ * `cf` is the visitor's `request.cf` (2026-11-16: the root middleware decides GA4 by
+ * `request.cf.country`). The runtime keeps it when `next()` gets a Request (copied from
+ * that Request, or `init.cf`), and a request built from a URL string has only `init.cf`.
+ * Node drops the property when a handler copies a Request, so a Request input without
+ * its own `cf` keeps the chain's.
  */
-export async function runChain(chain, request, { assets, env }) {
+export async function runChain(chain, request, { assets, env, cf }) {
   const handlers = chain.flatMap(step => {
     if (!step.ref.runnable) throw new Error(`${step.ref.file} (${step.ref.exportName}) runs for ${new URL(request.url).pathname} but cannot be executed by this check`);
     return step.ref.handlers.map(handler => ({ ...step, handler }));
   });
   let index = 0;
   let current = request;
+  let currentCf = cf;
   let data = {};
   const next = async (input, init) => {
     if (input !== undefined) {
       const url = typeof input === 'string' ? new URL(input, current.url).toString() : input;
+      currentCf = init?.cf !== undefined ? init.cf
+        : typeof input === 'string' ? undefined
+        : input.cf !== undefined ? input.cf : currentCf;
       current = new Request(url, init);
     }
     if (index < handlers.length) {
       const { handler, params, path: functionPath } = handlers[index++];
       return handler({
-        request: new Request(current.clone()), functionPath, next, params, env,
+        request: withCf(new Request(current.clone()), currentCf), functionPath, next, params, env,
         get data() { return data; }, set data(value) { data = value; },
         waitUntil() {}, passThroughOnException() {},
       });

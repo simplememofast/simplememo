@@ -48,6 +48,12 @@ jobs:
       - name: Homepage cache contract (static and middleware)
         run: node --test scripts/cache-contract.test.mjs
 
+      # GA4 is not loaded for EEA / UK / Switzerland or an unknown country (EU audit
+      # E34, 2026-11-16). The root middleware strips it per request.cf.country; this
+      # checks the decision, every tracked page and the cache headers of both versions.
+      - name: GA4 is not loaded for EEA, UK and Swiss visitors
+        run: node --test scripts/ga4-consent-region.test.mjs
+
       # No tracked file carries a credential-shaped value (2026-11-10 audit). The
       # PR is already public when this runs; what it stops is the merge and the deploy.
       - name: Secret shapes self-test

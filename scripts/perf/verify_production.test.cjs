@@ -64,7 +64,7 @@ test('editorial deployment requires the reviewed copy, CSS, metadata and analyti
     expected.replace('sm-editorial', 'legacy-home'),
     expected.replace(/home-editorial\.css\?v=[a-f0-9]+/, 'home-editorial.css?v=0000000000'),
     expected.replace('思いついたら、', 'Previous release'),
-    expected.replace('data-sitewide-app-routes="true"', 'data-sitewide-app-routes="false"'),
+    expected.replace(/(src="\/js\/app-store-tracking\.js\?v=[a-f0-9]+")/, '$1 data-sitewide-app-routes="true"'),
     expected.replace('<meta name="description"', '<meta name="missing-description"'),
     expected.replace('</head>', '<meta name="robots" content="noindex"></head>'),
     expected.replace('</head>', '<link rel="canonical" href="https://wrong.invalid/"></head>'),
