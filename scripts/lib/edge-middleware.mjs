@@ -1,14 +1,16 @@
 // functions/_middleware.js（エッジの URL 正規化）をロードして駆動する共通ヘルパ。
 // check-url-normalization.mjs と check-internal-redirects.mjs が共用する。
 //
-// ミドルウェアは素の ESM だが、このリポジトリには package.json（`"type":
-// "module"`）が無いため、.js ファイルの bare import は CommonJS として
-// 解釈されて失敗する。data: URL 経由の import は常にモジュールスコープ
-// なので、それで回避する。
+// ミドルウェアは素の ESM で、このリポジトリには package.json（`"type":
+// "module"`）が無い。以前は .js を CommonJS と読まれるのを避けるため
+// data: URL 経由で import していたが、2026-11-16 からミドルウェアが
+// ./lib/ga-geo.js を import するようになり、data: URL では相対 import を
+// 解決できない。ファイルの URL で import する。Node 22.7 以降（CI は 24）は
+// ESM の構文を検出して .js をモジュールとして読む。scripts/lib/pages-functions.mjs
+// （cache-contract の検査）も同じ読み方をしている。
 
-import { readFileSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -18,9 +20,8 @@ const PASSTHROUGH_HEADER = "X-Edge-Test-Passthrough";
 export const PASSTHROUGH = new Response(null, { headers: { [PASSTHROUGH_HEADER]: "1" } });
 
 export async function loadEdgeMiddleware(root = ROOT) {
-  const src = readFileSync(path.join(root, "functions/_middleware.js"), "utf8");
   const { onRequest } = await import(
-    "data:text/javascript," + encodeURIComponent(src)
+    pathToFileURL(path.join(root, "functions/_middleware.js")).href
   );
   return onRequest;
 }

@@ -85,6 +85,14 @@
 // /admin/* is retired by its terminal middleware (HTTP 410).
 // We must pass those requests through unmodified — root middleware runs
 // FIRST; pass these paths to the terminal retirement response.
+//
+// 5. 2026-11-16（EU 監査 E34・D11）: HTML の応答は、最後に
+//    applyAnalyticsPolicy()（functions/lib/ga-geo.js）を通る。EEA・英国・スイス、
+//    または国が分からない訪問では、GA4 の script を本文と CSP から外す。
+//    国で中身が変わるので、HTML の応答には Cloudflare-CDN-Cache-Control: no-store
+//    も付く。理由と、キャッシュについて確かめたことは ga-geo.js の冒頭。
+
+import { applyAnalyticsPolicy } from "./lib/ga-geo.js";
 
 // BEGIN data-publication (scripts/check-publication.mjs --write)
 // **サイトが配信しない data/*.json。**一覧は data/publication-policy.json が正。
@@ -492,5 +500,7 @@ export const onRequest = async (context) => {
     return response;
   }
 
-  return context.next();
+  // 5. GA4 for EEA / UK / Switzerland / unknown country — see ga-geo.js.
+  //    Non-HTML responses come back unchanged.
+  return applyAnalyticsPolicy(context);
 };

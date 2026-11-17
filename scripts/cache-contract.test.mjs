@@ -20,9 +20,13 @@
 // What the model cannot see fails instead of passing silently: env-dependent handlers,
 // handlers that cannot run here, ambiguous routes, invalid `_headers` lines, URL
 // placeholders in freshness headers, a missing 404.html, an advanced-mode _worker.js.
+// Since 2026-11-16 the root middleware answers differently by `request.cf.country`
+// (GA4 is not loaded for EEA / UK / Switzerland or an unknown country; see
+// functions/lib/ga-geo.js), so every request shape is also tried for each of VISITORS.
 // Known limits (see docs/perf/cache-contract-20261112.md): behaviour that depends on
-// time, cookies or randomness, and HTML produced by route Functions written in
-// TypeScript/JSX, which this check cannot execute.
+// time, cookies or randomness, `request.cf` fields other than the ones in VISITORS, and
+// HTML produced by route Functions written in TypeScript/JSX, which this check cannot
+// execute.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -51,6 +55,16 @@ const HOME_ROOTS = ['/', '/en/'];
 const DOCUMENT_MAX_AGE = 3600;
 const SKIP_DIRS = new Set(['.git', 'node_modules']);
 const PROBE = 'cache-contract-probe';
+// `request.cf` of the visitor. The root middleware strips GA4 and the request's
+// validators for EEA / UK / Switzerland and for an unknown country (no cf), and passes
+// the rest through. Each branch must keep the contract, and a check that only ever ran
+// one branch would miss a policy that only the other reaches (a 304 seen only when the
+// validators are forwarded, for example).
+const VISITORS = [
+  ['no cf', undefined],
+  ['JP', { country: 'JP' }],
+  ['FR', { country: 'FR', isEUCountry: '1' }],
+];
 const NAVIGATION = {
   accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
   'sec-fetch-mode': 'navigate', 'sec-fetch-dest': 'document', 'sec-fetch-site': 'none', 'sec-fetch-user': '?1',
@@ -203,10 +217,10 @@ const requestsFor = doc => [
   ['conditional', new Request(ORIGIN + doc, { headers: { ...NAVIGATION, 'if-none-match': etagFor(doc) } })],
 ];
 
-async function serveThroughFunctions(routes, assets, request) {
+async function serveThroughFunctions(routes, assets, request, cf) {
   const reads = new Set();
   const chain = handlerChain(routes, request.method, new URL(request.url).pathname);
-  const response = await runChain(chain, request, { assets, env: envFor(assets, reads) });
+  const response = await runChain(chain, request, { assets, env: envFor(assets, reads), cf });
   return { response, reads };
 }
 
@@ -216,14 +230,16 @@ export async function documentProblems({ compiled, routes, documents }) {
   const assets = assetServer(compiled);
   await withRuntimeStubs(async () => {
     for (const doc of documents) {
-      for (const [variant, request] of requestsFor(doc)) {
-        const where = `${doc} [${variant}]`;
-        try {
-          const { response, reads } = await serveThroughFunctions(routes, assets, request);
-          if (reads.size) problems.push(`${where}: a Function read env ${[...reads].join(', ')}; its production value is unknown here, so declare how it is checked first`);
-          problems.push(...responseProblems(where, doc, response));
-        } catch (e) {
-          problems.push(`${where}: ${e.message}`);
+      for (const [visitor, cf] of VISITORS) {
+        for (const [variant, request] of requestsFor(doc)) {
+          const where = `${doc} [${variant}, ${visitor}]`;
+          try {
+            const { response, reads } = await serveThroughFunctions(routes, assets, request, cf);
+            if (reads.size) problems.push(`${where}: a Function read env ${[...reads].join(', ')}; its production value is unknown here, so declare how it is checked first`);
+            problems.push(...responseProblems(where, doc, response));
+          } catch (e) {
+            problems.push(`${where}: ${e.message}`);
+          }
         }
       }
       // _routes.json exclusions and Functions fail-open serve _headers alone.
@@ -244,12 +260,14 @@ export async function routeProblems({ compiled, routes }) {
       if (!route.module.length || (route.method && !['GET', 'HEAD'].includes(route.method))) continue;
       if (!route.module.every(ref => ref.runnable)) continue; // cannot run here; covered when it answers a document
       const probe = instantiate(route.routePath) || '/';
-      const where = `${probe} [route ${route.module.map(ref => ref.file).join(', ')}]`;
-      try {
-        const { response } = await serveThroughFunctions(routes, assets, new Request(ORIGIN + probe, { headers: NAVIGATION }));
-        if ((response.headers.get('content-type') || '').toLowerCase().startsWith('text/html')) problems.push(...responseProblems(where, probe, response));
-      } catch (e) {
-        problems.push(`${where}: could not be evaluated (${e.message})`);
+      for (const [visitor, cf] of VISITORS) {
+        const where = `${probe} [route ${route.module.map(ref => ref.file).join(', ')}, ${visitor}]`;
+        try {
+          const { response } = await serveThroughFunctions(routes, assets, new Request(ORIGIN + probe, { headers: NAVIGATION }), cf);
+          if ((response.headers.get('content-type') || '').toLowerCase().startsWith('text/html')) problems.push(...responseProblems(where, probe, response));
+        } catch (e) {
+          problems.push(`${where}: could not be evaluated (${e.message})`);
+        }
       }
     }
   });
@@ -275,7 +293,7 @@ export async function evaluate(root) {
 const repository = await evaluate(ROOT);
 
 test('the repository satisfies the cache contract', t => {
-  t.diagnostic(`${repository.documents.length} documents x 7 request shapes, ${repository.routes.length} Function routes`);
+  t.diagnostic(`${repository.documents.length} documents x (5 request shapes x ${VISITORS.length} visitor locations + 2 static-only), ${repository.routes.length} Function routes`);
   assert.ok(repository.documents.length > 100, `only ${repository.documents.length} documents found`);
   for (const root of HOME_ROOTS) assert.ok(repository.documents.includes(root), root);
   assert.ok(repository.routes.some(r => r.routePath === '/' && r.middleware.length), 'the root middleware is modelled');
@@ -363,6 +381,9 @@ test('gate self-test: every bypass found in review is blocked', async t => {
     'a language-wide immutable rule': ({ append }) => append('_headers', `\n/en/*\n  ! Cache-Control\n  Cache-Control: public, max-age=31536000, immutable\n`),
     'a TypeScript middleware on documents': ({ write }) => write('functions/en/_middleware.ts', `export const onRequest = async (ctx: any) => ctx.next();\n`),
     'an advanced-mode _worker.js': ({ write }) => write('_worker.js', `export default { fetch: () => new Response('<!doctype html>', { headers: { 'content-type': 'text/html', 'cache-control': 'public, max-age=86400' } }) };\n`),
+    // 2026-11-16: the root middleware branches on request.cf.country (GA4), so the
+    // model runs every shape for each of VISITORS. A policy one country reaches.
+    'a long policy for visitors from one country only': ({ write }) => write('functions/blog/_middleware.js', `export const onRequest = async ctx => { const res = await ctx.next(); if (ctx.request.cf?.country !== 'JP') return res; const out = new Response(res.body, res); out.headers.set('Cache-Control', 'public, max-age=86400'); return out; };\n`),
   };
   for (const [name, mutate] of Object.entries(blocked)) {
     const problems = await scenario(mutate);
