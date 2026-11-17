@@ -1556,6 +1556,12 @@
       "expr": "value",
       "disposition": "前提",
       "note": "2026-10-20: plainData の型の振り分け。JSON の null は値として正当なので plain とする。meta そのものが null・配列・非オブジェクトの場合は buildDigest が plainData より前の assert で落とすので、null の meta が「plain」として通ることは無い（--selftest で null・配列・文字列の meta を拒否することを確認）。"
+    },
+    {
+      "file": "scripts/ga4-consent-region.test.mjs",
+      "expr": "cf",
+      "disposition": "検体の生成",
+      "note": "2026-11-16（EU 監査 E34）: テストの fixture。72行目（判定の単体テスト）と199行目（_middleware.js を端から端まで通すテスト）の visit(…, cf) は、cf を渡した検体だけ request.cf を Object.defineProperty で付け、undefined のときは付けない。これで「request.cf が無いリクエスト」（cf を持たない実行環境）の検体を作る。null・{}・国コードの無い cf・未知の国コードは別の検体として渡している。判定ではない。cf が無い検体で assert が消える経路も無い: undefined の検体自身が skipsGoogleAnalytics(…) === true（73行目）と、応答から GA4 が消え CSP から GA のホストが外れること（238行目の一覧の undefined）を確かめる。この分岐が無いと「cf の無いリクエストは GA4 を読み込まない（安全側）」の検体が作れない。"
     }
   ]
 }

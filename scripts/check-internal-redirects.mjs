@@ -42,8 +42,7 @@ const ORIGIN = "https://simplememofast.com";
 const require = createRequire(import.meta.url);
 const { collectHtmlFiles } = require("./lib/site-files");
 
-// data: URL 経由でロードする理由は lib/edge-middleware.mjs 参照
-// （package.json が無いので .js の bare import は CJS 扱いになる）。
+// ロードのしかた（ファイルの URL で import する理由）は lib/edge-middleware.mjs 参照。
 const onRequest = await loadEdgeMiddleware(ROOT);
 
 /** What the edge would do with this path, before static assets are consulted. */

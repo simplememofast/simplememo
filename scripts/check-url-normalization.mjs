@@ -29,8 +29,7 @@ const ORIGIN = "https://simplememofast.com";
 // HOST_ALIASES). Previews live on `<hash>.` / `<branch>.` subdomains of it.
 const PAGES_ALIAS = "https://simplememo-596.pages.dev";
 
-// data: URL 経由でロードする理由は lib/edge-middleware.mjs 参照
-// （package.json が無いので .js の bare import は CJS 扱いになる）。
+// ロードのしかた（ファイルの URL で import する理由）は lib/edge-middleware.mjs 参照。
 const onRequest = await loadEdgeMiddleware(ROOT);
 
 async function run(urlPath) {
