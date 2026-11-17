@@ -233,7 +233,7 @@ function summarize(pages) {
 }
 
 /** Pure aggregation over supplied public HTML bytes; no file/network/provider access. */
-export function buildRouteInventory({ pages, urls = [], trackerSource = null, ...options }) {
+export function buildRouteInventory({ pages, urls = [], trackerSource = null, pilotState = null, ...options }) {
   const keys = new Set(urls.flatMap(value => {
     try {
       const url = new URL(value);
@@ -254,6 +254,14 @@ export function buildRouteInventory({ pages, urls = [], trackerSource = null, ..
   const exact = pilot.length === 9 && PILOT_FILES.every(file => pilot.filter(p => p.file === file
     && p.placement === 'hero' && p.app_route === 'onelink' && p.app_scope === 'pilot'
     && p.variant === 'onelink_v1' && p.cluster === 'obsidian' && p.tracker_script).length === 1);
+  // growth/onelink-pilot.json state rolled_back (#2381): the nine pages exist and no anchor carries the
+  // pilot link, a modified pilot link or the pilot label. A missing page or manifest is never rolled_back.
+  const rolledBack = pilotState === 'rolled_back';
+  const pilotLeft = inspected.some(page => page.placements.some(p => p.route === 'onelink_pilot'
+    || p.app_scope === 'pilot' || p.reason === 'reserved_pilot_url_modified'));
+  const pilotStatus = rolledBack
+    ? (!pilotLeft && PILOT_FILES.every(file => files.has(file)) ? 'rolled_back' : 'source_differs_from_rolled_back_contract')
+    : exact ? 'source_matches_nine_hero_contract' : 'source_differs_from_nine_hero_contract';
   return { schema_version: 1, evidence_kind: 'source_declared', live_verified: false, traffic_coverage: null,
     offline_runtime_evaluation: { tracker_source_sha256: trackerSource === null ? null
       : createHash('sha256').update(trackerSource).digest('hex'), browser_executed: false,
@@ -264,9 +272,10 @@ export function buildRouteInventory({ pages, urls = [], trackerSource = null, ..
       qr: 'Local qr-* image references only; payloads are not decoded.',
       direct_apple: 'Source href count, including links eligible for runtime OneLink conversion; not an unsupported-link count.',
       runtime_eligible: 'Actual local tracker applied to detached anchor mocks on an opted-in page; no navigation or events.',
-      sitewide_campaigns: options.sitewideCampaigns ?? [SITEWIDE_CAMPAIGN] },
+      sitewide_campaigns: options.sitewideCampaigns ?? [SITEWIDE_CAMPAIGN],
+      pilot_state: 'declared_state is growth/onelink-pilot.json state as read by the CLI (null when not supplied); state compares the source with it.' },
     public_source: summarize(inspected), sitemap_listed: summarize(inspected.filter(p => p.sitemap_listed)),
-    pilot: { expected_placements: 9, state: exact ? 'source_matches_nine_hero_contract' : 'source_differs_from_nine_hero_contract', placements: pilot },
+    pilot: { declared_state: pilotState, expected_placements: rolledBack ? 0 : 9, state: pilotStatus, placements: pilot },
     excluded_from_anchor_expansion: ['smart_app_banner', 'qr_image', 'universal_link', 'localized_app_utility', 'web_app', 'custom_app_scheme', 'app_link_placeholder'],
     limitations: ['No published-page, exposure, traffic, install or first-launch coverage is inferred.',
       'Native Safari banner taps and QR scans do not become page anchor click events.',
@@ -306,7 +315,10 @@ export function main(args = process.argv.slice(2)) {
   });
   const trackerFile = path.join(root, 'js', 'app-store-tracking.js');
   const trackerSource = fs.existsSync(trackerFile) ? readSource(trackerFile, root) : null;
-  const result = buildRouteInventory({ pages, urls, trackerSource });
+  const manifestFile = path.join(root, 'growth', 'onelink-pilot.json');
+  const manifest = fs.existsSync(manifestFile) ? JSON.parse(readSource(manifestFile, root)) : null;
+  const pilotState = typeof manifest?.state === 'string' ? manifest.state : null;
+  const result = buildRouteInventory({ pages, urls, trackerSource, pilotState });
   result.generated_at = new Date().toISOString(); result.source_kind = 'local_public_source_files';
   result.snapshot_atomic = false;
   if (summaryOnly) delete result.pages;

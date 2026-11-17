@@ -189,11 +189,16 @@ describes the private, descriptive view built on these sources.
   Chrome and other non-Safari browsers under that browser as an app referrer,
   not under the site's web referrer
   ([Apple](https://developer.apple.com/help/app-store-connect-analytics/acquisition/acquisition/)).
-- An AppsFlyer install counts as site acquisition only when it arrives through
+- An AppsFlyer install counted as site acquisition only when it arrived through
   the owned-web OneLink pilot link (`owned_web` + `obsidian_bridge_pilot_v1`).
-  Only the nine Obsidian hub hero buttons carry it
+  Only the nine Obsidian hub hero buttons carried it, from 2026-10-15
   ([PR #1047](https://github.com/simplememofast/simplememo/pull/1047),
-  [pilot handoff](ONELINK_PILOT.md)); installs from the site's other plain App
+  [pilot handoff](ONELINK_PILOT.md)) until
+  [#2381](https://github.com/simplememofast/simplememo/pull/2381) (decided
+  2026-11-17) put them back on direct App Store links
+  (`growth/onelink-pilot.json` state `rolled_back`). From then on no site link
+  carries it. The boundary is that PR's production deployment, recorded in
+  `measurement_changes` after readback. Installs from the site's plain App
   Store links are normally reported as Organic, mixed with every other
   unattributed install.
 - `node scripts/company-os.mjs acquisition-status` lays these sources side by

@@ -40,6 +40,9 @@
   `en-2026-08-11-native-rewrite`・`title-2026-11-11-second-brain-term`）の notes に、明示依頼による変更として書いた。
   実験の効果として数えない。
 - 日本語トップの検査（`scripts/perf/build_home.py`）は、計測スクリプトに opt-in が無いことを求めるようにした。
+- `scripts/site-route-inventory.mjs` は `growth/onelink-pilot.json` の `state` を読む。
+  `rolled_back` で、9ページがそろい、pilot のリンクも目印も無ければ `pilot.state` は `rolled_back`。
+  それ以外は `source_differs_from_rolled_back_contract`。
 
 ### まだ残っていること
 
@@ -48,6 +51,8 @@
   `growth/lib/onelink-pilot.test.mjs`（QA の分類を読む）も直す。別の変更にする。
 - **プライバシーポリシー §13（C）の AppsFlyer OneLink の説明。** サイトのボタンはもう AppsFlyer を通らないが、
   文はまだ「一部のボタンは AppsFlyer のリンクを経由する」と書いている（10言語）。直すかどうかはオーナーが決める。
+  このPRは §13 を変えていない。マージしても、この文（例に挙げた冒頭ボタンを含む）は正しくならない。
+  同じ §13（C）は、下書きの #2373（ポリシーの見直し）も書き換えている。直すなら、そちらと合わせる。
 - **この変更の記録。** `measurement_changes` と `growth/data/annotations.json` にはまだ書いていない。
   下の「この変更の記録（本番反映の後）」のとおり、本番反映を読み戻してから足す。
 
