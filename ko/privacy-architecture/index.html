@@ -244,7 +244,7 @@
         <h1 class="lp-hero__title"> <span>메모 본문은 어디를 통과하고, <br> 어디에 남지 않는지</span> </h1>
 <p class="machine-translation-note" data-machine-translation-note="" style="font-size:.85rem;opacity:.8;margin:.25rem 0 1rem">이 페이지는 일본어 원문을 기계 번역한 것입니다. <a href="/privacy-architecture/" hreflang="ja">일본어 원문 보기</a></p>
 
-        <p class="lp-hero__sub"> <span>「로컬 Vault에 쓰는 도구인데, 외부 서버를 통과하나요？」——Obsidian 사용자들로부터 가장 많이 받는 질문에 경로도로 답변하는 페이지입니다. 가능한 것(Vault 추가의 로컬 완결·온디바이스 AI·서버 비저장)과 수행되지 않은 것(E2EE가 아님)을 동일한 해상도로 작성합니다. </span> </p>
+        <p class="lp-hero__sub"> <span>“로컬 Vault에 쓰는데 왜 서버가 필요한가요?” Obsidian 사용자들이 자주 묻는 이 질문에 데이터 흐름도로 답합니다. Vault에 내용을 추가하는 작업과 AI 처리는 기기에서 이루어집니다. 메모 본문을 당사 중계 서버에 저장하지 않는 방식과 이메일 전송에서 E2EE가 지원되지 않는 이유도 설명합니다.</span> </p>
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>저자: <a href="/ko/about/" style="color:var(--accent);text-decoration:none;">SimpleMemo Developer</a> · 공개일: <time datetime="2026-08-11">2026년 08월 11일</time> · 분석 조건 확인: <time datetime="2026-09-30">2026년 09월 30일</time></span> </p>
       </div><nav class="sd-hero-index" aria-label="이 페이지의 내용"><p>이 페이지의 내용</p><a href="#reading-01"><span aria-hidden="true">01</span><span>메모1통의 데이터 통로</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>서버에 남는 것·남지 않는 것</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>메모 본문의 보호 및 활용 분석</span><span aria-hidden="true">↗</span></a></nav></div>
 
@@ -255,7 +255,7 @@
           <li><span class="flow-step__title">단말기 내에서 생성 — AES-GCM-256로 보호</span> 작성한 메모는 먼저 단말기 내부의 Outbox(미전송 큐)에 들어갑니다. Outbox와 전송 기록은 Apple 순정 CryptoKit에 의해 <strong>AES-GCM-256</strong>으로 암호화되며, 256-bit 대칭 키는 Apple Keychain에 보관됩니다. 키는 다른 단말기로 이전되지 않도록 설정되어 있으며, 앱이 암호화·복호화할 때 읽어냅니다. 백업에 포함된 키 복사본도 다른 기기에서는 사용할 수 없습니다. 기종 변경 전에 필요한 메모가 저장 위치에 도착했는지 확인해 주세요. <a href="/ko/privacy">키 관리의 상세 내용과 Apple에 대한 설명</a>. 오프라인인 경우 여기에서 대기하고, 회선이 복구된 후 자동으로 재송부됩니다.</li>
           <li><span class="flow-step__title">Obsidian Vault에 대한 추가 기록 — 여기서는 완전 로컬</span>Obsidian 연동을 활성화한 경우, Vault에 대한 추가는 <strong>단말기 내 Vault 폴더에 파일을 직접 쓰기</strong>(열 수 없을 경우 URI 폴백)으로 수행되며, 플러그인도 외부 서버도 사용하지 않습니다. Vault 추가 경로에 네트워크가 등장하지 않습니다.</li>
           <li><span class="flow-step__title">AI 태그 지정 — 온 디바이스에서 완결</span>제목(20자 이내)·태그(1〜3개)·종류(todo/idea/log)의 자동 부여는 <strong>Apple Foundation Models에 의한 디바이스 온 디바이스 AI</strong>가 iPhone 내부에서만 수행됩니다. <strong>태깅을 위해 메모 본문이 외부 서버로 전송되지 않습니다. </strong>Apple Intelligence 비지원 기종은 단말기 내 경량 포맷에 자동으로 폴백합니다.</li>
-          <li><span class="flow-step__title">메일 전송 — TLS으로 통과, 영구 저장 없음</span>전송 시에만 본문은 TLS(HTTPS)으로 당사의 릴레이 API(Cloudflare Workers)와 외부 전송 기반(Resend)을 <strong>통과</strong>합니다. 지속적인 저장은 하지 않으며, 로그에도 기록하지 않습니다. 클라이언트는 <code>URLSessionConfiguration.ephemeral</code>을 사용하며, 쿠키·캐시를 남기지 않습니다.</li>
+          <li><span class="flow-step__title">이메일 전송 중계 및 보관</span>메일을 보낼 때만 메모 본문이 TLS(HTTPS) 연결을 통해 당사의 중계 API(Cloudflare Workers)와 메일 서비스 제공업체(Resend)를 <strong>거칩니다</strong>. 당사의 운영 중계 서버는 메모 본문을 저장하거나 로그에 기록하지 않습니다. Resend는 발송 메일을 보관합니다. 공개된 표준 요금제의 보관 기간은 30일이며 당사 계정에 적용되는 기간은 확인 중입니다. 앱은 <code>URLSessionConfiguration.ephemeral</code>을 사용하며 쿠키나 캐시를 남기지 않습니다.</li>
           <li><span class="flow-step__title">자신의 받은 편지함으로 — 표준 SMTP으로 배달(=E2EE가 아닙니다)</span>최종 배달은 표준 SMTP입니다. 그렇기 때문에 평소 메일 앱에서 그대로 읽을 수 있지만, <strong>엔드투엔드 암호화(E2EE)가 아닙니다</strong>. 이 설계 판단에 대해서는 아래의 “정직하게 작성해 두는 것”을 참고하십시오.</li>
         </ol>
       </div></section>
@@ -267,12 +267,13 @@
           <table class="compare-table">
             <thead><tr><th scope="col">데이터</th><th scope="col">어디에</th><th scope="col">남을까요</th></tr></thead>
             <tbody>
-              <tr><th scope="row">메모 본문</th><td>당사 서버(Relay/전송 기반)</td><td class="yes">남지 않음(전송 시 통과만·로그 비기록)</td></tr>
+              <tr><th scope="row">메모 본문</th><td>당사의 운영 중계 서버</td><td class="yes">남지 않음(전송 시 통과만·로그 비기록)</td></tr>
+              <tr><th scope="row">메모 본문</th><td>Resend</td><td>공개된 표준 요금제의 보관 기간은 30일입니다. 당사 계정에 적용되는 기간은 확인 중입니다.</td></tr>
               <tr><th scope="row">메모 본문</th><td>귀하의 메일 수신함</td><td>남다(그것이 목적입니다)</td></tr>
               <tr><th scope="row">메모 본문</th><td>귀하의 Obsidian Vault(설정 시)</td><td>남는(단말기 내 로컬)</td></tr>
               <tr><th scope="row">Outbox·전송 기록</th><td>단말기 내에서만</td><td>AES-GCM-256로 암호화 저장</td></tr>
-              <tr><th scope="row">이메일 주소</th><td>Cloudflare D1</td><td class="yes">전송 ID와 대상 해시의 대응을 저장합니다. 리마인더의 옵트인과는 별도로 기록하고, 35일을 초과한 것을 정기적으로 삭제합니다</td></tr>
-              <tr><th scope="row">이용 이벤트·단말기 식별자·진단 정보</th><td>Cloudflare D1</td><td>90일을 초과한 항목을 정기적으로 삭제합니다. 전송 ID를 통해 대상 해시와 연동 가능</td></tr>
+              <tr><th scope="row">전송 ID와 수신 주소 해시</th><td>Cloudflare D1</td><td class="yes">리마인더 설정과 관계없이 전송 ID와 수신 주소 해시의 대응 관계를 저장합니다. 35일이 지난 기록은 정기적으로 삭제합니다.</td></tr>
+              <tr><th scope="row">당사의 사용 이벤트 및 구독 상태 분석 데이터(기기 식별자 포함)</th><td>Cloudflare D1</td><td>2026년 11월 18일 업데이트 이후 당사 서버는 5.9.32까지 출시된 앱 버전에서 받은 이 두 종류의 데이터를 개별적으로 저장하지 않습니다. 업데이트 전에 저장한 기록은 수신 후 90일이 지나면 정기적으로 삭제합니다. 전송 ID가 있는 사용 이벤트는 그 ID를 통해 수신 주소의 해시와 연결할 수 있습니다. 그 밖의 진단 정보 보관 기간은 <a href="/ko/privacy#reading-09">개인정보 처리방침 제9절</a>을 참조하세요.</td></tr>
               <tr><th scope="row">AI 태그 지정 입력(본문)</th><td>외부 서버</td><td class="yes">전송되지 않습니다(온디바이스 처리)</td></tr>
             </tbody>
           </table>
@@ -283,7 +284,7 @@
       <section class="lp-section ce-chapter sd-chapter">
         <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"> <span>메모 본문 보호 및 이용 분석</span> </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead"> <span>iOS 앱 내에서는 메모 본문 암호화에 CryptoKit을, 키 보관에 Keychain을, 본문 전송에 URLSession을 사용합니다. GoogleSignIn와 Firebase Authentication은 임의의 메일 자동 입력에 사용하고, Firebase App Check는 백엔드 API의 보호에 사용합니다. <strong>자사의 이용 분석과 AppsFlyer는 앱 버전과 분석 선택에 따라 다르게 취급됩니다. </strong></span> </p>
-          <p class="lp-section__lead"> <span>설정에 “이용 상황 분석” 선택이 있는 버전에서는 자사 이용 이벤트와 기기에서 오는 구독 상태 분석이 기본적으로 꺼져 있으며, 동의 후에 시작됩니다. 이러한 버전의 AppsFlyer SDK는 별도의 획득 측정 선택이 제공될 때까지 중단됩니다. 선택 화면이 없는 버전도 자사 이용 이벤트와 기기에서 오는 구독 상태 분석을 전송합니다. 9월 28일부터 적용했던, 이전 방식의 요청을 저장하지 않는 서버 측 제한을 폐지하며, 수집하지 못한 과거 이벤트를 소급해 복원하지 않습니다. AppsFlyer의 획득·이용 측정 조건은 개인정보 처리방침을 확인해 주세요.</span> <span> 유효한 동의가 있는 대응 버전의 자체 분석은 설치·세션 식별자 및 이용 이벤트, 전송 결과 등을 처리합니다.  구버전 AppsFlyer에는 최초 메모 전송 성공, 인증 성공, 과금 화면 표시, 플랜 선택, 구매 성공을 전송하고, 동일한 설치 식별자를 Customer User ID로 설정합니다. 앱에서 설정하는 이벤트 항목에 이메일 주소·메모 본문·인증 코드는 직접 포함하지 않지만, 당사 전송 ID는 수신 해시와 연동되며, 획득 정보와 이용 기록도 연계됩니다. 완전히 익명인 분석이 아닙니다. 동의 철회 및 버전에 따른 조건은 <a href="/ko/privacy">정책 1(E)</a>이며, 항목의 자세한 내용은 <a href="/ko/privacy#technical">개인정보 처리방침</a>을 참조하십시오. </span> </p>
+          <p class="lp-section__lead"> <span>2026년 11월 18일 업데이트 이후 당사 서버는 출시된 앱 버전(5.9.32까지)이 보내는 자체 이용 이벤트와 구독 상태 분석을 저장하지 않습니다. 기기가 보내는 정보와 AppsFlyer 측정 방식은 앱 버전과 이전 선택에 따라 다릅니다.</span> <span>표에 나온 전송 ID 대응 기록 외에도 이전 인증 기록과 리마인더 연락처에 읽을 수 있는 형태의 주소가 남아 있을 수 있습니다. 분석 선택지는 <a href="/ko/privacy">정책 1(E)</a>, 저장 위치와 기간은 <a href="/ko/privacy#technical">개인정보 처리방침</a>에서 확인하세요.</span> </p>
       </div></section>
 
       <!-- Honest limitations -->
@@ -292,7 +293,7 @@
         <div class="honest-box">
           <p style="margin-bottom:.75rem;"><strong>SimpleMemo는 엔드투엔드 암호화(E2EE)가 아닙니다. </strong>메일 본문은 표준 SMTP로 귀하의 수신함으로 전달됩니다.「 일상적인 메일 앱에서 그대로 읽을 수 있는 것과 경로의 말단까지 암호키를 자신만 보유하는 것은 양립할 수 없으므로 전자를 선택한 설계입니다.</p>
           <p style="margin-bottom:.75rem;">단말기 내 Outbox 및 전송 기록은 AES-GCM-256로 암호화하고 있지만, 이는 <strong>단말 내부 보호</strong>이며, E2EE를 대신할 수 없습니다（<a href="/ko/glossary/e2e-encryption/" style="color:var(--accent);">E2EE가 무엇인지·왜 본 앱이 해당되지 않는지</a>).</p>
-          <p>기밀성이 최우선이며 E2EE가 필수인 분께는 Standard Notes과 같은 E2EE 설계의 노트 앱이 더 적합합니다. 이를 명시한 뒤, “본문을 서버에 남기지 않음”, “태깅을 단말기 내에서 완료하기”, “Vault 추가를 로컬에서 수행”이 본 앱의 방어 범위입니다.</p>
+          <p>기밀성이 최우선이고 E2EE가 꼭 필요하다면 Standard Notes처럼 E2EE를 지원하도록 설계된 메모 앱이 더 적합합니다. 당사의 중계 서버는 메모 본문을 저장하지 않습니다. 태그 생성과 Vault에 내용 추가는 기기에서 이루어집니다.</p>
         </div>
       </div></section>
 
@@ -313,7 +314,7 @@
           <span>통로를 확인한 후에 시도하십시오</span>
         </div>
         <div class="cta-box__desc">
-          <span>무료 3통/일. Vault 추가는 로컬이며, 본문은 서버에 남지 않습니다.</span>
+          <span>하루 3회 무료로 보낼 수 있습니다. Vault에 내용 추가는 기기에서 이루어지며, 당사의 중계 서버는 메모 본문을 저장하지 않습니다.</span>
         </div>
         <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="App Store에서 다운로드"> <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="App Store에서 다운로드" loading="lazy"> </a>
       </div>

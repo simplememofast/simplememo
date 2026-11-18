@@ -294,7 +294,7 @@
       <div class="lang-body">
         <p class="page-content__date">Última atualização: <time datetime="2026-11-18">18/11/2026</time></p>
         <div class="page-content__body">
-          <p>YURIKA, K.K. (doravante referida como "a Empresa") estabelece a seguinte política de privacidade em relação ao manuseio de informações do usuário em "SimpleMemo" (doravante denominada "o Serviço").</p>
+          <p>A YURIKA, K.K., empresa constituída no Japão (doravante “nós”), explica nesta política como tratamos informações pessoais no app para iOS “SimpleMemo de voz integrado ao Obsidian” (em alguns países e regiões, a App Store o exibe como “Simple Memo - Obsidian Voice”) e no nosso site simplememofast.com (em conjunto, o “Serviço”). Nosso endereço e nossos dados de contato estão na seção 11.</p>
 
           <h2 id="reading-01">1. Informações coletadas</h2>
           <p>Nós podemos obter as seguintes informações.</p>
@@ -303,42 +303,107 @@
           <ul>
             <li>Endereço de e-mail do destinatário (To)</li>
             <li>Configurações de assunto (Subject) e assinatura (Signature)</li>
-            <li>Corpo do memorando (o escopo necessário para enviar e-mails)</li>
+            <li>Texto da nota (na medida necessária para entregá-la ao destino que você escolher)</li>
+            <li>Se você conectar o Notion: a autorização para que nosso servidor crie páginas no espaço de trabalho do Notion que você escolher (veja (I) abaixo)</li>
+            <li>Se você usar o formulário de contato, o e-mail ou a pesquisa do roteiro: o que você escrever e os dados de contato que informar (veja a seção 14)</li>
           </ul>
 
           <h3>(B) Informações sobre o dispositivo e o uso</h3>
           <ul>
-            <li>Informações gerais do dispositivo, como sistema operacional e tipo de aparelho</li>
-            <li>Logs necessários para processamento de transmissão (data e hora de envio, status do resultado, etc.)</li>
+            <li>Informações do dispositivo (informações gerais, como sistema operacional e tipo de dispositivo)</li>
+            <li>Registros necessários para processar os envios (data e hora do envio, status do resultado etc.)</li>
             <li>Informações de diagnóstico, como eventos de uso (exibição de tela, operação, resultados de transmissão), identificadores aleatórios por terminal, ID de sessão, ID de transmissão e status de conclusão de inicialização</li>
-            <li>Informações técnicas para prevenir uso indevido e limitar a frequência das solicitações, como endereço IP e dados das solicitações</li>
+            <li>Endereço IP e informações da solicitação. Nosso servidor os recebe a cada comunicação, e nosso provedor de hospedagem os registra nos logs do servidor para segurança, prevenção de abusos, limitação de taxa e investigação de falhas (veja (J) abaixo).</li>
           </ul>
 
           <p>O evento de uso não inclui um endereço de e-mail ou o corpo do memorando, mas está vinculado ao hash do endereço de e-mail de destino do registro de transmissão através do ID de transmissão. Por esse motivo, esses eventos, identificadores de terminal e informações de diagnóstico são tratados como informações que podem ser vinculadas aos usuários. O local de armazenamento do identificador do terminal e o manuseio após a exclusão do aplicativo estão descritos em 12 abaixo.</p>
 
           <h3>(C) Notificações de assinatura e reembolso recebidas de Apple</h3>
-          <p>Para acompanhar o funcionamento das assinaturas e as falhas de pagamento, verificamos as notificações assinadas recebidas da Apple e registramos início, renovação, mudanças na renovação automática, falhas de renovação, vencimento, reembolso e outros eventos. Armazenamos os identificadores de notificações, transações e produtos de assinatura; os tipos e categorias de notificação; a indicação de ambiente de produção ou teste; datas e horários de compra, vencimento, cancelamento, notificação, recebimento e eventos relacionados; e os motivos de cancelamento informados pela Apple. Como os registros contêm identificadores da Apple, não os tratamos como informações totalmente anônimas. Esses registros de notificação não armazenam endereços de e-mail, texto de notas ou identificadores de instalação. Também não armazenamos uma tabela que associe os identificadores de transação da Apple a identificadores de instalação ou endereços de e-mail de destinatários. Conforme a seção (D) abaixo, cruzamos as notificações durante o processamento para criar registros de análise separados. Não é possível identificar os registros originais de notificação a partir de um pedido de exclusão baseado apenas no endereço de e-mail.</p>
+          <p>Para acompanhar o funcionamento das assinaturas e as falhas de pagamento, verificamos as notificações assinadas recebidas da Apple e registramos início, renovação, mudanças na renovação automática, falhas de renovação, vencimento, reembolso e outros eventos. Armazenamos os identificadores de notificações, transações e produtos de assinatura; os tipos e categorias de notificação; a indicação de ambiente de produção ou teste; datas e horários de compra, vencimento, cancelamento, notificação, recebimento e eventos relacionados; e os motivos de cancelamento informados pela Apple. Como os registros contêm identificadores da Apple, não os tratamos como informações totalmente anônimas. Esses registros de notificação não armazenam endereços de e-mail, texto de notas ou identificadores de instalação. Também não armazenamos uma tabela que associe os identificadores de transação da Apple a identificadores de instalação ou endereços de e-mail de destinatários. Na análise da seção (D), cruzávamos as notificações para criar registros separados. Desde a atualização de 18 de novembro de 2026, deixamos de fazer esse cruzamento e de criar esses registros para solicitações das versões publicadas do app. Não é possível identificar os registros originais de notificação a partir de um pedido de exclusão baseado apenas no endereço de e-mail.</p>
 
           <h3>(D) Análise do status da assinatura e uso contínuo</h3>
-          <p>Quando essa análise está ativada em uma versão compatível do aplicativo, recebemos do dispositivo informações assinadas de compra e renovação da Apple. Registramos o estado verificado da assinatura com um identificador por dispositivo e o cruzamos com eventos de continuidade de uso. Registramos o produto de assinatura; a indicação de compra própria ou compartilhamento familiar; preço e moeda; datas e horários de compra, vencimento, cancelamento, assinatura digital, observação e recebimento; estado da renovação automática; novas tentativas de cobrança, período de carência e motivo de vencimento; ambiente de produção ou teste; e ambiente de execução do aplicativo. Durante o processamento, usamos o identificador de transação da Apple para cruzar as notificações da seção (C). Também registramos a quantidade por tipo e a data mais recente das notificações confirmadas naquele momento. Não guardamos os identificadores de transação da Apple nem o conteúdo original das informações assinadas junto com esses registros de análise. Eles também não incluem endereços de e-mail ou texto de notas. Como identificadores de dispositivo, produtos, datas e preços podem ser associados às informações de uso, não os tratamos como dados anônimos.</p>
-          <p>Excluímos periodicamente esses registros de análise quando passam de 90 dias desde o recebimento. A exclusão solicitada por uma versão compatível do aplicativo remove os registros que correspondem às informações de exclusão mantidas no dispositivo. Não armazenamos novamente dados já excluídos caso sejam reenviados com atraso. Essa operação não exclui em conjunto as notificações originais da Apple descritas em (C), registros de outros dispositivos ou registros de serviços externos de análise. Em certas situações, como a perda das informações de exclusão guardadas no dispositivo, pode não ser possível identificar os registros correspondentes.</p>
+          <p>Desde a atualização de 18 de novembro de 2026, nosso servidor descarta essas informações de análise sem armazená-las (o motivo está em (E)). Esta seção descreve o que o app envia e como tratamos as informações recebidas antes dessa atualização.</p>
+          <p>Quando essa análise está ativada no app, recebemos pelo dispositivo as informações de compra e renovação assinadas pela Apple, as verificamos, registramos o status da assinatura com um identificador por dispositivo e o comparamos com os eventos de uso contínuo. Os campos registrados são: o produto da assinatura, se a compra é própria ou compartilhada com a família, o preço e a moeda, datas e horários como compra, vencimento, revogação, assinatura digital, observação e recebimento, o status da renovação automática, a nova tentativa de cobrança, o período de carência e o motivo do vencimento, se o ambiente é de produção ou de teste, e o ambiente de execução do app. Durante o processamento, usamos os identificadores de transação da Apple para cruzar as notificações descritas em (C) e registramos também a quantidade de notificações por tipo e a data e hora mais recentes que constavam naquele momento. Não armazenamos os identificadores de transação da Apple nem o texto original das informações assinadas junto com esses registros de análise. Eles também não incluem endereços de e-mail nem texto de notas, mas o identificador do dispositivo, o produto, as datas e o preço podem ser associados às informações de uso, por isso não os tratamos como informações anônimas. A tabela em (E) mostra quais versões enviam essas informações e se você pode escolher.</p>
+          <p>Excluímos periodicamente os registros dessa análise com mais de 90 dias desde o recebimento. A exclusão pelo app apaga os registros de análise correspondentes às informações de exclusão mantidas no dispositivo, e as informações já excluídas não são armazenadas novamente, mesmo que cheguem com atraso. Essa operação não exclui em bloco os registros originais de notificações da Apple descritos em (C), os registros de outros dispositivos nem os registros de serviços de análise externos. Talvez não consigamos identificar os registros afetados, por exemplo, se as informações de exclusão do dispositivo tiverem sido perdidas.</p>
 
-          <h3>(E) Seleção da análise de status de uso na versão compatível do aplicativo</h3>
-          <p>Nas versões do aplicativo que exibem a opção “Análise de uso” nos Ajustes, os eventos normais de uso do aplicativo e a análise do estado da assinatura enviada pelo dispositivo ficam desativados por padrão. A coleta começa quando o usuário escolhe “Concordar e ativar”; se não escolher essa opção, ela não começa. Essa escolha é independente do consentimento para lembretes por e-mail e do ajuste de compartilhamento do App Analytics nos dispositivos Apple. Revogar a escolha no aplicativo interrompe a nova coleta desses dados e tenta excluir os eventos ainda não enviados do dispositivo. Se não for possível confirmar a exclusão, isso será indicado na tela. Eventos criados sob um consentimento anterior não são reenviados após um novo consentimento. Um envio já em andamento pode ser concluído, e a revogação, por si só, não exclui os registros que já recebemos. As medições da ordem das operações e do sucesso ou falha da entrega nos testes internos do Capture também fazem parte dessa finalidade de análise de uso e melhoria da qualidade. Contudo, a participação no teste também exige um consentimento separado que informe seu escopo e período. Essa escolha, sozinha, não inscreve o usuário no teste. Revogá-la também interrompe novas medições do teste. Para excluir registros de teste já armazenados, use o controle de encerramento da participação e exclusão do próprio teste. Nas versões sem essa tela de escolha, os eventos de uso descritos na seção 12 e a análise do estado da assinatura descrita em (D) são enviados como parte do funcionamento do aplicativo. Removemos a restrição do servidor aplicada desde 28/9/2026 que impedia o armazenamento de solicitações pelo método anterior, e aceitamos solicitações de análise tanto pelo método anterior quanto pelas versões com a tela de escolha. Não reconstruímos retroativamente eventos que não foram coletados. Nas versões que mantêm essa tela, o início e a interrupção da coleta seguem os ajustes do aplicativo. A medição de aquisição e uso pelo SDK da AppsFlyer está descrita na seção 12.</p>
-          <p>Essa escolha não constitui consentimento para a medição de aquisição pelo AppsFlyer. Nas versões com a opção “Medição de como você conheceu o aplicativo”, o SDK do AppsFlyer só é iniciado quando há tanto o consentimento separado descrito em (F) quanto a permissão de rastreamento do iPhone. Nas versões com análise de uso, mas sem essa opção separada, o SDK permanece desativado. O tratamento nas versões sem a tela de escolha está descrito na seção 12 abaixo.</p>
+          <h3>(E) Análise de uso e medição da AppsFlyer por versão do app</h3>
+          <p>O que o app envia depende da versão instalada. Você pode ver a versão instalada nos Ajustes do iPhone &gt; Geral &gt; Armazenamento do iPhone, selecionando este app. A versão 5.9.10 não foi publicada na App Store. A tabela a seguir mostra o que o app envia. Se o nosso servidor armazena ou não essas informações está descrito depois da tabela.</p>
+          <div class="sd-table" tabindex="0" role="region" aria-label="Tabela com rolagem horizontal"><table>
+            <thead>
+              <tr><th>Versão do app</th><th>Eventos de uso próprios (seção 12) e análise do status da assinatura ((D))</th><th>AppsFlyer SDK (seção 12)</th><th>Opção no app</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>5.9.9 e anteriores</td><td>Enviados como parte do funcionamento do app (análise do status da assinatura a partir da versão 5.8.53)</td><td>Iniciado ao abrir o app, sem verificar a permissão de rastreamento do iPhone. Nosso identificador de instalação é definido como Customer User ID da AppsFlyer. A partir da versão 4.9.24, eventos no app (incluindo compras) também são enviados</td><td>Nenhum</td></tr>
+              <tr><td>5.9.11〜5.9.14</td><td>Desativado por padrão. Enviados somente se você escolher “Concordar e ativar”</td><td>Não é iniciado</td><td>“Análise de uso” nas Configurações</td></tr>
+              <tr><td>5.9.15</td><td>Igual às versões 5.9.11 a 5.9.14</td><td>Iniciado, com o escopo mais restrito descrito em (F), somente se você ativou “App discovery measurement” (medição de como você conheceu o app) e permitiu o rastreamento no iPhone</td><td>“Análise de uso” e “App discovery measurement” (medição de como você conheceu o app) nas Configurações</td></tr>
+              <tr><td>5.9.16 a 5.9.31 (versões publicadas: 5.9.16, 5.9.17, 5.9.18, 5.9.23, 5.9.24, 5.9.25 e 5.9.27)</td><td>Enviados como parte do funcionamento do app</td><td>Iniciado ao abrir o app, exceto se o rastreamento deste app não estiver permitido ou estiver restrito, ou se você recusou “App discovery measurement” na versão 5.9.15. Nosso identificador de instalação é definido como Customer User ID, e eventos no app (incluindo compras) são enviados</td><td>Nenhum</td></tr>
+              <tr><td>5.9.32 (atual)</td><td>Enviados como parte do funcionamento do app</td><td>Igual às versões 5.9.16 a 5.9.31. Além disso, bloqueia o compartilhamento com todos os parceiros integrados da AppsFlyer, não permite que o SDK leia o identificador de publicidade (IDFA) e desativa a medição do Apple Ads</td><td>Nenhum</td></tr>
+            </tbody>
+          </table></div>
+          <p>Nas versões 5.9.11 a 5.9.15, retirar o consentimento de “Análise de uso” interrompia a nova coleta e tentava excluir os eventos não enviados do dispositivo. A retirada não excluía os registros que já tínhamos recebido.</p>
+          <p>Nas versões 5.9.16 a 5.9.32, não há ajuste no app para desativar o envio de eventos de uso e dados de análise do status da assinatura para nós. Desde a atualização de 18 de novembro de 2026, nosso servidor descarta os dois tipos de dados recebidos dessas versões e só conta quantos registros descarta por dia. A AppsFlyer não é iniciada se o iOS indicar que o rastreamento está desautorizado ou restrito para este app. Em uma versão futura, planejamos pedir seu consentimento antes de iniciar nossa análise de uso em qualquer região.</p>
+          <p>De 28 de setembro de 2026 a 7 de outubro, nosso servidor descartou, sem armazenar, os eventos de uso e a análise do status da assinatura enviados por versões sem tela de escolha. De 7 de outubro de 2026 até a atualização de 18 de novembro, ele aceitou esses dados de todas as versões. Os eventos descartados não são reconstituídos.</p>
+          <p>Em um teste interno do Capture, medimos a ordem das ações e o sucesso ou a falha das entregas, com um consentimento de participação separado que indicava o objeto e a duração. Esse teste não é realizado desde a versão 5.9.10.</p>
+          <p>Desde a atualização de 18 de novembro de 2026, nosso servidor só armazena as solicitações que trazem uma nova marca indicando a concordância com a análise de uso. Nenhuma versão publicada atualmente (incluindo a 5.9.32) adiciona essa marca. Por isso, nosso servidor descarta, sem armazenar, os eventos de uso, a análise do status da assinatura e as observações do teste Capture mencionado acima, de qualquer versão, e apenas conta quantos descarta por dia. Os eventos de uso e os registros de análise do status da assinatura armazenados antes da atualização são excluídos periodicamente quando passam mais de 90 dias do recebimento.</p>
 
-          <h3>(F) Seleção da medição de aquisição na versão compatível do aplicativo</h3>
-          <p>A opção “Medição de como você conheceu o aplicativo” é facultativa e vem desativada. Quando há tanto consentimento para essa opção quanto permissão de rastreamento do iPhone, enviamos ao AppsFlyer dados de abertura do aplicativo, origem da aquisição, campanha e informações técnicas, como identificador de publicidade, endereço IP, modelo do dispositivo e versões do sistema operacional e do aplicativo, para compreender as aquisições pelos links de download. Usamos identificadores próprios do SDK, mas não passamos o identificador da nossa análise de uso como Customer User ID. Para essa finalidade, não enviamos texto de notas, endereços de e-mail, eventos de compra ou eventos normais de uso do aplicativo. Desativamos o compartilhamento com parceiros de publicidade e a personalização de anúncios. A medição por SKAdNetwork, IDFV e Apple Ads também fica desativada nesse fluxo. Como os dados incluem identificadores, não os tratamos como anônimos.</p>
-          <p>Você pode usar o aplicativo mesmo que não concorde. Se você retirar nas configurações, a nova medição será interrompida e o registro de confirmação da fonte de aquisição no terminal será excluído. Solicitações durante a comunicação podem ser concluídas, e a exclusão de dados já recebidos pelo AppsFlyer e a alteração das configurações de rastreamento do iPhone não estão incluídas nesta operação. É uma opção separada da análise de status de uso, do lembrete de e-mail e das configurações de compartilhamento do Apple App Analytics.</p>
+          <h3>(F) Medição de como você conheceu o app (somente versão 5.9.15)</h3>
+          <p>A “medição de como você conheceu o app” era opcional e vinha desativada por padrão. Somente quando você concordava com essa opção e permitia o rastreamento no iPhone, enviávamos à AppsFlyer as aberturas do app, a origem de aquisição e as informações de campanha, o identificador de publicidade, o endereço IP, o modelo do dispositivo, as versões do sistema operacional e do app e os identificadores próprios do SDK, para entender as aquisições pelos links de download. Por esse caminho, não fornecíamos como Customer User ID o identificador da nossa análise de uso própria, nem enviávamos texto de notas, endereços de e-mail, eventos de compra ou eventos comuns de uso no app. O compartilhamento com parceiros de publicidade e a personalização de anúncios, assim como SKAdNetwork, IDFV e a medição do Apple Ads, ficavam desativados. Como inclui identificadores, não tratamos esses dados como informações anônimas.</p>
+          <p>Era possível usar o app sem concordar. Retirar o consentimento nas Configurações interrompia a nova medição e excluía os registros de verificação da origem de aquisição armazenados no dispositivo. Uma solicitação em andamento podia ser concluída, e essa operação não excluía os dados já recebidos pela AppsFlyer nem alterava a configuração de rastreamento do iPhone. Era uma escolha independente do consentimento à análise de uso, do consentimento aos lembretes por e-mail e da configuração de compartilhamento do App Analytics da Apple. O que acontece depois de atualizar para a versão 5.9.16 ou posterior está descrito em (E).</p>
+
+          <h3 id="email-verification">(G) Verificação do endereço de e-mail</h3>
+          <p>Para que você possa enviar notas a um endereço, verificamos se você pode usar esse endereço de e-mail por meio de um código de 6 dígitos, de um link em um e-mail ou do login com a Apple ou o Google (veja (H) abaixo).</p>
+          <ul>
+            <li>Nosso servidor (Cloudflare Workers KV) armazena os seguintes registros de verificação. Desde a atualização de 18 de novembro de 2026, esses registros não contêm seu endereço de e-mail. Eles são identificados por um hash do endereço. <ul>
+                <li>Registro do código de verificação (o código, o idioma, o número de tentativas e dados semelhantes): 10 minutos</li>
+                <li>Registro que indica que o link de um e-mail foi usado: 30 minutos</li>
+                <li>O registro que autoriza um iPhone a enviar e-mails a um endereço verificado expira 365 dias após a última verificação. Quando a exclusão da conta é concluída, excluímos o registro deste aparelho e os registros que a busca localizar no nosso servidor para outros aparelhos que verificaram o mesmo endereço. A busca tem um limite. Registros antigos que ela não localizar podem permanecer por até 365 dias após a última verificação (seção 15).</li>
+              </ul>
+            </li>
+            <li>Os registros de endereço verificado criados antes da atualização de 18 de novembro de 2026 ainda contêm seu endereço de e-mail em forma legível. Um desses registros é excluído quando você verifica o endereço novamente (ele é substituído por um sem o endereço), quando se passam 365 dias desde a verificação ou quando você exclui a conta. No entanto, ao excluir a conta, talvez não encontremos os registros antigos de outros iPhone, porque a busca tem um limite. Os que não forem encontrados são excluídos 365 dias após a verificação. Os registros de códigos e de links criados antes dessa atualização também continham o endereço, mas todos já expiraram.</li>
+            <li>No nosso banco de dados (Cloudflare D1), armazenamos um hash abreviado do seu endereço de e-mail, calculado com SHA-256, junto com os IDs de envio por 35 dias e junto com os registros de cadastro e de lembretes (veja as seções 5 e 9). Esse hash não é anônimo, e sim uma informação pseudonimizada: quem conhece o endereço pode calcular o mesmo valor, por isso o tratamos como informação pessoal.</li>
+            <li>Quer você ative os lembretes ou não, para cada endereço verificado ou usado para enviar notas armazenamos o hash do endereço, o idioma, a data e hora da verificação, as datas e horas do primeiro e do último envio e o número de envios, até você excluir a conta (veja a seção 9).</li>
+            <li>Quando você ativa os lembretes, cadastramos esse endereço como contato no Resend, nosso provedor de envio de e-mails (seção 5(E)).</li>
+            <li>Antes da atualização de 18 de novembro de 2026, mesmo sem os lembretes ativados, cadastrávamos o endereço como contato no Resend, com a inscrição cancelada, quando alguém solicitava um código, concluía a verificação, se verificava com a Apple ou o Google ou enviava uma nota por e-mail. Isso incluía endereços que apenas solicitaram um código sem concluir a verificação. Esses contatos continuam no Resend (Estados Unidos), exceto quando a conta foi excluída. Ainda não decidimos quando excluí-los.</li>
+            <li>Se você solicitar um código, mas não concluir a verificação, poderemos enviar até 3 e-mails, cerca de 6, 24 e 72 horas depois, pedindo que você a conclua. Cada e-mail tem um link para cancelar a inscrição. O endereço de destino desses e-mails é obtido do contato no Resend. Por isso, desde a atualização de 18 de novembro de 2026, só os enviamos para endereços que têm um contato no Resend (os cadastrados antes dessa atualização e os que têm os lembretes ativados).</li>
+          </ul>
+
+          <h3 id="sign-in">(H) Login com a Apple ou o Google</h3>
+          <p>Para informar e verificar seu endereço de e-mail, você pode usar “Iniciar sessão com a Apple” ou sua conta do Google. Em ambos os casos, o app faz login no Firebase Authentication (Google LLC). O Firebase Authentication processa os dados somente em data centers nos Estados Unidos.</p>
+          <ul>
+            <li>Iniciar sessão com a Apple: o app solicita à Apple seu nome e seu endereço de e-mail. A Apple fornece o nome apenas no primeiro login, e na tela da Apple você pode editar o nome ou ocultar seu endereço de e-mail. O app repassa o nome ao Firebase, que o usa como nome de exibição da conta.</li>
+            <li>Google: o Google fornece o endereço de e-mail e as informações básicas de perfil vinculadas à sua conta do Google.</li>
+            <li>O Firebase armazena esse registro de login (endereço de e-mail, nome, se fornecido, e identificadores do provedor e do usuário) até que o excluamos. O Firebase armazena por algumas semanas os endereços IP usados no login.</li>
+            <li>Atualmente, excluir a conta no app não apaga o registro do Firebase nem desvincula o app da sua conta da Apple. Se você nos enviar um e-mail (seção 11), excluiremos o registro do Firebase. Você pode deixar de usar “Iniciar sessão com a Apple” neste app a qualquer momento nos ajustes da sua conta da Apple.</li>
+            <li>Usamos o endereço de e-mail obtido nesses logins para verificar o endereço no nosso servidor ((G)).</li>
+          </ul>
+
+          <h3 id="notion">(I) Notion</h3>
+          <p>Se você conectar o Notion (versão 5.8.12 e posteriores):</p>
+          <ul>
+            <li>A autorização para que nosso servidor grave no Notion (tokens OAuth) e o nome do espaço de trabalho são armazenados criptografados no nosso servidor (Cloudflare D1). Também armazenamos o ID do banco de dados Inbox criado no seu espaço de trabalho. Os tokens nunca são armazenados no seu iPhone.</li>
+            <li>Quando você salva uma nota no Notion, o texto da nota, um título gerado a partir dele, a data e hora e um ID de registro passam pelo nosso servidor (Cloudflare Workers) até a API do Notion. Não armazenamos o texto da nota. Para não criar páginas duplicadas, mantemos um registro de entrega (um valor criptográfico calculado a partir do conteúdo e o ID da página no Notion); os registros de salvamentos concluídos são excluídos após 30 dias. Pelo mesmo motivo, os registros de entrega cujo resultado é desconhecido são mantidos até que os registros da conexão sejam excluídos.</li>
+            <li>Ao escolher “Disconnect” (desconectar) nas Configurações, revogamos nosso acesso no Notion e excluímos os tokens armazenados. Mantemos a configuração do Inbox e os registros de entrega recentes para que a reconexão não crie duplicatas. Ao excluir a conta no app, excluímos os registros de conexão com o Notion criados a partir daquele iPhone.</li>
+            <li>As páginas salvas são mantidas pela Notion Labs, Inc. (Estados Unidos) no seu espaço de trabalho, de acordo com os termos e a política de privacidade do Notion. Para excluí-las, faça isso no Notion.</li>
+          </ul>
+
+          <h3 id="server-logs">(J) Logs do servidor</h3>
+          <p>Nossa API funciona no Cloudflare Workers (Cloudflare, Inc., Estados Unidos). O Cloudflare Workers Logs armazena um registro de cada solicitação por 7 dias. Esses registros incluem o endereço IP; a localização aproximada que a Cloudflare deduz do endereço IP (país, região, cidade, CEP e latitude e longitude); a rede da operadora (ASN); informações do navegador ou do app (user agent); a URL solicitada, incluindo a consulta; outras informações da solicitação; e, para e-mails enviados ao nosso endereço de suporte, os endereços do remetente e do destinatário. Usamos esses registros para segurança, prevenção de abusos e investigação de falhas. Eles podem ser armazenados em data centers da Cloudflare fora do seu país. Além disso, para limitação de taxa, nosso servidor armazena um hash abreviado do endereço IP por até 48 horas.</p>
 
           <h2 id="reading-02">2. Finalidade do uso</h2>
           <p>As informações adquiridas serão usadas para os seguintes fins.</p>
           <ul>
             <li>Fornecer o envio de e-mail, incluindo envio, gerenciamento e reenvio de mensagens pendentes e exibição do histórico</li>
-            <li>Operação e manutenção deste serviço, resposta a falhas, melhoria da qualidade</li>
+            <li>Verificar o endereço de e-mail e autorizar os envios (incluindo o login com a Apple ou o Google)</li>
+            <li>Salvar notas no Notion quando você conecta o Notion</li>
+            <li>Enviar os lembretes por e-mail que você ativar e os e-mails descritos na seção 5 e em 1(G)</li>
+            <li>Operar e manter o Serviço, corrigir falhas e melhorar a qualidade (incluindo a análise de uso)</li>
+            <li>Medir a partir de quais links ou campanhas o app é instalado e se isso leva a compras posteriores (valor e moeda) (AppsFlyer; os links da AppsFlyer no nosso site, até 17 de novembro de 2026, com a exceção descrita na seção 13(C))</li>
+            <li>Acompanhar o funcionamento das assinaturas e as falhas de pagamento</li>
             <li>Excluir dispositivos de teste interno das estatísticas de uso e evitar avisos repetidos sobre recursos de Obsidian já configurados</li>
-            <li>Prevenção de uso não autorizado e segurança (restrição de transmissão contínua de curto prazo, limite de taxa do lado do servidor, etc.)</li>
-            <li>Resposta à consulta</li>
+            <li>Prevenir abusos e garantir a segurança (limite de envios seguidos em pouco tempo, limitação de taxa no servidor, logs do servidor etc.)</li>
+            <li>Responder a dúvidas e a solicitações relacionadas a informações pessoais</li>
+            <li>Melhorar nossos planos futuros por meio da pesquisa do roteiro</li>
+            <li>Entender como nosso site é usado (seção 13)</li>
             <li>Conformidade com leis e regulamentos</li>
           </ul>
 
@@ -347,33 +412,40 @@
 
           <h2 id="reading-04">4. Tratamento do conteúdo do memorando (importante)</h2>
           <ul>
-            <li>O corpo do memorando é enviado por e-mail pela operação do usuário.</li>
-            <li>Para processamento de transmissão, o corpo do memorando e as informações de destino podem passar pela plataforma de transmissão (incluindo serviços externos) usada por nossa empresa.</li>
-            <li>Não pretendemos armazenar e visualizar permanentemente o conteúdo do memorando, a menos que haja uma necessidade legítima de resposta legal, contramedidas de fraude, resposta de falha, etc.</li>
+            <li>O texto da nota é enviado, por ação do usuário, ao destino que ele escolher. Os salvamentos no Obsidian, em Lembretes ou no Calendário são feitos dentro do iPhone e não passam pelo nosso servidor.</li>
+            <li>E-mail. O texto da nota e o endereço do destinatário passam pelo nosso servidor (Cloudflare Workers) e pelo provedor de e-mail Resend. Não armazenamos o texto da nota nos nossos servidores. A Resend guarda nos Estados Unidos os e-mails enviados (incluindo texto, assunto e endereço do destinatário) e os registros de entrega. O prazo divulgado para os planos padrão é de 30 dias. Contratos personalizados podem definir outro prazo. Estamos verificando qual prazo se aplica à nossa conta. Não podemos excluir mensagens individuais da Resend pela API do provedor.</li>
+            <li>Para detectar spam e phishing, a TypeSafe, suboperadora da Resend, processa uma amostra dos e-mails enviados. Segundo a Resend, a TypeSafe não armazena o conteúdo nem o usa para treinar modelos. No envio normal pela API de e-mail, o conteúdo das mensagens não é enviado à Anthropic. <a href="https://resend.com/security/gdpr" rel="noopener">Explicação da Resend</a></li>
+            <li>Se quiser que um e-mail enviado seja excluído antes do fim do prazo de retenção, entre em contato com nosso suporte. Se conseguirmos identificar o ID que a Resend atribuiu à mensagem, poderemos solicitar a exclusão usando o endereço de e-mail cadastrado na nossa conta.</li>
+            <li>Notion: o texto da nota passa pelo nosso servidor até o Notion (1(I)).</li>
+            <li>Entrada por voz: no iPhone (iOS 26 ou posterior), a fala é transcrita no próprio dispositivo. O app não cria gravações nem nos envia o áudio. O ditado pelo teclado, pelo Apple Watch ou pela Siri é processado pela Apple.</li>
+            <li>No iPhone ficam armazenados, criptografados, o histórico de envios (os 100 mais recentes), as notas não enviadas e os rascunhos (seção 12). Eles permanecem até que você os exclua ou exclua o app. Excluir a conta não os exclui.</li>
+            <li>Até 25 de agosto de 2026, os registros de eventos de entrega que nosso servidor armazenava com os registros de lembretes podiam incluir o endereço do destinatário e o assunto do e-mail. Esses registros são excluídos 180 dias após o recebimento.</li>
+            <li>Não temos a finalidade de visualizar o conteúdo das notas, exceto quando houver uma necessidade legítima, como cumprimento da lei, prevenção de abusos ou correção de falhas.</li>
           </ul>
 
-          <h2 id="reading-05">5. Função de lembrete de e-mail (opcional)</h2>
+          <h2 id="reading-05">5. Lembretes por e-mail (opcional) e outros e-mails</h2>
           <p>Para ajudar a criar o hábito de enviar notas, o serviço oferece um recurso opcional que envia lembretes por e-mail aos usuários que os solicitarem.</p>
 
           <h3>(A) Obtendo consentimento</h3>
           <ul>
             <li>Esse recurso vem <strong>desativado por padrão</strong>. Os lembretes só são enviados quando o usuário o ativa explicitamente na tela de autenticação ou nas configurações.</li>
-            <li>Mesmo para quem não ativou os lembretes, se o endereço de e-mail já tiver sido confirmado e não houver envio de notas por algum tempo, em geral 72 horas após o último envio, poderemos enviar um convite <strong>apenas 1 vez</strong> perguntando se deseja recebê-los. Não enviaremos lembretes sem essa escolha.</li>
+            <li>Antes, enviávamos 1 convite por e-mail a quem não tinha ativado os lembretes. Não o enviamos mais. O link para ativar os lembretes expira 14 dias após a emissão. O link de cancelamento continua funcionando depois disso enquanto existir o registro do convite.</li>
             <li>Mesmo após ativar, você pode interromper os lembretes com 1 toque nas configurações. Também pode usar o link de cancelamento no final de cada lembrete por e-mail.</li>
+            <li>Os e-mails sobre uma verificação não concluída estão descritos em 1(G).</li>
           </ul>
 
           <h3>(B) Informações a serem adquiridas e salvas</h3>
           <ul>
-            <li><strong>Hash</strong> do endereço de e-mail (SHA-256), armazenado em nosso servidor (Cloudflare D1).</li>
-            <li>Estado do consentimento, ativado ou desativado; data e hora do último envio de nota; e total de envios.</li>
-            <li>Histórico de transmissão de lembretes (data e hora de envio, eventos como entrega/abertura/clique/rebote).</li>
-            <li><strong>Não armazenamos o endereço de e-mail original em nossos servidores</strong>. Ele é mantido apenas pela API de contatos da plataforma de envio de e-mails (Resend).</li>
+            <li>Hash abreviado do seu endereço de e-mail, calculado com SHA-256: armazenado no nosso servidor (Cloudflare D1).</li>
+            <li>Estado do consentimento, ativado ou desativado; idioma; datas e horas do primeiro e do último envio de nota; e total de envios. Também armazenamos esses dados para quem não ativou os lembretes (1(G)).</li>
+            <li>Histórico de envio de lembretes (data e hora de envio e eventos como entrega, abertura, clique ou rejeição). Os eventos de entrega são excluídos 180 dias após o recebimento.</li>
+            <li>Seu endereço de e-mail em forma legível: está na lista de contatos do Resend (para quem ativou os lembretes e para quem foi cadastrado antes da atualização de 18 de novembro de 2026) e nos registros de endereço verificado do nosso servidor (somente os criados antes dessa atualização) (1(G)). Consulte a seção 12 para ver os outros locais de armazenamento.</li>
           </ul>
 
           <h3>(C) Frequência de transmissão</h3>
           <ul>
             <li>Enviamos até 1 mensagem em cada um destes momentos após o último envio de nota: 24 horas, 72 horas e 7 dias.</li>
-            <li>Estabelecemos um limite de até 2 mensagens em 1 semanas para cada 1 usuário e de até 80 mensagens a cada 1 dia para todo o serviço.</li>
+            <li>Estabelecemos um limite de até 2 mensagens a cada 1 semana para cada 1 usuário e de até 80 mensagens a cada 1 dia para todo o serviço.</li>
           </ul>
 
           <h3>(D) Cancelamento automático</h3>
@@ -381,8 +453,8 @@
             <li>Se houver uma rejeição ou reclamação no momento da entrega do e-mail, o envio para o endereço será interrompido imediatamente e o status de consentimento será desativado.</li>
           </ul>
 
-          <h3>(E) Prestador de serviço</h3>
-          <p>O envio de lembretes e o gerenciamento de contatos são realizados pela Resend, Inc., nos Estados Unidos. A empresa segue o <a href="https://resend.com/legal/dpa" rel="noopener">Data Processing Agreement</a> e as normas internacionais de envio de e-mail, como CAN-SPAM, GDPR e a Lei Japonesa de E-mails Especificados.</p>
+          <h3>(E) Provedor de envio de e-mails</h3>
+          <p>As mensagens do nosso servidor, incluindo notas, e-mails de verificação e lembretes, são entregues pela Resend, operada pela Plus Five Five, Inc. (Estados Unidos). A empresa publica seu <a href="https://resend.com/legal/dpa" rel="noopener">Data Processing Addendum</a>. A Resend também guarda nossa lista de contatos. A Resend armazena nos Estados Unidos o conteúdo dos e-mails, os metadados e os registros de entrega. O prazo publicado para os planos padrão é de 30 dias. Estamos verificando qual prazo se aplica à nossa conta (seção 4).</p>
 
           <h2 id="reading-06">6. Compartilhamento com terceiros</h2>
           <p>Não forneceremos informações pessoais a terceiros, exceto nos seguintes casos.</p>
@@ -390,23 +462,73 @@
             <li>Com o consentimento do usuário</li>
             <li>Quando exigido por lei</li>
             <li>Quando é necessário proteger a vida e a propriedade humana</li>
-            <li>Ao fornecer ao subcontratado dentro do escopo necessário (próximo parágrafo)</li>
+            <li>A prestadores de serviço, na medida necessária (veja a seção 7)</li>
           </ul>
 
-          <h2 id="reading-07">7. Terceirização de serviços, incluindo envio de e-mail</h2>
-          <p>Podemos contratar prestadores externos para envio de e-mail, operação, manutenção e análise, entre outras atividades. Nesses casos, supervisionamos adequadamente os prestadores.</p>
+          <h2 id="reading-07">7. Prestadores de serviço e países</h2>
+          <p>Contratamos os seguintes prestadores de serviço e os supervisionamos de forma adequada.</p>
+          <div class="sd-table" tabindex="0" role="region" aria-label="Tabela com rolagem horizontal"><table>
+            <thead>
+              <tr><th>Prestador</th><th>País</th><th>Informações que recebe</th><th>Propósito</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Cloudflare, Inc.</td><td>Estados Unidos. Sua rede está distribuída pelo mundo; nosso banco de dados principal fica na região Ásia-Pacífico</td><td>Todas as informações que passam pelo nosso servidor e pelo nosso site: texto das notas em trânsito, endereços de e-mail (em forma legível nos registros de endereço verificado criados antes da atualização de 18 de novembro de 2026, nos registros de eventos de entrega até 25 de agosto de 2026 (seção 4), em alguns logs do servidor (1(J)) e em alguns registros descritos na seção 14; nos demais casos, como hash), identificadores do dispositivo e da instalação, eventos de uso, tokens do Notion (criptografados), logs do servidor com endereços IP, mensagens do formulário de contato, respostas à pesquisa, análise de tráfego do site (seção 13(D)) e e-mails enviados ao nosso endereço de suporte</td><td>Hospedagem, banco de dados, logs do servidor, distribuição e análise do site, encaminhamento de e-mails de suporte</td></tr>
+              <tr><td>Plus Five Five, Inc. (Resend)</td><td>Estados Unidos</td><td>Endereço do destinatário, assunto e texto da nota de cada e-mail; lista de contatos; eventos de entrega</td><td>Entrega de correspondência</td></tr>
+              <tr><td>Google LLC</td><td>Estados Unidos</td><td>Firebase Authentication: registros de login (1(H)). Firebase App Check: comprovação da legitimidade das comunicações do app. Login com o Google. Google Analytics no site (seção 13(A))</td><td>Login, prevenção de abusos, análise de tráfego do site</td></tr>
+              <tr><td>Google LLC (Gmail)</td><td>Estados Unidos</td><td>E-mails recebidos no nosso endereço de suporte (seção 14(B))</td><td>Caixa de entrada de suporte</td></tr>
+              <tr><td>AppsFlyer (AppsFlyer Ltd. e as empresas do seu grupo, incluindo a AppsFlyer Inc.)</td><td>Israel e Estados Unidos. A AppsFlyer informa que hospeda os dados na UE e nos Estados Unidos</td><td>Identificadores do dispositivo, endereço IP, informações do dispositivo e do app, eventos no app (seção 12), cliques nos links da AppsFlyer no site (de 15 de outubro de 2026 até 17 de novembro de 2026, com a exceção descrita na seção 13(C))</td><td>Medição de instalações e de canais de aquisição</td></tr>
+              <tr><td>Ahrefs Pte. Ltd.</td><td>Singapura</td><td>Visitas ao site (seção 13(B))</td><td>Análise de tráfego do site</td></tr>
+            </tbody>
+          </table></div>
+          <p>Se você optar por salvar no Notion, enviamos a nota à Notion Labs, Inc. (Estados Unidos). O Notion a trata de acordo com os termos e a política de privacidade do Notion (1(I)).</p>
+          <p>A Apple (Apple Inc.; para o EEE, o Reino Unido e a Suíça, Apple Distribution International Ltd.) trata as compras na App Store, o login com a Apple e a comprovação do dispositivo de acordo com a política de privacidade da própria Apple. Recebemos da Apple as informações de compra e as notificações assinadas (1(C) e (D)) e as informações compartilhadas no login com a Apple (1(H)).</p>
 
           <h2 id="reading-08">8. Gerenciamento de segurança</h2>
-          <p>Tomaremos medidas de segurança razoáveis para evitar vazamento de informações, perda, danos, etc.</p>
+          <p>Adotamos medidas de segurança razoáveis para evitar vazamento, perda e danos às informações, entre outros riscos. Os hashes nos nossos registros são informações pseudonimizadas e são protegidos como informações pessoais.</p>
 
           <h2 id="reading-09">9. Período de armazenamento</h2>
-          <p>Procuramos não conservar informações além do período necessário para a finalidade de uso. Excluímos periodicamente eventos de uso e registros de análise do estado da assinatura da seção 1(D) com mais de 90 dias, bem como registros de associação entre ID de envio e hash do destinatário com mais de 35 dias. Os registros originais de notificações de assinatura e reembolso da Apple com mais de 180 dias desde o recebimento são excluídos diariamente. Como há um limite de registros por execução, se houver muitos aguardando exclusão, o processamento continua nos dias seguintes. Outros registros podem ser conservados por determinado período, na medida necessária para prevenção de fraudes e operação.</p>
+          <p>Procuramos não manter informações por mais tempo do que o necessário para as finalidades de uso.</p>
+          <div class="sd-table" tabindex="0" role="region" aria-label="Tabela com rolagem horizontal"><table>
+            <thead>
+              <tr><th>Informação</th><th>Local de armazenamento</th><th>Prazo</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Texto e assunto da nota</td><td>Não armazenado nos nossos servidores. Resend</td><td>O prazo de retenção publicado para os planos padrão é de 30 dias. Estamos verificando qual prazo se aplica à nossa conta.</td></tr>
+              <tr><td>Registro do código de verificação</td><td>Cloudflare KV</td><td>10 minutos</td></tr>
+              <tr><td>Registro de uso do link do e-mail</td><td>Cloudflare KV</td><td>30 minutos</td></tr>
+              <tr><td>Registro de endereço verificado (só contém o endereço se tiver sido criado antes da atualização de 18 de novembro de 2026)</td><td>Cloudflare KV</td><td>365 dias após a última verificação. Na exclusão da conta, apagamos o registro de verificação deste aparelho e os registros que a busca localizar para o mesmo endereço. Registros antigos associados a outros aparelhos que não forem localizados por causa do limite da busca podem permanecer até o vencimento (1(G)).</td></tr>
+              <tr><td>Índice dos iPhone que verificaram um endereço (hash do endereço e token do dispositivo)</td><td>Cloudflare KV</td><td>365 dias após a verificação; excluído quando você exclui a conta</td></tr>
+              <tr><td>Comprovante de exclusão da conta (hash do token do dispositivo, hash do endereço e data e hora)</td><td>Cloudflare KV</td><td>30 dias</td></tr>
+              <tr><td>Correspondência entre o ID de envio e o hash do endereço</td><td>Cloudflare D1</td><td>35 dias</td></tr>
+              <tr><td>Hashes com chave usados para coordenar as entregas</td><td>Cloudflare</td><td>35 dias</td></tr>
+              <tr><td>Registros de alterações no consentimento aos lembretes</td><td>Cloudflare</td><td>180 dias</td></tr>
+              <tr><td>Registros de envio e de verificação de e-mail (hash do endereço, idioma, datas e quantidades), configurações e histórico de envio de lembretes, registros de e-mails enviados, como avisos de verificação e convites, ID de contato do Resend</td><td>Cloudflare D1</td><td>Até você excluir a conta</td></tr>
+              <tr><td>Eventos de entrega de e-mail (entrega, abertura, clique, rejeição e semelhantes)</td><td>Cloudflare D1</td><td>180 dias após o recebimento</td></tr>
+              <tr><td>Contato no Resend (endereço de quem ativou os lembretes)</td><td>Resend (Estados Unidos)</td><td>Até você excluir a conta</td></tr>
+              <tr><td>Contato no Resend (endereço cadastrado antes da atualização de 18 de novembro de 2026 sem os lembretes ativados)</td><td>Resend (Estados Unidos)</td><td>Ainda não definimos um prazo. É excluído quando você exclui a conta (se o endereço não concluiu a verificação, envie-nos um e-mail)</td></tr>
+              <tr><td>Eventos de uso (não são armazenados desde a atualização de 18 de novembro de 2026)</td><td>Cloudflare D1</td><td>Exclusão periódica dos registros com mais de 90 dias desde o recebimento</td></tr>
+              <tr><td>Análise do status da assinatura (1(D); não é armazenada desde a atualização de 18 de novembro de 2026)</td><td>Cloudflare D1</td><td>Exclusão periódica dos registros com mais de 90 dias desde o recebimento</td></tr>
+              <tr><td>Registros originais de notificações da Apple (1(C))</td><td>Cloudflare D1</td><td>180 dias</td></tr>
+              <tr><td>Registros de bloqueio de envio e registros de endereços excluídos (hashes e datas)</td><td>Cloudflare</td><td>Mantidos para não enviar novamente e-mails a esse endereço</td></tr>
+              <tr><td>Logs do servidor (1(J))</td><td>Cloudflare Workers Logs</td><td>7 dias</td></tr>
+              <tr><td>Hash do endereço IP para limitação de taxa</td><td>Cloudflare KV</td><td>Até 48 horas</td></tr>
+              <tr><td>Tokens do Notion / registros de conexão / registros de entrega (1(I))</td><td>Cloudflare D1</td><td>Até você desconectar / até você excluir a conexão ou a conta / 30 dias após o salvamento ser concluído (registros com resultado desconhecido: até a conexão ser excluída)</td></tr>
+              <tr><td>Mensagens do formulário de contato (seção 14(A))</td><td>Cloudflare D1</td><td>180 dias</td></tr>
+              <tr><td>E-mails ao suporte (seção 14(B))</td><td>Google LLC (Gmail, Estados Unidos)</td><td>Ainda não definimos um prazo</td></tr>
+              <tr><td>Respostas à pesquisa do roteiro (seção 14(C))</td><td>Cloudflare D1</td><td>Ainda não definimos um prazo</td></tr>
+              <tr><td>Registro de login (1(H))</td><td>Firebase Authentication (Estados Unidos)</td><td>Até que o excluamos; endereços IP de login por algumas semanas</td></tr>
+              <tr><td>Dados da AppsFlyer</td><td>AppsFlyer</td><td>Conforme as regras de retenção da própria AppsFlyer (veja a política da AppsFlyer indicada na seção 13(C))</td></tr>
+              <tr><td>Análise de tráfego do site (seção 13)</td><td>Google, Ahrefs, Cloudflare</td><td>Veja a seção 13</td></tr>
+              <tr><td>Dados para recuperação pontual do banco de dados</td><td>Cloudflare</td><td>Até 30 dias</td></tr>
+            </tbody>
+          </table></div>
+          <p>A exclusão periódica é executada diariamente. Como cada execução tem um limite de itens, quando há muitos itens pendentes eles continuam sendo processados nos dias seguintes.</p>
 
           <h2 id="reading-10">10. Revisão</h2>
-          <p>Revisaremos esta política conforme necessário. Após a revisão, ela será publicada neste serviço ou em nosso site, etc.</p>
+          <p>Podemos alterar esta política quando necessário. A versão alterada será publicada no Serviço ou no nosso site, e a data da última atualização será indicada no início desta página.</p>
 
-          <h2 id="reading-11">11. Consultas</h2>
-          <p><!--email_off--><a href="mailto:support@simplememofast.com">support@simplememofast.com</a><!--/email_off--></p>
+          <h2 id="reading-11">11. Quem somos e como entrar em contato</h2>
+          <p>YURIKA, K.K. (YURIKA, K.K.)<br> Endereço: 2F-C, Shibuya Dogenzaka Tokyu Bldg., 1-10-8 Dogenzaka, Shibuya-ku, Tóquio, Japão<br> E-mail: <!--email_off--><a href="mailto:support@simplememofast.com">support@simplememofast.com</a><!--/email_off--> (atendemos principalmente por e-mail)<br> Telefone (Japão): 050-1793-7505</p>
 
           <h2 id="technical">12 Informações técnicas sobre criptografia (referência)</h2>
           <p>Este serviço toma as seguintes medidas técnicas para proteger a privacidade dos usuários. Estas são implementações para "minimização de dados" e "proteção no terminal" em vez de "segurança".</p>
@@ -414,18 +536,20 @@
             <li><strong>Armazenamento no terminal</strong>: A mensagem de espera offline (Outbox) e o histórico de transmissão são armazenados no terminal com criptografia <strong>AES-GCM-256</strong> por CryptoKit genuíno Apple (classe de proteção de arquivo: <code>completeFileProtectionUntilFirstUserAuthentication</code>).</li>
             <li><strong>Gerenciamento de chaves</strong>: A chave simétrica de 256 bits é armazenada no Apple Keychain Services (<code>kSecClassGenericPassword</code>), em uma <a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly">classe de proteção que permite o uso após o primeiro desbloqueio depois de reiniciar o dispositivo e impede a migração para outros aparelhos</a>. O aplicativo lê a chave ao criptografar e descriptografar. A cópia da chave incluída no backup é protegida por uma chave específica do dispositivo e não pode ser usada em outro aparelho (<a href="https://support.apple.com/ja-jp/guide/security/secb0694df1a/1/web/1">explicação da Apple</a>). Antes de trocar de dispositivo, confirme que as notas necessárias chegaram ao e-mail, ao Obsidian ou a outro destino de armazenamento.</li>
             <li><strong>canal de comunicação</strong>: A comunicação API é protegida por TLS (HTTPS). <code>URLSessionConfiguration.ephemeral</code> para envio de notas é uma configuração que não armazena permanentemente o cache, o cookie e as informações de autenticação da sessão no disco. Distingue-se do armazenamento e transmissão da análise de uso e da explicação da comunicação externa do SDK.</li>
-            <li><strong>Corpo do e-mail</strong>: Ele passará pelo nosso Relay API (Cloudflare Workers) e base de transmissão externa (Resend) para processamento de transmissão, mas não será armazenado permanentemente. Não será registrado no registro (exceto para a compilação DEBUG no momento do desenvolvimento).</li>
-            <li><strong>Armazenamento de endereços de e-mail no servidor</strong>: Guardamos no Cloudflare D1 a associação entre o ID de envio e o hash do endereço de e-mail do destinatário, gerado a partir de SHA-256. Esse registro é criado independentemente do consentimento para lembretes. Os contatos dos lembretes são gerenciados pela Contact API do Resend.</li>
+            <li><strong>Texto do e-mail</strong>: para o envio, ele passa pela nossa Relay API (Cloudflare Workers) e pela infraestrutura de envio externa (Resend), mas não o armazenamos de forma permanente na nossa infraestrutura. Ele também não é gravado nos nossos logs (exceto em builds DEBUG durante o desenvolvimento). O prazo que a Resend publica para a retenção de e-mails enviados nos planos padrão é de 30 dias. Estamos verificando qual prazo se aplica à nossa conta (seção 4).</li>
+            <li><strong>Armazenamento de endereços de e-mail no servidor</strong>: armazenamos no Cloudflare D1 a correspondência entre o ID de envio e um hash abreviado do endereço do destinatário, calculado com SHA-256. Esse registro é criado quer os lembretes tenham sido aceitos ou não. Os registros do hash do endereço, do idioma, das datas e das quantidades também são armazenados quer os lembretes tenham sido aceitos ou não (1(G)). Os endereços em forma legível estão nos registros de endereço verificado do Cloudflare KV criados antes da atualização de 18 de novembro de 2026 e nos contatos do Resend (de quem ativou os lembretes e de quem foi cadastrado antes dessa atualização) (1(G) e 5(B)). O endereço também pode constar em forma legível nos e-mails enviados que a Resend conserva (o prazo publicado para os planos padrão é de 30 dias e estamos verificando o da nossa conta), nos registros de entrega até 25 de agosto de 2026 (seção 4), nos registros de login do Firebase (1(H)), nos logs do servidor (1(J)) e em alguns e-mails de suporte e registros de pesquisas (seção 14).</li>
             <li><strong>Dependências de criptografia, armazenamento e caminho de comunicação</strong>: A criptografia do corpo do memorando (CryptoKit), o armazenamento de chaves (Keychain Services) e a comunicação (URLSession / Network.framework) são todos concluídos na estrutura genuína Apple e não passam por SDKs de terceiros.</li>
-            <li><strong>SDKs de login e prevenção de uso indevido</strong>: Usamos o SDK GoogleSignIn-iOS e o Firebase Authentication SDK para importar um endereço de e-mail de uma conta Google como recurso opcional para simplificar a configuração inicial. O Firebase App Check SDK é inicializado ao abrir o aplicativo e usa Apple App Attest para impedir acesso indevido à API do backend.</li>
-            <li><strong>A análise de uso da nossa empresa</strong>: Enviaremos um evento para o nosso <code>/v1/analytics/event</code> para melhorar a qualidade e entender o status de uso. Os itens incluem atributos permitidos, como identificadores de instalação aleatória, identificadores de sessão, tipos de eventos, identificadores e horários, versões e compilações de aplicativos, idiomas e resultados de transmissão. Ele foi projetado para não incluir diretamente um endereço de e-mail, corpo do memorando ou código de autenticação, mas pode ser vinculado ao hash do endereço de e-mail de destino através do ID de envio. Este identificador de instalação é armazenado no chaveiro do terminal. Devido ao mecanismo do iOS, os itens de chaveiro podem permanecer no terminal mesmo que o aplicativo seja excluído, caso em que o mesmo identificador é usado após a reinstalação (o mesmo identificador é usado para o ID de Usuário do Cliente na versão antiga do link AppsFlyer abaixo).</li>
-            <li><strong>Análise de aquisição e uso pelo AppsFlyer</strong>: Na versão do aplicativo sem a tela de seleção de 1(E) acima, o AppsFlyer SDK é iniciado e o primeiro envio de memorando bem-sucedido, o primeiro registro bem-sucedido, cada salvamento de memorando bem-sucedido (envios de e-mail e salvamentos no Obsidian ou no Notion), o sucesso da autenticação, a exibição da tela de cobrança, a seleção do plano e o sucesso da compra são enviados como eventos. Os atributos a serem definidos no aplicativo incluem, se aplicável, o método de entrada (como teclado ou entrada por voz), o caminho de envio, o local onde o memorando foi registrado (aplicativo para iPhone, Apple Watch, Atalhos da Siri, planilha de compartilhamento), o tipo de destino (e-mail, Obsidian, Notion), o idioma de exibição do aplicativo, a versão da definição de medição, o tipo de compilação e de ambiente de execução, o valor e a moeda da compra de transações verificadas, o período de assinatura, o tipo de oferta e a versão da tela de cobrança e o motivo de sua exibição. Como o mesmo identificador de instalação da análise interna é definido para o ID de Usuário do Cliente AppsFlyer, as informações de aquisição e os registros de uso podem ser associados. O item do evento definido no aplicativo não inclui diretamente um endereço de e-mail, corpo do memorando ou código de verificação. Os itens listados aqui são explicitamente definidos pelo aplicativo e não são todos itens das informações técnicas adquiridas pelo SDK. Identificadores e registros associados não são tratados como informações completamente anônimas. Na versão com a seleção de análise de status de uso, o SDK será interrompido e, apenas para a versão correspondente a (F) acima, a medição de aquisição só será iniciada se houver consentimento para outra finalidade e a permissão de rastreamento do iPhone.</li>
+            <li><strong>SDKs de login e de prevenção de abusos</strong>: “Iniciar sessão com a Apple” usa o AuthenticationServices da Apple e o Firebase Authentication; para obter o endereço de e-mail de uma conta do Google, usamos o GoogleSignIn-iOS SDK e o Firebase Authentication SDK (1(H)). O Firebase App Check SDK é inicializado ao abrir o app e usa o Apple App Attest para impedir acessos não autorizados à API de backend.</li>
+            <li><strong>Análise de uso própria</strong>: para melhorar a qualidade e entender o uso, enviamos eventos ao nosso endpoint <code>/v1/analytics/event</code>. Os campos incluem atributos permitidos, como um identificador de instalação aleatório, um identificador de sessão, o tipo, o identificador e o horário do evento, a versão e a build do app, o idioma e o resultado do envio. Ela foi projetada para não incluir diretamente endereços de e-mail, texto de notas nem códigos de verificação, mas o ID de envio permite vinculá-la ao hash do endereço do destinatário. Esse identificador de instalação é armazenado nas Chaves do dispositivo (Keychain). Pelo funcionamento do iOS, os itens das Chaves podem permanecer no dispositivo mesmo após a exclusão do app; nesse caso, o mesmo identificador volta a ser usado após a reinstalação. Nas versões 5.9.9 e anteriores e de 5.9.16 a 5.9.32, esse identificador também é definido como Customer User ID da AppsFlyer (1(E)).</li>
+            <li><strong>Armazenamento da análise de uso própria</strong>: desde a atualização de 18 de novembro de 2026, nosso servidor descarta, sem armazenar, os eventos de qualquer versão publicada e apenas conta quantos descarta por dia (1(E)). Os eventos recebidos antes da atualização são excluídos periodicamente quando passam mais de 90 dias do recebimento.</li>
+            <li><strong>Medição da AppsFlyer</strong>: nas versões 5.9.9 e anteriores e de 5.9.16 a 5.9.32 (as condições em que o SDK é iniciado estão em 1(E)), o app envia como eventos o primeiro envio bem-sucedido de uma nota, o primeiro salvamento bem-sucedido, cada salvamento bem-sucedido de uma nota (cada envio por e-mail e cada salvamento no Obsidian ou no Notion), a verificação bem-sucedida, a exibição da tela de pagamento, a seleção do plano e a compra bem-sucedida. Os atributos definidos pelo app incluem, quando aplicável, o método de entrada (teclado, voz etc.), o caminho de envio, o local de captura (app para iPhone, Apple Watch, Atalhos da Siri ou o menu de compartilhamento do iOS), o tipo de destino (e-mail, Obsidian ou Notion), o idioma do app, a versão da definição de medição, o tipo de build e de ambiente de execução, o valor e a moeda das transações verificadas, o período da assinatura, o tipo de oferta e a versão da tela de pagamento e o que levou à sua exibição. Como definimos o mesmo identificador de instalação da análise própria como Customer User ID da AppsFlyer, as informações de aquisição e os registros de uso podem ser vinculados. Os campos de evento definidos pelo app não incluem diretamente endereços de e-mail, texto de notas nem códigos de verificação. O próprio SDK também coleta informações técnicas, como o endereço IP, o modelo do dispositivo, as versões do sistema operacional e do app, o identificador para fornecedores (IDFV) e o ID próprio da AppsFlyer, e usa a medição pelo SKAdNetwork da Apple. A versão 5.9.32 bloqueia o compartilhamento com todos os parceiros integrados da AppsFlyer, não permite que o SDK leia o identificador de publicidade (IDFA) e desativa a medição do Apple Ads; as versões anteriores não têm essas 3 configurações. O iOS fornece o IDFA somente aos apps que você permitiu rastrear, e este app só pediu essa permissão na versão 5.9.15. O app recebe o resultado da medição da AppsFlyer e envia à nossa análise própria, junto com o identificador de instalação, apenas uma categoria geral (se é orgânico ou não, nosso site, outros etc.). Os itens listados aqui não são a lista completa das informações técnicas coletadas pelo SDK. Não tratamos identificadores nem registros que podem ser vinculados como informações totalmente anônimas. A versão 5.9.15 está descrita em 1(F).</li>
+            <li><strong>Categoria de origem de aquisição</strong>: o app também registra no seu iPhone a categoria aproximada mencionada acima (se a instalação foi orgânica, se foi a primeira abertura, nosso site ou outra origem, e se veio de uma de nossas campanhas). Desde a atualização de 18 de novembro de 2026, nosso servidor não armazena esse evento, nem mesmo quando ele traz a marca de consentimento descrita em 1(E). Os eventos recebidos antes da atualização são excluídos periodicamente quando passam mais de 90 dias do recebimento.</li>
           </ul>
           <p><strong>Nota</strong>: Este serviço não fornece <strong>Criptografia de ponta a ponta (E2EE)</strong>. O texto do e-mail é entregue usando o protocolo padrão SMTP para que o destinatário possa ler o texto como de costume no próprio cliente de e-mail do usuário. Para aplicativos que exigem E2EE, considere serviços dedicados como Standard Notes, Signal e ProtonMail.</p>
-          <p>O conteúdo desta seção está resumido na página <a href="/pt-BR/privacy-architecture/">Design de Privacidade</a> como uma ilustração do "Caminho de Dados" para usuários do Obsidian.</p>
+          <p>O conteúdo desta seção foi reorganizado para usuários do Obsidian como um diagrama do “caminho dos dados” na página <a href="/pt-BR/privacy-architecture/">Design de privacidade</a>. Se houver divergência entre os dois, prevalece esta política.</p>
 
-          <h2 id="website-analytics">13 Análise de acesso ao nosso site</h2>
-          <p>Nosso site (simplememofast.com) usa a seguinte análise de acesso para entender o status da navegação e melhorar o conteúdo. É diferente dos dados de uso do aplicativo acima (este serviço).</p>
+          <h2 id="website-analytics">13. Serviços usados no nosso site</h2>
+          <p>Nosso site (simplememofast.com) usa os seguintes serviços (deixamos de usar (C) em 17 de novembro de 2026). Isso é separado dos dados de uso do app (o Serviço) descritos acima.</p>
           <h3>(A) Análise Google (Google LLC, EUA)</h3>
           <ul>
             <li>Não carregamos o Google Analytics em visitas vindas do Espaço Econômico Europeu (EEE), do Reino Unido ou da Suíça; por isso, os cookies indicados a seguir também não são gravados nem lidos nessas visitas. O país ou a região é determinado pela estimativa que a Cloudflare faz a partir do endereço IP da conexão; se não for possível determiná-lo, também não carregamos a ferramenta. Como se trata de uma estimativa, o resultado pode não corresponder à sua localização real, por exemplo, quando você usa uma VPN.</li>
@@ -440,15 +564,102 @@
           <ul>
             <li>Usamos a ferramenta para estatísticas, como visualizações de páginas. A Ahrefs <a href="https://help.ahrefs.com/en/articles/10247870-about-ahrefs-web-analytics" target="_blank" rel="noopener">informa</a> que ela não usa cookies nem armazena endereços IP em sua forma original.</li>
           </ul>
-          <h3>(C) AppsFlyer OneLink (AppsFlyer Ltd., Israel; encerrado em 17 de novembro de 2026)</h3>
+          <h3>(C) AppsFlyer OneLink (AppsFlyer; veja a seção 7; encerrado em 17 de novembro de 2026)</h3>
           <ul>
-            <li>Atualizamos nosso site em 17 de novembro de 2026. Nas páginas abertas desde essa atualização, todos os botões e links da App Store abrem a App Store diretamente. Nenhum deles passa por um link da AppsFlyer.</li>
+            <li>Atualizamos nosso site em 17 de novembro de 2026, por volta das 22:24 (horário do Japão). Nas páginas abertas desde essa atualização, todos os botões e links da App Store abrem a App Store diretamente. Nenhum deles passa por um link da AppsFlyer. No entanto, se uma página aberta antes da atualização continuou aberta, ou se você voltar a ela pelo botão Voltar do navegador, os botões e links dela ainda podem passar por um link da AppsFlyer depois da atualização.</li>
             <li>De 15 de outubro de 2026 até 17 de novembro de 2026, alguns botões e links da App Store no nosso site (como o botão no topo da página de integração com o Obsidian) abriam a App Store por meio de um link da AppsFlyer (simplememofast.onelink.me). A AppsFlyer registrava um clique somente quando você tocava em um desses botões ou links. Apenas visualizar uma página não enviava nenhuma informação à AppsFlyer.</li>
             <li>Nesses cliques, a AppsFlyer recebia informações como seu endereço IP, navegador, sistema operacional e tipo de dispositivo (user agent), o horário, o link e o nome da campanha, e o site de origem (apenas o nosso domínio).</li>
-            <li>A AppsFlyer associava o clique à primeira abertura posterior do app (medida pelo SDK da AppsFlyer descrito na seção 12 acima) para contar as instalações vindas desses botões e links. Os cliques registrados até 17 de novembro de 2026 ainda podem ser associados a uma primeira abertura do app por um tempo limitado depois disso.</li>
+            <li>A AppsFlyer associava o clique à primeira abertura posterior do app (medida pelo SDK da AppsFlyer descrito na seção 12 acima) para contar as instalações vindas desses botões e links. Um clique registrado pode ser associado a uma primeira abertura do app por um tempo limitado depois de ser registrado.</li>
             <li>Da AppsFlyer recebemos relatórios agregados, como o número de cliques e instalações por link. A seção 12 acima descreve como o app trata a categoria de origem de aquisição que recebe.</li>
             <li>Consulte a <a href="https://www.appsflyer.com/legal/services-privacy-policy/" target="_blank" rel="noopener">Política de Privacidade dos Serviços da AppsFlyer</a> para saber como a AppsFlyer trata os cliques registrados. Essa política também explica como sair da medição enviando uma solicitação por e-mail à AppsFlyer.</li>
           </ul>
+          <h3>(D) Cloudflare Web Analytics (Cloudflare, Inc., EUA)</h3>
+          <ul>
+            <li>Nosso provedor de hospedagem, a Cloudflare, adiciona às nossas páginas um script que mede a velocidade de carregamento e conta as visitas. Ele registra a página, o site de referência, o tipo de navegador, sistema operacional e dispositivo, o país e o tempo de carregamento da página.</li>
+            <li>A Cloudflare <a href="https://www.cloudflare.com/web-analytics/" target="_blank" rel="noopener">afirma</a> que o Cloudflare Web Analytics não usa cookies nem localStorage e não identifica os visitantes (impressão digital) pelo endereço IP nem pelo user agent.</li>
+            <li>Ativamos a opção da Cloudflare que exclui os visitantes da UE dessa medição. A Cloudflare aplica essa opção de acordo com a localização do data center da Cloudflare que processa a visita.</li>
+          </ul>
+          <h3>(E) Outros</h3>
+          <ul>
+            <li>A Cloudflare pede ao navegador que informe os erros de rede ocorridos ao carregar nossas páginas (Network Error Logging). O navegador guarda essa configuração por 7 dias e pode enviar à Cloudflare relatórios dos erros de rede ocorridos nesse período.</li>
+            <li>Nosso site armazena o idioma de exibição escolhido no localStorage do navegador (<code>simple-memo-lang</code>). Esse valor não é enviado para nós.</li>
+            <li>A página inicial em inglês exibe uma imagem de selo carregada de fazier.com. Ao carregar a imagem, a Fazier recebe seu endereço IP e informações do navegador.</li>
+          </ul>
+
+          <h2 id="contact-and-survey">14. Formulário de contato, e-mail ao suporte e pesquisa do roteiro</h2>
+          <h3>(A) Formulário de contato</h3>
+          <ul>
+            <li>O formulário envia a mensagem (até 4,000 caracteres), o endereço de e-mail, o idioma de exibição e o dispositivo, o sistema operacional e a versão do app que você informar.</li>
+            <li>Armazenamos o endereço de e-mail e seu domínio apenas como hashes abreviados, por isso não conseguimos responder individualmente pelo formulário. Se precisar de resposta, envie um e-mail para <!--email_off--><a href="mailto:support@simplememofast.com">support@simplememofast.com</a><!--/email_off-->.</li>
+            <li>O conteúdo é armazenado no nosso banco de dados (Cloudflare D1) por 180 dias. Para limitação de taxa, armazenamos um hash abreviado do endereço IP por até 48 horas.</li>
+          </ul>
+          <h3>(B) E-mail ao suporte</h3>
+          <ul>
+            <li>Os e-mails enviados para <!--email_off--><a href="mailto:support@simplememofast.com">support@simplememofast.com</a><!--/email_off--> passam pelo Cloudflare Email Routing e pelo nosso servidor e chegam a uma caixa de entrada de suporte fornecida pela Google LLC (Gmail, Estados Unidos). Ainda não definimos um prazo para excluí-los dessa caixa de entrada.</li>
+            <li>Nosso servidor pode armazenar o texto e o hash do endereço no nosso banco de dados por 180 dias. No caso de e-mails enviados por empresas, pode armazenar o endereço do remetente, o nome de exibição e o assunto por 180 dias.</li>
+            <li>Os logs do servidor mantêm os endereços do remetente e do destinatário por 7 dias (1(J)).</li>
+          </ul>
+          <h3>(C) Pesquisa do roteiro</h3>
+          <ul>
+            <li>A pesquisa da página do roteiro armazena as respostas, o texto livre (até 1,000 caracteres), o idioma de exibição, a página e um hash abreviado do endereço IP. O endereço de e-mail só é armazenado se você marcar a caixa e informá-lo, e é usado apenas para responder e para avisar quando o que foi pedido for implementado.</li>
+            <li>As respostas são armazenadas no nosso banco de dados (Cloudflare D1). Ainda não definimos um prazo de exclusão.</li>
+            <li>Ao excluir a conta no app, também são excluídas as respostas em que o endereço informado é igual ao seu endereço verificado (veja a seção 15). Se quiser excluir qualquer outra resposta, envie-nos um e-mail a partir do endereço que você informou. Respostas sem endereço de e-mail não podem ser atribuídas a ninguém.</li>
+          </ul>
+
+          <h2 id="account-deletion">15. Exclusão da conta e dos dados</h2>
+          <p>Você pode excluí-la em “Configurações” &gt; “Conta” &gt; “Excluir conta” no app.</p>
+          <p>Ao excluí-la, apagamos o seguinte em relação ao endereço de e-mail verificado naquele iPhone.</p>
+          <ul>
+            <li>o registro do código de verificação deste aparelho e as sessões verificadas que encontramos para esse endereço nos diferentes iPhone, as configurações e o histórico de lembretes, os registros de cadastro, os registros de envio, os eventos de uso vinculados pelo ID de envio e os registros do formulário de contato e de e-mails de suporte vinculados ao endereço</li>
+            <li>O contato no Resend</li>
+            <li>As respostas à pesquisa do roteiro em que o endereço informado é igual a esse endereço (14(C))</li>
+            <li>Os registros de conexão com o Notion criados a partir daquele iPhone (1(I))</li>
+            <li>O identificador de instalação daquele iPhone (substituído por um novo)</li>
+          </ul>
+          <p>O que mantemos após a exclusão:</p>
+          <ul>
+            <li>Os registros de bloqueio de envio (por exemplo, após uma devolução, uma reclamação ou um cancelamento de inscrição) e o registro de que o endereço foi excluído (hashes e datas), para não enviar novamente e-mails a esse endereço.</li>
+            <li>As notificações originais da Apple (1(C)) permanecem até o fim do prazo de 180 dias. Os eventos de uso que não podem ser vinculados ao seu endereço são excluídos periodicamente quando passam mais de 90 dias do recebimento.</li>
+            <li>As cópias nos prestadores de serviços permanecem até o fim dos respectivos prazos. Para os e-mails enviados, a Resend publica um prazo de 30 dias nos planos padrão. Estamos verificando qual prazo se aplica à nossa conta. Os logs do servidor ficam armazenados por 7 dias e as cópias de recuperação do banco de dados, por até 30 dias.</li>
+            <li>Um comprovante da exclusão (hash do token do dispositivo, hash do endereço e data e hora), para podermos responder que a exclusão já foi feita se o app enviar a mesma solicitação novamente. Ele é excluído após 30 dias.</li>
+          </ul>
+          <p>O que a exclusão pelo app não alcança:</p>
+          <ul>
+            <li>Notas, histórico e rascunhos no iPhone (exclua-os individualmente ou exclua o app)</li>
+            <li>O endereço de e-mail verificado e o token do dispositivo que o app armazena nas Chaves (Keychain) do iPhone (os itens das Chaves podem permanecer mesmo após a exclusão do app)</li>
+            <li>Os registros criados antes da atualização de 18 de novembro de 2026 para o mesmo endereço em outros iPhone, se a busca não os encontrar por causa do limite (são excluídos 365 dias após a verificação)</li>
+            <li>Os registros de códigos pendentes em outros iPhone (expiram após 10 minutos)</li>
+            <li>os registros do link do e-mail de verificação (expiram em até 30 minutos)</li>
+            <li>Registros de endereços para os quais um código foi solicitado sem que a verificação fosse concluída, e o respectivo contato no Resend (envie-nos um e-mail)</li>
+            <li>O registro de login do Firebase (1(H)), os dados mantidos pela AppsFlyer e os e-mails na caixa de entrada de suporte (envie-nos um e-mail)</li>
+            <li>As respostas à pesquisa do roteiro sem endereço de e-mail ou com um endereço diferente (se você informou um endereço, envie-nos um e-mail a partir dele)</li>
+          </ul>
+          <p>Se o servidor recusar a exclusão porque o endereço de destino não foi verificado nesse iPhone ou porque a verificação expirou (1(G)), o app informa que a exclusão falhou e os registros vinculados ao endereço permanecem. Antes dessa verificação, o app pode já ter excluído as conexões do Notion criadas nesse aparelho (1(I)) e os registros de análise associados aos dados de exclusão do aparelho (1(D)). Verifique o endereço novamente e tente outra vez ou fale conosco por e-mail.</p>
+          <p>Na versão 5.9.32, se o campo de destinatário estiver vazio, o app não solicita ao nosso servidor a exclusão dos registros vinculados ao endereço anterior. O app pode exibir uma mensagem de conclusão quando terminar as outras etapas de exclusão.</p>
+          <p>Se você alterou ou apagou o endereço de destino antes da exclusão, ou se o app não conseguiu concluí-la, entre em contato por e-mail. Vamos conferir o que resta e excluir os registros que pudermos identificar e apagar. Se algum registro permanecer por causa dos prazos de retenção acima ou ficar com um prestador de serviços, explicaremos como ele será tratado.</p>
+          <p>Nas versões 5.9.16 a 5.9.32, se você continuar usando o app após a exclusão, a AppsFlyer poderá retomar a medição com o novo identificador de instalação se as condições de 1(E) forem atendidas.</p>
+          <p>Excluir a conta não cancela a assinatura Premium. Cancele-a nos Ajustes do iPhone &gt; (seu nome) &gt; Assinaturas.</p>
+
+          <h2 id="your-rights">16. Suas escolhas e seus direitos</h2>
+          <h3>(A) O que você pode escolher</h3>
+          <ul>
+            <li>Lembretes por e-mail: desative-os nas Configurações ou use o link de cancelamento da inscrição no e-mail (seção 5).</li>
+            <li>Notion: desconecte nas Configurações (1(I)).</li>
+            <li>Histórico: exclua os itens individualmente no app.</li>
+            <li>Análise de uso e AppsFlyer: o que sua versão permite está descrito em 1(E).</li>
+            <li>Site: desativação do Google Analytics e configurações de cookies (13(A)); solicitações à AppsFlyer sobre os cliques já registrados (13(C)).</li>
+          </ul>
+          <h3>(B) Solicitações relativas aos seus dados pessoais</h3>
+          <p>Você pode solicitar acesso, correção ou exclusão dos seus dados pessoais, ou pedir que deixemos de usá-los ou limitemos seu uso, enviando um e-mail para <!--email_off--><a href="mailto:support@simplememofast.com">support@simplememofast.com</a><!--/email_off-->, de preferência a partir do endereço de e-mail em questão. Para proteger seus dados, podemos pedir que você confirme que pode usar esse endereço. Responderemos em até 1 mês e, se precisarmos de mais tempo, informaremos o motivo dentro desse prazo de 1 mês.</p>
+          <h3>(C) Reclamações</h3>
+          <p>Dependendo de onde você mora, você também pode ter o direito de apresentar uma reclamação a uma autoridade supervisora de proteção de dados.</p>
+          <ul>
+            <li>EEE: a autoridade supervisora do país onde você mora ou trabalha, ou do país onde você acredita que o problema ocorreu (<a href="https://www.edpb.europa.eu/about-edpb/our-members_en" target="_blank" rel="noopener">lista de autoridades supervisoras</a>)</li>
+            <li>Reino Unido: Information Commission (antigo Information Commissioner's Office; <a href="https://ico.org.uk/" target="_blank" rel="noopener">ico.org.uk</a>)</li>
+            <li>Suíça: Comissário Federal de Proteção de Dados e Informação (<a href="https://www.edoeb.admin.ch/en" target="_blank" rel="noopener">edoeb.admin.ch</a>)</li>
+            <li>Japão: Comissão de Proteção de Informações Pessoais (<a href="https://www.ppc.go.jp/personalinfo/pipldial/" target="_blank" rel="noopener">linha de consulta sobre a Lei de Proteção de Informações Pessoais</a>)</li>
+          </ul>
+          <p>Agradeceríamos se você entrasse em contato conosco primeiro (seção 11).</p>
         </div>
       </div>
 
