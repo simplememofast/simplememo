@@ -271,7 +271,7 @@
               <tr><th scope="row">备忘录正文</th><td>你的邮件收件箱</td><td>留下（这就是目的）</td></tr>
               <tr><th scope="row">备忘录正文</th><td>你的Obsidian Vault（设置时）</td><td>残留（终端内本地）</td></tr>
               <tr><th scope="row">Outbox・发送记录</th><td>仅限终端内</td><td>用AES-GCM-256加密保存</td></tr>
-              <tr><th scope="row">邮箱地址</th><td>Cloudflare D1</td><td class="yes">保存发送ID和收件人哈希的对应。 与选择加入提醒分开记录，定期删除超过35天的内容</td></tr>
+              <tr><th scope="row">发送 ID 和收件地址哈希</th><td>Cloudflare D1</td><td class="yes">保存发送ID和收件人哈希的对应。 与选择加入提醒分开记录，定期删除超过35天的内容</td></tr>
               <tr><th scope="row">使用活动・终端标识符・诊断信息</th><td>Cloudflare D1</td><td>定期删除超过90天的东西。 可以通过发送ID与收件人哈希关联</td></tr>
               <tr><th scope="row">输入AI标签（正文）</th><td>外部服务器</td><td class="yes">无法发送（在设备上处理）</td></tr>
             </tbody>
@@ -283,7 +283,7 @@
       <section class="lp-section ce-chapter sd-chapter">
         <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"> <span>备忘录正文的保护和利用分析</span> </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead"> <span>iOS在应用内，备忘录正文的加密使用CryptoKit，钥匙保管使用Keychain，正文的发送使用URLSession。 GoogleSignIn和Firebase Authentication用于任意邮件自动输入，Firebase App Check用于后端API的保护。 <strong>本公司的使用分析和AppsFlyer，根据应用版和分析的选择，处理方式也不同。 </strong></span> </p>
-          <p class="lp-section__lead"> <span>在设置中提供“使用情况分析”选项的版本中，自有使用事件和来自设备的订阅状态分析默认关闭，同意后才开始。在另行提供获客测量选项之前，这些版本的 AppsFlyer SDK 会保持停止。没有此选项的版本也会发送自有使用事件和来自设备的订阅状态分析。我们撤销自 9 月 28 日起实施的、不保存旧方式请求的服务器端限制，不会追溯补齐此前未收集的事件。AppsFlyer 获客与使用情况测量的条件请参阅隐私政策。</span> <span>有有效同意的对应版的本公司分析，处理安装、会话的标识符、使用事件、发送结果等。  旧版的AppsFlyer发送首次备忘录成功、认证成功、收费画面显示、方案选择、购买成功，将相同的安装标识符设置为Customer User ID。 从应用程序设置的活动项目中不直接包含邮箱地址、备忘录正文、验证码，但本公司的发送ID与收件人哈希绑定，获取信息和使用记录也会相关联。 不是完全匿名的解析。 撤销同意和版本的条件是<a href="/zh/privacy">政策1(E)</a>，项目详情请看<a href="/zh/privacy#technical">隐私政策</a>。 </span> </p>
+          <p class="lp-section__lead"> <span>自2026年11月18日更新后，我们的服务器不再保存已发布版本（截至 5.9.32）发送的第一方使用事件或订阅状态分析。设备发送什么信息以及 AppsFlyer 如何计量，取决于应用版本和此前的选择。</span> <span>除了表中所列的发送 ID 对应关系，旧验证记录和提醒联系人中也可能保留可读形式的地址。分析选项见<a href="/zh/privacy">政策 1(E)</a>，存储位置和期限见<a href="/zh/privacy#technical">隐私政策</a>。</span> </p>
       </div></section>
 
       <!-- Honest limitations -->

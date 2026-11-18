@@ -271,7 +271,7 @@
               <tr><th scope="row">備忘錄正文</th><td>你的郵件收件箱</td><td>留下（這就是目的）</td></tr>
               <tr><th scope="row">備忘錄正文</th><td>你的Obsidian Vault（設定時）</td><td>殘留（終端內本地）</td></tr>
               <tr><th scope="row">Outbox・傳送記錄</th><td>僅限終端內</td><td>用AES-GCM-256加密儲存</td></tr>
-              <tr><th scope="row">郵箱地址</th><td>Cloudflare D1</td><td class="yes">儲存傳送ID和收件人雜湊的對應。 與選擇加入提醒分開記錄，定期刪除超過35天的內容</td></tr>
+              <tr><th scope="row">傳送 ID 與收件地址的雜湊值</th><td>Cloudflare D1</td><td class="yes">儲存傳送ID和收件人雜湊的對應。 與選擇加入提醒分開記錄，定期刪除超過35天的內容</td></tr>
               <tr><th scope="row">使用活動・終端識別符號・診斷資訊</th><td>Cloudflare D1</td><td>定期刪除超過90天的東西。 可以透過傳送ID與收件人雜湊關聯</td></tr>
               <tr><th scope="row">輸入AI標籤（正文）</th><td>外部伺服器</td><td class="yes">無法傳送（在裝置上處理）</td></tr>
             </tbody>
@@ -283,7 +283,7 @@
       <section class="lp-section ce-chapter sd-chapter">
         <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"> <span>備忘錄正文的保護和利用分析</span> </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead"> <span>iOS在應用內，備忘錄正文的加密使用CryptoKit，鑰匙保管使用Keychain，正文的傳送使用URLSession。 GoogleSignIn和Firebase Authentication用於任意郵件自動輸入，Firebase App Check用於後端API的保護。 <strong>本公司的使用分析和AppsFlyer，根據應用版和分析的選擇，處理方式也不同。 </strong></span> </p>
-          <p class="lp-section__lead"> <span>在設定中提供「使用情況分析」選項的版本中，自有使用事件和來自裝置的訂閱狀態分析預設關閉，同意後才開始。在另行提供獲客測量選項之前，這些版本的 AppsFlyer SDK 會保持停止。沒有此選項的版本也會傳送自有使用事件和來自裝置的訂閱狀態分析。我們撤銷自 9 月 28 日起實施的、不儲存舊方式請求的伺服器端限制，不會追溯補齊先前未收集的事件。AppsFlyer 獲客與使用情況測量的條件請參閱隱私權政策。</span> <span>有有效同意的對應版的本公司分析，處理安裝、會話的識別符號、使用事件、傳送結果等。  舊版的AppsFlyer傳送首次備忘錄成功、認證成功、收費畫面顯示、方案選擇、購買成功，將相同的安裝識別符號設定為Customer User ID。 從應用程式設定的活動專案中不直接包含郵箱地址、備忘錄正文、驗證碼，但本公司的傳送ID與收件人雜湊繫結，獲取資訊和使用記錄也會相關聯。 不是完全匿名的解析。 撤銷同意和版本的條件是<a href="/zh-Hant/privacy">政策1(E)</a>，專案詳情請看<a href="/zh-Hant/privacy#technical">隱私政策</a>。 </span> </p>
+          <p class="lp-section__lead"> <span>自2026年11月18日更新後，我們的伺服器不再儲存已發布版本（截至 5.9.32）傳來的第一方使用事件或訂閱狀態分析。裝置傳送的資料及 AppsFlyer 的計量方式取決於 App 版本和先前的選擇。</span> <span>除了表中所列的傳送 ID 對應關係，舊驗證記錄與提醒聯絡人中也可能留有可讀形式的地址。分析選項請見<a href="/zh-Hant/privacy">政策 1(E)</a>，儲存位置與期限請見<a href="/zh-Hant/privacy#technical">隱私權政策</a>。</span> </p>
       </div></section>
 
       <!-- Honest limitations -->

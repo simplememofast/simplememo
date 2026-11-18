@@ -413,7 +413,7 @@
           <h2 id="reading-04">4。 备忘录内容的处理（重要）</h2>
           <ul>
             <li>备忘录正文会根据用户的操作，发送到用户所选的目的地。保存到 Obsidian、提醒事项或日历的操作在 iPhone 内完成，不经过本公司服务器。</li>
-            <li>电子邮件：备忘录正文和收件地址会经过本公司服务器（Cloudflare Workers）和邮件发送服务商 Resend。本公司服务器不保存备忘录正文。Resend 会在美国将已发送的邮件（包括备忘录正文、主题和收件地址）及投递记录保存 30 天。本公司无法通过 API 删除保存在 Resend 中的单封邮件。</li>
+            <li>电子邮件：备忘录正文和收件地址经过我们的服务器（Cloudflare Workers）和电子邮件服务商 Resend。我们不在自己的服务器上保存备忘录正文。Resend 在美国保存发出的邮件（包括正文、主题和收件地址）及投递记录。其公布的标准方案保留 30 天，单独签订的合同可能另有规定。我们正在核实适用于本账户的期限。我们无法通过 API 删除 Resend 中的单封邮件。</li>
             <li>Notion：备忘录正文经由本公司服务器发送到 Notion（见上文1(I)）。</li>
             <li>语音输入：在 iPhone（iOS 26 或更高版本）上，语音会在设备内转换为文字。应用不会生成录音文件，也不会将语音发送给本公司。通过键盘、Apple Watch 或 Siri 进行的语音输入由 Apple 处理。</li>
             <li>iPhone 中会加密保存已发送的历史记录（最近 100 条）、未发送的备忘录和草稿（见下文第12节）。这些内容会一直保留，直到您将其删除或删除应用。删除账户不会删除这些内容。</li>
@@ -452,7 +452,7 @@
           </ul>
 
           <h3>(E) 邮件发送服务商</h3>
-          <p>本公司服务器发送的邮件（包括您发送的备忘录、确认邮件和提醒）由 Plus Five Five, Inc.（美国）运营的 Resend 依据该公司的 <a href="https://resend.com/legal/dpa" rel="noopener">Data Processing Addendum</a>（数据处理附录）进行投递。本公司的联系人列表也由 Resend 保存。Resend 会在美国将邮件内容、元数据和投递记录保存 30 天（见上文第4节）。</p>
+          <p>我们的服务器发送的邮件（包括备忘录、验证邮件和提醒）由美国 Plus Five Five, Inc. 运营的 Resend 投递。该公司公开了 <a href="https://resend.com/legal/dpa" rel="noopener">Data Processing Addendum</a>（数据处理附录）。我们的联系人列表也由 Resend 保存。Resend 在美国保存邮件内容、元数据和投递记录，其公布的标准方案保留 30 天（见第4节）。</p>
 
           <h2 id="reading-06">6。 第三方提供</h2>
           <p>除以下情况外，本公司不会向第三方提供个人信息。</p>
@@ -491,7 +491,7 @@
               <tr><th>信息</th><th>保存地点</th><th>期限</th></tr>
             </thead>
             <tbody>
-              <tr><td>备忘录正文和主题</td><td>不保存在本公司服务器上。Resend</td><td>Resend：30 天</td></tr>
+              <tr><td>备忘录正文和主题</td><td>不保存在本公司服务器上。Resend</td><td>Resend：30 天（标准方案）</td></tr>
               <tr><td>验证码记录</td><td>Cloudflare KV</td><td>10 分钟</td></tr>
               <tr><td>已使用邮件内链接的记录</td><td>Cloudflare KV</td><td>30 分钟</td></tr>
               <tr><td>已验证记录（仅在2026年11月18日的更新之前创建的记录包含地址）</td><td>Cloudflare KV</td><td>自验证起 365 天（再次验证时，从那时起 365 天）。删除账户时，删除验证过该地址的所有 iPhone 的记录（见上文1(G)）</td></tr>
@@ -534,8 +534,8 @@
             <li><strong>设备内存储空间</strong>：离线待发送消息（Outbox）和发送历史记录使用 Apple 原生 CryptoKit 提供的 <strong>AES-GCM-256</strong> 加密，保存在设备上（文件保护类别：<code>completeFileProtectionUntilFirstUserAuthentication</code>）。</li>
             <li><strong>密钥管理</strong>：256-bit 对称密钥存放在Apple Keychain Services（<code>kSecClassGenericPassword</code>），<a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly">重启后首次解锁后可以使用，使用不转移到其他终端的保护类</a>。 应用程序在加密、解密时读取密钥。 备份中包含的密钥副本由终端固有的密钥保护，在其他终端无法使用（<a href="https://support.apple.com/ja-jp/guide/security/secb0694df1a/1/web/1">Apple的说明</a>）。 在更换机型之前，请确认必要的备忘录是否已送达邮件或Obsidian等保存地址。</li>
             <li><strong>通信路</strong>：API通信由TLS（HTTPS）保护。 发送备忘录用的<code>URLSessionConfiguration.ephemeral</code>是将该会话的缓存、Cookie、认证信息不永久保存在磁盘上的构成。 与使用分析的保存、发送和外部SDK的通信说明区分开来。</li>
-            <li><strong>邮件正文</strong>：为进行发送处理，邮件正文会经过本公司的 Relay API（Cloudflare Workers）和外部发送基础设施（Resend），但不会持久保存在本公司的基础设施中，也不会记录在本公司的日志中（开发时的 DEBUG 构建除外）。Resend 会将已发送的邮件保存 30 天（见上文第4节）。</li>
-            <li><strong>电子邮件地址在服务器上的保存</strong>：Cloudflare D1 中保存发送 ID 与用 SHA-256 生成并截短的收件地址哈希之间的对应关系。无论是否选择接收提醒，都会创建此对应记录。地址哈希、语言、日期时间和次数的记录，也无论是否选择接收提醒都会保存（见上文1(G)）。可读形式的地址存在于在2026年11月18日的更新之前创建的 Cloudflare KV 已验证记录，以及 Resend 的联系人（开启了提醒的用户，以及在该更新之前登记的用户）中（见上文1(G)和5(B)）。此外，在 Resend 保留 30 天的已发送邮件、截至2026年8月25日的投递事件记录（第4节）、Firebase 登录记录（1(H)）、服务器日志（1(J)）以及部分支持邮件和调查记录（第14节）中，也可能有可读形式的地址。</li>
+            <li><strong>邮件正文</strong>：为进行发送处理，邮件正文会经过本公司的 Relay API（Cloudflare Workers）和外部发送基础设施（Resend），但不会持久保存在本公司的基础设施中，也不会记录在本公司的日志中（开发时的 DEBUG 构建除外）。Resend 会将已发送的邮件保存 30 天（标准方案）（见上文第4节）。</li>
+            <li><strong>电子邮件地址在服务器上的保存</strong>：Cloudflare D1 中保存发送 ID 与用 SHA-256 生成并截短的收件地址哈希之间的对应关系。无论是否选择接收提醒，都会创建此对应记录。地址哈希、语言、日期时间和次数的记录，也无论是否选择接收提醒都会保存（见上文1(G)）。可读形式的地址存在于在2026年11月18日的更新之前创建的 Cloudflare KV 已验证记录，以及 Resend 的联系人（开启了提醒的用户，以及在该更新之前登记的用户）中（见上文1(G)和5(B)）。此外，在 Resend 保留 30 天（标准方案）的已发送邮件、截至2026年8月25日的投递事件记录（第4节）、Firebase 登录记录（1(H)）、服务器日志（1(J)）以及部分支持邮件和调查记录（第14节）中，也可能有可读形式的地址。</li>
             <li><strong>加密、保管、通信路的依赖关系</strong>：备忘录正文的加密（CryptoKit）、钥匙保管（Keychain Services）、通信（URLSession / Network.framework）全部用Apple纯正框架完成，不通过第三方SDK。</li>
             <li><strong>登录和防滥用 SDK</strong>：“通过 Apple 登录”使用 Apple 的 AuthenticationServices 和 Firebase Authentication；从 Google 账户导入电子邮件地址时，使用 GoogleSignIn-iOS SDK 和 Firebase Authentication SDK（见上文1(H)）。Firebase App Check SDK 在启动时初始化，并使用 Apple App Attest 防止对后端 API 的未经授权访问。</li>
             <li><strong>本公司自有的使用分析</strong>：为改进质量和了解使用情况，应用会向本公司的 <code>/v1/analytics/event</code> 发送事件。字段包括随机的安装标识符、会话标识符、事件的类型/标识符/时间、应用的版本和构建号、语言、发送结果等允许的属性。其设计不直接包含电子邮件地址、备忘录正文或验证码，但可通过发送 ID 与收件地址的哈希相关联。此安装标识符保存在设备的钥匙串中。由于 iOS 的机制，即使删除应用，钥匙串中的项目也可能保留在设备上；这种情况下，重新安装后仍会使用相同的标识符。在 5.9.9 及更早版本以及 5.9.16～5.9.32 版本中，此标识符还会被设为 AppsFlyer 的 Customer User ID（见上文1(E)）。</li>
@@ -618,7 +618,7 @@
           <ul>
             <li>停止发送记录（例如在退信、投诉或退订之后）和地址删除记录（哈希和日期时间），用于避免再次向该地址发送邮件。</li>
             <li>Apple 通知的原始记录（见上文1(C)）会保留至 180 天期限届满，与地址无关联的使用事件会保留至 90 天期限届满。</li>
-            <li>受托方处的副本会保留至各自期限届满：Resend 中的邮件（30 天）、服务器日志（7 天）、用于数据库时间点恢复的数据（最长 30 天）。</li>
+            <li>受托方处的副本会保留至各自期限届满：Resend 中的邮件（30 天（标准方案））、服务器日志（7 天）、用于数据库时间点恢复的数据（最长 30 天）。</li>
             <li>账户删除的回执（设备令牌的哈希、地址的哈希、日期时间）。用于在删除后应用再次发送相同请求时，答复已删除。30 天后删除。</li>
           </ul>
           <p>应用内删除无法涉及的内容：</p>

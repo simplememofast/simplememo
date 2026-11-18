@@ -216,7 +216,7 @@
               <tr><th scope="row">Memo body</th><td>Your email inbox</td><td>Yes (that is the point)</td></tr>
               <tr><th scope="row">Memo body</th><td>Your Obsidian vault (if enabled)</td><td>Yes — local, on your device</td></tr>
               <tr><th scope="row">Outbox &amp; send history</th><td>On-device only</td><td>Encrypted with AES-GCM-256</td></tr>
-              <tr><th scope="row">Email address</th><td>Cloudflare D1</td><td class="yes">Send IDs mapped to recipient email hashes, independently of reminder opt-in. Records older than 35 days are removed by scheduled cleanup</td></tr>
+              <tr><th scope="row">Send ID and recipient address hash</th><td>Cloudflare D1</td><td class="yes">Send IDs mapped to recipient email hashes, independently of reminder opt-in. Records older than 35 days are removed by scheduled cleanup</td></tr>
               <tr><th scope="row">Usage events, device identifiers, and diagnostics</th><td>Cloudflare D1</td><td>Events older than 90 days are removed by scheduled cleanup. Send IDs can link events to recipient email hashes</td></tr>
               <tr><th scope="row">Tagging input (memo body)</th><td>External servers</td><td class="yes">Never sent — processing is on-device</td></tr>
             </tbody>
@@ -233,8 +233,8 @@
           <span>Within the iOS app, CryptoKit encrypts memo bodies, Keychain stores the key, and URLSession transmits memos. GoogleSignIn and Firebase Authentication support optional email auto-fill; Firebase App Check protects backend access. <strong>First-party usage analytics and AppsFlyer handling depend on app version and analytics choices.</strong></span>
           </p>
           <p class="lp-section__lead">
-            <span>In versions with a Usage analytics choice, first-party usage events and device-originated subscription analytics are off by default and begin after agreement. These versions keep the AppsFlyer SDK stopped until a separate acquisition choice is available. Versions without the choice also send first-party usage events and device-originated subscription analytics. We are removing the server restriction introduced on September 28 that prevented storage of requests using the original contract. Previously uncollected events are not reconstructed. See the privacy policy for the conditions governing AppsFlyer acquisition and usage measurement.</span>
-          <span>Consented first-party analytics in supported versions record installation and session identifiers, usage events, and send outcomes. Older versions send AppsFlyer events for first successful memo send, successful verification, paywall views, plan selection, and successful purchases. The same installation identifier is set as its Customer User ID. Event fields set by the app exclude raw email addresses, memo text, and verification codes, but first-party send IDs can link to recipient hashes, and acquisition and usage records can be connected. This analytics is not fully anonymous. See <a href="/en/privacy">policy 1(E)</a> for consent withdrawal and version conditions and the <a href="/en/privacy#technical">technical policy</a> for data fields.</span>
+            <span>Since the November 18, 2026 update, our server discards first-party usage events and subscription-state analytics from released versions through 5.9.32. What the device sends and how AppsFlyer measures usage depend on the app version and earlier choices.</span>
+          <span>Alongside the send-ID mapping in the table, older verification records and reminder contacts may contain a readable address. See <a href="/en/privacy">policy 1(E)</a> for analytics choices and the <a href="/en/privacy#technical">privacy policy</a> for storage locations and retention.</span>
         </p>
       </div></section>
 

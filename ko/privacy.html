@@ -413,7 +413,7 @@
           <h2 id="reading-04">4. 메모 내용의 처리(중요)</h2>
           <ul>
             <li>메모 본문은 사용자의 조작에 따라 사용자가 선택한 전송 대상으로 보내집니다. Obsidian, 미리 알림, 캘린더에 저장하는 작업은 iPhone 안에서 이루어지며 당사 서버를 거치지 않습니다.</li>
-            <li>이메일: 메모 본문과 수신 주소는 당사 서버(Cloudflare Workers)와 이메일 발송 사업자 Resend를 거칩니다. 당사 서버에는 메모 본문을 저장하지 않습니다. Resend는 보낸 이메일(메모 본문·제목·수신 주소 포함)과 전송 기록을 미국에서 30일 동안 저장합니다. Resend에 저장된 개별 이메일을 당사가 API로 삭제할 수는 없습니다.</li>
+            <li>이메일로 보낼 때 메모 본문과 수신 주소는 당사 서버(Cloudflare Workers)와 메일 발송업체 Resend을 거칩니다. 당사 서버에는 메모 본문을 저장하지 않습니다. Resend는 발송 메일(본문, 제목, 수신 주소 포함)과 전달 기록을 미국에 보관합니다. 공시된 표준 요금제의 보관 기간은 30일이며 개별 계약에 따라 달라질 수 있습니다. 당사 계정에 적용되는 기간은 확인 중입니다. 당사는 API를 통해 Resend의 개별 메일을 삭제할 수 없습니다.</li>
             <li>Notion: 메모 본문은 당사 서버를 거쳐 Notion에 전송됩니다(위 1(I) 참조).</li>
             <li>음성 입력: iPhone(iOS 26 이상)에서는 음성을 기기 안에서 텍스트로 변환합니다. 녹음 파일은 만들지 않으며 음성을 당사로 보내지 않습니다. 키보드, Apple Watch, Siri를 통한 음성 입력은 Apple이 처리합니다.</li>
             <li>iPhone 안에는 전송한 기록(최근 100건), 보내지 않은 메모, 임시 저장본을 암호화하여 저장합니다(아래 12 참조). 직접 삭제하거나 앱을 삭제할 때까지 남습니다. 계정을 삭제해도 이것들은 지워지지 않습니다.</li>
@@ -452,7 +452,7 @@
           </ul>
 
           <h3>(E) 이메일 발송 사업자</h3>
-          <p>당사 서버가 보내는 이메일(전송하는 메모, 확인 이메일, 리마인더 포함)은 Plus Five Five, Inc.(미국)가 운영하는 Resend가 해당 회사의 <a href="https://resend.com/legal/dpa" rel="noopener">Data Processing Addendum</a>(데이터 처리 부속 계약)에 따라 발송합니다. 당사의 연락처 목록도 Resend가 보관합니다. Resend는 이메일의 내용·메타데이터·전송 기록을 미국에서 30일 동안 저장합니다(위 4 참조).</p>
+          <p>미국 Plus Five Five, Inc.가 운영하는 Resend이 당사 서버의 메일(메모, 인증 메일, 리마인더 포함)을 발송합니다. 이 회사는 <a href="https://resend.com/legal/dpa" rel="noopener">Data Processing Addendum</a>를 공개합니다. 당사 연락처 목록도 Resend가 보관합니다. Resend는 메일 내용, 메타데이터 및 전달 기록을 미국에 보관하며, 공시된 표준 요금제의 보관 기간은 30일입니다(4절).</p>
 
           <h2 id="reading-06">6. 제3자 제공</h2>
           <p>당사는 다음 경우를 제외하고는 개인 정보를 제3자에게 제공하지 않습니다.</p>
@@ -491,7 +491,7 @@
               <tr><th>정보</th><th>저장 위치</th><th>기간</th></tr>
             </thead>
             <tbody>
-              <tr><td>메모 본문과 제목</td><td>당사 서버에는 저장하지 않음. Resend</td><td>Resend: 30일</td></tr>
+              <tr><td>메모 본문과 제목</td><td>당사 서버에는 저장하지 않음. Resend</td><td>Resend: 표준 요금제 기준 30일</td></tr>
               <tr><td>확인 코드 기록</td><td>Cloudflare KV</td><td>10분</td></tr>
               <tr><td>이메일 속 링크를 사용한 기록</td><td>Cloudflare KV</td><td>30분</td></tr>
               <tr><td>인증 완료 기록(2026년 11월 18일 업데이트 이전에 만든 기록만 주소를 포함)</td><td>Cloudflare KV</td><td>인증 후 365일(다시 인증하면 그때부터 365일). 계정을 삭제하면 그 주소를 인증한 모든 iPhone의 기록을 삭제(위 1(G) 참조)</td></tr>
@@ -534,8 +534,8 @@
             <li><strong>기기 내 저장</strong>: 오프라인 전송 대기 메시지(Outbox)와 전송 기록은 Apple의 CryptoKit을 이용한 <strong>AES-GCM-256</strong> 암호화로 기기 안에 저장합니다(파일 보호 클래스: <code>completeFileProtectionUntilFirstUserAuthentication</code>).</li>
             <li><strong>키 관리</strong>: 256-bit 대칭키는 Apple Keychain Services（<code>kSecClassGenericPassword</code>）에 보관하고, <a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly"> 재부팅 후 최초 잠금 해제부터 사용할 수 있으며, 다른 단말기로 이전되지 않는 보호 클래스</a>를 사용합니다. 앱은 암호화·복호화 시 키를 읽어냅니다. 백업에 포함된 키의 복사본은 기기 고유의 키로 보호되며, 다른 기기에서는 사용할 수 없습니다(<a href="https://support.apple.com/ja-jp/guide/security/secb0694df1a/1/web/1">Apple의 설명</a>). 기기 교체 전에, 필요한 메모가 이메일이나 Obsidian 등 저장처에 도착했는지 확인해 주세요.</li>
             <li><strong>통신로</strong>: API 통신은 TLS(HTTPS)으로 보호됩니다. 메모 전송용 <code>URLSessionConfiguration.ephemeral</code>은 해당 세션의 캐시·쿠키·인증 정보를 디스크에 영구적으로 저장하지 않는 구성입니다. 이용 분석의 저장·전송 및 외부 SDK 통신 설명과는 구별합니다.</li>
-            <li><strong>메일 본문</strong>: 전송 처리를 위해 당사의 Relay API(Cloudflare Workers)와 외부 전송 기반(Resend)을 거치지만, 당사 기반에는 지속적으로 저장하지 않습니다. 당사 로그에도 기록하지 않습니다(개발 시의 DEBUG 빌드 제외). Resend는 보낸 이메일을 30일 동안 저장합니다(위 4 참조).</li>
-            <li><strong>이메일 주소의 서버 저장</strong>: 전송 ID와, 수신 이메일 주소를 SHA-256으로 짧게 만든 해시의 대응을 Cloudflare D1에 저장합니다. 이 대응 기록은 리마인더 수신 동의 여부와 관계없이 생성됩니다. 주소의 해시·언어·일시·횟수 기록도 수신 동의 여부와 관계없이 저장합니다(위 1(G) 참조). 읽을 수 있는 형태의 주소는 2026년 11월 18일 업데이트 이전에 만든 Cloudflare KV의 인증 완료 기록과 Resend의 연락처(리마인더를 켠 분과 그 업데이트 이전에 등록된 분)에 있습니다(위 1(G)·5(B) 참조). 그 밖에도 Resend에서 30일 동안 보관하는 발송 메일, 2026년 8월 25일까지의 이메일 전달 이벤트 기록(4절), Firebase 로그인 기록(1(H)), 서버 로그(1(J)), 일부 지원 메일 및 설문 기록(14절)에 읽을 수 있는 형태의 주소가 포함될 수 있습니다.</li>
+            <li><strong>메일 본문</strong>: 전송 처리를 위해 당사의 Relay API(Cloudflare Workers)와 외부 전송 기반(Resend)을 거치지만, 당사 기반에는 지속적으로 저장하지 않습니다. 당사 로그에도 기록하지 않습니다(개발 시의 DEBUG 빌드 제외). Resend는 보낸 이메일을 표준 요금제 기준 30일 동안 저장합니다(위 4 참조).</li>
+            <li><strong>이메일 주소의 서버 저장</strong>: 전송 ID와, 수신 이메일 주소를 SHA-256으로 짧게 만든 해시의 대응을 Cloudflare D1에 저장합니다. 이 대응 기록은 리마인더 수신 동의 여부와 관계없이 생성됩니다. 주소의 해시·언어·일시·횟수 기록도 수신 동의 여부와 관계없이 저장합니다(위 1(G) 참조). 읽을 수 있는 형태의 주소는 2026년 11월 18일 업데이트 이전에 만든 Cloudflare KV의 인증 완료 기록과 Resend의 연락처(리마인더를 켠 분과 그 업데이트 이전에 등록된 분)에 있습니다(위 1(G)·5(B) 참조). 그 밖에도 Resend에서 표준 요금제 기준 30일 동안 보관하는 발송 메일, 2026년 8월 25일까지의 이메일 전달 이벤트 기록(4절), Firebase 로그인 기록(1(H)), 서버 로그(1(J)), 일부 지원 메일 및 설문 기록(14절)에 읽을 수 있는 형태의 주소가 포함될 수 있습니다.</li>
             <li><strong>암호화·보관·통신 경로의 의존 관계</strong>: 메모 본문의 암호화(CryptoKit), 키 보관(Keychain Services), 통신(URLSession / Network.framework)은 모두 Apple 순정 프레임워크로 완료되며, 서드파티 SDK를 거치지 않습니다.</li>
             <li><strong>로그인과 부정 이용 방지 SDK</strong>: “Apple로 로그인”에는 Apple의 AuthenticationServices와 Firebase Authentication을, Google 계정에서 이메일 주소를 가져올 때는 GoogleSignIn-iOS SDK와 Firebase Authentication SDK를 사용합니다(위 1(H) 참조). Firebase App Check SDK는 실행 시 초기화되며, Apple App Attest를 사용하여 백엔드 API에 대한 무단 접근을 막습니다.</li>
             <li><strong>자사 이용 분석</strong>: 품질 개선과 이용 현황 파악을 위해 당사의 <code>/v1/analytics/event</code>로 이벤트를 전송합니다. 항목에는 무작위 설치 식별자, 세션 식별자, 이벤트의 종류·식별자·시각, 앱의 버전·빌드, 언어, 전송 결과 등 허용된 속성이 포함됩니다. 이메일 주소·메모 본문·인증 코드를 직접 포함하지 않도록 설계했지만, 전송 ID를 통해 수신 이메일 주소의 해시와 연결될 수 있습니다. 이 설치 식별자는 기기의 키체인에 저장합니다. iOS의 구조상 키체인 항목은 앱을 삭제해도 기기에 남을 수 있으며, 그 경우 다시 설치한 후에도 같은 식별자를 사용합니다. 5.9.9 버전 이하와 5.9.16~5.9.32 버전에서는 이 식별자를 AppsFlyer의 Customer User ID로도 설정합니다(위 1(E) 참조).</li>
@@ -618,7 +618,7 @@
           <ul>
             <li>수신 거부 기록(반송·스팸 신고·수신 거부 후 등)과 주소를 삭제한 기록(해시와 일시). 해당 주소로 다시 이메일을 보내지 않기 위해서입니다.</li>
             <li>Apple 알림의 원본 기록(위 1(C) 참조)은 180일의 기간이 끝날 때까지, 주소와 연결되지 않는 이용 이벤트는 90일의 기간이 끝날 때까지 남습니다.</li>
-            <li>수탁자가 보유한 사본은 각각의 기간이 끝날 때까지 남습니다: Resend의 이메일(30일), 서버 로그(7일), 데이터베이스 특정 시점 복구용 데이터(최대 30일).</li>
+            <li>수탁자가 보유한 사본은 각각의 기간이 끝날 때까지 남습니다: Resend의 이메일(표준 요금제 기준 30일), 서버 로그(7일), 데이터베이스 특정 시점 복구용 데이터(최대 30일).</li>
             <li>계정 삭제 수령 기록(기기 토큰의 해시, 주소의 해시, 일시). 삭제 후 앱이 같은 요청을 다시 보냈을 때 삭제가 끝났다고 답하기 위한 것입니다. 30일 후에 삭제됩니다.</li>
           </ul>
           <p>앱에서의 삭제가 미치지 않는 것:</p>

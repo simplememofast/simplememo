@@ -271,7 +271,7 @@
               <tr><th scope="row">메모 본문</th><td>귀하의 메일 수신함</td><td>남다(그것이 목적입니다)</td></tr>
               <tr><th scope="row">메모 본문</th><td>귀하의 Obsidian Vault(설정 시)</td><td>남는(단말기 내 로컬)</td></tr>
               <tr><th scope="row">Outbox·전송 기록</th><td>단말기 내에서만</td><td>AES-GCM-256로 암호화 저장</td></tr>
-              <tr><th scope="row">이메일 주소</th><td>Cloudflare D1</td><td class="yes">전송 ID와 대상 해시의 대응을 저장합니다. 리마인더의 옵트인과는 별도로 기록하고, 35일을 초과한 것을 정기적으로 삭제합니다</td></tr>
+              <tr><th scope="row">전송 ID와 수신 주소 해시</th><td>Cloudflare D1</td><td class="yes">전송 ID와 대상 해시의 대응을 저장합니다. 리마인더의 옵트인과는 별도로 기록하고, 35일을 초과한 것을 정기적으로 삭제합니다</td></tr>
               <tr><th scope="row">이용 이벤트·단말기 식별자·진단 정보</th><td>Cloudflare D1</td><td>90일을 초과한 항목을 정기적으로 삭제합니다. 전송 ID를 통해 대상 해시와 연동 가능</td></tr>
               <tr><th scope="row">AI 태그 지정 입력(본문)</th><td>외부 서버</td><td class="yes">전송되지 않습니다(온디바이스 처리)</td></tr>
             </tbody>
@@ -283,7 +283,7 @@
       <section class="lp-section ce-chapter sd-chapter">
         <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"> <span>메모 본문 보호 및 이용 분석</span> </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead"> <span>iOS 앱 내에서는 메모 본문 암호화에 CryptoKit을, 키 보관에 Keychain을, 본문 전송에 URLSession을 사용합니다. GoogleSignIn와 Firebase Authentication은 임의의 메일 자동 입력에 사용하고, Firebase App Check는 백엔드 API의 보호에 사용합니다. <strong>자사의 이용 분석과 AppsFlyer는 앱 버전과 분석 선택에 따라 다르게 취급됩니다. </strong></span> </p>
-          <p class="lp-section__lead"> <span>설정에 “이용 상황 분석” 선택이 있는 버전에서는 자사 이용 이벤트와 기기에서 오는 구독 상태 분석이 기본적으로 꺼져 있으며, 동의 후에 시작됩니다. 이러한 버전의 AppsFlyer SDK는 별도의 획득 측정 선택이 제공될 때까지 중단됩니다. 선택 화면이 없는 버전도 자사 이용 이벤트와 기기에서 오는 구독 상태 분석을 전송합니다. 9월 28일부터 적용했던, 이전 방식의 요청을 저장하지 않는 서버 측 제한을 폐지하며, 수집하지 못한 과거 이벤트를 소급해 복원하지 않습니다. AppsFlyer의 획득·이용 측정 조건은 개인정보 처리방침을 확인해 주세요.</span> <span> 유효한 동의가 있는 대응 버전의 자체 분석은 설치·세션 식별자 및 이용 이벤트, 전송 결과 등을 처리합니다.  구버전 AppsFlyer에는 최초 메모 전송 성공, 인증 성공, 과금 화면 표시, 플랜 선택, 구매 성공을 전송하고, 동일한 설치 식별자를 Customer User ID로 설정합니다. 앱에서 설정하는 이벤트 항목에 이메일 주소·메모 본문·인증 코드는 직접 포함하지 않지만, 당사 전송 ID는 수신 해시와 연동되며, 획득 정보와 이용 기록도 연계됩니다. 완전히 익명인 분석이 아닙니다. 동의 철회 및 버전에 따른 조건은 <a href="/ko/privacy">정책 1(E)</a>이며, 항목의 자세한 내용은 <a href="/ko/privacy#technical">개인정보 처리방침</a>을 참조하십시오. </span> </p>
+          <p class="lp-section__lead"> <span>2026년 11월 18일 업데이트 이후 당사 서버는 출시된 앱 버전(5.9.32까지)이 보내는 자체 이용 이벤트와 구독 상태 분석을 저장하지 않습니다. 기기가 보내는 정보와 AppsFlyer 측정 방식은 앱 버전과 이전 선택에 따라 다릅니다.</span> <span>표에 나온 전송 ID 대응 기록 외에도 이전 인증 기록과 리마인더 연락처에 읽을 수 있는 형태의 주소가 남아 있을 수 있습니다. 분석 선택지는 <a href="/ko/privacy">정책 1(E)</a>, 저장 위치와 기간은 <a href="/ko/privacy#technical">개인정보 처리방침</a>에서 확인하세요.</span> </p>
       </div></section>
 
       <!-- Honest limitations -->
