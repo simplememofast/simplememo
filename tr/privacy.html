@@ -322,11 +322,12 @@
           <p>Aboneliklerin işleyişini ve ödeme hatalarını anlamak için Apple tarafından gönderilen imzalı bildirimleri doğrular; abonelik başlangıcı, yenileme, otomatik yenileme ayarı değişikliği, yenileme hatası, süre sonu ve iade gibi olayları kaydederiz. Saklanan alanlar; bildirim ve işlem tanımlayıcıları, abonelik ürünü tanımlayıcısı, bildirim türü ve alt türü, üretim veya test ortamı ayrımı, satın alma, süre sonu, iptal, bildirim ve alınma zamanları ile Apple tarafından bildirilen iptal nedenidir. Apple tanımlayıcıları içerdiği için bu bilgileri tamamen anonim kabul etmeyiz. Bu bildirim kayıtlarında e-posta adresi, not içeriği veya kurulum tanımlayıcısı saklanmaz. Apple işlem tanımlayıcılarını kurulum tanımlayıcıları veya alıcı e-posta adresleriyle eşleştiren bir tablo da saklanmaz. Aşağıdaki (D) bölümünde, işleme sırasında bildirimler eşleştirilerek ayrı bir analiz kaydı oluşturulur. Yalnızca e-posta adresine dayanan bir silme talebiyle özgün bildirim kayıtları belirlenemez.</p>
 
           <h3>(D) Abonelik durumu ve kullanıma devam etme analizi</h3>
+          <p>18 Kasım 2026 tarihinden itibaren sunucumuz bu analiz bilgilerini saklamadan atar (nedeni için bkz. (E)). Bu bölüm, uygulamanın gönderdiği bilgileri ve bu tarihten önce aldığımız bilgileri nasıl ele aldığımızı açıklar.</p>
           <p>Bu analiz uygulamada etkin olduğunda, Apple tarafından imzalanmış satın alma ve yenileme bilgilerini cihaz üzerinden alır, doğrular, doğrulanan abonelik durumunu cihaz bazında bir tanımlayıcıyla birlikte kaydeder ve kullanıma devam olaylarıyla karşılaştırırız. Kaydedilen alanlar şunlardır: abonelik ürünü, kendi satın alımınız mı yoksa Aile Paylaşımı mı olduğu, fiyat ve para birimi, satın alma, süre sonu, iptal, imzalama, gözlem ve alınma gibi zamanlar, otomatik yenileme durumu, ödeme yeniden denemesi, ek süre ve süre sonu nedeni, üretim veya test ortamı ayrımı ve uygulamanın çalışma ortamı. İşleme sırasında, yukarıdaki (C) bölümündeki bildirimleri Apple işlem tanımlayıcılarıyla eşleştirir; o anda doğrulanabilen bildirimlerin türe göre sayısını ve en son zamanını da kaydederiz. Apple işlem tanımlayıcılarını veya imzalı bilgilerin özgün metnini bu analiz kayıtlarıyla birlikte saklamayız. Kayıtlar e-posta adresi veya not içeriği de içermez; ancak cihaz tanımlayıcısı, ürün, zaman ve fiyat gibi bilgiler kullanım bilgileriyle ilişkilendirilebildiği için bunları anonim bilgi olarak kabul etmeyiz. Hangi sürümlerin bu bilgileri gönderdiği ve seçim yapıp yapamayacağınız aşağıdaki (E) bölümündeki tabloda gösterilmiştir.</p>
           <p>Bu analiz kayıtları, alınmalarının üzerinden 90 günden fazla geçtiğinde düzenli olarak silinir. Uygulamadan yapılan silme, cihazda tutulan silme bilgilerine karşılık gelen analiz kayıtlarını siler; silinmiş bilgiler gecikmeli olarak yeniden gönderilse bile saklanmaz. Bu işlem, yukarıdaki (C) bölümündeki özgün Apple bildirim kayıtlarını, başka cihazların kayıtlarını veya harici analiz hizmetlerindeki kayıtları topluca silmez. Örneğin cihazdaki silme bilgileri kaybolmuşsa ilgili kayıtları belirleyemeyebiliriz.</p>
 
           <h3>(E) Uygulama sürümüne göre kullanım analizi ve AppsFlyer ölçümü</h3>
-          <p>Uygulamanın gönderdiği bilgiler yüklü sürüme göre değişir. Yüklü sürümü iPhone cihazınızda Ayarlar &gt; Genel &gt; iPhone Saklama Alanı bölümünde bu uygulamayı seçerek görebilirsiniz. 5.9.10 sürümü App Store üzerinde yayımlanmadı.</p>
+          <p>Uygulamanın gönderdiği bilgiler yüklü sürüme göre değişir. Yüklü sürümü iPhone cihazınızda Ayarlar &gt; Genel &gt; iPhone Saklama Alanı bölümünde bu uygulamayı seçerek görebilirsiniz. 5.9.10 sürümü App Store üzerinde yayımlanmadı. Aşağıdaki tablo, uygulamanın gönderdiklerini gösterir. Sunucumuzun bunları saklayıp saklamadığı tablodan sonra açıklanır.</p>
           <div class="sd-table" tabindex="0" role="region" aria-label="Yatay olarak kaydırılabilen tablo"><table>
             <thead>
               <tr><th>Uygulama sürümü</th><th>Kendi kullanım olaylarımız (12. bölüm) ve abonelik durumu analizi ((D))</th><th>AppsFlyer SDK (12. bölüm)</th><th>Uygulama içindeki seçim</th></tr>
@@ -341,8 +342,9 @@
           </table></div>
           <p>5.9.11–5.9.15 sürümlerinde “Kullanım analizi” onayı geri çekildiğinde yeni veri toplama durdurulur ve cihazdaki gönderilmemiş olaylar silinmeye çalışılırdı. Onayın geri çekilmesi, daha önce aldığımız kayıtları silmiyordu.</p>
           <p>5.9.16–5.9.32 sürümlerinde bunları durduracak bir uygulama içi ayar yoktur. iOS bu uygulama için izlemenin “izin verilmedi” veya “kısıtlandı” olduğunu bildirirse AppsFlyer başlamaz. Bu sürümlerde kendi kullanım olaylarımız ve abonelik durumu analizi kapatılamaz. Gelecek bir sürümde, tüm bölgelerde bunlar başlamadan önce onayınızı istemeyi planlıyoruz.</p>
-          <p>28 Eylül 2026 tarihinden 7 Ekim tarihine kadar sunucumuz, seçim ekranı bulunmayan sürümlerden gelen kullanım olaylarını ve abonelik durumu analizini saklamadan attı. 7 Ekim 2026 tarihinden itibaren bunları tüm sürümlerden kabul ediyoruz. Atılan olaylar geriye dönük olarak tamamlanmaz.</p>
+          <p>28 Eylül 2026 tarihinden 7 Ekim tarihine kadar sunucumuz, seçim ekranı bulunmayan sürümlerden gelen kullanım olaylarını ve abonelik durumu analizini saklamadan attı. 7 Ekim 2026 tarihinden 18 Kasım tarihine kadar bunları tüm sürümlerden kabul etti. Atılan olaylar geriye dönük olarak tamamlanmaz.</p>
           <p>Dahili Capture denemesinde, kapsamı ve süresi belirtilen ayrı bir katılım onayıyla işlem sırasını ve teslimatın başarılı olup olmadığını ölçtük. Bu deneme 5.9.10 sürümünden bu yana yapılmamaktadır.</p>
+          <p>18 Kasım 2026 tarihinden itibaren sunucumuz yalnızca kullanım analizine onay verildiğini gösteren yeni bir işaret taşıyan istekleri saklar. Şu anda yayımlanmış sürümlerin hiçbiri (5.9.32 dahil) bu işareti eklemez. Bu nedenle sunucumuz, hangi sürümden gelirse gelsin kullanım olaylarını, abonelik durumu analizini ve yukarıdaki Capture denemesinin gözlemlerini saklamadan atar ve yalnızca her gün attığı kayıtların sayısını tutar. Bu tarihten önce saklanan kullanım olayları ve abonelik durumu analizi, alındıktan 90 gün sonra silinir.</p>
 
           <h3>(F) Uygulamayı nasıl bulduğunuzu ölçme (yalnızca 5.9.15 sürümü)</h3>
           <p>“Uygulamayı nasıl bulduğunuzu ölçme” isteğe bağlıydı ve başlangıçta kapalıydı. Yalnızca bu seçeneğe onay verdiğinizde ve iPhone üzerinde izlemeye izin verdiğinizde, indirme bağlantılarından gelen edinmeyi anlamak için AppsFlyer'a uygulama açılışlarını, edinme kaynağını ve kampanya bilgilerini, reklam tanımlayıcısını, IP adresini, cihaz modelini, işletim sistemi ve uygulama sürümünü ve SDK'ya özgü tanımlayıcıları gönderdik. Bu yolda kendi kullanım analizimizin tanımlayıcısını Customer User ID olarak iletmedik; not içeriği, e-posta adresi, satın alma olayları veya olağan uygulama içi kullanım olayları göndermedik. Reklam iş ortaklarıyla paylaşım ve reklam kişiselleştirme ile SKAdNetwork, IDFV ve Apple Ads ölçümü kapalıydı. Tanımlayıcı içerdiği için bu verileri anonim bilgi olarak kabul etmeyiz.</p>
@@ -351,15 +353,18 @@
           <h3 id="email-verification">(G) E-posta adresinin doğrulanması</h3>
           <p>Notları bir adrese gönderebilmeniz için o e-posta adresini kullanabildiğinizi 6 haneli bir kod, e-postadaki bir bağlantı ya da Apple veya Google ile giriş (bkz. aşağıdaki (H)) yoluyla doğrularız.</p>
           <ul>
-            <li>Sunucumuz (Cloudflare Workers KV), e-posta adresinizi aşağıdaki doğrulama kayıtlarında okunabilir biçimde saklar. <ul>
-                <li>Doğrulama kodu kaydı (kodla birlikte): 10 dakika</li>
+            <li>Sunucumuz (Cloudflare Workers KV) aşağıdaki doğrulama kayıtlarını saklar. 18 Kasım 2026 tarihindeki güncellemeden itibaren bu kayıtlar e-posta adresinizi içermez. Kayıtlar, adresin özetiyle birbirinden ayırt edilir. <ul>
+                <li>Doğrulama kodu kaydı (kod, dil, deneme sayısı ve benzeri bilgiler): 10 dakika</li>
                 <li>E-postadaki bağlantının kullanıldığını gösteren kayıt: 30 dakika</li>
-                <li>Gönderime izin veren, her iPhone için doğrulanmış adres kaydı: doğrulamadan itibaren 365 gün (yeniden doğrularsanız o andan itibaren 365 gün). Hesabınızı sildiğinizde, silme işlemini yaptığınız iPhone cihazına ait kayıt silinir (bkz. 15. bölüm).</li>
+                <li>Gönderime izin veren, her iPhone için doğrulanmış adres kaydı: doğrulamadan itibaren 365 gün (yeniden doğrularsanız o andan itibaren 365 gün). Hesabınızı sildiğinizde, bu adresi doğrulamış tüm iPhone cihazlarına ait kayıtlar silinir (bkz. 15. bölüm).</li>
               </ul>
             </li>
+            <li>18 Kasım 2026 tarihindeki güncellemeden önce oluşturulan doğrulanmış adres kayıtlarında e-posta adresiniz hâlâ okunabilir biçimde bulunur. Böyle bir kayıt, yeniden doğrulama yaptığınızda (adres içermeyen bir kayıtla değiştirilir), doğrulamadan itibaren 365 gün geçtiğinde veya hesabınızı sildiğinizde silinir. Ancak hesabınızı sildiğinizde, arama sayısında bir üst sınır olduğu için diğer iPhone cihazlarına ait eski kayıtlar bulunamayabilir. Bulunamayan kayıtlar doğrulamadan itibaren 365 gün sonra silinir. Bu güncellemeden önceki doğrulama kodu ve bağlantı kayıtları da adresi içeriyordu, ancak bunların süresi zaten dolmuştur.</li>
             <li>Veritabanımızda (Cloudflare D1), e-posta adresinizin SHA-256 ile hesaplanmış kısaltılmış özetini gönderim kimlikleriyle birlikte 35 gün boyunca, kayıt ve hatırlatıcı kayıtlarıyla birlikte de saklarız (bkz. 5. ve 9. bölümler). Bu özet anonim değil, takma adlı (pseudonymous) bir bilgidir: adresi bilen herkes aynı değeri hesaplayabileceğinden bunu kişisel bilgi olarak ele alırız.</li>
-            <li>Kod istediğinizde, doğrulamayı tamamladığınızda, Apple veya Google ile doğrulama yaptığınızda ya da e-postayla not gönderdiğinizde, bu adresi e-posta gönderim sağlayıcımız Resend hizmetinde (bkz. 5(E)) kişi olarak kaydederiz. Hatırlatıcıları açmadığınız sürece kişi, abonelikten çıkmış durumda kaydedilir. Kayıt, hatırlatıcıları açıp açmadığınızdan bağımsız olarak yapılır; yalnızca kod isteyip doğrulamayı tamamlamayan adresler de kaydedilir.</li>
-            <li>Kod isteyip doğrulamayı tamamlamadıysanız, yaklaşık 6, 24 ve 72 saat sonra, doğrulamayı tamamlamanızı isteyen en fazla 3 e-posta gönderebiliriz. Her e-postada abonelikten çıkma bağlantısı bulunur.</li>
+            <li>Hatırlatıcıları açıp açmadığınızdan bağımsız olarak, doğrulanan veya not göndermek için kullanılan her adres için adres özetini, dili, doğrulama zamanını, ilk ve son gönderim zamanlarını ve gönderim sayısını hesabınızı silene kadar saklarız (bkz. 9. bölüm).</li>
+            <li>Hatırlatıcıları açtığınızda, bu adresi e-posta gönderim sağlayıcımız Resend hizmetinde (bkz. 5(E)) kişi olarak kaydederiz.</li>
+            <li>18 Kasım 2026 tarihindeki güncellemeden önce, hatırlatıcılar açılmamış olsa bile, biri kod istediğinde, doğrulamayı tamamladığında, Apple veya Google ile doğrulama yaptığında ya da e-postayla not gönderdiğinde adresi Resend hizmetinde abonelikten çıkmış durumda kişi olarak kaydediyorduk. Buna yalnızca kod isteyip doğrulamayı tamamlamayan adresler de dahildi. Hesabın silindiği durumlar dışında bu kişiler hâlâ Resend (ABD) üzerinde durmaktadır. Bunları ne zaman sileceğimize henüz karar vermedik.</li>
+            <li>Kod isteyip doğrulamayı tamamlamadıysanız, yaklaşık 6, 24 ve 72 saat sonra, doğrulamayı tamamlamanızı isteyen en fazla 3 e-posta gönderebiliriz. Her e-postada abonelikten çıkma bağlantısı bulunur. Bu e-postaların alıcı adresi Resend hizmetindeki kişi kaydından alınır. Bu nedenle 18 Kasım 2026 tarihindeki güncellemeden sonra bu e-postaları yalnızca Resend üzerinde kişi kaydı bulunan adreslere (bu güncellemeden önce kaydedilen adresler ve hatırlatıcıları açık olan adresler) göndeririz.</li>
           </ul>
 
           <h3 id="sign-in">(H) Apple veya Google ile giriş</h3>
@@ -375,8 +380,8 @@
           <h3 id="notion">(I) Notion</h3>
           <p>Notion'ı bağladığınızda (5.8.12 ve sonraki sürümler):</p>
           <ul>
-            <li>Sunucumuzun Notion içine yazabilmesi için verilen izin (OAuth belirteçleri), çalışma alanınızda oluşturulan Inbox veritabanının kimliğiyle birlikte sunucumuzda (Cloudflare D1) şifrelenmiş olarak saklanır. Belirteçler hiçbir zaman iPhone cihazınızda saklanmaz.</li>
-            <li>Bir notu Notion içine kaydettiğinizde not içeriği, içerikten oluşturulan başlık, zaman ve kayıt kimliği sunucumuz (Cloudflare Workers) üzerinden Notion API hizmetine gönderilir. Not içeriğini saklamayız. Aynı sayfanın tekrar oluşturulmaması için bir teslim kaydı (içerikten hesaplanan kriptografik bir değer ve Notion sayfa kimliği) tutarız; tamamlanan kayıt işlemlerine ait kayıtlar 30 gün sonra silinir.</li>
+            <li>Sunucumuzun Notion içine yazabilmesi için verilen izin (OAuth belirteçleri) ve çalışma alanının adı, sunucumuzda (Cloudflare D1) şifrelenmiş olarak saklanır. Çalışma alanınızda oluşturulan Inbox veritabanının kimliğini de saklarız. Belirteçler hiçbir zaman iPhone cihazınızda saklanmaz.</li>
+            <li>Bir notu Notion içine kaydettiğinizde not içeriği, içerikten oluşturulan başlık, zaman ve kayıt kimliği sunucumuz (Cloudflare Workers) üzerinden Notion API hizmetine gönderilir. Not içeriğini saklamayız. Aynı sayfanın tekrar oluşturulmaması için bir teslim kaydı (içerikten hesaplanan kriptografik bir değer ve Notion sayfa kimliği) tutarız; tamamlanan kayıt işlemlerine ait kayıtlar 30 gün sonra silinir. Aynı nedenle, sonucu bilinmeyen teslim kayıtları bağlantı kayıtları silinene kadar saklanır.</li>
             <li>Ayarlar'da “Disconnect” (bağlantıyı kes) seçeneğini seçtiğinizde Notion üzerindeki erişimimizi iptal eder ve saklanan belirteçleri sileriz. Yeniden bağlandığınızda yinelenen kayıt oluşmaması için Inbox ayarlarını ve son teslim kayıtlarını saklarız. Uygulamada hesabınızı sildiğinizde, o iPhone cihazından oluşturulan Notion bağlantı kayıtları silinir.</li>
             <li>Kaydettiğiniz sayfalar, Notion Labs, Inc. (ABD) tarafından Notion koşulları ve gizlilik politikası uyarınca çalışma alanınızda saklanır. Sayfaları Notion içinden silin.</li>
           </ul>
@@ -392,7 +397,7 @@
             <li>Notion'ı bağladığınızda notların Notion içine kaydedilmesi</li>
             <li>Açtığınız hatırlatma e-postalarının ve 5. bölüm ile 1(G) bölümünde açıklanan e-postaların gönderilmesi</li>
             <li>Hizmetin işletilmesi ve bakımı, arızaların giderilmesi ve kalitenin iyileştirilmesi (kullanım analizi dahil)</li>
-            <li>Uygulamanın hangi bağlantı veya kampanyalardan yüklendiğinin ölçülmesi (AppsFlyer; web sitemizdeki AppsFlyer bağlantıları 17 Kasım 2026’ya kadar; istisna için bkz. 13(C))</li>
+            <li>Uygulamanın hangi bağlantı veya kampanyalardan yüklendiğinin ve bunun sonraki satın alımlara (tutar ve para birimi) yol açıp açmadığının ölçülmesi (AppsFlyer; web sitemizdeki AppsFlyer bağlantıları 17 Kasım 2026’ya kadar; istisna için bkz. 13(C))</li>
             <li>Aboneliklerin işleyişinin ve ödeme hatalarının anlaşılması</li>
             <li>Dahili test cihazlarının kullanım istatistiklerinden çıkarılması ve önceden ayarlanmış Obsidian özelliklerine ilişkin bildirimlerin yinelenmesinin önlenmesi</li>
             <li>Kötüye kullanımın önlenmesi ve güvenliğin sağlanması (kısa sürede art arda gönderimin sınırlanması, sunucu tarafında hız sınırlama, sunucu günlükleri vb.)</li>
@@ -422,7 +427,7 @@
           <h3>(A) Onay alınması</h3>
           <ul>
             <li>Bu özellik <strong>başlangıçta kapalıdır</strong>. Yalnızca kullanıcı doğrulama veya ayarlar ekranında açıkça etkinleştirdiğinde hatırlatıcı gönderilir.</li>
-            <li>Hatırlatıcıları açmamış olsa bile, e-posta adresi doğrulanmış ve bir süredir not göndermemiş kullanıcıya, son gönderimden yaklaşık 72 saat sonra, hatırlatıcı almak isteyip istemediğini soran bir davet e-postası <strong>yalnızca 1 kez</strong> gönderilebilir. Kullanıcı almayı seçmedikçe hatırlatıcı gönderilmez.</li>
+            <li>Daha önce hatırlatıcıları açmamış kullanıcılara, hatırlatıcı almak isteyip istemediklerini soran 1 davet e-postası gönderiyorduk. Artık göndermiyoruz. Daha önce gelen bir davetten kaydolmak veya aboneliği durdurmak hâlâ mümkündür.</li>
             <li>Etkinleştirdikten sonra ayarlardan 1 dokunuşla durdurabilirsiniz. Her hatırlatma e-postasının sonundaki abonelikten çıkma bağlantısını da kullanabilirsiniz.</li>
             <li>Doğrulama tamamlanmadığında gönderilen e-postalar 1(G) bölümünde açıklanmıştır.</li>
           </ul>
@@ -430,9 +435,9 @@
           <h3>(B) Toplanan ve saklanan bilgiler</h3>
           <ul>
             <li>E-posta adresinizin SHA-256 ile hesaplanmış kısaltılmış özeti — sunucumuzda (Cloudflare D1) saklanır.</li>
-            <li>Onay durumu, açık veya kapalı; son not gönderim zamanı; toplam gönderim sayısı.</li>
-            <li>Gönderim zamanı ile teslim, açılma, tıklanma ve geri dönme gibi olayları içeren hatırlatıcı gönderim geçmişi.</li>
-            <li>Okunabilir biçimdeki e-posta adresiniz — Resend kişi listesinde ve sunucumuzun doğrulama kayıtlarında bulunur. Bunlar hatırlatıcıları açıp açmadığınızdan bağımsız olarak vardır (1(G)).</li>
+            <li>Onay durumu, açık veya kapalı; dil; ilk ve son not gönderim zamanları; toplam gönderim sayısı. Bunları hatırlatıcıları açmamış kullanıcılar için de saklarız (1(G)).</li>
+            <li>Gönderim zamanı ile teslim, açılma, tıklanma ve geri dönme gibi olayları içeren hatırlatıcı gönderim geçmişi. Teslim olayları alındıktan 180 gün sonra silinir.</li>
+            <li>Okunabilir biçimdeki e-posta adresiniz — Resend kişi listesinde (hatırlatıcıları açanlar ve 18 Kasım 2026 tarihindeki güncellemeden önce kaydedilenler için) ve sunucumuzun doğrulanmış adres kayıtlarında (yalnızca bu güncellemeden önce oluşturulanlar) bulunur (1(G)).</li>
           </ul>
 
           <h3>(C) Gönderim sıklığı</h3>
@@ -465,7 +470,7 @@
               <tr><th>Hizmet sağlayıcı</th><th>Ülke</th><th>Aldığı bilgiler</th><th>Amaç</th></tr>
             </thead>
             <tbody>
-              <tr><td>Cloudflare, Inc.</td><td>ABD. Ağı dünyanın her yerindedir; ana veritabanımız Asya-Pasifik bölgesindedir</td><td>Sunucumuzdan ve sitemizden geçen tüm bilgiler: iletilmekte olan not içeriği, e-posta adresleri (doğrulama kayıtlarında ve 14. bölümde açıklanan bazı kayıtlarda okunabilir biçimde; diğerlerinde özet olarak), cihaz ve kurulum tanımlayıcıları, kullanım olayları, Notion belirteçleri (şifrelenmiş), IP adreslerini içeren sunucu günlükleri, iletişim formu içerikleri, anket yanıtları, site analizi (13(D)) ve destek adresimize gelen e-postalar</td><td>Barındırma, veritabanı, sunucu günlükleri, sitenin sunulması ve analizi, destek e-postalarının yönlendirilmesi</td></tr>
+              <tr><td>Cloudflare, Inc.</td><td>ABD. Ağı dünyanın her yerindedir; ana veritabanımız Asya-Pasifik bölgesindedir</td><td>Sunucumuzdan ve sitemizden geçen tüm bilgiler: iletilmekte olan not içeriği, e-posta adresleri (18 Kasım 2026 tarihindeki güncellemeden önce oluşturulan doğrulanmış adres kayıtlarında, bazı sunucu günlüklerinde (1(J)) ve 14. bölümde açıklanan bazı kayıtlarda okunabilir biçimde; diğerlerinde özet olarak), cihaz ve kurulum tanımlayıcıları, kullanım olayları, Notion belirteçleri (şifrelenmiş), IP adreslerini içeren sunucu günlükleri, iletişim formu içerikleri, anket yanıtları, site analizi (13(D)) ve destek adresimize gelen e-postalar</td><td>Barındırma, veritabanı, sunucu günlükleri, sitenin sunulması ve analizi, destek e-postalarının yönlendirilmesi</td></tr>
               <tr><td>Plus Five Five, Inc. (Resend)</td><td>ABD</td><td>Her e-postanın alıcı adresi, konusu ve not içeriği; kişi listesi; teslim olayları</td><td>E-posta teslimi</td></tr>
               <tr><td>Google LLC</td><td>ABD</td><td>Firebase Authentication: giriş kayıtları (1(H)). Firebase App Check: uygulama iletişiminin meşruiyetinin kanıtlanması. Google ile giriş. Sitedeki Google Analytics (13(A))</td><td>Giriş, kötüye kullanımı önleme, site analizi</td></tr>
               <tr><td>Google LLC (Gmail)</td><td>ABD</td><td>Destek adresimize gelen e-postalar (14(B))</td><td>Destek gelen kutusu</td></tr>
@@ -487,21 +492,25 @@
             </thead>
             <tbody>
               <tr><td>Not içeriği ve konu</td><td>Sunucularımızda saklanmaz. Resend</td><td>Resend: 30 gün</td></tr>
-              <tr><td>Doğrulama kodu kaydı (adres ve kod)</td><td>Cloudflare KV</td><td>10 dakika</td></tr>
-              <tr><td>E-postadaki bağlantının kullanıldığına dair kayıt (adres)</td><td>Cloudflare KV</td><td>30 dakika</td></tr>
-              <tr><td>Doğrulanmış adres kaydı (adres)</td><td>Cloudflare KV</td><td>Doğrulamadan itibaren 365 gün (yeniden doğrularsanız o andan itibaren 365 gün); o iPhone cihazında hesabınızı sildiğinizde silinir</td></tr>
+              <tr><td>Doğrulama kodu kaydı</td><td>Cloudflare KV</td><td>10 dakika</td></tr>
+              <tr><td>E-postadaki bağlantının kullanıldığına dair kayıt</td><td>Cloudflare KV</td><td>30 dakika</td></tr>
+              <tr><td>Doğrulanmış adres kaydı (yalnızca 18 Kasım 2026 tarihindeki güncellemeden önce oluşturulduysa adresi içerir)</td><td>Cloudflare KV</td><td>Doğrulamadan itibaren 365 gün (yeniden doğrularsanız o andan itibaren 365 gün); hesabınızı sildiğinizde, adresi doğrulamış tüm iPhone cihazlarına ait kayıtlar silinir (1(G))</td></tr>
+              <tr><td>Bir adresi doğrulamış iPhone cihazlarının dizini (adres özeti ve cihaz belirteci)</td><td>Cloudflare KV</td><td>Doğrulamadan itibaren 365 gün; hesabınızı sildiğinizde silinir</td></tr>
+              <tr><td>Hesap silme makbuzu (cihaz belirtecinin özeti, adres özeti ve zaman)</td><td>Cloudflare KV</td><td>30 gün</td></tr>
               <tr><td>Gönderim kimliği ile adres özeti eşleşmesi</td><td>Cloudflare D1</td><td>35 gün</td></tr>
               <tr><td>Teslimatı koordine etmek için kullanılan anahtarlı özetler</td><td>Cloudflare</td><td>35 gün</td></tr>
               <tr><td>Hatırlatıcı onayındaki değişikliklerin kayıtları</td><td>Cloudflare</td><td>180 gün</td></tr>
-              <tr><td>Hatırlatıcı ayarları ve geçmişi, kayıt bilgileri (adres özeti, Resend kişi kimliği, sayılar ve zamanlar)</td><td>Cloudflare D1</td><td>Hesabınızı silene kadar</td></tr>
-              <tr><td>Resend kişisi (adres)</td><td>Resend (ABD)</td><td>Hesabınızı silene kadar</td></tr>
-              <tr><td>Kullanım olayları</td><td>Cloudflare D1</td><td>90 gün</td></tr>
-              <tr><td>Abonelik durumu analizi (1(D))</td><td>Cloudflare D1</td><td>90 gün</td></tr>
+              <tr><td>E-posta gönderim ve doğrulama kayıtları (adres özeti, dil, zamanlar ve sayılar), hatırlatıcı ayarları ve gönderim geçmişi, doğrulama hatırlatmaları ve davetler gibi gönderilen e-postaların kayıtları, Resend kişi kimliği</td><td>Cloudflare D1</td><td>Hesabınızı silene kadar</td></tr>
+              <tr><td>E-posta teslim olayları (teslim, açılma, tıklanma, geri dönme ve benzerleri)</td><td>Cloudflare D1</td><td>Alındıktan sonra 180 gün</td></tr>
+              <tr><td>Resend kişisi (hatırlatıcıları açan kişinin adresi)</td><td>Resend (ABD)</td><td>Hesabınızı silene kadar</td></tr>
+              <tr><td>Resend kişisi (18 Kasım 2026 tarihindeki güncellemeden önce hatırlatıcılar açılmadan kaydedilen adres)</td><td>Resend (ABD)</td><td>Henüz bir süre belirlemedik. Hesabınızı sildiğinizde silinir (doğrulamayı tamamlamamış bir adres için bize e-posta gönderin)</td></tr>
+              <tr><td>Kullanım olayları (18 Kasım 2026 tarihinden beri saklanmıyor)</td><td>Cloudflare D1</td><td>90 gün</td></tr>
+              <tr><td>Abonelik durumu analizi (1(D); 18 Kasım 2026 tarihinden beri saklanmıyor)</td><td>Cloudflare D1</td><td>90 gün</td></tr>
               <tr><td>Özgün Apple bildirim kayıtları (1(C))</td><td>Cloudflare D1</td><td>180 gün</td></tr>
               <tr><td>Gönderim engeli kayıtları ve adresin silindiğine dair kayıtlar (özetler ve zamanlar)</td><td>Cloudflare</td><td>O adrese tekrar e-posta göndermemek için saklanır</td></tr>
               <tr><td>Sunucu günlükleri (1(J))</td><td>Cloudflare Workers Logs</td><td>7 gün</td></tr>
               <tr><td>Hız sınırlama için IP adresi özeti</td><td>Cloudflare KV</td><td>En fazla 48 saat</td></tr>
-              <tr><td>Notion belirteçleri / bağlantı kayıtları / teslim kayıtları (1(I))</td><td>Cloudflare D1</td><td>Bağlantıyı kesene kadar / bağlantıyı veya hesabı silene kadar / kayıt tamamlandıktan sonra 30 gün</td></tr>
+              <tr><td>Notion belirteçleri / bağlantı kayıtları / teslim kayıtları (1(I))</td><td>Cloudflare D1</td><td>Bağlantıyı kesene kadar / bağlantıyı veya hesabı silene kadar / kayıt tamamlandıktan sonra 30 gün (sonucu bilinmeyen kayıtlar: bağlantı silinene kadar)</td></tr>
               <tr><td>İletişim formu içerikleri (14(A))</td><td>Cloudflare D1</td><td>180 gün</td></tr>
               <tr><td>Desteğe gönderilen e-postalar (14(B))</td><td>Google LLC (Gmail, ABD)</td><td>Henüz bir süre belirlemedik</td></tr>
               <tr><td>Yol haritası anketi yanıtları (14(C))</td><td>Cloudflare D1</td><td>Henüz bir süre belirlemedik</td></tr>
@@ -526,11 +535,13 @@
             <li><strong>Anahtar yönetimi</strong>: 256 bit simetrik anahtar Apple Keychain Services içinde (<code>kSecClassGenericPassword</code>) saklanır. <a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly">Yeniden başlatmadan sonraki ilk kilit açılışından itibaren erişilebilen ve başka cihaza taşınmayan bir koruma sınıfı</a> kullanılır. Uygulama şifreleme ve şifre çözme sırasında anahtarı okur. Yedekteki anahtar kopyası cihaza özgü bir anahtarla korunur ve başka cihazda kullanılamaz (<a href="https://support.apple.com/ja-jp/guide/security/secb0694df1a/1/web/1">Apple açıklaması</a>). Cihaz değiştirmeden önce gerekli notların e-postaya veya Obsidian gibi kayıt yerlerine ulaştığından emin olun.</li>
             <li><strong>İletişim yolu</strong>: API iletişimi TLS (HTTPS) ile korunur. Not gönderiminde kullanılan <code>URLSessionConfiguration.ephemeral</code>, bu oturumun önbelleğini, çerezlerini ve kimlik doğrulama bilgilerini diskte kalıcı olarak saklamayacak biçimde yapılandırılmıştır. Bu açıklama, kullanım analizinin saklanması ve gönderilmesi ile harici SDK iletişiminden ayrıdır.</li>
             <li><strong>E-posta gövdesi</strong>: gönderim işlemi için Relay API hizmetimizden (Cloudflare Workers) ve harici gönderim altyapısından (Resend) geçer; ancak altyapımızda kalıcı olarak saklanmaz. Günlüklerimize de kaydedilmez (geliştirme sırasındaki DEBUG derlemeleri hariç). Resend, gönderilen e-postaları 30 gün saklar (bkz. 4. bölüm).</li>
-            <li><strong>E-posta adreslerinin sunucuda saklanması</strong>: gönderim kimliği ile alıcı e-posta adresinin SHA-256 ile hesaplanmış kısaltılmış özeti arasındaki eşleşme Cloudflare D1 içinde saklanır. Bu eşleşme kaydı, hatırlatıcılara onay verilip verilmediğinden bağımsız olarak oluşturulur. Cloudflare KV doğrulama kayıtları adresi okunabilir biçimde saklar (1(G)); Resend ise adresi kişi olarak saklar (1(G) ve 5. bölüm).</li>
+            <li><strong>E-posta adreslerinin sunucuda saklanması</strong>: gönderim kimliği ile alıcı e-posta adresinin SHA-256 ile hesaplanmış kısaltılmış özeti arasındaki eşleşme Cloudflare D1 içinde saklanır. Bu eşleşme kaydı, hatırlatıcılara onay verilip verilmediğinden bağımsız olarak oluşturulur. Adres özeti, dil, zaman ve sayı kayıtları da onaydan bağımsız olarak saklanır (1(G)). Okunabilir biçimdeki adresler, 18 Kasım 2026 tarihindeki güncellemeden önce oluşturulan Cloudflare KV doğrulanmış adres kayıtlarında ve Resend kişilerinde (hatırlatıcıları açanlar ile bu güncellemeden önce kaydedilenler için) bulunur (1(G) ve 5(B)).</li>
             <li><strong>Şifreleme, saklama ve iletişim bağımlılıkları</strong>: Not içeriğinin şifrelenmesi (CryptoKit), anahtar saklama (Keychain Services) ve iletişim (URLSession / Network.framework), üçüncü taraf SDK'ları kullanılmadan tamamen Apple tarafından sağlanan çerçevelerle gerçekleştirilir.</li>
             <li><strong>Giriş ve kötüye kullanımı önleme SDK'ları</strong>: “Apple ile Giriş Yap”, Apple AuthenticationServices ve Firebase Authentication kullanır; Google hesabından e-posta adresinin alınması için GoogleSignIn-iOS SDK ve Firebase Authentication SDK kullanılır (1(H)). Firebase App Check SDK açılışta başlatılır ve arka uç API erişimini yetkisiz kullanıma karşı korumak için Apple App Attest kullanır.</li>
             <li><strong>Kendi kullanım analizimiz</strong>: kaliteyi iyileştirmek ve kullanımı anlamak için kendi <code>/v1/analytics/event</code> uç noktamıza olaylar göndeririz. Alanlar; rastgele kurulum tanımlayıcısı, oturum tanımlayıcısı, olayın türü, tanımlayıcısı ve zamanı, uygulama sürümü ve derlemesi, dil ve gönderim sonucu gibi izin verilen nitelikleri içerir. E-posta adresi, not içeriği ve doğrulama kodunu doğrudan içermeyecek şekilde tasarlanmıştır; ancak gönderim kimliği üzerinden alıcı e-posta adresinin özetiyle ilişkilendirilebilir. Bu kurulum tanımlayıcısı cihazın anahtar zincirinde (Keychain) saklanır. iOS işleyişi gereği anahtar zinciri öğeleri uygulama silindikten sonra da cihazda kalabilir; bu durumda yeniden yüklemeden sonra aynı tanımlayıcı tekrar kullanılır. 5.9.9 ve öncesi ile 5.9.16–5.9.32 sürümlerinde bu tanımlayıcı AppsFlyer Customer User ID olarak da ayarlanır (1(E)).</li>
+            <li><strong>Kendi kullanım analizimizin saklanması</strong>: 18 Kasım 2026 tarihinden itibaren sunucumuz, yayımlanmış herhangi bir sürümden gelen olayları saklamadan atar ve yalnızca her gün attığı olayların sayısını tutar (1(E)). Bu tarihten önce alınan olaylar, alındıktan 90 gün sonra silinir.</li>
             <li><strong>AppsFlyer ölçümü</strong>: 5.9.9 ve öncesi ile 5.9.16–5.9.32 sürümlerinde (SDK'nın başlama koşulları için bkz. 1(E)), uygulama şu olayları gönderir: ilk başarılı not gönderimi, ilk başarılı kayıt, her başarılı not kaydı (her e-posta gönderimi ile her Obsidian veya Notion kaydı), başarılı doğrulama, ödeme ekranının gösterilmesi, plan seçimi ve başarılı satın alma. Uygulamanın ayarladığı nitelikler, uygun olduğunda giriş yöntemini (klavye, ses vb.), gönderim yolunu, notun alındığı yeri (iPhone uygulaması, Apple Watch, Siri Kestirmeleri veya paylaşım sayfası), hedef türünü (e-posta, Obsidian veya Notion), uygulamanın görüntüleme dilini, ölçüm tanımı sürümünü, derleme ve çalışma ortamı türünü, doğrulanmış işlemlerin satın alma tutarını ve para birimini, abonelik süresini, teklif türünü ve ödeme ekranının sürümü ile gösterilme nedenini içerir. Kendi analizimizdeki kurulum tanımlayıcısını AppsFlyer Customer User ID olarak ayarladığımız için edinme bilgileri ile kullanım kayıtları ilişkilendirilebilir. Uygulamanın ayarladığı olay alanları e-posta adresi, not içeriği veya doğrulama kodunu doğrudan içermez. SDK'nın kendisi de IP adresi, cihaz modeli, işletim sistemi ve uygulama sürümü, satıcı tanımlayıcısı (IDFV) ve AppsFlyer'a özgü kimlik gibi teknik bilgileri toplar ve Apple SKAdNetwork ölçümünü kullanır. 5.9.32 sürümü AppsFlyer'ın tüm entegre iş ortaklarıyla paylaşımı engeller, SDK'nın reklam tanımlayıcısını (IDFA) okumasına izin vermez ve Apple Ads ölçümünü kapatır; önceki sürümlerde bu 3 ayar yoktur. iOS, IDFA'yı yalnızca izlemesine izin verdiğiniz uygulamalara verir ve bu uygulama bu izni yalnızca 5.9.15 sürümünde istemiştir. Uygulama AppsFlyer ölçüm sonucunu alır ve kendi kullanım analizimize, kurulum tanımlayıcısıyla birlikte yalnızca kaba bir kategori (organik olup olmadığı, web sitemiz, diğer vb.) gönderir. Burada sayılan öğeler, SDK'nın topladığı teknik bilgilerin tam listesi değildir. Tanımlayıcıları ve ilişkilendirilebilen kayıtları tamamen anonim bilgi olarak kabul etmeyiz. 5.9.15 sürümü 1(F) bölümünde açıklanmıştır.</li>
+            <li><strong>Edinme kaynağı kategorisi</strong>: Uygulama, yukarıdaki kaba kategoriyi (yüklemenin organik olup olmadığı, ilk açılış olup olmadığı, sitemiz veya başka bir kaynak ve kampanyalarımızdan birinden gelip gelmediği) iPhone cihazınızda da kaydeder. 18 Kasım 2026 tarihinden itibaren sunucumuz bu olayı, 1(E) bölümünde açıklanan onay işaretini taşısa bile saklamaz. Bu tarihten önce alınan olaylar, alındıktan 90 gün sonra silinir.</li>
           </ul>
           <p><strong>Uyarı</strong>: Bu hizmet <strong>uçtan uca şifreleme (E2EE) sunmaz</strong>. Alıcı olarak kendi e-posta uygulamanızda içeriği normal biçimde okuyabilmeniz için e-posta gövdesi standart SMTP protokolüyle iletilir. E2EE gerektiren kullanımlar için Standard Notes, Signal veya ProtonMail gibi özel hizmetleri değerlendirin.</p>
           <p>Bu bölümün içeriği, Obsidian kullanıcıları için “verinin izlediği yol” şeması olarak <a href="/tr/privacy-architecture/">Gizlilik tasarımı</a> sayfasında yeniden düzenlenmiştir. İkisi arasında fark olursa bu politika geçerlidir.</p>
@@ -568,7 +579,7 @@
           </ul>
           <h3>(E) Diğer</h3>
           <ul>
-            <li>Cloudflare, sayfalarımız yüklenirken oluşan ağ hatalarını bildirmesini tarayıcınızdan ister (Network Error Logging). Tarayıcınız bu raporları Cloudflare tarafına gönderebilir.</li>
+            <li>Cloudflare, sayfalarımız yüklenirken oluşan ağ hatalarını bildirmesini tarayıcınızdan ister (Network Error Logging). Tarayıcınız bu ayarı 7 gün boyunca hatırlar ve bu süre içinde oluşan ağ hatalarının raporlarını Cloudflare tarafına gönderebilir.</li>
             <li>Sitemiz, seçtiğiniz görüntüleme dilini tarayıcının localStorage alanında (<code>simple-memo-lang</code>) saklar. Bu değer bize gönderilmez.</li>
             <li>İngilizce ana sayfa, fazier.com adresinden yüklenen bir rozet görseli gösterir. Görsel yüklenirken Fazier IP adresinizi ve tarayıcı bilgilerinizi alır.</li>
           </ul>
@@ -590,15 +601,16 @@
           <ul>
             <li>Yol haritası sayfasındaki anket; yanıtları, serbest metni (en fazla 1,000 karakter), görüntüleme dilini, sayfayı ve IP adresinin kısaltılmış özetini saklar. E-posta adresi yalnızca kutuyu işaretleyip girdiğinizde saklanır ve yalnızca yanıt vermek ve istenen özellik hayata geçtiğinde sizi bilgilendirmek için kullanılır.</li>
             <li>Yanıtlar veritabanımızda (Cloudflare D1) saklanır. Silinme süresini henüz belirlemedik.</li>
-            <li>Yanıtlar uygulama hesabıyla ilişkili değildir. Bir yanıtın silinmesini istiyorsanız girdiğiniz adresten bize e-posta gönderin. E-posta adresi içermeyen yanıtların kime ait olduğu belirlenemez.</li>
+            <li>Uygulamada hesabınızı sildiğinizde, girilen e-posta adresi doğrulanmış adresinizle aynı olan yanıtlar da silinir (bkz. 15. bölüm). Başka bir yanıtın silinmesini istiyorsanız girdiğiniz adresten bize e-posta gönderin. E-posta adresi içermeyen yanıtların kime ait olduğu belirlenemez.</li>
           </ul>
 
           <h2 id="account-deletion">15. Hesabın ve verilerin silinmesi</h2>
           <p>Hesabınızı uygulamada “Settings” &gt; “Account” &gt; “Delete Account” (Ayarlar &gt; Hesap &gt; Hesabı Sil) yolunu izleyerek silebilirsiniz.</p>
           <p>Silme işlemi, o iPhone cihazında doğrulanan e-posta adresi için şunları siler.</p>
           <ul>
-            <li>O iPhone cihazına ait sunucumuzdaki doğrulama kayıtları, hatırlatıcı ayarları ve geçmişi, kayıt bilgileri, gönderim kayıtları, gönderim kimliği üzerinden ilişkilendirilen kullanım olayları ve adresle ilişkili iletişim formu ve destek e-postası kayıtları</li>
+            <li>Sunucumuzdaki doğrulama kayıtları (adresi doğrulamış tüm iPhone cihazlarına ait olanlar), hatırlatıcı ayarları ve geçmişi, kayıt bilgileri, gönderim kayıtları, gönderim kimliği üzerinden ilişkilendirilen kullanım olayları ve adresle ilişkili iletişim formu ve destek e-postası kayıtları</li>
             <li>Resend kişisi</li>
+            <li>Girilen e-posta adresi bu adresle aynı olan yol haritası anketi yanıtları (14(C))</li>
             <li>O iPhone cihazından oluşturulan Notion bağlantı kayıtları (1(I))</li>
             <li>O iPhone cihazının kurulum tanımlayıcısı (yenisiyle değiştirilir)</li>
           </ul>
@@ -607,15 +619,19 @@
             <li>Gönderim engeli kayıtları (örneğin geri dönen e-posta, şikayet veya abonelikten çıkma sonrası) ve adresin silindiğine dair kayıt (özetler ve zamanlar). Amaç, o adrese tekrar e-posta göndermemektir.</li>
             <li>Özgün Apple bildirim kayıtları (1(C)) 180 günlük süreleri dolana kadar, adresle ilişkilendirilemeyen kullanım olayları ise 90 günlük süreleri dolana kadar kalır.</li>
             <li>Hizmet sağlayıcılarımızdaki kopyalar kendi süreleri dolana kadar kalır: Resend üzerindeki e-postalar (30 gün), sunucu günlükleri (7 gün) ve veritabanının belirli bir zamana geri yüklenmesi için veriler (en fazla 30 gün).</li>
+            <li>Silme işleminin makbuzu (cihaz belirtecinin özeti, adres özeti ve zaman); uygulama aynı isteği yeniden gönderirse silmenin tamamlandığını yanıtlayabilmek için tutulur. 30 gün sonra silinir.</li>
           </ul>
           <p>Uygulamadan silmenin ulaşmadıkları:</p>
           <ul>
             <li>iPhone cihazındaki notlar, geçmiş ve taslaklar (tek tek silin veya uygulamayı silin)</li>
             <li>Uygulamanın iPhone anahtar zincirinde (Keychain) sakladığı doğrulanmış e-posta adresi ve cihaz belirteci (anahtar zinciri öğeleri uygulama silindikten sonra da kalabilir)</li>
-            <li>Aynı adresin başka bir iPhone cihazında doğrulanmasına ait kayıtlar (o iPhone cihazında da hesabınızı silin veya bize e-posta gönderin)</li>
+            <li>18 Kasım 2026 tarihindeki güncellemeden önce aynı adres için diğer iPhone cihazlarında oluşturulan ve arama sınırı nedeniyle bulunamayan kayıtlar (doğrulamadan itibaren 365 gün sonra silinir)</li>
+            <li>Diğer iPhone cihazlarındaki bekleyen kod kayıtları (10 dakika sonra sona erer)</li>
             <li>Kod istenip doğrulaması tamamlanmayan adreslere ait kayıtlar ve bunların Resend kişisi (bize e-posta gönderin)</li>
-            <li>Firebase giriş kaydı (1(H)), AppsFlyer'ın tuttuğu veriler, destek gelen kutusundaki e-postalar ve yol haritası anketi yanıtları (bize e-posta gönderin)</li>
+            <li>Firebase giriş kaydı (1(H)), AppsFlyer'ın tuttuğu veriler ve destek gelen kutusundaki e-postalar (bize e-posta gönderin)</li>
+            <li>E-posta adresi içermeyen veya farklı bir adres girilmiş yol haritası anketi yanıtları (bir adres girdiyseniz bize o adresten e-posta gönderin)</li>
           </ul>
+          <p>Uygulamada silme için o iPhone cihazında doğrulama gerekir. Alıcıyı doğrulamadığınız bir adresle değiştirdiyseniz veya doğrulamanın süresi dolduysa (1(G)), hiçbir şey silinmez ve uygulama silme işleminin başarısız olduğunu gösterir. Yeniden doğrulayıp ardından hesabınızı silin veya bize e-posta gönderin.</p>
           <p>Silmeden önce alıcı adresini değiştirdiyseniz veya temizlediyseniz ya da uygulamadaki işlem tamamlanamadıysa bize e-posta gönderin; kalan kayıtları sileriz.</p>
           <p>5.9.16–5.9.32 sürümlerinde, silmeden sonra uygulamayı kullanmaya devam ederseniz AppsFlyer ölçümü yeni kurulum tanımlayıcısıyla yeniden başlar (1(E)).</p>
           <p>Hesabınızı silmek Premium aboneliğinizi iptal etmez. Aboneliği iPhone cihazınızda Ayarlar &gt; (adınız) &gt; Abonelikler bölümünden iptal edin.</p>
