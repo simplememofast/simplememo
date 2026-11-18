@@ -180,7 +180,7 @@
           <span>メモ本文はどこを通り、<br>どこに残らないか</span>
         </h1>
         <p class="lp-hero__sub">
-          <span>「ローカルVaultに書くツールなのに、外部サーバーを通るの？」——Obsidianユーザーからいちばん多くいただく質問に、経路図で答えるページです。できていること（Vault追記のローカル完結・オンデバイスAI・サーバ非保存）と、できていないこと（E2EEではない）を同じ解像度で書きます。</span>
+          <span>「ローカルVaultに書くツールなのに、外部サーバーを通るの？」——Obsidianユーザーからいちばん多くいただく質問に、経路図で答えるページです。できていること（Vault追記のローカル完結・オンデバイスAI・メモ本文を当社の中継サーバーに保存しないこと）と、できていないこと（E2EEではない）を同じ解像度で書きます。</span>
         </p>
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
           <span>著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">SimpleMemo Developer</a> · 公開日: <time datetime="2026-08-11">2026年08月11日</time> · 解析条件確認: <time datetime="2026-09-30">2026年09月30日</time></span>
@@ -196,7 +196,7 @@
           <li><span class="flow-step__title">端末内で作成 — AES-GCM-256で保護</span>書いたメモはまず端末内のOutbox（未送信キュー）に入ります。Outboxと送信履歴はApple純正CryptoKitによる<strong>AES-GCM-256</strong>で暗号化され、256-bit対称鍵はApple Keychainに保管されます。鍵は他端末へ移行しない設定で、アプリが暗号化・復号時に読み出します。バックアップに含まれる鍵のコピーも別の端末では使えません。機種変更前には、必要なメモが保存先に届いていることを確認してください。<a href="/privacy">鍵管理の詳細とAppleの説明</a>。オフラインならここで待機し、回線復帰後に自動再送されます。</li>
           <li><span class="flow-step__title">Obsidian Vaultへの追記 — ここは完全ローカル</span>Obsidian連携を有効にしている場合、Vaultへの追記は<strong>端末内のVaultフォルダへのファイル直接書き込み</strong>（開けない場合はURIフォールバック）で行われ、プラグインも外部サーバーも使いません。Vault追記の経路にネットワークは登場しません。</li>
           <li><span class="flow-step__title">AIタグ付け — オンデバイスで完結</span>タイトル（20文字以内）・タグ（1〜3個）・種別（todo/idea/log）の自動付与は、<strong>Apple Foundation ModelsによるオンデバイスAI</strong>がiPhoneの中だけで行います。<strong>タグ付けのためにメモ本文が外部サーバーへ送られることはありません。</strong>Apple Intelligence非対応機種は端末内の軽量整形に自動フォールバックします。</li>
-          <li><span class="flow-step__title">メール送信 — TLSで通過、恒常保存なし</span>送信時のみ、本文はTLS（HTTPS）で当社のRelay API（Cloudflare Workers）と外部送信基盤（Resend）を<strong>通過</strong>します。恒常的な保存は行わず、ログにも記録しません。クライアントは <code>URLSessionConfiguration.ephemeral</code> を使い、Cookie・キャッシュを残しません。</li>
+          <li><span class="flow-step__title">メール送信時の中継と保管</span>送信時のみ、本文はTLS（HTTPS）で当社のRelay API（Cloudflare Workers）と外部送信基盤（Resend）を<strong>通過</strong>します。当社の本番の中継サーバーはメモ本文を保存せず、本文をログにも記録しません。Resend は送信済みメールを保管します。同社が公表する標準プランの保存期間は30日で、当社に適用される期間は確認中です。クライアントは <code>URLSessionConfiguration.ephemeral</code> を使い、Cookie・キャッシュを残しません。</li>
           <li><span class="flow-step__title">自分の受信箱へ — 標準SMTPで配達（＝E2EEではない）</span>最終配達は標準SMTPです。だからこそ普段のメールアプリでそのまま読めるのですが、<strong>エンドツーエンド暗号化（E2EE）ではありません</strong>。この設計判断については下の「正直に書いておくこと」をご覧ください。</li>
         </ol>
       </div></section>
@@ -210,12 +210,13 @@
           <table class="compare-table">
             <thead><tr><th scope="col">データ</th><th scope="col">どこに</th><th scope="col">残るか</th></tr></thead>
             <tbody>
-              <tr><th scope="row">メモ本文</th><td>当社サーバ（Relay/送信基盤）</td><td class="yes">残らない（送信時に通過するのみ・ログ非記録）</td></tr>
+              <tr><th scope="row">メモ本文</th><td>当社の本番の中継サーバー</td><td class="yes">残らない（送信時に通過するのみ・ログ非記録）</td></tr>
+              <tr><th scope="row">メモ本文</th><td>Resend</td><td>公表されている標準プランの保存期間は30日です。当社に適用される期間は確認中です。</td></tr>
               <tr><th scope="row">メモ本文</th><td>あなたのメール受信箱</td><td>残る（それが目的です）</td></tr>
               <tr><th scope="row">メモ本文</th><td>あなたのObsidian Vault（設定時）</td><td>残る（端末内ローカル）</td></tr>
               <tr><th scope="row">Outbox・送信履歴</th><td>端末内のみ</td><td>AES-GCM-256で暗号化保存</td></tr>
-              <tr><th scope="row">送信IDと宛先アドレスのハッシュ</th><td>Cloudflare D1</td><td class="yes">送信IDと宛先ハッシュの対応を保存。リマインダーのオプトインとは別に記録し、35日を超えたものを定期削除</td></tr>
-              <tr><th scope="row">利用イベント・端末識別子・診断情報</th><td>Cloudflare D1</td><td>90日を超えたものを定期削除。送信IDを介して宛先ハッシュと紐付け可能</td></tr>
+              <tr><th scope="row">送信IDと宛先アドレスのハッシュ</th><td>Cloudflare D1</td><td class="yes">リマインダーの設定にかかわらず、送信IDと宛先アドレスのハッシュの対応を保存します。35日を超えた記録を定期的に削除します。</td></tr>
+              <tr><th scope="row">自社の利用イベントと購読状態の分析（端末識別子を含む）</th><td>Cloudflare D1</td><td>2026年11月18日の更新以降、当社サーバーは5.9.32までの公開版から届くこれらのデータを個別に保存しません。更新前に保存した記録は、受信から90日を超えると定期的に削除します。送信IDのある利用イベントは宛先アドレスのハッシュと照合できます。その他の診断情報の保存期間は<a href="/privacy#reading-09">ポリシー第9節</a>をご覧ください。</td></tr>
               <tr><th scope="row">AIタグ付けの入力（本文）</th><td>外部サーバー</td><td class="yes">送られない（オンデバイス処理）</td></tr>
             </tbody>
           </table>
@@ -244,7 +245,7 @@
         <div class="honest-box">
           <p style="margin-bottom:.75rem;"><strong>Obsidian連携シンプルメモはエンドツーエンド暗号化（E2EE）ではありません。</strong>メール本文は標準SMTPであなたの受信箱へ配達されます。「普段のメールアプリでそのまま読める」ことと「経路の末端まで暗号鍵を自分だけが持つ」ことは両立しないため、前者を選んだ設計です。</p>
           <p style="margin-bottom:.75rem;">端末内のOutboxと送信履歴はAES-GCM-256で暗号化していますが、これは<strong>端末内保護</strong>であって、E2EEの代わりにはなりません（<a href="/glossary/e2e-encryption/" style="color:var(--accent);">E2EEとは何か・なぜ本アプリは該当しないか</a>）。</p>
-          <p>機密性が最優先で、E2EEが必須の方には、Standard NotesのようなE2EE設計のノートアプリのほうが適しています。それを明記した上で、「本文をサーバに残さない」「タグ付けを端末内で完結させる」「Vault追記をローカルで行う」が本アプリの守備範囲です。</p>
+          <p>機密性が最優先で、E2EEが必須の方には、Standard NotesのようなE2EE設計のノートアプリのほうが適しています。それを明記した上で、「本文を当社の中継サーバーに残さない」「タグ付けを端末内で完結させる」「Vault追記をローカルで行う」が本アプリの守備範囲です。</p>
         </div>
       </div></section>
 
@@ -267,7 +268,7 @@
           <span>通り道を確認してから、試す</span>
         </div>
         <div class="cta-box__desc">
-          <span>無料3通/日。Vault追記はローカル、本文はサーバに残りません。</span>
+          <span>無料3通/日。Vault追記はローカル、当社の中継サーバーにはメモ本文を保存しません。</span>
         </div>
         <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
