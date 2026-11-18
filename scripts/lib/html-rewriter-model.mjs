@@ -1,8 +1,11 @@
 // Node には Workers の HTMLRewriter（lol-html）が無い。検査で functions/lib/ga-geo.js の
-// 書き換えを動かすための、"script" セレクタだけの模型。
+// 書き換えを動かすための、"script" と "script[属性]" のセレクタだけの模型。
 //
 // 写しているもの（lol-html の公開されている挙動）:
 //   - element ハンドラは開始タグで呼ばれ、remove() で要素を中身ごと消す。
+//   - replace(s, { html: true }) は要素を中身ごと s に置き換える（html: true が無ければ
+//     文字として入れる）。置き換えた要素の中身は、text ハンドラに渡らない。
+//   - "script[name]" は、その属性を持つ script だけに当たる。
 //   - text ハンドラは中身を小分け（chunk）で受け取り、最後の chunk だけ
 //     lastInTextNode が true。最後の chunk は空文字のことがある（trailingEmptyChunk）。
 //   - chunk.remove() で消し、chunk.replace(s, { html: true }) で s をそのまま入れる。
@@ -77,14 +80,17 @@ export function rewriteScripts(html, handlerList, { chunkSize = 16, trailingEmpt
 
     const attrs = attributes(startTag);
     let removed = false;
+    let replacement = null;
     const element = {
       tagName: "script",
       getAttribute: (name) => (attrs.has(name.toLowerCase()) ? attrs.get(name.toLowerCase()) : null),
       hasAttribute: (name) => attrs.has(name.toLowerCase()),
       remove() { removed = true; },
+      replace(content, options) { removed = true; replacement = options && options.html ? content : escapeText(content); },
     };
-    for (const h of handlerList) if (!removed && h.element) h.element(element);
-    if (removed) continue;
+    const applies = (h) => !h.attribute || attrs.has(h.attribute);
+    for (const h of handlerList) if (!removed && h.element && applies(h)) h.element(element);
+    if (removed) { if (replacement !== null) out += replacement; continue; }
 
     const pieces = chunksOf(content, chunkSize);
     if (trailingEmptyChunk || pieces.length === 0) pieces.push("");
@@ -99,7 +105,7 @@ export function rewriteScripts(html, handlerList, { chunkSize = 16, trailingEmpt
         remove() { this.removed = true; },
         replace(content, options) { this.replacement = options && options.html ? content : escapeText(content); },
       };
-      for (const h of handlerList) if (h.text) h.text(chunk);
+      for (const h of handlerList) if (h.text && applies(h)) h.text(chunk);
       body += chunk.replacement !== null ? chunk.replacement : chunk.removed ? "" : chunk.text;
     });
     out += startTag + body + endTag;
@@ -111,8 +117,9 @@ export function scriptRewriterModel(options = {}) {
   return class ScriptRewriterModel {
     constructor() { this.handlers = []; }
     on(selector, handlers) {
-      if (selector !== "script") throw new Error(`the HTMLRewriter model supports only "script", got "${selector}"`);
-      this.handlers.push(handlers);
+      const m = /^script(?:\[([a-z][a-z0-9-]*)\])?$/.exec(selector);
+      if (!m) throw new Error(`the HTMLRewriter model supports only "script" and "script[attr]", got "${selector}"`);
+      this.handlers.push(m[1] ? { ...handlers, attribute: m[1] } : handlers);
       return this;
     }
     onDocument() { throw new Error("the HTMLRewriter model does not support onDocument()"); }

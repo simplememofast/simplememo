@@ -1561,7 +1561,7 @@
       "file": "scripts/ga4-consent-region.test.mjs",
       "expr": "cf",
       "disposition": "検体の生成",
-      "note": "2026-11-16（EU 監査 E34）: テストの fixture。72行目（判定の単体テスト）と199行目（_middleware.js を端から端まで通すテスト）の visit(…, cf) は、cf を渡した検体だけ request.cf を Object.defineProperty で付け、undefined のときは付けない。これで「request.cf が無いリクエスト」（cf を持たない実行環境）の検体を作る。null・{}・国コードの無い cf・未知の国コードは別の検体として渡している。判定ではない。cf が無い検体で assert が消える経路も無い: undefined の検体自身が skipsGoogleAnalytics(…) === true（73行目）と、応答から GA4 が消え CSP から GA のホストが外れること（238行目の一覧の undefined）を確かめる。この分岐が無いと「cf の無いリクエストは GA4 を読み込まない（安全側）」の検体が作れない。"
+      "note": "2026-11-16（EU 監査 E34）、2026-11-17 に静的既定オフへ書き直したときに読み直した: テストの fixture。visit(urlPath, cf, init)（259行目）は、cf を渡した検体だけ request.cf を Object.defineProperty で付け、undefined のときは付けない。これで「request.cf が無いリクエスト」（cf を持たない実行環境）の検体を作る。null・{}・XX・T1・isEUCountry が \"1\" の JP は別の検体として渡している（CONSENT_VISITORS）。判定ではない。cf が無い検体で assert が消える経路も無い: undefined の検体自身が skipsGoogleAnalytics(…) === true（判定の単体テスト）と、middleware の応答が静的ファイルそのもの（本文が同じで GA4 が戻らず、CSP に GA のホストが無い）であること（CONSENT_VISITORS の undefined）を確かめる。この分岐が無いと「cf の無いリクエストは GA4 を読み込まない（安全側）」の検体が作れない。"
     }
   ]
 }
