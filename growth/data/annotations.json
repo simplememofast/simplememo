@@ -1226,6 +1226,12 @@
       "type": "feature",
       "label": "GA4 を EEA・英国・スイスと国不明の訪問で読み込まないようにした（#2374）",
       "note": "2026-11-17: #2374（本番のマージ SHA 5c40bf8a2f6b67816fe0fea60792eaa8790b0606、マージ 2026-11-17T13:54:53Z／2026-11-17 22:54:53 JST）。Cloudflare Pages の配備チェック完了 2026-11-17T13:55:22Z（2026-11-17 22:55:22 JST）。本番の読み戻し 2026-11-17T13:56:48Z〜13:56:50Z（22:56:48〜22:56:50 JST、日本から）: /・/privacy・/en/privacy・/zh/privacy で GA4 の読み込みが続いていること、ポリシー 13(A) に EEA・英国・スイスの箇条と、判定が働かないときの箇条が出ていることを確かめた。EU・英国からの確認（_ga が付かず googletagmanager.com への要求が無いこと）は未実施。変更: functions/_middleware.js で、Cloudflare が接続元 IP から推定した国（request.cf.country）が EEA・英国・スイス（と安全側に足した GG・JE・IM・GI・IC・EA・EU）のとき、または国が分からないとき（XX・T1 など）は、HTML から GA4 の読み込みを外す。このため、この時刻から GA4 のセッション・イベント・app_store_click・seo_cta_* などは、これらの地域と国不明の訪問を含まない。この時刻をまたいで、GA4 の地域別の値と、全体の値（特に欧州の比率が高いページや言語）を比べない。Pages Functions が上限や障害で動かないときは静的 HTML が出て GA4 が読み込まれうる（fail_open）。App Store Connect・Search Console・Cloudflare Web Analytics・Ahrefs は変わらない。オーナー判断 D11（全地域の同意への移行のうち、サイトの GA4 は EEA・英国・スイスで止める）による。新規の介入実験ではなく、既存実験の開始日・評価日・判定基準は変更しない。前後差を施策の成果として加点しない。"
+    },
+    {
+      "date": "2026-11-18",
+      "type": "feature",
+      "label": "GA4 の地域判定を静的既定オフに変更（#2385、通常時の地域・イベント名は不変）",
+      "note": "Cloudflare Pages Production（main）に #2385 のマージ SHA 63ef198acc608ba442fc49a718a84a467f552f6f。マージ 2026-11-17T23:54:29Z、配備チェック完了 2026-11-17T23:55:16Z（11月18日 08:55:16 JST）。配備記録: https://github.com/simplememofast/simplememo/runs/134463397029 。これは #2374 で始まった地域除外とは別の変更。正常時の対象地域・イベント名・OneLink 終了時のイベント対応は変えず、静的 HTML を既定オフにし、許可地域にだけ Functions が GA4 を挿入する方式に変えた。Functions を通らず静的 HTML が返る場合、許可地域も GA4 の対象外になる。実際の停止時間・欠測件数は未確認で、この境界をまたぐ GA4 の変動を獲得や施策の効果としない。後続の #2384（ea23ef39d1e06663a655d661ff3b9ef3c0b937c4、同 Production 配備チェック完了 2026-11-18T00:00:53Z）の後、2026-11-18T00:08:57Z〜00:08:58Z に公開ホストの /、/obsidian/、/privacy、/en/privacy の HTML を取得。この NRT 経路では4件とも HTTP 200、CF-Cache-Status: DYNAMIC、GA4 の実行可能なローダーあり。配備完了と後続版の本文観測は別の時刻。ブラウザのタグ通信・Cookie、除外地域・国不明からの実地検証、Cache Rules と地域をまたぐキャッシュは未確認。新しい介入実験ではなく、既存5実験の期間・判定・母数は変更しない。"
     }
   ]
 }
