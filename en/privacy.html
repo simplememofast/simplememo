@@ -278,11 +278,12 @@
         <p>To understand subscription operations and billing failures, we verify signed notifications from Apple and record subscription starts, renewals, changes to automatic renewal, failed renewals, expirations, refunds, and related events. Stored fields include notification and transaction identifiers, subscription product identifiers, notification types and subtypes, production or test environment, dates such as purchase, expiration, revocation, signing and receipt, and revocation reasons supplied by Apple. These Apple identifiers are not treated as fully anonymous information. These notification records contain no email addresses, memo content or installation identifiers. We do not retain a mapping from Apple transaction identifiers to installation identifiers or recipient email addresses. Section (D) describes matching notifications during processing to create separate analytics records. We cannot locate the original notification records from an email-address-only deletion request.</p>
 
         <h3>(D) Subscription State and Retention Analytics</h3>
+        <p>Since November 18, 2026, our server has discarded this analytics information without storing it (see (E) for why). This section describes what the app sends and how we handle the information we received before then.</p>
         <p>When this analytics feature is enabled in the app, we receive signed purchase and renewal information from Apple through the device, verify it, and store subscription facts with an installation identifier for comparison with usage-retention events. Recorded fields include the subscription product, purchased or family-shared ownership, price and currency, dates such as purchase, expiration, revocation, signing, observation and receipt, automatic-renewal status, billing retry, grace period, expiration reason, production or test environment, and the app's runtime environment. During processing, Apple transaction identifiers are used to match the notifications described in (C); counts and latest dates by notification type available at that time are also recorded. Apple transaction identifiers and raw signed information are not retained alongside these analytics records. The records also exclude email addresses and memo content, but installation identifiers, products, dates and prices can be linked to usage information and are not treated as anonymous. (E) shows which app versions send this information and whether you can choose.</p>
         <p>Scheduled cleanup deletes these analytics records more than 90 days after receipt. Deletion through the app removes records associated with the deletion information retained on that device and rejects delayed uploads under the erased information. This does not collectively delete the original Apple notification records in (C), another device's records, or records held by external analytics services. We may be unable to identify the affected records if, for example, the device's deletion information has been lost.</p>
 
         <h3>(E) Usage analytics and AppsFlyer measurement by app version</h3>
-        <p>What the app sends depends on the version installed. You can see the installed version in iPhone Settings &gt; General &gt; iPhone Storage, under the app. Version 5.9.10 was not released on the App Store.</p>
+        <p>What the app sends depends on the version installed. You can see the installed version in iPhone Settings &gt; General &gt; iPhone Storage, under the app. Version 5.9.10 was not released on the App Store. The table below shows what the app sends. Whether our server stores it is described after the table.</p>
         <div class="sd-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
           <thead>
             <tr><th>App version</th><th>First-party usage events (Section 12) and subscription-state analytics ((D))</th><th>AppsFlyer SDK (Section 12)</th><th>Choice in the app</th></tr>
@@ -297,8 +298,9 @@
         </table></div>
         <p>In versions 5.9.11 to 5.9.15, withdrawing "Usage analytics" stopped new collection and tried to remove unsent events on the device; it did not delete records we had already received.</p>
         <p>Versions 5.9.16 to 5.9.32 have no in-app setting to turn these off. AppsFlyer does not start when iOS reports that tracking is not allowed or is restricted for this app. First-party usage events and subscription-state analytics cannot be turned off in these versions. We plan to ask for your agreement before any of this starts, in all regions, in an upcoming version.</p>
-        <p>From September 28 to October 7, 2026, our server discarded usage events and subscription-state analytics sent by versions without the choice. Since October 7, 2026, it accepts them from all versions. Events that were discarded are not reconstructed.</p>
+        <p>From September 28 to October 7, 2026, our server discarded usage events and subscription-state analytics sent by versions without the choice. From October 7 to November 18, 2026, it accepted them from all versions. Events that were discarded are not reconstructed.</p>
         <p>An internal Capture pilot measured action order and delivery outcomes under a separate, time-limited participation consent. It has not run since version 5.9.10.</p>
+        <p>Since November 18, 2026, our server stores these requests only if they carry a new marker showing agreement to usage analytics. No version currently released (including 5.9.32) adds this marker. So our server discards usage events, subscription-state analytics and observations from the Capture pilot above from every version without storing them, and only counts how many it discards each day. Usage events and subscription-state analytics stored before then are deleted 90 days after receipt.</p>
 
         <h3>(F) App discovery measurement (version 5.9.15 only)</h3>
         <p>"App discovery measurement" was optional and off by default. Only when you agreed to this choice and allowed iPhone tracking, AppsFlyer received app launches, acquisition source and campaign, advertising identifier, IP address, device model, OS and app version, and SDK identifiers to measure which download links lead to the app. In this path we did not provide our first-party usage-analysis identifier as a Customer User ID, and we did not send memo text, email addresses, purchase events or ordinary in-app usage events. Sharing with advertising partners and advertising personalization were disabled, as were SKAdNetwork, IDFV and Apple Ads measurement. Records containing identifiers are not treated as anonymous.</p>
@@ -307,16 +309,19 @@
         <h3 id="email-verification">(G) Email address verification</h3>
         <p>To let you send memos to an email address, we verify that you control it, using a 6-digit code, a link in an email, or Sign in with Apple or Google ((H)).</p>
         <ul>
-          <li>Our server (Cloudflare Workers KV) keeps your email address in readable form in these verification records:
+          <li>Our server (Cloudflare Workers KV) keeps the following verification records. Since our server update on November 18, 2026, we no longer put your email address in these records. They are told apart by a hash of the address.
             <ul>
-              <li>the pending code record, with the code, for 10 minutes;</li>
+              <li>the pending code record (the code, language, number of attempts and similar details), for 10 minutes;</li>
               <li>the record that an email link has been used, for 30 minutes;</li>
-              <li>the verified-address record for each iPhone, which authorizes sending, for 365 days after verification (verifying again starts a new 365 days). Deleting your account removes the record for the iPhone you delete from (see Section 15).</li>
+              <li>the verified-address record for each iPhone, which authorizes sending, for 365 days after verification (verifying again starts a new 365 days). Deleting your account removes the records for every iPhone that verified the address (see Section 15).</li>
             </ul>
           </li>
+          <li>Verified-address records created before the November 18, 2026 update still contain your email address in readable form. Such a record is deleted when you verify again (it is replaced with one that has no address), 365 days after verification, or when you delete your account. However, when you delete your account, we may not find older records for other iPhones, because the search has a limit. Any we do not find are deleted 365 days after verification. Pending code and email-link records created before that update also contained the address, but they have all expired.</li>
           <li>Our database (Cloudflare D1) keeps a shortened SHA-256 hash of your address with send IDs (35 days) and with registration and reminder records (see Sections 5 and 9). A hash like this is pseudonymous, not anonymous: anyone who already knows an address can calculate the same value, so we treat it as personal data.</li>
-          <li>When you request a code, complete verification, verify with Apple or Google, or send a memo by email, we register your address as a contact at Resend, our email delivery provider (Section 5(E)). The contact is marked as unsubscribed unless you turn on reminders. This happens whether or not you turn on reminders, and also for addresses that request a code but do not complete verification.</li>
-          <li>If you request a code but do not complete verification, we may send up to three emails, about 6, 24 and 72 hours later, asking you to finish. Each has an unsubscribe link.</li>
+          <li>Whether or not you turn on reminders, for each address that has been verified or used to send a memo, we keep the address hash, language, verification time, first and last send times, and number of sends until you delete your account (see Section 9).</li>
+          <li>When you turn on reminders, we register your address as a contact at Resend, our email delivery provider (Section 5(E)).</li>
+          <li>Before the November 18, 2026 update, we also registered addresses as unsubscribed contacts at Resend when someone requested a code, completed verification, verified with Apple or Google, or sent a memo by email, even without turning on reminders. This included addresses that requested a code but did not complete verification. These contacts remain at Resend (United States), except where the account has been deleted. We have not yet decided when to delete them.</li>
+          <li>If you request a code but do not complete verification, we may send up to three emails, about 6, 24 and 72 hours later, asking you to finish. Each has an unsubscribe link. We take the recipient address for these emails from the contact at Resend. So since the November 18, 2026 update, we send them only to addresses that have a contact at Resend (addresses registered before that update, and addresses with reminders turned on).</li>
         </ul>
 
         <h3 id="sign-in">(H) Sign in with Apple or Google</h3>
@@ -332,8 +337,8 @@
         <h3 id="notion">(I) Notion</h3>
         <p>If you connect Notion (version 5.8.12 and later):</p>
         <ul>
-          <li>Notion's authorization for our server (OAuth tokens) is kept encrypted on our server (Cloudflare D1), together with the IDs of the Inbox database created in your workspace. The tokens are never stored on your iPhone.</li>
-          <li>When you save a memo to Notion, the memo text, a title made from it, the time and a capture ID pass through our server (Cloudflare Workers) to Notion's API. We do not store the memo text. We keep a delivery receipt (a cryptographic code calculated from the content, and the Notion page ID) to avoid creating duplicate pages. Receipts for completed saves are deleted after 30 days.</li>
+          <li>Notion's authorization for our server (OAuth tokens) and the workspace name are kept encrypted on our server (Cloudflare D1). We also keep the IDs of the Inbox database created in your workspace. The tokens are never stored on your iPhone.</li>
+          <li>When you save a memo to Notion, the memo text, a title made from it, the time and a capture ID pass through our server (Cloudflare Workers) to Notion's API. We do not store the memo text. We keep a delivery receipt (a cryptographic code calculated from the content, and the Notion page ID) to avoid creating duplicate pages. Receipts for completed saves are deleted after 30 days. For the same reason, receipts whose outcome is unknown are kept until the connection records are deleted.</li>
           <li>"Disconnect" in Settings revokes our access at Notion and deletes the stored tokens. The Inbox setup and recent receipts are kept so that reconnecting does not create duplicates. Deleting your account in the app deletes the Notion connection records created from that iPhone.</li>
           <li>Pages you save are kept by Notion Labs, Inc. (United States) in your workspace under Notion's own terms and privacy policy. Delete them in Notion.</li>
         </ul>
@@ -349,7 +354,7 @@
           <li>Saving memos to Notion when you connect it</li>
           <li>Sending the reminder emails you turn on and the other emails described in Section 5 and 1(G)</li>
           <li>Operating, maintaining, and improving the Service, including usage analytics</li>
-          <li>Measuring which links and campaigns lead people to install the app (AppsFlyer; AppsFlyer links on our website until November 17, 2026, with the exception in Section 13(C))</li>
+          <li>Measuring which links and campaigns lead people to install the app and to later purchases (amount and currency) (AppsFlyer; AppsFlyer links on our website until November 17, 2026, with the exception in Section 13(C))</li>
           <li>Understanding subscription operations and billing failures</li>
           <li>Excluding internal test devices from usage aggregates and avoiding repeated guidance for Obsidian features that are already configured</li>
           <li>Preventing abuse and ensuring security (cooldowns, server-side rate limits, server logs, etc.)</li>
@@ -379,7 +384,7 @@
         <h3>(A) Consent</h3>
         <ul>
           <li>This feature is <strong>disabled by default</strong>. We send reminder emails only after you explicitly enable it on the verification screen or in Settings.</li>
-          <li>If you have not enabled reminders, we may send <strong>one</strong> email asking whether you would like to receive them, once your email address is verified and you have not sent a memo for a while (roughly 72 hours after your last send). We send no reminders unless you choose to receive them.</li>
+          <li>We used to send one email asking people who had not enabled reminders whether they would like to receive them. We no longer send it. Signing up or unsubscribing from an invitation you already received still works.</li>
           <li>You can disable it at any time from Settings (one tap), or from the unsubscribe link in any reminder email.</li>
           <li>Emails about unfinished verification are described in 1(G).</li>
         </ul>
@@ -387,9 +392,9 @@
         <h3>(B) Information We Store</h3>
         <ul>
           <li>A shortened SHA-256 hash of your email address, stored on our servers (Cloudflare D1)</li>
-          <li>Your consent state (enabled/disabled), last memo send timestamp, and total send count</li>
-          <li>Reminder send history (timestamps for sent/delivered/opened/clicked/bounced events)</li>
-          <li>Your email address in readable form: in the contact list at Resend and in our server's verification records. These exist whether or not you turn on reminders (see 1(G)).</li>
+          <li>Your consent state (enabled/disabled), language, first and last memo send timestamps, and total send count. We keep these even if you have not turned on reminders (see 1(G)).</li>
+          <li>Reminder send history (timestamps for sent/delivered/opened/clicked/bounced events). Delivery events are deleted 180 days after receipt.</li>
+          <li>Your email address in readable form: in the contact list at Resend (for people who turned on reminders, and for people registered before the November 18, 2026 update) and in our server's verified-address records (only those created before that update) (see 1(G)).</li>
         </ul>
 
         <h3>(C) Sending Frequency</h3>
@@ -422,7 +427,7 @@
             <tr><th>Provider</th><th>Country</th><th>What they receive</th><th>Purpose</th></tr>
           </thead>
           <tbody>
-            <tr><td>Cloudflare, Inc.</td><td>United States. Its network operates worldwide; our main database is in the Asia-Pacific region</td><td>Everything that passes through our server and website: memo content in transit, email addresses (in readable form in verification records and in some records described in Section 14; otherwise hashed), device and installation identifiers, usage events, Notion tokens (encrypted), server logs including IP addresses, contact form messages, survey responses, website analytics (Section 13(D)), and email sent to our support address</td><td>Hosting, database, server logs, website delivery and analytics, support email routing</td></tr>
+            <tr><td>Cloudflare, Inc.</td><td>United States. Its network operates worldwide; our main database is in the Asia-Pacific region</td><td>Everything that passes through our server and website: memo content in transit, email addresses (in readable form in verified-address records created before the November 18, 2026 update, in some server logs (1(J)) and in some records described in Section 14; otherwise hashed), device and installation identifiers, usage events, Notion tokens (encrypted), server logs including IP addresses, contact form messages, survey responses, website analytics (Section 13(D)), and email sent to our support address</td><td>Hosting, database, server logs, website delivery and analytics, support email routing</td></tr>
             <tr><td>Plus Five Five, Inc. (Resend)</td><td>United States</td><td>Recipient address, subject and memo content of each email; contact list; delivery events</td><td>Email delivery</td></tr>
             <tr><td>Google LLC</td><td>United States</td><td>Firebase Authentication: sign-in records (1(H)). Firebase App Check: attestation of app requests. Google Sign-In. Google Analytics on our website (Section 13(A))</td><td>Sign-in, abuse prevention, website analytics</td></tr>
             <tr><td>Google LLC (Gmail)</td><td>United States</td><td>Emails you send to our support address (Section 14(B))</td><td>Support mailbox</td></tr>
@@ -444,21 +449,25 @@
           </thead>
           <tbody>
             <tr><td>Memo content and subject</td><td>Not stored on our servers. Resend</td><td>Resend: 30 days</td></tr>
-            <tr><td>Verification code record (address and code)</td><td>Cloudflare KV</td><td>10 minutes</td></tr>
-            <tr><td>Record that an email link was used (address)</td><td>Cloudflare KV</td><td>30 minutes</td></tr>
-            <tr><td>Verified-address record (address)</td><td>Cloudflare KV</td><td>365 days after verification (verifying again starts a new 365 days); deleted when you delete your account on that iPhone</td></tr>
+            <tr><td>Verification code record</td><td>Cloudflare KV</td><td>10 minutes</td></tr>
+            <tr><td>Record that an email link was used</td><td>Cloudflare KV</td><td>30 minutes</td></tr>
+            <tr><td>Verified-address record (contains the address only if created before the November 18, 2026 update)</td><td>Cloudflare KV</td><td>365 days after verification (verifying again starts a new 365 days); deleting your account deletes the records for every iPhone that verified the address (1(G))</td></tr>
+            <tr><td>Index of iPhones that verified an address (address hash and device token)</td><td>Cloudflare KV</td><td>365 days after verification; deleted when you delete your account</td></tr>
+            <tr><td>Account deletion receipt (hash of the device token, address hash and time)</td><td>Cloudflare KV</td><td>30 days</td></tr>
             <tr><td>Send ID linked to address hash</td><td>Cloudflare D1</td><td>35 days</td></tr>
             <tr><td>Keyed hashes used to coordinate delivery</td><td>Cloudflare</td><td>35 days</td></tr>
             <tr><td>Records of reminder consent changes</td><td>Cloudflare</td><td>180 days</td></tr>
-            <tr><td>Reminder settings and history, registration records (address hash, Resend contact ID, counts and times)</td><td>Cloudflare D1</td><td>Until you delete your account</td></tr>
-            <tr><td>Resend contact (address)</td><td>Resend (United States)</td><td>Until you delete your account</td></tr>
-            <tr><td>Usage events</td><td>Cloudflare D1</td><td>90 days</td></tr>
-            <tr><td>Subscription-state analytics (1(D))</td><td>Cloudflare D1</td><td>90 days</td></tr>
+            <tr><td>Email sending and verification records (address hash, language, times and counts), reminder settings and send history, records of sent emails such as verification follow-ups and invitations, Resend contact ID</td><td>Cloudflare D1</td><td>Until you delete your account</td></tr>
+            <tr><td>Email delivery events (delivered, opened, clicked, bounced and similar)</td><td>Cloudflare D1</td><td>180 days after receipt</td></tr>
+            <tr><td>Resend contact (address of a person who turned on reminders)</td><td>Resend (United States)</td><td>Until you delete your account</td></tr>
+            <tr><td>Resend contact (address registered before the November 18, 2026 update without reminders turned on)</td><td>Resend (United States)</td><td>No fixed period yet. Deleted when you delete your account (for an address that never completed verification, email us)</td></tr>
+            <tr><td>Usage events (none stored since November 18, 2026)</td><td>Cloudflare D1</td><td>90 days</td></tr>
+            <tr><td>Subscription-state analytics (1(D); none stored since November 18, 2026)</td><td>Cloudflare D1</td><td>90 days</td></tr>
             <tr><td>Original Apple notifications (1(C))</td><td>Cloudflare D1</td><td>180 days</td></tr>
             <tr><td>Do-not-mail records and records that an address was deleted (hashes and times)</td><td>Cloudflare</td><td>Kept so that we do not email that address again</td></tr>
             <tr><td>Server logs (1(J))</td><td>Cloudflare Workers Logs</td><td>7 days</td></tr>
             <tr><td>IP address hash for rate limiting</td><td>Cloudflare KV</td><td>Up to 48 hours</td></tr>
-            <tr><td>Notion tokens / connection records / receipts (1(I))</td><td>Cloudflare D1</td><td>Until you disconnect / until you delete the connection or your account / 30 days after a completed save</td></tr>
+            <tr><td>Notion tokens / connection records / receipts (1(I))</td><td>Cloudflare D1</td><td>Until you disconnect / until you delete the connection or your account / 30 days after a completed save (receipts with an unknown outcome: until the connection is deleted)</td></tr>
             <tr><td>Contact form messages (Section 14(A))</td><td>Cloudflare D1</td><td>180 days</td></tr>
             <tr><td>Support emails (Section 14(B))</td><td>Google LLC (Gmail, United States)</td><td>No fixed period yet</td></tr>
             <tr><td>Roadmap survey responses (Section 14(C))</td><td>Cloudflare D1</td><td>No fixed period yet</td></tr>
@@ -486,11 +495,13 @@
           <li><strong>Key management</strong>: A 256-bit symmetric key is stored in Apple Keychain Services (<code>kSecClassGenericPassword</code>) with <a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly">protection that allows access after the first unlock following a restart and prevents migration to another device</a>. The app reads the key for encryption and decryption. Key copies included in backups are protected by a device-specific key and cannot be used on another device (<a href="https://support.apple.com/en-ca/guide/security/secb0694df1a/web">Apple's explanation</a>). Before changing devices, confirm that important memos have reached their destination, such as your mailbox or Obsidian vault.</li>
           <li><strong>Transport</strong>: API communication uses TLS (HTTPS). The memo-sending <code>URLSessionConfiguration.ephemeral</code> avoids persisting that session’s caches, cookies, and credentials to disk. This is separate from analytics storage and transmission, and from external SDK networking.</li>
           <li><strong>Email body handling</strong>: Memo bodies transit through our Relay API (Cloudflare Workers) and the external delivery infrastructure (Resend) for the sole purpose of sending email. We do not persistently store them on our infrastructure, and they are not written to our logs (except in DEBUG builds during local development). Resend keeps sent emails for 30 days (Section 4).</li>
-          <li><strong>Email address storage on the server</strong>: Cloudflare D1 stores a mapping between send IDs and shortened SHA-256 hashes of recipient addresses. These delivery records are created regardless of reminder opt-in. Our verification records in Cloudflare KV hold the address in readable form (1(G)), and Resend holds it as a contact (1(G), Section 5).</li>
+          <li><strong>Email address storage on the server</strong>: Cloudflare D1 stores a mapping between send IDs and shortened SHA-256 hashes of recipient addresses. These delivery records are created regardless of reminder opt-in. Records of the address hash, language, times and counts are also kept regardless of opt-in (1(G)). Addresses in readable form are held in Cloudflare KV verified-address records created before the November 18, 2026 update and in contacts at Resend (for people who turned on reminders, and for people registered before that update) (1(G), 5(B)).</li>
           <li><strong>Dependencies on the data path</strong>: Memo body encryption (CryptoKit), key storage (Keychain Services), and network transport (URLSession / Network.framework) are all Apple-native — no third-party SDK sits in the data path.</li>
           <li><strong>Sign-in and abuse-prevention SDKs</strong>: Sign in with Apple uses Apple's AuthenticationServices and Firebase Authentication; filling in your address from a Google account uses GoogleSignIn-iOS and Firebase Authentication (1(H)). Firebase App Check initializes at launch and uses Apple App Attest to protect backend API access.</li>
           <li><strong>First-party usage analytics</strong>: We send events to our <code>/v1/analytics/event</code> endpoint to understand usage and improve quality. Fields include a random installation identifier, session identifier, event type, event identifier and time, app version and build, language, and allowed attributes such as send outcomes. The payload is designed to exclude raw email addresses, memo text, and verification codes, but send IDs can link events to recipient email hashes. This installation identifier is stored in the device's Keychain. Because of how iOS works, Keychain items may remain on the device after the app is deleted; in that case, the same identifier is used again after reinstalling. Versions 5.9.9 and earlier and 5.9.16 to 5.9.32 also set this identifier as AppsFlyer's Customer User ID (1(E)).</li>
+          <li><strong>Storage of first-party usage analytics</strong>: Since November 18, 2026, our server discards these events from every released version without storing them, and only counts how many it discards each day (1(E)). Events received before then are deleted 90 days after receipt.</li>
           <li><strong>AppsFlyer measurement</strong>: In versions 5.9.9 and earlier and 5.9.16 to 5.9.32 (see 1(E) for when the SDK starts), the app sends events for first successful memo send, first successful capture, each successful memo save (email sends and saves to Obsidian or Notion), successful verification, paywall views, plan selection, and successful purchases. Fields set by the app include, where applicable, the input method (such as keyboard or voice), the sending path, where the memo was captured (iPhone app, Apple Watch, Siri Shortcuts, or the share sheet), the destination type (email, Obsidian, or Notion), the app language, the measurement-definition version, the build and runtime type, the purchase price and currency of verified transactions, the subscription period, the offer type, and the paywall version and entry point. We set the same installation identifier used in first-party analytics as AppsFlyer’s Customer User ID, allowing acquisition and usage records to be linked. Event fields set by our app do not directly include email addresses, memo text, or verification codes. The SDK itself also collects technical information, including the IP address, device model, OS and app version, the identifier for vendor (IDFV) and its own AppsFlyer ID, and uses Apple's SKAdNetwork attribution. Version 5.9.32 blocks sharing with all AppsFlyer integrated partners, does not let the SDK read the advertising identifier (IDFA) and turns off Apple Ads attribution; earlier versions did not apply these settings. iOS provides the IDFA only to apps you have allowed to track you, and this app asked for that permission only in version 5.9.15. The app receives AppsFlyer's attribution result and sends only a coarse category (for example, organic or non-organic, our website, or other) to our first-party analytics with the installation identifier. This is not an exhaustive list of technical information collected by the SDK. Identifiers and linkable records are not treated as fully anonymous information. Version 5.9.15 is described in 1(F).</li>
+          <li><strong>Acquisition source category</strong>: The app also records the coarse category above (whether the install was organic, whether it was the first launch, our website or other, and whether it came from one of our campaigns) on your iPhone. Since November 18, 2026, our server has not stored this event, even if it carries the consent marker described in 1(E). Events received before then are deleted 90 days after receipt.</li>
         </ul>
         <p><strong>Note</strong>: The Service is <strong>not End-to-End Encrypted (E2EE)</strong>. Memo bodies are delivered through standard SMTP so you (the recipient) can read them in your normal mail client. For workloads requiring true E2EE, consider purpose-built services such as Standard Notes, Signal, or ProtonMail.</p>
         <p>These notes are restated as a route map for Obsidian users on the <a href="/en/privacy-architecture/">Privacy Architecture</a> page. If the two differ, this Policy prevails.</p>
@@ -528,7 +539,7 @@
         </ul>
         <h3>(E) Other</h3>
         <ul>
-          <li>Cloudflare asks your browser to report network errors when loading our pages (Network Error Logging). Your browser may send such reports to Cloudflare.</li>
+          <li>Cloudflare asks your browser to report network errors when loading our pages (Network Error Logging). Your browser keeps this setting for 7 days and may send reports of network errors during that time to Cloudflare.</li>
           <li>Our site stores your language choice in your browser's localStorage (<code>simple-memo-lang</code>). It is not sent to us.</li>
           <li>The English home page shows a badge image loaded from fazier.com. When the image loads, Fazier receives your IP address and browser information.</li>
         </ul>
@@ -550,15 +561,16 @@
         <ul>
           <li>The survey on our roadmap page stores your answers, any free text (up to 1,000 characters), your language, the page, and a shortened hash of your IP address. It stores your email address only if you tick the box, and uses it only to reply or to tell you when something ships.</li>
           <li>Responses are stored in our database (Cloudflare D1). We have not yet set a deletion period.</li>
-          <li>Responses are not linked to your app account. To delete a response, email us from the address you entered. Responses without an email address cannot be linked to you.</li>
+          <li>Deleting your account in the app also deletes responses in which the email address you entered is the same as your verified address (Section 15). To delete any other response, email us from the address you entered. Responses without an email address cannot be linked to you.</li>
         </ul>
 
         <h2 id="account-deletion">15. Deleting Your Account and Data</h2>
         <p>In the app, go to Settings &gt; Account &gt; Delete Account.</p>
         <p>Deletion removes, for the email address verified on that iPhone:</p>
         <ul>
-          <li>the verification records on our server for that iPhone, your reminder settings and history, registration records, delivery records, usage events linked through send IDs, and contact form and support email records linked to your address</li>
+          <li>the verification records on our server (for every iPhone that verified the address), your reminder settings and history, registration records, delivery records, usage events linked through send IDs, and contact form and support email records linked to your address</li>
           <li>your contact at Resend</li>
+          <li>roadmap survey responses in which the email address you entered is the same as that address (Section 14(C))</li>
           <li>the Notion connection records created from that iPhone (1(I))</li>
           <li>the installation identifier on that iPhone, which is replaced with a new one</li>
         </ul>
@@ -567,15 +579,19 @@
           <li>do-not-mail records (for example after a bounce, complaint or unsubscribe) and a record that the address was deleted (hashes and times), so that we do not email it again</li>
           <li>original Apple notifications (1(C)) until their 180 days end, and usage events that cannot be linked to your address until their 90 days end</li>
           <li>copies at our providers until their own periods end: emails at Resend (30 days), server logs (7 days) and database recovery copies (up to 30 days)</li>
+          <li>a receipt of the deletion (a hash of the device token, the address hash and the time), so that we can answer that the deletion is done if the app sends the same request again. It is deleted after 30 days.</li>
         </ul>
         <p>Deletion in the app does not reach:</p>
         <ul>
           <li>memos, history and drafts on your iPhone (delete them, or delete the app)</li>
           <li>the verified email address and the device token that the app keeps in your iPhone's Keychain (Keychain items can remain even after you delete the app)</li>
-          <li>verification records for the same address on another iPhone (delete your account on that iPhone too, or email us)</li>
+          <li>records created before the November 18, 2026 update for the same address on other iPhones, if the search does not find them because of its limit (they are deleted 365 days after verification)</li>
+          <li>pending code records on other iPhones (they expire after 10 minutes)</li>
           <li>records for an address you requested a code for but did not verify, including its contact at Resend (email us)</li>
-          <li>the Firebase sign-in record (1(H)), data held by AppsFlyer, emails in our support mailbox, and roadmap survey responses (email us)</li>
+          <li>the Firebase sign-in record (1(H)), data held by AppsFlyer, and emails in our support mailbox (email us)</li>
+          <li>roadmap survey responses without an email address, or with a different address (if you entered an address, email us from it)</li>
         </ul>
+        <p>Deleting in the app requires verification on that iPhone. If you changed the recipient to an address you have not verified, or the verification has expired (1(G)), nothing is deleted and the app shows that deletion failed. Verify again and then delete, or email us.</p>
         <p>If you changed or cleared the recipient address before deleting, or the app could not finish, email us and we will delete the remaining records.</p>
         <p>In versions 5.9.16 to 5.9.32, if you keep using the app after deletion, AppsFlyer measurement starts again with the new installation identifier (1(E)).</p>
         <p>Deleting your account does not cancel a Premium subscription. Cancel it in iPhone Settings &gt; your name &gt; Subscriptions.</p>
