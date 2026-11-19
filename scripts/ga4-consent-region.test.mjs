@@ -55,10 +55,10 @@ const EXPECTED_CORE = [
   'GF', 'GP', 'MQ', 'RE', 'YT', 'MF', 'AX',
 ];
 // 安全側に足したもの。外すなら、ga-geo.js とここを同時に直す。
-const EXPECTED_EXTRA = ['IC', 'EA', 'GG', 'JE', 'IM', 'GI', 'EU'];
+const EXPECTED_EXTRA = ['IC', 'EA', 'GG', 'JE', 'IM', 'GI', 'EU', 'SJ'];
 const OUTSIDE = ['JP', 'US', 'KR', 'CN', 'TW', 'HK', 'SG', 'IN', 'ID', 'TH', 'VN', 'PH', 'MY', 'AU', 'NZ',
   'CA', 'MX', 'BR', 'AR', 'CL', 'TR', 'SA', 'AE', 'IL', 'ZA', 'NG', 'EG', 'RU', 'UA', 'RS', 'BA',
-  'AL', 'MK', 'ME', 'MD', 'BY', 'GE', 'AM', 'AZ', 'AD', 'MC', 'SM', 'VA', 'FO', 'GL', 'SJ', 'PM', 'BL'];
+  'AL', 'MK', 'ME', 'MD', 'BY', 'GE', 'AM', 'AZ', 'AD', 'MC', 'SM', 'VA', 'FO', 'GL', 'PM', 'BL'];
 
 test('every EEA, UK and Swiss code (and the EU territories with their own codes) skips GA4', () => {
   assert.equal(EXPECTED_CORE.length, 27 + 3 + 2 + 7);

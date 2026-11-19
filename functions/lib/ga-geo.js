@@ -74,8 +74,9 @@ const EU_TERRITORIES_WITH_OWN_CODES = ["GF", "GP", "MQ", "RE", "YT", "MF", "AX",
 // 確かめていない）。安全側で対象に含める（オーナーの判断点。外すならこの 1 行と、
 // scripts/ga4-consent-region.test.mjs の EXPECTED_EXTRA を同時に直す）。
 const UK_CROWN_DEPENDENCIES_AND_GIBRALTAR = ["GG", "JE", "IM", "GI"];
-// 「欧州だが国は不明」の地域コード。地理 DB によっては返す。
-const EUROPE_UNSPECIFIED = ["EU"];
+// EU does not identify a country. SJ covers both Svalbard and Jan Mayen; only Svalbard
+// was exempted under EEA Protocol 40. The combined code cannot establish an outside visit.
+const EUROPE_UNSPECIFIED = ["EU", "SJ"];
 
 const AHREFS_PROTECTED_REGIONS = new Set([
   ...EU_MEMBER_STATES,
