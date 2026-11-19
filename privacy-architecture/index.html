@@ -29,7 +29,6 @@
   <meta name="twitter:title" content="プライバシー設計 — メモ本文はどこを通り、どこに残らないか">
   <meta name="twitter:description" content="Vault追記はローカル完結。AIタグ付けはオンデバイス。E2EEではない理由も含め、データの通り道を全公開。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
-  <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/privacy-architecture/">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/privacy-architecture/">
@@ -132,7 +131,7 @@
       .global-nav__links.open .nav-cta-mobile{display:block;text-align:center;margin-top:0.5rem;background:linear-gradient(135deg,#007AFF,#5856D6);color:#fff;border-radius:12px;padding:0.8rem;font-weight:700}
     }
   </style>
-  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <script type="text/plain" data-ahrefs="async"></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/privacy-architecture/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Obsidian Vaultへの追記に外部サーバーは関与しますか？","acceptedAnswer":{"@type":"Answer","text":"関与しません。Vault追記は端末内のVaultフォルダへのファイル直接書き込み（不可の場合はURIフォールバック）で、プラグインもネットワークも使いません。メール送信を伴わない下書きのローカル保存も端末内で完結します。"}},{"@type":"Question","name":"AIタグ付けでメモの内容がAppleや外部のサーバーに送られませんか？","acceptedAnswer":{"@type":"Answer","text":"送られません。タグ付けはApple Foundation ModelsによるオンデバイスAIがiPhoneの中だけで行い、ネットワーク通信を伴いません。Apple Intelligence非対応機種では端末内の軽量整形に自動フォールバックし、その場合も外部送信はありません。詳細はAIタグ自動追加の解説をご覧ください。"}},{"@type":"Question","name":"なぜE2EEにしないのですか？","acceptedAnswer":{"@type":"Answer","text":"メモの届け先を「普段のメール受信箱」にしているからです。受信箱で読める＝受信サーバが復号できる、なのでE2EEは構造的に成立しません。E2EEを優先する場合は専用クライアントが必須になり、「どの端末のメールアプリでも読める」という本アプリの価値と交換になります。E2EEが必須の用途にはStandard Notes等をおすすめします。"}},{"@type":"Question","name":"この内容はプライバシーポリシーとどう違うのですか？","acceptedAnswer":{"@type":"Answer","text":"法的な取り扱いの全文はプライバシーポリシー（特に§12「暗号化に関する技術的な情報」）にあります。このページはその技術的な中身を、Obsidianユーザーの関心（ローカル完結かどうか）に沿って経路図として再構成したものです。矛盾がある場合はプライバシーポリシーが優先します。"}}]}</script>
 <link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
