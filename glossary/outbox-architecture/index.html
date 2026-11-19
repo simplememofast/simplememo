@@ -27,7 +27,6 @@
   <meta name="twitter:title" content="Outboxアーキテクチャとは — Obsidian連携シンプルメモ用語集">
   <meta name="twitter:description" content="Outboxパターンの技術解説。オフラインで送信したメモを端末に残し、つながったら送る仕組み。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/glossary-outbox-architecture.png">
-  <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/glossary/outbox-architecture/">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/glossary/outbox-architecture/">
@@ -244,7 +243,7 @@
     }
 
   </style>
-  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <script type="text/plain" data-ahrefs="async"></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/glossary/outbox-architecture/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Outboxアーキテクチャとは何ですか？","acceptedAnswer":{"@type":"Answer","text":"メッセージをローカルのキュー（送信箱）に保存し、ネットワーク接続時に自動送信する設計パターンです。オフラインのあいだも送信待ちとして端末に残し、接続が戻ったら送信を再開します。"}},{"@type":"Question","name":"シンプルメモのOutboxはどう動きますか？","acceptedAnswer":{"@type":"Answer","text":"メモ送信時にネットワークが利用できない場合、AES-256-GCMで暗号化してOutboxに保存。接続が戻ると、アプリが動いていればすぐに、閉じていればiOSのバックグラウンド更新か次にアプリを開いたときに、Cloudflare Workers経由でResend APIに送信。送信が済んだらOutboxから消します。"}},{"@type":"Question","name":"Outboxのメモは安全ですか？","acceptedAnswer":{"@type":"Answer","text":"端末内に保存するOutboxはAES-256-GCMで暗号化します。暗号鍵はiOSのKeychainに保管し、アプリが暗号化・復号時に読み出します。鍵は別の端末へ移行しない設定です。メール配送はエンドツーエンド暗号化ではありません。バックアップと鍵管理の詳細も確認してください。"}}]}</script>
 <link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">

@@ -501,7 +501,7 @@ export const onRequest = async (context) => {
     return response;
   }
 
-  // 5. GA4 only outside EEA / UK / Switzerland / unknown country — see ga-geo.js.
+  // 5. Region-scoped Google and Ahrefs analytics — see ga-geo.js.
   //    Non-HTML responses come back unchanged.
   return applyAnalyticsPolicy(context);
 };

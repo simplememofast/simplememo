@@ -27,7 +27,6 @@
   <meta name="twitter:title" content="E2E暗号化（エンドツーエンド暗号化）とは？仕組み・TLSとの違い・限界を解説 | 用語集">
   <meta name="twitter:description" content="E2E暗号化の仕組み、TLS・保存時暗号化との違い、主なサービスの対応、限界と選び方。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/glossary-e2e-encryption.png">
-  <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/glossary/e2e-encryption/">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/glossary/e2e-encryption/">
@@ -244,7 +243,7 @@
     }
 
   </style>
-  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <script type="text/plain" data-ahrefs="async"></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/glossary/e2e-encryption/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"E2E暗号化とは何ですか？","acceptedAnswer":{"@type":"Answer","text":"データを送信者のデバイスで暗号化し、受信者のデバイスでのみ復号できる方式です。中間サーバーやネットワーク事業者はデータを読むことができません。"}},{"@type":"Question","name":"シンプルメモはE2E暗号化ですか？","acceptedAnswer":{"@type":"Answer","text":"いいえ。受信者であるユーザー自身が普段のメールアプリで本文を読めるよう、メール送信は標準 SMTP プロトコルを使用しています。代わりに、Outbox と送信履歴の端末内 AES-GCM-256 暗号化、メール本文の恒常保存なし、というデータ最小化モデルでプライバシーを保護しています。E2EE が必要な用途には Standard Notes・Signal・ProtonMail などをご検討ください。"}},{"@type":"Question","name":"E2E暗号化とAES-GCMの違いは？","acceptedAnswer":{"@type":"Answer","text":"E2E暗号化はアーキテクチャの概念（誰が復号できるか）。AES-GCMは暗号化アルゴリズム（どう暗号化するか）。E2E暗号化の内部実装にAES-GCMを使うことも可能です。"}},{"@type":"Question","name":"E2E暗号化とTLS（HTTPS）の違いは？","acceptedAnswer":{"@type":"Answer","text":"TLSは端末とサーバーの間の通信路だけを守り、サーバーに着いた時点で事業者は内容を読めます。E2E暗号化は受信者の端末に届くまで、経路上の誰も（事業者を含めて）内容を読めません。"}},{"@type":"Question","name":"E2E暗号化なら絶対に安全ですか？","acceptedAnswer":{"@type":"Answer","text":"いいえ。守れるのは通信経路と事業者からの漏えいです。端末の侵害、暗号化されていないクラウドバックアップ、メタデータ、受信者による転送やスクリーンショットは防げません。"}},{"@type":"Question","name":"メール（Gmailなど）はE2E暗号化されていますか？","acceptedAnswer":{"@type":"Answer","text":"通常のメールはTLSで通信路を守り、保存時は事業者が暗号化しますが、E2EEではありません。E2EEにするにはPGPやS/MIME、あるいはProton Mail同士のように送受信の両端が対応した仕組みが必要です。"}},{"@type":"Question","name":"LINEはE2E暗号化ですか？","acceptedAnswer":{"@type":"Answer","text":"1対1トークのテキストは「Letter Sealing」と呼ばれるE2E暗号化が既定で有効です。ただし対象外のコンテンツもあるため、詳細はLINEの公式情報で確認してください。"}}]}</script>
 <link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">

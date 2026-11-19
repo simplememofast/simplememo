@@ -1,4 +1,5 @@
-// GA4（Google アナリティクス）は、許可する地域の訪問にだけ読み込ませる。
+// Google Analytics と Ahrefs は、静的 HTML では無効。接続元地域が判明した場合だけ有効にする。
+// Ahrefs は EEA・英国・スイスと国不明で停止する。Google の既存の追加対象地域は下記のとおり。
 // 2026-11-16 の EU 監査 E34（P0）と、その推奨案 D11 の実装。
 // 2026-11-17 に「静的既定オフ」へ作り直した（最初の形は、静的な HTML から GA4 を
 // 取り除くものだった。その形の限界は下の【障害のとき】）。
@@ -48,6 +49,7 @@
 //   - Vary は付けない。Cloudflare のキャッシュは既定で Vary を見ず、国は利用者の要求の
 //     見出しではないので、ブラウザや途中のキャッシュにとっても意味を持たない。
 
+import { ahrefsInjection } from "./ahrefs.js";
 import { GA_MARKER_TYPE, gaLoaderElement } from "./ga-loaders.js";
 
 export const GA_MEASUREMENT_ID = "G-EPZVZKCVQG";
@@ -75,30 +77,39 @@ const UK_CROWN_DEPENDENCIES_AND_GIBRALTAR = ["GG", "JE", "IM", "GI"];
 // 「欧州だが国は不明」の地域コード。地理 DB によっては返す。
 const EUROPE_UNSPECIFIED = ["EU"];
 
-export const CONSENT_REGIONS = new Set([
+const AHREFS_PROTECTED_REGIONS = new Set([
   ...EU_MEMBER_STATES,
   ...EEA_EFTA_STATES,
   ...UK_AND_SWITZERLAND,
   ...EU_TERRITORIES_WITH_OWN_CODES,
-  ...UK_CROWN_DEPENDENCIES_AND_GIBRALTAR,
   ...EUROPE_UNSPECIFIED,
 ]);
 
-// Cloudflare が「国が分からない」に使う値。T1（Tor）は数字を含むので形の検査で落ちる。
-const UNKNOWN_COUNTRIES = new Set(["XX", "ZZ"]);
+export const CONSENT_REGIONS = new Set([...AHREFS_PROTECTED_REGIONS, ...UK_CROWN_DEPENDENCIES_AND_GIBRALTAR]);
+
+// ISO 3166-1 plus the separately recognized territory codes. An unassigned code
+// must not enable analytics merely because it looks like two letters.
+const KNOWN_COUNTRIES = new Set(`AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO
+BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ
+DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP
+GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG
+KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML
+MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE
+PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL
+SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM
+US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW
+IC EA XK AC TA DG`.split(/\s+/));
 
 /**
  * この国からの訪問で GA を読ませないか。純粋関数。
  * country は request.cf.country、isEUCountry は request.cf.isEUCountry（"1" のときだけ EU）。
  * 判定できない値はすべて true（読ませない）。
  */
-export function isConsentRegion(country, isEUCountry) {
+export function isConsentRegion(country, isEUCountry, regions = CONSENT_REGIONS) {
   if (isEUCountry === "1" || isEUCountry === 1 || isEUCountry === true) return true;
   if (typeof country !== "string") return true;
   const code = country.trim().toUpperCase();
-  if (!/^[A-Z]{2}$/.test(code)) return true;
-  if (UNKNOWN_COUNTRIES.has(code)) return true;
-  return CONSENT_REGIONS.has(code);
+  return !KNOWN_COUNTRIES.has(code) || regions.has(code);
 }
 
 /** 要求から判定する。request.cf が無い（手元の検査・未知の経路）ときは読ませない。 */
@@ -132,43 +143,50 @@ export const GA_CSP_SOURCES = Object.freeze({
   ]),
 });
 
+const AHREFS_CSP_SOURCES = {
+  "img-src": ["https://*.ahrefs.com"],
+  "script-src": ["https://analytics.ahrefs.com"],
+  "connect-src": ["https://*.ahrefs.com"],
+};
+
 function directives(csp) {
   return csp.split(";").map((d) => d.trim().split(/\s+/).filter(Boolean)).filter((parts) => parts.length > 0);
 }
 
 /**
- * CSP に GA のホストを足す（許可する地域への HTML だけ）。
+ * 許可する地域に応じて Ahrefs および GA のホストを CSP に加える。
  * img-src・script-src・connect-src の末尾に、まだ無いものだけを足す。'none' だけの
  * ディレクティブは GA のホストに置き換える。無いディレクティブは足さない（default-src に任せる）。
  */
-export function withGoogleAnalyticsSources(csp) {
+export function withAnalyticsSources(csp, includeGoogle = true) {
   if (typeof csp !== "string") return csp;
   return directives(csp).map(([name, ...sources]) => {
-    const add = GA_CSP_SOURCES[name.toLowerCase()];
-    if (!add) return [name, ...sources].join(" ");
+    const directive = name.toLowerCase();
+    const add = [...(includeGoogle ? GA_CSP_SOURCES[directive] ?? [] : []), ...(AHREFS_CSP_SOURCES[directive] ?? [])];
+    if (!add.length) return [name, ...sources].join(" ");
     const kept = sources.filter((source) => source !== "'none'");
     return [name, ...kept, ...add.filter((source) => !kept.includes(source))].join(" ");
   }).join("; ");
 }
 
 /**
- * CSP から GA のホストを外す（対象地域への応答。_headers に GA のホストは無いので、
+ * CSP から GA と Ahrefs のホストを外す（_headers に両社のホストは無いので、
  * ふだんは何も変わらない。誤って足されたときの保険）。
  * 外した結果、値が空になったディレクティブは 'none' にする。
  */
-export function withoutGoogleAnalyticsSources(csp) {
+export function withoutAnalyticsSources(csp) {
   if (typeof csp !== "string") return csp;
   return directives(csp).map(([name, ...sources]) => {
-    const kept = sources.filter((source) => !isGoogleAnalyticsSource(source));
+    const kept = sources.filter((source) => !isRegionalAnalyticsSource(source));
     if (kept.length === sources.length) return [name, ...sources].join(" ");
     return [name, ...(kept.length ? kept : ["'none'"])].join(" ");
   }).join("; ");
 }
 
-function isGoogleAnalyticsSource(source) {
+function isRegionalAnalyticsSource(source) {
   if (source.startsWith("'")) return false;
   const m = source.match(/^(?:[a-z][a-z0-9+.-]*:\/\/)?(?:\*\.)?([^/:\s]+)(?::(?:\d+|\*))?(?:\/\S*)?$/i);
-  return Boolean(m) && isGoogleAnalyticsHost(m[1]);
+  return Boolean(m) && (isGoogleAnalyticsHost(m[1]) || /(?:^|\.)ahrefs\.com\.?$/i.test(m[1]));
 }
 
 /** HTMLRewriter のセレクタ。目印は data-ga4 を持つ script だけ。 */
@@ -237,7 +255,7 @@ export function gaCookieExpiry(cookieHeader) {
 export function servedWithoutAnalytics(response, request, { expireCookies = EXPIRE_EXISTING_GA_COOKIES } = {}) {
   const out = new Response(response.body, response);
   const csp = out.headers.get("Content-Security-Policy");
-  if (csp !== null) out.headers.set("Content-Security-Policy", withoutGoogleAnalyticsSources(csp));
+  if (csp !== null) out.headers.set("Content-Security-Policy", withoutAnalyticsSources(csp));
   out.headers.set("Cloudflare-CDN-Cache-Control", "no-store");
   if (expireCookies && request) {
     for (const value of gaCookieExpiry(request.headers.get("Cookie"))) out.headers.append("Set-Cookie", value);
@@ -250,7 +268,7 @@ export function servedWithoutAnalytics(response, request, { expireCookies = EXPI
  * 本文が無い（HEAD）ときは、見出しだけ GET と同じにする。
  * HTMLRewriter が無い・状態が 200/404 でないときは、GA4 の無い版を返す。
  */
-export function withGoogleAnalytics(response, Rewriter) {
+export function withRegionalAnalytics(response, Rewriter, includeGoogle) {
   if (!INJECTABLE_STATUS.has(response.status) || typeof Rewriter !== "function") {
     return servedWithoutAnalytics(response, null, { expireCookies: false });
   }
@@ -259,13 +277,15 @@ export function withGoogleAnalytics(response, Rewriter) {
   headers.delete("Last-Modified");
   headers.delete("Content-Length");
   const csp = headers.get("Content-Security-Policy");
-  if (csp !== null) headers.set("Content-Security-Policy", withGoogleAnalyticsSources(csp));
+  if (csp !== null) headers.set("Content-Security-Policy", withAnalyticsSources(withoutAnalyticsSources(csp), includeGoogle));
   headers.set("Cloudflare-CDN-Cache-Control", "no-store");
   const shell = new Response(response.body, {
     status: response.status, statusText: response.statusText, headers,
   });
   if (response.body === null) return shell;
-  return new Rewriter().on(GA_MARKER_SELECTOR, gaInjectionHandlers()).transform(shell);
+  const rewriter = new Rewriter().on("script[data-ahrefs]", ahrefsInjection);
+  if (includeGoogle) rewriter.on(GA_MARKER_SELECTOR, gaInjectionHandlers());
+  return rewriter.transform(shell);
 }
 
 /**
@@ -276,7 +296,8 @@ export function withGoogleAnalytics(response, Rewriter) {
  */
 export async function applyAnalyticsPolicy(context, options = {}) {
   const { request } = context;
-  if (skipsGoogleAnalytics(request)) {
+  const { country, isEUCountry } = request.cf ?? {};
+  if (isConsentRegion(country, isEUCountry, AHREFS_PROTECTED_REGIONS)) {
     const response = await context.next();
     if (!isHtml(response)) return response;
     return servedWithoutAnalytics(response, request, { expireCookies: options.expireCookies ?? EXPIRE_EXISTING_GA_COOKIES });
@@ -293,5 +314,5 @@ export async function applyAnalyticsPolicy(context, options = {}) {
   if (request.method !== "GET" && request.method !== "HEAD") {
     return servedWithoutAnalytics(response, null, { expireCookies: false });
   }
-  return withGoogleAnalytics(response, Rewriter);
+  return withRegionalAnalytics(response, Rewriter, !skipsGoogleAnalytics(request));
 }

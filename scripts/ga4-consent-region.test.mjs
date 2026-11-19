@@ -22,11 +22,12 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import {
   CONSENT_REGIONS, GA_MEASUREMENT_ID, GA_CSP_SOURCES, GA_MARKER_SELECTOR, EXPIRE_EXISTING_GA_COOKIES, GA_COOKIE_NAMES,
-  isConsentRegion, skipsGoogleAnalytics, isGoogleAnalyticsHost, withGoogleAnalyticsSources, withoutGoogleAnalyticsSources,
+  isConsentRegion, skipsGoogleAnalytics, isGoogleAnalyticsHost, withAnalyticsSources, withoutAnalyticsSources,
   gaInjectionHandlers, looksLikeDocumentPath, applyAnalyticsPolicy, gaCookieExpiry,
 } from '../functions/lib/ga-geo.js';
 import { GA_INLINE_LOADERS, GA_MARKER_TYPE, GA_DEFERRED, gaLoaderElement } from '../functions/lib/ga-loaders.js';
 import { onRequest } from '../functions/_middleware.js';
+import { ahrefsLoaderElement } from '../functions/lib/ahrefs.js';
 import { scriptRewriterModel } from './lib/html-rewriter-model.mjs';
 import { activate, markersIn, markerFor, staticProblems, toStaticMarkers, GA_TRACE, MARKER } from './lib/ga4-static.mjs';
 import { parseHeaders, constructRules, compileRules, staticAssetHeaders } from './lib/pages-headers.mjs';
@@ -123,27 +124,31 @@ const SITE_CSP = (() => {
 // これと同じ集合の CSP を受け取る（計測の継続）。
 const CSP_UNTIL_20261116 = "default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://tools.applemediaservices.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com https://*.ahrefs.com https://fazier.com; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com https://analytics.ahrefs.com https://static.cloudflareinsights.com; connect-src 'self' https://api.simplememofast.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://analytics.google.com https://*.ahrefs.com https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'";
 const cspSets = (csp) => Object.fromEntries(csp.split(';').map((d) => d.trim().split(/\s+/)).filter((p) => p[0]).map(([name, ...sources]) => [name, [...sources].sort()]));
+const AHREFS_HOST = /analytics\.ahrefs\.com/i;
+const AHREFS_MARKER = /<script type="text\/plain" data-ahrefs="(async|idle|home-idle)"><\/script>/g;
+const activateAhrefs = (html) => html.replace(AHREFS_MARKER, (_, mode) => ahrefsLoaderElement(mode));
 const GA_SOURCE = /googletagmanager|google-analytics|analytics\.google/;
 
 test('_headers does not allow GA hosts (so Functions fail-open cannot load gtag.js)', () => {
   assert.doesNotMatch(read('_headers').split('\n').filter((l) => !/^\s*#/.test(l)).join('\n'), GA_SOURCE);
   // GA4 needs these three directives to exist; the middleware appends to them.
   for (const name of Object.keys(GA_CSP_SOURCES)) assert.ok(cspSets(SITE_CSP)[name], name);
-  assert.equal(withoutGoogleAnalyticsSources(SITE_CSP), SITE_CSP);
+  assert.doesNotMatch(SITE_CSP, /ahrefs/i);
+  assert.equal(withoutAnalyticsSources(SITE_CSP), SITE_CSP);
 });
 
 test('permitted regions get the same CSP as before 2026-11-17 (as sets), and nothing more', () => {
-  const widened = withGoogleAnalyticsSources(SITE_CSP);
+  const widened = withAnalyticsSources(SITE_CSP);
   assert.deepEqual(cspSets(widened), cspSets(CSP_UNTIL_20261116));
-  assert.equal(withoutGoogleAnalyticsSources(widened), SITE_CSP);
-  assert.equal(withGoogleAnalyticsSources(widened), widened, 'idempotent');
-  assert.equal(withGoogleAnalyticsSources("script-src 'none'; img-src data:; default-src 'self'"),
-    `script-src ${GA_CSP_SOURCES['script-src'].join(' ')}; img-src data: ${GA_CSP_SOURCES['img-src'].join(' ')}; default-src 'self'`);
-  assert.equal(withGoogleAnalyticsSources("default-src 'self'"), "default-src 'self'", 'no directive is invented');
-  assert.equal(withoutGoogleAnalyticsSources("script-src https://www.googletagmanager.com; img-src data:"), "script-src 'none'; img-src data:");
-  assert.equal(withoutGoogleAnalyticsSources("connect-src 'self' https://*.google-analytics.com:443/g/ https://notgoogletagmanager.com"), "connect-src 'self' https://notgoogletagmanager.com");
-  assert.equal(withGoogleAnalyticsSources(null), null);
-  assert.equal(withoutGoogleAnalyticsSources(null), null);
+  assert.equal(withoutAnalyticsSources(widened), SITE_CSP);
+  assert.equal(withAnalyticsSources(widened), widened, 'idempotent');
+  assert.equal(withAnalyticsSources("script-src 'none'; img-src data:; default-src 'self'"),
+    `script-src ${GA_CSP_SOURCES['script-src'].join(' ')} https://analytics.ahrefs.com; img-src data: ${GA_CSP_SOURCES['img-src'].join(' ')} https://*.ahrefs.com; default-src 'self'`);
+  assert.equal(withAnalyticsSources("default-src 'self'"), "default-src 'self'", 'no directive is invented');
+  assert.equal(withoutAnalyticsSources("script-src https://www.googletagmanager.com; img-src data:"), "script-src 'none'; img-src data:");
+  assert.equal(withoutAnalyticsSources("connect-src 'self' https://*.google-analytics.com:443/g/ https://notgoogletagmanager.com"), "connect-src 'self' https://notgoogletagmanager.com");
+  assert.equal(withAnalyticsSources(null), null);
+  assert.equal(withoutAnalyticsSources(null), null);
 });
 
 // HTML の仕様で JavaScript として実行される type（MIME の essence）。目印の型はこれ以外。
@@ -169,6 +174,7 @@ test('no tracked page loads GA4 by itself: only markers, and every marker is kno
     const html = read(file);
     for (const problem of staticProblems(html)) problems.push(`${file}: ${problem}`);
     for (const m of markersIn(html)) { markers += 1; if (m.name === GA_DEFERRED) deferred += 1; }
+    if (AHREFS_HOST.test(html) || /data-ahrefs\s*=/.test(html.replace(AHREFS_MARKER, ''))) problems.push(file + ': unexpected static Ahrefs URL or marker');
   }
   assert.deepEqual(problems, []);
   // The inventory must not silently shrink to nothing (same guard as ga4-tag-order.test.mjs).
@@ -320,7 +326,7 @@ const CASES = [
   ['/tiktok/', 'tiktok/index.html'],
 ];
 const CONSENT_VISITORS = [{ country: 'FR', isEUCountry: '1' }, { country: 'DE' }, { country: 'GB' }, { country: 'CH' }, { country: 'NO' },
-  { country: 'XX' }, { country: 'T1' }, { country: 'JP', isEUCountry: '1' }, {}, null, undefined];
+  { country: 'XX' }, { country: 'QQ' }, { country: 'T1' }, { country: 'JP', isEUCountry: '1' }, {}, null, undefined];
 const PERMITTED_VISITORS = [{ country: 'JP' }, { country: 'US' }, { country: 'KR', isEUCountry: false }];
 
 test('the cases cover every loader shape', () => {
@@ -355,16 +361,33 @@ test('visitors from elsewhere get the page with GA4 back in place, marked never 
       const original = asset(new Request(ORIGIN + urlPath));
       const { response, body } = await serve(visit(urlPath, cf), asset);
       assert.equal(response.status, 200, where);
-      assert.equal(body, activate(read(file)), where);
+      assert.equal(body, activateAhrefs(activate(read(file))), where);
       assert.equal(loaderCount(body), markersIn(read(file)).length, where);
       const expected = new Headers(original.headers);
       expected.set('cloudflare-cdn-cache-control', 'no-store');
-      expected.set('content-security-policy', withGoogleAnalyticsSources(SITE_CSP));
+      expected.set('content-security-policy', withAnalyticsSources(SITE_CSP));
       expected.delete('etag');
       expected.delete('last-modified');
       assert.deepEqual(Object.fromEntries(response.headers), Object.fromEntries(expected), where);
       assert.equal(response.headers.get('cache-control'), 'public, no-cache', `${where}: the cache contract`);
     }
+  }
+});
+
+test('Ahrefs runs only on previously measured pages in eligible regions, independently of purchase links', async () => {
+  for (const country of [...EXPECTED_CORE, ...EXPECTED_EXTRA, 'XX', 'QQ', 'T1', undefined, ...OUTSIDE]) {
+    const { body, response } = await serve(visit('/', { country }), assetFor('index.html'));
+    const ahrefsOnly = ['GG', 'GI', 'IM', 'JE'].includes(country);
+    const permitted = OUTSIDE.includes(country) || ahrefsOnly;
+    assert.equal(AHREFS_HOST.test(body), permitted, String(country));
+    assert.equal(/ahrefs/.test(response.headers.get('content-security-policy')), permitted, String(country));
+    if (ahrefsOnly) assert.equal(executableGa(body), false, String(country));
+    assert.deepEqual([...body.matchAll(/href="(https:\/\/apps\.apple\.com\/[^"]+)"/g)].map(m => m[1]),
+      [...read('index.html').matchAll(/href="(https:\/\/apps\.apple\.com\/[^"]+)"/g)].map(m => m[1]));
+  }
+  assert.equal(ahrefsLoaderElement('bogus'), null);
+  for (const mode of ['async', 'idle', 'home-idle']) {
+    assert.match(ahrefsLoaderElement(mode), AHREFS_HOST);
   }
 });
 
@@ -377,7 +400,7 @@ test('validators: stripped for permitted documents, forwarded otherwise; 304s pa
   assert.equal(jp.forwarded[0].headers.get('if-none-match'), null);
   assert.equal(jp.forwarded[0].headers.get('if-modified-since'), null);
   assert.equal(jp.response.status, 200);
-  assert.equal(jp.body, activate(read('index.html')));
+  assert.equal(jp.body, activateAhrefs(activate(read('index.html'))));
   // The static version is the same for everyone, so its validators stay valid in the EEA.
   const fr = await serve(visit('/', { country: 'FR' }, conditional), notModified);
   assert.equal(fr.forwarded[0].headers.get('if-none-match'), '"asset"');
@@ -396,7 +419,7 @@ test('validators: stripped for permitted documents, forwarded otherwise; 304s pa
 test('the 404 page and HEAD requests follow the same policy', async () => {
   const missingJp = await serve(visit('/no-such-page', { country: 'JP' }), assetFor('404.html', { status: 404 }));
   assert.equal(missingJp.response.status, 404);
-  assert.equal(missingJp.body, activate(read('404.html')));
+  assert.equal(missingJp.body, activateAhrefs(activate(read('404.html'))));
   assert.equal(loaderCount(missingJp.body), 1);
   assert.equal(missingJp.response.headers.get('cloudflare-cdn-cache-control'), 'no-store');
   const missingDe = await serve(visit('/no-such-page', { country: 'DE' }), assetFor('404.html', { status: 404 }));
@@ -404,7 +427,7 @@ test('the 404 page and HEAD requests follow the same policy', async () => {
   assert.equal(executableGa(missingDe.body), false);
   const headJp = await serve(visit('/', { country: 'JP' }, { method: 'HEAD' }), assetFor('index.html'));
   assert.equal(headJp.body, null);
-  assert.equal(headJp.response.headers.get('content-security-policy'), withGoogleAnalyticsSources(SITE_CSP));
+  assert.equal(headJp.response.headers.get('content-security-policy'), withAnalyticsSources(SITE_CSP));
   assert.equal(headJp.response.headers.get('etag'), null);
   assert.equal(headJp.response.headers.get('cloudflare-cdn-cache-control'), 'no-store');
   const headFr = await serve(visit('/', { country: 'FR' }, { method: 'HEAD' }), assetFor('index.html'));

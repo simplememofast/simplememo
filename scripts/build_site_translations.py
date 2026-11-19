@@ -95,6 +95,10 @@ def map_reference(value, source, locale, routes, document=False, decode=True):
     if not value or value.startswith(('#', 'data:', 'mailto:', 'tel:', 'obsidian:', 'javascript:')):
         return value
     url = urlsplit(urljoin(SITE + '/' + source, value))
+    if (source == 'legal.html' and document and url.netloc == 'support.apple.com'
+            and url.path in ('/ja-jp/118428', '/ja-jp/118212', '/ja-jp/118223')):
+        support_locale = OG_LOCALES[locale].replace('_', '-').lower()
+        return urlunsplit(url._replace(path=url.path.replace('/ja-jp/', '/' + support_locale + '/')))
     if url.netloc != 'simplememofast.com':
         return value
     path = url.path

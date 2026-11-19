@@ -9,13 +9,14 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
   Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+  # Ahrefs also requires a permitted region. Keep its hosts out of this static policy.
   # 【2026-11-17】GA4 のホスト（googletagmanager.com・google-analytics.com・
   # analytics.google.com）は、ここに書かない。GA4 は静的既定オフで、EEA・英国・スイスでも
   # 国不明でもない訪問の HTML にだけ、root middleware がローダーと一緒に CSP へ足す
   # （functions/lib/ga-geo.js の GA_CSP_SOURCES）。Functions を通らない経路（fail open など）
   # では、この CSP だけが付くので、ブラウザは gtag.js を取りに行けない（二重の止め）。
   # ここへ戻すと scripts/ga4-consent-region.test.mjs が落ちる。
-  Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://tools.applemediaservices.com https://*.ahrefs.com https://fazier.com; script-src 'self' 'unsafe-inline' https://analytics.ahrefs.com https://static.cloudflareinsights.com; connect-src 'self' https://api.simplememofast.com https://*.ahrefs.com https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://tools.applemediaservices.com https://fazier.com; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; connect-src 'self' https://api.simplememofast.com https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
   # 【2026-09-03】HTML は max-age=3600 から no-cache へ。
   #
   # **1時間、直したページが読者に届かない。**この日、横スクロールの修理を
