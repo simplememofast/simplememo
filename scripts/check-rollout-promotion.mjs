@@ -309,6 +309,9 @@ const NOW = '2026-09-10T00:00:00.000Z';
 function fixture(over = {}) {
   const doc = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
   const policy = JSON.parse(JSON.stringify(doc.policy));
+  // 実運用の停止中も各規則を試す。停止の2スイッチだけ検体内で解除し、
+  // 出荷している上限・母数・寝かせ・梯子はそのまま使う。実台帳は書き換えない。
+  policy.kill_switch = false;
   policy.auto_promote.enabled = true;          // 既定 false のままだと他の規則を一切試せない
   const arm = (installs) => ({ installs, successes: Math.round(installs * 0.9), rate: 0.9 });
   const obs = (metric) => ({
@@ -342,10 +345,45 @@ const held = (over, needle) => {
 
 function selftest() {
   const doc = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
+  const isolatedDoc = { ...doc, policy: fixture().policy };
   const scenarios = [
     ['実データの台帳は検査を通る', () => {
       const p = validate(doc);
       assert(p.length === 0, p.join(' / '));
+    }],
+    ['検体の停止解除は実台帳を書き換えず、他の方針を変えない', () => {
+      const before = fs.readFileSync(LEDGER_PATH, 'utf8');
+      const expected = JSON.parse(before).policy;
+      expected.kill_switch = false;
+      expected.auto_promote.enabled = true;
+      assert(JSON.stringify(fixture().policy) === JSON.stringify(expected), '停止2スイッチ以外の方針が変わった');
+      assert(fs.readFileSync(LEDGER_PATH, 'utf8') === before, '検体が実台帳を書き換えた');
+    }],
+    ['停止2スイッチの全4組み合わせを評価と計画の両方で守る', () => {
+      for (const kill of [false, true]) for (const enabled of [false, true]) {
+        const f = fixture();
+        f.policy.kill_switch = kill;
+        f.policy.auto_promote.enabled = enabled;
+        const r = evaluatePromotion(f);
+        const stopped = kill || !enabled;
+        assert(r.decision === (stopped ? 'hold' : 'promote'), JSON.stringify({ kill, enabled, r }));
+        if (kill) assert(r.why.includes('kill_switch'), r.why);
+        else if (!enabled) assert(r.why.includes('有効になっていない'), r.why);
+        const flags = { flags: { [f.flag]: f.flagState }, history: [] };
+        const plan = planAll({ guard: f.guard, flags, doc: { policy: f.policy }, now: NOW });
+        assert(plan.promote.length === (stopped ? 0 : 1), JSON.stringify({ kill, enabled, plan }));
+      }
+    }],
+    ['実台帳の停止状態も評価と計画の両方に適用する', () => {
+      const f = fixture({ policy: doc.policy });
+      const r = evaluatePromotion(f);
+      const stopped = doc.policy.kill_switch || !doc.policy.auto_promote.enabled;
+      assert(r.decision === (stopped ? 'hold' : 'promote'), JSON.stringify(r));
+      if (doc.policy.kill_switch) assert(r.why.includes('kill_switch'), r.why);
+      else if (!doc.policy.auto_promote.enabled) assert(r.why.includes('有効になっていない'), r.why);
+      const flags = { flags: { [f.flag]: f.flagState }, history: [] };
+      const plan = planAll({ guard: f.guard, flags, doc, now: NOW });
+      assert(plan.promote.length === (stopped ? 0 : 1), JSON.stringify(plan));
     }],
     // **[2026-08-28] enabled が立ったので「実台帳のまま必ず止まる」は成り立たない。**
     // この行が守っていたのは「出荷している policy が検体より緩くない」ことなので、
@@ -359,16 +397,18 @@ function selftest() {
       ).toISOString();
       const a = evaluatePromotion({
         ...fixture(),
-        policy: doc.policy,
+        policy: isolatedDoc.policy,
         flagState: { rollout: 25, updated_at: shortSoak, killed: false },
       });
       assert(a.decision === 'hold', `寝かせ ${ap.min_hours_at_current_rollout}h に1時間足りないのに止まっていない（${a.decision}: ${a.why}）`);
+      assert(a.why.includes('寝ていない'), `寝かせ以外の理由で止まっている: ${a.why}`);
 
       const f = fixture();
-      f.policy = doc.policy;
+      f.policy = isolatedDoc.policy;
       f.guard.decisions[0].observations[0].exposed.installs = ap.min_sample_per_arm - 1;
       const b = evaluatePromotion(f);
       assert(b.decision === 'hold', `母数 ${ap.min_sample_per_arm} に1つ足りないのに止まっていない（${b.decision}: ${b.why}）`);
+      assert(b.why.includes(`露出群が ${ap.min_sample_per_arm - 1}`), `母数以外の理由で止まっている: ${b.why}`);
     }],
     ['条件が揃えば promote', () => {
       const r = ev();
@@ -511,20 +551,20 @@ function selftest() {
     ['**材料が無ければ plan は promote を返さない**（holds_when_unknown）', () => {
       const flags = { flags: { tf04_progress: { rollout: 25, description: 'c', updated_at: '2026-09-05T00:00:00.000Z' } }, history: [] };
 
-      const noDecision = planAll({ guard: { decisions: [] }, flags, doc, now: NOW });
+      const noDecision = planAll({ guard: { decisions: [] }, flags, doc: isolatedDoc, now: NOW });
       assert(noDecision.promote.length === 0, 'ガードの判定が1件も無いのに promote が出た');
 
       const unjudged = fixture();
       for (const o of unjudged.guard.decisions[0].observations) { o.judged = false; }
-      const p2 = planAll({ guard: unjudged.guard, flags, doc, now: NOW });
+      const p2 = planAll({ guard: unjudged.guard, flags, doc: isolatedDoc, now: NOW });
       assert(p2.promote.length === 0, '指標が未判定なのに promote が出た');
 
-      const noFlagState = planAll({ guard: fixture().guard, flags: { flags: {}, history: [] }, doc, now: NOW });
+      const noFlagState = planAll({ guard: fixture().guard, flags: { flags: {}, history: [] }, doc: isolatedDoc, now: NOW });
       assert(noFlagState.promote.length === 0, 'フラグの現状が無いのに promote が出た');
     }],
     ['**材料が揃えば plan は promote を返す**（止まりっぱなしを「安全」と読み違えない）', () => {
       const flags = { flags: { tf04_progress: { rollout: 25, description: 'c', updated_at: '2026-09-05T00:00:00.000Z' } }, history: [] };
-      const plan = planAll({ guard: fixture().guard, flags, doc, now: NOW });
+      const plan = planAll({ guard: fixture().guard, flags, doc: isolatedDoc, now: NOW });
       assert(plan.promote.length === 1, `材料が揃っているのに promote が出ない: ${JSON.stringify(plan.plans)}`);
     }],
 
