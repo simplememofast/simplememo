@@ -35,8 +35,7 @@ class Head(HTMLParser):
 
 def safe_url(url):
     u = urllib.parse.urlsplit(url)
-    if (u.scheme not in ('https', 'http') or u.hostname not in HOSTS
-            or u.username or u.password or u.port is not None):
+    if u.scheme not in ('https', 'http') or u.netloc.lower() not in HOSTS:
         raise ValueError('Unexpected URL; no request sent: ' + url)
 
 
@@ -47,8 +46,14 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 
 def raw_request(url):
     safe_url(url)
-    opener = urllib.request.build_opener(NoRedirect())
     req = urllib.request.Request(url, headers={'User-Agent': 'SimpleMemo-Redirect-Audit/1.0'})
+    if (req.host or '').lower() not in HOSTS:
+        raise ValueError('Unexpected transport host; no request sent')
+    proxies = urllib.request.getproxies()
+    if (proxies.get(req.type) or proxies.get('all')) and not urllib.request.proxy_bypass(req.host):
+        raise ValueError('Audit requires a direct connection; proxy configured; no request sent')
+    # Only use a direct route when the host's proxy policy permits it.
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
     try:
         response = opener.open(req, timeout=15)
     except urllib.error.HTTPError as error:
@@ -313,6 +318,35 @@ def selftest():
             for url in ('file:///etc/passwd', 'https://example.com/', ORIGIN + ':8443/', 'https://user@simplememofast.com/'):
                 with self.subTest(url=url), self.assertRaises(ValueError):
                     safe_url(url)
+
+        def test_required_proxy_stops_before_open(self):
+            for scheme in ('http', 'https', 'all'):
+                url = 'http://www.simplememofast.com/' if scheme == 'http' else ORIGIN + '/'
+                with self.subTest(scheme=scheme), mock.patch.multiple(
+                    urllib.request,
+                    getproxies=mock.Mock(return_value={scheme: 'http://proxy.invalid'}),
+                    proxy_bypass=mock.Mock(return_value=False),
+                    build_opener=mock.DEFAULT,
+                ) as patched:
+                    with self.assertRaisesRegex(ValueError, 'proxy configured'):
+                        raw_request(url)
+                    patched['build_opener'].assert_not_called()
+
+        def test_direct_routes_use_only_the_requested_host(self):
+            for url, proxies in [('http://www.simplememofast.com/', {}),
+                                 (ORIGIN + '/', {'https': 'http://proxy.invalid'})]:
+                reply = mock.MagicMock(code=200, headers={})
+                reply.read.return_value = b'OK'
+                discover = mock.Mock(return_value=proxies)
+                with self.subTest(url=url), mock.patch.multiple(
+                    urllib.request, getproxies=discover, proxy_bypass=mock.Mock(return_value=True),
+                ), mock.patch.object(
+                    urllib.request.AbstractHTTPHandler, 'do_open', return_value=reply
+                ) as transport:
+                    self.assertEqual(raw_request(url)['body'], 'OK')
+                    transport.assert_called_once()
+                    self.assertEqual(transport.call_args.args[1].host, urllib.parse.urlsplit(url).hostname)
+                    discover.assert_called_once_with()
 
         def client(self, responses):
             clock = FakeClock()
