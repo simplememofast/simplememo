@@ -259,16 +259,19 @@
     "vendors": [
       {
         "id": "apple",
-        "liability_cap": "unreviewed",
-        "ip": "unreviewed",
-        "personal_data": "unreviewed",
-        "governing_law": "unreviewed",
+        "liability_cap": "risk",
+        "ip": "ok",
+        "personal_data": "risk",
+        "governing_law": "risk",
         "$ip": "**[2026-08-28 追加・オーナー確認済み]** オーナーが §2.5 Ownership の本文を貼った。The parties acknowledge that this Agreement does not give Apple any ownership interest in Your Covered Products or Corresponding Products. 逆向きに Apple retains all rights ... in and to the Apple Software, Services, and any Updates。\n\n**線が両方向にはっきり引かれているので ok。**アプリはこちらのもの、Apple のソフトウェアは Apple のもの。この欄（生成物・投稿物の権利がどちらに残るか）に対する答えとして、曖昧さが無い。付随義務は「Apple のソフトウェアに関する権利主張を知ったら速やかに通知する」程度で、こちらの資産を削るものではない。\n\n**一時的に `draft_clauses: [\"ip\"]` で下書き扱いにしていた**（ほかの3観点は先に人が確認済みで、行の `reviewed_by` ひとつでは表せなかったため）。同日中にオーナーが確認したので外した。**この欄が必要になった経緯そのものは残しておく** —— 読みは観点ごとに起きるので、次も同じ形は出る。\n\n**なお、この本文は 08-28 の取得ツールが返してきた引用と一致した。**当時は「同じ取得で §13 と §14.10 を一般論で埋めてきたので根拠に使わない」と判断して unreviewed に置いた。**結果として引用は正しかったが、その判断は変えない** —— 当たっていたことは、当てにしてよかったことの証明にならない。",
         "source": "https://developer.apple.com/support/terms/apple-developer-program-license-agreement/",
         "$source": "[2026-11-10] 出所を契約の一覧ページ（https://developer.apple.com/terms/ → /support/terms/）から Apple Developer Program License Agreement 本体へ移した（オーナー判断 2026-11-10「3社とも直す PR を作る」）。一覧ページの指紋は判定の根拠の本文を見ておらず、DPLA の 2026-10-29 ごろの改定（Schedule 2 の版 LYL255 → LYL262、§3.2 の禁止事項の追加など）を検知できなかった。指紋は 2026-11-10 に2回取得して同じだった DPLA の <main>（627,694字）のもの。",
         "body_scope": "main",
-        "reviewed_at": null,
+        "reviewed_at": "2026-11-26",
+        "reviewed_by": "ai_draft",
         "$reviewed_by": "**経緯をそのまま残す。**(1) オーナーが Apple のページを開き、§13 / §14.10 / §3.3.3 の本文を貼った。(2) AIがその本文を読んで3観点を下書きした（`ai_draft`）。(3) オーナーが判定を確認し「これでいい」と応答したので `human` に上げた（2026-08-28）。\n\n**『人が本文を読んで決めた』の厳密な意味からは少しずれる** —— 本文を機械が読み、人が結論を承認した形。責任の所在は人にあるので `human` で正しいが、**読解そのものは機械がやっている**ことをここに書いておく。次に誰かがこの `risk` を根拠に何かを決めるなら、そこを知った上で決めるべき。\n\n**`governing_law` は判断が分かれる箇所として提示した上での承認。**「iOS開発者に一律で交渉の余地が無いのだから ok」という読みも示した上で、オーナーは `risk` のままを選んだ。\n\n**[2026-09-24] 改定で戻されたあとの読み直し。**戻した指紋は source（developer.apple.com/terms/ の一覧ページ）のもの。DPLA は「Schedule 1 last updated August 18, 2026」で、前回の読み（2026-08-28）より前の版のまま。**オーナーがこの確認を見て、前回の4判定のまま付け直すと判断した（2026-09-24）。**確かめる作業（版と本文の突き合わせ）は Claude。原文を人が通読していない点は前回と同じ。",
+        "draft_note": "[2026-11-26] **AIの読み直し（ai_draft）。人はこの読みを確認していない。**オーナー判断（2026-11-26、選択肢「ai_draft で読み直す」）。2026-11-23 の週次スナップショット（#2417）の取り込みで本文の改定として戻され、14日の猶予を過ぎる 2026-12-07 ごろから Corporate obligations が全PRで落ちるため。\n\n読んだもの: この行の出所 Apple Developer Program License Agreement（2026-11-10 の #2288 で本体を見る設定にした）の <main>。scripts/vendor-terms.mjs の extractBody（main）と fingerprint で、2026-11-10 に取得して残していた版が f75cb1db36c2（前の指紋）、2026-11-26 の現行が 111e5e7cf99a（今の指紋）で、台帳の新旧と一致した。\n差分（文単位・語単位で比べた）: 「from time to time via the App Store Connect site:」に続く国の一覧に Botswana と Rwanda が加わっただけ（627,694字 → 627,710字）。§13（責任の上限 $50）・§14.10（準拠法・管轄）・§2.5（所有）・§3.3.3（Data and Privacy）・§3.2（11-10 に記録した禁止事項の追加）は1字も変わっていない。\nよって 2026-11-10 の判定（liability_cap risk / ip ok / personal_data risk / governing_law risk）を、根拠の条項の字句が同一であることを理由に引き継いだ。reviewed_by は ai_draft で、人の判定ではない。\n\n読めていないもの: 11-10 の draft_note の (a)〜(c)（SDK のデータの流れと同意の説明の突き合わせは、その後 2026-11-10 の報告とプライバシーポリシー #2289 で一部を扱った）。\n\n--- 以下は、2026-11-23 の戻しで消えた前の draft_note ---\n[2026-11-10] **AIの読み直し（ai_draft）。人はこの読みを確認していない。**オーナー判断（2026-11-09、選択肢「公開して ai_draft で読み直す」）。2026-11-09 の週次スナップショットの取り込みで本文の改定として戻され、14日を過ぎる 2026-11-23 から Corporate obligations が全PRで落ちるため。\n\n読んだもの: (1) この行の出所 https://developer.apple.com/terms/（301 で /support/terms/ へ）の <main>。scripts/vendor-terms.mjs の extractBody（main）と fingerprint で計算すると、Web Archive の 2026-10-26 14:08:15Z 版が e6b0a134ff04（前の指紋）、2026-11-10 の現行が d89683c090cf（今の指紋）で、台帳の新旧と一致した。差分は見出しの「Agreements and Guidelines for Apple Developers」→「Agreements and guidelines」の1か所だけで、一覧ページの表記の変更。\n(2) **ただし判定の根拠の Apple Developer Program License Agreement（analysis_sources）そのものは別に改定されていた。**この行の指紋は一覧ページしか見ていないので、この改定は検知されていなかった。Web Archive の 2026-09-24 17:37:54Z 版（前回の判定日）と 2026-11-10 の現行を文単位で比べた。変わったのは、新しい API・エンタイトルメントの条項（Live Assistance API、App Replacement Entitlement、iWork API → Creator Studio API の改名）、§6.4 の CarPlay と Apple HomeView、台湾ストアの付属書（Attachment 15、2026-10-31 から手数料26%）、Schedule 2・3 のグループ購入・税務情報の開示、住所の変更、引用符の表記。**§13（責任の上限 $50）・§14.10（カリフォルニア州法・管轄）・§2.5 の所有・§3.3.3 Data and Privacy は差分に出ない**（Wallet の付属書で §3.3.3(B) に触れる文は、段落の区切りが変わっただけ）。\n(3) **個人データに関わる追加が1つある。**§3.2 の「Apple Software・証明書・サービスを使って作ってはならないコード」の列挙に (2)〜(7) が加わり、(6) は「自分のコードでも他人のコードでも、同意を求めたときに説明した範囲を超えて利用者のデータにアクセス・収集・送信してはならない」。組み込んだ SDK も含む書き方で、こちらの義務が増える方向の変更。\n(4) よって 2026-09-24 の判定（liability_cap risk / ip ok / personal_data risk / governing_law risk）を引き継いだ。personal_data は義務が増える方向の変更なので ok には動かない。reviewed_by は ai_draft で、人の判定ではない。\n\n読めていない・確かめていないもの: (a) アプリに組み込んだ SDK（AppsFlyer・Firebase など）が集める・送るデータが、同意を求めたときの説明（App Store のプライバシー表示やアプリ内の説明）の範囲に収まっているかの突き合わせはしていない（§3.2 (6) の新しい義務）。(b) DPLA の改定日の表示は本文に無く、Schedule 2 の版番号（LYL255 → LYL262、2026-10-29）から見た。(c) 指紋を一覧ページではなく DPLA 本体に向けるかは、オーナーに残す。\n\n--- 以下は、2026-11-09 の戻しで消えた前の draft_note ---\nオーナーが Apple Developer Program License Agreement の §13 / §14.10 / §3.3.3 を画面から貼り、その本文を読んで下書きした。**この欄は下書き時点の記録として残す**（何を読んで、何を読めなかったか）。\n\n**読めた:** §13 LIMITATION OF LIABILITY（全文）／§14.10 Dispute Resolution; Governing Law（全文・Exhibit C §13 の参照込み）／§3.3.3 Data and Privacy（A〜R 全文）。\n\n**読めていない: `ip`。**§2.5 Ownership の本文は貼られていないので unreviewed のまま残した。**取得ツールで一度それらしい引用が返ってきたが、根拠に使わない** —— 同じ取得で §13 と §14.10 は本文が無いのに、要約器が『通常はカリフォルニア州法』と一般論で埋めて返してきた。実際の §14.10 は下記のとおりカリフォルニアだったが、**当たっていたことは根拠にならない。**\n\n**判定に迷いがある箇所を明示しておく。**(1) `governing_law` を risk にしたが、条項は iOS 開発者に一律で交渉の余地が無く、『標準だから ok』という読みも成り立つ。risk にしたのはこの欄の趣旨が「争えるかどうか」だから。(2) `personal_data` は、§3.3.3 が**こちらの義務**を課すもので Apple 側の処理を定める DPA ではない。**DPA の有無という問いには、この本文では答えられていない。**それでも risk にしたのは、課された義務のうち1つを現に果たせないため（$personal_data 参照）。",
+        "risk_note": "**Apple の総責任額の上限は $50。**§13 の末尾: In no event shall Apple's total liability to You under this Agreement for all damages (other than as may be required by applicable law in cases involving personal injury) exceed the amount of fifty dollars ($50.00). 加えて逸失利益・データ喪失・事業中断は**種類として全部除外**されている（大文字の段落）。\n\n**この欄が効くのは、代替が無いから。**ベンダー台帳は apple を critical / fallback なし（「配信と課金が止まる」「iOSアプリである以上ここは置き換えられない」）と記録している。$50 が意味するのは**金銭では回復しないということ**で、$clause_note が言う「止まったときに何も請求できないなら、冗長化でしか守れない」の冗長化が、この相手には存在しない。\n\nしたがってこれは**是正できる risk ではなく、抱えていることを知っておく risk。**下げる手立てがあるとすれば契約側ではなく運用側（端末Outboxのような、Appleが止まっても失われない作り）で、そこは既に一部ある。\n\n[2026-11-10] 判定の根拠の §13（上限 $50）の字句は 2026-09-24 の判定時と同一（ai_draft で確認。draft_note 参照）。DPLA は 2026-10-29 ごろに改定されたが、§13・§14.10・§2.5・§3.3.3 は差分に出ない。重さの見立ては変えていない。\n\n[2026-11-26] 判定の根拠の §13（上限 $50）の字句は 2026-11-10 の読み直しの時と同一（ai_draft で確認。draft_note 参照）。今回の改定は国の一覧に2か国が加わっただけ。重さの見立ては変えていない。",
         "$governing_law": "§14.10: 管轄は **Northern District of California の州・連邦裁判所に専属**、準拠法は合衆国法およびカリフォルニア州法（抵触法を除く）。**European Relationship の例外はアイルランドだが、日本法人には適用されない。**Exhibit C §13 も §14.10 を参照するので、出口は1つ。\n\n実務上の意味: **争うにはカリフォルニアへ行くしかない。**費用・代理人・時間のどれを取っても一人法人には現実的でない。この欄の趣旨（$clause_note「海外事業者が大半なので、争えるかどうかがここで決まる」）に照らすと、答えは**「争えない」。**\n\n**$50 の上限と合わせて読むこと。**請求できる額が $50 で、請求する場所がカリフォルニア。2つ合わせて初めて『契約による救済は無いに等しい』という1つの事実になる。",
         "$personal_data": "**§3.3.3(C) が、利用者へのデータ侵害通知を契約上の義務にしている。**原文: You agree to notify Your users, in accordance with applicable law, in the event of a data breach in which user data collected from Your Application is compromised (e.g., You will send an email notifying Your users if there has been an unintentional disclosure or misuse of their user data).\n\n**その経路が無い。**⑧「障害案内の一斉配信」は `nobody` で、2026-08-27 の実測が経路を2つとも閉じている —— (a) **メール**: 宛先になりうる名簿は reminder_optin_invites だけで、同意文言が『メモが途切れた日に、そっと1通』とリマインダーに限定されており、**障害案内を送ると同意を超える。**(b) **アプリ内**: /v1/config の RemoteFlagPayload は flags / rollouts / killed / maxStaleSeconds / refreshSeconds しか運ばず、**文言を運ぶ欄も表示するUIも無い。**\n\nつまり**契約で約束した動作を、事故が起きた日に実行できない。**⑦（この行）と⑧（配信経路）と⑬（危機対応）が同じ穴を指している。**条項検査がこれを出したのは、この台帳を作った目的そのもの。**\n\nなお §3.3.3 のその他の義務（プライバシーポリシーの掲示・収集前の同意・目的外利用の禁止・Face Data / HealthKit の制限）は、現在の作りでは抵触しそうな箇所が見当たらない —— 収集しているものが少ないため。**ただしこれは本文と現況を突き合わせた結果であって、監査ではない。**",
         "fingerprint": "111e5e7cf99a",
@@ -276,14 +279,6 @@
         "fetched_at": "2026-11-23",
         "analysis_sources": [
           "https://developer.apple.com/support/terms/apple-developer-program-license-agreement/"
-        ],
-        "reset_reason": "本文が改定された（f75cb1db36c2 → 111e5e7cf99a・2026-11-23） — **前の判定は前の本文に対するもの。**読み直すまで unreviewed",
-        "reset_at": "2026-11-23",
-        "reset_clauses": [
-          "liability_cap",
-          "ip",
-          "personal_data",
-          "governing_law"
         ]
       },
       {
@@ -362,13 +357,13 @@
       },
       {
         "id": "google_cloud",
-        "liability_cap": "unreviewed",
-        "ip": "unreviewed",
-        "personal_data": "unreviewed",
-        "governing_law": "unreviewed",
+        "liability_cap": "risk",
+        "ip": "ok",
+        "personal_data": "risk",
+        "governing_law": "risk",
         "source": "https://cloud.google.com/terms",
         "body_scope": "main",
-        "reviewed_at": null,
+        "reviewed_at": "2026-11-26",
         "$liability_cap": "**GCP Terms §12。firebase の欄と同一の条項。**上限は責任原因の直前12か月に当該 Services へ支払った Fees、**無料提供分は別枠で USD 5,000**（「支払0→上限0」ではない）。§12.1 は間接・結果的・特別・付随・懲罰的損害に加えて lost revenues / profits / savings / goodwill を除外。§12.3 の無制限は詐欺・§13 の補償義務・知財侵害・支払義務・法令上排除できない責任で、**重過失・故意・人身損害は入っていない**（探した上で無かった）。\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
         "$ip": "**GCP Terms §5.1。ライセンスを渡していない。**Customer Data と Customer Applications の全 IP 権が Customer に残り、**Google に与える IP ライセンス条項が本文に見つからない。**§5.2 は逆向きで、Google は Cloud DPA に従ってのみ処理し、それ以外の目的では処理しない。「改善のため利用できる」という権利も見つからなかった。Feedback は `without restriction` で、**過去版の『assign』ではない。**§14.14 が Section 5 全体を存続させる。\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
         "$personal_data": "**Cloud DPA が §5.2 経由で組み込まれる。**Google が processor、こちらが controller または processor。渡しているのは pseudonymous。\n\n**役割構造は分かったが DPA本文（サブプロセッサ・越境移転・削除）は読んでいない。**cloudflare・firebase と同じ理由で risk。\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
@@ -377,14 +372,9 @@
         "fingerprint": "370cfd8c7fc6",
         "fingerprint_scope": "main",
         "fetched_at": "2026-11-23",
-        "reset_reason": "本文が改定された（4e09d30f8af1 → 370cfd8c7fc6・2026-11-23） — **前の判定は前の本文に対するもの。**読み直すまで unreviewed",
-        "reset_at": "2026-11-23",
-        "reset_clauses": [
-          "liability_cap",
-          "ip",
-          "personal_data",
-          "governing_law"
-        ]
+        "reviewed_by": "ai_draft",
+        "risk_note": "この行は BigQuery。判定は firebase と同じ GCP Terms による。上限は責任原因の直前12か月に支払った Fees（GCP Terms §12.2）、無料提供分は USD 5,000。lost revenues / profits / savings / goodwill は種類として除外（§12.1）。上限の効かないもの（§12.3）に重過失・故意・人身損害は入っていない。紛争はカリフォルニア州法・Santa Clara County 専属管轄（§14.12(c)）で、Regional Modifications の APAC 仲裁は Japan を除外。2026-10-27 に、これらの条項の字句が 2026-09-24 の判定時と同一であることを確かめた（ai_draft）。ただし重さは違う。ベンダー台帳は google_cloud を critical: false（計測が止まる。出荷は続く）と記録している。\n\n[2026-11-26] §12（上限と除外）・§14.12（準拠法・管轄）の字句は 2026-10-27 の判定時と同一（ai_draft で確認。draft_note 参照）。2026-11-18 の改定は §2.1 の課金（任意のクレジット購入）だけ。重さの見立ては変えていない。",
+        "draft_note": "[2026-11-26] **AIの読み直し（ai_draft）。人はこの読みを確認していない。**オーナー判断（2026-11-26、選択肢「ai_draft で読み直す」）。2026-11-23 の週次スナップショット（#2417）の取り込みで本文の改定として戻され、14日の猶予を過ぎる 2026-12-07 ごろから Corporate obligations が全PRで落ちるため。\n\n読んだもの: この行の出所 cloud.google.com/terms の <main>。scripts/vendor-terms.mjs の extractBody（main）と fingerprint で、2026-10-27 に取得して残していた版が 4e09d30f8af1（前の指紋）、2026-11-26 の現行が 370cfd8c7fc6（今の指紋）で、台帳の新旧と一致した。現行の最終更新は 2026-11-18。\n差分（文単位・語単位で比べた）: §2.1 の課金で、Google がクレジットの購入を求められる対象に「(ii) 個々の顧客が任意でクレジットを買えるようにする」選択肢とサービスの「tier」単位が加わった。「Customer Malfeasance」の引用符の表記と、過去の版の一覧（2026-11-18 の追加）が変わった。**§5・§5.2・§12.1〜12.3・§14.12 は字句が同一。**\nよって前回の判定（liability_cap risk / ip ok / personal_data risk / governing_law risk。2026-10-27 にオーナーが human で付け直したもの）を、根拠の条項の字句が同一であることを理由に引き継いだ。**reviewed_by は ai_draft に戻した**（人が見たのは前の本文で、今回の本文を人は見ていない）。\n\n読めていないもの: Cloud Data Processing Addendum と Regional Modifications の改定の有無（この行の指紋の外）。§2.1 の変更は課金の取り扱いで、4観点の判定には当たらないと読んだ。\n\n--- 以下は、2026-11-23 の戻しで消えた前の draft_note ---\n[2026-10-27] **AIの読み直し（ai_draft）。人はこの読みを確認していない。**オーナー判断（2026-10-27、選択肢「Claudeがai_draftで付け直す」）。同じ GCP Terms の改定で 2026-10-22 に戻されており、このままだと 2026-11-06 に猶予（14日）を過ぎて全PRが落ちるため、firebase と同じ読みで付け直した。\n\n読んだもの: (1) この行の出所 cloud.google.com/terms そのもの。指紋 de8000039069 → 4e09d30f8af1（2026-10-22 に戻された）は、下の 2026-10-12 の改定。\n(2) cloud.google.com/terms（最終更新 2026-10-12）と 2026-09-02 版（Wayback 2026-10-05 取得）を節ごとに比べた。変わったのは §3.3（制限の対象に AI Agent を追加）、§13.2（顧客の補償義務の対象に AI Agents の使用を追加）、§14.19（\"AI Agent\" の定義を追加し、Export Control Laws に sanctions を追加）だけ。**§5.1・§5.2・§12.1〜12.3・§14.12 は字句が同一。**(3) Cloud Data Processing Addendum は最終更新 2026-06-08 で、前回の判定より前。(4) Regional Modifications は最終更新 2025-11-25 で、APAC の仲裁置換は Japan を除外したまま。\n\n判定: 4観点とも 2026-09-24 の判定（liability_cap risk / ip ok / personal_data risk / governing_law risk）を、根拠の条項の字句が同一であることを理由に引き継いだ。**新しい法的評価ではない。**\n\n読めていないもの・確かめていないもの: 実際に適用される契約・請求地域・Service Specific Terms（AI Agent の定義の中身を含む）。§13.2 の拡張は AI Agents を使っていなければ効かない見込みだが、使っているかは確かめていない。§12.3(b) により顧客側の補償義務は上限の外なので、AI Agents を使い始めるときは読み直す。"
       },
       {
         "id": "search_console",
