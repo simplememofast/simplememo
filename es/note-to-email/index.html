@@ -61,7 +61,7 @@
   "description": "Presentamos el procedimiento para enviarte una nota a ti mismo a través del correo electrónico Gmail o iPhone, la confirmación de recepción y cómo elegir una aplicación dedicada. SimpleMemo puede autenticar al destinatario por primera vez y enviar hasta 3 mensajes al día de forma gratuita. También explicará dónde comprobar cuándo no se recibe, la diferencia entre el correo electrónico y el guardado en Obsidian, y cómo organizarlo para volver a mirar las notas.",
   "url": "https://simplememofast.com/es/note-to-email/",
   "datePublished": "2026-03-04",
-  "dateModified": "2026-09-30",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -148,7 +148,7 @@
       "name": "¿El contenido de la nota se guardará en el servidor?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "La Outbox y el historial en el terminal están encriptados con AES-GCM. El cuerpo del correo electrónico pasa por nuestro API y una plataforma externa de transmisión de correo electrónico para la entrega, y el correo electrónico recibido se almacena en el servicio de correo del destinatario. El cifrado en el terminal no significa cifrado de extremo a extremo de todo el correo electrónico."
+        "text": "La Outbox y el historial en el terminal están encriptados con AES-GCM. Para su envío, el cuerpo del correo electrónico pasa por nuestra API y por el servicio de entrega Resend. Nuestra API no almacena el cuerpo del correo. Resend conserva los correos enviados, incluido el texto de las notas (el plazo de conservación publicado para sus planes estándar es de 30 días; estamos comprobando cuál se aplica a nuestra cuenta). El correo electrónico recibido se almacena en el servicio de correo del destinatario. El cifrado en el terminal no significa cifrado de extremo a extremo de todo el correo electrónico."
       }
     },
     {
@@ -156,7 +156,7 @@
       "name": "¿Puedo personalizar el asunto y la firma?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Sí. Puede establecer libremente el asunto y la firma del correo electrónico en la aplicación. Si establece prefijos de asunto como \"[Memo]\" y \"[TODO]\" dependiendo del propósito, también es posible la asignación automática en el lado del correo electrónico."
+        "text": "Sí. El asunto es la línea 1 de la nota, precedida del texto que escribas en «Asunto», en Ajustes (si lo dejas vacío, el asunto es la línea 1 tal cual). Para la firma, escribe el texto en «Firma», en Ajustes, y se añadirá al final del cuerpo del correo. Si empiezas la línea 1 con una etiqueta como «[Nota]» o «[TODO]», también puedes clasificar los correos automáticamente con los filtros de tu correo."
       }
     },
     {
@@ -391,7 +391,7 @@
   "image": "https://simplememofast.com/assets/img/app-icon-256.png",
   "applicationCategory": "UtilitiesApplication",
   "operatingSystem": "iOS 16.0+, watchOS",
-  "softwareVersion": "5.9.27",
+  "softwareVersion": "5.9.35",
   "isAccessibleForFree": true,
   "inLanguage": "es",
   "downloadUrl": "https://apps.apple.com/jp/app/id6758438948",
@@ -590,8 +590,8 @@
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>¿Cuáles son las ventajas de enviarte una nota por correo electrónico? </span></summary><div class="faq-answer"><p>Es para recopilar notas cortas en la bandeja de entrada que normalmente revisas. Si no mira mucho su correo electrónico o si su bandeja de entrada ya está llena de muchos correos electrónicos, considere cómo dejarlo directamente en sus notas diarias o aplicaciones de tareas.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>¿Puedo usar cualquier dirección de correo electrónico? </span></summary><div class="faq-answer"><p>Gmail, Outlook, ¡Yahoo! Establezca y autentique su propia dirección que pueda recibirse, como correos electrónicos y correos electrónicos iCloud. Por favor, acepte remitentes externos para los correos electrónicos de la empresa o verifique sus reglas internas de recepción.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>¿Puedo enviar notas sin conexión? </span></summary><div class="faq-answer"><p>Mientras está fuera de línea, está encriptado y guardado en la Outbox en el terminal, y cuando se devuelva la comunicación, intentará reenviarlo. Se requiere comunicación y una dirección verificada para la llegada del correo electrónico. Después de regresar, abra la aplicación y compruebe el estado y la bandeja de entrada no enviados.</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>¿El contenido de la nota se guardará en el servidor? </span></summary><div class="faq-answer"><p>La Outbox y el historial en el terminal están encriptados con AES-GCM. El cuerpo del correo electrónico pasa por nuestro API y una plataforma externa de transmisión de correo electrónico para la entrega, y el correo electrónico recibido se almacena en el servicio de correo del destinatario. El cifrado en el terminal no significa cifrado de extremo a extremo de todo el correo electrónico.</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>¿Puedo personalizar el asunto y la firma? </span></summary><div class="faq-answer"><p>Sí. Puede establecer libremente el asunto y la firma del correo electrónico en la aplicación. Si establece prefijos de asunto como "[Memo]" y "[TODO]" dependiendo del propósito, también es posible la asignación automática en el lado del correo electrónico.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>¿El contenido de la nota se guardará en el servidor? </span></summary><div class="faq-answer"><p>La Outbox y el historial en el terminal están encriptados con AES-GCM. Para su envío, el cuerpo del correo electrónico pasa por nuestra API y por el servicio de entrega Resend. Nuestra API no almacena el cuerpo del correo. Resend conserva los correos enviados, incluido el texto de las notas (el plazo de conservación publicado para sus planes estándar es de 30 días; estamos comprobando cuál se aplica a nuestra cuenta). El correo electrónico recibido se almacena en el servicio de correo del destinatario. El cifrado en el terminal no significa cifrado de extremo a extremo de todo el correo electrónico.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>¿Puedo personalizar el asunto y la firma? </span></summary><div class="faq-answer"><p>Sí. El asunto es la línea 1 de la nota, precedida del texto que escribas en «Asunto», en Ajustes (si lo dejas vacío, el asunto es la línea 1 tal cual). Para la firma, escribe el texto en «Firma», en Ajustes, y se añadirá al final del cuerpo del correo. Si empiezas la línea 1 con una etiqueta como «[Nota]» o «[TODO]», también puedes clasificar los correos automáticamente con los filtros de tu correo.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>¿Cuál es la diferencia entre el correo electrónico de Gmail? </span></summary><div class="faq-answer"><p>Gmail también puede introducir su dirección y enviarla al destino. El tema será un marcador que se encontrará más adelante. SimpleMemo puede establecer y autenticar al destinatario por primera vez, y luego ingresar el texto y enviarlo.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>¿Puedo usarlo en Android? ( Quiero enviarme un correo electrónico a mí mismo)</span></summary><div class="faq-answer"><p>SimpleMemo es actualmente exclusivamente para iOS. Si quieres enviarte un correo electrónico en Android, puedes enviártelo a ti mismo en la aplicación Gmail o compartir una nota en Google Keep. Por favor, elija según la frecuencia de uso y el destino que desea recibir.</p></div></details></div>
 </div>
@@ -615,7 +615,7 @@
 </tbody>
 </table></div>
 </div></section>
-<p class="lp-section__lead">Actualización de la explicación: 23 de septiembre de 2026. Confirmación final de las especificaciones: 9 de septiembre de 2026. <a href="/es/blog/fastest-memo-app-benchmark">Condiciones de medición de la velocidad de inicio</a> · <a href="/es/privacy">Manejo de datos</a></p>
+<p class="lp-section__lead">Actualización de la explicación: 28 de noviembre de 2026. Confirmación final de las especificaciones: 9 de septiembre de 2026. <a href="/es/blog/fastest-memo-app-benchmark">Condiciones de medición de la velocidad de inicio</a> · <a href="/es/privacy">Manejo de datos</a></p>
 <!-- CTA -->
 <div class="cta-box">
 <div class="cta-box__title">

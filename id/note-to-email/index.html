@@ -61,7 +61,7 @@
   "description": "Memperkenalkan prosedur untuk mengirim catatan kepada diri sendiri melalui email Gmail atau iPhone, konfirmasi penerimaan, dan cara memilih aplikasi khusus. SimpleMemo dapat mengautentikasi penerima untuk pertama kalinya dan mengirim maksimal 3 pesan per hari secara gratis. Ini juga akan menjelaskan di mana harus memeriksa ketika tidak diterima, perbedaan antara email dan menyimpan ke Obsidian, dan bagaimana mengaturnya untuk melihat kembali catatan.",
   "url": "https://simplememofast.com/id/note-to-email/",
   "datePublished": "2026-03-04",
-  "dateModified": "2026-09-30",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -148,7 +148,7 @@
       "name": "Apakah isi memo akan disimpan di server?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Outbox dan riwayat di perangkat dienkripsi dengan AES-GCM. Untuk pengantaran, isi email melewati API kami dan infrastruktur pengiriman email eksternal. Email yang telah tiba disimpan oleh layanan email penerima. Enkripsi di perangkat tidak berarti seluruh email dilindungi enkripsi ujung ke ujung."
+        "text": "Outbox dan riwayat di perangkat dienkripsi dengan AES-GCM. Untuk pengantaran, isi email melewati API kami dan layanan pengantaran Resend. API kami tidak menyimpan isi email. Resend menyimpan email yang telah dikirim, termasuk isi catatan (masa simpan yang dipublikasikan untuk paket standar adalah 30 hari, dan kami masih memeriksa masa simpan yang berlaku untuk akun kami). Email yang telah tiba disimpan oleh layanan email penerima. Enkripsi di perangkat tidak berarti seluruh email dilindungi enkripsi ujung ke ujung."
       }
     },
     {
@@ -156,7 +156,7 @@
       "name": "Dapatkah saya menyesuaikan subjek dan tanda tangan?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Ya. Anda dapat dengan bebas mengatur subjek dan tanda tangan email di aplikasi. Jika Anda menetapkan awalan subjek seperti \"[Memo]\" dan \"[TODO]\" tergantung pada tujuannya, alokasi otomatis di sisi email juga dimungkinkan."
+        "text": "Ya. Subjek email diambil dari baris ke-1 memo, dan teks yang Anda isi di kolom “Subjek” di pengaturan diletakkan di depannya (jika kolom itu kosong, baris ke-1 menjadi subjek apa adanya). Untuk tanda tangan, teks yang Anda isi di kolom “Tanda Tangan” di pengaturan juga ditambahkan di akhir isi email. Jika Anda menulis “[Memo]”, “[TODO]”, atau tag serupa di awal baris ke-1, email juga dapat disortir otomatis dengan filter di layanan email Anda."
       }
     },
     {
@@ -391,7 +391,7 @@
   "image": "https://simplememofast.com/assets/img/app-icon-256.png",
   "applicationCategory": "UtilitiesApplication",
   "operatingSystem": "iOS 16.0+, watchOS",
-  "softwareVersion": "5.9.27",
+  "softwareVersion": "5.9.35",
   "isAccessibleForFree": true,
   "inLanguage": "id",
   "downloadUrl": "https://apps.apple.com/jp/app/id6758438948",
@@ -590,8 +590,8 @@
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Apa keuntungan mengirim catatan kepada diri sendiri melalui email? </span></summary><div class="faq-answer"><p>Ini untuk dapat mengumpulkan catatan singkat di kotak masuk yang biasanya Anda periksa. Jika Anda tidak sering melihat kembali email Anda atau jika kotak masuk Anda sudah dipenuhi dengan banyak email, harap pertimbangkan cara meninggalkannya langsung di catatan harian atau aplikasi tugas Anda.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Dapatkah saya menggunakan alamat email apa pun? </span></summary><div class="faq-answer"><p>Gmail, Outlook, Yahoo! Atur dan autentikasi alamat Anda sendiri yang dapat diterima, seperti email dan email iCloud. Mohon terima pengirim eksternal untuk email perusahaan atau periksa aturan penerimaan internal Anda.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span> Dapatkah saya mengirim catatan secara offline? </span></summary><div class="faq-answer"><p>Saat offline, catatan disimpan secara terenkripsi di Outbox pada perangkat, lalu pengiriman dicoba ulang setelah koneksi kembali. Email memerlukan koneksi dan alamat tujuan yang sudah diverifikasi agar dapat tiba. Setelah kembali online, buka aplikasi, periksa status kiriman tertunda, dan lihat kotak masuk.</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Apakah isi memo akan disimpan di server? </span></summary><div class="faq-answer"><p>Outbox dan riwayat di perangkat dienkripsi dengan AES-GCM. Untuk pengantaran, isi email melewati API kami dan infrastruktur pengiriman email eksternal. Email yang telah tiba disimpan oleh layanan email penerima. Enkripsi di perangkat tidak berarti seluruh email dilindungi enkripsi ujung ke ujung.</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span> Dapatkah saya menyesuaikan subjek dan tanda tangan? </span></summary><div class="faq-answer"><p>Ya. Anda dapat dengan bebas mengatur subjek dan tanda tangan email di aplikasi. Jika Anda menetapkan awalan subjek seperti "[Memo]" dan "[TODO]" tergantung pada tujuannya, alokasi otomatis di sisi email juga dimungkinkan.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Apakah isi memo akan disimpan di server? </span></summary><div class="faq-answer"><p>Outbox dan riwayat di perangkat dienkripsi dengan AES-GCM. Untuk pengantaran, isi email melewati API kami dan layanan pengantaran Resend. API kami tidak menyimpan isi email. Resend menyimpan email yang telah dikirim, termasuk isi catatan (masa simpan yang dipublikasikan untuk paket standar adalah 30 hari, dan kami masih memeriksa masa simpan yang berlaku untuk akun kami). Email yang telah tiba disimpan oleh layanan email penerima. Enkripsi di perangkat tidak berarti seluruh email dilindungi enkripsi ujung ke ujung.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span> Dapatkah saya menyesuaikan subjek dan tanda tangan? </span></summary><div class="faq-answer"><p>Ya. Subjek email diambil dari baris ke-1 memo, dan teks yang Anda isi di kolom “Subjek” di pengaturan diletakkan di depannya (jika kolom itu kosong, baris ke-1 menjadi subjek apa adanya). Untuk tanda tangan, teks yang Anda isi di kolom “Tanda Tangan” di pengaturan juga ditambahkan di akhir isi email. Jika Anda menulis “[Memo]”, “[TODO]”, atau tag serupa di awal baris ke-1, email juga dapat disortir otomatis dengan filter di layanan email Anda.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Apa perbedaan antara email Gmail yang ditujukan kepada saya? </span></summary><div class="faq-answer"><p>Gmail juga dapat memasukkan alamat Anda dan mengirimkannya ke tujuan. Subjeknya akan menjadi penanda yang akan ditemukan nanti. SimpleMemo dapat mengatur dan mengautentikasi penerima untuk pertama kalinya, lalu memasukkan teks dan mengirimkannya.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Bisakah saya menggunakannya di Android? ( Saya ingin mengirim email ke diri saya sendiri)</span></summary><div class="faq-answer"><p>SimpleMemo saat ini eksklusif untuk iOS. Jika Anda ingin mengirim email ke diri sendiri di Android, Anda dapat mengirimkannya ke diri sendiri di aplikasi Gmail atau membagikan catatan di Google Keep. Silakan pilih sesuai dengan frekuensi penggunaan dan tujuan yang ingin Anda terima.</p></div></details></div>
 </div>
@@ -615,7 +615,7 @@
 </tbody>
 </table></div>
 </div></section>
-<p class="lp-section__lead">Penjelasan diperbarui: 23/9/2026. Spesifikasi terakhir diperiksa: 9/9/2026. <a href="/id/blog/fastest-memo-app-benchmark">Kondisi pengukuran waktu membuka aplikasi</a> · <a href="/id/privacy">Penanganan data</a></p>
+<p class="lp-section__lead">Penjelasan diperbarui: 28/11/2026. Spesifikasi terakhir diperiksa: 9/9/2026. <a href="/id/blog/fastest-memo-app-benchmark">Kondisi pengukuran waktu membuka aplikasi</a> · <a href="/id/privacy">Penanganan data</a></p>
 <!-- CTA -->
 <div class="cta-box">
 <div class="cta-box__title">

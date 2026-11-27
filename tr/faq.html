@@ -430,7 +430,7 @@
       "name": "Notun içeriği bir yerde bir sunucuda mı saklanıyor?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Hayır. Notun içeriği Simple Memo sunucusuna kaydedilmeyecektir. Notlar, Relay API (Cloudflare Workers) ve teslimat hizmeti (Resend) aracılığıyla e-posta ile gönderilir, ancak notun gövdesi Simple Memo sunucusunda saklanmaya devam etmez. Outbox ve terminaldeki geçmiş veriler yalnızca terminalde AES-GCM şifreli durumda saklanır."
+        "text": "Notlarınızın içeriği Simple Memo sunucularında saklanmaz. Notlar, Relay API (Cloudflare Workers) ve teslim hizmeti (Resend) aracılığıyla e-posta ile gönderilir. Üretim ortamındaki Relay API, not gövdesini günlüklerine de kaydetmez. Resend, gönderilen e-postaları (not gövdesi dâhil) saklar (standart planlar için yayımlanan saklama süresi 30 gündür; hesabımıza uygulanan süreyi teyit ediyoruz). Cihazdaki Outbox ve geçmiş verileri AES-GCM ile şifrelenmiş olarak yalnızca cihazda saklanır."
       }
     },
     {
@@ -494,7 +494,7 @@
       "name": "Simple Memo ne tür bir uygulamadır?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Simple Memo, yalnızca \"başlat → yaz → gönder\" 3 adımı için uzmanlaşmış bir not uygulamasıdır. Girilen not, önceden ayarlanmış e-posta adresine tek dokunuşla gönderilecektir. Klasör yönetimi, etiketleme ve senkronizasyon ayarları gibi karmaşık işlevler yoktur. Şu anda aklınıza gelenleri yazın ve kendi e-postanıza gönderin\" - bu, odaklanan bir uygulamadır."
+        "text": "Aklınıza geleni sesle veya klavyeyle yazıp tek dokunuşla kendinize e-posta olarak gönderdiğiniz bir iPhone ve Apple Watch uygulamasıdır. Notu Obsidian kasanızdaki bir nota ekleyebilir, Notion'a da kaydedebilirsiniz. Uygulamada notları düzenlemek için bir ekran yoktur; düzenlemeyi notların ulaştığı yerde yaparsınız. Obsidian entegrasyonunu kurup ayarlardaki “AI etiketlerini otomatik ekle” seçeneğini açarsanız başlık, etiketler ve tür de cihazda otomatik olarak eklenir (varsayılan olarak kapalıdır)."
       }
     },
     {
@@ -590,7 +590,7 @@
       "name": "Lütfen bana uyumlu cihazı ve işletim ortamını söyleyin.",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "iPhone (iOS 16.0 veya üstü) Apple Watch (watchOS 9.0 veya üstü)"
+        "text": "iPhone (iOS 16.0 veya üstü) Apple Watch (watchOS 9.0 veya üstü) iPad, Mac veya Android sürümü yoktur."
       }
     },
     {
@@ -750,7 +750,7 @@
       "name": "E-posta gövdesi, kimlik doğrulama kodu ve e-posta adresi sunucuda kalacak mı?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Not gövdesi gönderim sırasında Relay API hizmetimizden (Cloudflare Workers) ve teslim hizmetinden (Resend) geçer, ancak gizlilik politikamızda belirtildiği gibi kalıcı saklamayız. Doğrulama kodu, 10 dakikalık geçerlilik süresi dolunca otomatik silinir. E-posta adresiniz sunucumuza kaydedilecektir. Örneğin, aşağıdakiler (diğerleri için gizlilik politikası bölümüne bakın): İletim Kimliği ve hedef e-posta adresi karması (SHA-256'den oluşturuldu) yazışmaları (Cloudflare D1) Muhatapın kimliğini doğrulama kaydı. Her terminal için uygulama tarafından oluşturulan rastgele tanımlayıcı ve hedef e-posta adresinin karması 1 yıl içinde otomatik olarak silinir (Cloudflare KV) Bu karmalar ve tanımlayıcılar tamamen anonim bilgi olarak kabul edilmez. Terminaldeki Outbox geçmiş verileri AES-GCM ile şifrelenir ve şifreleme anahtarı Anahtar Zincirinde saklanır."
+        "text": "Not gövdesi gönderim sırasında Relay API hizmetimizden (Cloudflare Workers) ve teslim hizmetinden (Resend) geçer, ancak gizlilik politikamızda belirtildiği gibi kalıcı saklamayız. Resend, gönderilen e-postaları (not gövdesi dâhil) saklar (standart planlar için yayımlanan saklama süresi 30 gündür; hesabımıza uygulanan süreyi teyit ediyoruz). Doğrulama kodu, 10 dakikalık geçerlilik süresi dolunca otomatik silinir. E-posta adresiniz sunucumuza kaydedilecektir. Örneğin, aşağıdakiler (diğerleri için gizlilik politikası bölümüne bakın): İletim Kimliği ve hedef e-posta adresi karması (SHA-256'den oluşturuldu) yazışmaları (Cloudflare D1) Muhatapın kimliğini doğrulama kaydı. Her terminal için uygulama tarafından oluşturulan rastgele tanımlayıcı ve hedef e-posta adresinin karması 1 yıl içinde otomatik olarak silinir (Cloudflare KV) Bu karmalar ve tanımlayıcılar tamamen anonim bilgi olarak kabul edilmez. Terminaldeki Outbox geçmiş verileri AES-GCM ile şifrelenir ve şifreleme anahtarı Anahtar Zincirinde saklanır."
       }
     },
     {
@@ -869,7 +869,7 @@
 
       <!-- Japanese Content -->
       <div class="lang-body">
-        <p class="page-content__date">Son güncelleme: <time datetime="2026-11-21">21 Kasım 2026</time></p>
+        <p class="page-content__date">Son güncelleme: <time datetime="2026-11-28">28 Kasım 2026</time></p>
         <div class="page-content__body faq-body">
 
           <!-- 料金・プラン -->
@@ -1146,7 +1146,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">Notun içeriği bir yerde bir sunucuda mı saklanıyor?</summary>
                 <div class="faq-answer">
-                  <p>Hayır. Notun içeriği Simple Memo sunucusuna kaydedilmeyecektir. Notlar, Relay API (Cloudflare Workers) ve teslimat hizmeti (Resend) aracılığıyla e-posta ile gönderilir, ancak notun gövdesi Simple Memo sunucusunda saklanmaya devam etmez. Outbox ve terminaldeki geçmiş veriler yalnızca terminalde AES-GCM şifreli durumda saklanır.</p>
+                  <p>Notlarınızın içeriği Simple Memo sunucularında saklanmaz. Notlar, Relay API (Cloudflare Workers) ve teslim hizmeti (Resend) aracılığıyla e-posta ile gönderilir. Üretim ortamındaki Relay API, not gövdesini günlüklerine de kaydetmez. Resend, gönderilen e-postaları (not gövdesi dâhil) saklar (standart planlar için yayımlanan saklama süresi 30 gündür; hesabımıza uygulanan süreyi teyit ediyoruz). Cihazdaki Outbox ve geçmiş verileri AES-GCM ile şifrelenmiş olarak yalnızca cihazda saklanır.</p>
                 </div>
               </details>
             </div>
@@ -1185,7 +1185,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">E-posta gövdesi, kimlik doğrulama kodu ve e-posta adresi sunucuda kalacak mı?</summary>
                 <div class="faq-answer">
-                  <p>Not gövdesi gönderim sırasında Relay API hizmetimizden (Cloudflare Workers) ve teslim hizmetinden (Resend) geçer, ancak gizlilik politikamızda belirtildiği gibi kalıcı saklamayız. Doğrulama kodu, 10 dakikalık geçerlilik süresi dolunca otomatik silinir.</p>
+                  <p>Not gövdesi gönderim sırasında Relay API hizmetimizden (Cloudflare Workers) ve teslim hizmetinden (Resend) geçer, ancak gizlilik politikamızda belirtildiği gibi kalıcı saklamayız. Resend, gönderilen e-postaları (not gövdesi dâhil) saklar (standart planlar için yayımlanan saklama süresi 30 gündür; hesabımıza uygulanan süreyi teyit ediyoruz). Doğrulama kodu, 10 dakikalık geçerlilik süresi dolunca otomatik silinir.</p>
                   <p>E-posta adresiniz sunucumuza kaydedilecektir. Örneğin, aşağıdakiler (diğerleri için <a href="/tr/privacy">gizlilik politikası</a> bölümüne bakın):</p>
                   <ul>
                     <li>İletim Kimliği ve hedef e-posta adresi karması (SHA-256'den oluşturuldu) yazışmaları (Cloudflare D1)</li>
@@ -1261,7 +1261,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">Simple Memo ne tür bir uygulamadır?</summary>
                 <div class="faq-answer">
-                  <p>Simple Memo, yalnızca "başlat → yaz → gönder" 3 adımı için uzmanlaşmış bir not uygulamasıdır. Girilen not, önceden ayarlanmış e-posta adresine tek dokunuşla gönderilecektir. Klasör yönetimi, etiketleme ve senkronizasyon ayarları gibi karmaşık işlevler yoktur. Şu anda aklınıza gelenleri yazın ve kendi e-postanıza gönderin" - bu, odaklanan bir uygulamadır.</p>
+                  <p>Aklınıza geleni sesle veya klavyeyle yazıp tek dokunuşla kendinize e-posta olarak gönderdiğiniz bir iPhone ve Apple Watch uygulamasıdır. Notu Obsidian kasanızdaki bir nota ekleyebilir, Notion'a da kaydedebilirsiniz. Uygulamada notları düzenlemek için bir ekran yoktur; düzenlemeyi notların ulaştığı yerde yaparsınız. Obsidian entegrasyonunu kurup ayarlardaki “AI etiketlerini otomatik ekle” seçeneğini açarsanız başlık, etiketler ve tür de cihazda otomatik olarak eklenir (varsayılan olarak kapalıdır).</p>
                 </div>
               </details>
             </div>
@@ -1434,6 +1434,7 @@
                     <li>iPhone (iOS 16.0 veya üstü)</li>
                     <li>Apple Watch (watchOS 9.0 veya üstü)</li>
                   </ul>
+                  <p>iPad, Mac veya Android sürümü yoktur.</p>
                 </div>
               </details>
             </div>

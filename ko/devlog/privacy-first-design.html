@@ -60,7 +60,7 @@
   "url": "https://simplememofast.com/ko/devlog/privacy-first-design",
   "inLanguage": "ko",
   "datePublished": "2026-02-13",
-  "dateModified": "2026-09-24",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -492,7 +492,7 @@
 
 
       <div class="article-meta">
-        <span>2026년2월13일 공개 ・ 보호·이용 분석 설명 업데이트：2026년9월6일</span>
+        <span>2026년2월13일 공개 ・ 보호·이용 분석 설명 업데이트：2026년9월6일 ・ 저장 및 이용 분석 FAQ 정정：2026년11월28일</span>
 
       </div>
 
@@ -558,7 +558,7 @@
 
             <div class="faq-item">
               <div class="faq-item__question">Q. 메모 내용이 서버에 저장됩니까?</div>
-              <div class="faq-item__answer">메일 전송 시, 본문은 당사의 Relay API와 배송 기반을 통과합니다. 당사의 Relay API에서는 법령 대응이나 장애 대응 등 정당한 필요가 있는 경우를 제외하고는 본문을 지속적으로 저장하지 않습니다. 배송지 메일함에 저장하는 것과는 별개입니다. 저장처별 설명은<a href="/ko/privacy-architecture/">프라이버시 설계</a>을(를) 보시기 바랍니다.</div>
+              <div class="faq-item__answer">메일 전송 시, 본문은 당사의 Relay API와 배송 기반을 통과합니다. 당사의 Relay API는 본문을 저장하지 않습니다. 배송 기반인 Resend는 보낸 메일(메모 본문 포함)을 보관합니다(공개된 표준 요금제의 보관 기간은 30일이며, 당사 계정에 적용되는 기간은 확인 중입니다). 배송지 메일함에 저장하는 것과는 별개입니다. 저장처별 설명은 <a href="/ko/privacy-architecture/">프라이버시 설계</a>을(를) 보시기 바랍니다.</div>
             </div>
 
             <div class="faq-item">
@@ -573,12 +573,12 @@
 
             <div class="faq-item">
               <div class="faq-item__question">Q. 분석 및 트래킹이 있습니까?</div>
-              <div class="faq-item__answer">네. 당사는 자체 이용 분석과 AppsFlyer SDK를 사용하고 있습니다. 당사 분석에는 무작위 설치 식별자, 세션 식별자, 이벤트 종류·시간, 앱 버전, 전송 결과 등을 전송합니다. AppsFlyer에는 최초 메모 전송 성공, 인증 성공, 과금 화면 표시, 플랜 선택, 구매 성공 이벤트가 전송되며, 구매 시 금액·통화·기간 등이 표시될 수 있습니다. 동일한 설치 식별자를 AppsFlyer의 Customer User ID에도 설정하기 위해, 획득 정보와 사용 이벤트를 연관시킵니다. 앱에서 설정하는 이벤트 항목에는 이메일 주소·메모 본문·인증 코드를 직접 포함하지 않지만, 자체 분석 전송 ID는 수신 이메일 주소의 해시와 연결되므로 완전히 익명인 정보는 아닙니다. 자세히는<a href="/ko/privacy#technical">개인정보 보호정책의 기술적 대책</a>을(를) 보시기 바랍니다.</div>
+              <div class="faq-item__answer">앱 버전에 따라 다릅니다. 5.9.32까지의 앱은 버전과 설정에 따라 자체 이용 이벤트를 전송하거나 AppsFlyer SDK를 사용하는 경우가 있습니다(개인정보 처리방침 1(E)). 이 글에서 2026년 9월 6일에 확인한 5.8.17 버전은 둘 다 사용했으며, 자체 분석과 같은 설치 식별자를 AppsFlyer의 Customer User ID에도 설정하고 있었습니다. 앱에서 설정하는 이벤트 항목에는 이메일 주소·메모 본문·인증 코드를 직접 포함하지 않지만, 자체 분석 전송 ID는 수신 이메일 주소의 해시와 연결되므로 완전히 익명인 정보는 아닙니다. 5.9.35 버전의 App Store 릴리스 노트는 선택적 이용 및 구독 분석의 종료를 안내하고 있습니다. 현재 처리 방식은 <a href="/ko/privacy#technical">개인정보 보호정책의 기술적 대책</a>을(를) 보시기 바랍니다.</div>
             </div>
 
             <div class="faq-item">
               <div class="faq-item__question">Q. Apple 순정 프레임워크와 외부 SDK를 어떻게 구분해서 사용하고 계십니까?</div>
-              <div class="faq-item__answer">iOS 앱 내 메모 본문의 암호화와 키 보관은 CryptoKit과 Keychain을 사용하고, 본문 전송은 URLSession으로 진행합니다. 한편, Google 로그인, Firebase에 의한 백엔드 보호, AppsFlyer에 의한 획득·이용 분석에는 외부 SDK를 사용합니다. 본문의 보호와 식별자를 동반한 이용 분석을 구분하여 설명하고 있습니다.</div>
+              <div class="faq-item__answer">iOS 앱 내 메모 본문의 암호화와 키 보관은 CryptoKit과 Keychain을 사용하고, 본문 전송은 URLSession으로 진행합니다. 한편, Google 로그인과 Firebase에 의한 백엔드 보호에는 외부 SDK를 사용합니다. 5.9.32까지의 버전에서는 버전과 설정에 따라 AppsFlyer에 의한 획득·이용 분석에도 외부 SDK를 사용하는 경우가 있습니다(개인정보 처리방침 1(E)). 본문의 보호와 식별자를 동반한 이용 분석을 구분하여 설명하고 있습니다.</div>
             </div>
           </div>
 

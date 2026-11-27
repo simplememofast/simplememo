@@ -412,7 +412,7 @@
       "name": "メモの内容はどこかのサーバーに保存されますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "いいえ。メモの内容がSimple Memoのサーバーに保存されることはありません。メモはRelay API（Cloudflare Workers）と配信サービス（Resend）を経由してメールとして送信されますが、Simple Memoのサーバーにメモ本文を保存し続けることはありません。端末内のOutboxと履歴データはAES-GCM暗号化された状態で端末にのみ保存されます。"
+        "text": "Simple Memoのサーバーには保存しません。メモはRelay API（Cloudflare Workers）と配信サービス（Resend）を経由してメールとして送信されます。本番のRelay APIは、メモ本文をログにも記録しません。Resendは送ったメール（メモ本文を含む）を保存します（公表されている標準プランの保存期間は30日で、当社に適用される期間は確認中です）。端末内のOutboxと履歴データはAES-GCM暗号化された状態で端末にのみ保存されます。"
       }
     },
     {
@@ -476,7 +476,7 @@
       "name": "Simple Memoはどんなアプリですか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Simple Memoは「起動→書く→送信」の3ステップだけに特化したメモアプリです。入力したメモは、あらかじめ設定したメールアドレス宛にワンタップで送信されます。フォルダ管理、タグ付け、同期設定などの複雑な機能はありません。「思いついたことを今すぐメモして、自分のメールに送る」——それだけに絞ったアプリです。"
+        "text": "思いついたことを声かキーボードで書き、ワンタップで自分宛てのメールへ送る、iPhoneとApple Watchのアプリです。Obsidianの保管庫のノートへの追記や、Notionへの保存もできます。アプリの中にメモを整理する画面はなく、整理は届いた先で行います。Obsidian連携を設定し、設定の「AIタグ自動追加」をオンにすると、タイトル・タグ・種別も端末内で自動で付きます（既定はオフ）。"
       }
     },
     {
@@ -572,7 +572,7 @@
       "name": "対応デバイス・動作環境を教えてください。",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "iPhone（iOS 16.0以降）\n Apple Watch（watchOS 9.0以降）"
+        "text": "iPhone（iOS 16.0以降）\n Apple Watch（watchOS 9.0以降）\n iPad・Mac・Androidの版はありません。"
       }
     },
     {
@@ -732,7 +732,7 @@
       "name": "メール本文・認証コード・メールアドレスはサーバーに残りますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "メモの本文は、送信の処理のために当社の Relay API（Cloudflare Workers）と配信サービス（Resend）を通りますが、当社は恒常的な保存を行いません（プライバシーポリシーと同じ）。認証コードは、有効期限の10分が過ぎると自動で消えます。 メールアドレスについては、当社のサーバーに記録が残ります。たとえば次のものです（ほかはプライバシーポリシーをご覧ください）： 送信IDと、宛先メールアドレスのハッシュ（SHA-256から生成）の対応（Cloudflare D1） 宛先を認証したことの記録。アプリが端末ごとに作るランダムな識別子と、宛先メールアドレスのハッシュの組で、1年で自動削除（Cloudflare KV） これらのハッシュや識別子は、完全に匿名の情報としては扱いません。 端末内のOutbox・履歴データはAES-GCM暗号化、暗号化キーはKeychainに保管されています。"
+        "text": "メモの本文は、送信の処理のために当社の Relay API（Cloudflare Workers）と配信サービス（Resend）を通りますが、当社は恒常的な保存を行いません（プライバシーポリシーと同じ）。Resendは送ったメール（メモ本文を含む）を保存します（公表されている標準プランの保存期間は30日で、当社に適用される期間は確認中です）。認証コードは、有効期限の10分が過ぎると自動で消えます。 メールアドレスについては、当社のサーバーに記録が残ります。たとえば次のものです（ほかはプライバシーポリシーをご覧ください）： 送信IDと、宛先メールアドレスのハッシュ（SHA-256から生成）の対応（Cloudflare D1） 宛先を認証したことの記録。アプリが端末ごとに作るランダムな識別子と、宛先メールアドレスのハッシュの組で、1年で自動削除（Cloudflare KV） これらのハッシュや識別子は、完全に匿名の情報としては扱いません。 端末内のOutbox・履歴データはAES-GCM暗号化、暗号化キーはKeychainに保管されています。"
       }
     },
     {
@@ -856,7 +856,7 @@
 
       <!-- Japanese Content -->
       <div class="lang-body">
-        <p class="page-content__date">最終更新：<time datetime="2026-11-21">2026年11月21日</time></p>
+        <p class="page-content__date">最終更新：<time datetime="2026-11-28">2026年11月28日</time></p>
         <div class="page-content__body faq-body">
 
           <!-- 料金・プラン -->
@@ -1133,7 +1133,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">メモの内容はどこかのサーバーに保存されますか？</summary>
                 <div class="faq-answer">
-                  <p>いいえ。メモの内容がSimple Memoのサーバーに保存されることはありません。メモはRelay API（Cloudflare Workers）と配信サービス（Resend）を経由してメールとして送信されますが、Simple Memoのサーバーにメモ本文を保存し続けることはありません。端末内のOutboxと履歴データはAES-GCM暗号化された状態で端末にのみ保存されます。</p>
+                  <p>Simple Memoのサーバーには保存しません。メモはRelay API（Cloudflare Workers）と配信サービス（Resend）を経由してメールとして送信されます。本番のRelay APIは、メモ本文をログにも記録しません。Resendは送ったメール（メモ本文を含む）を保存します（公表されている標準プランの保存期間は30日で、当社に適用される期間は確認中です）。端末内のOutboxと履歴データはAES-GCM暗号化された状態で端末にのみ保存されます。</p>
                 </div>
               </details>
             </div>
@@ -1172,7 +1172,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">メール本文・認証コード・メールアドレスはサーバーに残りますか？</summary>
                 <div class="faq-answer">
-                  <p>メモの本文は、送信の処理のために当社の Relay API（Cloudflare Workers）と配信サービス（Resend）を通りますが、当社は恒常的な保存を行いません（プライバシーポリシーと同じ）。認証コードは、有効期限の10分が過ぎると自動で消えます。</p>
+                  <p>メモの本文は、送信の処理のために当社の Relay API（Cloudflare Workers）と配信サービス（Resend）を通りますが、当社は恒常的な保存を行いません（プライバシーポリシーと同じ）。Resendは送ったメール（メモ本文を含む）を保存します（公表されている標準プランの保存期間は30日で、当社に適用される期間は確認中です）。認証コードは、有効期限の10分が過ぎると自動で消えます。</p>
                   <p>メールアドレスについては、当社のサーバーに記録が残ります。たとえば次のものです（ほかは<a href="/privacy">プライバシーポリシー</a>をご覧ください）：</p>
                   <ul>
                     <li>送信IDと、宛先メールアドレスのハッシュ（SHA-256から生成）の対応（Cloudflare D1）</li>
@@ -1248,7 +1248,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">Simple Memoはどんなアプリですか？</summary>
                 <div class="faq-answer">
-                  <p>Simple Memoは「起動→書く→送信」の3ステップだけに特化したメモアプリです。入力したメモは、あらかじめ設定したメールアドレス宛にワンタップで送信されます。フォルダ管理、タグ付け、同期設定などの複雑な機能はありません。「思いついたことを今すぐメモして、自分のメールに送る」——それだけに絞ったアプリです。</p>
+                  <p>思いついたことを声かキーボードで書き、ワンタップで自分宛てのメールへ送る、iPhoneとApple Watchのアプリです。Obsidianの保管庫のノートへの追記や、Notionへの保存もできます。アプリの中にメモを整理する画面はなく、整理は届いた先で行います。Obsidian連携を設定し、設定の「AIタグ自動追加」をオンにすると、タイトル・タグ・種別も端末内で自動で付きます（既定はオフ）。</p>
                 </div>
               </details>
             </div>
@@ -1421,6 +1421,7 @@
                     <li>iPhone（iOS 16.0以降）</li>
                     <li>Apple Watch（watchOS 9.0以降）</li>
                   </ul>
+                  <p>iPad・Mac・Androidの版はありません。</p>
                 </div>
               </details>
             </div>

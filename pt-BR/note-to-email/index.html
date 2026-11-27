@@ -61,7 +61,7 @@
   "description": "Apresentando o procedimento para enviar uma nota para si mesmo por e-mail Gmail ou iPhone, confirmação de recebimento e como escolher um aplicativo dedicado. SimpleMemo pode autenticar o destinatário pela primeira vez e enviar até 3 mensagens por dia gratuitamente. Também explicará onde verificar quando não é recebido, a diferença entre e-mail e salvar para Obsidian e como organizá-lo para olhar para as notas.",
   "url": "https://simplememofast.com/pt-BR/note-to-email/",
   "datePublished": "2026-03-04",
-  "dateModified": "2026-09-30",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -148,7 +148,7 @@
       "name": "O conteúdo do memorando será salvo no servidor?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "O Outbox e o histórico no terminal são criptografados com AES-GCM. O corpo do e-mail passa pelo nosso API e uma plataforma externa de transmissão de e-mail para entrega, e o e-mail recebido é salvo no serviço de correio do destinatário. A criptografia no terminal não significa criptografia de ponta a ponta de todo o e-mail."
+        "text": "O Outbox e o histórico no dispositivo são criptografados com AES-GCM. Para ser entregue, o corpo do e-mail passa pela nossa API e pelo serviço de entrega Resend. Nossa API não armazena o corpo do e-mail. A Resend armazena os e-mails enviados, incluindo o texto das notas (o prazo de retenção publicado para os planos padrão é de 30 dias, e estamos verificando qual prazo se aplica à nossa conta). O e-mail recebido fica armazenado no serviço de e-mail do destinatário. A criptografia no dispositivo não significa criptografia de ponta a ponta de todo o e-mail."
       }
     },
     {
@@ -156,7 +156,7 @@
       "name": "Posso personalizar o assunto e a assinatura?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Sim. Você pode definir livremente o assunto e a assinatura do e-mail no aplicativo. Se você definir prefixos de assunto como \"[Memo]\" e \"[TODO]\", dependendo do propósito, a alocação automática no lado do e-mail também é possível."
+        "text": "Sim. O assunto é a 1ª linha da nota, precedida pelo texto que você inserir em “Assunto” nas configurações (se esse campo estiver vazio, a 1ª linha é usada como assunto sem alterações). Você também pode definir uma assinatura: o texto que inserir em “Assinatura” nas configurações é adicionado ao final do corpo do e-mail. Se você começar a 1ª linha com “[Nota]”, “[TODO]” ou algo semelhante, também poderá separar as mensagens automaticamente com os filtros do seu e-mail."
       }
     },
     {
@@ -391,7 +391,7 @@
   "image": "https://simplememofast.com/assets/img/app-icon-256.png",
   "applicationCategory": "UtilitiesApplication",
   "operatingSystem": "iOS 16.0+, watchOS",
-  "softwareVersion": "5.9.27",
+  "softwareVersion": "5.9.35",
   "isAccessibleForFree": true,
   "inLanguage": "pt-BR",
   "downloadUrl": "https://apps.apple.com/jp/app/id6758438948",
@@ -590,8 +590,8 @@
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Quais são as vantagens de enviar uma nota para si mesmo por e-mail? </span></summary><div class="faq-answer"><p>É para coletar notas curtas na caixa de entrada que você costuma verificar. Se você não olhar muito para o seu e-mail ou se sua caixa de entrada já estiver cheia de muitos e-mails, considere como deixá-lo diretamente em suas notas diárias ou aplicativos de tarefas.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Posso usar qualquer endereço de e-mail? </span></summary><div class="faq-answer"><p>Gmail, Outlook, Yahoo! Defina e autentique seu próprio endereço que pode ser recebido, como e-mails e e-mails iCloud. Aceite remetentes externos para e-mails da empresa ou verifique suas regras internas de recebimento.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Posso enviar notas offline? </span></summary><div class="faq-answer"><p>Enquanto estiver offline, criptografe e armazene-o no Outbox no terminal e tente reenviá-lo quando a comunicação for retornada. Comunicação e um endereço verificado são necessários para a chegada do e-mail. Depois de retornar, abra o aplicativo e verifique o status não enviado e a caixa de entrada.</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>O conteúdo do memorando será salvo no servidor? </span></summary><div class="faq-answer"><p>O Outbox e o histórico no terminal são criptografados com AES-GCM. O corpo do e-mail passa pelo nosso API e uma plataforma externa de transmissão de e-mail para entrega, e o e-mail recebido é salvo no serviço de correio do destinatário. A criptografia no terminal não significa criptografia de ponta a ponta de todo o e-mail.</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Posso personalizar o assunto e a assinatura? </span></summary><div class="faq-answer"><p>Sim. Você pode definir livremente o assunto e a assinatura do e-mail no aplicativo. Se você definir prefixos de assunto como "[Memo]" e "[TODO]", dependendo do propósito, a alocação automática no lado do e-mail também é possível.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>O conteúdo do memorando será salvo no servidor? </span></summary><div class="faq-answer"><p>O Outbox e o histórico no dispositivo são criptografados com AES-GCM. Para ser entregue, o corpo do e-mail passa pela nossa API e pelo serviço de entrega Resend. Nossa API não armazena o corpo do e-mail. A Resend armazena os e-mails enviados, incluindo o texto das notas (o prazo de retenção publicado para os planos padrão é de 30 dias, e estamos verificando qual prazo se aplica à nossa conta). O e-mail recebido fica armazenado no serviço de e-mail do destinatário. A criptografia no dispositivo não significa criptografia de ponta a ponta de todo o e-mail.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Posso personalizar o assunto e a assinatura? </span></summary><div class="faq-answer"><p>Sim. O assunto é a 1ª linha da nota, precedida pelo texto que você inserir em “Assunto” nas configurações (se esse campo estiver vazio, a 1ª linha é usada como assunto sem alterações). Você também pode definir uma assinatura: o texto que inserir em “Assinatura” nas configurações é adicionado ao final do corpo do e-mail. Se você começar a 1ª linha com “[Nota]”, “[TODO]” ou algo semelhante, também poderá separar as mensagens automaticamente com os filtros do seu e-mail.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Qual é a diferença entre o auto-mail do Gmail? </span></summary><div class="faq-answer"><p>Você também pode inserir seu endereço e enviá-lo para o destinatário no Gmail. O assunto será um marcador a ser encontrado mais tarde. O SimpleMemo pode definir e autenticar o destinatário pela primeira vez e, em seguida, inserir o texto e enviá-lo.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Posso usá-lo no Android? ( Quero enviar um e-mail para mim mesmo)</span></summary><div class="faq-answer"><p>SimpleMemo é atualmente exclusivo para iOS. Se você quiser enviar um e-mail para si mesmo no Android, você pode enviá-lo para si mesmo no aplicativo Gmail ou compartilhar uma nota no Google Keep. Por favor, escolha de acordo com a frequência de uso e o destino que você deseja receber.</p></div></details></div>
 </div>
@@ -615,7 +615,7 @@
 </tbody>
 </table></div>
 </div></section>
-<p class="lp-section__lead">Atualização da explanação: 23 de setembro de 2026. Confirmação final das especificações: 9 de setembro de 2026. <a href="/pt-BR/blog/fastest-memo-app-benchmark">Condições de medição de velocidade de inicialização</a> · <a href="/pt-BR/privacy">Mateio de dados</a></p>
+<p class="lp-section__lead">Atualização da explanação: 28 de novembro de 2026. Confirmação final das especificações: 9 de setembro de 2026. <a href="/pt-BR/blog/fastest-memo-app-benchmark">Condições de medição de velocidade de inicialização</a> · <a href="/pt-BR/privacy">Mateio de dados</a></p>
 <!-- CTA -->
 <div class="cta-box">
 <div class="cta-box__title">

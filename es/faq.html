@@ -430,7 +430,7 @@
       "name": "¿El contenido de la nota se guardará en un servidor en algún lugar?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No. El contenido de las notas no se almacena en los servidores de Simple Memo. Se envía por correo mediante la Relay API, en Cloudflare Workers, y el servicio de entrega Resend, pero el texto no permanece almacenado en los servidores de Simple Memo. La Outbox y el historial se guardan únicamente en el dispositivo, cifrados con AES-GCM."
+        "text": "El contenido de las notas no se almacena en los servidores de Simple Memo. Se envía por correo mediante la Relay API, en Cloudflare Workers, y el servicio de entrega Resend. La Relay API de producción tampoco escribe el texto de las notas en sus registros. Resend conserva los correos enviados, incluido el texto de las notas (el plazo de conservación publicado para sus planes estándar es de 30 días; estamos comprobando cuál se aplica a nuestra cuenta). La Outbox y el historial se guardan únicamente en el dispositivo, cifrados con AES-GCM."
       }
     },
     {
@@ -494,7 +494,7 @@
       "name": "¿Qué tipo de aplicación es Simple Memo?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Simple Memo es una aplicación de notas especializada solo en el paso 3 de \"iniciar → escribir → enviar\". La nota introducida se enviará a la dirección de correo electrónico preestablecida con un solo toque. No hay funciones complicadas como la gestión de carpetas, el etiquetado y la configuración de sincronización. Escribe lo que te viene a la mente ahora mismo y envíalo a tu propio correo electrónico\" - esta es una aplicación que se centra en."
+        "text": "Es una app para iPhone y Apple Watch con la que escribes lo que se te ocurre, con la voz o con el teclado, y lo envías con un toque a tu propio correo. También puedes añadirlo a una nota de tu bóveda de Obsidian o guardarlo en Notion. La app no tiene ninguna pantalla para organizar las notas: se organizan donde llegan. Si configuras la integración con Obsidian y activas «Adición automática de etiquetas de IA» en los ajustes, también se añaden automáticamente en el dispositivo un título, etiquetas y un tipo (la opción está desactivada de forma predeterminada)."
       }
     },
     {
@@ -590,7 +590,7 @@
       "name": "Por favor, dígame el dispositivo compatible y el entorno operativo.",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "iPhone (iOS 16.0 o posterior) Apple Watch (watchOS 9.0 o posterior)"
+        "text": "iPhone (iOS 16.0 o posterior) Apple Watch (watchOS 9.0 o posterior) No hay versión para iPad, Mac ni Android."
       }
     },
     {
@@ -750,7 +750,7 @@
       "name": "¿El cuerpo del correo electrónico, el código de autenticación y la dirección de correo electrónico permanecerán en el servidor?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Para enviarlo, el texto de la nota pasa por nuestra Relay API, en Cloudflare Workers, y el servicio de entrega Resend, pero no lo almacenamos de forma permanente, tal como indica la política de privacidad. El código de verificación se elimina automáticamente cuando transcurren sus 10 minutos de validez. La dirección de correo electrónico se registrará en nuestro servidor. Por ejemplo, lo siguiente (ver Política de privacidad para otros): Correspondencia del ID de envío y el hash de la dirección de correo electrónico de destino (generado a partir de SHA-256) (Cloudflare D1) Un registro de autenticación del destinatario. El identificador aleatorio creado por la aplicación para cada terminal y el hash de la dirección de correo electrónico de destino se eliminan automáticamente en 1 años (Cloudflare KV) Estos hashes e identificadores no se tratan como información completamente anónima. Los datos de la Outbox y el historial en el terminal están encriptados con AES-GCM, y la clave de cifrado se almacena en el llavero."
+        "text": "Para enviarlo, el texto de la nota pasa por nuestra Relay API, en Cloudflare Workers, y el servicio de entrega Resend, pero no lo almacenamos de forma permanente, tal como indica la política de privacidad. Resend conserva los correos enviados, incluido el texto de las notas (el plazo de conservación publicado para sus planes estándar es de 30 días; estamos comprobando cuál se aplica a nuestra cuenta). El código de verificación se elimina automáticamente cuando transcurren sus 10 minutos de validez. La dirección de correo electrónico se registrará en nuestro servidor. Por ejemplo, lo siguiente (ver Política de privacidad para otros): Correspondencia del ID de envío y el hash de la dirección de correo electrónico de destino (generado a partir de SHA-256) (Cloudflare D1) Un registro de autenticación del destinatario. El identificador aleatorio creado por la aplicación para cada terminal y el hash de la dirección de correo electrónico de destino se eliminan automáticamente en 1 años (Cloudflare KV) Estos hashes e identificadores no se tratan como información completamente anónima. Los datos de la Outbox y el historial en el terminal están encriptados con AES-GCM, y la clave de cifrado se almacena en el llavero."
       }
     },
     {
@@ -869,7 +869,7 @@
 
       <!-- Japanese Content -->
       <div class="lang-body">
-        <p class="page-content__date">Última actualización: <time datetime="2026-11-21">21 de noviembre de 2026</time></p>
+        <p class="page-content__date">Última actualización: <time datetime="2026-11-28">28 de noviembre de 2026</time></p>
         <div class="page-content__body faq-body">
 
           <!-- 料金・プラン -->
@@ -1146,7 +1146,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">¿El contenido de la nota se guardará en un servidor en algún lugar?</summary>
                 <div class="faq-answer">
-                  <p>No. El contenido de las notas no se almacena en los servidores de Simple Memo. Se envía por correo mediante la Relay API, en Cloudflare Workers, y el servicio de entrega Resend, pero el texto no permanece almacenado en los servidores de Simple Memo. La Outbox y el historial se guardan únicamente en el dispositivo, cifrados con AES-GCM.</p>
+                  <p>El contenido de las notas no se almacena en los servidores de Simple Memo. Se envía por correo mediante la Relay API, en Cloudflare Workers, y el servicio de entrega Resend. La Relay API de producción tampoco escribe el texto de las notas en sus registros. Resend conserva los correos enviados, incluido el texto de las notas (el plazo de conservación publicado para sus planes estándar es de 30 días; estamos comprobando cuál se aplica a nuestra cuenta). La Outbox y el historial se guardan únicamente en el dispositivo, cifrados con AES-GCM.</p>
                 </div>
               </details>
             </div>
@@ -1185,7 +1185,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">¿El cuerpo del correo electrónico, el código de autenticación y la dirección de correo electrónico permanecerán en el servidor?</summary>
                 <div class="faq-answer">
-                  <p>Para enviarlo, el texto de la nota pasa por nuestra Relay API, en Cloudflare Workers, y el servicio de entrega Resend, pero no lo almacenamos de forma permanente, tal como indica la política de privacidad. El código de verificación se elimina automáticamente cuando transcurren sus 10 minutos de validez.</p>
+                  <p>Para enviarlo, el texto de la nota pasa por nuestra Relay API, en Cloudflare Workers, y el servicio de entrega Resend, pero no lo almacenamos de forma permanente, tal como indica la política de privacidad. Resend conserva los correos enviados, incluido el texto de las notas (el plazo de conservación publicado para sus planes estándar es de 30 días; estamos comprobando cuál se aplica a nuestra cuenta). El código de verificación se elimina automáticamente cuando transcurren sus 10 minutos de validez.</p>
                   <p>La dirección de correo electrónico se registrará en nuestro servidor. Por ejemplo, lo siguiente (ver <a href="/es/privacy"> Política de privacidad</a> para otros):</p>
                   <ul>
                     <li>Correspondencia del ID de envío y el hash de la dirección de correo electrónico de destino (generado a partir de SHA-256) (Cloudflare D1)</li>
@@ -1261,7 +1261,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">¿Qué tipo de aplicación es Simple Memo?</summary>
                 <div class="faq-answer">
-                  <p>Simple Memo es una aplicación de notas especializada solo en el paso 3 de "iniciar → escribir → enviar". La nota introducida se enviará a la dirección de correo electrónico preestablecida con un solo toque. No hay funciones complicadas como la gestión de carpetas, el etiquetado y la configuración de sincronización. Escribe lo que te viene a la mente ahora mismo y envíalo a tu propio correo electrónico" - esta es una aplicación que se centra en.</p>
+                  <p>Es una app para iPhone y Apple Watch con la que escribes lo que se te ocurre, con la voz o con el teclado, y lo envías con un toque a tu propio correo. También puedes añadirlo a una nota de tu bóveda de Obsidian o guardarlo en Notion. La app no tiene ninguna pantalla para organizar las notas: se organizan donde llegan. Si configuras la integración con Obsidian y activas «Adición automática de etiquetas de IA» en los ajustes, también se añaden automáticamente en el dispositivo un título, etiquetas y un tipo (la opción está desactivada de forma predeterminada).</p>
                 </div>
               </details>
             </div>
@@ -1434,6 +1434,7 @@
                     <li>iPhone (iOS 16.0 o posterior)</li>
                     <li>Apple Watch (watchOS 9.0 o posterior)</li>
                   </ul>
+                  <p>No hay versión para iPad, Mac ni Android.</p>
                 </div>
               </details>
             </div>

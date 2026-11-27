@@ -430,7 +430,7 @@
       "name": "메모의 내용은 어느 서버에 저장됩니까?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "아니요. 메모 내용은 Simple Memo 서버에 저장되지 않습니다. 메모는 Relay API(Cloudflare Workers)와 배포 서비스(Resend)를 통해 이메일로 전송되지만, Simple Memo 서버에 메모 본문을 계속 저장하지는 않습니다. 단말기 내의 Outbox 및 이력 데이터는 AES-GCM 암호화된 상태로 단말기에만 저장됩니다."
+        "text": "Simple Memo 서버에는 저장하지 않습니다. 메모는 Relay API(Cloudflare Workers)와 메일 발송 서비스(Resend)를 통해 이메일로 전송됩니다. 운영 환경의 Relay API는 메모 본문을 로그에도 기록하지 않습니다. Resend는 보낸 메일(메모 본문 포함)을 보관합니다(공개된 표준 요금제의 보관 기간은 30일이며, 당사 계정에 적용되는 기간은 확인 중입니다). 단말기 내의 Outbox 및 이력 데이터는 AES-GCM 암호화된 상태로 단말기에만 저장됩니다."
       }
     },
     {
@@ -494,7 +494,7 @@
       "name": "Simple Memo는 어떤 앱인가요?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Simple Memo는 “시작→쓰기→전송”의 3 단계에만 특화된 메모 앱입니다. 입력한 메모는 미리 설정한 이메일 주소로 원터치로 전송됩니다. 폴더 관리, 태그 지정, 동기화 설정 등과 같은 복잡한 기능은 없습니다. 생각난 것을 지금 바로 메모하고, 자신의 메일에 보내세요——그것만을 위해 집중한 앱입니다."
+        "text": "떠오른 생각을 음성이나 키보드로 입력하고 원터치로 자신에게 메일로 보내는 iPhone과 Apple Watch용 앱입니다. Obsidian 보관함의 노트에 추가하거나 Notion에 저장할 수도 있습니다. 앱 안에는 메모를 정리하는 화면이 없으며, 정리는 메모가 도착한 곳에서 합니다. Obsidian 연동을 설정하고 설정의 “AI 태그 자동 추가”를 켜면 제목·태그·종류도 기기 내에서 자동으로 붙습니다(기본값은 꺼져 있습니다)."
       }
     },
     {
@@ -590,7 +590,7 @@
       "name": "지원되는 디바이스·동작 환경을 알려 주세요.",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "iPhone（iOS 16.0 이후） Apple Watch（watchOS 9.0 이후）"
+        "text": "iPhone（iOS 16.0 이후） Apple Watch（watchOS 9.0 이후） iPad·Mac·Android 버전은 없습니다."
       }
     },
     {
@@ -750,7 +750,7 @@
       "name": "메일 본문·인증 코드·이메일 주소는 서버에 남아 있습니까?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "메모의 본문은 전송 처리를 위해 당사의 Relay API(Cloudflare Workers)와 배포 서비스(Resend)를 통해 처리되지만, 당사는 지속적인 저장을 수행하지 않습니다(개인정보 보호정책과 동일). 인증 코드는 유효기간 10분이 지나면 자동으로 사라집니다. 이메일 주소는 당사 서버에 기록이 남습니다. 예를 들어 다음과 같습니다(다른 내용은 개인정보 처리방침을(를) 참조하십시오): 전송 ID와 수신 이메일 주소 해시(SHA-256에서 생성)의 대응(Cloudflare D1) 수신자를 인증한 기록. 앱이 각 단말기에 생성하는 무작위 식별자와 수신 이메일 주소의 해시 조합으로, 1년에 자동 삭제(Cloudflare KV) 이러한 해시와 식별자는 완전히 익명 정보로 취급되지 않습니다. 단말기 내의 Outbox·이력 데이터는 AES-GCM 암호화되어 있으며, 암호화 키는 Keychain에 보관되어 있습니다."
+        "text": "메모의 본문은 전송 처리를 위해 당사의 Relay API(Cloudflare Workers)와 메일 발송 서비스(Resend)를 통해 처리되지만, 당사는 지속적인 저장을 수행하지 않습니다(개인정보 처리방침과 동일). Resend는 보낸 메일(메모 본문 포함)을 보관합니다(공개된 표준 요금제의 보관 기간은 30일이며, 당사 계정에 적용되는 기간은 확인 중입니다). 인증 코드는 유효기간 10분이 지나면 자동으로 사라집니다. 이메일 주소는 당사 서버에 기록이 남습니다. 예를 들어 다음과 같습니다(다른 내용은 개인정보 처리방침을(를) 참조하십시오): 전송 ID와 수신 이메일 주소 해시(SHA-256에서 생성)의 대응(Cloudflare D1) 수신자를 인증한 기록. 앱이 각 단말기에 생성하는 무작위 식별자와 수신 이메일 주소의 해시 조합으로, 1년에 자동 삭제(Cloudflare KV) 이러한 해시와 식별자는 완전히 익명 정보로 취급되지 않습니다. 단말기 내의 Outbox·이력 데이터는 AES-GCM 암호화되어 있으며, 암호화 키는 Keychain에 보관되어 있습니다."
       }
     },
     {
@@ -869,7 +869,7 @@
 
       <!-- Japanese Content -->
       <div class="lang-body">
-        <p class="page-content__date">최종 업데이트：<time datetime="2026-11-21">2026년11월21일</time></p>
+        <p class="page-content__date">최종 업데이트：<time datetime="2026-11-28">2026년11월28일</time></p>
         <div class="page-content__body faq-body">
 
           <!-- 料金・プラン -->
@@ -1146,7 +1146,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">메모의 내용은 어느 서버에 저장됩니까?</summary>
                 <div class="faq-answer">
-                  <p>아니요. 메모 내용은 Simple Memo 서버에 저장되지 않습니다. 메모는 Relay API(Cloudflare Workers)와 배포 서비스(Resend)를 통해 이메일로 전송되지만, Simple Memo 서버에 메모 본문을 계속 저장하지는 않습니다. 단말기 내의 Outbox 및 이력 데이터는 AES-GCM 암호화된 상태로 단말기에만 저장됩니다.</p>
+                  <p>Simple Memo 서버에는 저장하지 않습니다. 메모는 Relay API(Cloudflare Workers)와 메일 발송 서비스(Resend)를 통해 이메일로 전송됩니다. 운영 환경의 Relay API는 메모 본문을 로그에도 기록하지 않습니다. Resend는 보낸 메일(메모 본문 포함)을 보관합니다(공개된 표준 요금제의 보관 기간은 30일이며, 당사 계정에 적용되는 기간은 확인 중입니다). 단말기 내의 Outbox 및 이력 데이터는 AES-GCM 암호화된 상태로 단말기에만 저장됩니다.</p>
                 </div>
               </details>
             </div>
@@ -1185,7 +1185,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">메일 본문·인증 코드·이메일 주소는 서버에 남아 있습니까?</summary>
                 <div class="faq-answer">
-                  <p>메모의 본문은 전송 처리를 위해 당사의 Relay API(Cloudflare Workers)와 배포 서비스(Resend)를 통해 처리되지만, 당사는 지속적인 저장을 수행하지 않습니다(개인정보 보호정책과 동일). 인증 코드는 유효기간 10분이 지나면 자동으로 사라집니다.</p>
+                  <p>메모의 본문은 전송 처리를 위해 당사의 Relay API(Cloudflare Workers)와 메일 발송 서비스(Resend)를 통해 처리되지만, 당사는 지속적인 저장을 수행하지 않습니다(개인정보 처리방침과 동일). Resend는 보낸 메일(메모 본문 포함)을 보관합니다(공개된 표준 요금제의 보관 기간은 30일이며, 당사 계정에 적용되는 기간은 확인 중입니다). 인증 코드는 유효기간 10분이 지나면 자동으로 사라집니다.</p>
                   <p>이메일 주소는 당사 서버에 기록이 남습니다. 예를 들어 다음과 같습니다(다른 내용은 <a href="/ko/privacy">개인정보 처리방침</a>을(를) 참조하십시오):</p>
                   <ul>
                     <li>전송 ID와 수신 이메일 주소 해시(SHA-256에서 생성)의 대응(Cloudflare D1)</li>
@@ -1261,7 +1261,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">Simple Memo는 어떤 앱인가요?</summary>
                 <div class="faq-answer">
-                  <p>Simple Memo는 “시작→쓰기→전송”의 3 단계에만 특화된 메모 앱입니다. 입력한 메모는 미리 설정한 이메일 주소로 원터치로 전송됩니다. 폴더 관리, 태그 지정, 동기화 설정 등과 같은 복잡한 기능은 없습니다. 생각난 것을 지금 바로 메모하고, 자신의 메일에 보내세요——그것만을 위해 집중한 앱입니다.</p>
+                  <p>떠오른 생각을 음성이나 키보드로 입력하고 원터치로 자신에게 메일로 보내는 iPhone과 Apple Watch용 앱입니다. Obsidian 보관함의 노트에 추가하거나 Notion에 저장할 수도 있습니다. 앱 안에는 메모를 정리하는 화면이 없으며, 정리는 메모가 도착한 곳에서 합니다. Obsidian 연동을 설정하고 설정의 “AI 태그 자동 추가”를 켜면 제목·태그·종류도 기기 내에서 자동으로 붙습니다(기본값은 꺼져 있습니다).</p>
                 </div>
               </details>
             </div>
@@ -1434,6 +1434,7 @@
                     <li>iPhone（iOS 16.0 이후）</li>
                     <li>Apple Watch（watchOS 9.0 이후）</li>
                   </ul>
+                  <p>iPad·Mac·Android 버전은 없습니다.</p>
                 </div>
               </details>
             </div>

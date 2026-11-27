@@ -61,7 +61,7 @@
   "description": "Gmail 및 iPhone의 이메일로 자신에게 메모를 보내는 절차, 수신 확인, 전용 앱과의 선택 방법을 소개합니다. SimpleMemo는 최초에 수신자를 인증하고, 무료로 하루 최대 3건을 보낼 수 있습니다. 도착하지 않을 경우의 확인처, 메일과 Obsidian에 저장하는 차이점, 메모를 다시 확인하기 위한 정리 방법도 설명합니다.",
   "url": "https://simplememofast.com/ko/note-to-email/",
   "datePublished": "2026-03-04",
-  "dateModified": "2026-09-30",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -148,7 +148,7 @@
       "name": "메모의 내용은 서버에 저장됩니까?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "단말기 내의 Outbox 및 이력은 AES-GCM로 암호화합니다. 메일 본문은 배송을 위해 당사 API와 외부 메일 전송 플랫폼을 통해 전송되며, 수신된 메일은 수신 대상 메일 서비스에 저장됩니다. 단말기 내 암호화는 메일 전체의 엔드투엔드 암호화를 의미하지 않습니다."
+        "text": "단말기 내의 Outbox 및 이력은 AES-GCM으로 암호화합니다. 메일 본문은 전달을 위해 당사 API와 메일 발송 서비스 Resend를 거칩니다. 당사 API는 본문을 저장하지 않습니다. Resend는 보낸 메일(메모 본문 포함)을 보관합니다(공개된 표준 요금제의 보관 기간은 30일이며, 당사 계정에 적용되는 기간은 확인 중입니다). 수신된 메일은 수신 대상 메일 서비스에 저장됩니다. 단말기 내 암호화는 메일 전체의 엔드투엔드 암호화를 의미하지 않습니다."
       }
     },
     {
@@ -156,7 +156,7 @@
       "name": "제목과 서명을 맞춤 설정할 수 있습니까?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "예. 이메일의 제목과 서명은 앱 내에서 자유롭게 설정할 수 있습니다. 용도에 따라 “[메모]”, “[TODO]”와 같은 제목 접두사를 설정하면 메일 측에서 자동 분류도 가능합니다."
+        "text": "예. 제목은 메모의 1행이며, 설정의 “제목”에 입력한 텍스트가 맨 앞에 붙습니다(비어 있으면 1행이 그대로 제목이 됩니다). 서명도 설정의 “서명”에 입력해 두면 본문 끝에 붙습니다. 1행의 맨 앞에 “[메모]”, “[TODO]” 등을 적어 두면 메일 쪽 필터로 자동 분류도 할 수 있습니다."
       }
     },
     {
@@ -391,7 +391,7 @@
   "image": "https://simplememofast.com/assets/img/app-icon-256.png",
   "applicationCategory": "UtilitiesApplication",
   "operatingSystem": "iOS 16.0+, watchOS",
-  "softwareVersion": "5.9.27",
+  "softwareVersion": "5.9.35",
   "isAccessibleForFree": true,
   "inLanguage": "ko",
   "downloadUrl": "https://apps.apple.com/jp/app/id6758438948",
@@ -590,8 +590,8 @@
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>자신에게 이메일로 메모를 보내는 장점은 무엇입니까? </span></summary><div class="faq-answer"><p>보통 확인하는 받은 편지함에 짧은 메모를 모을 수 있다는 것입니다. 메일을 자주 확인하지 않거나, 받은 편지함이 이미 많은 메일로 가득 차 있는 경우에는 일상적으로 사용하는 노트나 작업 앱에 직접 남기는 방법도 검토해 주세요.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>어떤 이메일 주소든 사용할 수 있나요? </span></summary><div class="faq-answer"><p>Gmail、Outlook、Yahoo! 메일, iCloud 메일 등 수신 가능한 자신의 주소를 설정·인증하여 사용합니다. 회사 메일에서는 외부 발신자를 수락하는지, 사내 수신 규칙도 확인해 주세요.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>오프라인에서도 메모를 보낼 수 있나요? </span></summary><div class="faq-answer"><p>오프라인 중에는 단말기 내 Outbox에 암호화하여 저장하고, 통신이 복구된 후 재전송을 시도합니다. 메일 도착에는 통신 및 인증된 수신인이 필요합니다. 복귀 후에 앱을 열어 미전송 상태와 받은 편지함을 확인해 주세요.</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>메모의 내용은 서버에 저장됩니까? </span></summary><div class="faq-answer"><p>단말기 내의 Outbox 및 이력은 AES-GCM로 암호화합니다. 메일 본문은 배송을 위해 당사 API와 외부 메일 전송 플랫폼을 통해 전송되며, 수신된 메일은 수신 대상 메일 서비스에 저장됩니다. 단말기 내 암호화는 메일 전체의 엔드투엔드 암호화를 의미하지 않습니다.</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span> 제목과 서명을 맞춤 설정할 수 있습니까? </span></summary><div class="faq-answer"><p>예. 이메일의 제목과 서명은 앱 내에서 자유롭게 설정할 수 있습니다. 용도에 따라 “[메모]”, “[TODO]”와 같은 제목 접두사를 설정하면 메일 측에서 자동 분류도 가능합니다.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>메모의 내용은 서버에 저장됩니까? </span></summary><div class="faq-answer"><p>단말기 내의 Outbox 및 이력은 AES-GCM으로 암호화합니다. 메일 본문은 전달을 위해 당사 API와 메일 발송 서비스 Resend를 거칩니다. 당사 API는 본문을 저장하지 않습니다. Resend는 보낸 메일(메모 본문 포함)을 보관합니다(공개된 표준 요금제의 보관 기간은 30일이며, 당사 계정에 적용되는 기간은 확인 중입니다). 수신된 메일은 수신 대상 메일 서비스에 저장됩니다. 단말기 내 암호화는 메일 전체의 엔드투엔드 암호화를 의미하지 않습니다.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span> 제목과 서명을 맞춤 설정할 수 있습니까? </span></summary><div class="faq-answer"><p>예. 제목은 메모의 1행이며, 설정의 “제목”에 입력한 텍스트가 맨 앞에 붙습니다(비어 있으면 1행이 그대로 제목이 됩니다). 서명도 설정의 “서명”에 입력해 두면 본문 끝에 붙습니다. 1행의 맨 앞에 “[메모]”, “[TODO]” 등을 적어 두면 메일 쪽 필터로 자동 분류도 할 수 있습니다.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Gmail의 자신에게 보내는 메일과의 차이는 무엇입니까? </span></summary><div class="faq-answer"><p>Gmail에서도 수신자에게 자신의 주소를 입력하여 보낼 수 있습니다. 제목은 나중에 찾는 표시가 됩니다. SimpleMemo는 최초에 수신자를 설정·인증하고, 그 후에는 본문을 입력하여 전송할 수 있습니다.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Android에서도 사용할 수 있나요?（ 자신에게 메일을 보내고 싶습니다)</span></summary><div class="faq-answer"><p>SimpleMemo는 현재 iOS 전용입니다. Android에서 자신에게 메일을 보내고 싶다면, Gmail 앱에서 자신에게 메일을 보내거나 Google Keep 메모를 공유하는 방법이 대안이 됩니다. 사용 빈도와 받고 싶은 저장처에 맞춰 선택해 주세요.</p></div></details></div>
 </div>
@@ -615,7 +615,7 @@
 </tbody>
 </table></div>
 </div></section>
-<p class="lp-section__lead">설명 갱신: 2026년 9월 23일. 사양 최종 확인: 2026년 9월 9일. <a href="/ko/blog/fastest-memo-app-benchmark">실행 속도 측정 조건</a> · <a href="/ko/privacy">데이터 처리 방식</a></p>
+<p class="lp-section__lead">설명 갱신: 2026년 11월 28일. 사양 최종 확인: 2026년 9월 9일. <a href="/ko/blog/fastest-memo-app-benchmark">실행 속도 측정 조건</a> · <a href="/ko/privacy">데이터 처리 방식</a></p>
 <!-- CTA -->
 <div class="cta-box">
 <div class="cta-box__title">

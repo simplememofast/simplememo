@@ -60,7 +60,7 @@
   "url": "https://simplememofast.com/es/devlog/privacy-first-design",
   "inLanguage": "es",
   "datePublished": "2026-02-13",
-  "dateModified": "2026-09-24",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -492,7 +492,7 @@
 
 
       <div class="article-meta">
-        <span>Publicado: 2026-2-13 · Explicación sobre protección y análisis de uso actualizada: 2026-9-6</span>
+        <span>Publicado: 2026-2-13 · Explicación sobre protección y análisis de uso actualizada: 2026-9-6 · Preguntas frecuentes sobre almacenamiento y análisis de uso corregidas: 2026-11-28</span>
 
       </div>
 
@@ -558,7 +558,7 @@
 
             <div class="faq-item">
               <div class="faq-item__question">P. ¿El contenido de la nota se guardará en el servidor?</div>
-              <div class="faq-item__answer">Al enviar un correo, su contenido pasa por nuestra Relay API y la infraestructura de entrega. Nuestra Relay API no conserva el contenido de forma permanente, salvo cuando exista una necesidad legítima, como cumplir obligaciones legales o responder a incidencias. Esto es distinto del almacenamiento en el buzón del destinatario. La explicación para cada destino está en<a href="/es/privacy-architecture/">Diseño de privacidad</a>.</div>
+              <div class="faq-item__answer">Al enviar un correo, su contenido pasa por nuestra Relay API y la infraestructura de entrega. Nuestra Relay API no conserva el contenido. Resend, el proveedor de la infraestructura de entrega, conserva los correos enviados, incluido el texto de las notas (el plazo de conservación publicado para sus planes estándar es de 30 días; estamos comprobando cuál se aplica a nuestra cuenta). Esto es distinto del almacenamiento en el buzón del destinatario. La explicación para cada destino está en <a href="/es/privacy-architecture/">Diseño de privacidad</a>.</div>
             </div>
 
             <div class="faq-item">
@@ -573,12 +573,12 @@
 
             <div class="faq-item">
               <div class="faq-item__question">Q. ¿Hay algún análisis o seguimiento?</div>
-              <div class="faq-item__answer">Sí. Utilizamos nuestro propio análisis de uso y AppsFlyer SDK. Los identificadores de instalación aleatorios, los identificadores de sesión, el tipo y la hora del evento, la versión de la aplicación, los resultados de la transmisión, etc. se enviarán a nuestro propio análisis. AppsFlyer envía eventos como la transmisión de notas iniciales exitosa, la autenticación exitosa, la visualización de la pantalla de facturación, la selección del plan y el éxito de la compra, y la cantidad, la moneda, el período, etc. pueden agregarse en el momento de la compra. El mismo identificador de instalación también se establece para el ID de usuario de cliente de AppsFlyer, de modo que se puedan asociar la información de adquisición y los eventos de uso. Los elementos del evento establecidos desde la aplicación no incluyen directamente una dirección de correo electrónico, el cuerpo de la nota o el código de autenticación, pero el ID de envío del análisis interno está vinculado al hash de la dirección de correo electrónico de destino, por lo que no es información completamente anónima. Para más detalles<a href="/es/privacy#technical">Medidas técnicas para la política de privacidad</a>.</div>
+              <div class="faq-item__answer">Depende de la versión de la app. Las versiones hasta la 5.9.32 pueden, según la versión y los ajustes, enviar eventos de uso propios o usar el SDK de AppsFlyer (política de privacidad, sección 1(E)). La versión 5.8.17, comprobada en este artículo el 6 de septiembre de 2026, hacía ambas cosas y también asignaba como Customer User ID de AppsFlyer el mismo identificador de instalación que usaba el análisis propio. Los campos de evento que establece la app no incluyen directamente direcciones de correo electrónico, el texto de las notas ni códigos de verificación, pero el ID de envío del análisis propio está vinculado al hash de la dirección de correo del destinatario, por lo que no se trata de información completamente anónima. Las notas de la versión 5.9.35 en App Store anuncian el fin de los análisis opcionales de uso y suscripción. El tratamiento actual se explica en <a href="/es/privacy#technical">Medidas técnicas para la política de privacidad</a>.</div>
             </div>
 
             <div class="faq-item">
               <div class="faq-item__question">Q. ¿Cómo se utiliza el marco genuino Apple y el SDK externo por separado?</div>
-              <div class="faq-item__answer">Utilice CryptoKit y Keychain para cifrar y almacenar el cuerpo de la nota dentro de la aplicación iOS, y envíe el texto a través de URLSession. Por otro lado, el SDK externo se utiliza para el inicio de sesión de Google, la protección del back-end por parte de Firebase y el análisis de adquisición y uso por parte de AppsFlyer. La protección del texto y el análisis de uso con identificadores se explican por separado.</div>
+              <div class="faq-item__answer">Dentro de la app de iOS, el cifrado del texto de las notas y el almacenamiento de las claves se realizan con CryptoKit y Keychain, y el texto se envía con URLSession. Por otro lado, para el inicio de sesión con Google y la protección del backend con Firebase se usan SDK externos. Las versiones hasta la 5.9.32 pueden, según la versión y los ajustes, usar también un SDK externo para el análisis de adquisición y uso con AppsFlyer (política de privacidad, sección 1(E)). La protección del texto y el análisis de uso con identificadores se explican por separado.</div>
             </div>
           </div>
 
