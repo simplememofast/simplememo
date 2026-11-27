@@ -430,7 +430,7 @@
       "name": "Apakah isi memo disimpan di server di suatu tempat?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Tidak. Isi catatan tidak disimpan di server Simple Memo. Catatan dikirim sebagai email melalui Relay API (Cloudflare Workers) dan layanan pengantaran Resend, tetapi isi catatan tidak disimpan secara berkelanjutan di server Simple Memo. Outbox dan data riwayat hanya disimpan di perangkat dalam bentuk terenkripsi dengan AES-GCM."
+        "text": "Isi catatan tidak disimpan di server Simple Memo. Catatan dikirim sebagai email melalui Relay API (Cloudflare Workers) dan layanan pengantaran Resend. Relay API produksi juga tidak menuliskan isi catatan ke log. Resend menyimpan email yang telah dikirim, termasuk isi catatan (masa simpan yang dipublikasikan untuk paket standar adalah 30 hari, dan kami masih memeriksa masa simpan yang berlaku untuk akun kami). Outbox dan data riwayat hanya disimpan di perangkat dalam bentuk terenkripsi dengan AES-GCM."
       }
     },
     {
@@ -494,7 +494,7 @@
       "name": "Aplikasi seperti apa Simple Memo?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Simple Memo berfokus pada 3 langkah: buka → tulis → kirim. Catatan dikirim dengan satu ketukan ke alamat email yang sudah diatur. Tidak ada fitur rumit seperti pengelolaan folder, pemberian tag, atau pengaturan sinkronisasi. Aplikasi ini hanya berfokus pada menuliskan ide saat muncul dan mengirimkannya ke email sendiri."
+        "text": "Ini adalah aplikasi iPhone dan Apple Watch untuk menulis ide yang terlintas dengan suara atau papan ketik, lalu mengirimkannya ke email Anda sendiri dengan satu ketukan. Memo juga dapat ditambahkan ke catatan di vault Obsidian dan disimpan ke Notion. Di dalam aplikasi tidak ada layar untuk merapikan memo; memo dirapikan di tempat tujuannya. Jika integrasi Obsidian sudah diatur dan “Tambahkan tag AI otomatis” di pengaturan diaktifkan, judul, tag, dan jenis juga ditambahkan secara otomatis di perangkat (nonaktif secara bawaan)."
       }
     },
     {
@@ -590,7 +590,7 @@
       "name": "Tolong beri tahu saya perangkat yang kompatibel dan lingkungan operasi.",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "iPhone (iOS 16.0 atau lebih baru) Apple Watch (watchOS 9.0 atau versi lebih baru)"
+        "text": "iPhone (iOS 16.0 atau lebih baru) Apple Watch (watchOS 9.0 atau versi lebih baru) Tidak ada versi untuk iPad, Mac, atau Android."
       }
     },
     {
@@ -750,7 +750,7 @@
       "name": "Apakah badan email, kode otentikasi, dan alamat email akan tetap ada di server?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Isi catatan melewati Relay API kami (Cloudflare Workers) dan layanan pengantaran Resend untuk diproses saat pengiriman, tetapi tidak kami simpan secara permanen, sesuai kebijakan privasi. Kode verifikasi dihapus otomatis setelah masa berlakunya selama 10 menit habis. Alamat email Anda akan dicatat di server kami. Misalnya, berikut ini (lihat kebijakan privasi untuk yang lainnya): ID transmisi dan alamat email tujuan hash (dihasilkan dari SHA-256) korespondensi (Cloudflare D1) Catatan otentikasi penerima. Pengenal acak yang dibuat oleh aplikasi untuk setiap terminal dan hash alamat email tujuan dihapus secara otomatis dalam 1 tahun (Cloudflare KV) Hash dan pengidentifikasi ini tidak diperlakukan sebagai informasi yang sepenuhnya anonim. Outbox dan data riwayat di perangkat dienkripsi dengan AES-GCM. Kunci enkripsinya disimpan di Keychain."
+        "text": "Isi catatan melewati Relay API kami (Cloudflare Workers) dan layanan pengantaran Resend untuk diproses saat pengiriman, tetapi tidak kami simpan secara permanen, sesuai kebijakan privasi. Resend menyimpan email yang telah dikirim, termasuk isi catatan (masa simpan yang dipublikasikan untuk paket standar adalah 30 hari, dan kami masih memeriksa masa simpan yang berlaku untuk akun kami). Kode verifikasi dihapus otomatis setelah masa berlakunya selama 10 menit habis. Alamat email Anda akan dicatat di server kami. Misalnya, berikut ini (lihat kebijakan privasi untuk yang lainnya): ID transmisi dan alamat email tujuan hash (dihasilkan dari SHA-256) korespondensi (Cloudflare D1) Catatan otentikasi penerima. Pengenal acak yang dibuat oleh aplikasi untuk setiap terminal dan hash alamat email tujuan dihapus secara otomatis dalam 1 tahun (Cloudflare KV) Hash dan pengidentifikasi ini tidak diperlakukan sebagai informasi yang sepenuhnya anonim. Outbox dan data riwayat di perangkat dienkripsi dengan AES-GCM. Kunci enkripsinya disimpan di Keychain."
       }
     },
     {
@@ -869,7 +869,7 @@
 
       <!-- Japanese Content -->
       <div class="lang-body">
-        <p class="page-content__date">Terakhir diperbarui: <time datetime="2026-11-21">21 November 2026</time></p>
+        <p class="page-content__date">Terakhir diperbarui: <time datetime="2026-11-28">28 November 2026</time></p>
         <div class="page-content__body faq-body">
 
           <!-- 料金・プラン -->
@@ -1146,7 +1146,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">Apakah isi memo disimpan di server di suatu tempat?</summary>
                 <div class="faq-answer">
-                  <p>Tidak. Isi catatan tidak disimpan di server Simple Memo. Catatan dikirim sebagai email melalui Relay API (Cloudflare Workers) dan layanan pengantaran Resend, tetapi isi catatan tidak disimpan secara berkelanjutan di server Simple Memo. Outbox dan data riwayat hanya disimpan di perangkat dalam bentuk terenkripsi dengan AES-GCM.</p>
+                  <p>Isi catatan tidak disimpan di server Simple Memo. Catatan dikirim sebagai email melalui Relay API (Cloudflare Workers) dan layanan pengantaran Resend. Relay API produksi juga tidak menuliskan isi catatan ke log. Resend menyimpan email yang telah dikirim, termasuk isi catatan (masa simpan yang dipublikasikan untuk paket standar adalah 30 hari, dan kami masih memeriksa masa simpan yang berlaku untuk akun kami). Outbox dan data riwayat hanya disimpan di perangkat dalam bentuk terenkripsi dengan AES-GCM.</p>
                 </div>
               </details>
             </div>
@@ -1185,7 +1185,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">Apakah badan email, kode otentikasi, dan alamat email akan tetap ada di server?</summary>
                 <div class="faq-answer">
-                  <p>Isi catatan melewati Relay API kami (Cloudflare Workers) dan layanan pengantaran Resend untuk diproses saat pengiriman, tetapi tidak kami simpan secara permanen, sesuai kebijakan privasi. Kode verifikasi dihapus otomatis setelah masa berlakunya selama 10 menit habis.</p>
+                  <p>Isi catatan melewati Relay API kami (Cloudflare Workers) dan layanan pengantaran Resend untuk diproses saat pengiriman, tetapi tidak kami simpan secara permanen, sesuai kebijakan privasi. Resend menyimpan email yang telah dikirim, termasuk isi catatan (masa simpan yang dipublikasikan untuk paket standar adalah 30 hari, dan kami masih memeriksa masa simpan yang berlaku untuk akun kami). Kode verifikasi dihapus otomatis setelah masa berlakunya selama 10 menit habis.</p>
                   <p>Alamat email Anda akan dicatat di server kami. Misalnya, berikut ini (lihat <a href="/id/privacy">kebijakan privasi</a> untuk yang lainnya):</p>
                   <ul>
                     <li>ID transmisi dan alamat email tujuan hash (dihasilkan dari SHA-256) korespondensi (Cloudflare D1)</li>
@@ -1261,7 +1261,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">Aplikasi seperti apa Simple Memo?</summary>
                 <div class="faq-answer">
-                  <p>Simple Memo berfokus pada 3 langkah: buka → tulis → kirim. Catatan dikirim dengan satu ketukan ke alamat email yang sudah diatur. Tidak ada fitur rumit seperti pengelolaan folder, pemberian tag, atau pengaturan sinkronisasi. Aplikasi ini hanya berfokus pada menuliskan ide saat muncul dan mengirimkannya ke email sendiri.</p>
+                  <p>Ini adalah aplikasi iPhone dan Apple Watch untuk menulis ide yang terlintas dengan suara atau papan ketik, lalu mengirimkannya ke email Anda sendiri dengan satu ketukan. Memo juga dapat ditambahkan ke catatan di vault Obsidian dan disimpan ke Notion. Di dalam aplikasi tidak ada layar untuk merapikan memo; memo dirapikan di tempat tujuannya. Jika integrasi Obsidian sudah diatur dan “Tambahkan tag AI otomatis” di pengaturan diaktifkan, judul, tag, dan jenis juga ditambahkan secara otomatis di perangkat (nonaktif secara bawaan).</p>
                 </div>
               </details>
             </div>
@@ -1434,6 +1434,7 @@
                     <li>iPhone (iOS 16.0 atau lebih baru)</li>
                     <li>Apple Watch (watchOS 9.0 atau versi lebih baru)</li>
                   </ul>
+                  <p>Tidak ada versi untuk iPad, Mac, atau Android.</p>
                 </div>
               </details>
             </div>

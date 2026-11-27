@@ -51,7 +51,7 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- JSON-LD: BlogPosting -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/devlog/privacy-first-design#article","headline":"プライバシーファースト設計：メモアプリにおける偏執的なこだわり","description":"iPhone版シンプルメモのプライバシー設計を解説。AES-GCMの端末内暗号化、通信キャッシュ、診断ログ、利用解析の範囲と、アプリスイッチャーでメモを隠さない現行仕様・メール配送の制限を説明します。Keychainの鍵管理、保存先に残る情報、AppsFlyerと自社解析の識別子による関連付けも明記します。","url":"https://simplememofast.com/devlog/privacy-first-design","inLanguage":"ja","datePublished":"2026-02-13","dateModified":"2026-09-24","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"SimpleMemo Developer","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Obsidian連携シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/privacy-first-design#webpage"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/devlog/privacy-first-design#article","headline":"プライバシーファースト設計：メモアプリにおける偏執的なこだわり","description":"iPhone版シンプルメモのプライバシー設計を解説。AES-GCMの端末内暗号化、通信キャッシュ、診断ログ、利用解析の範囲と、アプリスイッチャーでメモを隠さない現行仕様・メール配送の制限を説明します。Keychainの鍵管理、保存先に残る情報、AppsFlyerと自社解析の識別子による関連付けも明記します。","url":"https://simplememofast.com/devlog/privacy-first-design","inLanguage":"ja","datePublished":"2026-02-13","dateModified":"2026-11-28","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"SimpleMemo Developer","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Obsidian連携シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/privacy-first-design#webpage"}}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"開発日誌","item":"https://simplememofast.com/devlog/"},{"@type":"ListItem","position":3,"name":"プライバシーファースト設計","item":"https://simplememofast.com/devlog/privacy-first-design"}]}</script>
@@ -422,7 +422,7 @@
       </h1>
 
       <div class="article-meta">
-        <span lang="ja">2026年2月13日公開 ・ 保護・利用解析の説明更新：2026年9月6日</span>
+        <span lang="ja">2026年2月13日公開 ・ 保護・利用解析の説明更新：2026年9月6日 ・ 保存と利用解析のFAQを訂正：2026年11月28日</span>
 
       </div>
 
@@ -489,7 +489,7 @@
 
             <div class="faq-item">
               <div class="faq-item__question">Q. メモの内容はサーバーに保存されますか？</div>
-              <div class="faq-item__answer">メール送信時、本文は当社のRelay APIと配送基盤を通過します。当社のRelay APIでは、法令対応や障害対応等の正当な必要性がある場合を除き、本文の恒常的な保存を行いません。配送先のメールボックスでの保存とは別です。保存先ごとの説明は<a href="/privacy-architecture/">プライバシー設計</a>をご覧ください。</div>
+              <div class="faq-item__answer">メール送信時、本文は当社のRelay APIと配送基盤を通過します。当社のRelay APIは本文を保存しません。配送基盤のResendは、送ったメール（メモ本文を含む）を保存します（公表されている標準プランの保存期間は30日で、当社に適用される期間は確認中です）。配送先のメールボックスでの保存とは別です。保存先ごとの説明は<a href="/privacy-architecture/">プライバシー設計</a>をご覧ください。</div>
             </div>
 
             <div class="faq-item">
@@ -504,12 +504,12 @@
 
             <div class="faq-item">
               <div class="faq-item__question">Q. アナリティクスやトラッキングはありますか？</div>
-              <div class="faq-item__answer">はい。自社の利用解析とAppsFlyer SDKを使用しています。自社解析にはランダムなインストール識別子、セッション識別子、イベントの種類・時刻、アプリの版、送信結果などを送ります。AppsFlyerには初回メモ送信成功、認証成功、課金画面表示、プラン選択、購入成功のイベントを送り、購入時には金額・通貨・期間などを付ける場合があります。同じインストール識別子をAppsFlyerのCustomer User IDにも設定するため、獲得情報と利用イベントを関連付けられます。アプリから設定するイベント項目にはメールアドレス・メモ本文・認証コードを直接含めませんが、自社解析の送信IDは宛先メールアドレスのハッシュと紐付くため、完全に匿名の情報ではありません。詳しくは<a href="/privacy#technical">プライバシーポリシーの技術的な対策</a>をご覧ください。</div>
+              <div class="faq-item__answer">アプリの版によって異なります。5.9.32までのアプリは、版と設定により、自社の利用イベントを送ったり、AppsFlyer SDKを使ったりすることがあります（プライバシーポリシー1(E)）。この記事が2026年9月6日に確認した5.8.17は両方を使い、自社解析と同じインストール識別子をAppsFlyerのCustomer User IDにも設定していました。アプリから設定するイベント項目にはメールアドレス・メモ本文・認証コードを直接含めませんが、自社解析の送信IDは宛先メールアドレスのハッシュと紐付くため、完全に匿名の情報ではありません。5.9.35のApp Storeのリリースノートは、利用状況と購読状況の任意の分析の終了を案内しています。現在の扱いは<a href="/privacy#technical">プライバシーポリシーの技術的な対策</a>をご覧ください。</div>
             </div>
 
             <div class="faq-item">
               <div class="faq-item__question">Q. Apple純正フレームワークと外部SDKをどう使い分けていますか？</div>
-              <div class="faq-item__answer">iOSアプリ内のメモ本文の暗号化と鍵保管にはCryptoKitとKeychainを使い、本文の送信はURLSessionで行います。一方、Googleサインイン、Firebaseによるバックエンド保護、AppsFlyerによる獲得・利用解析には外部SDKを使います。本文の保護と、識別子を伴う利用解析は区別して説明しています。</div>
+              <div class="faq-item__answer">iOSアプリ内のメモ本文の暗号化と鍵保管にはCryptoKitとKeychainを使い、本文の送信はURLSessionで行います。一方、Googleサインインと、Firebaseによるバックエンド保護には外部SDKを使います。5.9.32までの版は、版と設定により、AppsFlyerによる獲得・利用解析にも外部SDKを使うことがあります（プライバシーポリシー1(E)）。本文の保護と、識別子を伴う利用解析は区別して説明しています。</div>
             </div>
           </div>
 

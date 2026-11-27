@@ -22,6 +22,38 @@ function getMetaContent(html, key, value) {
   return null;
 }
 
+/** The only attribute the site writes with no value on a <meta>/<link>. */
+const VALUELESS_HEAD_ATTRS = new Set(['crossorigin', 'disabled']);
+
+/**
+ * <meta>/<link> tags with tokens left over once every name=value pair (and
+ * a known valueless attribute) is removed — i.e. a quote closed the value early.
+ *
+ * #1618 (2026-09-26) shipped `content="… the popular "74% in a day" and …"` in
+ * three tags on /en/blog/brain-science-memo. Browsers and crawlers ended the
+ * description at the inner `"` and read the rest as junk attributes. getMetaContent
+ * returns the same cut-off value a browser does, so all this check said was
+ * "[DESC] too long", and the broken snippet stayed live for two months.
+ * A pair counts only after whitespace, as HTML requires between attributes:
+ * a hand fix that leaves `…come from."name="description"` is a parse error too.
+ * Like getMetaContent, a tag ends at its first `>`; write one in a value as &gt;.
+ */
+function malformedHeadTags(html) {
+  const bad = [];
+  // `(?=[\s/>])`, not `\b`: a custom element such as <link-preview> is not a <link>.
+  for (const tag of html.match(/<(?:meta|link)(?=[\s/>])[^>]*>/gi) || []) {
+    const leftovers = tag
+      .replace(/^<(?:meta|link)(?=[\s/>])/i, '')
+      .replace(/\/?>$/, '')
+      .replace(/\s+[a-zA-Z_:][-a-zA-Z0-9_:.]*\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+)/g, ' ')
+      .split(/\s+/)
+      // A lone `/` (as in `/ >`) is skipped by HTML parsers; it is not a stray attribute.
+      .filter((t) => t && t !== '/' && !VALUELESS_HEAD_ATTRS.has(t.toLowerCase()));
+    if (leftovers.length) bad.push({ tag, leftovers });
+  }
+  return bad;
+}
+
 /**
  * ISO 8601 date-time carrying an explicit timezone — `Z` or `±hh:mm`.
  * A bare `2026-08-11` fails, and so does a local time with no offset.
@@ -136,6 +168,14 @@ function checkDocumentHead(content, { rel, errors, warnings, pageUrl, getSiteUrl
     // description too short" (59 pages in the 2026-08-05 crawl). 110 keeps a
     // margin above that line.
     warnings.push(`[DESC] Description too short (${desc.length} chars): ${rel}`);
+  }
+
+  // 2b. Attribute quoting on every <meta>/<link> (see malformedHeadTags, #1618).
+  for (const { tag, leftovers } of malformedHeadTags(content)) {
+    const key = tag.match(/\s(name|property|rel|itemprop|http-equiv)\s*=\s*("[^"]*"|'[^']*')/i);
+    const where = key ? `<${tag.slice(1, 5).toLowerCase()} ${key[1]}=${key[2]}>` : `${tag.slice(0, 60)}…`;
+    errors.push(`[ATTR] Malformed attribute quoting in ${where} (stray: ${leftovers.slice(0, 4).join(' ')}); ` +
+      `write a literal " inside a value as &quot; and a literal > as &gt;, and put a space between attributes: ${rel}`);
   }
 
   // 3. Canonical tag
@@ -283,4 +323,4 @@ function checkStructuredData(content, { rel, errors, warnings, ownAppNames: OWN_
   }
 }
 
-module.exports = { getMetaContent, validatePage };
+module.exports = { getMetaContent, malformedHeadTags, validatePage };

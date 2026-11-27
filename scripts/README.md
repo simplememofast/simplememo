@@ -53,6 +53,9 @@ CI全体の成功を意味しない。対象の一覧は `--list`、
 - `autopilot-gate.mjs` … ゲート判断の純関数核。5本の検査が import
 - `pr-hero-layout.mjs` … check-pr-hero が import
 - `i18n_config.py` … generate_sitemap.py / normalize_i18n_head.py が import
+- `indexnow_content_changes.py` … indexnow-notify.js がパスで呼ぶ比較器（**名前を変えない**）。
+  変更 .html のうち内容が変わったものを、sitemap_lastmod.py の content_signature で選ぶ。
+  自己テストは indexnow-notify.js の `--selftest` が中から回す
 - `check-asc-landed.mjs` … data/operating-memory.json の script_ok 検証として
   autopilot-act が実行
 - `lib/` … selftest.mjs（自己テストの実行）、read-ledger.mjs（13本）、

@@ -60,7 +60,7 @@
   "url": "https://simplememofast.com/zh-Hant/devlog/privacy-first-design",
   "inLanguage": "zh-Hant",
   "datePublished": "2026-02-13",
-  "dateModified": "2026-09-24",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -492,7 +492,7 @@
 
 
       <div class="article-meta">
-        <span>2026年2月13日公開・保護・使用分析的說明更新：2026年9月6日</span>
+        <span>2026年2月13日發布 ・ 保護與使用分析的說明更新：2026年9月6日 ・ 儲存與使用分析的常見問題更正：2026年11月28日</span>
 
       </div>
 
@@ -558,7 +558,7 @@
 
             <div class="faq-item">
               <div class="faq-item__question">問。 備忘錄的內容會儲存在伺服器上嗎？</div>
-              <div class="faq-item__answer">郵件傳送時，正文透過本公司的Relay API和配送基礎。 在本公司的Relay API中，除非有法令對應或故障對應等正當必要性，否則不會對本文進行永久儲存。 與在配送地址的郵箱中儲存是不同的。 每個儲存目的地的說明<a href="/zh-Hant/privacy-architecture/">隱私設計</a>。</div>
+              <div class="faq-item__answer">寄送郵件時，內文會經過本公司的 Relay API 與郵件遞送基礎設施。本公司的 Relay API 不會儲存內文。作為遞送基礎設施的 Resend 會保留寄出的郵件，包括備忘錄內文（其公布的標準方案保留期限為 30 天，適用於本公司的期限仍在確認中）。這與郵件在收件信箱中的保存是分開的。各儲存位置的說明，請參閱<a href="/zh-Hant/privacy-architecture/">隱私設計</a>。</div>
             </div>
 
             <div class="faq-item">
@@ -573,12 +573,12 @@
 
             <div class="faq-item">
               <div class="faq-item__question">問。 有分析和追蹤嗎？</div>
-              <div class="faq-item__answer">是的。 使用本公司的使用分析和AppsFlyer SDK。 本公司分析會傳送隨機的安裝識別符號、會話識別符號、活動種類・時間、應用程式的版本、傳送結果等。 AppsFlyer傳送首次備忘錄傳送成功、認證成功、收費畫面顯示、方案選擇、購買成功的活動，購買時可能會附加金額、貨幣、期限等。 因為將相同的安裝識別符號也設定為AppsFlyer的Customer User ID，所以可以將獲取資訊和使用事件聯絡起來。 從應用程式設定的活動專案中不直接包含郵箱地址、備忘錄正文、驗證碼，但本公司解析的傳送ID與收件人郵箱地址的雜湊相關聯，所以不是完全匿名的資訊。 詳情<a href="/zh-Hant/privacy#technical">隱私政策的技術對策</a>。</div>
+              <div class="faq-item__answer">依 App 版本而異。5.9.32 及更早版本的 App，視版本與設定而定，可能會傳送自有使用事件，或使用 AppsFlyer SDK（隱私政策 1(E)）。這篇文章於2026年9月6日確認的 5.8.17 版，兩者都有使用，並將與自有分析相同的安裝識別碼也設定為 AppsFlyer 的 Customer User ID。App 所設定的事件欄位不會直接包含電子郵件地址、備忘錄內文或驗證碼，但自有分析的傳送 ID 與收件電子郵件地址的雜湊值相關聯，因此並非完全匿名的資訊。5.9.35 版的 App Store 版本說明宣布結束使用情況與訂閱狀態的選用分析。目前的處理方式，請參閱<a href="/zh-Hant/privacy#technical">隱私政策的技術對策</a>。</div>
             </div>
 
             <div class="faq-item">
               <div class="faq-item__question">問。 如何區分使用Apple純正框架和外部SDK？</div>
-              <div class="faq-item__answer">iOS應用內備忘錄正文的加密和金鑰保管使用CryptoKit和Keychain，正文的傳送使用URLSession進行。 另一方面，Google登入、Firebase的後端保護、AppsFlyer的獲取、使用分析使用外部SDK。 本文的保護和帶有識別符號的使用分析是區分說明的。</div>
+              <div class="faq-item__answer">在 iOS App 內，備忘錄內文的加密與金鑰保管使用 CryptoKit 和 Keychain，內文的傳送則使用 URLSession 進行。另一方面，Google 登入，以及透過 Firebase 進行的後端保護，則使用外部 SDK。5.9.32 及更早的版本，視版本與設定而定，也可能使用外部 SDK，透過 AppsFlyer 進行獲客與使用分析（隱私政策 1(E)）。我們將備忘錄內文的保護與涉及識別碼的使用分析分開說明。</div>
             </div>
           </div>
 

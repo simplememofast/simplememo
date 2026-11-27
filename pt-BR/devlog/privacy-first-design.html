@@ -60,7 +60,7 @@
   "url": "https://simplememofast.com/pt-BR/devlog/privacy-first-design",
   "inLanguage": "pt-BR",
   "datePublished": "2026-02-13",
-  "dateModified": "2026-09-24",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -492,7 +492,7 @@
 
 
       <div class="article-meta">
-        <span>Publicado em 13/2/2026 · Explicação sobre proteção e análise de uso atualizada em 6/9/2026</span>
+        <span>Publicado em 13/2/2026 · Explicação sobre proteção e análise de uso atualizada em 6/9/2026 · Perguntas frequentes sobre armazenamento e análise de uso corrigidas em 28/11/2026</span>
 
       </div>
 
@@ -558,7 +558,7 @@
 
             <div class="faq-item">
               <div class="faq-item__question">P. O conteúdo do memorando será salvo no servidor?</div>
-              <div class="faq-item__answer">Ao enviar um e-mail, o texto passa pelo nosso Relay API e pela plataforma de entrega. Nosso Relay API não preserva permanentemente o texto, a menos que haja uma necessidade legítima de conformidade legal ou resposta de falha. É diferente de salvar na caixa de correio do destino de entrega. A descrição de cada destino de armazenamento é<a href="/pt-BR/privacy-architecture/">Design de privacidade</a>.</div>
+              <div class="faq-item__answer">Ao enviar um e-mail, o texto passa pelo nosso Relay API e pela plataforma de entrega. Nosso Relay API não armazena o texto. A plataforma de entrega, a Resend, armazena os e-mails enviados, incluindo o texto das notas (o prazo de retenção publicado para os planos padrão é de 30 dias, e estamos verificando qual prazo se aplica à nossa conta). É diferente de salvar na caixa de correio do destino de entrega. A descrição de cada destino de armazenamento está na página <a href="/pt-BR/privacy-architecture/">Design de privacidade</a>.</div>
             </div>
 
             <div class="faq-item">
@@ -573,12 +573,12 @@
 
             <div class="faq-item">
               <div class="faq-item__question">P. Há alguma análise ou rastreamento?</div>
-              <div class="faq-item__answer">Sim. Usamos nossa própria análise de uso e AppsFlyer SDK. Identificadores de instalação aleatória, identificadores de sessão, tipo e hora do evento, versão do aplicativo, resultados de transmissão, etc. serão enviados para nossa própria análise. O AppsFlyer envia eventos como transmissão inicial de memorando bem-sucedida, autenticação bem-sucedida, exibição da tela de cobrança, seleção do plano e sucesso da compra, e o valor, moeda, período, etc. podem ser adicionados no momento da compra. O mesmo identificador de instalação também é definido para o ID de Usuário do Cliente do AppsFlyer, para que as informações de aquisição e os eventos de uso possam ser associados. Os itens do evento definidos a partir do aplicativo não incluem diretamente um endereço de e-mail, corpo do memorando ou código de autenticação, mas o ID de envio da análise interna está vinculado ao hash do endereço de e-mail de destino, portanto, não é uma informação completamente anônima. Para detalhes<a href="/pt-BR/privacy#technical">Medidas técnicas para a política de privacidade</a>.</div>
+              <div class="faq-item__answer">Depende da versão do aplicativo. As versões do aplicativo até a 5.9.32 podem, conforme a versão e as configurações, enviar eventos de uso próprios ou usar o SDK da AppsFlyer (seção 1(E) da política de privacidade). A versão 5.8.17, que este artigo verificou em 6 de setembro de 2026, usava os dois e também definia o mesmo identificador de instalação da análise interna como Customer User ID da AppsFlyer. Os itens do evento definidos a partir do aplicativo não incluem diretamente um endereço de e-mail, texto da nota ou código de verificação, mas o ID de envio da análise interna está vinculado ao hash do endereço de e-mail de destino, portanto, não é uma informação completamente anônima. As notas de versão na App Store da versão 5.9.35 informam o fim das análises opcionais de uso e de assinatura. Para conhecer o tratamento atual, consulte a seção <a href="/pt-BR/privacy#technical">Medidas técnicas para a política de privacidade</a>.</div>
             </div>
 
             <div class="faq-item">
               <div class="faq-item__question">P. Como você usa a estrutura genuína Apple e o SDK externo separadamente?</div>
-              <div class="faq-item__answer">Use CryptoKit e Keychain para criptografar e armazenar o texto da nota no aplicativo iOS e enviar o texto usando URLSession. Por outro lado, o SDK externo é usado para login Google, proteção de back-end pelo Firebase e análise de aquisição e uso pelo AppsFlyer. A proteção do texto e a análise de uso com identificadores são explicadas separadamente.</div>
+              <div class="faq-item__answer">No aplicativo iOS, usamos CryptoKit e Keychain para criptografar o texto da nota e guardar as chaves, e enviamos o texto usando URLSession. Por outro lado, usamos SDKs externos para o login com o Google e para a proteção de back-end pelo Firebase. As versões até a 5.9.32 podem, conforme a versão e as configurações, usar também um SDK externo para a análise de aquisição e uso pela AppsFlyer (seção 1(E) da política de privacidade). A proteção do texto e a análise de uso com identificadores são explicadas separadamente.</div>
             </div>
           </div>
 

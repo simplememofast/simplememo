@@ -54,6 +54,25 @@ test('metadata keeps quote handling, first matching tag and exact length boundar
   }
 });
 
+test('meta/link attribute quoting fails on a raw quote inside a value or a missing space (#1618) and nothing else', () => {
+  const withDesc = tag => page('').replace(/<meta name="description"[^>]*>/, tag);
+  const inHead = extra => page('').replace('</head>', `${extra}</head>`);
+  // The shape #1618 shipped: raw " inside a double-quoted content value.
+  const raw = `<meta content="${'d'.repeat(120)} the popular "74% in a day" and "29% better" figures come from." name="description"/>`;
+  assert.deepEqual(tags(validate(withDesc(raw)).errors), ['[ATTR]']);
+  assert.match(validate(withDesc(raw)).errors[0], /<meta name="description"> \(stray: 74% in a day"\)/);
+  assert.deepEqual(validate(withDesc(raw.replace(/"(74%[^"]*|29%[^"]*)"/g, '&quot;$1&quot;'))).errors, []);
+  assert.deepEqual(tags(validate(withDesc(`<meta content='${'d'.repeat(120)} Simple Memo's notes' name='description'>`)).errors), ['[ATTR]']);
+  // A value that runs straight into the next attribute, as a hand fix of #1618 once left it.
+  assert.deepEqual(tags(validate(withDesc(`<meta content="${'d'.repeat(120)}"name="description"/>`)).errors), ['[ATTR]']);
+  // Valueless crossorigin, unquoted values and a spaced self-close are well formed.
+  assert.deepEqual(validate(inHead('<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+    + '<meta charset=utf-8><link href="/a.css" rel="stylesheet" / >')).errors, []);
+  // A boolean `disabled` on <link> is valid HTML, and custom elements named link-*/meta-* are not head tags.
+  assert.deepEqual(validate(inHead('<link rel="alternate stylesheet" href="/b.css" title="b" disabled>'
+    + '<link-preview data-x="a b"></link-preview><meta-card stray"value></meta-card>')).errors, []);
+});
+
 test('schema traversal retains nested nodes, own-app scoping and time-zone validation', () => {
   const nodePage = node => page(`<script type="application/ld+json">${JSON.stringify(node)}</script>`);
   const nodes = { '@graph': [

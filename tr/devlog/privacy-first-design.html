@@ -60,7 +60,7 @@
   "url": "https://simplememofast.com/tr/devlog/privacy-first-design",
   "inLanguage": "tr",
   "datePublished": "2026-02-13",
-  "dateModified": "2026-09-24",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -492,7 +492,7 @@
 
 
       <div class="article-meta">
-        <span>13 Şubat 2026 sürüm ・ Koruma ve kullanım analizi açıklama güncelleme: 6 Eylül 2026</span>
+        <span>13 Şubat 2026 tarihinde yayımlandı ・ Koruma ve kullanım analizi açıklaması güncellendi: 6 Eylül 2026 ・ Saklama ve kullanım analiziyle ilgili SSS düzeltildi: 28 Kasım 2026</span>
 
       </div>
 
@@ -558,7 +558,7 @@
 
             <div class="faq-item">
               <div class="faq-item__question">S. Notun içeriği sunucuya kaydedilecek mi?</div>
-              <div class="faq-item__answer">Bir e-posta gönderirken, metin Relay API'den ve teslimat platformumuzdan geçer. Rölemiz API, yasal uyum veya başarısızlık yanıtı için meşru bir ihtiyaç olmadığı sürece metni kalıcı olarak korumaz. Teslimat varış noktasının posta kutusuna kaydetmekten farklıdır. Her depolama hedefi için açıklama<a href="/tr/privacy-architecture/">Gizlilik tasarımı</a>adresine bakın.</div>
+              <div class="faq-item__answer">Bir e-posta gönderirken, metin Relay API'den ve teslimat platformumuzdan geçer. Relay API hizmetimiz metni saklamaz. Teslimat platformu olan Resend, gönderilen e-postaları (not gövdesi dâhil) saklar (standart planlar için yayımlanan saklama süresi 30 gündür; hesabımıza uygulanan süreyi teyit ediyoruz). Bu, teslimat varış noktasının posta kutusuna kaydetmekten farklıdır. Her depolama hedefiyle ilgili açıklama için <a href="/tr/privacy-architecture/">Gizlilik tasarımı</a>adresine bakın.</div>
             </div>
 
             <div class="faq-item">
@@ -573,12 +573,12 @@
 
             <div class="faq-item">
               <div class="faq-item__question">S. Herhangi bir analiz veya izleme var mı?</div>
-              <div class="faq-item__answer">Evet. Kendi kullanım analizimizi ve AppsFlyer SDK'mızı kullanıyoruz. Rastgele kurulum tanımlayıcıları, oturum tanımlayıcıları, olay türü ve zamanı, uygulama sürümü, iletim sonuçları vb. kendi analizimize gönderilecektir. AppsFlyer, başarılı ilk not iletimi, başarılı kimlik doğrulama, faturalandırma ekran görüntüsü, plan seçimi ve satın alma başarısı gibi olaylar gönderir ve satın alma sırasında miktar, para birimi, dönem vb. eklenebilir. Aynı kurulum tanımlayıcısı, satın alma bilgileri ve kullanım olayları ilişkilendirilebilmesi için AppsFlyer'ın Müşteri Kullanıcı Kimliği için de ayarlanır. Uygulamadan ayarlanan etkinlik öğeleri doğrudan bir e-posta adresi, not gövdesi veya kimlik doğrulama kodu içermez, ancak şirket içi analizin gönderme kimliği hedef e-posta adresinin karmasına bağlanır, bu nedenle tamamen anonim bir bilgi değildir. Ayrıntılar için<a href="/tr/privacy#technical">Gizlilik politikası için teknik önlemler</a>adresine bakın.</div>
+              <div class="faq-item__answer">Uygulamanın sürümüne göre değişir. 5.9.32 ve önceki sürümler, sürüme ve ayarlara bağlı olarak kullanım olaylarını sunucularımıza gönderebilir veya AppsFlyer SDK'sını kullanabilir (Gizlilik Politikası, bölüm 1(E)). Bu yazı için 6/9/2026 tarihinde kontrol edilen 5.8.17 sürümü ikisini de kullanıyordu ve şirket içi analizle aynı kurulum tanımlayıcısını AppsFlyer Customer User ID olarak da ayarlıyordu. Uygulamadan ayarlanan etkinlik öğeleri doğrudan bir e-posta adresi, not gövdesi veya kimlik doğrulama kodu içermez, ancak şirket içi analizin gönderme kimliği hedef e-posta adresinin karmasına bağlanır, bu nedenle tamamen anonim bir bilgi değildir. 5.9.35 sürümünün App Store sürüm notları, isteğe bağlı kullanım ve abonelik analizlerinin sona erdiğini bildirir. Güncel işleyiş hakkında <a href="/tr/privacy#technical">Gizlilik politikası için teknik önlemler</a>adresine bakın.</div>
             </div>
 
             <div class="faq-item">
               <div class="faq-item__question">S. Apple orijinal çerçevesini ve harici SDK'yı ayrı ayrı nasıl kullanıyorsunuz?</div>
-              <div class="faq-item__answer">iOS Not metnini şifrelemek ve uygulamada saklamak ve metni URLSession aracılığıyla göndermek için CryptoKit ve Keychain'i kullanın. Öte yandan, harici SDK, Google oturum açma, Firebase tarafından arka uç koruması ve AppsFlyer tarafından edinme ve kullanım analizi için kullanılır. Metnin korunması ve tanımlayıcılarla kullanım analizi ayrı ayrı açıklanmaktadır.</div>
+              <div class="faq-item__answer">iOS uygulamasında not metninin şifrelenmesi ve anahtarların saklanması için CryptoKit ile Keychain, metnin gönderilmesi için de URLSession kullanılır. Öte yandan Google ile oturum açma ve Firebase ile arka uç koruması için harici SDK'lar kullanılır. 5.9.32 ve önceki sürümler, sürüme ve ayarlara bağlı olarak AppsFlyer ile edinme ve kullanım analizi için de harici SDK kullanabilir (Gizlilik Politikası, bölüm 1(E)). Metnin korunması ve tanımlayıcılarla kullanım analizi ayrı ayrı açıklanmaktadır.</div>
             </div>
           </div>
 

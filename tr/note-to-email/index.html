@@ -61,7 +61,7 @@
   "description": "Gmail veya iPhone e-posta ile kendinize bir not gönderme prosedürünü, makbuz onayını ve özel bir uygulamanın nasıl seçileceğini tanıtmak. SimpleMemo, muhatabın kimliğini ilk kez doğrulayabilir ve günde en fazla 3 mesaj'ü ücretsiz olarak gönderebilir. Ayrıca, alınmadığında nerede kontrol edileceğini, e-posta ile Obsidian'e kaydetme arasındaki farkı ve notlara geri bakmak için nasıl organize edileceğini de açıklayacaktır.",
   "url": "https://simplememofast.com/tr/note-to-email/",
   "datePublished": "2026-03-04",
-  "dateModified": "2026-09-30",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -148,7 +148,7 @@
       "name": "Notun içeriği sunucuya kaydedilecek mi?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Terminaldeki Outbox ve geçmiş AES-GCM ile şifrelenir. E-postanın gövdesi API'mizden ve teslimat için harici bir e-posta iletim platformundan geçer ve alınan e-posta alıcının posta hizmetine kaydedilir. Terminal şifreleme, tüm e-postanın uçtan uca şifrelenmesi anlamına gelmez."
+        "text": "Cihazdaki Outbox ve geçmiş, AES-GCM ile şifrelenir. E-posta gövdesi, iletilmek üzere API'mizden ve teslim hizmeti Resend'den geçer. API'miz e-posta gövdesini saklamaz. Resend, gönderilen e-postaları (not gövdesi dâhil) saklar (standart planlar için yayımlanan saklama süresi 30 gündür; hesabımıza uygulanan süreyi teyit ediyoruz). Ulaşan e-posta, alıcının e-posta hizmetinde saklanır. Cihazdaki şifreleme, e-postanın tamamının uçtan uca şifrelendiği anlamına gelmez."
       }
     },
     {
@@ -156,7 +156,7 @@
       "name": "Konuyu ve imzayı özelleştirebilir miyim?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Evet. Uygulamada e-postanın konusunu ve imzasını özgürce ayarlayabilirsiniz. Amaca bağlı olarak \"[Memo]\" ve \"[TODO]\" gibi konu önekleri belirlerseniz, e-posta tarafında otomatik tahsis de mümkündür."
+        "text": "Evet. Konu olarak notun 1. satırı kullanılır ve ayarlardaki “Konu” alanına yazdığınız metin konunun başına eklenir (alan boşsa 1. satır olduğu gibi konu olur). Ayarlardaki “İmza” alanına yazdığınız imza da e-posta metninin sonuna eklenir. Notun 1. satırının başına “[Not]”, “[TODO]” gibi etiketler yazarsanız e-posta hizmetinizin filtreleriyle notları otomatik olarak ayırmak da mümkündür."
       }
     },
     {
@@ -391,7 +391,7 @@
   "image": "https://simplememofast.com/assets/img/app-icon-256.png",
   "applicationCategory": "UtilitiesApplication",
   "operatingSystem": "iOS 16.0+, watchOS",
-  "softwareVersion": "5.9.27",
+  "softwareVersion": "5.9.35",
   "isAccessibleForFree": true,
   "inLanguage": "tr",
   "downloadUrl": "https://apps.apple.com/jp/app/id6758438948",
@@ -590,8 +590,8 @@
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Kendinize e-posta ile not göndermenin avantajları nelerdir? </span></summary><div class="faq-answer"><p>Genellikle kontrol ettiğiniz gelen kutusunda kısa notları toplayabilmektir. E-postanıza çok fazla bakmıyorsanız veya gelen kutunuz zaten çok sayıda e-postayla doluysa, lütfen doğrudan günlük notlarınıza veya görev uygulamalarınıza nasıl bırakacağınızı düşünün.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Herhangi bir e-posta adresi kullanabilir miyim? </span></summary><div class="faq-answer"><p>Gmail, Outlook, Yahoo! E-postalar ve iCloud e-postaları gibi alınabilecek kendi adresinizi ayarlayın ve doğrulayın. Lütfen şirket e-postaları için harici gönderenleri kabul edin veya dahili alma kurallarınızı kontrol edin.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span> Notları çevrimdışı olarak gönderebilir miyim? </span></summary><div class="faq-answer"><p>Çevrimdışıyken, terminalde Outbox'de şifrelenir ve saklanır ve iletişim döndürüldüğünde yeniden göndermeye çalışır. E-posta varışı için iletişim ve doğrulanmış bir adres gereklidir. Geri döndükten sonra uygulamayı açın ve gönderilmemiş durumunu ve gelen kutusunu kontrol edin.</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Notun içeriği sunucuya kaydedilecek mi? </span></summary><div class="faq-answer"><p>Terminaldeki Outbox ve geçmiş AES-GCM ile şifrelenir. E-postanın gövdesi API'mizden ve teslimat için harici bir e-posta iletim platformundan geçer ve alınan e-posta alıcının posta hizmetine kaydedilir. Terminal şifreleme, tüm e-postanın uçtan uca şifrelenmesi anlamına gelmez.</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span> Konuyu ve imzayı özelleştirebilir miyim? </span></summary><div class="faq-answer"><p>Evet. Uygulamada e-postanın konusunu ve imzasını özgürce ayarlayabilirsiniz. Amaca bağlı olarak "[Memo]" ve "[TODO]" gibi konu önekleri belirlerseniz, e-posta tarafında otomatik tahsis de mümkündür.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Notun içeriği sunucuya kaydedilecek mi? </span></summary><div class="faq-answer"><p>Cihazdaki Outbox ve geçmiş, AES-GCM ile şifrelenir. E-posta gövdesi, iletilmek üzere API'mizden ve teslim hizmeti Resend'den geçer. API'miz e-posta gövdesini saklamaz. Resend, gönderilen e-postaları (not gövdesi dâhil) saklar (standart planlar için yayımlanan saklama süresi 30 gündür; hesabımıza uygulanan süreyi teyit ediyoruz). Ulaşan e-posta, alıcının e-posta hizmetinde saklanır. Cihazdaki şifreleme, e-postanın tamamının uçtan uca şifrelendiği anlamına gelmez.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span> Konuyu ve imzayı özelleştirebilir miyim? </span></summary><div class="faq-answer"><p>Evet. Konu olarak notun 1. satırı kullanılır ve ayarlardaki “Konu” alanına yazdığınız metin konunun başına eklenir (alan boşsa 1. satır olduğu gibi konu olur). Ayarlardaki “İmza” alanına yazdığınız imza da e-posta metninin sonuna eklenir. Notun 1. satırının başına “[Not]”, “[TODO]” gibi etiketler yazarsanız e-posta hizmetinizin filtreleriyle notları otomatik olarak ayırmak da mümkündür.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Gmail'in bana gönderdiği e-posta arasındaki fark nedir? </span></summary><div class="faq-answer"><p>Gmail ayrıca adresinizi girebilir ve varış noktasına gönderebilir. Konu daha sonra bulunacak bir işaretleyici olacaktır. SimpleMemo, muhatabı ilk kez ayarlayabilir ve doğrulayabilir ve ardından metni girip gönderebilir.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Android'de kullanabilir miyim? ( Kendime bir e-posta göndermek istiyorum)</span></summary><div class="faq-answer"><p>SimpleMemo şu anda sadece iOS içindir. Android'de kendinize bir e-posta göndermek istiyorsanız, bunu Gmail uygulamasında kendinize gönderebilir veya Google Keep'te bir not paylaşabilirsiniz. Lütfen kullanım sıklığına ve almak istediğiniz varış noktasına göre seçin.</p></div></details></div>
 </div>
@@ -615,7 +615,7 @@
 </tbody>
 </table></div>
 </div></section>
-<p class="lp-section__lead">Açıklama güncellemesi: 23 Eylül 2026. Spesifikasyonların son onayı: 9 Eylül 2026. <a href="/tr/blog/fastest-memo-app-benchmark">Başlangıç hızı ölçüm koşulları</a> · <a href="/tr/privacy">Veri işleme</a></p>
+<p class="lp-section__lead">Açıklama güncellemesi: 28 Kasım 2026. Spesifikasyonların son onayı: 9 Eylül 2026. <a href="/tr/blog/fastest-memo-app-benchmark">Başlangıç hızı ölçüm koşulları</a> · <a href="/tr/privacy">Veri işleme</a></p>
 <!-- CTA -->
 <div class="cta-box">
 <div class="cta-box__title">

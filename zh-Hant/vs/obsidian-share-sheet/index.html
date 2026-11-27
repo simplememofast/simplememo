@@ -60,7 +60,7 @@
   "description": "Obsidian官方1.13的iOS共享表・快捷鍵・QuickAdd・SimpleMemo的4路線認真比較。 先明確說明官方足夠的情況後，解說速度、Apple Watch、語音、AI標籤的差異（啟動時間只有SimpleMemo由開發者測量）。",
   "url": "https://simplememofast.com/zh-Hant/vs/obsidian-share-sheet/",
   "datePublished": "2026-08-11",
-  "dateModified": "2026-09-30",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -222,7 +222,7 @@
 <link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
 <link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/zh-Hant/vs/obsidian-share-sheet/#faq","inLanguage":"zh-Hant","mainEntity":[{"@type":"Question","name":"Obsidian有官方1.13的共享表的話，SimpleMemo不是不需要嗎？","acceptedAnswer":{"@type":"Answer","text":"如果只是從共享表中將文字或URL傳送到Vault的話就不需要了。 SimpleMemo具有價值的是，想以warm啟動的實測中值0.4秒開始寫沒有共享來源的“想法”時，想透過Apple Watch輸入語音並透過配對的iPhone傳送時，想要語音的自動錄音、AI標籤授予、郵件的雙重化時。 如果不適用的話，官方就足夠了。"}},{"@type":"Question","name":"快捷鍵的官方動作和URL方案有什麼不同？","acceptedAnswer":{"@type":"Answer","text":"移動1.11以後的官方快捷動作不用開啟Obsidian就可以補充。 傳統的obsidian:// URL方案一定要在前面啟動Obsidian，是容易發生正文中斷、重複製作筆記、寫入其他Vault等失敗的路徑。 按症狀劃分的分類指南彙總。"}},{"@type":"Question","name":"SimpleMemo的Vault補充需要外掛嗎？","acceptedAnswer":{"@type":"Answer","text":"不需要。 以直接追記到Vault資料夾的檔案為基本，打不開時用URI回退追記。 不能像QuickAdd那樣控制Vault內模板，Obsidian側的設定為零。 結構請看Obsidian合作的解說頁面。"}},{"@type":"Question","name":"備忘錄的正文會儲存在某個伺服器上嗎？","acceptedAnswer":{"@type":"Answer","text":"不會永久儲存。 正文只有在透過傳送時才會透過伺服器，AI標記是在裝置（Apple Foundation Models）上進行的，所以不會傳送到外部伺服器。 但是郵件配送因為使用標準SMTP，所以不是E2EE（端到端加密）。 隱私設計的全貌圖解了通道。"}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/zh-Hant/vs/obsidian-share-sheet/#faq","inLanguage":"zh-Hant","mainEntity":[{"@type":"Question","name":"Obsidian有官方1.13的共享表的話，SimpleMemo不是不需要嗎？","acceptedAnswer":{"@type":"Answer","text":"如果只是要從分享表單把文字或 URL 傳送到 Vault，那就不需要。至於沒有分享來源的「想法」，在 iOS 26 上，也能用 Obsidian 官方的 Quick Capture（自2026年10月5日的公開版 1.14 起；語音捕捉自11月2日的公開版 1.15 起），不必等待筆記庫載入就能書寫。如果只需要留在 Obsidian，請先試試這個是否就夠用。SimpleMemo 額外提供的是：在 Apple Watch 上語音輸入，並透過配對的 iPhone 送達；把同一則筆記也留在寄給自己的郵件中（普通模式）；以及在設定中開啟的 AI 標籤功能。"}},{"@type":"Question","name":"快捷鍵的官方動作和URL方案有什麼不同？","acceptedAnswer":{"@type":"Answer","text":"移動1.11以後的官方快捷動作不用開啟Obsidian就可以補充。 傳統的obsidian:// URL方案一定要在前面啟動Obsidian，是容易發生正文中斷、重複製作筆記、寫入其他Vault等失敗的路徑。 按症狀劃分的分類指南彙總。"}},{"@type":"Question","name":"SimpleMemo的Vault補充需要外掛嗎？","acceptedAnswer":{"@type":"Answer","text":"不需要。 以直接追記到Vault資料夾的檔案為基本，打不開時用URI回退追記。 不能像QuickAdd那樣控制Vault內模板，Obsidian側的設定為零。 結構請看Obsidian合作的解說頁面。"}},{"@type":"Question","name":"備忘錄的正文會儲存在某個伺服器上嗎？","acceptedAnswer":{"@type":"Answer","text":"不會儲存在 SimpleMemo 的伺服器上。內文在傳送時會經過本公司的 Relay API（Cloudflare Workers）和傳送服務 Resend，正式環境的 Relay API 也不會將內文記錄在日誌中。不過，Resend 會保留寄出的郵件，包括備忘錄內文（其公布的標準方案保留期限為 30 天，適用於本公司的期限仍在確認中）。AI 加標籤是在裝置上（Apple Foundation Models）進行的，備忘錄內文不會為了加標籤而被傳送到外部伺服器。郵件遞送使用標準的 SMTP，因此並非 E2EE（端對端加密）。隱私設計的全貌一頁以圖解說明了資料的傳遞路徑。"}}]}</script>
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
 <script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
@@ -269,7 +269,7 @@
       <!-- Premise -->
       <section class="lp-section ce-chapter sd-chapter">
         <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"> <span>前提：4條路線都可以成為“正確答案”</span> </h2></div><div class="ce-chapter__body">
-        <p class="lp-section__lead"> <span>從iPhone到Obsidian的Vault中放入備忘錄的主要路線比較4個。 1<strong>官方1.13的共享表</strong>（從其他應用程式的“共享”傳送到Vault的筆記），2<strong>快捷鍵</strong>（移動1.11以後的官方動作可以不開啟應用程式進行補充，傳統的obsidian:// URL方案在前面啟動Obsidian），3<strong><a href="/zh-Hant/obsidian/plugins/quickadd/">QuickAdd</a>等社群外掛</strong>（詳細控制Vault內的模板插入、補充地址），4<strong>SimpleMemo</strong>（warm啟動時的點選→可以輸入為止的實際測量中心值為0.4秒，傳送後郵件和Vault）。  哪個適合取決於“什麼、從哪裡、在什麼情況下”捕捉。 另外，<a href="https://obsidian.md/changelog/2026-09-02-mobile-v1.14.0/">移動1.14的先行提供版</a>中，還加入了面向iOS 26的官方Quick Capture。 從鎖屏、控制中心、快捷鍵無需等待保管庫的載入即可輸入，這是與表中的4路線不同的入口。 請在使用前確認一般公開版的提供情況。 </span> </p>
+        <p class="lp-section__lead"> <span>這裡比較從 iPhone 把筆記存入 Obsidian Vault 的 4 種主要路徑：①<strong>官方 1.13 的分享表單</strong>（從其他 App 的「分享」傳送到 Vault 的筆記）、②<strong>捷徑</strong>（行動版 1.11 起提供的官方動作不必開啟 App 即可追加；舊有的 obsidian:// URL 架構則會在前景開啟 Obsidian）、③<strong><a href="/zh-Hant/obsidian/plugins/quickadd/">QuickAdd</a> 等社群外掛</strong>（可細部控制 Vault 內的範本插入與追加位置）、④<strong>SimpleMemo</strong>（熱啟動時從點一下到可以輸入的實測中位數為 0.4 秒，送出後會到達電子郵件與 Vault 兩處）。哪一種適合你，取決於你要捕捉的是「什麼、從哪裡、在什麼情況下」。此外，自<a href="https://obsidian.md/changelog/2026-10-05-mobile-v1.14.4/">2026年10月5日的公開版 1.14（行動版）</a>起，也能使用適用於 iOS 26 的官方 Quick Capture。這是與表中 4 種路徑不同的另一個入口，可以從鎖定畫面、控制中心、主畫面小工具或「捷徑」輸入，不必等待筆記庫載入。自<a href="https://obsidian.md/changelog/2026-11-02-mobile-v1.15.0/">11月2日的公開版 1.15</a> 起，也支援邊說邊轉成文字的語音捕捉（已於2026年11月27日對照官方更新日誌確認）。</span> </p>
       </div></section>
 
       <!-- Comparison Table -->
@@ -313,9 +313,9 @@
       <section class="lp-section ce-chapter sd-chapter">
         <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04"> <span>即便如此也有使用SimpleMemo的理由的4場景</span> </h2></div><div class="ce-chapter__body">
         <ul class="diff-list">
-          <li> <span class="diff-num">1</span> <strong>“想到的瞬間”的零輸入 — 共享表需要共享源</strong><br> 共享表是“在看什麼”時的工具。 走著走著腦子裡浮現的一句話沒有共同點。 SimpleMemo點選0.4秒（warm啟動・實測中值）出現鍵盤，寫1點選傳送。 不需要Obsidian的啟動和筆記選擇。 官方Quick Capture的先行提供版也可以輸入，無需等待保管庫的載入。 </li>
+          <li> <span class="diff-num">1</span> <strong>在「想到的瞬間」從零輸入 — 分享表單需要分享來源</strong><br> 分享表單是「正在看著某樣東西」時使用的工具。走路時腦中浮現的一句話，並沒有分享來源。SimpleMemo 從點一下起 0.4 秒（熱啟動，實測中位數）就會出現鍵盤，寫完點 1 下即可傳送，不需要啟動 Obsidian 或選擇筆記。在 iOS 26 上，官方的 Quick Capture（自公開版 1.14 起）也能不必等待筆記庫載入就開始輸入。 </li>
           <li> <span class="diff-num">2</span> <strong>Apple Watch語音輸入 — Obsidian沒有推出watchOS應用程式</strong><br> Obsidian中沒有watchOS應用程式，所以Watch上沒有應用程式、Vault和共享表（<a href="/zh-Hant/obsidian/apple-watch-not-working/" style="color:var(--accent);">詳細的解說</a>）。 SimpleMemo在Watch上進行語音備忘錄，透過配對的iPhone同時傳送到郵件和Vault。 傳送和Vault追記需要iPhone方面的設定和轉播。 </li>
-          <li> <span class="diff-num">3</span> <strong>語音和AI標籤的自動化 — “開啟→說話→結束”</strong><br> 設定的“啟動時自動開啟語音輸入”開啟後，開啟後自動開始錄音，在開啟裝置上轉錄文字（iOS 26以後的對應終端）。 此外，如果開啟設定的“AI標籤自動新增”，裝置AI（Apple Foundation Models）會自動賦予20字以內的標題、1~3個標籤、種類（todo/idea/log）。 為了標記，備忘錄正文不會傳送到外部伺服器。 因為帶有標籤的Vault會追加，所以不需要後面的整理。 </li>
+          <li> <span class="diff-num">3</span> <strong>語音與 AI 標籤的自動化 — 「打開→說話→完成」</strong><br> 如果只是要把說的話轉成文字，在 iOS 26 上使用 Obsidian 官方 Quick Capture 的語音捕捉（自公開版 1.15 起）也能做到。在 SimpleMemo 中，只要在設定中開啟「啟動時自動開啟語音輸入」，打開 App 就會自動開始錄音，並在裝置上轉成文字（iOS 26 或更新版本的支援裝置）。若再於設定中開啟「AI標籤自動新增」，裝置端 AI（Apple Foundation Models）會自動加上 20 字以內的標題、1～3 個標籤與類型（todo/idea/log）。不會為了加標籤而把筆記內文傳送到外部伺服器。筆記會帶著標籤直接追加到 Vault，事後不必再整理。 </li>
           <li> <span class="diff-num">4</span> <strong>郵件收件箱的雙重化 — 已傳送的備忘錄在收件箱中也會留下副本</strong><br> 在正常模式下，傳送的備忘錄會透過與Vault的補充不同的路徑，也會傳送到自己的郵件收件箱（“只儲存為Obsidian”期間不傳送郵件）。 如果是已經傳送的備忘錄，即使Vault的同步事故或手機丟失，也會在不依賴郵件這個應用程式的地方留下記錄（等待傳送的備忘錄只在終端內）。 </li>
         </ul>
       </div></section>
@@ -345,17 +345,17 @@
             </ul>
           </div>
         </div>
-        <p class="lp-section__lead" style="margin-top:1rem;"> <span>同時使用是最現實的。“ 傳送正在看的東西”是官方共享表，“傳送腦海中浮現的東西”是SimpleMemo，“Vault內的定型作業”是QuickAdd——不同起點的工具不競爭。 </span> </p>
+        <p class="lp-section__lead" style="margin-top:1rem;"> <span>搭配使用是最實際的做法。「傳送正在看的東西」用官方分享表單，「傳送腦中浮現的想法」用 SimpleMemo（在 iOS 26 上，如果只留在 Obsidian 中，也可以用官方的 Quick Capture），「Vault 內的例行作業」用 QuickAdd——起點不同的工具並不互相競爭。</span> </p>
       </div></section>
 
       <!-- FAQ -->
       <section class="lp-section ce-chapter sd-chapter">
         <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06"> <span>常見問題</span> </h2></div><div class="ce-chapter__body">
         <div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Obsidian有官方1.13的共享表的話，SimpleMemo不是不需要嗎？</summary><div class="faq-answer"><p>如果只是從共享表中將文字或URL傳送到Vault的話就不需要了。 SimpleMemo具有價值的是，想以warm啟動的實測中值0.4秒開始寫沒有共享來源的“想法”時，想透過Apple Watch輸入語音並透過配對的iPhone傳送時，想要語音的自動錄音、AI標籤授予、郵件的雙重化時。 如果不適用的話，官方就足夠了。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Obsidian有官方1.13的共享表的話，SimpleMemo不是不需要嗎？</summary><div class="faq-answer"><p>如果只是要從分享表單把文字或 URL 傳送到 Vault，那就不需要。至於沒有分享來源的「想法」，在 iOS 26 上，也能用 Obsidian 官方的 Quick Capture（自2026年10月5日的公開版 1.14 起；語音捕捉自11月2日的公開版 1.15 起），不必等待筆記庫載入就能書寫。如果只需要留在 Obsidian，請先試試這個是否就夠用。SimpleMemo 額外提供的是：在 Apple Watch 上語音輸入，並透過配對的 iPhone 送達；把同一則筆記也留在寄給自己的郵件中（普通模式）；以及在設定中開啟的 AI 標籤功能。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">快捷鍵的官方動作和URL方案有什麼不同？</summary><div class="faq-answer"><p>移動1.11以後的官方快捷動作不用開啟Obsidian就可以補充。 傳統的obsidian:// URL方案一定要在前面啟動Obsidian，是容易發生正文中斷、重複製作筆記、寫入其他Vault等失敗的路徑。 <a href="/zh-Hant/obsidian/shortcuts-not-working/" style="color:var(--accent);">按症狀劃分的分類指南</a>彙總。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">SimpleMemo的Vault補充需要外掛嗎？</summary><div class="faq-answer"><p>不需要。 以直接追記到Vault資料夾的檔案為基本，打不開時用URI回退追記。 不能像QuickAdd那樣控制Vault內模板，Obsidian側的設定為零。 結構請看<a href="/zh-Hant/obsidian/" style="color:var(--accent);">Obsidian合作的解說頁面</a>。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">備忘錄的正文會儲存在某個伺服器上嗎？</summary><div class="faq-answer"><p>不會永久儲存。 正文只有在透過傳送時才會透過伺服器，AI標記是在裝置（Apple Foundation Models）上進行的，所以不會傳送到外部伺服器。 但是郵件配送因為使用標準SMTP，所以不是E2EE（端到端加密）。 <a href="/zh-Hant/privacy-architecture/" style="color:var(--accent);">隱私設計的全貌</a>圖解了通道。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">備忘錄的正文會儲存在某個伺服器上嗎？</summary><div class="faq-answer"><p>不會儲存在 SimpleMemo 的伺服器上。內文在傳送時會經過本公司的 Relay API（Cloudflare Workers）和傳送服務 Resend，正式環境的 Relay API 也不會將內文記錄在日誌中。不過，Resend 會保留寄出的郵件，包括備忘錄內文（其公布的標準方案保留期限為 30 天，適用於本公司的期限仍在確認中）。AI 加標籤是在裝置上（Apple Foundation Models）進行的，備忘錄內文不會為了加標籤而被傳送到外部伺服器。郵件遞送使用標準的 SMTP，因此並非 E2EE（端對端加密）。<a href="/zh-Hant/privacy-architecture/" style="color:var(--accent);">隱私設計的全貌</a>一頁以圖解說明了資料的傳遞路徑。</p></div></details></div>
         </div>
       </div></section>
 

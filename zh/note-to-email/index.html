@@ -61,7 +61,7 @@
   "description": "介绍通过Gmail和iPhone的邮件向自己发送备忘录的步骤、接收确认、专用应用程序和选择方法。 SimpleMemo第一次认证收件人，可以免费发送每天最多3条。 也会说明无法送达时的确认地址、邮件和Obsidian的保存差异、回顾备忘录的整理方法。",
   "url": "https://simplememofast.com/zh/note-to-email/",
   "datePublished": "2026-03-04",
-  "dateModified": "2026-09-30",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -148,7 +148,7 @@
       "name": "备忘录的内容会保存在服务器上吗？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "终端内的Outbox和履历用AES-GCM加密。 邮件正文为了配送，通过本公司API和外部邮件发送基础，收到的邮件会保存在收件人的邮件服务中。 终端内的加密并不意味着邮件整体的端到端加密。"
+        "text": "设备上的 Outbox 和历史记录使用 AES-GCM 加密。为了投递，邮件正文会经过本公司的 API 和发送服务 Resend。本公司的 API 不保存正文。Resend 会保存已发送的邮件，其中包括备忘录正文（已公布的标准方案保留期限为 30 天，适用于本公司的期限仍在核实中）。收到的邮件会保存在收件人的邮件服务中。设备上的加密并不意味着整封邮件实现了端到端加密。"
       }
     },
     {
@@ -156,7 +156,7 @@
       "name": "标题和签名可以定制吗？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "是的。 邮件的标题和签名可以在应用程序内自由设置。 根据用途设置“[备忘录]”、“[TODO]”等标题前缀的话，邮件方面也可以自动分配。"
+        "text": "可以。邮件主题取自备忘录的第 1 行，并会在前面加上设置中“主题”里填写的文字（留空时，第 1 行会直接作为主题）。签名也一样，在设置的“签名”中填写后，就会附加在正文末尾。如果在第 1 行开头写上“[备忘录]”“[TODO]”等标记，还可以利用邮箱的过滤器自动分类。"
       }
     },
     {
@@ -391,7 +391,7 @@
   "image": "https://simplememofast.com/assets/img/app-icon-256.png",
   "applicationCategory": "UtilitiesApplication",
   "operatingSystem": "iOS 16.0+, watchOS",
-  "softwareVersion": "5.9.27",
+  "softwareVersion": "5.9.35",
   "isAccessibleForFree": true,
   "inLanguage": "zh-Hans",
   "downloadUrl": "https://apps.apple.com/jp/app/id6758438948",
@@ -590,8 +590,8 @@
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>用邮件给自己发送备忘录的优点是什么？ </span></summary><div class="faq-answer"><p>在平时确认的收件箱里收集简短的备忘录。 如果不怎么回看邮件，或者收件箱已经被很多邮件填满的话，也请考虑直接留在日常使用的笔记或任务应用程序上的方法。</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>任何邮箱地址都可以使用吗？ </span></summary><div class="faq-answer"><p>Gmail、Outlook、雅虎！ 邮件、iCloud邮件等，设置、认证可以接收的自己的地址后使用。 公司邮件是否接受外部发送方，也请确认公司内部的接收规则。</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>离线也能发送备忘录吗？ </span></summary><div class="faq-answer"><p>离线时在终端内的Outbox中加密保存，通信恢复后尝试重新发送。 邮件到达需要通信和认证的收件人。 恢复后请打开应用程序，确认未发送的状态和收件箱。</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>备忘录的内容会保存在服务器上吗？ </span></summary><div class="faq-answer"><p>终端内的Outbox和履历用AES-GCM加密。 邮件正文为了配送，通过本公司API和外部邮件发送基础，收到的邮件会保存在收件人的邮件服务中。 终端内的加密并不意味着邮件整体的端到端加密。</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>标题和签名可以定制吗？ </span></summary><div class="faq-answer"><p>是的。 邮件的标题和签名可以在应用程序内自由设置。 根据用途设置“[备忘录]”、“[TODO]”等标题前缀的话，邮件方面也可以自动分配。</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>备忘录的内容会保存在服务器上吗？ </span></summary><div class="faq-answer"><p>设备上的 Outbox 和历史记录使用 AES-GCM 加密。为了投递，邮件正文会经过本公司的 API 和发送服务 Resend。本公司的 API 不保存正文。Resend 会保存已发送的邮件，其中包括备忘录正文（已公布的标准方案保留期限为 30 天，适用于本公司的期限仍在核实中）。收到的邮件会保存在收件人的邮件服务中。设备上的加密并不意味着整封邮件实现了端到端加密。</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>标题和签名可以定制吗？ </span></summary><div class="faq-answer"><p>可以。邮件主题取自备忘录的第 1 行，并会在前面加上设置中“主题”里填写的文字（留空时，第 1 行会直接作为主题）。签名也一样，在设置的“签名”中填写后，就会附加在正文末尾。如果在第 1 行开头写上“[备忘录]”“[TODO]”等标记，还可以利用邮箱的过滤器自动分类。</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Gmail和给自己的邮件有什么不同？ </span></summary><div class="faq-answer"><p>Gmail也可以在收件人中输入自己的地址发送。 题目是以后找到的标志。 SimpleMemo第一次可以设置、认证收件人，之后可以输入正文发送。</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Android也可以使用吗？（ 想给自己发邮件）</span></summary><div class="faq-answer"><p>SimpleMemo现在是iOS专用的。 如果想在Android上给自己发邮件的话，用Gmail应用程序发给自己，或者分享Google Keep的备忘录的方法可以替代。 请根据使用频率和想要接收的保存地址进行选择。</p></div></details></div>
 </div>
@@ -615,7 +615,7 @@
 </tbody>
 </table></div>
 </div></section>
-<p class="lp-section__lead">说明更新：2026年9月23日。 规格的最终确认：2026年9月9日。 <a href="/zh/blog/fastest-memo-app-benchmark">启动速度的测量条件</a> · <a href="/zh/privacy">数据的处理</a></p>
+<p class="lp-section__lead">说明更新：2026年11月28日。 规格的最终确认：2026年9月9日。 <a href="/zh/blog/fastest-memo-app-benchmark">启动速度的测量条件</a> · <a href="/zh/privacy">数据的处理</a></p>
 <!-- CTA -->
 <div class="cta-box">
 <div class="cta-box__title">

@@ -61,7 +61,7 @@
   "description": "介紹透過Gmail和iPhone的郵件向自己傳送備忘錄的步驟、接收確認、專用應用程式和選擇方法。 SimpleMemo第一次認證收件人，可以免費傳送每天最多3則。 也會說明無法送達時的確認地址、郵件和Obsidian的儲存差異、回顧備忘錄的整理方法。",
   "url": "https://simplememofast.com/zh-Hant/note-to-email/",
   "datePublished": "2026-03-04",
-  "dateModified": "2026-09-30",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -148,7 +148,7 @@
       "name": "備忘錄的內容會儲存在伺服器上嗎？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "終端內的Outbox和履歷用AES-GCM加密。 郵件正文為了配送，透過本公司API和外部郵件傳送基礎，收到的郵件會儲存在收件人的郵件服務中。 終端內的加密並不意味著郵件整體的端到端加密。"
+        "text": "裝置內的 Outbox 和歷史記錄會以 AES-GCM 加密。為了遞送，郵件內文會經過本公司的 API 和傳送服務 Resend。本公司的 API 不會儲存內文。Resend 會保留寄出的郵件，包括備忘錄內文（其公布的標準方案保留期限為 30 天，適用於本公司的期限仍在確認中）。送達的郵件會儲存在收件方的郵件服務中。裝置內的加密，並不代表整封郵件都經過端對端加密。"
       }
     },
     {
@@ -156,7 +156,7 @@
       "name": "標題和簽名可以定製嗎？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "是的。 郵件的標題和簽名可以在應用程式內自由設定。 根據用途設定“[備忘錄]”、“[TODO]”等標題字首的話，郵件方面也可以自動分配。"
+        "text": "可以。郵件主旨是備忘錄的第 1 行，前面會加上在設定的「主旨」中輸入的文字（若留空，第 1 行就會直接成為主旨）。簽名也一樣，只要在設定的「簽名」中輸入，就會附加在內文的最後。若在第 1 行開頭寫上「[備忘錄]」「[TODO]」等，也能透過郵件端的篩選器自動分類。"
       }
     },
     {
@@ -391,7 +391,7 @@
   "image": "https://simplememofast.com/assets/img/app-icon-256.png",
   "applicationCategory": "UtilitiesApplication",
   "operatingSystem": "iOS 16.0+, watchOS",
-  "softwareVersion": "5.9.27",
+  "softwareVersion": "5.9.35",
   "isAccessibleForFree": true,
   "inLanguage": "zh-Hant",
   "downloadUrl": "https://apps.apple.com/jp/app/id6758438948",
@@ -590,8 +590,8 @@
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>用郵件給自己傳送備忘錄的優點是什麼？ </span></summary><div class="faq-answer"><p>在平時確認的收件箱裡收集簡短的備忘錄。 如果不怎麼回看郵件，或者收件箱已經被很多郵件填滿的話，也請考慮直接留在日常使用的筆記或任務應用程式上的方法。</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>任何郵箱地址都可以使用嗎？ </span></summary><div class="faq-answer"><p>Gmail、Outlook、雅虎！ 郵件、iCloud郵件等，設定、認證可以接收的自己的地址後使用。 公司郵件是否接受外部傳送方，也請確認公司內部的接收規則。</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>離線也能傳送備忘錄嗎？ </span></summary><div class="faq-answer"><p>離線時在終端內的Outbox中加密儲存，通訊恢復後嘗試重新傳送。 郵件到達需要通訊和認證的收件人。 恢復後請開啟應用程式，確認未傳送的狀態和收件箱。</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>備忘錄的內容會儲存在伺服器上嗎？ </span></summary><div class="faq-answer"><p>終端內的Outbox和履歷用AES-GCM加密。 郵件正文為了配送，透過本公司API和外部郵件傳送基礎，收到的郵件會儲存在收件人的郵件服務中。 終端內的加密並不意味著郵件整體的端到端加密。</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>標題和簽名可以定製嗎？ </span></summary><div class="faq-answer"><p>是的。 郵件的標題和簽名可以在應用程式內自由設定。 根據用途設定“[備忘錄]”、“[TODO]”等標題字首的話，郵件方面也可以自動分配。</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>備忘錄的內容會儲存在伺服器上嗎？ </span></summary><div class="faq-answer"><p>裝置內的 Outbox 和歷史記錄會以 AES-GCM 加密。為了遞送，郵件內文會經過本公司的 API 和傳送服務 Resend。本公司的 API 不會儲存內文。Resend 會保留寄出的郵件，包括備忘錄內文（其公布的標準方案保留期限為 30 天，適用於本公司的期限仍在確認中）。送達的郵件會儲存在收件方的郵件服務中。裝置內的加密，並不代表整封郵件都經過端對端加密。</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>標題和簽名可以定製嗎？ </span></summary><div class="faq-answer"><p>可以。郵件主旨是備忘錄的第 1 行，前面會加上在設定的「主旨」中輸入的文字（若留空，第 1 行就會直接成為主旨）。簽名也一樣，只要在設定的「簽名」中輸入，就會附加在內文的最後。若在第 1 行開頭寫上「[備忘錄]」「[TODO]」等，也能透過郵件端的篩選器自動分類。</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Gmail和給自己的郵件有什麼不同？ </span></summary><div class="faq-answer"><p>Gmail也可以在收件人中輸入自己的地址傳送。 題目是以後找到的標誌。 SimpleMemo第一次可以設定、認證收件人，之後可以輸入正文傳送。</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Android也可以使用嗎？（ 想給自己發郵件）</span></summary><div class="faq-answer"><p>SimpleMemo現在是iOS專用的。 如果想在Android上給自己發郵件的話，用Gmail應用程式發給自己，或者分享Google Keep的備忘錄的方法可以替代。 請根據使用頻率和想要接收的儲存地址進行選擇。</p></div></details></div>
 </div>
@@ -615,7 +615,7 @@
 </tbody>
 </table></div>
 </div></section>
-<p class="lp-section__lead">說明更新：2026年9月23日。 規格的最終確認：2026年9月9日。 <a href="/zh-Hant/blog/fastest-memo-app-benchmark">啟動速度的測量條件</a> · <a href="/zh-Hant/privacy">資料的處理</a></p>
+<p class="lp-section__lead">說明更新：2026年11月28日。 規格的最終確認：2026年9月9日。 <a href="/zh-Hant/blog/fastest-memo-app-benchmark">啟動速度的測量條件</a> · <a href="/zh-Hant/privacy">資料的處理</a></p>
 <!-- CTA -->
 <div class="cta-box">
 <div class="cta-box__title">

@@ -60,7 +60,7 @@
   "url": "https://simplememofast.com/id/devlog/privacy-first-design",
   "inLanguage": "id",
   "datePublished": "2026-02-13",
-  "dateModified": "2026-09-24",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -492,7 +492,7 @@
 
 
       <div class="article-meta">
-        <span>13 Februari 2026 rilis ・ Pembaruan penjelasan analisis perlindungan dan pemanfaatan: 6 September 2026</span>
+        <span>Diterbitkan 13 Februari 2026 ・ Pembaruan penjelasan tentang perlindungan dan analisis penggunaan: 6 September 2026 ・ Koreksi FAQ tentang penyimpanan dan analisis penggunaan: 28 November 2026</span>
 
       </div>
 
@@ -558,7 +558,7 @@
 
             <div class="faq-item">
               <div class="faq-item__question">Q. Apakah isi memo akan disimpan di server?</div>
-              <div class="faq-item__answer">Saat mengirim email, teks akan melewati Relay API kami dan platform pengiriman. Relay API kami tidak menyimpan teks secara permanen kecuali ada kebutuhan yang sah untuk kepatuhan hukum atau respons kegagalan. Ini berbeda dengan menyimpan di kotak surat tujuan pengiriman. Deskripsi dari setiap tujuan penyimpanan adalah<a href="/id/privacy-architecture/">Desain privasi</a>.</div>
+              <div class="faq-item__answer">Saat email dikirim, isi catatan melewati Relay API kami dan infrastruktur pengiriman. Relay API kami tidak menyimpan isi catatan. Infrastruktur pengiriman, yaitu Resend, menyimpan email yang telah dikirim, termasuk isi catatan (masa simpan yang dipublikasikan untuk paket standar adalah 30 hari, dan kami masih memeriksa masa simpan yang berlaku untuk akun kami). Ini terpisah dari penyimpanan di kotak surat tujuan. Untuk penjelasan setiap lokasi penyimpanan, lihat <a href="/id/privacy-architecture/">Desain privasi</a>.</div>
             </div>
 
             <div class="faq-item">
@@ -573,12 +573,12 @@
 
             <div class="faq-item">
               <div class="faq-item__question">Q. Apakah ada analisis atau pelacakan?</div>
-              <div class="faq-item__answer">Ya. Kami menggunakan analisis penggunaan kami sendiri dan AppsFlyer SDK. Pengidentifikasi instalasi acak, pengidentifikasi sesi, jenis dan waktu acara, versi aplikasi, hasil transmisi, dll. akan dikirim ke analisis kami sendiri. AppsFlyer mengirimkan acara seperti transmisi memo awal yang berhasil, otentikasi yang berhasil, tampilan layar penagihan, pemilihan paket, dan keberhasilan pembelian, dan jumlah, mata uang, periode, dll. dapat ditambahkan pada saat pembelian. Pengidentifikasi instalasi yang sama juga ditetapkan untuk ID Pengguna Pelanggan AppsFlyer, sehingga informasi akuisisi dan acara penggunaan dapat dikaitkan. Item acara yang ditetapkan dari aplikasi tidak secara langsung menyertakan alamat email, badan memo, atau kode otentikasi, tetapi ID pengirim dari analisis internal ditautkan ke hash alamat email tujuan, jadi itu bukan informasi yang sepenuhnya anonim. Untuk detailnya<a href="/id/privacy#technical">Langkah-langkah teknis untuk kebijakan privasi</a>.</div>
+              <div class="faq-item__answer">Tergantung pada versi aplikasi. Aplikasi hingga versi 5.9.32 dapat mengirim peristiwa penggunaan pihak pertama atau menggunakan AppsFlyer SDK, bergantung pada versi dan pengaturannya (bagian 1(E) kebijakan privasi). Versi 5.8.17, yang diperiksa dalam artikel ini pada tanggal 6 September 2026, menggunakan keduanya, dan pengenal instalasi yang sama dengan analisis pihak pertama juga ditetapkan sebagai Customer User ID AppsFlyer. Data peristiwa yang ditetapkan aplikasi tidak secara langsung memuat alamat email, isi catatan, atau kode verifikasi, tetapi ID pengiriman dalam analisis pihak pertama tertaut ke hash alamat email penerima, sehingga informasi ini tidak sepenuhnya anonim. Catatan rilis di App Store untuk versi 5.9.35 mengumumkan berakhirnya analisis penggunaan dan langganan opsional. Untuk penanganan saat ini, lihat <a href="/id/privacy#technical">Langkah-langkah teknis untuk kebijakan privasi</a>.</div>
             </div>
 
             <div class="faq-item">
               <div class="faq-item__question">Q. Bagaimana Anda menggunakan kerangka kerja asli Apple dan SDK eksternal secara terpisah?</div>
-              <div class="faq-item__answer">iOS Gunakan CryptoKit dan Keychain untuk mengenkripsi dan menyimpan teks memo di aplikasi, dan mengirim teks melalui URLSession. Di sisi lain, SDK eksternal digunakan untuk masuk Google, perlindungan back-end oleh Firebase, dan analisis akuisisi dan penggunaan oleh AppsFlyer. Perlindungan teks dan analisis penggunaan dengan pengidentifikasi dijelaskan secara terpisah.</div>
+              <div class="faq-item__answer">Di dalam aplikasi iOS, CryptoKit dan Keychain digunakan untuk mengenkripsi isi catatan dan menyimpan kuncinya. Pengiriman isi catatan dilakukan melalui URLSession. Di sisi lain, SDK eksternal digunakan untuk masuk dengan Google dan untuk perlindungan backend oleh Firebase. Versi aplikasi hingga 5.9.32, bergantung pada versi dan pengaturannya, juga dapat menggunakan SDK eksternal untuk analisis akuisisi dan penggunaan oleh AppsFlyer (bagian 1(E) kebijakan privasi). Perlindungan isi catatan dan analisis penggunaan yang melibatkan pengenal dijelaskan secara terpisah.</div>
             </div>
           </div>
 

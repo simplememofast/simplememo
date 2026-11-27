@@ -430,7 +430,7 @@
       "name": "備忘錄的內容會儲存在某處的伺服器上嗎？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "不。 備忘錄的內容不會儲存在Simple Memo的伺服器上。 備忘錄透過Relay API（Cloudflare Workers）和傳送服務（Resend）以郵件形式傳送，但不會在Simple Memo的伺服器上繼續儲存備忘錄正文。 終端內的Outbox和履歷資料在AES-GCM加密的狀態下只儲存在終端上。"
+        "text": "不會儲存在 Simple Memo 的伺服器上。備忘錄透過 Relay API（Cloudflare Workers）和傳送服務（Resend）以郵件形式傳送。正式環境的 Relay API 也不會將備忘錄內文記錄在日誌中。Resend 會保留寄出的郵件，包括備忘錄內文（其公布的標準方案保留期限為 30 天，適用於本公司的期限仍在確認中）。裝置內的 Outbox 和歷史記錄資料經 AES-GCM 加密後，只儲存在裝置上。"
       }
     },
     {
@@ -494,7 +494,7 @@
       "name": "Simple Memo是什麼樣的應用程式？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Simple Memo是專門針對“啟動→寫→傳送”的3步驟的備忘錄應用程式。 輸入的備忘錄，會一鍵傳送到預先設定的郵箱地址。 沒有資料夾管理、標記、同步設定等複雜的功能。“ 現在馬上把想到的事情記下來，然後發到自己的郵件裡”——是隻針對這一點的應用程式。"
+        "text": "這是一款適用於 iPhone 和 Apple Watch 的 App，可以把想到的事情用語音或鍵盤寫下，點一下就以電子郵件寄給自己。也能追加到 Obsidian 筆記庫中的筆記，或儲存到 Notion。App 內沒有整理筆記的畫面，整理則在送達的地方進行。設定 Obsidian 整合，並在設定中開啟「AI標籤自動新增」後，也會在裝置上自動加上標題、標籤和類型（預設為關閉）。"
       }
     },
     {
@@ -590,7 +590,7 @@
       "name": "請告訴我對應裝置、執行環境。",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "iPhone（iOS 16.0以後） Apple Watch（watchOS 9.0以後）"
+        "text": "iPhone（iOS 16.0以後） Apple Watch（watchOS 9.0以後） 沒有 iPad、Mac 或 Android 版。"
       }
     },
     {
@@ -750,7 +750,7 @@
       "name": "郵件正文、驗證碼、郵箱地址會留在伺服器上嗎？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "備忘錄的正文，為了處理傳送，透過本公司的Relay API（Cloudflare Workers）和傳送服務（Resend），但本公司不會進行持續儲存（與隱私政策相同）。 驗證碼在有效期10分鐘後自動消失。 關於郵箱地址，會記錄在本公司的伺服器上。 例如以下內容（其他請看隱私政策）： 傳送ID和收件人郵箱地址的雜湊（從SHA-256生成）的對應（Cloudflare D1） 認證收件人的記錄。 應用程式按終端建立的隨機識別符號和收件人郵箱地址的雜湊組，在1年自動刪除（Cloudflare KV） 這些雜湊和識別符號，完全不作為匿名資訊處理。 終端內的Outbox・履歷資料是AES-GCM加密，加密金鑰儲存在Keychain中。"
+        "text": "備忘錄的正文，為了處理傳送，會經過本公司的 Relay API（Cloudflare Workers）和傳送服務（Resend），但本公司不會進行持續儲存（與隱私政策相同）。Resend 會保留寄出的郵件，包括備忘錄內文（其公布的標準方案保留期限為 30 天，適用於本公司的期限仍在確認中）。驗證碼在有效期 10 分鐘後自動消失。 關於郵箱地址，會記錄在本公司的伺服器上。 例如以下內容（其他請看隱私政策）： 傳送ID和收件人郵箱地址的雜湊（從SHA-256生成）的對應（Cloudflare D1） 認證收件人的記錄。 應用程式按終端建立的隨機識別符號和收件人郵箱地址的雜湊組，在1年自動刪除（Cloudflare KV） 這些雜湊和識別符號，完全不作為匿名資訊處理。 終端內的Outbox・履歷資料是AES-GCM加密，加密金鑰儲存在Keychain中。"
       }
     },
     {
@@ -869,7 +869,7 @@
 
       <!-- Japanese Content -->
       <div class="lang-body">
-        <p class="page-content__date">最後更新：<time datetime="2026-11-21">2026年11月21日</time></p>
+        <p class="page-content__date">最後更新：<time datetime="2026-11-28">2026年11月28日</time></p>
         <div class="page-content__body faq-body">
 
           <!-- 料金・プラン -->
@@ -1146,7 +1146,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">備忘錄的內容會儲存在某處的伺服器上嗎？</summary>
                 <div class="faq-answer">
-                  <p>不。 備忘錄的內容不會儲存在Simple Memo的伺服器上。 備忘錄透過Relay API（Cloudflare Workers）和傳送服務（Resend）以郵件形式傳送，但不會在Simple Memo的伺服器上繼續儲存備忘錄正文。 終端內的Outbox和履歷資料在AES-GCM加密的狀態下只儲存在終端上。</p>
+                  <p>不會儲存在 Simple Memo 的伺服器上。備忘錄透過 Relay API（Cloudflare Workers）和傳送服務（Resend）以郵件形式傳送。正式環境的 Relay API 也不會將備忘錄內文記錄在日誌中。Resend 會保留寄出的郵件，包括備忘錄內文（其公布的標準方案保留期限為 30 天，適用於本公司的期限仍在確認中）。裝置內的 Outbox 和歷史記錄資料經 AES-GCM 加密後，只儲存在裝置上。</p>
                 </div>
               </details>
             </div>
@@ -1185,7 +1185,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">郵件正文、驗證碼、郵箱地址會留在伺服器上嗎？</summary>
                 <div class="faq-answer">
-                  <p>備忘錄的正文，為了處理傳送，透過本公司的Relay API（Cloudflare Workers）和傳送服務（Resend），但本公司不會進行持續儲存（與隱私政策相同）。 驗證碼在有效期10分鐘後自動消失。</p>
+                  <p>備忘錄的正文，為了處理傳送，會經過本公司的 Relay API（Cloudflare Workers）和傳送服務（Resend），但本公司不會進行持續儲存（與隱私政策相同）。Resend 會保留寄出的郵件，包括備忘錄內文（其公布的標準方案保留期限為 30 天，適用於本公司的期限仍在確認中）。驗證碼在有效期 10 分鐘後自動消失。</p>
                   <p>關於郵箱地址，會記錄在本公司的伺服器上。 例如以下內容（其他請看<a href="/zh-Hant/privacy">隱私政策</a>）：</p>
                   <ul>
                     <li>傳送ID和收件人郵箱地址的雜湊（從SHA-256生成）的對應（Cloudflare D1）</li>
@@ -1261,7 +1261,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">Simple Memo是什麼樣的應用程式？</summary>
                 <div class="faq-answer">
-                  <p>Simple Memo是專門針對“啟動→寫→傳送”的3步驟的備忘錄應用程式。 輸入的備忘錄，會一鍵傳送到預先設定的郵箱地址。 沒有資料夾管理、標記、同步設定等複雜的功能。“ 現在馬上把想到的事情記下來，然後發到自己的郵件裡”——是隻針對這一點的應用程式。</p>
+                  <p>這是一款適用於 iPhone 和 Apple Watch 的 App，可以把想到的事情用語音或鍵盤寫下，點一下就以電子郵件寄給自己。也能追加到 Obsidian 筆記庫中的筆記，或儲存到 Notion。App 內沒有整理筆記的畫面，整理則在送達的地方進行。設定 Obsidian 整合，並在設定中開啟「AI標籤自動新增」後，也會在裝置上自動加上標題、標籤和類型（預設為關閉）。</p>
                 </div>
               </details>
             </div>
@@ -1434,6 +1434,7 @@
                     <li>iPhone（iOS 16.0以後）</li>
                     <li>Apple Watch（watchOS 9.0以後）</li>
                   </ul>
+                  <p>沒有 iPad、Mac 或 Android 版。</p>
                 </div>
               </details>
             </div>

@@ -4,6 +4,7 @@
  *
  *   node growth/scripts/weekly-report.mjs            # print
  *   node growth/scripts/weekly-report.mjs --write    # also save under growth/reports/
+ *   node growth/scripts/weekly-report.mjs --selftest # ledger marks on the opportunity tables
  *
  * Ordered by what it costs to ignore, not by what is easiest to measure:
  * decisions that are already late come first, then paid-relevant work, then
@@ -22,10 +23,12 @@ import {
   ROOT, latestSnapshot, previousSnapshot, listSnapshots, loadSnapshot,
   expectedCtr, positionOpportunity, businessRelevance, curveFor, segmentOfPath,
 } from '../lib/gsc.mjs';
-import { loadLedger, summarize, daysOverdue, today } from '../lib/ledger.mjs';
-import { classifyDueOwnership } from '../lib/experiment-coexistence.mjs';
+import { loadLedger, summarize, daysOverdue, today, isOpen } from '../lib/ledger.mjs';
+import { classifyDueOwnership, canonicalPage } from '../lib/experiment-coexistence.mjs';
 import { assessComparison, selectComparison } from '../lib/comparison.mjs';
-import { auditOverlaps } from '../lib/experiment-overlap.mjs';
+import { auditOverlaps, experimentScope, nonexclusiveObservation } from '../lib/experiment-overlap.mjs';
+
+if (process.argv.includes('--selftest')) process.exit(selftest());
 
 const write = process.argv.includes('--write');
 const asOf = today();
@@ -44,6 +47,16 @@ const ledger = loadLedger();
 const { due, overdue, byStatus, total } = summarize(ledger, asOf);
 const { blocking: blockingDue, observations: observationDue } = classifyDueOwnership(due);
 const observationIds = new Set(observationDue.map((e) => e.id));
+
+// A decision in the ledger binds the working lists, not only the content queue
+// (SEO_AIO_PLAN_2026-08 P0-2 step 4; data/operating-memory.json lesson
+// a-decision-in-one-ledger-must-bind-another). Before this, the report ranked
+// /blog/line-keep-alternative first in every week after its 2026-08-11
+// `abandoned` decision, and listed frozen pages with no mark.
+let i18nRegistry = null;
+try { i18nRegistry = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/i18n/pages.json'), 'utf8')); } catch { /* direct pages are still marked */ }
+const marks = ledgerMarks(ledger, { generatedSource: generatedSources(i18nRegistry) });
+const markText = (page) => markLabel(marks.of(page));
 
 p(`# Weekly Growth Report — ${asOf}`);
 p();
@@ -153,16 +166,20 @@ if (snap) {
     })
     .filter((r) => r.score > 0)
     .sort((a, b) => b.score - a.score);
+  // `abandoned` pages leave the ranked CTR work lists but stay visible in one
+  // line below them: since #1015 the decision can also be an administrative
+  // closure, so dropping them silently could hide a page. Open exclusive scopes
+  // stay ranked with a frozen mark (the owner reopening a page is exactly that).
+  const { paid, lowRel, excluded: excludedByLedger } = workLists(scored, marks);
 
   const table = (rows) => {
     p('| Page | Imp | CTR → expected | Pos | Upside |');
     p('|---|---:|---|---:|---:|');
     for (const r of rows) {
-      p(`| \`${r.page}\` | ${r.impressions.toLocaleString()} | ${pct(r.ctr)} → ${pct(r.exp)} | ${n1(r.position)} | +${Math.round(r.upside)} |`);
+      p(`| \`${r.page}\`${markText(r.page)} | ${r.impressions.toLocaleString()} | ${pct(r.ctr)} → ${pct(r.exp)} | ${n1(r.position)} | +${Math.round(r.upside)} |`);
     }
   };
 
-  const paid = scored.filter((r) => r.rel >= 0.7).slice(0, 10);
   p('## Paid-relevant opportunities');
   p();
   p('_Pages whose readers are plausibly close to installing (business relevance ≥ 0.7). Work these first._');
@@ -170,13 +187,26 @@ if (snap) {
   paid.length ? table(paid) : p('None scoring above zero this period.');
   p();
 
-  const lowRel = scored.filter((r) => r.rel < 0.7).slice(0, 10);
   p('## Low-relevance SEO quick wins');
   p();
   p('_Real click upside, weak install intent. Worth taking cheaply; not worth a large build._');
   p();
   lowRel.length ? table(lowRel) : p('None scoring above zero this period.');
   p();
+  if (excludedByLedger.length) {
+    const shown = excludedByLedger.slice(0, 10).map((r) => `\`${r.page}\` (abandoned: ${marks.of(r.page).ids.join(', ')}) ${r.impressions.toLocaleString()} imp · CTR ${pct(r.ctr)} · pos ${n1(r.position)}`);
+    const more = excludedByLedger.length > shown.length ? `; and ${excludedByLedger.length - shown.length} more` : '';
+    p(`_Left out of both tables by a ledger decision (not CTR work items; reopening needs an owner decision): ${shown.join('; ')}${more}_`);
+    p();
+  }
+  if (marks.global.length) {
+    p(`_Open exclusive site-wide experiment(s) cover every page above: ${marks.global.join('; ')}._`);
+    p();
+  }
+  if (!i18nRegistry) {
+    p('_Generated locale copies carry no ledger mark this week: data/i18n/pages.json could not be read._');
+    p();
+  }
 
   if (prev) {
     const before = new Map(prev.pages.map((r) => [r.page, r]));
@@ -192,7 +222,7 @@ if (snap) {
       p('| Page | Clicks | Δ | Δ position |');
       p('|---|---|---:|---:|');
       for (const { r, b } of declining) {
-        p(`| \`${r.page}\` | ${b.clicks} → ${r.clicks || 0} | ${(r.clicks || 0) - b.clicks} | ${n1((r.position ?? 0) - (b.position ?? 0))} |`);
+        p(`| \`${r.page}\`${markText(r.page)} | ${b.clicks} → ${r.clicks || 0} | ${(r.clicks || 0) - b.clicks} | ${n1((r.position ?? 0) - (b.position ?? 0))} |`);
       }
     }
     p();
@@ -296,7 +326,7 @@ if (!snap) {
 if (snap && !snap.queryPages.length) {
   actions.push('**P1** — add a query×page export so cannibalisation detection can run (`GSC_OWNER_ACTION.md` step 3). Human time: ~3 min.');
 }
-if (!actions.length) actions.push('Nothing is overdue and data is current — pick the top paid-relevant opportunity above.');
+if (!actions.length) actions.push('Nothing is overdue and data is current — pick the top unlabelled paid-relevant opportunity above.');
 actions.forEach((a, i) => p(`${i + 1}. ${a}`));
 p();
 p(`_Generated by \`growth/scripts/weekly-report.mjs\` · snapshots on file: ${listSnapshots().join(', ') || 'none'}_`);
@@ -310,4 +340,166 @@ if (write) {
   const file = path.join(dir, `${asOf}-weekly.md`);
   fs.writeFileSync(file, text);
   console.error(`written: growth/reports/${path.basename(file)}`);
+}
+
+/* ── Ledger marks ───────────────────────────────────────────────────────
+ * Function declarations, so --selftest (checked before any report code runs)
+ * can call them. They read nothing but their arguments. */
+
+/**
+ * Generated locale copy → its source page, from data/i18n/pages.json.
+ * A copy follows its source (its text is the source's, translated by the
+ * pipeline); a hand-written page (listed under `existing`) is its own page.
+ */
+function generatedSources(registry) {
+  const map = new Map();
+  for (const g of registry?.pages || []) {
+    if (!g || typeof g.source !== 'string' || !g.pages) continue;
+    let source;
+    try { source = canonicalPage(`/${g.source}`); } catch { continue; }
+    for (const [locale, file] of Object.entries(g.pages)) {
+      if (g.existing?.[locale] || typeof file !== 'string') continue;
+      try { map.set(canonicalPage(`/${file}`), source); } catch { /* not a local page path */ }
+    }
+  }
+  return map;
+}
+
+/**
+ * Marks from the experiment ledger, by page.
+ *   abandoned … `decision: abandoned` (the same decision build-queues honours)
+ *   frozen    … inside an open, exclusive experiment (nonexclusive observations
+ *               do not freeze pages); a frozen mark replaces an abandoned one,
+ *               so a page the owner reopens returns to the tables, marked
+ * Scopes come from the ledger's free-text page lists via experimentScope; one
+ * that cannot be read is skipped (these are labels, never data). Site-wide
+ * exclusive experiments are returned in `global` rather than on every row.
+ */
+function ledgerMarks(ledger, { generatedSource = new Map(), now = new Date() } = {}) {
+  const byPage = new Map();
+  const global = [];
+  const scopeOf = (e) => { try { return experimentScope(e); } catch { return { global: false, pages: [] }; } };
+  for (const e of ledger?.experiments || []) {
+    if (e.decision !== 'abandoned') continue;
+    for (const page of scopeOf(e).pages) {
+      const prev = byPage.get(page);
+      byPage.set(page, { kind: 'abandoned', ids: [...(prev?.ids || []), e.id] });
+    }
+  }
+  for (const e of ledger?.experiments || []) {
+    if (!isOpen(e)) continue;
+    let observation = false;
+    try { observation = nonexclusiveObservation(e, { now }); } catch { /* an invalid coexistence stays exclusive */ }
+    if (observation) continue;
+    const scope = scopeOf(e);
+    const id = `${e.id}, eval ${e.evaluation_at}`;
+    if (scope.global) global.push(id);
+    for (const page of scope.pages) {
+      const prev = byPage.get(page);
+      byPage.set(page, { kind: 'frozen', ids: [...(prev?.kind === 'frozen' ? prev.ids : []), id] });
+    }
+  }
+  const of = (page) => {
+    let key;
+    try { key = canonicalPage(page); } catch { return null; }
+    if (byPage.has(key)) return byPage.get(key);
+    const source = generatedSource.get(key);
+    return (source && byPage.get(source)) || null;
+  };
+  return { of, global };
+}
+
+/**
+ * The two CTR work lists the report prints, and the `abandoned` rows left out of
+ * both (in score order). Frozen pages stay in the lists, marked. Pure, so
+ * --selftest checks the lists the tables are printed from, not only the marks.
+ */
+function workLists(rows, marks, limit = 10) {
+  const ranked = rows.filter((r) => marks.of(r.page)?.kind !== 'abandoned');
+  return {
+    paid: ranked.filter((r) => r.rel >= 0.7).slice(0, limit),
+    lowRel: ranked.filter((r) => r.rel < 0.7).slice(0, limit),
+    excluded: rows.filter((r) => marks.of(r.page)?.kind === 'abandoned'),
+  };
+}
+
+function markLabel(mark) {
+  if (!mark) return '';
+  return mark.kind === 'frozen' ? ` _(frozen: ${mark.ids.join('; ')})_` : ` _(abandoned: ${mark.ids.join(', ')})_`;
+}
+
+function selftest() {
+  const failures = [];
+  let total = 0;
+  const t = (name, cond) => { total++; if (!cond) failures.push(name); };
+  const safe = (fn) => { try { return fn(); } catch (e) { return `throw: ${e.message}`; } };
+
+  const ledger = { experiments: [
+    { id: 'closed', page: '/blog/x', type: 'title_test', status: 'evaluated', decision: 'abandoned' },
+    { id: 'closed-set', page: '(2 pages: /blog/y, /blog/z)', type: 'title_test', status: 'evaluated', decision: 'abandoned' },
+    { id: 'clips', page: '(2 pages: /, /apple-watch/)', type: 'video', status: 'running', evaluation_at: '2026-11-14' },
+    { id: 'home', page: '/', type: 'title_test', status: 'running', evaluation_at: '2026-11-20' },
+    { id: 'kept', page: '/blog/w', type: 'title_test', status: 'evaluated', decision: 'keep' },
+    { id: 'planned', page: '/blog/p', type: 'title_test', status: 'planned', evaluation_at: '2026-12-20' },
+    // experimentScope throws on this one (a query string is not a page scope).
+    { id: 'unreadable', page: '/blog/q?x=1', type: 'title_test', status: 'running', evaluation_at: '2026-12-01' },
+  ] };
+  const registry = { pages: [
+    { source: 'blog/x.html', existing: { ja: 'blog/x.html', en: 'en/blog/x.html' },
+      pages: { ja: 'blog/x.html', en: 'en/blog/x.html', es: 'es/blog/x.html', 'zh-Hant': 'zh-Hant/blog/x.html' } },
+    { source: 'apple-watch/index.html', existing: { ja: 'apple-watch/index.html' },
+      pages: { ja: 'apple-watch/index.html', ko: 'ko/apple-watch/index.html' } },
+    { source: 'index.html', existing: { ja: 'index.html', es: 'es/index.html' }, pages: { ja: 'index.html', es: 'es/index.html' } },
+  ] };
+  // A throw becomes a named failure, not a crash: a failed build yields `throw: …`,
+  // and every lookup on it is undefined (never a mark, never null).
+  const marksOf = (l, opts) => safe(() => ledgerMarks(l, opts));
+  const ofIn = (mk, page) => (typeof mk === 'string' ? undefined : mk.of(page));
+  const m = marksOf(ledger, { generatedSource: generatedSources(registry) });
+  const of = (page) => ofIn(m, page);
+
+  t('**abandoned のページに印が付く**（CTR の表から外す対象）', of('/blog/x')?.kind === 'abandoned' && of('/blog/x').ids.join() === 'closed');
+  t('abandoned のページ集合は1ページずつ', of('/blog/y')?.kind === 'abandoned' && of('/blog/z')?.kind === 'abandoned');
+  t('**進行中の排他的な実験の範囲は frozen**', of('/apple-watch/')?.kind === 'frozen'
+    && of('/apple-watch/').ids.join() === 'clips, eval 2026-11-14');
+  t('同じページの実験は全部並べる', of('/')?.ids?.join('; ') === 'clips, eval 2026-11-14; home, eval 2026-11-20');
+  t('判定済み（keep）と planned は印を付けない', of('/blog/w') === null && of('/blog/p') === null);
+  t('書き方の違うパスも同じページ', of('/apple-watch')?.kind === 'frozen' && of('/apple-watch/index.html')?.kind === 'frozen');
+  t('**生成された各言語の写しは元のページに従う**', of('/es/blog/x')?.kind === 'abandoned'
+    && of('/zh-Hant/blog/x')?.kind === 'abandoned' && of('/ko/apple-watch/')?.kind === 'frozen');
+  t('手で書いたページ（existing）は元のページに従わない', of('/en/blog/x') === null && of('/es/') === null);
+  t('読めない範囲の実験は飛ばす（落ちない）', typeof m !== 'string');
+  t('ページとして読めないパスは印なし（落ちない）', of('/blog/x?utm_source=a') === null && of('not-a-path') === null);
+  t('台帳の外のページは印なし', of('/blog/other') === null);
+
+  const reopened = marksOf({ experiments: [...ledger.experiments,
+    { id: 'retry', page: '/blog/x', type: 'title_test', status: 'running', evaluation_at: '2026-12-21' }] });
+  t('**オーナーが開け直したページは frozen として表に戻る**', ofIn(reopened, '/blog/x')?.kind === 'frozen'
+    && ofIn(reopened, '/blog/x').ids.join() === 'retry, eval 2026-12-21');
+  const sitewide = marksOf({ experiments: [
+    { id: 'all', page: 'サイト全体（全ページのフッター）', type: 'layout', status: 'running', evaluation_at: '2026-12-01' }] });
+  t('サイト全体の排他的な実験は global に出す', sitewide?.global?.join() === 'all, eval 2026-12-01'
+    && ofIn(sitewide, '/blog/x') === null);
+  t('台帳が空でも落ちない', safe(() => ledgerMarks({}).of('/')) === null && generatedSources(null).size === 0);
+
+  t('印の文言: frozen', markLabel(of('/apple-watch/')) === ' _(frozen: clips, eval 2026-11-14)_');
+  t('印の文言: abandoned', markLabel(of('/blog/x')) === ' _(abandoned: closed)_');
+  t('印が無ければ何も足さない', markLabel(null) === '');
+
+  // 表に載る一覧そのもの。印だけ確かめても、表から外す配線が抜ければ abandoned のページが第1位に戻る。
+  const scoredRows = [
+    { page: '/blog/x', rel: 0.3 }, { page: '/apple-watch/', rel: 0.9 }, { page: '/blog/other', rel: 0.3 },
+    { page: '/es/blog/x', rel: 0.3 }, { page: '/blog/w', rel: 0.9 },
+  ];
+  const lists = safe(() => workLists(scoredRows, m));
+  const pagesOf = (list) => (Array.isArray(list) ? list.map((r) => r.page).join() : 'missing');
+  t('**abandoned のページ（と生成された写し）は CTR の表に載らず、表の下の1行へ回る**',
+    pagesOf(lists?.lowRel) === '/blog/other' && pagesOf(lists?.excluded) === '/blog/x,/es/blog/x');
+  t('frozen のページは外さず、印付きで表に残る', pagesOf(lists?.paid) === '/apple-watch/,/blog/w');
+  t('表はそれぞれ上位10件まで', safe(() => workLists(Array.from({ length: 12 }, (_, i) => ({ page: `/blog/n${i}`, rel: 0.9 })), m)
+    .paid.length) === 10);
+
+  failures.forEach((f) => console.error(`  ✗ ${f}`));
+  console.log(`weekly-report 自己テスト ${total} 件中 ${failures.length} 件失敗`);
+  return failures.length ? 1 : 0;
 }
