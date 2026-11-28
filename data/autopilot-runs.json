@@ -3482,6 +3482,26 @@
       "eligibility_verdict": "declined_by_design",
       "gate_code": "skip_repair_limit",
       "stage_note": "封じ込めのステップで止まった（通常は同じ故障種別の修理が上限に達した状態。判定そのものの例外でも同じ形になるので、原因は run のログで確かめる。node scripts/autopilot-selfheal.mjs --contain）。解除は実修理の repair_of か、オーナーの判断"
+    },
+    {
+      "run_id": "ap-20261128-actions",
+      "date_jst": "2026-11-28",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "failed",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "failure_reason": "Claude Code ステップが 11000ms で失敗し、同じトークンでの単独実行が **HTTP 429（使用量上限）** を返した（ワークフローの切り分けステップ）。**資格情報は失効していない —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。**上限がリセットされれば自動で戻る。副系CCRも同じアカウントを使うので**同じ時間帯に同じ形で落ちる**（代走は当てにできない）。恒久的に減らすなら上限を上げるか、1回あたりの入力量を下げること（自動判定）",
+      "external_ref": "46105599779",
+      "interventions": null,
+      "source": "act-reconcile",
+      "failure_class": "usage_limit",
+      "failed_at": "2026-11-28T04:03:23Z",
+      "detected_at": "2026-11-28T04:05:21.748Z",
+      "detected_note": "Actions run 46105599779 を repository_dispatch で照合。監視起動元run 46105599779、自動起動のAPI検証=true。失敗時刻は GitHub step #17「Claude Code（Runbook 1イテレーション実行）」の completed_at。",
+      "failure_stage": "cost"
     }
   ],
   "retracted_observations": [
