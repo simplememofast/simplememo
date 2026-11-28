@@ -3725,6 +3725,63 @@
         "2026-11-11: gsc-second-brain-title-20261004 の評価（iterate）を受けて登録した。オーナーの判断（2026-11-11、選択肢「英語表記を戻す」）による。基準値は登録の時点で測ってあり、後から書き換えない。",
         "2026-11-17: #2381 で、/methods/second-brain/ の計測スクリプトの script タグから data-sitewide-app-routes（App Store へのリンクを実行時に AppsFlyer OneLink へ変える opt-in）を外した（本番反映の前に書いた。本番の時刻と SHA は読み戻してから measurement_changes と growth/data/annotations.json に書く）。OneLink へ変わるリンクが無かったので、リンク先と GA4 のイベントは変わらない。生成翻訳8ページも同じ。題・本文・CTA は変えていない。評価日（12-14）までの窓の中の変更。2026-11-17 のオーナーの明示依頼（アプリが次の版で AppsFlyer SDK を外すので OneLink をやめる。実験中のページも「かえていい」）による変更で、新規の介入実験として登録していない。既存の開始日・評価日・状態・baseline・比較方法・母数・停止条件・判定基準は変更しない。前後差を今回の変更または既存施策だけの成果、自律運転の成功へ加点しない。"
       ]
+    },
+    {
+      "id": "title-2026-11-28-voice-route-superlative",
+      "page": "/blog/obsidian-voice-fastest-route",
+      "type": "title_test",
+      "hypothesis": "題と H1 から、本文が支えない最上級（「最速の経路」）を外す。本文は「省けない操作の数」で5経路を数えているが、iOS 26 の Obsidian 公式の Quick Capture（1.14〜、音声は 1.15〜）は数えておらず、順位も付けていない。主な目的は事実の訂正（Quick Capture より速いと読める言い方をしない）。このページの日本語版は表示がほぼ無く、CTR や表示の差は測れない見込み。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-11-28",
+      "evaluation_at": "2027-01-23",
+      "status": "running",
+      "before": {
+        "title": "Obsidianに音声で挿す最速の経路 — 5ルートを画面数とタップ数で数える【2026】"
+      },
+      "after": {
+        "title": "Obsidianに音声で挿す5つの経路 — 画面数とタップ数で数える【2026】"
+      },
+      "baseline": {
+        "clicks": 0,
+        "impressions": 0,
+        "ctr": null,
+        "position": null,
+        "window": "2026-10-24..2026-11-20",
+        "source": "growth/data/gsc/2026-11-23（pages.json）に /blog/obsidian-voice-fastest-route の行が無い（表示0として記録）",
+        "note": "直前の5回のスナップショット（2026-10-21〜2026-11-16）は、どれも表示1・クリック0・5位。生成翻訳と英語のページは別の行（例: /es/blog/obsidian-voice-fastest-route は 2026-10-24..11-20 で表示10・15位）で、この実験の範囲に入れない。"
+      },
+      "target_metric": "impressions",
+      "decision": null,
+      "evaluated_at": null,
+      "control": {
+        "kind": "pre_post",
+        "note": "このページ（日本語）の変更前28日と変更後28日を比べる。ホールドアウトは無い。",
+        "confounders": "表示がほぼ無いので、検索の揺れと区別できない。同じ PR で、このページへのリンクの文字（/blog/ のカードと構造化データ、/obsidian/・/obsidian/airpods/・/data/voice-shift/ の関連リンク、/en/blog/・/en/obsidian/）も変えた。8言語と英語の生成ページの題も同時に変わる。単独では因果を主張しない。"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 30,
+        "rationale": "変更後28日の表示が30回に届かなければ、表示・順位・CTR の前後差を読まない。変更前は0〜1回なので、届かない見込みが高い。"
+      },
+      "stop_conditions": [
+        "このページの題・description・H1・本文に、この実験以外の変更が入った → notes に記録し、前後差をこの実験の効果と読まない",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
+      ],
+      "measurement_scope": {
+        "kind": "page",
+        "page": "/blog/obsidian-voice-fastest-route"
+      },
+      "guardrails": [
+        "変えるのはタイトル欄（title・og:title・twitter:title・JSON-LD の headline・パンくずの name）と H1。description・本文・CTA・計測は変えない。",
+        "このページへのリンクの文字を新しい題に揃える。8言語と英語の生成ページの同じ欄も、日本語の原文に追従する（英語の <title> は前から最上級の無い訳）。"
+      ],
+      "decision_rule": "表示が増えても減っても、本文が支えない最上級には戻さない（事実の訂正）。評価では、変更後28日（2026-11-29 以降で最初に揃う窓）の表示・クリック・順位を変更前と並べて記録する。表示が min_sample に届かなければ inconclusive とし、題はそのまま残す。",
+      "notes": [
+        "2026-11-28: オーナーの承認（2026-11-28）で登録した。題の「最速」が本文で支えられていないという報告（docs/seo/seo-aio-facts-2026-11-28.md の「題の変更」）への回答。基準値は登録の時点で測ってあり、後から書き換えない。本番反映の前に書いた。本番の時刻と SHA は読み戻してから growth/data/annotations.json に書く。"
+      ]
     }
   ],
   "measurement_changes": [

@@ -492,7 +492,7 @@
 
 
       <div class="article-meta">
-        <span>2026年2月13日公开 ・ 保护与使用分析的说明更新：2026年9月6日 ・ 保存与使用分析的常见问题更正：2026年11月28日</span>
+        <span>2026年2月13日公开 ・ 保护与使用分析的说明更新：2026年9月6日 ・ 保存与使用分析的常见问题及正文更正：2026年11月28日</span>
 
       </div>
 
@@ -528,13 +528,13 @@
             <li><strong>URL缓存失效：</strong>将缓存存储本身设置为<code>nil</code></li>
             <li><strong>不使用永久存储的构成：</strong>URLSession的会话信息不保存到磁盘</li>
           </ul>
-          <p>这是关于URLSession的缓存等的保护，不是应用程序单独保存、发送的使用事件或消除服务器端的发送记录的功能。 通过使用解析的标识符进行关联，也与这个设置分开进行。</p>
+          <p>这是针对 URLSession 缓存等方面的保护，并不是消除应用另行保存、发送的使用事件或服务器端发送记录的功能。5.9.32 及更早的版本借助使用分析标识符进行的关联，也独立于这项设置进行。</p>
 
           <h2 id="reading-04">4。 性能测量日志的输出范围</h2>
           <p><code>PerformanceLogger</code>的日志输出被<code>#if DEBUG</code>包围。 在没有定义DEBUG的构建中，不包含这个记录器的日志输出处理。</p>
           <p>这个记录器的<code>logError</code>，记录的不是错误的详细文，而是类型。 例如，使用<code>URLError</code>这种类型，不直接输出可能包含文件路径和用户输入的<code>localizedDescription</code>。</p>
           <p>另一方面，不是自动将传递给<code>logEvent</code>的事件名和附加字符串全部无害化的机制。 呼叫方需要不传递邮箱地址、备忘录正文、认证信息。</p>
-          <p><strong>这个说明不扩展到应用程序、外部SDK、OS整体的“零日志”的保证。 </strong>本公司的使用事件发送和AppsFlyer作为不同的机制生效。 获取范围在本报道的使用分析FAQ和<a href="/zh/privacy#technical">隐私政策</a>中说明。</p>
+          <p><strong>这一说明不扩展为对整个应用、外部 SDK 和操作系统的“零日志”保证。</strong>在 5.9.32 及更早的版本中，视版本和设置而定，第一方使用事件的发送和 AppsFlyer 可能会作为各自独立的机制运行。目前在 App Store 上发布的 5.9.35 版不发送第一方使用事件和订阅状态分析，也不包含 AppsFlyer SDK（在分析方面，它只发送删除过去的分析数据及使其失效的请求）。收集范围在本文的使用分析常见问题和<a href="/zh/privacy#technical">隐私政策</a>中说明。</p>
 
           <h2 id="reading-05">5。 AES-GCM加密Outbox的保护范围</h2>
           <p>等待发送的备忘录，在终端内的Outbox队列中进行管理。 保存时使用Apple的CryptoKit用AES-GCM进行加密。 新的密码密钥用256比特生成。</p>
@@ -545,11 +545,11 @@
 
           <h2 id="reading-06">6。 备忘录正文的保护和外部SDK的作用</h2>
           <p>iOS在应用内，备忘录正文的加密使用CryptoKit，钥匙保管使用Keychain，正文的发送使用URLSession。 Network.framework负责监视连接状态，BackgroundTasks负责后台发送的调度。</p>
-          <p>另一方面，应用程序也使用外部SDK。 GoogleSignIn和Firebase Authentication用于Google账户的任意邮件自动输入，Firebase App Check在启动时初始化保护后端API。 AppsFlyer用于获取、使用分析，设置与本公司分析共同的安装标识符。</p>
+          <p>另一方面，应用也使用外部 SDK。GoogleSignIn 和 Firebase Authentication 用于借助 Google 账户进行可选的邮箱自动填写和确认（Firebase Authentication 也用于 Sign in with Apple）。Firebase App Check 在启动时初始化，并在发往后端 API 的请求中附加用于防止滥用的令牌。目前在 App Store 上发布的 5.9.35 版不包含 AppsFlyer SDK。5.9.32 及更早的版本，视版本和设置而定，可能会将 AppsFlyer 用于获客与使用分析，并设置与第一方分析共用的安装标识符。</p>
           <p>即使设计不将备忘录正文纳入事件项目，也会保留标识符和发送记录的关联。 包括SDK在内的使用分析范围，需要与本文的加密分开确认。 项目和用途在<a href="/zh/privacy#technical">隐私政策</a>中进行了说明。</p>
 
           <h2 id="reading-07">7。 明确保护范围</h2>
-          <p>终端内的加密、通信缓存的处理、利用分析，分别具有不同的作用。 即使有Outbox的加密和ephemeral URLSession，使用事件的收集也不会消失。</p>
+          <p>设备上的加密、通信缓存的处理和使用分析，各自承担不同的作用。即使有 Outbox 的加密和 ephemeral URLSession，仅凭这些也并不能消除使用事件的收集（使用事件的发送已在 5.9.35 版中另行停止）。</p>
           <p>重视能够快速留下备忘录和能够理解获取的信息。 说明使用分析的发送目的地、标识符、关联的范围，根据应用程序的变化进行重新审查。</p>
 
           <!-- FAQ Section -->

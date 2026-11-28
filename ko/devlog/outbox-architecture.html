@@ -226,7 +226,7 @@
   "description": "전송 버튼을 누른 순간 UI가 클리어되지만, 전송되지 않은 메시지는 기기에 남아 다시 전송됩니다. AES-GCM 암호화·자동 재전송·NWPath Monitor 회선 복귀 감지를 통한 Outbox 아키텍처의 전체 모습.",
   "url": "https://simplememofast.com/ko/devlog/outbox-architecture",
   "datePublished": "2026-02-13",
-  "dateModified": "2026-10-04",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -437,7 +437,7 @@ func send(message: String, onSaved: () -&gt; Void,
             <li><strong>외부 업데이트에 좌우되지 않음</strong> — 전송 대기 중인 처리가 서드파티 라이브러리 업데이트나 제공 종료로 인해 작동하지 않게 되는 일은 없습니다.</li>
             <li><strong>보안</strong> — 전송 대기 중인 메모의 본문에 접촉하는 처리(암호화·저장·전송)에 제3자 코드가 들어가지 않습니다.</li>
           </ul>
-          <p>참고로, 앱 전체에서는 외부 SDK(Google 로그인, Firebase, AppsFlyer)도 사용하고 있습니다(<a href="/ko/devlog/privacy-first-design">프라이버시 퍼스트 설계</a>를 참조). 여기서 말하는 “Apple 순정만”은 전송 대기 데이터의 경로에 관한 이야기입니다.</p>
+          <p>참고로, 앱 전체에서는 외부 SDK(Google 로그인, Firebase, 5.9.32까지의 버전에서는 AppsFlyer도 포함)도 사용하고 있습니다(<a href="/ko/devlog/privacy-first-design">프라이버시 퍼스트 설계</a> 참조). 여기서 말하는 “Apple 순정만”은 전송 대기 데이터의 경로에 관한 이야기입니다.</p>
 
           <!-- Section 6 -->
           <h2 id="reading-06" data-ce-number="06">UI 클리어와 네트워크 전송의 분리</h2>

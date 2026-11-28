@@ -334,7 +334,7 @@
       "name": "Apa subjeknya?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Subjek dihasilkan secara otomatis oleh aturan berikut: Jika template subjek diatur: Template + baris 1 dari memo (misalnya \"Simple Memo Daftar belanja hari ini\") Jika templat subjek kosong: Baris 1 dari memo akan menjadi subjek apa adanya Saat memo dimulai dengan baris kosong: Baris tempat karakter pertama muncul menjadi subjek Subjek akan dipotong dengan maksimal karakter 60 Jika “Tambahkan tag AI otomatis” aktif pada integrasi Obsidian: gunakan judul singkat yang dibuat di perangkat sebagai pengganti baris ke-1. Jika judul tidak dapat dibuat, gunakan baris ke-1."
+        "text": "Subjek dihasilkan secara otomatis oleh aturan berikut: Jika template subjek diatur: Template + baris 1 dari memo (misalnya \"Simple Memo Daftar belanja hari ini\") Jika templat subjek kosong: Baris 1 dari memo akan menjadi subjek apa adanya Saat memo dimulai dengan baris kosong: Baris tempat karakter pertama muncul menjadi subjek Jika baris ke-1 lebih dari 60 karakter, baris itu dipotong menjadi 60 karakter, lalu diberi “…” di akhirnya (karakter templat subjek tidak ikut dihitung) Jika Anda memakai integrasi Obsidian dan “Tambahkan tag AI otomatis” aktif: baris ke-1 dipendekkan di perangkat menjadi paling banyak 20 karakter, lalu dipakai (baris yang panjangnya 20 karakter atau kurang hampir tidak berubah; simbol di awal baris seperti “・”, “- ”, atau “1.” dihilangkan, dan baris yang panjang dipotong pada tanda baca atau batas kata, lalu diberi “…”). Ini bukan judul yang dibuat Apple Intelligence dari isi memo"
       }
     },
     {
@@ -462,7 +462,7 @@
       "name": "Apakah isi memo akan dicatat dalam log?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Tidak tercatat. INFORMASI SENSITIF SEPERTI ALAMAT EMAIL, BADAN MEMO, KODE OTENTIKASI, TOKEN, DAN URL TIDAK DICATAT DI SEMUA BUILD, TERMASUK BUILD DEBUG. Bahkan dalam log kesalahan, hanya jenis kesalahan (nama jenis) yang keluar, dan pesan terperinci tidak dicatat."
+        "text": "Tidak dicatat. Kode aplikasi tidak meneruskan isi catatan ke log di build mana pun, termasuk build DEBUG. Kode aplikasi yang didistribusikan melalui App Store (5.9.35) juga tidak menulis alamat email, kode verifikasi, token, maupun URL ke log. Yang ditulisnya ke log hanyalah informasi diagnostik untuk pembelian, pemulihan pembelian, dan pemeriksaan langganan (nama kategori yang sudah ditetapkan, serta jenis dan nomor kesalahan dari Apple). Pada build DEBUG yang dipakai pengembang, URL tautan dalam email verifikasi saat tautan itu dibuka dan detail beberapa kesalahan ditampilkan di konsol Xcode. Kode Relay API produksi juga tidak menulis isi catatan maupun kode verifikasi ke log."
       }
     },
     {
@@ -494,7 +494,7 @@
       "name": "Aplikasi seperti apa Simple Memo?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Ini adalah aplikasi iPhone dan Apple Watch untuk menulis ide yang terlintas dengan suara atau papan ketik, lalu mengirimkannya ke email Anda sendiri dengan satu ketukan. Memo juga dapat ditambahkan ke catatan di vault Obsidian dan disimpan ke Notion. Di dalam aplikasi tidak ada layar untuk merapikan memo; memo dirapikan di tempat tujuannya. Jika integrasi Obsidian sudah diatur dan “Tambahkan tag AI otomatis” di pengaturan diaktifkan, judul, tag, dan jenis juga ditambahkan secara otomatis di perangkat (nonaktif secara bawaan)."
+        "text": "Ini adalah aplikasi iPhone dan Apple Watch untuk menulis ide yang terlintas dengan suara atau papan ketik, lalu mengirimkannya ke email Anda sendiri dengan satu ketukan. Memo juga dapat ditambahkan ke catatan di vault Obsidian dan disimpan ke Notion. Di dalam aplikasi tidak ada layar untuk merapikan memo; memo dirapikan di tempat tujuannya. Jika integrasi Obsidian sudah diatur dan “Tambahkan tag AI otomatis” di pengaturan diaktifkan, memo yang ditambahkan ke Obsidian diberi tag secara otomatis di perangkat (nonaktif secara bawaan)."
       }
     },
     {
@@ -1018,8 +1018,8 @@
                     <li><strong>Jika template subjek diatur</strong>: Template + baris 1 dari memo (misalnya "Simple Memo Daftar belanja hari ini")</li>
                     <li><strong>Jika templat subjek kosong</strong>: Baris 1 dari memo akan menjadi subjek apa adanya</li>
                     <li><strong>Saat memo dimulai dengan baris kosong</strong>: Baris tempat karakter pertama muncul menjadi subjek</li>
-                    <li>Subjek akan dipotong dengan maksimal karakter 60</li>
-                    <li><strong>Jika “Tambahkan tag AI otomatis” aktif pada integrasi Obsidian</strong>: gunakan judul singkat yang dibuat di perangkat sebagai pengganti baris ke-1. Jika judul tidak dapat dibuat, gunakan baris ke-1.</li>
+                    <li>Jika baris ke-1 lebih dari 60 karakter, baris itu dipotong menjadi 60 karakter, lalu diberi “…” di akhirnya (karakter templat subjek tidak ikut dihitung)</li>
+                    <li><strong>Jika Anda memakai integrasi Obsidian dan “Tambahkan tag AI otomatis” aktif</strong>: baris ke-1 dipendekkan di perangkat menjadi paling banyak 20 karakter, lalu dipakai (baris yang panjangnya 20 karakter atau kurang hampir tidak berubah; simbol di awal baris seperti “・”, “- ”, atau “1.” dihilangkan, dan baris yang panjang dipotong pada tanda baca atau batas kata, lalu diberi “…”). Ini bukan judul yang dibuat Apple Intelligence dari isi memo</li>
                   </ul>
                 </div>
               </details>
@@ -1210,7 +1210,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">Apakah isi memo akan dicatat dalam log?</summary>
                 <div class="faq-answer">
-                  <p>Tidak tercatat. INFORMASI SENSITIF SEPERTI ALAMAT EMAIL, BADAN MEMO, KODE OTENTIKASI, TOKEN, DAN URL TIDAK DICATAT DI SEMUA BUILD, TERMASUK BUILD DEBUG. Bahkan dalam log kesalahan, hanya jenis kesalahan (nama jenis) yang keluar, dan pesan terperinci tidak dicatat.</p>
+                  <p>Tidak dicatat. Kode aplikasi tidak meneruskan isi catatan ke log di build mana pun, termasuk build DEBUG. Kode aplikasi yang didistribusikan melalui App Store (5.9.35) juga tidak menulis alamat email, kode verifikasi, token, maupun URL ke log. Yang ditulisnya ke log hanyalah informasi diagnostik untuk pembelian, pemulihan pembelian, dan pemeriksaan langganan (nama kategori yang sudah ditetapkan, serta jenis dan nomor kesalahan dari Apple). Pada build DEBUG yang dipakai pengembang, URL tautan dalam email verifikasi saat tautan itu dibuka dan detail beberapa kesalahan ditampilkan di konsol Xcode. Kode Relay API produksi juga tidak menulis isi catatan maupun kode verifikasi ke log.</p>
                 </div>
               </details>
             </div>
@@ -1261,7 +1261,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">Aplikasi seperti apa Simple Memo?</summary>
                 <div class="faq-answer">
-                  <p>Ini adalah aplikasi iPhone dan Apple Watch untuk menulis ide yang terlintas dengan suara atau papan ketik, lalu mengirimkannya ke email Anda sendiri dengan satu ketukan. Memo juga dapat ditambahkan ke catatan di vault Obsidian dan disimpan ke Notion. Di dalam aplikasi tidak ada layar untuk merapikan memo; memo dirapikan di tempat tujuannya. Jika integrasi Obsidian sudah diatur dan “Tambahkan tag AI otomatis” di pengaturan diaktifkan, judul, tag, dan jenis juga ditambahkan secara otomatis di perangkat (nonaktif secara bawaan).</p>
+                  <p>Ini adalah aplikasi iPhone dan Apple Watch untuk menulis ide yang terlintas dengan suara atau papan ketik, lalu mengirimkannya ke email Anda sendiri dengan satu ketukan. Memo juga dapat ditambahkan ke catatan di vault Obsidian dan disimpan ke Notion. Di dalam aplikasi tidak ada layar untuk merapikan memo; memo dirapikan di tempat tujuannya. Jika integrasi Obsidian sudah diatur dan “Tambahkan tag AI otomatis” di pengaturan diaktifkan, memo yang ditambahkan ke Obsidian diberi tag secara otomatis di perangkat (nonaktif secara bawaan).</p>
                 </div>
               </details>
             </div>

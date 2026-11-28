@@ -226,7 +226,7 @@
   "description": "في اللحظة التي تضغط فيها على زر الإرسال، يتم مسح واجهة المستخدم، ولكن تظل الرسالة غير المرسلة على الجهاز ويتم إعادة إرسالها. الصورة الكاملة لبنية Outbox مع تشفير AES-GCM وإعادة الإرسال التلقائي واكتشاف إرجاع خط NWPathMonitor.",
   "url": "https://simplememofast.com/ar/devlog/outbox-architecture",
   "datePublished": "2026-02-13",
-  "dateModified": "2026-10-04",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -437,7 +437,7 @@ func send(message: String, onSaved: () -&gt; Void,
             <li><strong>لا يتأثر بالتحديثات الخارجية</strong> - لا تتوقف المعالجة المعلقة عن العمل بسبب تحديث مكتبات الجهات الخارجية أو إنهاء التوفير.</li>
             <li><strong>الأمان</strong> — لا يدخل رمز الطرف الثالث المعالجة (التشفير والحفظ والإرسال) الذي يمس نص المذكرة التي تنتظر إرسالها.</li>
           </ul>
-          <p>بالإضافة إلى ذلك، يستخدم التطبيق بأكمله أيضا SDK خارجيا (Google تسجيل الدخول، Firebase، AppsFlyer) (انظر <a href="/ar/devlog/privacy-first-design"> تصميم يضع الخصوصية أولاً</a>). يتعلق "Apple أصلي فقط" المذكور هنا بمسار البيانات التي تنتظر إرسالها.</p>
+          <p>وتجدر الإشارة إلى أن التطبيق ككل يستخدم أيضًا حزم SDK خارجية (تسجيل الدخول عبر Google، وFirebase، وكذلك AppsFlyer في الإصدارات حتى 5.9.32 شاملًا؛ انظر <a href="/ar/devlog/privacy-first-design">تصميم يضع الخصوصية أولًا</a>). أما عبارة «مكونات Apple الأصلية فقط» هنا، فتخص مسار البيانات التي تنتظر الإرسال.</p>
 
           <!-- Section 6 -->
           <h2 id="reading-06" data-ce-number="06">فصل مسح واجهة المستخدم ونقل الشبكة</h2>

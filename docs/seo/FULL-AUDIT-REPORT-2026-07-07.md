@@ -142,7 +142,7 @@ llms.txt banned claim gone, Current-facts line on canon (v3.8 / 4.4·10 / price 
 
 - **GSC disavow re-upload** — docs/disavow.txt now **286 domains** (+22 on 07-07; attack ongoing at 3–5 domains/day, nofollow-heavy, association-spam pattern).
 - **GSC reindex requests** after the Critical/High fixes land: `en/send-email-to-yourself/`, the 3 hidden-EN pages, and the 12 answer-parity pages.
-- **paji.me redirect flattening** (CF-1 from the 07-02 依頼書, ~5 min) — legacy links still 2–3-hop.
+- **Legacy blog domain redirect flattening** (CF-1 from the 07-02 依頼書, ~5 min) — legacy links still 2–3-hop.
 - **Cloudflare Scrape Shield → Email Obfuscation OFF** (~1 min) — kills the 22 phantom `/cdn-cgi/l/email-protection` internal links Ahrefs counts.
 - **CF Web Analytics decision** — currently CSP-blocked and collecting nothing (see On-Page findings): either whitelist `static.cloudflareinsights.com` or turn the injection off.
 - **PSI API key** — third audit running without field data.

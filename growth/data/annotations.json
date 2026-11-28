@@ -1232,6 +1232,12 @@
       "type": "feature",
       "label": "GA4 の地域判定を静的既定オフに変更（#2385、通常時の地域・イベント名は不変）",
       "note": "Cloudflare Pages Production（main）に #2385 のマージ SHA 63ef198acc608ba442fc49a718a84a467f552f6f。マージ 2026-11-17T23:54:29Z、配備チェック完了 2026-11-17T23:55:16Z（11月18日 08:55:16 JST）。配備記録: https://github.com/simplememofast/simplememo/runs/134463397029 。これは #2374 で始まった地域除外とは別の変更。正常時の対象地域・イベント名・OneLink 終了時のイベント対応は変えず、静的 HTML を既定オフにし、許可地域にだけ Functions が GA4 を挿入する方式に変えた。Functions を通らず静的 HTML が返る場合、許可地域も GA4 の対象外になる。実際の停止時間・欠測件数は未確認で、この境界をまたぐ GA4 の変動を獲得や施策の効果としない。後続の #2384（ea23ef39d1e06663a655d661ff3b9ef3c0b937c4、同 Production 配備チェック完了 2026-11-18T00:00:53Z）の後、2026-11-18T00:08:57Z〜00:08:58Z に公開ホストの /、/obsidian/、/privacy、/en/privacy の HTML を取得。この NRT 経路では4件とも HTTP 200、CF-Cache-Status: DYNAMIC、GA4 の実行可能なローダーあり。配備完了と後続版の本文観測は別の時刻。ブラウザのタグ通信・Cookie、除外地域・国不明からの実地検証、Cache Rules と地域をまたぐキャッシュは未確認。新しい介入実験ではなく、既存5実験の期間・判定・母数は変更しない。"
+    },
+    {
+      "date": "2026-11-28",
+      "type": "feature",
+      "label": "サイトの事実の訂正とストア情報の同期（#2431）",
+      "note": "2026-11-28: #2431（本番のマージ SHA d0a9b16b5c614c2c43a04f6eeef9121d92825f8d、マージ 2026-11-27T23:52:22Z／2026-11-28 08:52:22 JST）。Cloudflare Pages の配備チェック完了 2026-11-27T23:52:54Z（2026-11-28 08:52:54 JST）。配備記録: https://github.com/simplememofast/simplememo/runs/140792076168 （同じ SHA の再配備が 2026-11-28T01:04:39Z にもう1回ある）。IndexNow は、変更 .html 456件のうち内容の変更なし30件・noindex 20件を除いた406 URLを、本番の公開を確かめてから（22秒待機）2026-11-27T23:53:05Z に送信し HTTP 200。本番の読み戻し 2026-11-28T01:48:47Z〜01:48:48Z（10:48:47〜10:48:48 JST、後続の #2432 の配備後）: /llms.txt・/faq・/en/faq・/devlog/privacy-first-design と英語版・/note-to-email/・/blog/captio-discontinued（日本語・英語・韓国語）・/vs/obsidian-share-sheet/ に新しい本文があり、sitemap-ja.xml の /faq の lastmod が 2026-11-28 であることを確かめた。変更: App Store の公開情報の同期（5.9.35・4.2・30件、2026-11-27 確認）、llms.txt の製品の定義・データの扱い・Obsidian の Quick Capture・AI の機能、/faq と /about/ の製品の定義、保存の記述（当社のサーバーには保存しない・配信の Resend は送ったメールを保存する）、Quick Capture より速いと読める言い方の削除、ページの不具合、内部リンクとハブのカード、IndexNow の差分通知。題（<title>・og:title・H1）は変えていない。実験中のページは数字の同期だけ（各実験の notes に記載）。新しい介入実験ではなく、既存実験の開始日・評価日・判定基準は変更しない。前後差を施策の成果として加点しない。記録: docs/seo/seo-aio-facts-2026-11-28.md。"
     }
   ]
 }

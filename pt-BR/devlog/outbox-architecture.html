@@ -226,7 +226,7 @@
   "description": "No momento em que você pressiona o botão enviar, a interface do usuário é apagada, mas a mensagem não transmitida permanece no terminal e é reenviada. A imagem completa da arquitetura Outbox com criptografia AES-GCM, retransmissão automática e detecção de recuperação de linha NWPathMonitor.",
   "url": "https://simplememofast.com/pt-BR/devlog/outbox-architecture",
   "datePublished": "2026-02-13",
-  "dateModified": "2026-10-04",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -437,7 +437,7 @@ func send(message: String, onSaved: () -&gt; Void,
             <li><strong>Não afetado por atualizações externas</strong> — O processamento de aguardar a transmissão não para de funcionar devido à atualização ou encerramento da biblioteca de terceiros.</li>
             <li><strong>Segurança</strong> - O código de terceiros não entra no processamento (criptografia, armazenamento, transmissão) que toca o corpo do memorando que aguarda para ser enviado.</li>
           </ul>
-          <p>Além disso, todo o aplicativo também usa um SDK externo (Google sign-in, Firebase, AppsFlyer) (consulte <a href="/pt-BR/devlog/privacy-first-design"> Privacy First Design</a>). O "apenas genuíno Apple" mencionado aqui é sobre o caminho dos dados que aguardam para serem transmitidos.</p>
+          <p>Vale notar que o aplicativo como um todo também usa SDKs externos (login com o Google, Firebase e, nas versões até a 5.9.32, também AppsFlyer; veja <a href="/pt-BR/devlog/privacy-first-design">Design com privacidade em primeiro lugar</a>). O “somente componentes nativos da Apple” mencionado aqui se refere ao caminho dos dados que aguardam envio.</p>
 
           <!-- Section 6 -->
           <h2 id="reading-06" data-ce-number="06">Separação da limpeza da interface do usuário e transmissão de rede</h2>

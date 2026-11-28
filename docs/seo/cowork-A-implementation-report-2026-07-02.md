@@ -102,7 +102,7 @@ second-brain両ページは title / og:title / twitter:title / meta-template / J
 ### 未対応・保留
 - **A5 capacities**: 7/29 CTR測定後に再評価（測定汚染防止）
 - **A2 EN版 /en/voice-input/**: 新設せず（EN長期戦方針と整合、需要データ待ち）
-- **§5連携**: Bing登録・paji.me 301平坦化・robots経路はapi担当者側タスク
+- **§5連携**: Bing登録・〈旧ブログのドメイン〉 301平坦化・robots経路はapi担当者側タスク
 
 ### ロールバック方法
 - 対象: 本PR（2コミット: A系統 + スラッグ掃除）を `git revert`

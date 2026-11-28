@@ -40,7 +40,7 @@ Source: `FULL-AUDIT-REPORT-2026-07-07.md` (score 92/100, up from 88). Priorities
 
 - **GSC disavow re-upload** — docs/disavow.txt, now 286 domains (attack ongoing 3–5/day).
 - **GSC reindex** after items 1–5 land: en/send-email-to-yourself + the 3 hidden-EN pages + the 12 parity pages.
-- **paji.me redirect flattening** (CF-1, ~5 min) and **Scrape Shield Email Obfuscation OFF** (~1 min).
+- **Legacy blog domain redirect flattening** (CF-1, ~5 min) and **Scrape Shield Email Obfuscation OFF** (~1 min).
 - **CF Web Analytics** decision (item 9) · **PSI API key** (3rd audit without field data) · **github.com/<personal-handle>** handle decision (item 6).
 
 ## Measurement (continuity)

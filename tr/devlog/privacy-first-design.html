@@ -492,7 +492,7 @@
 
 
       <div class="article-meta">
-        <span>13 Şubat 2026 tarihinde yayımlandı ・ Koruma ve kullanım analizi açıklaması güncellendi: 6 Eylül 2026 ・ Saklama ve kullanım analiziyle ilgili SSS düzeltildi: 28 Kasım 2026</span>
+        <span>13 Şubat 2026 tarihinde yayımlandı ・ Koruma ve kullanım analizi açıklaması güncellendi: 6 Eylül 2026 ・ Saklama ve kullanım analiziyle ilgili SSS ile makale metni düzeltildi: 28 Kasım 2026</span>
 
       </div>
 
@@ -528,13 +528,13 @@
             <li><strong>URL önbellek devre dışı:</strong>önbellek depolama alanının kendisini <code>nil</code> olarak ayarlayın</li>
             <li><strong>Kalıcı depolama kullanmayan yapılandırma: </strong>URLSession'ın oturum bilgilerini diske saklamayın</li>
           </ul>
-          <p>Bu, URLSession vb. önbelleği ile ilgili bir korumadır ve uygulamanın ayrı olarak sakladığı ve ilettiği kullanım olaylarını veya sunucu tarafındaki iletim kayıtlarını ortadan kaldıran bir işlev değildir. Kullanım analizinin tanımlayıcısı ile ilişkilendirme de bu ayardan ayrı olarak gerçekleştirilir.</p>
+          <p>Bu, URLSession önbelleği ve benzeri veriler için bir korumadır; uygulamanın ayrı olarak sakladığı ve gönderdiği kullanım olaylarını ya da sunucu tarafındaki gönderim kayıtlarını ortadan kaldıran bir işlev değildir. 5.9.32 ve önceki sürümlerin kullanım analizi tanımlayıcılarıyla yaptığı ilişkilendirme de bu ayardan ayrı olarak gerçekleşir.</p>
 
           <h2 id="reading-04">4. Performans ölçüm günlüğünün çıktı aralığı</h2>
           <p><code>PerformanceLogger</code>'in günlük çıkışı <code>#if DEBUG</code> ile çevrilidir. DEBUG'un tanımlanmadığı yapılarda, bu logger'ın günlük çıktısı işlemi dahil değildir.</p>
           <p>Bu kaydedicinin <code>logError</code>'i, hatanın ayrıntılı ifadesini değil, türü kaydeder. Örneğin, <code>URLError</code> türünü kullanın ve dosya yolları ve kullanıcı girişi içerebilecek <code>localizedDescription</code>'yi olduğu gibi yayınlamayın.</p>
           <p>Öte yandan, <code>logEvent</code>'e geçirilen tüm olay adlarını ve ek dizeleri otomatik olarak zararsız hale getiren bir mekanizma değildir. E-posta adresini, not gövdesini veya kimlik doğrulama bilgilerini arayana iletmemek gerekir.</p>
-          <p><strong> Bu açıklama, tüm uygulama, harici SDK ve işletim sistemi için "sıfır günlük" garantisine genişletilmeyecektir. </strong>Şirket içi kullanım olayı iletimi ve AppsFlyer ayrı mekanizmalar olarak etkinleştirilir. Satın alma kapsamı, bu makalenin kullanım analizi SSS'sinde ve <a href="/tr/privacy#technical"> Gizlilik Politikası</a>'nda açıklanacaktır.</p>
+          <p><strong>Bu açıklamayı, uygulamanın, harici SDK'ların ve işletim sisteminin tamamı için bir “sıfır günlük kaydı” güvencesine genişletmiyoruz.</strong> 5.9.32 ve önceki sürümlerde birinci taraf kullanım olaylarının gönderimi ve AppsFlyer, sürüme ve ayarlara bağlı olarak ayrı mekanizmalar olarak çalışabilir. App Store'da yayında olan 5.9.35 sürümü, birinci taraf kullanım olaylarını ve abonelik durumu analizlerini göndermez ve AppsFlyer SDK'sını da içermez (analizle ilgili olarak yalnızca geçmiş analiz verilerinin silinmesi ve geçersiz kılınması isteklerini gönderir). Toplanan verilerin kapsamı, bu yazıdaki kullanım analizi SSS'sinde ve <a href="/tr/privacy#technical">gizlilik politikasında</a> açıklanmaktadır.</p>
 
           <h2 id="reading-05">5. AES-GCM Şifreleme Outbox Koruma Aralığı</h2>
           <p>İletim bekleyen notlar, terminaldeki Outbox adlı kuyrukta yönetilir. Tasarruf ederken, AES-GCM ile şifrelemek için Apple'in CryptoKit'ini kullanın. Yeni şifreleme anahtarı 256 bit ile oluşturulur.</p>
@@ -545,11 +545,11 @@
 
           <h2 id="reading-06">6. Not gövdesinin korunması ve harici SDK'nın rolü</h2>
           <p>iOS uygulamasında, notun gövdesini şifrelemek için CryptoKit'i, anahtar depolama için Anahtarlık'ı ve gövdeyi iletmek için URLSession'ı kullanın. Network.framework bağlantı durumunu izler ve BackgroundTasks arka plan iletimini planlamaktan sorumludur.</p>
-          <p>Öte yandan, uygulama harici bir SDK da kullanır. GoogleSignIn ve Firebase Kimlik Doğrulaması, Google hesabıyla rastgele e-postaları otomatik olarak girmek için kullanılır ve Firebase Uygulama Kontrolü, arka uç API'i korumak için başlangıçta başlatılır. AppsFlyer, satın alma ve kullanım analizi için kullanılır ve kendi analiziniz için ortak olan bir kurulum tanımlayıcısı belirler.</p>
+          <p>Öte yandan uygulama harici SDK'lar da kullanır. GoogleSignIn ve Firebase Authentication, Google hesabıyla e-posta adresinin isteğe bağlı olarak otomatik doldurulması ve doğrulanması için kullanılır (Firebase Authentication, Sign in with Apple için de kullanılır). Firebase App Check açılışta başlatılır ve arka uç API'sine gönderilen isteklere kötüye kullanımı önlemeye yönelik bir belirteç ekler. AppsFlyer SDK, App Store'da yayında olan 5.9.35 sürümünde yer almaz. 5.9.32 ve önceki sürümler, sürüme ve ayarlara bağlı olarak AppsFlyer'ı edinim ve kullanım analizi için kullanabilir ve birinci taraf analizle ortak olan kurulum tanımlayıcısını ayarlayabilir.</p>
           <p>Tasarım, olay öğesine not gövdesini içermese bile, tanımlayıcıların ve iletim kayıtlarının ilişkisi kalır. SDK da dahil olmak üzere kullanım analizinin kapsamının, metnin şifrelenmesinden ayrı olarak onaylanması gerekir. Öğeler ve kullanımlar <a href="/tr/privacy#technical"> Gizlilik Politikası</a>'nda açıklanmıştır.</p>
 
           <h2 id="reading-07">7. Koruma kapsamını belirtin</h2>
-          <p>Terminalde şifreleme, iletişim önbelleğinin işlenmesi ve kullanım analizinin her birinin farklı rolleri vardır. Outbox şifrelemesi ve geçici URLSession ile bile, kullanım olaylarının toplanması kaybolmaz.</p>
+          <p>Cihaz içi şifreleme, iletişim önbelleğinin ele alınışı ve kullanım analizi birbirinden farklı rollere sahiptir. Outbox şifrelemesi ve ephemeral URLSession bulunsa bile, bunlar tek başına kullanım olaylarının toplanmasını ortadan kaldırmaz (kullanım olaylarının gönderilmesini 5.9.35 sürümünde ayrı olarak durdurduk).</p>
           <p>Hem hızlı bir şekilde not bırakabilmeye hem de elde edilecek bilgileri anlamaya değer veriyoruz. Kullanım analizinin hedefini, tanımlayıcısını ve ilişki kapsamını açıklayın ve uygulamadaki değişikliklere göre gözden geçirin.</p>
 
           <!-- FAQ Section -->

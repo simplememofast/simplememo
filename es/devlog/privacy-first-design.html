@@ -492,7 +492,7 @@
 
 
       <div class="article-meta">
-        <span>Publicado: 2026-2-13 · Explicación sobre protección y análisis de uso actualizada: 2026-9-6 · Preguntas frecuentes sobre almacenamiento y análisis de uso corregidas: 2026-11-28</span>
+        <span>Publicado: 2026-2-13 · Explicación sobre protección y análisis de uso actualizada: 2026-9-6 · Preguntas frecuentes sobre almacenamiento y análisis de uso, y texto del artículo, corregidos: 2026-11-28</span>
 
       </div>
 
@@ -528,13 +528,13 @@
             <li><strong>Caché URL desactivado:</strong>Establezca el almacenamiento de caché en <code>nil</code></li>
             <li><strong>Configuración que no utiliza almacenamiento persistente:</strong>No guarda la información de sesión de URLSession en el disco</li>
           </ul>
-          <p>Esta es una protección relacionada con la caché de URLSession, etc., y no es una función que elimine los eventos de uso que la aplicación almacena y transmite por separado o los registros de transmisión en el lado del servidor. La asociación por el identificador del análisis de uso también se lleva a cabo por separado de esta configuración.</p>
+          <p>Se trata de una protección relativa a la caché de URLSession, entre otros elementos; no es una función que elimine los eventos de uso que la app guarda y envía por separado ni los registros de envío del lado del servidor. La vinculación mediante identificadores de análisis de uso que realizan las versiones hasta la 5.9.32 inclusive también se produce al margen de esta configuración.</p>
 
           <h2 id="reading-04">4. Rango de salida de registros de medición de rendimiento</h2>
           <p>La salida de registro de <code>PerformanceLogger</code> está rodeada por <code>#if DEBUG</code>. En las compilaciones donde DEBUG no está definido, el procesamiento de salida de registro de este registrador no está incluido.</p>
           <p>El <code>logError</code> de este registrador registra el tipo en lugar de los detalles del error. Por ejemplo, use el tipo <code>URLError</code> y no libere <code>localizedDescription</code> tal cual, que puede contener rutas de archivo y entrada de usuario.</p>
           <p>Por otro lado, no es un mecanismo que automáticamente hace inofensivos todos los nombres de eventos y cadenas adicionales pasadas a <code>logEvent</code>. Es necesario no pasar la dirección de correo electrónico, el cuerpo de la nota o la información de autenticación a la que llama.</p>
-          <p><strong>Esta explicación no se extiende a la garantía de "registro cero" para toda la aplicación, el SDK externo y el sistema operativo. </strong>La transmisión de eventos de uso interno y AppsFlyer están habilitadas como mecanismos separados. El alcance de la adquisición se explicará en las preguntas frecuentes sobre el análisis de uso de este artículo y <a href="/es/privacy#technical"> Política de privacidad</a>.</p>
+          <p><strong>Esta explicación no se extiende a una garantía de «cero registros» para el conjunto de la app, los SDK externos y el sistema operativo.</strong> En las versiones hasta la 5.9.32 inclusive, el envío de eventos de uso propios y AppsFlyer pueden funcionar como mecanismos independientes, según la versión y los ajustes. La versión 5.9.35, disponible actualmente en el App Store, no envía eventos de uso propios ni el análisis del estado de suscripción, y tampoco incluye el AppsFlyer SDK (lo único que envía en relación con el análisis son solicitudes para eliminar y dar por caducados los datos de análisis anteriores). El alcance de la recopilación se explica en las preguntas frecuentes sobre el análisis de uso de este artículo y en la <a href="/es/privacy#technical">política de privacidad</a>.</p>
 
           <h2 id="reading-05">5. Alcance de la protección de Outbox con cifrado AES-GCM</h2>
           <p>Las notas que esperan ser enviadas se gestionan en la cola llamada Outbox en la terminal. Al guardar, use CryptoKit de Apple para cifrar con AES-GCM. La nueva clave de cifrado se genera con 256 bits.</p>
@@ -545,11 +545,11 @@
 
           <h2 id="reading-06">6. Protección del cuerpo de la nota y el papel del SDK externo</h2>
           <p>En la aplicación iOS, use CryptoKit para cifrar el cuerpo de la nota, Keychain para almacenar la clave y URLSession para enviar el texto. Network.framework monitorea el estado de la conexión, y BackgroundTasks es responsable de programar la transmisión en segundo plano.</p>
-          <p>Por otro lado, la aplicación también utiliza un SDK externo. GoogleSignIn y Firebase Authentication se utilizan para introducir automáticamente correos electrónicos arbitrarios con la cuenta Google, y la comprobación de la aplicación de Firebase se inicializa al inicio para proteger el backend API. AppsFlyer se utiliza para el análisis de adquisición y uso, y establece un identificador de instalación que es común a su propio análisis.</p>
+          <p>Por otro lado, la app también usa SDK externos. GoogleSignIn y Firebase Authentication se usan para rellenar automáticamente y confirmar, de forma opcional, la dirección de correo electrónico con una cuenta de Google (Firebase Authentication también se usa para Sign in with Apple). Firebase App Check se inicializa al iniciarse la app y añade un token contra el uso indebido a las solicitudes enviadas a la API del backend. El AppsFlyer SDK no está incluido en la versión 5.9.35, disponible actualmente en el App Store. Las versiones hasta la 5.9.32 inclusive pueden, según la versión y los ajustes, usar AppsFlyer para el análisis de adquisición y uso, y establecer un identificador de instalación compartido con el análisis propio.</p>
           <p>Incluso si el diseño no incluye el cuerpo de la nota en el elemento del evento, la asociación de identificadores y registros de transmisión permanece. El alcance del análisis de uso, incluido el SDK, debe confirmarse por separado del cifrado del texto. Los artículos y usos se describen en <a href="/es/privacy#technical"> Política de privacidad</a>.</p>
 
           <h2 id="reading-07">7 Especifique el alcance de la protección</h2>
-          <p>El cifrado, el manejo de caché de comunicación y el análisis de utilización en el terminal tienen diferentes funciones. Incluso con el cifrado de Outbox y la URLSession efímera, no significa que se elimine la recopilación de eventos de uso.</p>
+          <p>El cifrado en el dispositivo, la gestión de la caché de red y el análisis de uso cumplen funciones distintas. El cifrado de la Outbox y la ephemeral URLSession no eliminan por sí solos la recopilación de eventos de uso (el envío de eventos de uso se detuvo por separado en la versión 5.9.35).</p>
           <p>Valora tanto poder dejar notas rápidamente como poder entender la información que se va a adquirir. Explica el destino, el identificador y el alcance de la asociación del análisis de uso, y revísalo de acuerdo con los cambios en la aplicación.</p>
 
           <!-- FAQ Section -->
