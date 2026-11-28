@@ -146,7 +146,7 @@
   </style>
   <script type="text/plain" data-ahrefs="async"></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/obsidian-share-sheet/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Obsidian公式1.13の共有シートがあれば、シンプルメモは不要では？","acceptedAnswer":{"@type":"Answer","text":"共有シートからテキストやURLをVaultへ送るだけなら不要です。共有元のない「思いつき」も、iOS 26ならObsidian公式のQuick Capture（2026年10月5日の公開版1.14から。音声キャプチャは11月2日の公開版1.15から）で保管庫の読み込みを待たずに書けます。Obsidianだけに残すなら、まずこれで足りるか試してください。シンプルメモが足すのは、Apple Watchで音声入力しペアのiPhone経由で届けること、同じメモを自分宛メールにも残すこと（通常モード）、設定でオンにするAIタグ付与です。"}},{"@type":"Question","name":"ショートカットの公式アクションとURLスキームはどう違いますか？","acceptedAnswer":{"@type":"Answer","text":"モバイル1.11以降の公式ショートカットアクションはObsidianを開かずに追記できます。旧来の obsidian:// URLスキームは必ずObsidianを前面に起動し、本文切れ・ノート二重作成・別Vaultへの書き込みなどの失敗が起きやすい経路です。症状別の切り分けガイドにまとめています。"}},{"@type":"Question","name":"シンプルメモのVault追記にプラグインは必要ですか？","acceptedAnswer":{"@type":"Answer","text":"不要です。Vaultフォルダへのファイル直接追記を基本とし、開けない場合はURIフォールバックで追記します。QuickAddのようなVault内テンプレート制御はできない代わりに、Obsidian側の設定はゼロです。仕組みはObsidian連携の解説ページをご覧ください。"}},{"@type":"Question","name":"メモの本文はどこかのサーバーに保存されますか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモのサーバーには保存しません。本文は送信時に当社のRelay API（Cloudflare Workers）と配信のResendを通り、本番のRelay APIは本文をログにも記録しません。ただしResendは送ったメール（メモ本文を含む）を保存します（公表されている標準プランの保存期間は30日で、当社に適用される期間は確認中です）。AIタグ付けはオンデバイス（Apple Foundation Models）で行われ、タグ付けのためにメモ本文が外部サーバーへ送られることはありません。メール配送は標準SMTPを使うためE2EE（エンドツーエンド暗号化）ではありません。プライバシー設計の全体像で通り道を図解しています。"}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/obsidian-share-sheet/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Obsidian公式1.13の共有シートがあれば、シンプルメモは不要では？","acceptedAnswer":{"@type":"Answer","text":"共有シートからテキストやURLをVaultへ送るだけなら不要です。共有元のない「思いつき」も、iOS 26ならObsidian公式のQuick Capture（2026年10月5日の公開版1.14から。音声キャプチャは11月2日の公開版1.15から）で保管庫の読み込みを待たずに書けます。Obsidianだけに残すなら、まずこれで足りるか試してください。シンプルメモが足すのは、Apple Watchで音声入力しペアのiPhone経由で届けること、同じメモを自分宛メールにも残すこと（通常モード）、設定でオンにするAIタグ付与です。"}},{"@type":"Question","name":"ショートカットの公式アクションとURLスキームはどう違いますか？","acceptedAnswer":{"@type":"Answer","text":"モバイル1.11以降の公式ショートカットアクションはObsidianを開かずに追記できます。旧来の obsidian:// URLスキームは必ずObsidianを前面に起動し、本文切れ・ノート二重作成・別Vaultへの書き込みなどの失敗が起きやすい経路です。症状別の切り分けガイドにまとめています。"}},{"@type":"Question","name":"シンプルメモのVault追記にプラグインは必要ですか？","acceptedAnswer":{"@type":"Answer","text":"不要です。Vaultフォルダへのファイル直接追記を基本とし、開けない場合はURIフォールバックで追記します。QuickAddのようなVault内テンプレート制御はできない代わりに、Obsidian側の設定はゼロです。仕組みはObsidian連携の解説ページをご覧ください。"}},{"@type":"Question","name":"メモの本文はどこかのサーバーに保存されますか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモのサーバーには保存しません。本文は送信時に当社のRelay API（Cloudflare Workers）と配信のResendを通り、本番のRelay APIは本文をログにも記録しません。ただしResendは送ったメール（メモ本文を含む）を保存します（公表されている標準プランの保存期間は30日で、当社に適用される期間は確認中です）。AIタグ付けはオンデバイス（Apple Foundation Models。Apple Intelligenceが使えないiPhoneでは端末内のルール）で行われ、タグ付けのためにメモ本文が外部サーバーへ送られることはありません。メール配送は標準SMTPを使うためE2EE（エンドツーエンド暗号化）ではありません。プライバシー設計の全体像で通り道を図解しています。"}}]}</script>
 <link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
 <link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
 <link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
@@ -223,7 +223,7 @@
               <tr><th scope="row">思いつきメモの速さ</th><td>共有元アプリを開いてから共有シートを辿る</td><td>ショートカット起動＋入力プロンプト</td><td>Obsidianの起動を待つ（Vault規模で変動）</td><td class="yes">起動0.4秒（実測・ウォーム）→ 即入力</td></tr>
               <tr><th scope="row">Apple Watchからの入力</th><td class="no">不可（watchOSアプリなし）</td><td class="no">Vault不在のため実質不可</td><td class="no">不可</td><td class="yes">手首で音声入力。送信・Vault追記はペアのiPhone経由</td></tr>
               <tr><th scope="row">音声入力</th><td>iOSキーボード音声入力に依存</td><td>Siri経由で一部可</td><td>iOSキーボード音声入力に依存</td><td class="yes">開いたら自動録音（設定でオン・iOS 26以降）・オンデバイス変換</td></tr>
-              <tr><th scope="row">タグ・タイトル付与</th><td>テンプレートで一部自動（ページタイトル・URL・日付など）</td><td class="no">手動（テンプレで一部自動）</td><td class="yes">テンプレートで強力に制御</td><td class="yes">オンデバイスAIが自動付与（「AIタグ自動追加」をオンにしたとき。タグ付けのための外部送信なし）</td></tr>
+              <tr><th scope="row">タグ・タイトル付与</th><td>テンプレートで一部自動（ページタイトル・URL・日付など）</td><td class="no">手動（テンプレで一部自動）</td><td class="yes">テンプレートで強力に制御</td><td class="yes">オンデバイスAIがタグを自動付与（「AIタグ自動追加」をオンにしたとき。タグ付けのための外部送信なし）</td></tr>
               <tr><th scope="row">オフライン時</th><td class="yes">ローカル保存で動作</td><td>アクションによる</td><td class="yes">ローカル保存で動作</td><td class="yes">Outboxに暗号化保存→自動再送</td></tr>
               <tr><th scope="row">Vault以外への控え</th><td class="no">なし</td><td class="no">なし（組めば可）</td><td class="no">なし</td><td class="yes">メール受信箱にも残る（二重化。通常モード）</td></tr>
               <tr><th scope="row">失敗モード</th><td>共有先ノートの選び間違い</td><td class="no">URLスキーム経由は本文切れ・二重作成・別Vault書込みが起きやすい</td><td>プラグイン更新で壊れることがある</td><td>メール経由が不要な人には過剰</td></tr>
@@ -269,7 +269,7 @@
           <li>
             <span class="diff-num">3</span>
             <strong>音声とAIタグの自動化 — 「開く→話す→終わり」</strong><br>
-            話して文字にするだけなら、iOS 26ではObsidian公式のQuick Captureの音声キャプチャ（公開版1.15から）でもできます。シンプルメモでは、設定の「起動時に音声入力を自動オン」をオンにすれば、開いたら自動で録音が始まり、オンデバイスで文字起こし（iOS 26以降の対応端末）。さらに設定の「AIタグ自動追加」をオンにすれば、オンデバイスAI（Apple Foundation Models）が20文字以内のタイトル・1〜3個のタグ・種別（todo/idea/log）を自動付与します。タグ付けのためにメモ本文が外部サーバーへ送られることはありません。タグ付きのままVaultに追記されるので、後の整理が要りません。
+            話して文字にするだけなら、iOS 26ではObsidian公式のQuick Captureの音声キャプチャ（公開版1.15から）でもできます。シンプルメモでは、設定の「起動時に音声入力を自動オン」をオンにすれば、開いたら自動で録音が始まり、オンデバイスで文字起こし（iOS 26以降の対応端末）。さらに設定の「AIタグ自動追加」をオンにすれば、オンデバイスAI（Apple Foundation Models。Apple Intelligenceが使えないiPhoneでは端末内のルール）が最大3個のタグを自動付与します。タグ付けのためにメモ本文が外部サーバーへ送られることはありません。タグ付きのままVaultに追記されるので、後の整理が要りません。
           </li>
           <li>
             <span class="diff-num">4</span>
@@ -301,7 +301,7 @@
               <li>歩行中・移動中の「思いつき」をすぐ書き始めたい</li>
               <li>Apple Watchで音声入力し、ペアのiPhone経由で届けたい</li>
               <li>声で書きたい（自動録音・オンデバイス変換）</li>
-              <li>タイトル・タグ付けを自動化したい</li>
+              <li>タグ付けを自動化したい</li>
               <li>Vaultとメールの両方に残る二重化が欲しい</li>
             </ul>
           </div>
@@ -320,7 +320,7 @@
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Obsidian公式1.13の共有シートがあれば、シンプルメモは不要では？</summary><div class="faq-answer"><p>共有シートからテキストやURLをVaultへ送るだけなら不要です。共有元のない「思いつき」も、iOS 26ならObsidian公式のQuick Capture（2026年10月5日の公開版1.14から。音声キャプチャは11月2日の公開版1.15から）で保管庫の読み込みを待たずに書けます。Obsidianだけに残すなら、まずこれで足りるか試してください。シンプルメモが足すのは、Apple Watchで音声入力しペアのiPhone経由で届けること、同じメモを自分宛メールにも残すこと（通常モード）、設定でオンにするAIタグ付与です。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">ショートカットの公式アクションとURLスキームはどう違いますか？</summary><div class="faq-answer"><p>モバイル1.11以降の公式ショートカットアクションはObsidianを開かずに追記できます。旧来の obsidian:// URLスキームは必ずObsidianを前面に起動し、本文切れ・ノート二重作成・別Vaultへの書き込みなどの失敗が起きやすい経路です。<a href="/obsidian/shortcuts-not-working/" style="color:var(--accent);">症状別の切り分けガイド</a>にまとめています。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">シンプルメモのVault追記にプラグインは必要ですか？</summary><div class="faq-answer"><p>不要です。Vaultフォルダへのファイル直接追記を基本とし、開けない場合はURIフォールバックで追記します。QuickAddのようなVault内テンプレート制御はできない代わりに、Obsidian側の設定はゼロです。仕組みは<a href="/obsidian/" style="color:var(--accent);">Obsidian連携の解説ページ</a>をご覧ください。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メモの本文はどこかのサーバーに保存されますか？</summary><div class="faq-answer"><p>シンプルメモのサーバーには保存しません。本文は送信時に当社のRelay API（Cloudflare Workers）と配信のResendを通り、本番のRelay APIは本文をログにも記録しません。ただしResendは送ったメール（メモ本文を含む）を保存します（公表されている標準プランの保存期間は30日で、当社に適用される期間は確認中です）。AIタグ付けはオンデバイス（Apple Foundation Models）で行われ、タグ付けのためにメモ本文が外部サーバーへ送られることはありません。メール配送は標準SMTPを使うためE2EE（エンドツーエンド暗号化）ではありません。<a href="/privacy-architecture/" style="color:var(--accent);">プライバシー設計の全体像</a>で通り道を図解しています。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メモの本文はどこかのサーバーに保存されますか？</summary><div class="faq-answer"><p>シンプルメモのサーバーには保存しません。本文は送信時に当社のRelay API（Cloudflare Workers）と配信のResendを通り、本番のRelay APIは本文をログにも記録しません。ただしResendは送ったメール（メモ本文を含む）を保存します（公表されている標準プランの保存期間は30日で、当社に適用される期間は確認中です）。AIタグ付けはオンデバイス（Apple Foundation Models。Apple Intelligenceが使えないiPhoneでは端末内のルール）で行われ、タグ付けのためにメモ本文が外部サーバーへ送られることはありません。メール配送は標準SMTPを使うためE2EE（エンドツーエンド暗号化）ではありません。<a href="/privacy-architecture/" style="color:var(--accent);">プライバシー設計の全体像</a>で通り道を図解しています。</p></div></details></div>
         </div>
       </div></section>
 

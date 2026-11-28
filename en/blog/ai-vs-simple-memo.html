@@ -193,7 +193,7 @@
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/blog/ai-vs-simple-memo#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Do memo apps need AI features?","acceptedAnswer":{"@type":"Answer","text":"It depends on use case. AI is valuable for organizing and searching large note collections, but for quick idea capture, AI is unnecessary and can actually slow you down. The best approach separates capture from organization."}},{"@type":"Question","name":"What are the downsides of AI memo apps?","acceptedAnswer":{"@type":"Answer","text":"Three main downsides: 1) Slower launch and processing times, 2) Privacy risk from memo content being sent to cloud AI servers, 3) Higher monthly subscription costs."}},{"@type":"Question","name":"What's the difference between Memo Post and Simple Memo?","acceptedAnswer":{"@type":"Answer","text":"Memo Post is a feature-rich memo app with AI summarization and auto-categorization. Simple Memo focuses on capture speed: 0.4s warm launch, one-tap send, and on-device titles and tags instead of cloud AI. Choose Simple Memo for capture speed, Memo Post for all-in-one organization."}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/blog/ai-vs-simple-memo#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Do memo apps need AI features?","acceptedAnswer":{"@type":"Answer","text":"It depends on use case. AI is valuable for organizing and searching large note collections, but for quick idea capture, AI is unnecessary and can actually slow you down. The best approach separates capture from organization."}},{"@type":"Question","name":"What are the downsides of AI memo apps?","acceptedAnswer":{"@type":"Answer","text":"Three main downsides: 1) Slower launch and processing times, 2) Privacy risk from memo content being sent to cloud AI servers, 3) Higher monthly subscription costs."}},{"@type":"Question","name":"What's the difference between Memo Post and Simple Memo?","acceptedAnswer":{"@type":"Answer","text":"Memo Post is a feature-rich memo app with AI summarization and auto-categorization. Simple Memo focuses on capture speed: 0.4s warm launch, one-tap send, and on-device tags (opt-in, with Obsidian) instead of cloud AI. Choose Simple Memo for capture speed, Memo Post for all-in-one organization."}}]}</script>
 <link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
 <link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
 <link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
@@ -258,7 +258,7 @@
 <li><strong>Memo Post</strong> -- AI summarization, auto-tagging, sentiment analysis, reminder suggestions</li>
 <li><strong>Obsidian</strong> -- Community plugins enable GPT integration</li>
 </ul>
-<p style="margin-top:.75rem">Meanwhile, some apps <strong>avoid AI or keep it narrow</strong>. Simplenote and Standard Notes have no AI features, and Simple Memo only adds titles, tags and a type on the device, keeping simplicity and speed first.</p>
+<p style="margin-top:.75rem">Meanwhile, some apps <strong>avoid AI or keep it narrow</strong>. Simplenote and Standard Notes have no AI features, and Simple Memo only adds tags on the device, keeping simplicity and speed first.</p>
 </div>
 </div>
 </div>
@@ -312,7 +312,7 @@
 <tbody>
 <tr><th scope="row">Launch speed</th><td>Not measured</td><td class="highlight">0.4 seconds (warm launch, measured)</td></tr>
 <tr><th scope="row">AI summary</th><td class="highlight">Yes</td><td>No (use email client AI instead)</td></tr>
-<tr><th scope="row">Auto-categorize</th><td class="highlight">Yes</td><td>On-device titles, tags and type (opt-in, with Obsidian)</td></tr>
+<tr><th scope="row">Auto-categorize</th><td class="highlight">Yes</td><td>On-device tags (opt-in, with Obsidian)</td></tr>
 <tr><th scope="row">Privacy</th><td>Content sent to AI servers</td><td class="highlight">Email only, <a href="/en/glossary/aes-gcm/">AES-GCM</a> encryption</td></tr>
 <tr><th scope="row">Offline</th><td>Cloud AI features don't work offline</td><td class="highlight">Offline Outbox supported</td></tr>
 <tr><th scope="row">Price</th><td>$5-15/month</td><td class="highlight">Free (3/day) / Premium available</td></tr>
@@ -366,7 +366,7 @@
 <p>The conclusion: <strong>It's not "AI memo OR simple memo" -- use both.</strong></p>
 <p style="margin-top:.75rem"><strong>Recommended workflow:</strong></p>
 <ol style="margin-top:.5rem;padding-left:1.2rem;line-height:2.2">
-<li><strong>Capture</strong> with Simple Memo (about 0.4s to type in the developer's warm-launch measurement on iPhone 16e; with AI Auto-Tagging on, on-device AI adds titles and tags)</li>
+<li><strong>Capture</strong> with Simple Memo (about 0.4s to type in the developer's warm-launch measurement on iPhone 16e; with AI Auto-Tagging on, the memos it writes to Obsidian get tags chosen on the device)</li>
 <li>Memos arrive in <strong>your email</strong> (one-tap)</li>
 <li>Gmail AI summaries and auto-labels handle <strong>organization</strong></li>
 <li>Important notes get <strong>migrated/deepened</strong> in Notion (AI) or Obsidian</li>
@@ -391,7 +391,7 @@
 <li>Memos are <strong>only sent as email</strong> via Cloudflare Workers + Resend API</li>
 <li>Memo text is <strong>not kept on Simple Memo's servers</strong> (send and done)</li>
 <li>Offline Outbox uses <strong>AES-GCM encryption</strong> on device</li>
-<li>Titles and tags are generated on the device, so <strong>memos are not sent to an external server for AI processing</strong></li>
+<li>Tags are chosen on the device, so <strong>memos are not sent to an external server for AI processing</strong></li>
 </ul>
 </div>
 </div>
@@ -404,7 +404,7 @@
 <div lang="en">
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Do memo apps need AI features?</summary><div class="faq-answer"><p>It depends on use case. AI is valuable for organizing and searching large note collections, but for quick idea capture, AI is unnecessary and can actually slow you down. The best approach separates capture from organization.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What are the downsides of AI memo apps?</summary><div class="faq-answer"><p>Three main downsides: 1) Slower launch and processing times, 2) Privacy risk from memo content being sent to cloud AI servers, 3) Higher monthly subscription costs.</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary">What's the difference between Memo Post and Simple Memo?</summary><div class="faq-answer"><p>Memo Post is a feature-rich memo app with AI summarization and auto-categorization. Simple Memo focuses on capture speed: 0.4s warm launch, one-tap send, and on-device titles and tags instead of cloud AI. Choose Simple Memo for capture speed, Memo Post for all-in-one organization.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">What's the difference between Memo Post and Simple Memo?</summary><div class="faq-answer"><p>Memo Post is a feature-rich memo app with AI summarization and auto-categorization. Simple Memo focuses on capture speed: 0.4s warm launch, one-tap send, and on-device tags (opt-in, with Obsidian) instead of cloud AI. Choose Simple Memo for capture speed, Memo Post for all-in-one organization.</p></div></details></div>
 </div>
 </div></section>
 <!-- When AI Backfires -->
@@ -457,7 +457,7 @@
 </div></section>
 <div class="cta-box">
 <div class="cta-box__title"><span lang="en">Capture first, sort later</span></div>
-<div class="cta-box__desc"><span lang="en">No account needed. Each memo reaches your email with one tap, and with Obsidian set up and AI Auto-Tagging on, on-device AI adds titles and tags.</span></div>
+<div class="cta-box__desc"><span lang="en">No account needed. Each memo reaches your email with one tap, and with Obsidian set up and AI Auto-Tagging on, the memos written to Obsidian also get tags chosen on the device.</span></div>
 
 <a aria-label="Download on the App Store" class="app-store-badge" data-cta-cluster="blog" data-cta-placement="mid" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" lang="en" data-cta-position="mid"><img alt="Download on the App Store" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="120"/></a>
 </div>

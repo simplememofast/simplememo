@@ -378,7 +378,7 @@
 
       <section class="lp-section ce-chapter sd-chapter">
         <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02"> <span>加密備忘錄應用程式的比較：Standard Notes vs SimpleMemo</span> </h2></div><div class="ce-chapter__body">
-        <p class="lp-section__lead"> <span>Standard Notes和SimpleMemo都是重視隱私的備忘錄應用程式，但加密方法從根本上不同。 Standard Notes採用XChaCha20-Poly1305的端到端加密。 筆記本在裝置上被加密，在加密狀態下儲存、同步到Standard Notes的雲伺服器上。 因為伺服器方面也無法讀取筆記的內容，所以可以說安全級別非常高。 權衡是，閱讀筆記僅限於Standard Notes的應用程式。  SimpleMemo採取不同的方法。 等待離線傳送的Outbox和傳送記錄在終端內用AES-GCM-256加密，但郵件傳送本身是標準SMTP，所以不是E2E加密（為了作為收件人的使用者自己可以在日常使用的郵件應用程式上閱讀）。 取而代之的是，郵件正文不會常設在本公司伺服器上（只有在傳送處理時才會透過）。 傳送的備忘錄會以郵件的形式留在收件箱（郵件服務的伺服器）中。“ 加密後雲端儲存（E2E）”vs“不將正文留在伺服器上（資料最小化）”的模型差異。  另一方面，Standard Notes作為全功能的筆記應用程式，具有標籤管理、擴充套件編輯器、版本歷史、檔案附加等豐富的功能。 SimpleMemo是捕獲專用的，沒有手動整理、編輯的功能（透過Obsidian連線開啟“AI標籤自動新增”，終端內AI會附加標題和標籤）。 安全模型的選擇取決於你的威脅模型。“ 在伺服器上留下密碼文也可以，但是隻想用Standard Notes來閱讀正文的應用程式”的話Standard Notes。“ 想在平時的郵件收件箱裡閱讀備忘錄，但不希望在傳送基礎方面留下正文”的話SimpleMemo。 </span> </p>
+        <p class="lp-section__lead"> <span>Standard Notes和SimpleMemo都是重視隱私的備忘錄應用程式，但加密的做法根本不同。Standard Notes採用XChaCha20-Poly1305的端對端加密。筆記會在裝置上加密，並以加密狀態儲存、同步到Standard Notes的雲端伺服器。由於連伺服器端都無法讀取筆記的內容，可以說安全等級非常高。代價是能讀取筆記的只限於Standard Notes的應用程式。SimpleMemo採取不同的做法。離線待傳送的Outbox與傳送紀錄會在裝置上以AES-GCM-256加密，但郵件傳送本身使用標準SMTP，因此並非E2E加密（這是為了讓身為收件人的使用者本人，能用平常使用的郵件應用程式閱讀）。取而代之的是，郵件內文不會長期儲存在本公司的伺服器上（只在傳送處理時經過）。送出的備忘錄會以郵件的形式留在收件匣（郵件服務的伺服器）中。這是「加密後存放在雲端（E2E）」與「不把內文留在伺服器上（資料最小化）」兩種模式的差異。另一方面，Standard Notes作為功能完整的筆記應用程式，具備標籤管理、擴充編輯器、版本紀錄、檔案附件等豐富的功能。SimpleMemo專門用於捕捉，沒有手動整理或編輯的功能（使用Obsidian整合並開啟「AI標籤自動新增」後，裝置端AI會為追加到Obsidian的備忘錄加上標籤）。安全模型的選擇取決於你的威脅模型。如果是「在伺服器上留下密文也沒關係，但能讀取內文的應用程式只想限於Standard Notes」，就選Standard Notes；如果是「想在平常的郵件收件匣閱讀備忘錄，但不希望傳送基礎設施端留下內文」，就選SimpleMemo。</span> </p>
       </div></section>
 
       <!-- Comparison Table -->
@@ -395,7 +395,7 @@
               <tr><th scope="row">離線支援</th><td class="yes">Outbox自動重新傳送</td><td class="yes">離線編輯・連線時同步</td></tr>
               <tr><th scope="row">服務依賴</th><td>開發者的傳送中轉（Relay API）和郵件傳送企業</td><td class="no">Standard Notes服務</td></tr>
               <tr><th scope="row">開源</th><td class="no">非公開</td><td class="yes">有（GitHub）</td></tr>
-              <tr><th scope="row">標籤・整理</th><td>透過終端內AI自動賦予標題、標籤、種類（透過Obsidian連線開啟設定時。 沒有手動整理功能）</td><td class="yes">有</td></tr>
+              <tr><th scope="row">標籤・整理</th><td>由裝置端AI自動加上標籤（使用Obsidian整合並開啟該設定時。沒有手動整理功能）</td><td class="yes">有</td></tr>
               <tr><th scope="row">擴充套件編輯器</th><td class="no">無</td><td class="yes">僅限收費計劃</td></tr>
               <tr><th scope="row">免費計劃的功能</th><td class="yes">每天最多3則（“只儲存Obsidian”是Premium）</td><td class="no">僅基本功能</td></tr>
               <tr><th scope="row">跨平臺</th><td class="yes">透過郵件所有裝置</td><td class="yes">iOS/安卓/Win/Mac/Linux</td></tr>

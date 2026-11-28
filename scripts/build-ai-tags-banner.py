@@ -14,6 +14,16 @@ The banner is 1.917:1 but an OG card must be 1.905:1, so the card is centre
 cropped by ~11px of width before resizing — nothing meaningful sits that close
 to either edge.
 
+The pages no longer use og/ai-tags.jpg. Since 2026-11-28 /ai-tags/ uses
+og/ai-tags-20261128.jpg: the same crop, with the second line of the bottom-right
+footnote replaced. The master says "メモが外部サーバーへ送られることはありません。",
+which reads as if memos never reach a server; email delivery does pass the memo
+text through a server. The card says
+"タグ付けのためにメモが外部へ送られることはありません。" instead. The master is
+left as it is because it carries the image generator's signed provenance (C2PA),
+which any edit would invalidate. Running this script rebuilds og/ai-tags.jpg
+with the old footnote; do not point og:image back at it.
+
 Usage:
     pip install Pillow
     python3 scripts/build-ai-tags-banner.py

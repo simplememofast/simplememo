@@ -253,7 +253,7 @@
         <ol class="flow-steps">
           <li><span class="flow-step__title">在终端内创建 — 用AES-GCM-256保护</span>写的备忘录首先进入终端内的Outbox（未发送队列）。 Outbox和发送历史由Apple纯正CryptoKit通过<strong>AES-GCM-256</strong>加密，256-bit对称密钥保存在Apple Keychain中。 密钥是不转移到其他终端的设置，在应用程序加密、解密时读取。 备份中包含的密钥复制也不能在其他终端上使用。 在更换机型之前，请确认必要的备忘录是否已送达保存地址。 <a href="/zh/privacy">钥匙管理的详细内容和Apple的说明</a>。 离线的话在这里等待，线路恢复后自动重新发送。</li>
           <li><span class="flow-step__title">Obsidian Vault的追记 — 这里是完全本地</span>Obsidian激活关联时，Vault的追记是<strong>终端内的Vault文件夹直接写入文件</strong>（打不开的话URI回退）进行，不使用插件和外部服务器。 Vault追记的路径中没有网络。</li>
-          <li><span class="flow-step__title">AI标签—在设备上完成</span>标题（20字以内）、标签（1~3个）、种类（todo/idea/log）的自动授予，<strong>Apple Foundation Models的机上AI</strong>只在iPhone中进行。 <strong>为了标记，备忘录正文不会发送到外部服务器。 </strong>Apple Intelligence不支持的机型会自动回退到终端内的轻量整形。</li>
+          <li><span class="flow-step__title">AI 添加标签 — 在设备上完成</span>使用 Obsidian 集成并打开“AI标签自动添加”时，标签（最多 3 个）的自动添加由<strong>基于 Apple Foundation Models 的设备端 AI</strong>仅在 iPhone 内完成。<strong>备忘录正文不会为了添加标签而发送到外部服务器。</strong>不支持 Apple Intelligence 的机型会自动改用设备上的轻量文本整理。</li>
           <li><span class="flow-step__title">电子邮件的中继与存储</span>仅在发送邮件时，备忘录正文才会通过 TLS（HTTPS）<strong>经过</strong>我们的中继 API（Cloudflare Workers）和邮件服务商（Resend）。我们的生产中继服务器不保存正文，也不将正文写入日志。Resend 会保留已发送的邮件。其公布的标准方案保留期限为 30 天，本账户适用的期限仍在核实中。客户端使用 <code>URLSessionConfiguration.ephemeral</code>，不保留 Cookie 或缓存。</li>
           <li><span class="flow-step__title">到自己的收件箱 — 标准SMTP配送（=不是E2EE）</span>最终配送是标准SMTP。 正因为如此，在平时的邮件软件上可以直接阅读，但<strong>不是端到端加密（E2EE）</strong>。 关于这个设计判断，请看下面的“诚实地写下来”。</li>
         </ol>
