@@ -62,7 +62,7 @@ const CARDS = {
     badge: 'NEW ― AIタグ自動追加',
     title: '話すだけで、<br>メールと<em class="v">Obsidian</em>へ。',
     titleSize: '56px', // "メールとObsidianへ。" overflows the 640px column at the default size
-    sub: 'Obsidian連携でオンにすれば、AIがタイトル・タグ・種別を<b>自動</b>で付ける。',
+    sub: 'Obsidian連携でオンにすれば、<br>AIがタグを<b>自動</b>で付ける。',
     tags: [['#Obsidian'], ['#AI', 'cyan'], ['#アイデア'], ['#連携', 'cyan']],
     note: 'Apple Watch対応 ・ 音声自動入力 ・ 起動0.4秒（ウォーム起動の実測）',
   },
@@ -72,7 +72,7 @@ const CARDS = {
     brand: 'Simple Memo - for Obsidian',
     badge: 'NEW — AI auto-tagging',
     title: 'Just speak.<br>To your email — and <em class="v">Obsidian</em>.',
-    sub: 'Opt-in AI adds the title, tags and type <b>for Obsidian</b>.',
+    sub: 'Opt-in AI adds tags <b>for Obsidian</b>.',
     tags: [['#obsidian'], ['#ai', 'cyan'], ['#idea'], ['#sync', 'cyan']],
     note: 'Apple Watch ・ voice auto-input ・ 0.4s launch (warm start, measured)',
   },

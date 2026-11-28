@@ -253,7 +253,7 @@
         <ol class="flow-steps">
           <li><span class="flow-step__title">在終端內建立 — 用AES-GCM-256保護</span>寫的備忘錄首先進入終端內的Outbox（未傳送佇列）。 Outbox和傳送歷史由Apple純正CryptoKit透過<strong>AES-GCM-256</strong>加密，256-bit對稱金鑰儲存在Apple Keychain中。 金鑰是不轉移到其他終端的設定，在應用程式加密、解密時讀取。 備份中包含的金鑰複製也不能在其他終端上使用。 在更換機型之前，請確認必要的備忘錄是否已送達儲存地址。 <a href="/zh-Hant/privacy">鑰匙管理的詳細內容和Apple的說明</a>。 離線的話在這裡等待，線路恢復後自動重新傳送。</li>
           <li><span class="flow-step__title">Obsidian Vault的追記 — 這裡是完全本地</span>Obsidian啟用關聯時，Vault的追記是<strong>終端內的Vault資料夾直接寫入檔案</strong>（打不開的話URI回退）進行，不使用外掛和外部伺服器。 Vault追記的路徑中沒有網路。</li>
-          <li><span class="flow-step__title">AI標籤—在裝置上完成</span>標題（20字以內）、標籤（1~3個）、種類（todo/idea/log）的自動授予，<strong>Apple Foundation Models的機上AI</strong>只在iPhone中進行。 <strong>為了標記，備忘錄正文不會傳送到外部伺服器。 </strong>Apple Intelligence不支援的機型會自動回退到終端內的輕量整形。</li>
+          <li><span class="flow-step__title">AI加標籤 — 在裝置上完成</span>使用Obsidian整合並開啟「AI標籤自動新增」時，自動加上標籤（最多3個）的處理，由<strong>Apple Foundation Models的裝置端AI</strong>只在iPhone內進行。<strong>備忘錄內文不會為了加標籤而被傳送到外部伺服器。</strong>不支援Apple Intelligence的機型會自動改用裝置上的輕量文字整理。</li>
           <li><span class="flow-step__title">電子郵件的中繼與儲存</span>僅在寄信時，備忘錄內文才會透過 TLS（HTTPS）<strong>經過</strong>我們的中繼 API（Cloudflare Workers）和郵件服務商（Resend）。我們的正式環境中繼伺服器不儲存內文，也不將內文寫入日誌。Resend 會保留已寄出的郵件。其公布的標準方案保留期限為 30 天，本帳戶適用的期限仍在確認中。用戶端使用 <code>URLSessionConfiguration.ephemeral</code>，不保留 Cookie 或快取。</li>
           <li><span class="flow-step__title">到自己的收件箱 — 標準SMTP配送（=不是E2EE）</span>最終配送是標準SMTP。 正因為如此，在平時的郵件軟體上可以直接閱讀，但<strong>不是端到端加密（E2EE）</strong>。 關於這個設計判斷，請看下面的“誠實地寫下來”。</li>
         </ol>

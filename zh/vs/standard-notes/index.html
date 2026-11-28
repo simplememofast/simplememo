@@ -378,7 +378,7 @@
 
       <section class="lp-section ce-chapter sd-chapter">
         <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02"> <span>加密备忘录应用程序的比较：Standard Notes vs SimpleMemo</span> </h2></div><div class="ce-chapter__body">
-        <p class="lp-section__lead"> <span>Standard Notes和SimpleMemo都是重视隐私的备忘录应用程序，但加密方法从根本上不同。 Standard Notes采用XChaCha20-Poly1305的端到端加密。 笔记本在设备上被加密，在加密状态下保存、同步到Standard Notes的云服务器上。 因为服务器方面也无法读取笔记的内容，所以可以说安全级别非常高。 权衡是，阅读笔记仅限于Standard Notes的应用程序。  SimpleMemo采取不同的方法。 等待离线发送的Outbox和发送记录在终端内用AES-GCM-256加密，但邮件发送本身是标准SMTP，所以不是E2E加密（为了作为收件人的用户自己可以在日常使用的邮件应用程序上阅读）。 取而代之的是，邮件正文不会常设在本公司服务器上（只有在发送处理时才会通过）。 发送的备忘录会以邮件的形式留在收件箱（邮件服务的服务器）中。“ 加密后云存储（E2E）”vs“不将正文留在服务器上（数据最小化）”的模型差异。  另一方面，Standard Notes作为全功能的笔记应用程序，具有标签管理、扩展编辑器、版本历史、文件附加等丰富的功能。 SimpleMemo是捕获专用的，没有手动整理、编辑的功能（通过Obsidian连接打开“AI标签自动添加”，终端内AI会附加标题和标签）。 安全模型的选择取决于你的威胁模型。“ 在服务器上留下密码文也可以，但是只想用Standard Notes来阅读正文的应用程序”的话Standard Notes。“ 想在平时的邮件收件箱里阅读备忘录，但不希望在发送基础方面留下正文”的话SimpleMemo。 </span> </p>
+        <p class="lp-section__lead"> <span>Standard Notes 和 SimpleMemo 都是重视隐私的备忘录应用，但加密方式有根本区别。Standard Notes 采用基于 XChaCha20-Poly1305 的端到端加密。笔记在设备上加密，并以加密状态保存和同步到 Standard Notes 的云服务器。由于服务器端也无法读取笔记内容，可以说安全级别非常高。代价是只能在 Standard Notes 的应用中阅读笔记。SimpleMemo 采取了不同的方式。离线待发送的 Outbox 和发送历史记录会在设备上使用 AES-GCM-256 加密，但邮件发送本身使用标准 SMTP，因此不是 E2E 加密（这是为了让作为收件人的用户本人能用平时使用的邮件应用阅读）。相应地，邮件正文不会长期保存在本公司的服务器上（只在发送处理时经过）。发送的备忘录会作为邮件保留在收件箱（邮件服务的服务器）中。这是“加密后存储在云端（E2E）”与“不把正文留在服务器上（数据最小化）”两种模型的区别。另一方面，Standard Notes 作为一款全功能笔记应用，拥有标签管理、扩展编辑器、版本历史、文件附件等丰富功能。SimpleMemo 专注于捕获，没有手动整理或编辑的功能（使用 Obsidian 集成并打开“AI标签自动添加”后，设备端 AI 会为追加到 Obsidian 的备忘录加上标签）。安全模型的选择取决于你的威胁模型。如果是“以密文形式留在服务器上也没关系，但能读取正文的应用只限于 Standard Notes”，就选 Standard Notes；如果是“想在平时的邮件收件箱里阅读备忘录，但不希望发送基础设施一侧留下正文”，就选 SimpleMemo。</span> </p>
       </div></section>
 
       <!-- Comparison Table -->
@@ -395,7 +395,7 @@
               <tr><th scope="row">离线对应</th><td class="yes">Outbox自动重新发送</td><td class="yes">离线编辑・连接时同步</td></tr>
               <tr><th scope="row">服务依赖</th><td>开发者的发送中转（Relay API）和邮件发送企业</td><td class="no">Standard Notes服务</td></tr>
               <tr><th scope="row">开源</th><td class="no">非公开</td><td class="yes">有（GitHub）</td></tr>
-              <tr><th scope="row">标签・整理</th><td>通过终端内AI自动赋予标题、标签、种类（通过Obsidian连接打开设置时。 没有手动整理功能）</td><td class="yes">有</td></tr>
+              <tr><th scope="row">标签・整理</th><td>由设备端 AI 自动添加标签（使用 Obsidian 集成并打开该设置时；没有手动整理功能）</td><td class="yes">有</td></tr>
               <tr><th scope="row">扩展编辑器</th><td class="no">无</td><td class="yes">仅限收费计划</td></tr>
               <tr><th scope="row">免费计划的功能</th><td class="yes">每天最多3条（“只保存Obsidian”是Premium）</td><td class="no">仅基本功能</td></tr>
               <tr><th scope="row">跨平台</th><td class="yes">通过邮件所有设备</td><td class="yes">iOS/安卓/Win/Mac/Linux</td></tr>
