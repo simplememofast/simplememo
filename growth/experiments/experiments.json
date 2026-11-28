@@ -1785,7 +1785,8 @@
         "2026-11-13: App Store の公開版が 5.9.27 になっていた（2026-11-13 10:43 JST に SEO Daily の run 43346944022 が iTunes Lookup の日本のストアで確認。台帳はそのログからの転記。評価 4.1・28件は変わっていない）ので、data/site-constants.json の appVersion を 5.9.25 から 5.9.27 にし、sync_constants.js で 101 ファイル（JSON-LD の softwareVersion 100ページと、llms.txt の版・確認日）を更新した。対象5ページのうち `/`・`/siri/`・`/obsidian/` は JSON-LD の softwareVersion だけが変わった（`/apple-watch/` と `/ai-tags/` は変わっていない）。動画・poster・VideoObject・本文・title・description・CTA は変えていない。評価日（11-14）の前日の変更。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの変更だけ、または既存施策だけの効果と断定しない。",
         "2026-11-14: #2347（本番のマージ SHA 29e7a369402f4f91a7704ede8eda19107242cec6、マージ 2026-11-14T02:41:07Z／2026-11-14 11:41:07 JST）。Cloudflare Pages の配備チェック完了 2026-11-14T02:42:04Z（2026-11-14 11:42:04 JST）。旧版の最終観測 2026-11-14T02:29:06.063047Z（2026-11-14 11:29:06 JST）から下記の新版本文照合までの間に切り替わった。チェック記録: https://github.com/simplememofast/simplememo/runs/132302878081。本番HTMLの採取は 2026-11-14T02:43:03.924743Z〜2026-11-14T02:43:53.184913Z（2026-11-14 11:43:03 JST〜2026-11-14 11:43:53 JST）、ホームで新版本文を最初に観測したのは 2026-11-14T02:43:07.646874Z（2026-11-14 11:43:07 JST）。保存応答の再照合では、既知のCloudflareの空のmodule beacon 1本だけを除き、変更対象10ページのHTML全体がマージ版と一致し、英語トップも従来版を保持していた。読み戻し済みの対象は /・/en/・/blog/obsidian-voice-input・/ar/blog/obsidian-voice-input・/es/blog/obsidian-voice-input・/id/blog/obsidian-voice-input・/ko/blog/obsidian-voice-input・/pt-BR/blog/obsidian-voice-input・/tr/blog/obsidian-voice-input・/zh/blog/obsidian-voice-input・/zh-Hant/blog/obsidian-voice-input。マージ時刻・作業の準備時刻と、配備チェック完了・本文観測の時刻を混同しない。対象5ページのうち日本語トップ / から図解動画の video 要素と VideoObject を撤去した。これはスクロール距離の変化だけでなく、既存の動画介入の一部撤去である。残る /apple-watch/・/siri/・/obsidian/・/ai-tags/ と英語トップは今回変えていない。公開以後の / は元の5本の動画が存在する条件と異なるため、評価や観測を延長する場合も公開前後を混ぜず、この撤去から動画施策の成功・失敗を判定しない。 オーナーの明示依頼によるデザイン更新で、新規の介入実験として登録していない。既存の開始日・評価日・状態・baseline・比較方法・母数・停止条件・判定基準は変更しない。前後差を今回の変更または既存施策だけの成果、自律運転の成功へ加点しない。",
         "2026-11-17: #2381 で、対象5ページの App Store への導線から AppsFlyer OneLink を外した（本番反映の前に書いた。本番の時刻と SHA は読み戻してから measurement_changes と growth/data/annotations.json に書く）。/obsidian/ は冒頭の App Store ボタン1個を、OneLink の pilot（2026-10-15 から）から直接 Apple（ct=web_obsidian_v1、ほかのボタンと同じ CPP）に戻し、data-app-route・data-app-traffic を外して data-cta-variant を onelink_v1 から v1 に戻した。/obsidian/・/apple-watch/・/siri/ は計測スクリプトの script タグから data-sitewide-app-routes（App Store へのリンクを実行時に AppsFlyer OneLink へ変える opt-in）を外したので、実行時に OneLink へ変えていた素の App Store リンク（参考リンク）各1本が直接 Apple のまま開く。/ と /ai-tags/ は同じ属性を外しただけで、変わるリンクは無い。生成翻訳（/obsidian/・/apple-watch/・/siri/・/ai-tags/ の各8言語）も同じ。見える文言・ボタンの位置・動画・poster・VideoObject・title・description は変えていない。/obsidian/ と生成8ページは冒頭ボタンのリンク先が変わったので、サイトマップの lastmod が 11-17 になる。GA4 ではこれらのクリックが web_to_app_*（pilot・sitewide）から app_store_click 系に移る。変更後の窓（2026-08-12..11-11）が閉じた後の変更。2026-11-17 のオーナーの明示依頼（アプリが次の版で AppsFlyer SDK を外すので OneLink をやめる。実験中のページも「かえていい」）による変更で、新規の介入実験として登録していない。既存の開始日・評価日・状態・baseline・比較方法・母数・停止条件・判定基準は変更しない。前後差を今回の変更または既存施策だけの成果、自律運転の成功へ加点しない。",
-        "2026-11-28: #2431 で、App Store の公開情報（2026-11-27 に iTunes Lookup で確認。版 5.9.35、評価 4.2・30件）を、対象ページのうち `/`・`/siri/`・`/obsidian/`・`/ai-tags/` とその生成翻訳の表示と JSON-LD に同期した（本番反映の前に書いた。本番の時刻と SHA は読み戻してから growth/data/annotations.json に書く）。`/obsidian/` は同期の規則の外にある評価の表示5か所（星の aria-label、「App Store 4.2 · 30件」、評価と件数の数字、CTA の ★）を数字だけ手で直した。題・本文・動画・CTA・リンクは変えていない。同じ PR でサイトの多くのページの事実を訂正した（llms.txt、/faq・/about/ の製品の定義、Obsidian の Quick Capture の記述、ハブのカードなど）が、対象5ページの本文は変えていない。定例の公開情報の同期で、新規の介入実験として登録していない。既存の開始日・評価日・状態・baseline・比較方法・母数・停止条件・判定基準は変更しない。前後差を今回の変更または既存施策だけの成果、自律運転の成功へ加点しない。"
+        "2026-11-28: #2431 で、App Store の公開情報（2026-11-27 に iTunes Lookup で確認。版 5.9.35、評価 4.2・30件）を、対象ページのうち `/`・`/siri/`・`/obsidian/`・`/ai-tags/` とその生成翻訳の表示と JSON-LD に同期した（本番反映の前に書いた。本番の時刻と SHA は読み戻してから growth/data/annotations.json に書く）。`/obsidian/` は同期の規則の外にある評価の表示5か所（星の aria-label、「App Store 4.2 · 30件」、評価と件数の数字、CTA の ★）を数字だけ手で直した。題・本文・動画・CTA・リンクは変えていない。同じ PR でサイトの多くのページの事実を訂正した（llms.txt、/faq・/about/ の製品の定義、Obsidian の Quick Capture の記述、ハブのカードなど）が、対象5ページの本文は変えていない。定例の公開情報の同期で、新規の介入実験として登録していない。既存の開始日・評価日・状態・baseline・比較方法・母数・停止条件・判定基準は変更しない。前後差を今回の変更または既存施策だけの成果、自律運転の成功へ加点しない。",
+        "2026-11-28: #2436 で、対象5ページのうち /obsidian/ の事実を直した（本番反映の前に書いた。本番の時刻と SHA は読み戻してから growth/data/annotations.json に書く）。比較表の Obsidian の列を iOS 26 の公式の Quick Capture（1.14〜・1.15〜）に合わせ（×3つを ✓3つに。Apple Watch のアプリが無いことの × は残した）、「摩擦」の1文に Quick Captureなら待たずに書けることを足し、見出しを「同じ目的、違う役割。」に、「30件のレビュー」を「30件の評価」にし、デモのメール欄を5.9.35 の実際（件名はメモの1行目、メールにタグは付かない）に合わせた。関連リンクの文字も、リンク先（/blog/obsidian-voice-fastest-route）の新しい題に揃え、見えている更新日と dateModified を 2026-11-28 にした。生成翻訳8ページも同じ。動画・poster・VideoObject・title・description・CTA・リンク先は変えていない。同じ PR で、/ai-tags/ の生成翻訳8ページは、実行時の訳のファイル（js/i18n/）のハッシュ付きの名前の参照だけが変わった（デモの文字列の訳を足したため。ページの文言・動画・VideoObject は不変）。/・/apple-watch/・/siri/・/ai-tags/ の日本語のページは変えていない。評価日（11-14）の後の事実の訂正で、オーナーの承認（2026-11-28）による。新規の介入実験として登録していない。既存の開始日・評価日・状態・baseline・比較方法・母数・停止条件・判定基準は変更しない。前後差を今回の変更または既存施策だけの成果、自律運転の成功へ加点しない。"
       ],
       "control": {
         "kind": "pre_post",
@@ -3723,7 +3724,65 @@
       "decision_rule": "変更後28日（2026-11-12 以降で最初に揃う窓）の、検索語 second brain × このページの表示回数を、変更前の 4回と比べる。100回以上なら keep（表記を戻した後に表示が戻った、と記述的に読む。因果は主張しない）。30回未満なら「戻っていない」として、次の手（10/4 より前のタイトルへの完全な戻し、日英ページ分離の hreflang の見直し）をオーナーに諮る。30〜99回は inconclusive。クリック数・順位と、サイト全体の同じ検索語の行を併記する。",
       "notes": [
         "2026-11-11: gsc-second-brain-title-20261004 の評価（iterate）を受けて登録した。オーナーの判断（2026-11-11、選択肢「英語表記を戻す」）による。基準値は登録の時点で測ってあり、後から書き換えない。",
-        "2026-11-17: #2381 で、/methods/second-brain/ の計測スクリプトの script タグから data-sitewide-app-routes（App Store へのリンクを実行時に AppsFlyer OneLink へ変える opt-in）を外した（本番反映の前に書いた。本番の時刻と SHA は読み戻してから measurement_changes と growth/data/annotations.json に書く）。OneLink へ変わるリンクが無かったので、リンク先と GA4 のイベントは変わらない。生成翻訳8ページも同じ。題・本文・CTA は変えていない。評価日（12-14）までの窓の中の変更。2026-11-17 のオーナーの明示依頼（アプリが次の版で AppsFlyer SDK を外すので OneLink をやめる。実験中のページも「かえていい」）による変更で、新規の介入実験として登録していない。既存の開始日・評価日・状態・baseline・比較方法・母数・停止条件・判定基準は変更しない。前後差を今回の変更または既存施策だけの成果、自律運転の成功へ加点しない。"
+        "2026-11-17: #2381 で、/methods/second-brain/ の計測スクリプトの script タグから data-sitewide-app-routes（App Store へのリンクを実行時に AppsFlyer OneLink へ変える opt-in）を外した（本番反映の前に書いた。本番の時刻と SHA は読み戻してから measurement_changes と growth/data/annotations.json に書く）。OneLink へ変わるリンクが無かったので、リンク先と GA4 のイベントは変わらない。生成翻訳8ページも同じ。題・本文・CTA は変えていない。評価日（12-14）までの窓の中の変更。2026-11-17 のオーナーの明示依頼（アプリが次の版で AppsFlyer SDK を外すので OneLink をやめる。実験中のページも「かえていい」）による変更で、新規の介入実験として登録していない。既存の開始日・評価日・状態・baseline・比較方法・母数・停止条件・判定基準は変更しない。前後差を今回の変更または既存施策だけの成果、自律運転の成功へ加点しない。",
+        "2026-11-28: #2436 で、/methods/second-brain/ の生成翻訳8ページは、実行時の訳のファイル（js/i18n/）のハッシュ付きの名前の参照だけが変わった（別のページのデモの文字列の訳を足したため。本番反映の前に書いた）。日本語のページと、題・本文・CTA・計測は変えていない。既存の開始日・評価日・状態・baseline・比較方法・母数・停止条件・判定基準は変更しない。"
+      ]
+    },
+    {
+      "id": "title-2026-11-28-voice-route-superlative",
+      "page": "/blog/obsidian-voice-fastest-route",
+      "type": "title_test",
+      "hypothesis": "題と H1 から、本文が支えない最上級（「最速の経路」）を外す。本文は「省けない操作の数」で5経路を数えているが、iOS 26 の Obsidian 公式の Quick Capture（1.14〜、音声は 1.15〜）は数えておらず、順位も付けていない。主な目的は事実の訂正（Quick Capture より速いと読める言い方をしない）。このページの日本語版は表示がほぼ無く、CTR や表示の差は測れない見込み。",
+      "source": {
+        "pr": 2436,
+        "commit": null
+      },
+      "started_at": "2026-11-28",
+      "evaluation_at": "2027-01-23",
+      "status": "running",
+      "before": {
+        "title": "Obsidianに音声で挿す最速の経路 — 5ルートを画面数とタップ数で数える【2026】"
+      },
+      "after": {
+        "title": "Obsidianに音声で挿す5つの経路 — 画面数とタップ数で数える【2026】"
+      },
+      "baseline": {
+        "clicks": 0,
+        "impressions": 0,
+        "ctr": null,
+        "position": null,
+        "window": "2026-10-24..2026-11-20",
+        "source": "growth/data/gsc/2026-11-23（pages.json）に /blog/obsidian-voice-fastest-route の行が無い（表示0として記録）",
+        "note": "直前の5回のスナップショット（2026-10-21〜2026-11-16）は、どれも表示1・クリック0・5位。生成翻訳と英語のページは別の行（例: /es/blog/obsidian-voice-fastest-route は 2026-10-24..11-20 で表示10・15位）で、この実験の範囲に入れない。"
+      },
+      "target_metric": "impressions",
+      "decision": null,
+      "evaluated_at": null,
+      "control": {
+        "kind": "pre_post",
+        "note": "このページ（日本語）の変更前28日と変更後28日を比べる。ホールドアウトは無い。",
+        "confounders": "表示がほぼ無いので、検索の揺れと区別できない。同じ PR で、このページへのリンクの文字（/blog/ のカードと構造化データ、/obsidian/・/obsidian/airpods/・/data/voice-shift/ の関連リンク、/en/blog/・/en/obsidian/）も変えた。8言語と英語の生成ページの題も同時に変わる。単独では因果を主張しない。"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 30,
+        "rationale": "変更後28日の表示が30回に届かなければ、表示・順位・CTR の前後差を読まない。変更前は0〜1回なので、届かない見込みが高い。"
+      },
+      "stop_conditions": [
+        "このページの題・description・H1・本文に、この実験以外の変更が入った → notes に記録し、前後差をこの実験の効果と読まない",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
+      ],
+      "measurement_scope": {
+        "kind": "page",
+        "page": "/blog/obsidian-voice-fastest-route"
+      },
+      "guardrails": [
+        "変えるのはタイトル欄（title・og:title・twitter:title・JSON-LD の headline・パンくずの name）と H1。description・本文・CTA・計測は変えない。",
+        "このページへのリンクの文字を新しい題に揃える。8言語と英語の生成ページの同じ欄も、日本語の原文に追従する（英語の <title> は前から最上級の無い訳）。"
+      ],
+      "decision_rule": "表示が増えても減っても、本文が支えない最上級には戻さない（事実の訂正）。評価では、変更後28日（2026-11-29 以降で最初に揃う窓）の表示・クリック・順位を変更前と並べて記録する。表示が min_sample に届かなければ inconclusive とし、題はそのまま残す。",
+      "notes": [
+        "2026-11-28: オーナーの承認（2026-11-28）で登録した。題の「最速」が本文で支えられていないという報告（docs/seo/seo-aio-facts-2026-11-28.md の「題の変更」）への回答。基準値は登録の時点で測ってあり、後から書き換えない。本番反映の前に書いた。本番の時刻と SHA は読み戻してから growth/data/annotations.json に書く。"
       ]
     }
   ],

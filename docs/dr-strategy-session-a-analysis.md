@@ -21,7 +21,7 @@
 
 1. **simplememofast.comの被リンクの大半がスパム**
    - SEOリンク販売サービスからの低品質リンク（itxoft, backlinks-seorank, rankva, primeseo, grow-your.website等）が**8本以上**
-   - paji.me → simplememofast.com/captio/ への301リダイレクト経由のリンクが大半を占める
+   - 〈旧ブログのドメイン〉 → simplememofast.com/captio/ への301リダイレクト経由のリンクが大半を占める
    - **実質的なオーガニック被リンク: zenn.dev (DR83) + hatena.blog (DR85) の2本のみ**
    - dofollow率38%は競合の半分以下
 

@@ -418,7 +418,7 @@
 </h1>
 <div class="article-meta">
 
-<span lang="en">Published February 13, 2026 ・ Protection and analytics explanation updated September 6, 2026 ・ Storage and analytics FAQ answers corrected November 28, 2026</span>
+<span lang="en">Published February 13, 2026 ・ Protection and analytics explanation updated September 6, 2026 ・ Storage and analytics FAQ answers and text corrected November 28, 2026</span>
 </div>
 <!-- Japanese Content -->
 
@@ -452,12 +452,12 @@
 <li><strong>URL cache disabled:</strong> The cache storage itself is set to <code>nil</code></li>
 <li><strong>No persistent session storage:</strong> URLSession session data is not stored on disk</li>
 </ul>
-<p>This protects URLSession storage. It does not remove usage events separately stored or sent by the app, delivery records on the server, or links made through analytics identifiers.</p>
+<p>This protects URLSession storage. It does not remove usage events separately stored or sent by the app, delivery records on the server, or links made through analytics identifiers in versions up to 5.9.32.</p>
 <h2 id="reading-04">4. The Scope of Performance Logging</h2>
 <p>Logging in <code>PerformanceLogger</code> is guarded by <code>#if DEBUG</code>. Builds without DEBUG defined do not include this logger’s logging operations.</p>
 <p>Its <code>logError</code> records the error type, such as <code>URLError</code>, instead of the detailed <code>localizedDescription</code>, which may contain a file path or user input.</p>
 <p>This does not automatically sanitize every event name or additional string passed to <code>logEvent</code>. Callers must avoid passing email addresses, memo text, and authentication information.</p>
-<p><strong>This is not a guarantee of zero logs across the entire app, external SDKs, and operating system.</strong> First-party usage events and AppsFlyer remain separate, enabled systems. The analytics FAQ below and our <a href="/en/privacy#technical">Privacy Policy</a> explain that collection.</p>
+<p><strong>This is not a guarantee of zero logs across the entire app, external SDKs, and operating system.</strong> In versions up to 5.9.32, first-party usage events and AppsFlyer may run as separate systems, depending on the version and settings. Version 5.9.35, the current App Store version, sends no usage events or subscription-state analytics and does not contain the AppsFlyer SDK; the only analytics-related requests it sends are requests to delete or expire past analytics data. The analytics FAQ below and our <a href="/en/privacy#technical">Privacy Policy</a> explain that collection.</p>
 <h2 id="reading-05">5. What the AES-GCM Encrypted Outbox Protects</h2>
 <p>Pending memos are managed in an on-device queue called the Outbox. The app uses Apple’s CryptoKit to encrypt saved data with <a href="/en/glossary/aes-gcm/">AES-GCM</a>. Newly generated encryption keys are 256 bits.</p>
 <p>Keys are stored in Keychain with <code>kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly</code>. This allows access after the first unlock following a restart, until the next restart, and prevents migration through a backup restored to another device. The app reads the key for encryption and decryption.</p>
@@ -466,10 +466,10 @@
 <p>For the pending-send queue, see the <a href="/en/devlog/outbox-architecture">Outbox architecture article</a>.</p>
 <h2 id="reading-06">6. Memo Protection and External SDKs</h2>
 <p>Within the iOS app, CryptoKit encrypts memo bodies, Keychain stores the key, and URLSession transmits memos. Network.framework monitors connectivity, and BackgroundTasks schedules background sending.</p>
-<p>The app also uses external SDKs. GoogleSignIn and Firebase Authentication support optional email auto-fill from a Google account. Firebase App Check initializes at launch to protect backend access. AppsFlyer supports acquisition and usage analytics, with the same installation identifier used for first-party analytics.</p>
+<p>The app also uses external SDKs. GoogleSignIn and Firebase Authentication support optional email auto-fill and confirmation from a Google account (Firebase Authentication also backs Sign in with Apple). Firebase App Check initializes at launch and attaches an anti-abuse token to requests sent to the backend API. Version 5.9.35, the current App Store version, does not contain the AppsFlyer SDK. Versions up to 5.9.32 may use AppsFlyer for acquisition and usage analytics, depending on the version and settings, with the same installation identifier used for first-party analytics.</p>
 <p>Keeping memo text out of event fields does not remove links through identifiers and delivery records. Analytics, including SDK behavior, needs to be considered separately from memo encryption. Our <a href="/en/privacy#technical">Privacy Policy</a> describes the fields and purposes.</p>
 <h2 id="reading-07">7. Explain the Scope of Each Protection</h2>
-<p>On-device encryption, session storage, and usage analytics serve different purposes. An encrypted Outbox and an ephemeral URLSession do not mean the app collects no usage events.</p>
+<p>On-device encryption, session storage, and usage analytics serve different purposes. An encrypted Outbox and an ephemeral URLSession do not by themselves stop usage events (sending them was stopped separately in 5.9.35).</p>
 <p>Fast capture should come with an understandable explanation of collected data. We describe analytics destinations, identifiers, and how records can be linked, and review these explanations as the app changes.</p>
 <!-- FAQ Section -->
 <div class="faq-section">

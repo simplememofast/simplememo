@@ -334,7 +334,7 @@
       "name": "¿Cuál es el tema?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Los sujetos se generan automáticamente con las siguientes reglas: Si la plantilla del tema está configurada: línea 1 de la plantilla + memo (por ejemplo, \"Simple Memo Lista de compras de hoy\") Si la plantilla de tema está vacía: La línea 1 de la nota se convierte en el sujeto tal y como está Cuando una nota comienza con una línea vacía: La línea donde aparece el primer carácter se convierte en el sujeto Los sujetos se cortan con hasta 60 caracteres Si ha activado \"Adición automática de etiquetas AI\" en el enlace Obsidian: Use el título corto creado en el terminal en lugar de la línea 1 (si no puede crearlo, línea 1nd)"
+        "text": "Los sujetos se generan automáticamente con las siguientes reglas: Si la plantilla del tema está configurada: línea 1 de la plantilla + memo (por ejemplo, \"Simple Memo Lista de compras de hoy\") Si la plantilla de tema está vacía: La línea 1 de la nota se convierte en el sujeto tal y como está Cuando una nota comienza con una línea vacía: La línea donde aparece el primer carácter se convierte en el sujeto Si la línea 1 supera los 60 caracteres, se corta a los 60 caracteres y se añade «…» al final (sin contar los caracteres de la plantilla de asunto) Si usas la integración con Obsidian y tienes activada «Adición automática de etiquetas de IA»: la línea 1 se acorta en el dispositivo a 20 caracteres como máximo y se usa así (una línea de 20 caracteres o menos queda casi igual; se quitan los símbolos del principio de la línea, como «・», «- » o «1.», y las líneas largas se cortan en un signo de puntuación o entre dos palabras, con «…» al final). No es un título que Apple Intelligence haya creado a partir del contenido"
       }
     },
     {
@@ -462,7 +462,7 @@
       "name": "¿El contenido de la nota se registrará en el registro?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No se grabará. LA INFORMACIÓN DE SENSIBILIZACIÓN, COMO LAS DIRECCIONES DE CORREO ELECTRÓNICO, EL CUERPO DE LA NOTA, LOS CÓDIGOS DE AUTENTICACIÓN, LOS TOKENS Y URL NO SE REGISTRAN EN TODAS LAS COMPILACIONES, INCLUIDAS LAS COMPILACIONES DE DEPURACIÓN. Incluso en el registro de errores, solo se emite el tipo de error (nombre del tipo) y no se registran los mensajes detallados."
+        "text": "No se registra. El código de la app no pasa el texto de las notas a los registros en ninguna compilación, incluidas las compilaciones DEBUG. El código de la app distribuida en el App Store (5.9.35) tampoco escribe en los registros direcciones de correo electrónico, códigos de verificación, tokens ni URL; lo único que escribe son diagnósticos de compra, restauración y comprobación de la suscripción (nombres de categoría fijos, y el tipo y el número de error de Apple). En las compilaciones DEBUG que usa el desarrollador, la consola de Xcode muestra la URL al abrir un enlace del correo de verificación, y también detalles de algunos errores. El código de la Relay API de producción tampoco escribe en los registros el texto de las notas ni los códigos de verificación."
       }
     },
     {
@@ -494,7 +494,7 @@
       "name": "¿Qué tipo de aplicación es Simple Memo?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Es una app para iPhone y Apple Watch con la que escribes lo que se te ocurre, con la voz o con el teclado, y lo envías con un toque a tu propio correo. También puedes añadirlo a una nota de tu bóveda de Obsidian o guardarlo en Notion. La app no tiene ninguna pantalla para organizar las notas: se organizan donde llegan. Si configuras la integración con Obsidian y activas «Adición automática de etiquetas de IA» en los ajustes, también se añaden automáticamente en el dispositivo un título, etiquetas y un tipo (la opción está desactivada de forma predeterminada)."
+        "text": "Es una app para iPhone y Apple Watch con la que escribes lo que se te ocurre, con la voz o con el teclado, y lo envías con un toque a tu propio correo. También puedes añadirlo a una nota de tu bóveda de Obsidian o guardarlo en Notion. La app no tiene ninguna pantalla para organizar las notas: se organizan donde llegan. Si configuras la integración con Obsidian y activas «Adición automática de etiquetas de IA» en los ajustes, las notas que se añaden a Obsidian reciben etiquetas automáticamente en el dispositivo (la opción está desactivada de forma predeterminada)."
       }
     },
     {
@@ -1018,8 +1018,8 @@
                     <li><strong>Si la plantilla del tema está configurada</strong>: línea 1 de la plantilla + memo (por ejemplo, "Simple Memo Lista de compras de hoy")</li>
                     <li><strong>Si la plantilla de tema está vacía</strong>: La línea 1 de la nota se convierte en el sujeto tal y como está</li>
                     <li><strong>Cuando una nota comienza con una línea vacía</strong>: La línea donde aparece el primer carácter se convierte en el sujeto</li>
-                    <li>Los sujetos se cortan con hasta 60 caracteres</li>
-                    <li><strong>Si ha activado "Adición automática de etiquetas AI" en el enlace Obsidian</strong>: Use el título corto creado en el terminal en lugar de la línea 1 (si no puede crearlo, línea 1nd)</li>
+                    <li>Si la línea 1 supera los 60 caracteres, se corta a los 60 caracteres y se añade «…» al final (sin contar los caracteres de la plantilla de asunto)</li>
+                    <li><strong>Si usas la integración con Obsidian y tienes activada «Adición automática de etiquetas de IA»</strong>: la línea 1 se acorta en el dispositivo a 20 caracteres como máximo y se usa así (una línea de 20 caracteres o menos queda casi igual; se quitan los símbolos del principio de la línea, como «・», «- » o «1.», y las líneas largas se cortan en un signo de puntuación o entre dos palabras, con «…» al final). No es un título que Apple Intelligence haya creado a partir del contenido</li>
                   </ul>
                 </div>
               </details>
@@ -1210,7 +1210,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">¿El contenido de la nota se registrará en el registro?</summary>
                 <div class="faq-answer">
-                  <p>No se grabará. LA INFORMACIÓN DE SENSIBILIZACIÓN, COMO LAS DIRECCIONES DE CORREO ELECTRÓNICO, EL CUERPO DE LA NOTA, LOS CÓDIGOS DE AUTENTICACIÓN, LOS TOKENS Y URL NO SE REGISTRAN EN TODAS LAS COMPILACIONES, INCLUIDAS LAS COMPILACIONES DE DEPURACIÓN. Incluso en el registro de errores, solo se emite el tipo de error (nombre del tipo) y no se registran los mensajes detallados.</p>
+                  <p>No se registra. El código de la app no pasa el texto de las notas a los registros en ninguna compilación, incluidas las compilaciones DEBUG. El código de la app distribuida en el App Store (5.9.35) tampoco escribe en los registros direcciones de correo electrónico, códigos de verificación, tokens ni URL; lo único que escribe son diagnósticos de compra, restauración y comprobación de la suscripción (nombres de categoría fijos, y el tipo y el número de error de Apple). En las compilaciones DEBUG que usa el desarrollador, la consola de Xcode muestra la URL al abrir un enlace del correo de verificación, y también detalles de algunos errores. El código de la Relay API de producción tampoco escribe en los registros el texto de las notas ni los códigos de verificación.</p>
                 </div>
               </details>
             </div>
@@ -1261,7 +1261,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">¿Qué tipo de aplicación es Simple Memo?</summary>
                 <div class="faq-answer">
-                  <p>Es una app para iPhone y Apple Watch con la que escribes lo que se te ocurre, con la voz o con el teclado, y lo envías con un toque a tu propio correo. También puedes añadirlo a una nota de tu bóveda de Obsidian o guardarlo en Notion. La app no tiene ninguna pantalla para organizar las notas: se organizan donde llegan. Si configuras la integración con Obsidian y activas «Adición automática de etiquetas de IA» en los ajustes, también se añaden automáticamente en el dispositivo un título, etiquetas y un tipo (la opción está desactivada de forma predeterminada).</p>
+                  <p>Es una app para iPhone y Apple Watch con la que escribes lo que se te ocurre, con la voz o con el teclado, y lo envías con un toque a tu propio correo. También puedes añadirlo a una nota de tu bóveda de Obsidian o guardarlo en Notion. La app no tiene ninguna pantalla para organizar las notas: se organizan donde llegan. Si configuras la integración con Obsidian y activas «Adición automática de etiquetas de IA» en los ajustes, las notas que se añaden a Obsidian reciben etiquetas automáticamente en el dispositivo (la opción está desactivada de forma predeterminada).</p>
                 </div>
               </details>
             </div>

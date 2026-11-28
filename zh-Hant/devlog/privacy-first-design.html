@@ -492,7 +492,7 @@
 
 
       <div class="article-meta">
-        <span>2026年2月13日發布 ・ 保護與使用分析的說明更新：2026年9月6日 ・ 儲存與使用分析的常見問題更正：2026年11月28日</span>
+        <span>2026年2月13日發布 ・ 保護與使用分析的說明更新：2026年9月6日 ・ 儲存與使用分析的常見問題及內文更正：2026年11月28日</span>
 
       </div>
 
@@ -528,13 +528,13 @@
             <li><strong>URL快取失效：</strong>將快取儲存本身設定為<code>nil</code></li>
             <li><strong>不使用永久儲存的構成：</strong>URLSession的會話資訊不儲存到磁碟</li>
           </ul>
-          <p>這是關於URLSession的快取等的保護，不是應用程式單獨儲存、傳送的使用事件或消除伺服器端的傳送記錄的功能。 透過使用解析的識別符號進行關聯，也與這個設定分開進行。</p>
+          <p>這是針對 URLSession 快取等項目的保護，並不是能消除 App 另外儲存、傳送的使用事件或伺服器端傳送紀錄的功能。5.9.32 及更早的版本透過使用分析識別碼進行的關聯，也是在這項設定之外另行進行的。</p>
 
           <h2 id="reading-04">4。 效能測量日誌的輸出範圍</h2>
           <p><code>PerformanceLogger</code>的日誌輸出被<code>#if DEBUG</code>包圍。 在沒有定義DEBUG的構建中，不包含這個記錄器的日誌輸出處理。</p>
           <p>這個記錄器的<code>logError</code>，記錄的不是錯誤的詳細文，而是型別。 例如，使用<code>URLError</code>這種型別，不直接輸出可能包含檔案路徑和使用者輸入的<code>localizedDescription</code>。</p>
           <p>另一方面，不是自動將傳遞給<code>logEvent</code>的事件名和附加字串全部無害化的機制。 呼叫方需要不傳遞郵箱地址、備忘錄正文、認證資訊。</p>
-          <p><strong>這個說明不擴充套件到應用程式、外部SDK、OS整體的“零日誌”的保證。 </strong>本公司的使用事件傳送和AppsFlyer作為不同的機制生效。 獲取範圍在本報道的使用分析FAQ和<a href="/zh-Hant/privacy#technical">隱私政策</a>中說明。</p>
+          <p><strong>這項說明並不延伸為 App、外部 SDK 與作業系統整體「零日誌」的保證。</strong>在 5.9.32 及更早的版本中，自有使用事件的傳送與 AppsFlyer，可能會視版本與設定，作為各自獨立的機制運作。目前在 App Store 上架的 5.9.35 版，不會傳送自有使用事件與訂閱狀態分析，也不包含 AppsFlyer SDK（在分析方面，只會傳送刪除過往分析資料及使其失效的請求）。收集範圍在本文的使用分析常見問題與<a href="/zh-Hant/privacy#technical">隱私政策</a>中說明。</p>
 
           <h2 id="reading-05">5。 AES-GCM加密Outbox的保護範圍</h2>
           <p>等待傳送的備忘錄，在終端內的Outbox佇列中進行管理。 儲存時使用Apple的CryptoKit用AES-GCM進行加密。 新的密碼金鑰用256位元生成。</p>
@@ -545,11 +545,11 @@
 
           <h2 id="reading-06">6。 備忘錄正文的保護和外部SDK的作用</h2>
           <p>iOS在應用內，備忘錄正文的加密使用CryptoKit，鑰匙保管使用Keychain，正文的傳送使用URLSession。 Network.framework負責監視連線狀態，BackgroundTasks負責後臺傳送的排程。</p>
-          <p>另一方面，應用程式也使用外部SDK。 GoogleSignIn和Firebase Authentication用於Google賬戶的任意郵件自動輸入，Firebase App Check在啟動時初始化保護後端API。 AppsFlyer用於獲取、使用分析，設定與本公司分析共同的安裝識別符號。</p>
+          <p>另一方面，App 也使用外部 SDK。GoogleSignIn 與 Firebase Authentication 用於以 Google 帳戶自動填入並確認電子郵件地址的選用功能（Firebase Authentication 也用於 Sign in with Apple）。Firebase App Check 會在啟動時初始化，並在傳送到後端 API 的請求中附加防止不當使用的權杖。目前在 App Store 上架的 5.9.35 版不包含 AppsFlyer SDK。5.9.32 及更早的版本，視版本與設定而定，可能會將 AppsFlyer 用於獲客與使用分析，並設定與自有分析共用的安裝識別碼。</p>
           <p>即使設計不將備忘錄正文納入事件專案，也會保留識別符號和傳送記錄的關聯。 包括SDK在內的使用分析範圍，需要與本文的加密分開確認。 專案和用途在<a href="/zh-Hant/privacy#technical">隱私政策</a>中進行了說明。</p>
 
           <h2 id="reading-07">7。 明確保護範圍</h2>
-          <p>終端內的加密、通訊快取的處理、利用分析，分別具有不同的作用。 即使有Outbox的加密和ephemeral URLSession，使用事件的收集也不會消失。</p>
+          <p>裝置內的加密、通訊快取的處理與使用分析，各自扮演不同的角色。即使有 Outbox 的加密和 ephemeral URLSession，單憑這些並不會停止收集使用事件（使用事件的傳送是在 5.9.35 版另外停止的）。</p>
           <p>重視能夠快速留下備忘錄和能夠理解獲取的資訊。 說明使用分析的傳送目的地、識別符號、關聯的範圍，根據應用程式的變化進行重新審查。</p>
 
           <!-- FAQ Section -->

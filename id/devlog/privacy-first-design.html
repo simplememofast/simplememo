@@ -492,7 +492,7 @@
 
 
       <div class="article-meta">
-        <span>Diterbitkan 13 Februari 2026 ・ Pembaruan penjelasan tentang perlindungan dan analisis penggunaan: 6 September 2026 ・ Koreksi FAQ tentang penyimpanan dan analisis penggunaan: 28 November 2026</span>
+        <span>Diterbitkan 13 Februari 2026 ・ Pembaruan penjelasan tentang perlindungan dan analisis penggunaan: 6 September 2026 ・ Koreksi FAQ tentang penyimpanan dan analisis penggunaan, serta teks artikel: 28 November 2026</span>
 
       </div>
 
@@ -528,13 +528,13 @@
             <li><strong>Pengabsahan cache URL:</strong>Atur penyimpanan cache itu sendiri ke <code>nil</code></li>
             <li><strong>Konfigurasi yang tidak menggunakan penyimpanan persisten: </strong>Jangan menyimpan informasi sesi URLSession di disk</li>
           </ul>
-          <p>Ini adalah perlindungan yang terkait dengan cache URLSession, dll., dan bukan fungsi yang menghilangkan peristiwa penggunaan yang disimpan aplikasi dan ditransmisikan secara terpisah atau catatan transmisi di sisi server. Asosiasi dengan pengidentifikasi analisis penggunaan juga dilakukan secara terpisah dari pengaturan ini.</p>
+          <p>Ini adalah perlindungan terkait cache URLSession dan sejenisnya, bukan fungsi yang menghilangkan peristiwa penggunaan yang disimpan dan dikirim aplikasi secara terpisah, ataupun catatan pengiriman di sisi server. Pengaitan melalui pengenal analisis penggunaan yang dilakukan oleh versi 5.9.32 dan sebelumnya juga berlangsung terpisah dari pengaturan ini.</p>
 
           <h2 id="reading-04">4. Rentang keluaran log pengukuran kinerja</h2>
           <p>Keluaran log dari <code>PerformanceLogger</code> dikelilingi oleh <code>#if DEBUG</code>. Dalam build di mana DEBUG tidak ditentukan, pemrosesan keluaran log dari logger ini tidak disertakan.</p>
           <p><code>logError</code> pencatat ini mencatat jenisnya, bukan pernyataan terperinci dari kesalahan tersebut. Misalnya, gunakan tipe <code>URLError</code> dan jangan lepaskan <code>localizedDescription</code> apa adanya, yang mungkin berisi jalur file dan input pengguna.</p>
           <p>Di sisi lain, ini bukan mekanisme yang secara otomatis membahayakan semua nama acara dan string tambahan yang diteruskan ke <code>logEvent</code>. Penting untuk tidak memberikan alamat email, badan memo, atau informasi otentikasi kepada penelepon.</p>
-          <p><strong> Penjelasan ini tidak akan diperluas ke jaminan "nol log" untuk seluruh aplikasi, SDK eksternal, dan OS. </strong>Transmisi acara penggunaan internal dan AppsFlyer diaktifkan sebagai mekanisme terpisah. Ruang lingkup akuisisi akan dijelaskan dalam FAQ analisis penggunaan artikel ini dan <a href="/id/privacy#technical"> Kebijakan Privasi</a>.</p>
+          <p><strong>Penjelasan ini tidak kami perluas menjadi jaminan “nol log” untuk aplikasi, SDK eksternal, dan OS secara keseluruhan.</strong> Pada versi 5.9.32 dan sebelumnya, pengiriman peristiwa penggunaan pihak pertama dan AppsFlyer dapat berjalan sebagai mekanisme terpisah, bergantung pada versi dan pengaturannya. Versi 5.9.35 yang saat ini tersedia di App Store tidak mengirim peristiwa penggunaan pihak pertama maupun analisis status langganan, dan tidak menyertakan AppsFlyer SDK (terkait analisis, yang dikirimnya hanyalah permintaan untuk menghapus data analisis sebelumnya dan mengakhiri masa berlakunya). Cakupan data yang dikumpulkan dijelaskan dalam FAQ analisis penggunaan di artikel ini dan <a href="/id/privacy#technical">kebijakan privasi</a>.</p>
 
           <h2 id="reading-05">5. AES-GCM Enkripsi Outbox Jangkauan Perlindungan</h2>
           <p>Memo yang menunggu untuk dikirim dikelola dalam antrian yang disebut Outbox di terminal. Saat menyimpan, gunakan CryptoKit Apple untuk mengenkripsi dengan AES-GCM. Kunci enkripsi baru dihasilkan dengan bit 256.</p>
@@ -545,11 +545,11 @@
 
           <h2 id="reading-06">6. Perlindungan isi memo dan peran SDK eksternal</h2>
           <p>Di aplikasi iOS, gunakan CryptoKit untuk mengenkripsi isi memo, Keychain untuk penyimpanan kunci, dan URLSession untuk mengirimkan teks. Network.framework memantau status koneksi, dan BackgroundTasks bertanggung jawab untuk menjadwalkan transmisi latar belakang.</p>
-          <p>Di sisi lain, aplikasi ini juga menggunakan SDK eksternal. GoogleSignIn dan Firebase Authentication digunakan untuk secara otomatis memasukkan email sewenang-wenang dengan akun Google, dan Pemeriksaan Aplikasi Firebase diinisialisasi saat startup untuk melindungi backend API. AppsFlyer digunakan untuk akuisisi dan analisis penggunaan, dan menetapkan pengidentifikasi instalasi yang umum untuk analisis Anda sendiri.</p>
+          <p>Di sisi lain, aplikasi juga memakai SDK eksternal. GoogleSignIn dan Firebase Authentication dipakai untuk pengisian otomatis dan konfirmasi alamat email secara opsional melalui akun Google (Firebase Authentication juga dipakai untuk Sign in with Apple). Firebase App Check diinisialisasi saat aplikasi dibuka dan melampirkan token untuk mencegah penyalahgunaan pada permintaan yang dikirim ke API backend. AppsFlyer SDK tidak disertakan dalam versi 5.9.35 yang saat ini tersedia di App Store. Versi 5.9.32 dan sebelumnya, bergantung pada versi dan pengaturannya, dapat memakai AppsFlyer untuk analisis akuisisi dan penggunaan, serta menetapkan pengenal instalasi yang sama dengan yang dipakai analisis pihak pertama.</p>
           <p>Meskipun desainnya tidak menyertakan badan memo dalam item acara, asosiasi pengidentifikasi dan catatan transmisi tetap ada. Ruang lingkup analisis penggunaan, termasuk SDK, perlu dikonfirmasi secara terpisah dari enkripsi teks. Item dan penggunaan dijelaskan dalam <a href="/id/privacy#technical"> Kebijakan Privasi</a>.</p>
 
           <h2 id="reading-07">7. Tentukan cakupan perlindungan</h2>
-          <p>Enkripsi di terminal, penanganan cache komunikasi, dan analisis pemanfaatan masing-masing memiliki peran yang berbeda. Bahkan dengan enkripsi Outbox dan URLSession fana, kumpulan acara penggunaan tidak hilang.</p>
+          <p>Enkripsi di perangkat, penanganan cache komunikasi, dan analisis penggunaan masing-masing memiliki peran yang berbeda. Meskipun ada enkripsi Outbox dan ephemeral URLSession, hal itu saja tidak menghilangkan pengumpulan peristiwa penggunaan (pengiriman peristiwa penggunaan kami hentikan secara terpisah di versi 5.9.35).</p>
           <p>Hargai kemampuan untuk meninggalkan catatan dengan cepat dan kemampuan untuk memahami informasi yang Anda peroleh. Jelaskan tujuan, pengidentifikasi, dan cakupan asosiasi analisis penggunaan, dan tinjau sesuai dengan perubahan di aplikasi.</p>
 
           <!-- FAQ Section -->

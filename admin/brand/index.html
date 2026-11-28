@@ -332,9 +332,25 @@ const CAP_STORE_KEY = 'captio_collect_v1';
 //   status_id,target_url,status,reply_url,user
 // status_id 空 + user 設定: アカウント単位スキップ（bot 等）
 // status_id 設定: 該当 tweet 単位スキップ。user 列は情報用（フィルタにも使う）。
+// 公開リポジトリに名前を平文で置かないアカウント（運営者の個人アカウントなど）は、
+// user 列に capUserKey() の値（`fnv1a:` + 小文字の名前の FNV-1a 32bit を16進8桁）を書き、
+// target_url は空にする。照合のための符号で、秘匿の仕組みではない（名前を知っていれば同じ値を作れる）。
 const CAP_HANDLED_CSV = '/admin/brand/content/captio-handled.csv';
 let CAP_HANDLED_IDS = null;          // Set<string>  — status_id 単位
-let CAP_HANDLED_USERS = null;        // Set<string>  — username (lowercase) 単位
+let CAP_HANDLED_USERS = null;        // Set<string>  — username (lowercase) か capUserKey() の値
+function capUserKey(name) {
+  const s = String(name).toLowerCase();
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return 'fnv1a:' + h.toString(16).padStart(8, '0');
+}
+function capUserHandled(users, name) {
+  const u = String(name).toLowerCase();
+  return users.has(u) || users.has(capUserKey(u));
+}
 let CAP_HANDLED_LOAD_ERROR = null;   // string | null
 const CAP_HANDLED_READY = (async function () {
   try {
@@ -353,7 +369,7 @@ const CAP_HANDLED_READY = (async function () {
       const trimmed = line.trim();
       if (!trimmed) continue;
       // 簡易 CSV split。値に , を含まない前提（status_id は数字、URL は %エンコード、
-      // user はハンドル文字 [A-Za-z0-9_] のみ）。
+      // user はハンドル文字 [A-Za-z0-9_] か capUserKey() の値のみ）。
       const cols = trimmed.split(',');
       const id = (cols[0] || '').trim();
       const user = (cols[4] || '').trim();
@@ -476,7 +492,7 @@ function captioRender() {
     : s.tweets.filter(function (t) {
         if (!t) return true;
         if (t.id && handledIds.has(String(t.id))) { handledHidden++; return false; }
-        if (t.author_username && handledUsers.has(String(t.author_username).toLowerCase())) {
+        if (t.author_username && capUserHandled(handledUsers, t.author_username)) {
           handledHidden++;
           return false;
         }
@@ -620,7 +636,7 @@ async function captioFetchNext(btn) {
       if (!t || !t.id) continue;
       // 既 replied/skipped/candidate/bot を弾く（ID + user 両方）
       if (handledIds.has(String(t.id))) { handledOut++; continue; }
-      if (t.author_username && handledUsers.has(String(t.author_username).toLowerCase())) {
+      if (t.author_username && capUserHandled(handledUsers, t.author_username)) {
         handledOut++;
         continue;
       }

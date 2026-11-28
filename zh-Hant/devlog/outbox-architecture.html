@@ -226,7 +226,7 @@
   "description": "按下傳送按鈕的瞬間UI清除，但是未傳送的資訊會留在終端上，重新傳送。 AES-GCM加密、自動重新傳送、NWPathMonitor線路迴歸檢測的Outbox架構的全貌。",
   "url": "https://simplememofast.com/zh-Hant/devlog/outbox-architecture",
   "datePublished": "2026-02-13",
-  "dateModified": "2026-10-04",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -437,7 +437,7 @@ func send(message: String, onSaved: () -&gt; Void,
             <li><strong>不受外部更新的影響</strong> — 等待傳送的處理不會因為第三方庫的更新或提供終止而停止執行。</li>
             <li><strong>安全</strong> — 接觸等待傳送的備忘錄正文的處理（加密、儲存、傳送）中，第三方的程式碼無法進入。</li>
           </ul>
-          <p>另外，整個應用程式也使用外部的SDK（Google登入、Firebase、AppsFlyer）（參考<a href="/zh-Hant/devlog/privacy-first-design">隱私第一設計</a>）。 這裡所說的“只有Apple純正”是關於等待傳送的資料路徑。</p>
+          <p>另外，就 App 整體而言，也使用了外部 SDK（Google 登入、Firebase；5.9.32 及更早的版本也包括 AppsFlyer）（請參閱<a href="/zh-Hant/devlog/privacy-first-design">隱私第一設計</a>）。這裡所說的「僅限 Apple 原生」，指的是待傳送資料的路徑。</p>
 
           <!-- Section 6 -->
           <h2 id="reading-06" data-ce-number="06">UI清除和網路傳送的分離</h2>

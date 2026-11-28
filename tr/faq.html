@@ -334,7 +334,7 @@
       "name": "Konu nedir?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Konular aşağıdaki kurallarla otomatik olarak oluşturulur: Konu şablonu ayarlanmışsa: Notun Şablonu + satırı 1 (ör. \"Simple Memo Bugünün alışveriş listesi\") Konu şablonu boşsa: Notun 1 satırı konu olduğu gibi olacaktır Bir not boş bir satırla başladığında: İlk karakterin göründüğü satır özne olur Konu maksimum 60 karakterle kesilecektir Obsidian işbirliğinde \"Otomatik Yapay Zeka Etiket Ekleme\"yi açtıysanız: 1 satırı yerine terminalde yapılan kısa başlığı kullanın (yapamıyorsanız, 1nd satırı)"
+        "text": "Konular aşağıdaki kurallarla otomatik olarak oluşturulur: Konu şablonu ayarlanmışsa: Notun Şablonu + satırı 1 (ör. \"Simple Memo Bugünün alışveriş listesi\") Konu şablonu boşsa: Notun 1 satırı konu olduğu gibi olacaktır Bir not boş bir satırla başladığında: İlk karakterin göründüğü satır özne olur 1. satır 60 karakteri aşarsa 60 karakterde kesilir ve sonuna “…” eklenir (konu şablonunun karakterleri bu sayıya dâhil edilmez) Obsidian entegrasyonunu kullanıyor ve “AI etiketlerini otomatik ekle” seçeneğini açtıysanız: 1. satır cihazda en fazla 20 karaktere kısaltılarak kullanılır (20 karakter veya daha kısa satırlar neredeyse olduğu gibi kalır; satır başındaki “・”, “- ”, “1.” gibi işaretler kaldırılır, uzun satırlar noktalama işaretlerinde veya sözcük aralarında kesilir ve “…” eklenir). Bu, Apple Intelligence'ın içeriğe bakarak oluşturduğu bir başlık değildir"
       }
     },
     {
@@ -462,7 +462,7 @@
       "name": "Notun içeriği günlüğüne kaydedilecek mi?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Kaydedilmedi. E-POSTA ADRESLERI, NOT GÖVDESI, KIMLIK DOĞRULAMA KODLARI, BELIRTEÇLER VE URL GIBI HASSASLAŞTIRMA BILGILERI, HATA AYIKLAMA YAPILARI DA DAHIL OLMAK ÜZERE TÜM YAPILARDA OTURUM AÇMAZ. Hata günlüğünde bile, yalnızca hata türü (tür adı) çıktılanır ve ayrıntılı mesajlar kaydedilmez."
+        "text": "Hayır, kaydedilmez. Uygulamanın kodu, DEBUG derlemeleri dâhil hiçbir derlemede not gövdesini günlüğe aktarmaz. App Store üzerinden dağıtılan uygulamanın (5.9.35) kodu e-posta adreslerini, doğrulama kodlarını, belirteçleri ve URL adreslerini de günlüğe yazmaz; günlüğe yalnızca satın alma, satın alımları geri yükleme ve abonelik kontrolüyle ilgili tanılama bilgilerini (sabit kategori adları ile Apple hatalarının türü ve numarası) yazar. Geliştiricinin kullandığı DEBUG derlemelerinde ise doğrulama e-postasındaki bir bağlantı açıldığında o bağlantının URL adresi ve bazı hataların ayrıntıları Xcode konsolunda görünür. Üretim ortamındaki Relay API kodu da not gövdesini ve doğrulama kodlarını günlüğe yazmaz."
       }
     },
     {
@@ -494,7 +494,7 @@
       "name": "Simple Memo ne tür bir uygulamadır?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Aklınıza geleni sesle veya klavyeyle yazıp tek dokunuşla kendinize e-posta olarak gönderdiğiniz bir iPhone ve Apple Watch uygulamasıdır. Notu Obsidian kasanızdaki bir nota ekleyebilir, Notion'a da kaydedebilirsiniz. Uygulamada notları düzenlemek için bir ekran yoktur; düzenlemeyi notların ulaştığı yerde yaparsınız. Obsidian entegrasyonunu kurup ayarlardaki “AI etiketlerini otomatik ekle” seçeneğini açarsanız başlık, etiketler ve tür de cihazda otomatik olarak eklenir (varsayılan olarak kapalıdır)."
+        "text": "Aklınıza geleni sesle veya klavyeyle yazıp tek dokunuşla kendinize e-posta olarak gönderdiğiniz bir iPhone ve Apple Watch uygulamasıdır. Notu Obsidian kasanızdaki bir nota ekleyebilir, Notion'a da kaydedebilirsiniz. Uygulamada notları düzenlemek için bir ekran yoktur; düzenlemeyi notların ulaştığı yerde yaparsınız. Obsidian entegrasyonunu kurup ayarlardaki “AI etiketlerini otomatik ekle” seçeneğini açarsanız, Obsidian'e eklenen notlara cihazda otomatik olarak etiket eklenir (varsayılan olarak kapalıdır)."
       }
     },
     {
@@ -1018,8 +1018,8 @@
                     <li><strong>Konu şablonu ayarlanmışsa</strong>: Notun Şablonu + satırı 1 (ör. "Simple Memo Bugünün alışveriş listesi")</li>
                     <li><strong>Konu şablonu boşsa</strong>: Notun 1 satırı konu olduğu gibi olacaktır</li>
                     <li><strong>Bir not boş bir satırla başladığında</strong>: İlk karakterin göründüğü satır özne olur</li>
-                    <li>Konu maksimum 60 karakterle kesilecektir</li>
-                    <li><strong>Obsidian işbirliğinde "Otomatik Yapay Zeka Etiket Ekleme"yi açtıysanız</strong>: 1 satırı yerine terminalde yapılan kısa başlığı kullanın (yapamıyorsanız, 1nd satırı)</li>
+                    <li>1. satır 60 karakteri aşarsa 60 karakterde kesilir ve sonuna “…” eklenir (konu şablonunun karakterleri bu sayıya dâhil edilmez)</li>
+                    <li><strong>Obsidian entegrasyonunu kullanıyor ve “AI etiketlerini otomatik ekle” seçeneğini açtıysanız</strong>: 1. satır cihazda en fazla 20 karaktere kısaltılarak kullanılır (20 karakter veya daha kısa satırlar neredeyse olduğu gibi kalır; satır başındaki “・”, “- ”, “1.” gibi işaretler kaldırılır, uzun satırlar noktalama işaretlerinde veya sözcük aralarında kesilir ve “…” eklenir). Bu, Apple Intelligence'ın içeriğe bakarak oluşturduğu bir başlık değildir</li>
                   </ul>
                 </div>
               </details>
@@ -1210,7 +1210,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">Notun içeriği günlüğüne kaydedilecek mi?</summary>
                 <div class="faq-answer">
-                  <p>Kaydedilmedi. E-POSTA ADRESLERI, NOT GÖVDESI, KIMLIK DOĞRULAMA KODLARI, BELIRTEÇLER VE URL GIBI HASSASLAŞTIRMA BILGILERI, HATA AYIKLAMA YAPILARI DA DAHIL OLMAK ÜZERE TÜM YAPILARDA OTURUM AÇMAZ. Hata günlüğünde bile, yalnızca hata türü (tür adı) çıktılanır ve ayrıntılı mesajlar kaydedilmez.</p>
+                  <p>Hayır, kaydedilmez. Uygulamanın kodu, DEBUG derlemeleri dâhil hiçbir derlemede not gövdesini günlüğe aktarmaz. App Store üzerinden dağıtılan uygulamanın (5.9.35) kodu e-posta adreslerini, doğrulama kodlarını, belirteçleri ve URL adreslerini de günlüğe yazmaz; günlüğe yalnızca satın alma, satın alımları geri yükleme ve abonelik kontrolüyle ilgili tanılama bilgilerini (sabit kategori adları ile Apple hatalarının türü ve numarası) yazar. Geliştiricinin kullandığı DEBUG derlemelerinde ise doğrulama e-postasındaki bir bağlantı açıldığında o bağlantının URL adresi ve bazı hataların ayrıntıları Xcode konsolunda görünür. Üretim ortamındaki Relay API kodu da not gövdesini ve doğrulama kodlarını günlüğe yazmaz.</p>
                 </div>
               </details>
             </div>
@@ -1261,7 +1261,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">Simple Memo ne tür bir uygulamadır?</summary>
                 <div class="faq-answer">
-                  <p>Aklınıza geleni sesle veya klavyeyle yazıp tek dokunuşla kendinize e-posta olarak gönderdiğiniz bir iPhone ve Apple Watch uygulamasıdır. Notu Obsidian kasanızdaki bir nota ekleyebilir, Notion'a da kaydedebilirsiniz. Uygulamada notları düzenlemek için bir ekran yoktur; düzenlemeyi notların ulaştığı yerde yaparsınız. Obsidian entegrasyonunu kurup ayarlardaki “AI etiketlerini otomatik ekle” seçeneğini açarsanız başlık, etiketler ve tür de cihazda otomatik olarak eklenir (varsayılan olarak kapalıdır).</p>
+                  <p>Aklınıza geleni sesle veya klavyeyle yazıp tek dokunuşla kendinize e-posta olarak gönderdiğiniz bir iPhone ve Apple Watch uygulamasıdır. Notu Obsidian kasanızdaki bir nota ekleyebilir, Notion'a da kaydedebilirsiniz. Uygulamada notları düzenlemek için bir ekran yoktur; düzenlemeyi notların ulaştığı yerde yaparsınız. Obsidian entegrasyonunu kurup ayarlardaki “AI etiketlerini otomatik ekle” seçeneğini açarsanız, Obsidian'e eklenen notlara cihazda otomatik olarak etiket eklenir (varsayılan olarak kapalıdır).</p>
                 </div>
               </details>
             </div>

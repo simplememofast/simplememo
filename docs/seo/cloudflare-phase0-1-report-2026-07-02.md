@@ -8,7 +8,7 @@ Claude (api/インフラ担当エージェント、simplememoアカウント aut
 
 ## 実施項目
 
-- [x] CF-1 paji.me 1ホップ301化 → **実測監査完了・実装はオーナー作業**(paji.meは別Cloudflareアカウント管理。§CF-1に5分手順を記載)
+- [x] CF-1 〈旧ブログのドメイン〉 1ホップ301化 → **実測監査完了・実装はオーナー作業**(〈旧ブログのドメイン〉は別Cloudflareアカウント管理。§CF-1に5分手順を記載)
 - [x] CF-2 Bing Webmaster Tools登録・認証・sitemap送信 → **IndexNow実装・送信完了**(HTTP 200、224 URL受理)。WMT本登録はオーナー作業(GSCインポート推奨、§CF-2)
 - [x] CF-3 AIボット許可維持確認 → **完了**(9UA×2パス全200実測)
 - [x] CF-4 robots.txt配信経路確認 → **完了**(Pages静的配信+`_headers`で24hエッジキャッシュ、デプロイはパージしないことを実測確認)
@@ -28,57 +28,57 @@ Claude (api/インフラ担当エージェント、simplememoアカウント aut
 
 ---
 
-## CF-1: paji.me 多段301の平坦化 — 実測結果とオーナー実装手順
+## CF-1: 〈旧ブログのドメイン〉 多段301の平坦化 — 実測結果とオーナー実装手順
 
 ### 実測(2026-07-02 09:01 UTC)
 
 | 入口URL | ホップ数 | 経路 |
 |---|---|---|
-| `http://paji.me/` | **3** | → `https://paji.me/` → `https://www.paji.me/` → captio |
-| `https://paji.me/` | **2** | → `https://www.paji.me/` → captio |
-| `http://www.paji.me/` | **2** | → `https://www.paji.me/` → captio |
-| `https://www.paji.me/` | 1 | → captio ✅ |
+| `http://〈旧ブログのドメイン〉/` | **3** | → `https://〈旧ブログのドメイン〉/` → `https://www.〈旧ブログのドメイン〉/` → captio |
+| `https://〈旧ブログのドメイン〉/` | **2** | → `https://www.〈旧ブログのドメイン〉/` → captio |
+| `http://www.〈旧ブログのドメイン〉/` | **2** | → `https://www.〈旧ブログのドメイン〉/` → captio |
+| `https://www.〈旧ブログのドメイン〉/` | 1 | → captio ✅ |
 
 最終到達先 `https://simplememofast.com/captio/` は200。全ホップ301(302なし)。
 
 **追加発見(重要)**: ルート以外のパスは現状**壊れている**。
 
 ```text
-https://paji.me/some-old-post?utm_source=x
-  → 301 https://www.paji.me/some-old-post?utm_source=x (パス・クエリ保持)
+https://〈旧ブログのドメイン〉/some-old-post?utm_source=x
+  → 301 https://www.〈旧ブログのドメイン〉/some-old-post?utm_source=x (パス・クエリ保持)
   → HTTP 525 (SSL handshake failed = オリジン不在)
 ```
 
-www.paji.me はルート(`/`)だけ captio へ転送するルールになっており、旧ブログ記事等への深いパスの被リンクは現在525で死んでいる。平坦化と同時に**全パスをキャッチオールで captio へ301**させることで、依頼書の「旧被リンク動線を壊さない」をむしろ改善できる。
+www.〈旧ブログのドメイン〉 はルート(`/`)だけ captio へ転送するルールになっており、旧ブログ記事等への深いパスの被リンクは現在525で死んでいる。平坦化と同時に**全パスをキャッチオールで captio へ301**させることで、依頼書の「旧被リンク動線を壊さない」をむしろ改善できる。
 
 ### アクセス権の確認結果
 
-- paji.me / www.paji.me は Cloudflare管理(NS: mariah/nicolas.ns.cloudflare.com)だが、**simplememoアカウント(6f37d8ca…)とは別アカウント**。ゾーン一覧に存在しない。
+- 〈旧ブログのドメイン〉 / www.〈旧ブログのドメイン〉 は Cloudflare管理(NS: mariah/nicolas.ns.cloudflare.com)だが、**simplememoアカウント(6f37d8ca…)とは別アカウント**。ゾーン一覧に存在しない。
 - automation token・wrangler OAuth の両方で到達不可を確認 → **オーナーの個人Cloudflareアカウントでの作業が必要**。
 
 ### オーナー実装手順(約5分、Freeプラン可)
 
-1. Cloudflareダッシュボード(paji.meを管理するアカウント)→ paji.me ゾーン → **Rules → Redirect Rules → Create rule**
+1. Cloudflareダッシュボード(〈旧ブログのドメイン〉を管理するアカウント)→ 〈旧ブログのドメイン〉 ゾーン → **Rules → Redirect Rules → Create rule**
 2. ルール設定:
-   - 名前: `flatten paji.me -> simplememofast /captio/`
+   - 名前: `flatten 〈旧ブログのドメイン〉 -> simplememofast /captio/`
    - If(Custom filter expression / Expression Editor):
      ```text
-     (http.host eq "paji.me") or (http.host eq "www.paji.me")
+     (http.host eq "〈旧ブログのドメイン〉") or (http.host eq "www.〈旧ブログのドメイン〉")
      ```
      ※ パス・スキーム条件は付けない = 全パス・http/https の両方にマッチさせる
    - Then: Type **Static** / URL `https://simplememofast.com/captio/` / Status **301** / **Preserve query string にチェック**
-3. **SSL/TLS → Edge Certificates → Always Use HTTPS を OFF**(paji.meゾーンのみ)。現状の `http://paji.me/ → https://paji.me/` の1ホップ目はこの設定由来のため、OFFにしないと http 入口が1ホップにならない。新ルールが http も直接 https の captio へ301するため安全。
+3. **SSL/TLS → Edge Certificates → Always Use HTTPS を OFF**(〈旧ブログのドメイン〉ゾーンのみ)。現状の `http://〈旧ブログのドメイン〉/ → https://〈旧ブログのドメイン〉/` の1ホップ目はこの設定由来のため、OFFにしないと http 入口が1ホップにならない。新ルールが http も直接 https の captio へ301するため安全。
 4. 既存の転送設定(Page Rules の Forwarding URL 等)があれば無効化/削除。Single Redirects は Page Rules より先に評価される(Cloudflare Rules実行順序)ため残っていても実害はないが、整理推奨。
 5. DNSは変更不要(A/AAAAレコードはプロキシ=オレンジ雲のまま維持。プロキシを外すとリダイレクトが機能しなくなるので注意)。
 
 ### 実装後の受入検証(依頼書§11+深いパス)
 
 ```bash
-curl -IL http://paji.me/
-curl -IL https://paji.me/
-curl -IL http://www.paji.me/
-curl -IL https://www.paji.me/
-curl -IL "https://paji.me/old-post?utm_source=x"   # → 1ホップで /captio/?utm_source=x
+curl -IL http://〈旧ブログのドメイン〉/
+curl -IL https://〈旧ブログのドメイン〉/
+curl -IL http://www.〈旧ブログのドメイン〉/
+curl -IL https://www.〈旧ブログのドメイン〉/
+curl -IL "https://〈旧ブログのドメイン〉/old-post?utm_source=x"   # → 1ホップで /captio/?utm_source=x
 curl -I  https://simplememofast.com/captio/         # → 200
 ```
 
@@ -207,12 +207,12 @@ curl -A "Claude-SearchBot" -I https://simplememofast.com/                     # 
 
 ## 検証結果(生ログ抜粋)
 
-### paji.me(現状=変更前ベースライン)
+### 〈旧ブログのドメイン〉(現状=変更前ベースライン)
 
 ```text
-http://paji.me/   → 301 https://paji.me/ → 301 https://www.paji.me/ → 301 https://simplememofast.com/captio/ → 200  (3 hops)
-https://paji.me/  → 301 https://www.paji.me/ → 301 https://simplememofast.com/captio/ → 200  (2 hops)
-https://paji.me/some-old-post?utm_source=x → 301 www.paji.me/some-old-post?utm_source=x → 525  (broken)
+http://〈旧ブログのドメイン〉/   → 301 https://〈旧ブログのドメイン〉/ → 301 https://www.〈旧ブログのドメイン〉/ → 301 https://simplememofast.com/captio/ → 200  (3 hops)
+https://〈旧ブログのドメイン〉/  → 301 https://www.〈旧ブログのドメイン〉/ → 301 https://simplememofast.com/captio/ → 200  (2 hops)
+https://〈旧ブログのドメイン〉/some-old-post?utm_source=x → 301 www.〈旧ブログのドメイン〉/some-old-post?utm_source=x → 525  (broken)
 https://simplememofast.com/captio/ → HTTP/2 200
 ```
 
@@ -248,7 +248,7 @@ IndexNow POST (api.indexnow.org)     → HTTP 200(224 URL受理)
 
 ## 依頼者確認が必要な事項
 
-1. **paji.me の1ホップ301化の実施**(§CF-1手順。承認事項→実施者がオーナー本人のため、実施=承認)
+1. **〈旧ブログのドメイン〉 の1ホップ301化の実施**(§CF-1手順。承認事項→実施者がオーナー本人のため、実施=承認)
 2. **Bing認証方式の選択**: GSCインポート(推奨・即時)/ DNS TXT(値を共有いただければ自動追加可)
 3. **Cache Purge専用APIトークンの発行可否**(任意): 発行すれば robots.txt 等の即時反映を今後自動化可能
 4. GSCリンクレポートでの捏造4URLリンク元確認 → disavow追記(CF-6、既存TODOの再掲)

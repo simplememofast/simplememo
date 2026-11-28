@@ -226,7 +226,7 @@
   "description": "En el momento en que se presiona el botón de enviar, la interfaz de usuario se borra, pero el mensaje no enviado permanece en el terminal y se vuelve a enviar. La imagen completa de la arquitectura de Outbox con cifrado AES-GCM, reenvío automático y detección de retorno de línea NWPathMonitor.",
   "url": "https://simplememofast.com/es/devlog/outbox-architecture",
   "datePublished": "2026-02-13",
-  "dateModified": "2026-10-04",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -437,7 +437,7 @@ func send(message: String, onSaved: () -&gt; Void,
             <li><strong>No afectado por actualizaciones externas</strong> — El procesamiento de la espera de transmisión no deja de funcionar debido a la actualización o terminación de bibliotecas de terceros.</li>
             <li><strong>Seguridad</strong> - El código de terceros no entra en el procesamiento (cifrado, guardado, transmisión) que toca el cuerpo de la nota que espera ser enviada.</li>
           </ul>
-          <p>Además, toda la aplicación también utiliza un SDK externo (inicio de sesión Google, Firebase, AppsFlyer) (ver <a href="/es/devlog/privacy-first-design">privacy first design</a>). El "Apple solo genuino" mencionado aquí se trata de la ruta de los datos que esperan ser transmitidos.</p>
+          <p>Cabe aclarar que la app, en su conjunto, también usa SDK externos (inicio de sesión con Google y Firebase, y además AppsFlyer en las versiones hasta la 5.9.32 inclusive; véase <a href="/es/devlog/privacy-first-design">Diseño de privacidad primero</a>). Aquí, «solo frameworks nativos de Apple» se refiere a la ruta de los datos pendientes de envío.</p>
 
           <!-- Section 6 -->
           <h2 id="reading-06" data-ce-number="06">Separación de la eliminación de la interfaz de usuario y la transmisión de red</h2>

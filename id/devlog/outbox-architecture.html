@@ -226,7 +226,7 @@
   "description": "Saat Anda menekan tombol kirim, UI akan dihapus, tetapi pesan yang tidak terkirim tetap ada di terminal dan dikirim ulang. Gambaran lengkap arsitektur Outbox dengan enkripsi AES-GCM, transmisi ulang otomatis, dan deteksi pemulihan saluran NWPathMonitor.",
   "url": "https://simplememofast.com/id/devlog/outbox-architecture",
   "datePublished": "2026-02-13",
-  "dateModified": "2026-10-04",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -437,7 +437,7 @@ func send(message: String, onSaved: () -&gt; Void,
             <li><strong>Tidak terpengaruh oleh pembaruan eksternal</strong> — Proses menunggu transmisi tidak berhenti bekerja karena pembaruan atau penghentian perpustakaan pihak ketiga.</li>
             <li><strong>Keamanan</strong> - Kode pihak ketiga tidak memasukkan pemrosesan (enkripsi, penyimpanan, transmisi) yang menyentuh isi memo yang menunggu untuk dikirim.</li>
           </ul>
-          <p>Selain itu, seluruh aplikasi juga menggunakan SDK eksternal (Google sign-in, Firebase, AppsFlyer) (lihat <a href="/id/devlog/privacy-first-design"> Desain Privasi Pertama</a>). "Apple hanya asli" yang disebutkan di sini adalah tentang jalur data yang menunggu untuk dikirimkan.</p>
+          <p>Perlu dicatat, aplikasi secara keseluruhan juga memakai SDK eksternal: Google Sign-In dan Firebase, serta AppsFlyer pada versi 5.9.32 dan sebelumnya (lihat <a href="/id/devlog/privacy-first-design">Desain yang Mengutamakan Privasi</a>). Yang dimaksud dengan “hanya bawaan Apple” di sini adalah jalur data yang menunggu dikirim.</p>
 
           <!-- Section 6 -->
           <h2 id="reading-06" data-ce-number="06">Pemisahan pembersihan UI dan transmisi jaringan</h2>

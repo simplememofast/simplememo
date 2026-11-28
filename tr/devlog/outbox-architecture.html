@@ -226,7 +226,7 @@
   "description": "Gönder düğmesine bastığınız anda kullanıcı arayüzü temizlenir, ancak iletilmeyen mesaj terminalde kalır ve yeniden gönderilir. AES-GCM şifreleme, otomatik yeniden iletim ve NWPathMonitor hat kurtarma algılama ile Outbox mimarisinin tam resmi.",
   "url": "https://simplememofast.com/tr/devlog/outbox-architecture",
   "datePublished": "2026-02-13",
-  "dateModified": "2026-10-04",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -437,7 +437,7 @@ func send(message: String, onSaved: () -&gt; Void,
             <li><strong>Harici güncellemelere bağlı değil</strong> — Üçüncü taraf kitaplığın güncellenmesi veya sonlandırılması nedeniyle bekleyen işlem çalışmayı durdurmuyor.</li>
             <li><strong>Güvenlik</strong> - Üçüncü taraf kodu, gönderilmeyi bekleyen notun gövdesine dokunan işleme (şifreleme, kaydetme, iletim) girmez.</li>
           </ul>
-          <p>Ek olarak, tüm uygulama harici bir SDK (Google oturum açma, Firebase, AppsFlyer) kullanır (bkz. <a href="/tr/devlog/privacy-first-design">ilk gizlilik tasarımı</a>). Burada bahsedilen "yalnızca orijinal Apple", iletilmeyi bekleyen verilerin yolu ile ilgilidir.</p>
+          <p>Bununla birlikte uygulamanın genelinde harici SDK'lar da kullanılır: Google ile oturum açma ve Firebase; 5.9.32 ve önceki sürümlerde ayrıca AppsFlyer (bkz. <a href="/tr/devlog/privacy-first-design">Gizlilik öncelikli tasarım</a>). Buradaki “yalnızca Apple tarafından sağlanan” ifadesi, gönderilmeyi bekleyen verilerin izlediği yolla ilgilidir.</p>
 
           <!-- Section 6 -->
           <h2 id="reading-06" data-ce-number="06">UI temizleme ve ağ iletiminin ayrılması</h2>

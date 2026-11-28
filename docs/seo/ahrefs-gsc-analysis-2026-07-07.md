@@ -13,7 +13,7 @@
 | 2 | **AI発クエリの出現**(完全文の日本語疑問クエリ群がbest-memo-apps-2026に着地、pos5-7) | 7/29凍結明け用のFAQ追記草案を本書§4に用意 | 📋 7/29実行 |
 | 3 | CTR機会クラスタ(line-keep 4,045imp/CTR0.9%等)は**全て測定中** | 触らない(実験汚染防止) | ⏸ 7/29-30評価 |
 | 4 | /apple-watch-obsidian/ 公開4日で**pos 3.2**(imp4)と好発進 | 内部リンク2本追加(voice-input, hands-free) | ✅ 本PRで実施 |
-| 5 | **paji.me経由の正規旧リンクがまだ2〜3ホップ301**(Ahrefsで全チェーン実測) | CF-1(1ホップ化)は7/2依頼書のまま未実施 | ⏳ オーナー(5分) |
+| 5 | **〈旧ブログのドメイン〉経由の正規旧リンクがまだ2〜3ホップ301**(Ahrefsで全チェーン実測) | CF-1(1ホップ化)は7/2依頼書のまま未実施 | ⏳ オーナー(5分) |
 | 6 | /cdn-cgi/l/email-protection への内部リンク22本(Ahrefs計測) | CF Email Obfuscation由来の幻リンク | ⏳ オーナー: Scrape Shield OFF(1分) |
 
 ---
@@ -25,7 +25,7 @@
 7/2の全数監査(296参照ドメイン中264スパム)以降も注入が続いている。今回のライブインデックスで**disavow未収載22ドメイン**を検出(全て既知フリートと同型):
 
 - **SEOExpress偽レビュー .storeフリート**(同一定型文「Before discovering SEOExpress.org, simplememofast.com struggled with low domain authority...」): `bold-outrank-hq-serp-workshop.store` `dynamic-systems-for-serp-boost-and-contextual-link.store` 等 — 初検出7/5-7/6のものは取得時点で「11時間前」「20時間前」表示 = **現在進行形**
-- **.shopリンク販売群**(paji.me/simplememofast.com両方をアンカーに使用): `rankcart.shop` `seostash.shop` `linkfinds.shop` 等
+- **.shopリンク販売群**(〈旧ブログのドメイン〉/simplememofast.com両方をアンカーに使用): `rankcart.shop` `seostash.shop` `linkfinds.shop` 等
 - 特筆: ほぼ全て**nofollow**であり直接的な順位毀損力は限定的。実害よりも「関連付け」を狙った営業スパム/嫌がらせの色が濃い。ただし規模が異常(累計286ドメイン)なので、確立済みポリシーどおり全量disavowを維持する。
 
 **404捏造URL攻撃**(energy-budget-field-notes等4件)は既にトリアージ確定済み(404維持、gsc-index-triage-2026-07-02.md)。今回のダンプに新しい捏造URLパターンは見当たらない。
@@ -42,9 +42,9 @@
 | minory.org / paraworld.jp | 19-21 | dofollow | /obsidian/ | PRリリース二次波及 |
 | molayo1419.me (KO) / readerfi | - | - | /voice-input/ | 海外からの自然参照が発生し始めている |
 
-### 2-3. paji.me レガシーリンクの毀損(実測)
+### 2-3. 〈旧ブログのドメイン〉 レガシーリンクの毀損(実測)
 
-hatena著名人ページ(DR85)・susi-paku(DR35)・ossam.jp等の**正規の旧被リンクが全て `http://www.paji.me/ →301→ https://www.paji.me/ →301→ /captio/` の2〜3ホップ**でAhrefsに記録されている。7/2のCloudflare依頼書CF-1(1ホップ化+深いパス525救済)は**未実施**。手順は docs/seo/cloudflare-phase0-1-report-2026-07-02.md §CF-1(オーナーの個人CFアカウントで5分)。
+hatena著名人ページ(DR85)・susi-paku(DR35)・ossam.jp等の**正規の旧被リンクが全て `http://www.〈旧ブログのドメイン〉/ →301→ https://www.〈旧ブログのドメイン〉/ →301→ /captio/` の2〜3ホップ**でAhrefsに記録されている。7/2のCloudflare依頼書CF-1(1ホップ化+深いパス525救済)は**未実施**。手順は docs/seo/cloudflare-phase0-1-report-2026-07-02.md §CF-1(オーナーの個人CFアカウントで5分)。
 
 ---
 
@@ -111,7 +111,7 @@ hatena著名人ページ(DR85)・susi-paku(DR35)・ossam.jp等の**正規の旧�
 ## 5. オーナーアクション(優先順)
 
 1. **disavow再アップロード**: GSC > リンクの否認ツールへ docs/disavow.txt 全文を再アップロード(ツールは**置換**方式。264版をアップ済みでも286版で上書きが必要)。
-2. **paji.me 1ホップ301化**(再掲・今回Ahrefsで毀損を実測): 手順 docs/seo/cloudflare-phase0-1-report-2026-07-02.md §CF-1。
+2. **〈旧ブログのドメイン〉 1ホップ301化**(再掲・今回Ahrefsで毀損を実測): 手順 docs/seo/cloudflare-phase0-1-report-2026-07-02.md §CF-1。
 3. **GSC URL検査**: /apple-watch-obsidian/ と /en/apple-watch-obsidian/ のインデックス登録リクエスト(未実施なら)。
 4. **Cloudflare Scrape Shield > Email Address Obfuscation を OFF**: /cdn-cgi/l/email-protection への幻リンク22本の発生源。サイトはsupport@を意図的に公開しており難読化は不要。
 5. Bing Webmaster Tools登録(GSCインポート、未実施のまま)。

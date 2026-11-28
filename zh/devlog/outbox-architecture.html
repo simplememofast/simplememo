@@ -226,7 +226,7 @@
   "description": "按下发送按钮的瞬间UI清除，但是未发送的信息会留在终端上，重新发送。 AES-GCM加密、自动重新发送、NWPathMonitor线路回归检测的Outbox架构的全貌。",
   "url": "https://simplememofast.com/zh/devlog/outbox-architecture",
   "datePublished": "2026-02-13",
-  "dateModified": "2026-10-04",
+  "dateModified": "2026-11-28",
   "author": {
     "@type": "Person",
     "@id": "https://simplememofast.com/about/#person",
@@ -437,7 +437,7 @@ func send(message: String, onSaved: () -&gt; Void,
             <li><strong>不受外部更新的影响</strong> — 等待发送的处理不会因为第三方库的更新或提供终止而停止运行。</li>
             <li><strong>安全</strong> — 接触等待发送的备忘录正文的处理（加密、保存、发送）中，第三方的代码无法进入。</li>
           </ul>
-          <p>另外，整个应用程序也使用外部的SDK（Google登录、Firebase、AppsFlyer）（参考<a href="/zh/devlog/privacy-first-design">隐私第一设计</a>）。 这里所说的“只有Apple纯正”是关于等待发送的数据路径。</p>
+          <p>另外，就整个应用而言，也使用了外部 SDK（Google 登录、Firebase；5.9.32 及更早的版本还使用 AppsFlyer）（参见<a href="/zh/devlog/privacy-first-design">隐私第一设计</a>）。这里所说的“仅限 Apple 原生”，指的是待发送数据的路径。</p>
 
           <!-- Section 6 -->
           <h2 id="reading-06" data-ce-number="06">UI清除和网络发送的分离</h2>
