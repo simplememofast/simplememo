@@ -84,7 +84,7 @@ try {
 p(`# Full Funnel — ${month}`);
 p();
 p('検索表示からMRRまでを1列で読む月次1枚（v4 §1 の鎖の定型化）。');
-p('自動で埋まるのはGSC行だけ。GA4行とASC行・ファネル行は手動転記で、未転記の月は — のまま出る。');
+p('GSCは自動集計、GA4とASCは各サービスの集計値を転記する。各段の観測対象と期間は異なる。');
 p();
 p('| # | 段 | 値 | 窓 | 出典 |');
 p('|--:|---|---:|---|---|');
@@ -94,18 +94,23 @@ p(`| 2 | GSCクリック | ${snap ? fmt(Math.round(snap.meta.totals.clicks)) : '
 p(`| 3 | GA4セッション | ${fmt(m('ga4_sessions'))} | ${fmt(m('ga4_window'))} | 手動（GA4探索 → funnel-manual/${month}.json） |`);
 p(`| 4 | app_store_click | ${fmt(m('ga4_app_store_click'))} | ${fmt(m('ga4_window'))} | 手動（同上） |`);
 p(`| 5 | ASC プロダクトページ閲覧 | ${fmt(m('asc_ppv'))} | ${fmt(m('asc_window'))} | 手動（ASC App Analytics） |`);
-p(`| 6 | 初回install | ${fmt(m('asc_installs'))} | ${fmt(m('asc_window'))} | 手動（同上） |`);
-p(`| 7 | 活性（24h内 送信到達） | ${m('activation_rate') != null ? pct(m('activation_rate')) : '—'} | ${fmt(m('funnel_window'))} | 手動（analytics:funnel 正史・内部除外あり） |`);
+p(`| 6 | ASC 初回ダウンロード | ${fmt(m('asc_installs'))} | ${fmt(m('asc_window'))} | 手動（同上） |`);
+// November includes the retirement transition; its monthly rate cannot be interpreted.
+if (month < '2026-11') {
+  p(`| 7 | 旧台帳の活性（24h内 送信到達） | ${pct(m('activation_rate'))} | ${fmt(m('funnel_window'))} | 保存済みの過去値のみ（内部除外） |`);
+} else {
+  p('| 7 | 活性（24h内 送信到達） | 評価不能 | — | 任意の利用分析を終了。転記対象外 |');
+}
 p(`| 8 | D1継続 | ${m('d1_retention') != null ? pct(m('d1_retention')) : '—'} | ${fmt(m('asc_window'))} | 手動（ASCベンチマーク画面） |`);
 p(`| 9 | サブスク開始 | ${fmt(m('subs_started'))} | ${fmt(m('asc_window'))} | 手動（ASCサブスクリプション） |`);
 p(`| 10 | MRR | ${m('mrr_usd') != null ? `$${fmt(m('mrr_usd'))}` : '—'} | ${fmt(m('asc_window'))} | 手動（同上） |`);
 p();
 if (snapNote) { p(snapNote); p(); }
 if (!manual) {
-  p(`手動行の転記先: \`growth/data/funnel-manual/${month}.json\`（書式は同ディレクトリのREADME）。`);
+  p(`GA4・ASCの転記先: \`growth/data/funnel-manual/${month}.json\`（書式は同ディレクトリのREADME）。`);
   p();
 }
-p('_参照基準（v4 §1・2026-08-20時点）: 表示82.5千/3M → クリック1,764 → セッション1,912/30日 → app_store_click 87 → PPV 9,330/90日 → install 2,250/90日 → 活性58%（生値・要正史差し替え） → D1 40.28% → 開始57/90日 → MRR $102。_');
+p('_参照基準（v4 §1・2026-08-20時点）: 表示82.5千/3M → クリック1,764 → セッション1,912/30日 → app_store_click 87 → PPV 9,330/90日 → install 2,250/90日 → D1 40.28% → 開始57/90日 → MRR $102。_');
 p();
 
 p('## この月のアノテーション（PR配信・アプリリリース・機能出荷）');
